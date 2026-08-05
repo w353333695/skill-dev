@@ -1,0 +1,39 @@
+[project]
+name = "doc-converter"
+version = "0.1.0"
+description = "文档格式转换 CLI:md/docx/pdf/html/excel/csv/json/mermaid 互转 + 内容提取"
+# 上限 <3.13:uv 默认选最高可用 python，系统装的 3.14 让 pymupdf/opencv 等走 sdist
+# 编译（极慢/失败）。钉到 3.12 区间，所有依赖都有预编译 wheel。
+requires-python = ">=3.9,<3.13"
+dependencies = [
+    # 核心依赖：全是纯 python 或小 wheel，任意 python 版本秒装。
+    # md→pdf 走系统 pandoc+xelatex（免 chromium）；渲染/截图/PDF→Word 走下面的 extras。
+    "click>=8.1,<8.2",  # 8.2 起要求 Python>=3.10，卡住以保证 3.9 可用
+    "markdown>=3.5",
+    "openpyxl>=3.1",
+    "python-docx>=1.1",
+    "pygments>=2.15",
+    "pyyaml>=6.0",
+]
+
+[project.optional-dependencies]
+# PDF/截图渲染：md/html→pdf 的 playwright 回退路径、mermaid/code→图片。
+# chromium 大件由 `doc-converter install-deps` 单独装，不进 whl。
+render = ["playwright>=1.44,<1.56"]
+# PDF→Word：拖 opencv-python ~60MB，仅 pdf→docx 需要。
+pdf = ["pdf2docx>=0.5"]
+
+[project.scripts]
+doc-converter = "doc_converter.cli:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["doc_converter"]
+
+[dependency-groups]
+dev = [
+    "pytest>=8.0",
+]

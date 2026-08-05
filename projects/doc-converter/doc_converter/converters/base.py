@@ -20,6 +20,14 @@ logger = logging.getLogger(__name__)
 # 全局注册表: {(source_fmt, target_fmt): converter_class}
 _REGISTRY: dict[tuple[str, str], type["BaseConverter"]] = {}
 
+# pip 包名 -> import 名映射（仅两者不同的）。dependencies 存 pip 包名，
+# check_dependencies 据此映射探测，缺失返回 pip 名供用户直接 pip install。
+PIP_TO_IMPORT: dict[str, str] = {
+    "python-docx": "docx",
+    "pymupdf": "fitz",
+    "Pillow": "PIL",
+}
+
 
 @dataclass
 class ConvertResult:
@@ -47,7 +55,7 @@ class BaseConverter(abc.ABC):
     source_formats: list[str] = []
     target_formats: list[str] = []
     description: str = ""
-    dependencies: list[str] = []  # 所需的 pip 包
+    dependencies: list[str] = []  # 所需 pip 包名（如 python-docx，非 import 名 docx）
 
     @abc.abstractmethod
     def convert(self, input_path: Path, output_path: Path, **options) -> ConvertResult:
@@ -72,11 +80,16 @@ class BaseConverter(abc.ABC):
         )
 
     def check_dependencies(self) -> tuple[bool, list[str]]:
-        """检查依赖是否已安装，返回 (all_ok, missing_list)"""
+        """检查依赖是否已安装，返回 (all_ok, missing_list)。
+
+        dependencies 存 pip 包名；经 PIP_TO_IMPORT 映射到 import 名探测，
+        缺失时返回 pip 名（用户可直接 ``pip install``）。
+        """
         missing = []
         for dep in self.dependencies:
+            import_name = PIP_TO_IMPORT.get(dep, dep.replace("-", "_"))
             try:
-                __import__(dep.replace("-", "_"))
+                __import__(import_name)
             except ImportError:
                 missing.append(dep)
         return len(missing) == 0, missing
@@ -109,7 +122,7 @@ def register(cls: type[BaseConverter]) -> type[BaseConverter]:
                     f"将被 {cls.name} 覆盖"
                 )
             _REGISTRY[key] = cls
-            logger.debug(f"注册转换器: {src} → {tgt} ({cls.name})")
+            logger.debug(f"注册转换器: {src} -> {tgt} ({cls.name})")
     return cls
 
 
@@ -147,3 +160,15 @@ def list_conversions() -> list[tuple[str, str, str]]:
         (src, tgt, cls.name)
         for (src, tgt), cls in sorted(_REGISTRY.items())
     ]
+
+
+def load_template(name: str) -> str:
+    """读取包内 templates/ 下的模板文件；缺失时返回最小 HTML 骨架。
+
+    用 importlib.resources 访问，打包进 whl 后仍可用。
+    """
+    try:
+        from importlib.resources import files
+        return (files("doc_converter") / "templates" / name).read_text(encoding="utf-8")
+    except (FileNotFoundError, ModuleNotFoundError):
+        return "<html><head><title>{{TITLE}}</title>{{EXTRA_HEAD}}</head><body>{{CONTENT}}</body></html>"
