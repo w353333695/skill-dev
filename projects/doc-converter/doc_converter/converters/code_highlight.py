@@ -1,10 +1,10 @@
-"""代码 → 语法高亮 HTML/PNG 转换器"""
+"""代码 -> 语法高亮 HTML/PNG 转换器"""
 
 import re
 from pathlib import Path
-from .base import BaseConverter, ConvertResult, register
+from .base import BaseConverter, ConvertResult, register, load_template
 
-# 源格式 → 语言映射
+# 源格式 -> 语言映射
 LANG_MAP = {
     "py": "python", "js": "javascript", "ts": "typescript",
     "rb": "ruby", "rs": "rust", "go": "go", "java": "java",
@@ -52,7 +52,7 @@ class CodeToHtml(BaseConverter):
     name = "code-html"
     source_formats = _CODE_FORMATS
     target_formats = ["html"]
-    description = "代码文件 → 语法高亮 HTML"
+    description = "代码文件 -> 语法高亮 HTML"
     dependencies = []  # pygments 可选，有 fallback
 
     def convert(self, input_path: Path, output_path: Path, **options) -> ConvertResult:
@@ -61,14 +61,8 @@ class CodeToHtml(BaseConverter):
 
         css, body = highlight_code(code, lang)
 
-        template = Path(__file__).parent.parent / "templates" / "base.html"
-        if template.exists():
-            html = template.read_text(encoding="utf-8")
-        else:
-            html = "<html><head><title>{{TITLE}}</title>{{EXTRA_HEAD}}</head><body>{{CONTENT}}</body></html>"
-
         html = (
-            html
+            load_template("base.html")
             .replace("{{TITLE}}", f"{input_path.name} - Syntax Highlight")
             .replace("{{EXTRA_HEAD}}", f"<style>{css}</style>")
             .replace("{{CONTENT}}", body)
@@ -83,7 +77,7 @@ class CodeToImage(BaseConverter):
     name = "code-image"
     source_formats = _CODE_FORMATS
     target_formats = ["png", "jpeg", "jpg"]
-    description = "代码文件 → 语法高亮图片"
+    description = "代码文件 -> 语法高亮图片"
     dependencies = ["playwright"]
 
     def convert(self, input_path: Path, output_path: Path, **options) -> ConvertResult:

@@ -2,7 +2,7 @@
 
 import re
 from pathlib import Path
-from .base import BaseConverter, ConvertResult, register
+from .base import BaseConverter, ConvertResult, register, load_template
 
 # Mermaid 占位符前缀
 _MERMAID_PLACEHOLDER = "MERMAID_BLOCK_{idx}_PLACEHOLDER"
@@ -178,12 +178,7 @@ def _fallback_md_to_html(md_text: str) -> str:
 
 def build_full_html(body: str, title: str = "Document", extra_head: str = "") -> str:
     """用模板包装 HTML body"""
-    template_path = Path(__file__).parent.parent / "templates" / "base.html"
-    if template_path.exists():
-        template = template_path.read_text(encoding="utf-8")
-    else:
-        template = "<html><head><title>{{TITLE}}</title>{{EXTRA_HEAD}}</head><body>{{CONTENT}}</body></html>"
-
+    template = load_template("base.html")
     return (
         template
         .replace("{{TITLE}}", title)

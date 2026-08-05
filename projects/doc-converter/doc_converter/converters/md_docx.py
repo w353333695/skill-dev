@@ -327,7 +327,7 @@ class MdToDocx(BaseConverter):
     source_formats = ["md", "markdown"]
     target_formats = ["docx"]
     description = "Markdown 转 Word 文档 (Mermaid 自动转图片插入)"
-    dependencies = ["docx"]  # python-docx, import 名为 docx
+    dependencies = ["python-docx"]  # import 名 docx
 
     # 标题字号映射：h1 → h6
     HEADING_SIZES = {
