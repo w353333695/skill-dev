@@ -58,6 +58,54 @@ def render_mermaid_to_image(code: str, output_path: Path, theme: str = "default"
     return output_path
 
 
+def render_mermaid_blocks(blocks: list[str], out_dir, theme: str = "default", **options) -> list[Path]:
+    """批量渲染 mermaid 代码块为 PNG，返回图片路径列表。
+
+    单块渲染复用 render_mermaid_to_image；供 md-docx / md-pdf 等"预先光栅化
+    mermaid 再嵌入"的路径共用（区别于 md-html 的浏览器内客户端渲染）。
+    playwright 缺失时由底层抛 ImportError，由调用方决定是否降级。
+    """
+    out_dir = Path(out_dir)
+    out_dir.mkdir(parents=True, exist_ok=True)
+    images = []
+    for i, code in enumerate(blocks):
+        img = out_dir / f"mermaid_{i}.png"
+        render_mermaid_to_image(code, img, theme, **options)
+        images.append(img)
+    return images
+
+
+def inline_mermaid_as_images(md_text: str, out_dir, theme: str = "default", **options) -> tuple[str, list[Path]]:
+    """提取 md 中 mermaid 块 → 渲染 PNG → 占位符替换为图片引用。
+
+    供 pandoc/typst 等"非浏览器渲染"路径使用：mermaid 先光栅化再以 ![]() 嵌入，
+    pandoc 转 typst 后由 typst image 内联。返回 (处理后的 md, 图片路径列表)。
+
+    - 渲染成功：占位符 → `![](mermaid_i.png)`（相对文件名，需配合 typst root=out_dir）
+    - 渲染失败（如缺 playwright）：占位符 → 还原为 ```mermaid 块，返回 ([], [])，
+      保证不残留半截占位符文本。
+    """
+    from .md_html import _extract_mermaid_blocks, _MERMAID_PLACEHOLDER
+    text, blocks = _extract_mermaid_blocks(md_text)
+    if not blocks:
+        return md_text, []
+    try:
+        images = render_mermaid_blocks(blocks, out_dir, theme, **options)
+    except Exception:
+        for i, code in enumerate(blocks):
+            text = text.replace(
+                _MERMAID_PLACEHOLDER.format(idx=i),
+                f"```mermaid\n{code}\n```",
+            )
+        return text, []
+    for i, img in enumerate(images):
+        text = text.replace(
+            _MERMAID_PLACEHOLDER.format(idx=i),
+            f"![mermaid 图 {i + 1}]({img.name})",
+        )
+    return text, images
+
+
 @register
 class MermaidToImage(BaseConverter):
     name = "mermaid-image"
