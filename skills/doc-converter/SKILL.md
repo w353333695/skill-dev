@@ -40,4 +40,4 @@ doc-converter convert <输入> -t <目标格式> [-o 输出] [--extract ...] [--
 
 ## 依赖
 
-skill 不携带依赖、不建 venv。能力 project **核心包轻量**（纯 python 库）；重依赖按需 extras：PDF/截图装 `[render]`、PDF→Word 装 `[pdf]`，**md→pdf 默认走系统 pandoc+xelatex 免 chromium**。分发态由 `scripts/setup.sh` 装 CLI（vendor whl 优先），运行时大件 chromium 用 `doc-converter install-deps` 装（缓存在 `~/.cache/ms-playwright`，全局共享）。
+skill 不携带依赖、不建 venv。能力 project **核心包轻量**（纯 python 库）；重依赖按需 extras：md→pdf 主路径装 `[typst]`（pandoc3+typst，原生中文/表格/代码高亮，免 TexLive）、PDF/截图/mermaid 嵌入装 `[render]`、PDF→Word 装 `[pdf]`。md→pdf 引擎链自动回退：pandoc3+typst → 系统 pandoc+xelatex → playwright。分发态由 `scripts/setup.sh` 装 CLI（vendor whl 优先），运行时大件 chromium 用 `doc-converter install-deps` 装（缓存在 `~/.cache/ms-playwright`，全局共享）。

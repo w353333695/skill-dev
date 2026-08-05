@@ -8,7 +8,7 @@
 | 转换 | 命令示例 | 提取模式 |
 |------|---------|---------|
 | Mermaid -> PNG/SVG | `convert x.md -t png` | 从 MD 提取 mermaid 块: `--extract mermaid` |
-| Markdown -> PDF | `convert x.md -t pdf` | 全量，含 Mermaid 渲染 |
+| Markdown -> PDF | `convert x.md -t pdf` | 全量；Mermaid 需 [render] 嵌入 |
 | Markdown -> HTML | `convert x.md -t html` | 全量，含样式和 Mermaid |
 | Markdown -> Word | `convert x.md -t docx` | 全量 |
 | Word -> Markdown | `convert x.docx -t md` | 全量，图片提取到 `_assets/<文件名>/` |
@@ -56,9 +56,11 @@ doc-converter doctor          # 核心依赖 + 可选 extras + 运行时大件
 doc-converter install-deps    # 装 chromium（装 [render] 后）
 ```
 
-核心转换无需重依赖。PDF/截图装 `[render]`，PDF→Word 装 `[pdf]`：
+核心转换无需重依赖。按需装 extras：
 ```bash
-pip install 'doc-converter[render]'   # md/html→pdf(回退)、mermaid/代码→图片
+pip install 'doc-converter[typst]'    # md→pdf 主路径（pandoc3+typst，原生中文/表格/代码高亮）
+pip install 'doc-converter[render]'   # PDF/截图渲染、mermaid 嵌入、代码→图片
 pip install 'doc-converter[pdf]'      # PDF→Word
 ```
-**md→pdf 默认走系统 pandoc+xelatex（免 chromium、支持中文）**，核心包即可用。
+md→pdf 引擎链自动回退：pandoc3+typst → 系统 pandoc+xelatex → playwright。
+mermaid 图嵌入需 `[render]`；未装时 mermaid 优雅回退为代码块，不阻断转换。
