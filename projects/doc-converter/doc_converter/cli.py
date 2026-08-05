@@ -130,8 +130,13 @@ def doctor():
 
     click.echo("\n可选 extras（按需安装，核心转换不需要）:")
     try:
+        import pypandoc, typst  # noqa: F401
+        click.echo("  [typst]  pandoc3+typst ✅   md→pdf 主路径（原生中文/表格/代码高亮）")
+    except ImportError:
+        click.echo("  [typst]  ❌   pip install 'doc-converter[typst]'  (md→pdf 主路径)")
+    try:
         import playwright  # noqa: F401
-        click.echo("  [render] playwright ✅   PDF/截图渲染")
+        click.echo("  [render] playwright ✅   PDF/截图渲染 + md→pdf 的 mermaid 嵌入")
     except ImportError:
         click.echo("  [render] playwright ❌   pip install 'doc-converter[render]'")
     try:
@@ -140,6 +145,17 @@ def doctor():
     except ImportError:
         click.echo("  [pdf]    pdf2docx  ❌   pip install 'doc-converter[pdf]'")
 
+    click.echo("\nmd→pdf 引擎链（自动按优先级选用）:")
+    try:
+        import pypandoc, typst  # noqa: F401
+        click.echo("  ✅ pandoc3+typst（主路径，已就绪）")
+    except ImportError:
+        click.echo("  ❌ pandoc3+typst 主路径未装 → 将回退")
+    if shutil.which("pandoc") and shutil.which("xelatex"):
+        click.echo("  ✅ 系统 pandoc+xelatex（回退路径）")
+    else:
+        click.echo("  ⚠️  系统 pandoc+xelatex 不全（回退不可用；非必需）")
+
     click.echo("\n运行时大件:")
     cache = Path.home() / ".cache" / "ms-playwright"
     chromium_dirs = list(cache.glob("chromium-*")) if cache.exists() else []
@@ -147,10 +163,8 @@ def doctor():
         click.echo(f"  chromium ✅ ({chromium_dirs[0].name})")
     else:
         click.echo("  chromium ❌ 未装（装 [render] 后运行: doc-converter install-deps）")
-    if shutil.which("pandoc") and shutil.which("xelatex"):
-        click.echo("  pandoc+xelatex ✅   md→pdf 走系统工具，免 chromium")
-    elif shutil.which("pandoc"):
-        click.echo("  pandoc ✅（但缺 xelatex，md→pdf 仍可走 [render]）")
+    if shutil.which("pandoc"):
+        click.echo("  pandoc ✅ (docx→md 用)")
     else:
         click.echo("  pandoc ❌ 未装（docx→md 需要；brew/apt install pandoc）")
 
