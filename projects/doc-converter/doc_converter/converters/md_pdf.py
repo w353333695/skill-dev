@@ -92,9 +92,10 @@ class MdToPdf(BaseConverter):
             text, mermaid_imgs = inline_mermaid_as_images(text, tmp, theme)
             # 2. 其他图片重定位到 tmp（typst root 单目录）；网络/缺失图降级为文本
             text = self._relocate_images(text, input_path, tmp)
-            # 3. Markdown → typst 源
+            # 3. Markdown → typst 源（禁 auto_identifiers：typst label 不支持中文）
             typ_path = tmp / "doc.typ"
-            pypandoc.convert_text(text, "typst", format="markdown", outputfile=str(typ_path))
+            pypandoc.convert_text(text, "typst", format="markdown-auto_identifiers", outputfile=str(typ_path))
+            self._fix_typst_source(typ_path)
             # 4. typst → PDF（root=tmp 解析 mermaid/图片相对路径）
             typst.compile(str(typ_path), output=str(output_path), root=str(tmp))
             extra = f"，{len(mermaid_imgs)} 个 Mermaid 图已嵌入" if mermaid_imgs else ""
@@ -137,6 +138,18 @@ class MdToPdf(BaseConverter):
             return f"*［图片缺失：{alt or src}］*"
 
         return re.sub(r"!\[([^\]]*)\]\(([^)]+)\)", repl, md_text)
+
+    @staticmethod
+    def _fix_typst_source(typ_path) -> None:
+        """修正 pandoc→typst 的已知不兼容产物（否则 typst 编译中断）。
+
+        - `#horizontalrule`：pandoc HorizontalRule 输出，typst 无此内置 → 原生水平线；
+        - `#link(<label>)[body]`：typst label 不支持中文，内部锚点链接降级为纯文本（外链 url 不受影响）。
+        """
+        text = Path(typ_path).read_text(encoding="utf-8")
+        text = re.sub(r"^#horizontalrule\s*$", "#line(length: 100%)", text, flags=re.MULTILINE)
+        text = re.sub(r'#link\(<[^>]*>\)\[(.*?)\]', r"\1", text)
+        Path(typ_path).write_text(text, encoding="utf-8")
 
     # ----- 回退路径 1：系统 pandoc + xelatex -----
     def _via_pandoc_xelatex(self, input_path: Path, output_path: Path, **options) -> ConvertResult:

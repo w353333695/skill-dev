@@ -76,33 +76,32 @@ def render_mermaid_blocks(blocks: list[str], out_dir, theme: str = "default", **
 
 
 def inline_mermaid_as_images(md_text: str, out_dir, theme: str = "default", **options) -> tuple[str, list[Path]]:
-    """提取 md 中 mermaid 块 → 渲染 PNG → 占位符替换为图片引用。
+    """提取 md 中 mermaid 块 → 逐块渲染 PNG → 占位符替换为图片引用。
 
     供 pandoc/typst 等"非浏览器渲染"路径使用：mermaid 先光栅化再以 ![]() 嵌入，
-    pandoc 转 typst 后由 typst image 内联。返回 (处理后的 md, 图片路径列表)。
+    pandoc 转 typst 后由 typst image 内联。返回 (处理后的 md, 成功渲染的图片路径列表)。
 
-    - 渲染成功：占位符 → `![](mermaid_i.png)`（相对文件名，需配合 typst root=out_dir）
-    - 渲染失败（如缺 playwright）：占位符 → 还原为 ```mermaid 块，返回 ([], [])，
-      保证不残留半截占位符文本。
+    逐块容错：单块渲染失败（如某 mermaid 类型/语法不受支持、CDN 超时）时，该块
+    还原为 ```mermaid 代码块，不影响其他块继续嵌入，避免"一坏全坏"。
     """
+    from pathlib import Path
     from .md_html import _extract_mermaid_blocks, _MERMAID_PLACEHOLDER
     text, blocks = _extract_mermaid_blocks(md_text)
     if not blocks:
         return md_text, []
-    try:
-        images = render_mermaid_blocks(blocks, out_dir, theme, **options)
-    except Exception:
-        for i, code in enumerate(blocks):
-            text = text.replace(
-                _MERMAID_PLACEHOLDER.format(idx=i),
-                f"```mermaid\n{code}\n```",
-            )
-        return text, []
-    for i, img in enumerate(images):
-        text = text.replace(
-            _MERMAID_PLACEHOLDER.format(idx=i),
-            f"![mermaid 图 {i + 1}]({img.name})",
-        )
+    out_dir = Path(out_dir)
+    out_dir.mkdir(parents=True, exist_ok=True)
+    images = []
+    for i, code in enumerate(blocks):
+        placeholder = _MERMAID_PLACEHOLDER.format(idx=i)
+        try:
+            img = out_dir / f"mermaid_{i}.png"
+            render_mermaid_to_image(code, img, theme, **options)
+            images.append(img)
+            text = text.replace(placeholder, f"![mermaid 图 {i + 1}]({img.name})")
+        except Exception:
+            # 该块渲染失败 → 还原为代码块，不阻断其余块
+            text = text.replace(placeholder, f"```mermaid\n{code}\n```")
     return text, images
 
 
