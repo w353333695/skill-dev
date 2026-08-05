@@ -1,0 +1,258 @@
+openapi: 3.0.3
+info:
+  title: ITSM 标准字段管理 API
+  version: "1.0.0"
+  description: |
+    EasyOps ITSM「系统管理 -> 标准字段管理」相关接口。
+
+    标准字段是可复用于多个表单的字段定义，配置一次即可在多处引用。
+    本清单覆盖标准字段的列表查询、详情、创建、更新、删除。
+
+    - 录制来源：http://172.30.5.20/next/itsc-advanced-settings/standard-field
+    - 每条 `x-relevant: true` 表示与本流程强相关；`false` 的条目（心跳、公告、菜单、静态资源等）已从 paths 中剔除，可在 apis.json 中回溯。
+servers:
+  - url: http://172.30.5.20
+    description: ITSM 测试环境
+tags:
+  - name: 标准字段列表查询
+    description: 按关键词、字段类型、创建人查询标准字段列表
+  - name: 标准字段详情
+    description: 查询单个标准字段详情
+  - name: 标准字段创建
+    description: 新建标准字段
+  - name: 标准字段更新
+    description: 更新标准字段
+  - name: 标准字段删除
+    description: 删除标准字段
+paths:
+  /next/api/gateway/logic.flowable_service/api/flowable_service/v1/standard_field/_search:
+    post:
+      tags: [标准字段列表查询]
+      operationId: searchStandardField
+      summary: 查询标准字段列表
+      description: |
+        按关键词（Q）、唯一标识（key）、字段名称（name）、字段说明（desc）、字段类型（kind）、创建人（creator）等条件查询标准字段列表。
+        进入列表页、执行搜索时调用。
+      x-relevant: true
+      x-triggered-by-step: [3, 8]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                page: { type: integer, example: 1 }
+                pageSize: { type: integer, example: 10 }
+                Q: { type: string, description: 关键词（模糊匹配唯一标识/名称/说明/创建人）, example: "" }
+                key: { type: string, description: 唯一标识, example: "" }
+                name: { type: string, description: 字段名称, example: "" }
+                desc: { type: string, description: 字段说明, example: "" }
+                kind: { type: string, description: 字段类型（如 USER_SELECTOR、INPUT）, example: "" }
+                creator: { type: string, description: 创建人, example: "" }
+                et: { type: string, description: 预留筛选, example: "" }
+                st: { type: string, description: 预留筛选, example: "" }
+      responses:
+        '200':
+          description: 查询成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code: { type: integer, example: 0 }
+                  data:
+                    type: object
+                    properties:
+                      total: { type: integer, example: 28 }
+                      page: { type: integer, example: 1 }
+                      page_size: { type: integer, example: 10 }
+                      list:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/StandardField'
+  /next/api/gateway/logic.flowable_service/api/flowable_service/v1/standard_field/{fieldId}:
+    get:
+      tags: [标准字段详情]
+      operationId: getStandardField
+      summary: 查询标准字段详情
+      description: 进入字段编辑页时，按 fieldId 拉取该字段完整定义（key/name/kind/sourceConfig/domainModels 等）。
+      x-relevant: true
+      x-triggered-by-step: [44]
+      parameters:
+        - name: fieldId
+          in: path
+          required: true
+          schema: { type: string }
+          description: 字段实例 ID
+          example: 656788ffdaf71
+      responses:
+        '200':
+          description: 查询成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code: { type: integer, example: 0 }
+                  data:
+                    $ref: '#/components/schemas/StandardField'
+    put:
+      tags: [标准字段更新]
+      operationId: updateStandardField
+      summary: 更新标准字段
+      description: |
+        在编辑页修改字段说明、属性配置等后点击「保存」提交更新。
+        body 结构与创建一致（key/name/kind/sourceType/sourceConfig/required/readonly/default/desc/domainModelIds）。
+      x-relevant: true
+      x-triggered-by-step: [62]
+      parameters:
+        - name: fieldId
+          in: path
+          required: true
+          schema: { type: string }
+          description: 字段实例 ID
+          example: 656788ffdaf71
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/StandardFieldInput'
+      responses:
+        '200':
+          description: 更新成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code: { type: integer, example: 0 }
+                  data:
+                    type: object
+                    properties:
+                      instanceId: { type: string, example: 656788ffdaf71 }
+    delete:
+      tags: [标准字段删除]
+      operationId: deleteStandardField
+      summary: 删除标准字段
+      description: 在列表中对字段执行删除，前端二次确认（输入数字）后调用。按 fieldId 删除单条。
+      x-relevant: true
+      x-triggered-by-step: [43]
+      parameters:
+        - name: fieldId
+          in: path
+          required: true
+          schema: { type: string }
+          description: 字段实例 ID
+          example: 654e1f0fad767
+      responses:
+        '200':
+          description: 删除成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code: { type: integer, example: 0 }
+                  data: { type: object, nullable: true, example: null }
+  /next/api/gateway/logic.flowable_service/api/flowable_service/v1/standard_field:
+    post:
+      tags: [标准字段创建]
+      operationId: createStandardField
+      summary: 新建标准字段
+      description: |
+        在新建页填写唯一标识、字段名称、字段类型，配置属性后点击「保存」提交创建。
+        `sourceConfig` 为字段属性配置 JSON 字符串（含 key/modelField/label/type 及类型相关属性）。
+        `kind` 为字段类型枚举：USER_SELECTOR（用户选择器）、INPUT（单行文本）等。
+      x-relevant: true
+      x-triggered-by-step: [34]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/StandardFieldInput'
+      responses:
+        '200':
+          description: 创建成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code: { type: integer, example: 0 }
+                  data:
+                    type: object
+                    properties:
+                      instanceId: { type: string, example: 656788ffdaf71 }
+components:
+  schemas:
+    StandardFieldInput:
+      type: object
+      description: 标准字段创建/更新请求体
+      required: [key, name, kind, sourceType]
+      properties:
+        key:
+          type: string
+          description: 唯一标识（数字、大小写字母、下划线）
+          example: ITSC_handler
+        name:
+          type: string
+          description: 字段名称
+          example: 处理人
+        kind:
+          type: string
+          description: 字段类型（USER_SELECTOR=用户选择器，INPUT=单行文本 等）
+          example: USER_SELECTOR
+        sourceType:
+          type: string
+          description: 数据源类型（customize=自定义）
+          example: customize
+        sourceConfig:
+          type: string
+          description: 字段属性配置 JSON 字符串（key/modelField/label/type + 类型相关属性，如用户字段的显示字段、多选上限）
+          example: '{"key":"ITSC_handler","modelField":"ITSC_handler","label":"处理人","type":"USER_SELECTOR","multiLimit":3,"displayFields":["nickname","tel"]}'
+        desc:
+          type: string
+          description: 字段说明
+          example: 工单处理人
+        required:
+          type: boolean
+          description: 是否必填
+          example: true
+        readonly:
+          type: boolean
+          description: 是否只读
+          example: false
+        default:
+          type: string
+          description: 默认值
+          example: ""
+        domainModelIds:
+          type: array
+          items: { type: string }
+          description: 关联领域模型 ID 列表
+          example: []
+    StandardField:
+      type: object
+      description: 标准字段
+      properties:
+        instanceId: { type: string, example: 656788ffdaf71 }
+        key: { type: string, description: 唯一标识, example: ITSC_handler }
+        name: { type: string, description: 字段名称, example: 处理人 }
+        kind: { type: string, description: 字段类型, example: USER_SELECTOR }
+        sourceType: { type: string, description: 数据源类型, example: customize }
+        sourceConfig:
+          type: string
+          description: 属性配置 JSON 字符串
+        desc: { type: string, description: 字段说明, example: "" }
+        domainModels:
+          type: array
+          description: 关联领域模型
+          items: { type: object }
+        formVersions:
+          type: array
+          description: 引用该字段的表单版本
+          items: { type: object }
+        fileCfgResource: { type: string, example: "" }

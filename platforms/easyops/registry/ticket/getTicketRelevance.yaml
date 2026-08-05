@@ -1,0 +1,51 @@
+name: getTicketRelevance
+module: ticket
+method: GET
+path: /api/flowable_service/v1/ticket/{ticketId}/relevance
+gateway_path: /next/api/gateway/logic.flowable_service/api/flowable_service/v1/ticket/{ticketId}/relevance
+service: logic.flowable_service
+side_effect: read
+path_source: backend_contract
+path_confidence: high
+tags:
+- 工单
+- 关联
+- 查询
+- 列表
+- relevance
+summary: 查询工单关联服务/工单列表
+description: 查询工单关联的服务/工单列表。
+request:
+  required:
+  - ticketId
+  properties:
+    ticketId:
+      type: instance_id
+      desc: 工单Id
+outputs:
+  list_full:
+    jsonpath: $.data.serviceRelevanceOrder
+    desc: 工单关联单列表全量（关联的服务/工单）
+  list_ids:
+    jsonpath: $.data.serviceRelevanceOrder
+    desc: 关联单 id 集合（配合 ${s.list_full.instanceId} 投影）
+requires:
+- ticketId 须为已存在工单实例 ID
+rollback: null
+examples: []
+confidence:
+  module: high
+  outputs: high
+  requires: medium
+  rollback: high
+  summary: high
+  tags: high
+  request: high
+endpoint:
+  contract_ref: logic.flowable_service|GET|/api/flowable_service/v1/ticket/{ticketId}/relevance
+  mode: easyops_gateway
+source:
+  openapi_file: ITSM-工单发起-openapi.yaml
+  openapi_hash: 1ca484b7e487f62a1c488f8e8b29d32e77b51750fc68f94a51a775d93f09be61
+  recorded_at: '2026-07-13T14:47:07'
+registered_at: '2026-07-22T10:34:09.642601'

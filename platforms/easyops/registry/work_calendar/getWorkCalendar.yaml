@@ -1,0 +1,49 @@
+name: getWorkCalendar
+module: work_calendar
+method: GET
+path: /api/sys_setting/v1/work/calendar/{id}
+gateway_path: /next/api/gateway/logic.sys_setting/api/sys_setting/v1/work/calendar/{calendarId}
+service: logic.sys_setting
+side_effect: read
+path_source: backend_contract
+path_confidence: high
+tags:
+- 工作日历
+- 详情
+- 营业时间
+summary: 查询工作日历详情
+description: 获取单个工作日历详情（编辑表单回填用）。
+request:
+  required: []
+  properties:
+    id:
+      type: mongo_object_id
+      desc: 日历ID
+      _source: contract
+    year:
+      type: string
+      desc: 年份
+      _source: contract
+outputs:
+  detail:
+    jsonpath: $.data
+    desc: 工作日历详情
+requires:
+- calendarId 须存在
+rollback: null
+examples: []
+confidence:
+  request: high
+  module: high
+  outputs: high
+  tags: high
+  summary: high
+  requires: high
+endpoint:
+  contract_ref: logic.sys_setting|GET|/api/sys_setting/v1/work/calendar/{id}
+  mode: easyops_gateway
+source:
+  openapi_file: ITSM-运行管理-营业时间管理-openapi.yaml
+  openapi_hash: 02467de10e4cd52adcbf8975ca51b51a5a06742b85a95342ca4ffec2ea26481f
+  recorded_at: '2026-07-28T14:13:31.896000'
+registered_at: '2026-07-28T16:48:34.882046'

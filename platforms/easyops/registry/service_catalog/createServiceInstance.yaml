@@ -1,0 +1,108 @@
+name: createServiceInstance
+module: service_catalog
+method: POST
+path: /api/flowable_service/v2/service_instance
+gateway_path: /next/api/gateway/logic.flowable_service/api/flowable_service/v2/service_instance
+service: logic.flowable_service
+side_effect: create
+path_source: backend_contract
+path_confidence: high
+tags:
+- 服务
+- 新建
+- 创建
+- service_instance
+summary: 新建服务
+description: |
+  在指定目录下新建服务。需配置服务名称、关联流程、负责人、触发器。
+  ⚠️ 2026-07-28 实测补充（卡片原 request 漏列字段 + 平台约束）：
+  - `category` 必填（卡片 request.properties 未列，但服务端校验"必填key category 不存在"）——传服务分类名（如"服务请求"，与流程分类对应）。
+  - `catalogId` 不能是内置目录——"服务请求"/"事件管理"等根目录是内置（报"内置服务,禁止新建服务实例"），服务只能建在**用户创建的子目录**下（先 createServiceCatalog 建子目录）。
+  - `associatedProcess` 关联流程定义 ID（流程须已设主版本+部署，否则发起工单无表单）。
+  - defaultUser 在 GET service_instance 详情时可能报"用户不存在"（GET 走另一套用户校验），但 POST 建服务时认。
+  实测可建 body：{catalogId, serviceName(英文编码), name(展示名), category, associatedProcess, ownerList, icon, iconColor, builtIn:false}。
+request:
+  required:
+  - catalogId
+  - serviceName
+  - name
+  - category
+  properties:
+    catalogId:
+      type: instance_id
+      desc: 所属目录 ID（⚠️ 不能是内置根目录，须用户建的子目录）
+    serviceName:
+      type: string
+      desc: 服务编码（英文唯一）
+    name:
+      type: string
+      desc: 服务名称
+    category:
+      type: string
+      desc: 服务分类名（必填，卡片原漏列；如"服务请求"，与流程分类对应）
+      _source: manual
+    description:
+      type: string
+      desc: ''
+    icon:
+      type: object
+      desc: 图标配置
+    ownerList:
+      type: string[]
+      desc: 负责人用户名列表
+      _source: contract
+    groupList:
+      type: instance_id[]
+      desc: 负责用户组列表
+      _source: contract
+    associatedProcess:
+      type: instance_id
+      desc: 关联流程定义
+      _source: contract
+    builtIn:
+      type: bool
+      desc: 是否为内置(默认为false)
+      _source: contract
+    iconColor:
+      type: string
+      desc: 图标颜色
+      _source: contract
+    url:
+      type: url
+      desc: 用户自定义服务实例url
+      _source: contract
+    triggerIdList:
+      type: string[]
+      desc: 触发器ID列表
+      _source: contract
+    slaRuleId:
+      type: string
+      desc: SLA 规则 ID
+      _source: contract
+outputs:
+  instanceId:
+    jsonpath: $.data.instanceId
+    desc: 新建服务实例 ID
+requires:
+- catalogId 须是已存在目录 ID
+- serviceName 与 name 必填
+rollback:
+  api: deleteServiceInstance
+  param_from_output: instanceId
+examples: []
+confidence:
+  module: high
+  outputs: medium
+  requires: medium
+  rollback: high
+  summary: high
+  tags: high
+  request: medium
+endpoint:
+  contract_ref: logic.flowable_service|POST|/api/flowable_service/v2/service_instance
+  mode: easyops_gateway
+source:
+  openapi_file: ITSM-系统管理-服务目录管理-openapi.yaml
+  openapi_hash: a27e0a4e7c6dd1cab5f0e3af9182e873d3ef6a3e84b03f255c424ea97fa2df6e
+  recorded_at: '2026-07-13T16:11:24'
+registered_at: '2026-07-22T10:34:10.494082'

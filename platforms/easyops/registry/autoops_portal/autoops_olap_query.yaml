@@ -1,0 +1,138 @@
+name: autoops_olap_query
+module: autoops_portal
+method: POST
+path: /api/v2/data_exchange/olap
+gateway_path: /next/api/gateway/logic.data_exchange/api/v2/data_exchange/olap
+service: logic.data_exchange
+side_effect: read
+path_source: backend_contract
+path_confidence: high
+tags:
+- AutoOps
+- 运维度量
+- OLAP
+summary: OLAP 度量查询
+description: 查询运维度量数据（任务执行统计等）。按维度聚合，返回度量指标序列。
+request:
+  required: []
+  properties:
+    model:
+      type: string
+      desc: 度量模型 ID
+    dims:
+      type: string[]
+      desc: 聚合维度
+    metrics:
+      type: array
+      desc: 度量指标
+    query:
+      type: map
+      desc: CMDB 过滤条件
+      _source: contract
+    cmdbGroupDims:
+      type: string[]
+      desc: 根据 cmdb 关系/属性汇聚，例如：relatedHost.hostname（按所属主机汇聚）
+      _source: contract
+    measures:
+      type: Measure[]
+      desc: 指标聚合计算规则
+      _source: contract
+    filters:
+      type: Filter[]
+      desc: 过滤条件
+      _source: contract
+    order:
+      type: Order[]
+      desc: 指定字段排序, 数组是有顺序，哪个字段在前，先按哪个字段排序
+      _source: contract
+    limit:
+      type: Limit
+      desc: 指定获取数据的最大条数
+      _source: contract
+    translate:
+      type: string[]
+      desc: 翻译字段，若返回数据存在instanceId，则在cmdb取相应字段的值填充进返回数据。
+      _source: contract
+    transform:
+      type: object
+      desc: 转换规则，类似 excel 透视表行和列的转换， 详情见 https://tapd.easyops.local/pages/viewpage.action?pageId=25277283
+      _source: contract
+    epoch:
+      type: string
+      desc: 返回时间单位
+      _source: contract
+    limitBy:
+      type: LimitBy
+      desc: 按字段分组，指定每组返回最大条数
+      _source: contract
+    having:
+      type: Having[]
+      desc: having过滤
+      _source: contract
+    countTotal:
+      type: bool
+      desc: 是否查询真实total(为false时置为返回list的长度)
+      _source: contract
+    withEmptyData:
+      type: bool
+      desc: 是否查询时序数据为空时的实例数据(只在model为cmdb时才生效)
+      _source: contract
+    withAlertRule:
+      type: bool
+      desc: 是否查询实例所属告警规则
+      _source: contract
+    displayName:
+      type: bool
+      desc: 是否显示别名
+      _source: contract
+    fillEmptyData:
+      type: bool
+      desc: 是否填充空数据
+      _source: contract
+    minimumStep:
+      type: string
+      desc: 最小步长，仅聚合维度time为auto时才生效
+      _source: contract
+    withoutObjectId:
+      type: bool
+      desc: 是否返回 _object_id 字段,默认返回 _object_id
+      _source: contract
+    withShowKey:
+      type: bool
+      desc: 是否返回cmdb实例showKey
+      _source: contract
+    resolutionOffset:
+      type: int64
+      desc: 汇聚时相对于UTC偏移量，单位ms。比如需要按照本地时间偏移：8 * 3600 * 1000（加8小时），如果需要按照start_time偏移，可以设置为start_time
+      _source: contract
+    fieldsRelationFilter:
+      type: map
+      desc: '为 key -> filter, 其中key必须为关系（支持多层）或者边属性@结尾，filter语法同上面的实例filter。 如: APP
+        <-cluster---app-> CLUSTER <-host---cluster-> HOST 中 支持： {"cluster": {"$or":[{"name":"aaa"},{"ip":"1"}]},"cluster.@":{"name":"aaa","ctime":"xxx"},"cluster.host":{...}}
+        上面过滤，则获取的数据只包含cluster名字为aaa或者ip为1 的 同时边属性满足上面的条件的（目前边属性仅支持 and 逻辑，不支持 or 逻辑），cluster.host同理。
+        不支持：{"cluster.name":"aaa"}，key只能为关系的out_id 或者 多层out_id，最后一层支持.@表示该关系上的边属性。'
+      _source: contract
+outputs:
+  detail:
+    jsonpath: $.data
+    desc: OLAP 查询结果
+requires:
+- model 为合法度量模型 ID
+rollback: null
+examples: []
+confidence:
+  request: medium
+  module: high
+  outputs: high
+  tags: high
+  summary: high
+  requires: medium
+  rollback: medium
+endpoint:
+  contract_ref: logic.data_exchange|POST|/api/v2/data_exchange/olap
+  mode: easyops_gateway
+source:
+  openapi_file: AutoOps-入口与功能预览-openapi.yaml
+  openapi_hash: 83d3bdb67d59bec3aa970fbd014c3aa03c60e8fed470857fa78d2a2613dcbd31
+  recorded_at: '2026-07-23T12:05:14.132308'
+registered_at: '2026-07-23T14:28:57.999092'

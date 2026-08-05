@@ -1,0 +1,46 @@
+name: file_pkg_workspace_upload
+module: autoops_file
+method: POST
+path: /workspace/{packageId}/upload
+gateway_path: /next/api/gateway/file_repository.workspace.UploadFile/workspace/{packageId}/upload
+service: file_repository.workspace.UploadFile
+side_effect: create
+path_source: gateway_strip
+path_confidence: medium
+tags:
+- 文件分发
+- 版本
+- 上传
+- 工作区
+summary: 上传文件到版本工作区
+description: 向文件包的版本工作区上传文件（multipart/form-data，单文件不超过 4000 MB），支持自动解压 tar.gz/tgz/zip/war。上传后文件处于工作区暂存态，需再调
+  CommitWorkspaceV2 提交为正式版本。
+request:
+  required:
+  - packageId
+  properties:
+    packageId:
+      type: string
+      desc: 文件包 ID（path 参数）
+    file:
+      type: string
+      desc: 上传的文件（multipart/form-data 二进制）
+outputs: {}
+requires:
+- 需先创建文件包（file_pkg_create），工作区由后端自动初始化
+rollback: null
+examples: []
+confidence:
+  request: medium
+  module: high
+  outputs: low
+  tags: high
+  summary: high
+endpoint:
+  contract_ref: ''
+  mode: easyops_gateway
+source:
+  openapi_file: AutoOps-文件分发管理-openapi.yaml
+  openapi_hash: edf3872fae57ab16180ccec0257fe32c2d0de09a4a639719250779d5ae96e426
+  recorded_at: '2026-07-29T16:20:10'
+registered_at: '2026-07-29T16:49:25.523907'

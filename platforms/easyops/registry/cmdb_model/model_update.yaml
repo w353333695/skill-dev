@@ -1,0 +1,61 @@
+name: model_update
+module: cmdb_model
+method: PUT
+path: /v2/object/{objectId}
+gateway_path: /next/api/gateway/cmdb.cmdb_object.UpdateV2/v2/object/{objectId}
+service: logic.cmdb.service
+side_effect: update
+path_source: gateway_strip
+path_confidence: medium
+tags:
+- CMDB
+- 模型
+- 更新
+summary: 更新模型(v2整体)
+description: 整体更新模型定义。高级设置提交时会调用此接口，写入 `wordIndexDenied`/`notifyDenied`/
+request:
+  required: []
+  properties:
+    wordIndexDenied:
+      type: boolean
+      desc: ''
+    notifyDenied:
+      type: boolean
+      desc: ''
+    system:
+      type: string
+      desc: ''
+    view:
+      type: object
+      desc: 视图配置（分组顺序、字段启用等）
+    objectId:
+      type: object_id
+      desc: 模型Id
+      _source: contract
+    body:
+      type: object
+      desc: 模型信息
+      _source: contract
+outputs:
+  detail:
+    jsonpath: $.data
+    desc: 更新结果
+requires:
+- objectId 为已存在模型
+rollback: null
+examples: []
+confidence:
+  request: medium
+  module: high
+  outputs: high
+  tags: high
+  summary: high
+  requires: medium
+  rollback: medium
+endpoint:
+  contract_ref: logic.cmdb.service|PUT|/v2/object/{objectId}
+source:
+  openapi_file: CMDB-模型管理-openapi.yaml
+  openapi_hash: e422eadfbcf745f98992379d09d3334717c7e3992c54b62f366b7f342e7e08f0
+  recorded_at: '2026-07-23T10:29:50.694479'
+registered_at: '2026-07-23T14:28:58.926734'

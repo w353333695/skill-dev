@@ -1,0 +1,76 @@
+name: cmdb_policy_validate
+module: cmdb_portal
+method: POST
+path: /api/v1/policy_validate
+gateway_path: /next/api/gateway/logic.permission/api/v1/policy_validate
+service: logic.permission
+side_effect: create
+path_source: backend_contract
+path_confidence: high
+tags:
+- CMDB
+- 权限
+- 校验
+summary: 权限校验
+description: 校验当前用户对指定资源的操作权限。
+request:
+  required: []
+  properties:
+    policies:
+      type: array
+      desc: ''
+    user:
+      type: user_name
+      desc: 校验角色
+      _source: contract
+    action:
+      type: string
+      desc: 权限点
+      _source: contract
+    resource:
+      type: string
+      desc: 校验对象
+      _source: contract
+    resourceIds:
+      type: string[]
+      desc: 校验数据id
+      _source: contract
+    resourceKey:
+      type: string
+      desc: resourceId查询的key值，不设置则为instanceId
+      _source: contract
+    onlyFilter:
+      type: bool
+      desc: 只返回filter, 不对校验对象进行校验，用于业务方获取规则filter，筛选查询条件
+      _source: contract
+    collectNoPermissionIds:
+      type: bool
+      desc: 为true时，统计noPermissionIds和notFoundPermissionIds
+      _source: contract
+    noPermissionSuppressError:
+      type: bool
+      desc: 为true时，权限校验没通过也不返回错误。使用场景：批量鉴权时需要对部分没有权限的实例 ID 进行业务逻辑处理。
+      _source: contract
+outputs:
+  detail:
+    jsonpath: $.data
+    desc: 权限校验结果
+requires: []
+rollback: null
+examples: []
+confidence:
+  request: medium
+  module: high
+  outputs: high
+  tags: high
+  summary: high
+  requires: medium
+  rollback: medium
+endpoint:
+  contract_ref: logic.permission|POST|/api/v1/policy_validate
+  mode: easyops_gateway
+source:
+  openapi_file: CMDB-登录与功能入口-openapi.yaml
+  openapi_hash: 03368b8fed81615f7835509bbeb28ad4bc3b44520f5e837fe3383ab4c85a3bbf
+  recorded_at: '2026-07-23T09:55:56.715723'
+registered_at: '2026-07-23T14:28:59.247623'

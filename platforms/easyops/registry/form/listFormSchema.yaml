@@ -1,0 +1,47 @@
+name: listFormSchema
+module: form
+method: GET
+path: /api/flowable_service/v1/form_schema_version
+gateway_path: /next/api/gateway/flowable_service.form_schema_version.ListFormSchema/api/flowable_service/v1/form_schema_version
+service: flowable_service.form_schema_version.ListFormSchema
+side_effect: read
+path_source: gateway_strip
+path_confidence: medium
+tags:
+- 表单
+- schema
+- 列表
+- form_schema
+summary: 查询表单 schema 列表
+description: 流程设置-绑定表单时调用，返回可选表单 schema。
+request:
+  required: []
+  properties: {}
+outputs:
+  list_full:
+    jsonpath: $.data.list
+    desc: 表单 schema 列表全量
+  list_ids:
+    jsonpath: $.data.list
+    desc: 表单 schema id 列表（配合 ${s.list_full.instanceId} 投影）
+  total:
+    jsonpath: $.data.total
+    desc: 表单 schema 总数
+requires: []
+rollback: null
+examples: []
+confidence:
+  module: high
+  outputs: medium
+  requires: high
+  rollback: high
+  summary: high
+  tags: high
+endpoint:
+  contract_ref: ''
+  mode: easyops_gateway
+source:
+  openapi_file: ITSM-系统管理-流程管理-openapi.yaml
+  openapi_hash: be88bdf060789ec422b671fffae672e0754857b66418b48c317c4c55f8e9a77d
+  recorded_at: '2026-07-13T14:31:52'
+registered_at: '2026-07-22T10:34:10.699651'

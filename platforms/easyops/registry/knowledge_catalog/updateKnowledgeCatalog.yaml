@@ -1,0 +1,52 @@
+name: updateKnowledgeCatalog
+module: knowledge_catalog
+method: PUT
+path: /api/flowable_service/v1/knowledge_base/catalog/{catalogId}
+gateway_path: /next/api/gateway/logic.flowable_service/api/flowable_service/v1/knowledge_base/catalog/{catalogId}
+service: logic.flowable_service
+side_effect: update
+path_source: gateway_strip
+path_confidence: medium
+tags:
+- 知识目录
+- catalog
+- 编辑
+- 更新
+- 移动
+summary: 编辑或移动知识目录
+description: 修改目录名称、描述。通过修改 parentId 可改变目录归属（移动到其他父目录下）。
+request:
+  required: []
+  properties:
+    name:
+      type: string
+      desc: 目录名称
+    description:
+      type: string
+      desc: ''
+    parentId:
+      type: string
+      desc: 父目录 ID（修改可实现移动）
+outputs:
+  detail:
+    jsonpath: $.data
+    desc: 更新结果（无明确返回时兜底）
+requires:
+- catalogId 须为已存在的目录 ID；修改 parentId 实现移动时新父目录须存在
+rollback: null
+examples: []
+confidence:
+  module: high
+  outputs: low
+  requires: medium
+  rollback: high
+  summary: high
+  tags: high
+endpoint:
+  contract_ref: ''
+  mode: easyops_gateway
+source:
+  openapi_file: ITSM-系统管理-知识目录管理-openapi.yaml
+  openapi_hash: cf72ee6896240e33a2a149bf98871adabd5a51cb22b632b8e246d4f5d98d89d2
+  recorded_at: '2026-07-13T13:50:45'
+registered_at: '2026-07-22T10:34:11.335182'

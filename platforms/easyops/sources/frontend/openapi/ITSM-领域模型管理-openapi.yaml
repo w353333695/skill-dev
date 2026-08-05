@@ -1,0 +1,317 @@
+openapi: 3.0.3
+info:
+  title: ITSM 领域模型管理 API
+  version: "1.0.0"
+  description: |
+    EasyOps ITSM「系统管理 -> 领域模型管理」相关接口。
+
+    领域模型是关联标准字段的业务模型定义，用于在工单表单中复用字段组合。
+    本清单覆盖领域模型的列表查询、详情、创建、更新、删除，以及关联标准字段的查询。
+
+    - 录制来源：http://172.30.5.20/next/itsc-advanced-settings/domain-model
+    - 每条 `x-relevant: true` 表示与本流程强相关；`false` 的条目（心跳、公告、菜单、登录态、静态资源等）已从 paths 中剔除，可在 apis.json 中回溯。
+servers:
+  - url: http://172.30.5.20
+    description: ITSM 测试环境
+tags:
+  - name: 领域模型列表查询
+    description: 按关键词、唯一标识、模型名称、创建人等条件查询领域模型列表
+  - name: 领域模型创建
+    description: 新建领域模型并关联标准字段
+  - name: 领域模型详情
+    description: 查询单个领域模型详情（含关联的标准字段定义）
+  - name: 领域模型更新
+    description: 更新领域模型的名称、描述、关联字段、允许修改等
+  - name: 领域模型删除
+    description: 批量删除领域模型
+  - name: 标准字段查询
+    description: 新建/编辑领域模型时，下拉选择关联的标准字段
+paths:
+  /next/api/gateway/logic.flowable_service/api/flowable_service/v1/domain_model/_search:
+    post:
+      tags: [领域模型列表查询]
+      operationId: searchDomainModel
+      summary: 查询领域模型列表
+      description: |
+        按关键词（Q）、唯一标识（key）、模型名称（name）、说明（desc）、创建人（creator）、关联标准字段（standard_field）等条件查询领域模型列表。
+        进入列表页、执行搜索、新建/编辑/删除后刷新列表时调用。
+      x-relevant: true
+      x-triggered-by-step: [3, 6, 29, 34, 39]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                page: { type: integer, description: 页码, example: 1 }
+                pageSize: { type: integer, description: 每页条数, example: 10 }
+                Q: { type: string, description: 关键词（模糊匹配唯一标识/名称/说明/创建人）, example: "test" }
+                key: { type: string, description: 唯一标识, example: "" }
+                name: { type: string, description: 模型名称, example: "" }
+                desc: { type: string, description: 模型说明, example: "" }
+                creator: { type: string, description: 创建人, example: "easyops" }
+                standard_field: { type: string, description: 关联的标准字段, example: "" }
+                kind: { type: string, description: 预留筛选, example: "" }
+                st: { type: string, description: 预留筛选, example: "" }
+                et: { type: string, description: 预留筛选, example: "" }
+      responses:
+        '200':
+          description: 查询成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code: { type: integer, example: 0 }
+                  codeExplain: { type: string, example: "" }
+                  error: { type: string, example: "" }
+                  data:
+                    type: object
+                    properties:
+                      total: { type: integer, example: 4 }
+                      page: { type: integer, example: 1 }
+                      page_size: { type: integer, example: 10 }
+                      list:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/DomainModelSummary'
+  /next/api/gateway/logic.flowable_service/api/flowable_service/v1/domain_model:
+    post:
+      tags: [领域模型创建]
+      operationId: createDomainModel
+      summary: 新建领域模型
+      description: |
+        创建领域模型，需指定唯一标识（key）、模型名称（name），并关联一个或多个标准字段（standardFieldIds）。
+        可选设置「允许修改」（allowUpdate）与说明（desc）。
+      x-relevant: true
+      x-triggered-by-step: [29]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [key, name, standardFieldIds]
+              properties:
+                key: { type: string, description: 唯一标识（英文，不可重复）, example: "handler" }
+                name: { type: string, description: 模型名称（中文）, example: "工单处理信息" }
+                standardFieldIds:
+                  type: array
+                  description: 关联的标准字段 instanceId 列表
+                  items: { type: string }
+                  example: ["656788ffdaf71"]
+                allowUpdate: { type: boolean, description: 是否允许后续修改, example: true }
+                desc: { type: string, description: 模型说明, example: "info" }
+      responses:
+        '200':
+          description: 创建成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code: { type: integer, example: 0 }
+                  codeExplain: { type: string, example: "" }
+                  error: { type: string, example: "" }
+                  data:
+                    type: object
+                    properties:
+                      instanceId: { type: string, description: 新建模型的实例 ID, example: "656789ae45cb9" }
+  /next/api/gateway/logic.flowable_service/api/flowable_service/v1/domain_model/{modelId}:
+    get:
+      tags: [领域模型详情]
+      operationId: getDomainModel
+      summary: 查询领域模型详情
+      description: |
+        进入模型详情/编辑页时，按 modelId 拉取该模型完整定义，含关联的标准字段完整配置（key/name/kind/sourceType/sourceConfig 等）。
+      x-relevant: true
+      x-triggered-by-step: [30]
+      parameters:
+        - name: modelId
+          in: path
+          required: true
+          schema: { type: string }
+          description: 领域模型实例 ID
+          example: 656789ae45cb9
+      responses:
+        '200':
+          description: 查询成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code: { type: integer, example: 0 }
+                  codeExplain: { type: string, example: "" }
+                  error: { type: string, example: "" }
+                  data:
+                    type: object
+                    properties:
+                      instanceId: { type: string, example: "656789ae45cb9" }
+                      key: { type: string, example: "handler" }
+                      name: { type: string, example: "工单处理信息" }
+                      desc: { type: string, example: "info" }
+                      allowUpdate: { type: boolean, example: true }
+                      builtin: { type: boolean, description: 是否内置模型, example: false }
+                      creator: { type: string, example: "easyops" }
+                      ctime: { type: string, example: "2026-06-22 10:54:44" }
+                      mtime: { type: string, example: "2026-06-22 10:54:44" }
+                      standardFields:
+                        type: array
+                        description: 关联的标准字段完整定义
+                        items: { $ref: '#/components/schemas/StandardFieldDetail' }
+    put:
+      tags: [领域模型更新]
+      operationId: updateDomainModel
+      summary: 更新领域模型
+      description: |
+        更新领域模型的 key、name、desc、allowUpdate 及关联的标准字段列表（standardFieldIds）。
+        编辑页点击「提交」时调用。
+      x-relevant: true
+      x-triggered-by-step: [34]
+      parameters:
+        - name: modelId
+          in: path
+          required: true
+          schema: { type: string }
+          description: 领域模型实例 ID
+          example: 656789ae45cb9
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                key: { type: string, description: 唯一标识, example: "handler" }
+                name: { type: string, description: 模型名称, example: "工单处理信息" }
+                desc: { type: string, description: 模型说明, example: "info1" }
+                allowUpdate: { type: boolean, description: 是否允许修改, example: true }
+                standardFieldIds:
+                  type: array
+                  description: 关联的标准字段 instanceId 列表（覆盖式更新）
+                  items: { type: string }
+                  example: ["656788ffdaf71", "654e18f63e9b5"]
+      responses:
+        '200':
+          description: 更新成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code: { type: integer, example: 0 }
+                  codeExplain: { type: string, example: "" }
+                  error: { type: string, example: "" }
+                  data:
+                    type: object
+                    properties:
+                      instanceId: { type: string, example: "656789ae45cb9" }
+  /next/api/gateway/logic.flowable_service/api/flowable_service/v1/domain_model/_batch/{modelId}:
+    delete:
+      tags: [领域模型删除]
+      operationId: deleteDomainModel
+      summary: 批量删除领域模型
+      description: |
+        按模型 instanceId 批量删除领域模型。路径中的 modelId 为待删除模型的 instanceId。
+        列表页勾选模型后点击「删除」时调用。
+      x-relevant: true
+      x-triggered-by-step: [39]
+      parameters:
+        - name: modelId
+          in: path
+          required: true
+          schema: { type: string }
+          description: 待删除的领域模型实例 ID
+          example: 654cec3c0c9db
+      responses:
+        '200':
+          description: 删除成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code: { type: integer, example: 0 }
+                  codeExplain: { type: string, example: "" }
+                  error: { type: string, example: "" }
+                  data: { type: object, nullable: true, example: null }
+  /next/api/gateway/logic.flowable_service/api/flowable_service/v1/standard_field/_search:
+    post:
+      tags: [标准字段查询]
+      operationId: searchStandardFieldForDomainModel
+      summary: 查询标准字段列表（领域模型关联用）
+      description: |
+        新建/编辑领域模型时，点击「选择字段」下拉框加载可选标准字段列表。
+        支持按关键词（q）搜索定位字段。
+      x-relevant: true
+      x-triggered-by-step: [18, 30]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                page: { type: integer, example: 1 }
+                pageSize: { type: integer, example: 20 }
+                q: { type: string, description: 关键词（模糊搜索字段标识/名称）, example: "" }
+      responses:
+        '200':
+          description: 查询成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code: { type: integer, example: 0 }
+                  codeExplain: { type: string, example: "" }
+                  error: { type: string, example: "" }
+                  data:
+                    type: object
+                    properties:
+                      total: { type: integer, example: 28 }
+                      page: { type: integer, example: 1 }
+                      page_size: { type: integer, example: 20 }
+                      list:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/StandardFieldDetail'
+components:
+  schemas:
+    DomainModelSummary:
+      type: object
+      description: 领域模型列表项
+      properties:
+        instanceId: { type: string, description: 模型实例 ID, example: "654cec3c0c9db" }
+        key: { type: string, description: 唯一标识, example: "testcypaqQwkE" }
+        name: { type: string, description: 模型名称, example: "Cypress领域447" }
+        desc: { type: string, description: 模型说明, example: "cyp领域模型api" }
+        allowUpdate: { type: boolean, description: 是否允许修改, example: true }
+        builtin: { type: boolean, description: 是否内置, example: false }
+        creator: { type: string, description: 创建人, example: "easyops" }
+        ctime: { type: string, description: 创建时间, example: "2026-06-22 10:54:44" }
+        mtime: { type: string, description: 修改时间, example: "2026-06-22 10:54:44" }
+        standardFields:
+          type: array
+          description: 关联的标准字段（列表项中通常为空，详情接口返回完整定义）
+          items: { type: object }
+        triggers: { type: array, items: { type: object } }
+        formVersions: { type: array, items: { type: object } }
+    StandardFieldDetail:
+      type: object
+      description: 标准字段定义
+      properties:
+        instanceId: { type: string, description: 字段实例 ID, example: "656788ffdaf71" }
+        key: { type: string, description: 字段唯一标识, example: "ITSC_handler" }
+        name: { type: string, description: 字段名称, example: "处理人" }
+        kind: { type: string, description: 字段类型（如 USER_SELECTOR）, example: "USER_SELECTOR" }
+        sourceType: { type: string, description: 数据源类型（如 customize）, example: "customize" }
+        sourceConfig: { type: string, description: 字段配置（JSON 字符串，含 placeholder/required 等）, example: '{"key":"ITSC_handler","type":"USER_SELECTOR","required":true}' }
+        fileCfgResource: { type: string, example: "" }
+        domainModels:
+          type: array
+          description: 引用该字段领域模型列表
+          items: { type: object }
+        formVersions: { type: array, items: { type: object } }

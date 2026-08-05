@@ -1,0 +1,242 @@
+openapi: 3.0.3
+info:
+  title: EasyOps AutoOps — 入口与功能预览 API
+  description: |
+    录制自 EasyOps 平台（http://172.30.0.90/）「从门户进入 AutoOps（运维自动化）并预览功能」流程。
+    涵盖：AutoOps 菜单与作业加载、任务历史（我的任务）、运维度量（OLAP 查询）。
+
+    - 流程指引见同目录 `AutoOps-入口与功能预览-操作指引.md`
+    - 通用响应包装：`{ code, codeExplain, error, data }`（notify 系列为 `{ code, error, message, data }`），`code === 0` 表示成功
+    - AutoOps 网关接口前缀 `/next/api/gateway/<service>/...`，命名式接口形如 `ops_automation.menu.ListMenus`、`ops_automation.jobs.ListJobs`
+  version: "1.0.0"
+  contact:
+    name: 录制生成（browser-recorder）
+
+servers:
+  - url: http://172.30.0.90
+    description: EasyOps 测试环境
+
+tags:
+  - name: AutoOps 菜单与作业
+    description: AutoOps 工作台的菜单、作业分类、作业清单加载
+  - name: 任务历史
+    description: 我的任务（部署/工具/流程任务）的执行历史日志
+  - name: 运维度量
+    description: 任务执行度量的 OLAP 聚合查询
+
+paths:
+  # ============ AutoOps 菜单与作业 ============
+  /next/api/gateway/ops_automation.menu.ListMenus/api/ops_automation/v1/menus:
+    get:
+      tags: [AutoOps 菜单与作业]
+      summary: AutoOps 菜单列表
+      description: 获取 AutoOps 工作台的可见菜单（任务、巡检、运维工具、资源交付、度量等）。
+      operationId: autoops_list_menus
+      responses:
+        "200":
+          description: 菜单列表
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AutoOpsResult"
+      x-relevant: true
+
+  /next/api/gateway/ops_automation.jobs.ListJobs/api/ops_automation/v1/jobs:
+    get:
+      tags: [AutoOps 菜单与作业]
+      summary: 作业列表
+      description: 获取 AutoOps 作业（Job）清单。
+      operationId: autoops_list_jobs
+      responses:
+        "200":
+          description: 作业列表
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AutoOpsResult"
+      x-relevant: true
+
+  /next/api/gateway/ops_automation.jobs.GetJobCategories/api/ops_automation/v1/jobCategories:
+    get:
+      tags: [AutoOps 菜单与作业]
+      summary: 作业分类
+      description: 获取作业的分类（用于任务页 tab 分组）。
+      operationId: autoops_job_categories
+      responses:
+        "200":
+          description: 作业分类
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AutoOpsResult"
+      x-relevant: true
+
+  /next/api/gateway/logic.ops_automation/api/ops_automation/v1/job_all:
+    get:
+      tags: [AutoOps 菜单与作业]
+      summary: 全部作业
+      description: 获取全部作业的聚合信息（含分类、状态等），用于菜单总览页展示。
+      operationId: autoops_job_all
+      responses:
+        "200":
+          description: 全部作业
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AutoOpsResult"
+      x-relevant: true
+
+  /next/api/gateway/logic.micro_app_standalone_service/api/v1/micro_app_standalone/runtime/{microApp}:
+    get:
+      tags: [AutoOps 菜单与作业]
+      summary: 微应用运行时清单
+      description: |
+        获取指定 AutoOps 微应用的运行时清单（菜单、路由、provider 等）。
+        `microApp` 取值如 `ops-automation`。
+      operationId: autoops_micro_app_runtime
+      parameters:
+        - name: microApp
+          in: path
+          required: true
+          schema: { type: string }
+          description: 微应用 ID，如 ops-automation
+        - name: version
+          in: query
+          required: false
+          schema: { type: string }
+      responses:
+        "200":
+          description: 微应用运行时清单
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AutoOpsResult"
+      x-relevant: true
+
+  # ============ 任务历史 ============
+  /next/api/gateway/logic.notify/operation/log:
+    get:
+      tags: [任务历史]
+      summary: 任务历史日志
+      description: |
+        获取任务执行的历史日志，用于「我的任务」列表
+        （部署任务 / 工具任务 / 流程任务）。
+      operationId: autoops_operation_log
+      parameters:
+        - name: page
+          in: query
+          schema: { type: number }
+        - name: page_size
+          in: query
+          schema: { type: number }
+        - name: type
+          in: query
+          schema: { type: string }
+          description: 任务类型过滤
+      responses:
+        "200":
+          description: 任务历史日志
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NotifyResult"
+      x-relevant: true
+
+  /next/api/gateway/notify.oplog.ListOperationLog/operation/log:
+    get:
+      tags: [任务历史]
+      summary: 操作日志（任务执行历史）
+      description: 任务执行操作日志的另一查询入口（命名式接口 notify.oplog）。
+      operationId: autoops_list_operation_log
+      parameters:
+        - name: page
+          in: query
+          schema: { type: number }
+        - name: page_size
+          in: query
+          schema: { type: number }
+      responses:
+        "200":
+          description: 操作日志列表
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NotifyResult"
+      x-relevant: true
+
+  # ============ 运维度量 ============
+  /next/api/gateway/logic.data_exchange/api/v2/data_exchange/olap:
+    post:
+      tags: [运维度量]
+      summary: OLAP 度量查询
+      description: |
+        查询运维度量数据（任务执行统计等）。按维度聚合，返回度量指标序列。
+        典型 model：`easyops.TASK_COLLECTOR_METRIC@EASYOPS`（任务采集度量）。
+      operationId: autoops_olap_query
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                model:
+                  type: string
+                  example: easyops.TASK_COLLECTOR_METRIC@EASYOPS
+                  description: 度量模型 ID
+                dims:
+                  type: array
+                  items: { type: string }
+                  example: [system, target_name, target_id]
+                  description: 聚合维度
+                metrics:
+                  type: array
+                  items: { type: string }
+                  description: 度量指标
+      responses:
+        "200":
+          description: OLAP 查询结果
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AutoOpsResult"
+      x-relevant: true
+
+components:
+  schemas:
+    AutoOpsResult:
+      type: object
+      description: AutoOps 通用响应包装
+      properties:
+        code:
+          type: number
+          description: 业务码，0 表示成功
+          example: 0
+        codeExplain:
+          type: string
+          description: 业务码说明
+          example: ""
+        error:
+          type: string
+          description: 错误信息（成功时为空）
+          example: ""
+        data:
+          description: 业务数据（具体结构见各接口）
+      required: [code]
+    NotifyResult:
+      type: object
+      description: notify 系列响应包装（任务历史日志）
+      properties:
+        code:
+          type: number
+          description: 业务码，0 表示成功
+          example: 0
+        error:
+          type: string
+          example: ""
+        message:
+          type: string
+          example: ""
+        data:
+          description: 业务数据
+      required: [code]

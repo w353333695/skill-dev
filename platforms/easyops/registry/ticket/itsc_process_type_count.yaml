@@ -1,0 +1,58 @@
+name: itsc_process_type_count
+module: ticket
+method: GET
+path: /api/flowable_service/v1/process_type_count
+gateway_path: /next/api/gateway/logic.flowable_service/api/flowable_service/v1/process_type_count
+service: logic.flowable_service
+side_effect: read
+path_source: backend_contract
+path_confidence: high
+tags:
+- 工单
+- 流程类型
+- 计数
+- 统计
+- 查询
+summary: 按类型统计流程实例数量
+description: ''
+request:
+  required: []
+  properties:
+    tag:
+      type: string
+      desc: 分类标签(run:待办、cc:待阅, done:已完成, mine:我的工单, claim:待认领, unhandled:未指定处理人, waitComment:待评价,
+        supervision:督办)
+    st:
+      type: datetime
+      desc: 开始时间
+      _source: contract
+    et:
+      type: datetime
+      desc: 结束时间
+      _source: contract
+outputs:
+  list_full:
+    jsonpath: $.data.list
+    desc: 流程实例分类数量列表
+  list_ids:
+    jsonpath: $.data.list
+    desc: 列表项id集合(配合 ${s.list_full.instanceId} 投影)
+requires: []
+rollback: null
+examples: []
+confidence:
+  module: high
+  outputs: high
+  requires: high
+  rollback: high
+  summary: high
+  tags: high
+  request: medium
+endpoint:
+  contract_ref: logic.flowable_service|GET|/api/flowable_service/v1/process_type_count
+  mode: easyops_gateway
+source:
+  openapi_file: ITSM-登录与功能入口-openapi.yaml
+  openapi_hash: ec5d99f1d3772798ed04de980321a11cbf0d5a286894ac6da4acaea855a5904a
+  recorded_at: '2026-07-09T14:05:09'
+registered_at: '2026-07-22T10:34:10.040270'

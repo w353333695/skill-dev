@@ -1,0 +1,61 @@
+name: tool_lib_search
+module: autoops_tool
+method: POST
+path: /object/{objectId}/instance/_search
+gateway_path: /next/api/gateway/cmdb.instance.PostSearch/object/_TOOL_LIB@EASYOPS/instance/_search
+service: logic.cmdb.service
+side_effect: read
+path_source: backend_contract
+path_confidence: high
+tags:
+- 工具库
+- lib包
+- 公共依赖
+- 查询
+summary: 搜索工具库的 lib 包（可被工具引用的公共依赖）
+description: |
+  检索 `_TOOL_LIB@EASYOPS`——工具库中的 lib 库，即所有工具都可引用的
+  公共包/依赖（每条含 packageId、scriptType、name 等，工具通过引用 lib
+  复用脚本逻辑）。区别于「工具列表」（`tool_list` / `tool.basic.ListTool`，
+  后者是具体的运维脚本工具本身）。
+request:
+  required: []
+  properties:
+    page:
+      type: number
+      desc: ''
+    page_size:
+      type: number
+      desc: ''
+    query:
+      type: object
+      desc: 过滤条件（分类/类型/关键字）
+    fields:
+      type: object
+      desc: 返回字段控制
+outputs:
+  list_full:
+    jsonpath: $.data.list
+    desc: 工具列表
+  list_ids:
+    jsonpath: $.data.list
+    desc: 工具 instanceId 列表
+requires: []
+rollback: null
+examples: []
+confidence:
+  request: high
+  module: high
+  outputs: high
+  tags: high
+  summary: high
+  requires: medium
+  rollback: medium
+endpoint:
+  contract_ref: logic.cmdb.service|POST|/object/{objectId}/instance/_search
+  mode: easyops_gateway
+source:
+  openapi_file: AutoOps-工具库管理-openapi.yaml
+  openapi_hash: 7ed1d5a46514c3b8bc40573042495f3c411417688c19c42fbf739581cf1bb2c6
+  recorded_at: '2026-07-23T14:19:29.887012'
+registered_at: '2026-07-23T14:28:58.209763'

@@ -1,0 +1,40 @@
+name: model_get_object_basic_all
+module: cmdb_model
+method: GET
+path: /object_basic_all
+gateway_path: /next/api/gateway/cmdb.cmdb_object.GetObjectBasicAll/object_basic_all
+service: logic.cmdb.service
+side_effect: read
+path_source: gateway_strip
+path_confidence: medium
+tags:
+- CMDB
+- 模型
+- 基础信息
+summary: 全部模型基础信息
+description: 拉取全部模型基础信息（含实例计数等），用于列表与分类角标。
+request:
+  required: []
+  properties: {}
+outputs:
+  list_full:
+    jsonpath: $.data
+    desc: 模型基础信息数组
+requires: []
+rollback: null
+examples: []
+confidence:
+  request: high
+  module: high
+  outputs: high
+  tags: high
+  summary: high
+  requires: medium
+  rollback: medium
+endpoint:
+  contract_ref: logic.cmdb.service|GET|/object_basic_all
+source:
+  openapi_file: CMDB-模型管理-openapi.yaml
+  openapi_hash: e422eadfbcf745f98992379d09d3334717c7e3992c54b62f366b7f342e7e08f0
+  recorded_at: '2026-07-23T10:29:50.694479'
+registered_at: '2026-07-23T14:28:58.926734'

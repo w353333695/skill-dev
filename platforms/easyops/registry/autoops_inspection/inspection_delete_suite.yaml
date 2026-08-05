@@ -1,0 +1,47 @@
+name: inspection_delete_suite
+module: autoops_inspection
+method: DELETE
+path: /api/v1/inspection/{pluginId}
+gateway_path: ''
+service: logic.inspection
+side_effect: delete
+path_source: backend_contract
+path_confidence: high
+tags:
+- AutoOps
+- 巡检
+- 套件
+- 删除
+summary: 删除巡检套件
+description: 删除指定套件。删除前确认该套件未被巡检任务引用（被引用删除后任务失效）；复合套件中的原子套件需先移除。更新套件的标准姿势是先删后导。
+request:
+  required:
+  - pluginId
+  properties:
+    pluginId:
+      type: string
+      desc: 套件 id，如 inspector_mysql
+outputs:
+  detail:
+    jsonpath: $.data
+    desc: 删除结果
+requires:
+- pluginId 为已存在套件
+rollback: null
+examples: []
+confidence:
+  request: high
+  module: high
+  outputs: medium
+  tags: high
+  summary: high
+  requires: high
+  rollback: medium
+endpoint:
+  contract_ref: logic.inspection|DELETE|/api/v1/inspection/{pluginId}
+  mode: easyops_internal
+source:
+  openapi_file: ''
+  openapi_hash: ''
+  recorded_at: '2026-07-29T00:00:00'
+registered_at: '2026-07-29T14:42:35.155348'

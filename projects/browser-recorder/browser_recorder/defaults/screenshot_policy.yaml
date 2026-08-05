@@ -1,0 +1,20 @@
+# 截图时机策略（内置最佳实践默认；用户未传 --screenshot-policy 时生效）。
+# 动作类型 -> 截图点：before / after / [before,after] / []（不截）。
+#
+# 设计要点：
+#   - click 只截 after（事件在 capture 阶段触发，「before」实为事件瞬间，与 after 雷同，
+#     连续点击会闪烁）；需要「点击前上下文」可在自定义策略里为 click 开 before。
+#   - submit 截 before+after（提交前后都留，便于看表单与结果）。
+#   - input/select 截 after（显示已输入/已选值）。
+#   - scroll 不截（无业务语义）。
+points:
+  click: [after]
+  submit: [before, after]
+  input: [after]
+  select: [after]
+  keypress: [after]
+  scroll: []
+  navigation: [after]
+  hover: [before]
+dedup_window_ms: 500            # 同指纹同类型在此窗口内去重
+input_aggregate_timeout_ms: 1500

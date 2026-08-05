@@ -1,0 +1,384 @@
+openapi: 3.0.3
+info:
+  title: ITSM-系统管理-通知触发器管理与配置
+  description: |
+    EasyOps ITSM「通知配置（notify_policy）」与「触发器（trigger）」管理接口。
+
+    通知配置：定义工单在何种信号下、用何种方式、通知哪些人、通知内容是什么。
+    触发器：定义工单/任务发生某事件且满足某条件时，执行的动作（如发送通知）。
+
+    覆盖能力：通知配置的 列表/详情/新建/编辑/删除 + 枚举；
+    触发器的 列表/新建/删除 + 枚举；触发器在服务/流程中的引用。
+  version: "1.0.0"
+  x-flow: ITSM-系统管理-通知触发器管理与配置
+  x-system: EasyOps ITSM
+  x-host: http://172.30.0.90
+  x-entry: /next/itsc-workbench/workbench
+
+servers:
+  - url: http://172.30.0.90
+
+tags:
+  - name: 通知配置管理
+    description: 通知策略（notify_policy）的增删改查与枚举
+  - name: 触发器管理
+    description: 触发器（trigger）的新建/查询/删除与枚举
+  - name: 触发器引用
+    description: 在服务管理/流程节点中引用触发器
+
+paths:
+  # ===== 通知配置 =====
+  /next/api/gateway/logic.flowable_service/api/itsc_trigger/v1/notify_policy:
+    get:
+      tags: [通知配置管理]
+      operationId: listNotifyPolicy
+      summary: 查询通知配置列表
+      description: 通知配置列表页查询，支持按名称、通知类型、通知模式、触发信号、创建人筛选。
+      x-relevant: true
+      parameters:
+        - name: Q
+          in: query
+          schema: { type: string }
+        - name: notifyType
+          in: query
+          description: "通知类型：process_instance=工单 / process_task=任务"
+          schema: { type: string }
+        - name: triggerSignal
+          in: query
+          description: "触发信号：start=发起 / todo=待办 等"
+          schema: { type: string }
+        - name: notifyMode
+          in: query
+          schema: { type: string }
+        - name: creator
+          in: query
+          schema: { type: string }
+        - name: pageSize
+          in: query
+          schema: { type: string, example: "10" }
+    delete:
+      tags: [通知配置管理]
+      operationId: deleteNotifyPolicy
+      summary: 删除通知配置（批量）
+      description: 按 instanceIds 批量删除通知配置。
+      x-relevant: true
+      parameters:
+        - name: instanceIds
+          in: query
+          required: true
+          description: 通知配置实例 ID，多个逗号分隔
+          schema: { type: string, example: 657a6dfd407e1 }
+      responses:
+        "200":
+          description: 删除结果
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ApiEnvelope" }
+
+  /next/api/gateway/flowable_service.notify_policy.CreateNotifyPolicy/api/itsc_trigger/v1/notify_policy:
+    post:
+      tags: [通知配置管理]
+      operationId: createNotifyPolicy
+      summary: 新建通知配置
+      description: |
+        创建通知配置。notifyType=process_instance（工单）、triggerSignal=start（发起触发）；
+        notifyMode 数组为通知方式代号（语音/短信/邮件等，来自枚举）；
+        notifyRange 数组为通知对象（creator=创建人、todo_user=待办人等）。
+      x-relevant: true
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/NotifyPolicyUpsert" }
+      responses:
+        "200":
+          description: 创建结果
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ApiEnvelope" }
+
+  /next/api/gateway/flowable_service.notify_policy.GetNotifyPolicyDetail/api/itsc_trigger/v1/notify_policy/{notifyPolicyId}:
+    get:
+      tags: [通知配置管理]
+      operationId: getNotifyPolicyDetail
+      summary: 查询通知配置详情
+      description: 获取单条通知配置详情（编辑回填用）。
+      x-relevant: true
+      parameters:
+        - $ref: "#/components/parameters/NotifyPolicyId"
+      responses:
+        "200":
+          description: 通知配置详情
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/ApiEnvelope"
+                  - type: object
+                    properties:
+                      data: { $ref: "#/components/schemas/NotifyPolicyUpsert" }
+
+  /next/api/gateway/flowable_service.notify_policy.UpdateNotifyPolicy/api/itsc_trigger/v1/notify_policy/{notifyPolicyId}:
+    put:
+      tags: [通知配置管理]
+      operationId: updateNotifyPolicy
+      summary: 编辑通知配置
+      description: 修改已存在的通知配置，body 结构同 create。
+      x-relevant: true
+      parameters:
+        - $ref: "#/components/parameters/NotifyPolicyId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/NotifyPolicyUpsert" }
+      responses:
+        "200":
+          description: 编辑结果
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ApiEnvelope" }
+
+  /next/api/gateway/flowable_service.notify_policy.ListEnums/api/itsc_trigger/v1/enums:
+    get:
+      tags: [通知配置管理]
+      operationId: listNotifyEnums
+      summary: 查询通知枚举
+      description: 获取通知相关枚举（如 notify_mode 通知模式代号）。
+      x-relevant: true
+      parameters:
+        - name: name
+          in: query
+          description: 枚举名，如 notify_mode
+          schema: { type: string, example: notify_mode }
+      responses:
+        "200":
+          description: 枚举值
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ApiEnvelope" }
+
+  /next/api/gateway/flowable_service.notify_policy.ListAllNotifyTypeV2/api/itsc_trigger/v2/notify_type:
+    get:
+      tags: [通知配置管理]
+      operationId: listNotifyType
+      summary: 查询通知类型
+      description: 获取通知类型下拉选项。
+      x-relevant: true
+      responses:
+        "200":
+          description: 通知类型列表
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ApiEnvelope" }
+
+  # ===== 触发器 =====
+  /next/api/gateway/logic.flowable_service/api/flowable_service/v1/trigger:
+    get:
+      tags: [触发器管理]
+      operationId: listTrigger
+      summary: 查询触发器列表
+      description: 触发器列表查询，支持按名称、scope（引用范围）筛选。
+      x-relevant: true
+      parameters:
+        - name: Q
+          in: query
+          schema: { type: string }
+        - name: scope
+          in: query
+          description: "引用范围：service_instance / process_instance / process_task"
+          schema: { type: string }
+        - name: page
+          in: query
+          schema: { type: string, example: "1" }
+        - name: pageSize
+          in: query
+          schema: { type: string, example: "10" }
+
+  /next/api/gateway/flowable_service.trigger.CreateTrigger/api/flowable_service/v1/trigger:
+    post:
+      tags: [触发器管理]
+      operationId: createTrigger
+      summary: 新建触发器
+      description: |
+        创建触发器。event 为触发事件（逗号分隔多个，如 process_task.todo,process_task.jump）；
+        scope 为引用范围（process_task=任务节点级）；
+        config.actionList 定义触发动作（如 send_message 发通知）及其触发条件。
+      x-relevant: true
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/TriggerUpsert" }
+      responses:
+        "200":
+          description: 创建结果
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ApiEnvelope" }
+
+  /next/api/gateway/logic.flowable_service/api/flowable_service/v1/trigger/{triggerId}:
+    delete:
+      tags: [触发器管理]
+      operationId: deleteTrigger
+      summary: 删除触发器
+      description: 删除指定触发器。
+      x-relevant: true
+      parameters:
+        - $ref: "#/components/parameters/TriggerId"
+      responses:
+        "200":
+          description: 删除结果
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ApiEnvelope" }
+
+  /next/api/gateway/flowable_service.trigger.GetTriggerEnums/api/flowable_service/v1/enums/trigger_enum:
+    get:
+      tags: [触发器管理]
+      operationId: getTriggerEnums
+      summary: 查询触发器枚举
+      description: 获取触发器的事件类型、动作类型、条件变量/操作符等枚举。
+      x-relevant: true
+      responses:
+        "200":
+          description: 触发器枚举
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ApiEnvelope" }
+
+components:
+  parameters:
+    NotifyPolicyId:
+      name: notifyPolicyId
+      in: path
+      required: true
+      description: 通知配置实例 ID
+      schema: { type: string, example: 657a6dfd407e1 }
+    TriggerId:
+      name: triggerId
+      in: path
+      required: true
+      description: 触发器 ID
+      schema: { type: string, example: 657a6e802e315 }
+
+  schemas:
+    ApiEnvelope:
+      type: object
+      properties:
+        code: { type: number, example: 0 }
+        codeExplain: { type: string, example: "" }
+        error: { type: string, example: "" }
+        data:
+          nullable: true
+
+    NotifyPolicyUpsert:
+      type: object
+      description: 新建/编辑通知配置的请求体
+      required: [name, notifyType, triggerSignal, notifyMode, notifyRange]
+      properties:
+        name:
+          type: string
+          description: 通知名称
+          example: "【**项目】测试通知"
+        notifyType:
+          type: string
+          description: "通知类型：process_instance=工单 / process_task=任务"
+          example: process_instance
+        triggerSignal:
+          type: string
+          description: "触发信号：start=发起 / todo=待办 等"
+          example: start
+        notifyMode:
+          type: array
+          description: 通知方式代号（语音/短信/邮件等，来自枚举）
+          items: { type: string }
+          example: [test_voice]
+        notifyRange:
+          type: array
+          description: 通知对象（creator=创建人、todo_user=待办人、权限涉及人员、自定义人）
+          items: { type: string }
+          example: [creator, todo_user]
+        content:
+          type: string
+          description: 通知内容模板（可含变量 ${process_instance_id} 等）
+          example: "工单ID: ${process_instance_id} 工单名称: ${process_instance_name}"
+
+    TriggerUpsert:
+      type: object
+      description: 新建触发器的请求体
+      required: [name, event, scope, config]
+      properties:
+        name:
+          type: string
+          description: 触发器名称
+          example: "【**项目】测试触发器"
+        event:
+          type: string
+          description: 触发事件，多个逗号分隔
+          example: "process_task.todo,process_task.jump"
+        status:
+          type: string
+          description: "状态：enabled / disabled"
+          example: enabled
+        scope:
+          type: string
+          description: "引用范围：service_instance / process_instance / process_task"
+          example: process_task
+        config:
+          type: object
+          description: 触发器配置（动作+条件）
+          properties:
+            actionList:
+              type: array
+              description: 触发动作列表
+              items:
+                type: object
+                properties:
+                  name:
+                    type: string
+                    description: 动作名（send_message=发送通知消息）
+                    example: send_message
+                  args:
+                    type: object
+                    description: 动作参数
+                    properties:
+                      notifyPolicyId: { type: string, description: 通知策略ID, example: 5e99fb5c49085 }
+                      notifyTimes: { type: integer, description: 通知次数, example: 1 }
+                      notifyInterval: { type: string, description: 通知间隔, example: 1h }
+                  condition:
+                    type: object
+                    description: 触发条件（不满足则不执行动作）
+                    properties:
+                      logical:
+                        type: string
+                        description: 条件组逻辑（or=任一满足 / and=全部满足）
+                        example: or
+                      conditionList:
+                        type: array
+                        description: 条件组列表（组间用 logical 连接）
+                        items:
+                          type: object
+                          properties:
+                            logical:
+                              type: string
+                              description: 组内规则逻辑
+                              example: and
+                            ruleList:
+                              type: array
+                              description: 规则列表
+                              items:
+                                type: object
+                                properties:
+                                  variable:
+                                    type: string
+                                    description: 条件变量（process_instance_name=工单名称 / process_task_status_change=任务状态变化）
+                                    example: process_instance_name
+                                  operator:
+                                    type: string
+                                    description: "操作符（=~=包含 / ==等于 等）"
+                                    example: "=~"
+                                  value:
+                                    type: string
+                                    description: 条件值（任务状态变化时如 rejected=退回）
+                                    example: 网络不

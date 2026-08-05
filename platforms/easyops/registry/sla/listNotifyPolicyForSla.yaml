@@ -1,0 +1,41 @@
+name: listNotifyPolicyForSla
+module: sla
+method: GET
+path: /api/itsc_trigger/v1/notify_policy
+gateway_path: /next/api/gateway/flowable_service.notify_policy.ListNotifyPolicy/api/itsc_trigger/v1/notify_policy
+service: flowable_service.notify_policy.ListNotifyPolicy
+side_effect: read
+path_source: gateway_strip
+path_confidence: medium
+tags:
+- 通知策略
+- 查询
+- sla
+- 依赖
+summary: 查询通知策略列表
+description: 获取 SLA 4 种通知（响应预警/超时、完成预警/超时）可选的通知策略。
+request:
+  required: []
+  properties: {}
+outputs:
+  list_full:
+    jsonpath: $.data
+    desc: 通知策略列表(SLA选用)
+requires: []
+rollback: null
+examples: []
+confidence:
+  request: high
+  module: high
+  outputs: medium
+  tags: high
+  summary: high
+  requires: low
+endpoint:
+  contract_ref: ''
+  mode: easyops_gateway
+source:
+  openapi_file: ITSM-运行管理-SLA协议管理-openapi.yaml
+  openapi_hash: 932ebe240075b0787316921f641a05f77ac16e8c2d23cb007ae7917133d3aa47
+  recorded_at: '2026-07-28T14:04:57.668523'
+registered_at: '2026-07-28T16:48:34.376143'

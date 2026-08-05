@@ -1,0 +1,51 @@
+name: get_api_flowable_service_v1_ticket_{ticketId}_sla_record
+module: ticket
+method: GET
+path: /api/flowable_service/v1/ticket/{ticketId}/sla_record
+gateway_path: /next/api/gateway/logic.flowable_service/api/flowable_service/v1/ticket/{ticketId}/sla_record
+service: logic.flowable_service
+side_effect: read
+path_source: backend_contract
+path_confidence: high
+tags:
+- SLA
+- 达标超时
+- 工单
+- 事件记录
+- sla_record
+summary: 工单 SLA 达标/超时记录
+description: 详情页「SLA信息」Tab 数据源。
+request:
+  required: []
+  properties:
+    ticketId:
+      type: instance_id
+      desc: 工单ID
+      _source: contract
+outputs:
+  instEventLog:
+    jsonpath: $.data.instEventLog
+    desc: 工单SLA事件历史(type=inst)
+  stepEventLog:
+    jsonpath: $.data.stepEventLog
+    desc: 任务SLA事件记录(type=step)
+requires:
+- ticketId
+rollback: null
+examples: []
+confidence:
+  module: high
+  outputs: high
+  requires: low
+  rollback: high
+  summary: high
+  tags: high
+  request: medium
+endpoint:
+  contract_ref: logic.flowable_service|GET|/api/flowable_service/v1/ticket/{ticketId}/sla_record
+  mode: easyops_gateway
+source:
+  openapi_file: ITSM-工单搜索与处理-openapi.yaml
+  openapi_hash: df32200dd3f5e69e90c5f01356dcbb67bef6292eac32ef0f06011eacb3d50100
+  recorded_at: '2026-07-09T17:54:19'
+registered_at: '2026-07-22T10:44:45.827137'

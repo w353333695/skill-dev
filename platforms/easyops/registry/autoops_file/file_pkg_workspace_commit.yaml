@@ -1,0 +1,65 @@
+name: file_pkg_workspace_commit
+module: autoops_file
+method: POST
+path: /v2/workspace/{packageId}
+gateway_path: /next/api/gateway/file_repository.workspace.CommitWorkspaceV2/v2/workspace/{packageId}
+service: file_repository.workspace.CommitWorkspaceV2
+side_effect: create
+path_source: gateway_strip
+path_confidence: medium
+tags:
+- 文件分发
+- 版本
+- 提交
+- 新建版本
+summary: 将工作区提交为新版本
+description: 把工作区中已上传/变更的文件提交为正式版本。env_type 为版本类型位掩码（开发=1/测试=2/预发布=4/生产=8，可组合，如 15=全部）。提交前可用
+  file_pkg_version_check_name 校验版本名。返回新版本 ID。
+request:
+  required:
+  - packageId
+  - name
+  properties:
+    packageId:
+      type: string
+      desc: 文件包 ID（path 参数）
+    name:
+      type: string
+      desc: 版本名称（如 1.0.0）
+    env_type:
+      type: number
+      desc: 版本类型位掩码（开发1/测试2/预发布4/生产8，可组合）
+    message:
+      type: string
+      desc: 版本备注
+outputs:
+  versionId:
+    jsonpath: $.data
+    desc: 新提交的版本 ID
+requires:
+- 工作区需已有文件变更（先调 file_pkg_workspace_upload 上传）
+- 版本名需在包内唯一（可先调 file_pkg_version_check_name 校验）
+rollback:
+  api: file_pkg_version_delete
+  params:
+  - param_key: packageId
+    from_output: packageId
+    from_field: ''
+  - param_key: versionId
+    from_output: versionId
+    from_field: ''
+examples: []
+confidence:
+  request: high
+  module: high
+  outputs: medium
+  tags: high
+  summary: high
+endpoint:
+  contract_ref: ''
+  mode: easyops_gateway
+source:
+  openapi_file: AutoOps-文件分发管理-openapi.yaml
+  openapi_hash: edf3872fae57ab16180ccec0257fe32c2d0de09a4a639719250779d5ae96e426
+  recorded_at: '2026-07-29T16:20:10'
+registered_at: '2026-07-29T16:49:25.523907'

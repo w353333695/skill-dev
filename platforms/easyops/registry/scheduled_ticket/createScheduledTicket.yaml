@@ -1,0 +1,63 @@
+name: createScheduledTicket
+module: scheduled_ticket
+method: POST
+path: /api/flowable_service/v1/scheduled_ticket/create
+gateway_path: /next/api/gateway/logic.flowable_service/api/flowable_service/v1/scheduled_ticket/create
+service: logic.flowable_service
+side_effect: create
+path_source: backend_contract
+path_confidence: high
+tags:
+- 定时工单
+- 创建
+- cron
+- scheduled_ticket
+- 写
+summary: 新建定时工单
+description: 创建一条定时工单。`taskType` 固定为 `crontab`；
+request:
+  required: []
+  properties:
+    serviceCatalogId:
+      type: string
+      desc: 服务目录ID
+      _source: contract
+    serviceInstanceId:
+      type: string
+      desc: 服务实例ID
+      _source: contract
+    notifyPolicyId:
+      type: string
+      desc: 通知策略实例ID
+      _source: contract
+outputs:
+  instanceId:
+    jsonpath: $.data.instanceId
+    desc: 新建定时工单id
+requires:
+- taskType 固定 crontab
+- taskScheduler 为标准cron表达式(分 时 日 月 周)
+- serviceInstanceId/serviceCatalogId 来自服务目录与实例
+- notifyPolicyId 来自通知策略
+rollback:
+  api: deleteScheduledTicket
+  params:
+  - param_key: instanceId
+    from_output: instanceId
+    from_field: ''
+examples: []
+confidence:
+  request: high
+  module: high
+  outputs: high
+  tags: high
+  summary: high
+  requires: high
+endpoint:
+  contract_ref: logic.flowable_service|POST|/api/flowable_service/v1/scheduled_ticket/create
+  mode: easyops_gateway
+source:
+  openapi_file: ITSM-定时工单管理-openapi.yaml
+  openapi_hash: 7c164daae27a4e69b941b437666023c3db3c53beb1fbfb69014783779a4f02ec
+  recorded_at: '2026-07-28T13:50:10.276651'
+registered_at: '2026-07-28T16:49:09.576472'

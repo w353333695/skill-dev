@@ -1,0 +1,352 @@
+openapi: 3.0.3
+info:
+  title: EasyOps HyperInsight — 自定义监控套件 API
+  description: |
+    录制自 EasyOps 平台（https://172.30.0.232/）「HyperInsight 自定义监控套件」流程。
+    为某个 CMDB 资源（示例：防火墙 FIREWALL@ONEMODEL）创建 EasyOps 自定义监控套件：
+    搜索并关联资源 → 选择 EasyOps 采集 → 填写套件信息（名称/描述/帮助文档）→ 配置采集参数 → 保存时创建采集插件、导入采集指标并激活套件。
+
+    核心能力：
+    - 套件搜索与资源关联：`resource-monitor-config/{objectId}`、套件信息列表、采集探测任务
+    - 采集插件创建：`CreatePluginWithScriptInfo`（写套件名称/描述/帮助文档/采集脚本）
+    - 指标导入：`ImportPluginAliasMetrics` / `ImportAliasMetricCheck`
+    - 套件激活：`ActivateCollectorKit`、`SearchCollectorKitDashboards`
+
+    - 流程指引见同目录 `HyperInsight-自定义监控套件-操作指引.md`
+    - 通用响应包装：`{ code, codeExplain, error, data }`，`code === 0` 表示成功
+    - 网关接口前缀 `/next/api/gateway/<service>/...`，命名式接口形如 `easyops.api.collector_service.job.ActivateCollectorKit@1.0.19`
+    - 采集参数以 JSONPath 表达式（如 `$.ip`）从资源实例中取值
+  version: "1.0.0"
+  x-system: easyops
+  x-recorded-at: 2026-08-02T08:19:08
+  contact:
+    name: 录制生成（browser-recorder）
+
+servers:
+  - url: https://172.30.0.232
+    description: EasyOps HyperInsight 环境
+
+tags:
+  - name: 套件搜索与资源关联
+    description: 搜索监控资源、查询资源监控配置与套件信息、确认资源关联（配置采集前的上下文加载）
+  - name: 套件信息填写
+    description: 填写套件名称 / 描述 / 帮助文档时加载的套件包与版本信息
+  - name: 采集参数配置
+    description: 保存套件时创建采集插件、导入采集指标、激活套件的写操作（本流程核心）
+
+paths:
+  /next/api/gateway/logic.resource_monitor/api/v1/resource-monitor-config/{objectId}:
+    get:
+      tags: [套件搜索与资源关联]
+      summary: 查询资源监控配置
+      description: 按资源对象 ID（如 FIREWALL@ONEMODEL）查询该资源当前的监控配置状态，搜索资源时实时加载。对应操作指引「一、搜索并选择监控资源」。
+      operationId: getResourceMonitorConfig
+      x-relevant: true
+      x-triggered-by-step: 2
+      parameters:
+        - name: objectId
+          in: path
+          required: true
+          description: 资源对象 ID（CMDB 模型 ID，格式 `模型@分类`）
+          example: FIREWALL@ONEMODEL
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code: {type: number, example: 0}
+                  data: {type: object, description: 资源监控配置详情}
+  /next/api/gateway/easyops.api.collector_service.job.ListCollectorKitInfo@1.0.8/api/v1/collector/kit/info/list:
+    get:
+      tags: [套件搜索与资源关联]
+      summary: 查询套件信息列表
+      description: 分页查询已启用的监控套件信息，搜索资源时加载可用套件。对应操作指引「一、步骤 3」。
+      operationId: listCollectorKitInfo
+      x-relevant: true
+      x-triggered-by-step: 3
+      parameters:
+        - name: page
+          in: query
+          schema: {type: number, example: 1}
+          description: 页码
+        - name: pageSize
+          in: query
+          schema: {type: number, example: 3000}
+          description: 每页条数
+        - name: status
+          in: query
+          schema: {type: string, example: enabled}
+          description: 套件状态过滤（enabled=已启用）
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code: {type: number, example: 0}
+                  data: {type: object, description: 套件信息分页数据}
+  /next/api/gateway/logic.collector_service/api/v1/collector_detect_job:
+    get:
+      tags: [套件搜索与资源关联]
+      summary: 查询采集探测任务
+      description: 查询资源关联的采集探测任务，搜索资源时加载。对应操作指引「一、步骤 3」。
+      operationId: listCollectorDetectJob
+      x-relevant: true
+      x-triggered-by-step: 3
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code: {type: number, example: 0}
+                  data: {type: object, description: 采集探测任务列表}
+  /next/api/gateway/cmdb.instance.PostSearchV3/v3/object/{modelId}/instance/_search:
+    post:
+      tags: [套件搜索与资源关联]
+      summary: 搜索模型实例
+      description: 按模型搜索 CMDB 实例，确认资源关联时加载微应用分类等数据。对应操作指引「二、步骤 4」。
+      operationId: searchModelInstance
+      x-relevant: true
+      x-triggered-by-step: 7
+      parameters:
+        - name: modelId
+          in: path
+          required: true
+          description: CMDB 模型 ID
+          example: MICRO_APP_CATEGORY@EASYOPS
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              description: 实例搜索条件（分页/过滤）
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code: {type: number, example: 0}
+                  data: {type: object, description: 实例搜索结果}
+  /next/api/gateway/artifact.pkgservice.Search/package/search:
+    get:
+      tags: [套件信息填写]
+      summary: 搜索套件包
+      description: 编辑套件信息时搜索可选的套件包。对应操作指引「三、步骤 5」。
+      operationId: searchPackage
+      x-relevant: true
+      x-triggered-by-step: 12
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code: {type: number, example: 0}
+                  data: {type: object, description: 套件包搜索结果}
+  /next/api/gateway/artifact.version.ListVersion/version/list:
+    get:
+      tags: [套件信息填写]
+      summary: 查询套件包版本
+      description: 编辑套件信息时查询选中套件包的可用版本。对应操作指引「三、步骤 5」。
+      operationId: listVersion
+      x-relevant: true
+      x-triggered-by-step: 12
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code: {type: number, example: 0}
+                  data: {type: object, description: 版本列表}
+  /next/api/gateway/collector_plugin_service.easyops_plugin.CreatePluginWithScriptInfo/api/v1/plugin/with_script_info:
+    post:
+      tags: [采集参数配置]
+      summary: 创建采集插件（含脚本信息）
+      description: 保存套件时创建采集插件，携带套件名称/描述/帮助文档/采集脚本与采集参数。对应操作指引「四、步骤 3」。
+      operationId: createPluginWithScriptInfo
+      x-relevant: true
+      x-triggered-by-step: 15
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name, relateObjectId, scriptType]
+              properties:
+                name: {type: string, description: 套件名称, example: test}
+                category: {type: string, description: 资源分类, example: 硬件相关}
+                relateObjectId: {type: string, description: 关联资源对象 ID, example: FIREWALL@ONEMODEL}
+                memo: {type: string, description: 套件描述, example: descr^^}
+                readme: {type: string, description: 帮助文档（Markdown）, example: '# title1\n## title2\n1. l1\n2. l2'}
+                scriptType: {type: string, description: 采集脚本类型, example: python}
+                content: {type: string, description: 采集脚本内容}
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code: {type: number, example: 0}
+                  data: {type: object, description: 创建的插件信息（含 instanceId）}
+  /next/api/gateway/collector_plugin_service.metric_management.ImportAliasMetricCheck/api/v2/import/plugin/{pluginId}/alias/metric/check:
+    post:
+      tags: [采集参数配置]
+      summary: 校验待导入的采集指标
+      description: 保存套件时对导入的指标数据做预校验（区分新增/更新）。对应操作指引「四、步骤 3」。
+      operationId: importAliasMetricCheck
+      x-relevant: true
+      x-triggered-by-step: 15
+      parameters:
+        - name: pluginId
+          in: path
+          required: true
+          description: 采集插件 ID
+          example: 6580559721a0f
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [agentType, data, importType]
+              properties:
+                agentType: {type: string, description: Agent 类型, example: easyops}
+                data: {type: string, description: 指标数据 JSON 字符串, example: '[{"dims":{"ip":"1.1.1.1"},"vals":{"host.disk.used":12}}]'}
+                importType: {type: string, description: 导入方式, example: upsert}
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code: {type: number, example: 0}
+                  data: {type: object, description: 校验结果}
+  /next/api/gateway/collector_plugin_service.metric_management.ImportPluginAliasMetrics/api/v2/import/plugin/{pluginId}/alias/metric/import:
+    post:
+      tags: [采集参数配置]
+      summary: 导入采集指标
+      description: 将采集指标批量导入采集插件（支持新增/更新），返回插入与更新计数。对应操作指引「四、步骤 3」。
+      operationId: importPluginAliasMetrics
+      x-relevant: true
+      x-triggered-by-step: 15
+      parameters:
+        - name: pluginId
+          in: path
+          required: true
+          description: 采集插件 ID
+          example: 6580559721a0f
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [agentType, data]
+              properties:
+                agentType: {type: string, description: Agent 类型, example: easyops}
+                data:
+                  type: array
+                  description: 指标定义列表
+                  items:
+                    type: object
+                    properties:
+                      aliasName: {type: string, description: 指标别名, example: host_disk_used}
+                      name: {type: string, description: 指标唯一名, example: 6580559721a0f-host.disk.used}
+                      key: {type: string, description: 指标 key, example: host.disk.used}
+                      metricType: {type: string, description: 指标类型, example: gauge}
+                      dataType: {type: string, description: 数据类型, example: double}
+                      updateType: {type: string, description: insert 或 update, example: insert}
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code: {type: number, example: 0}
+                  data:
+                    type: object
+                    properties:
+                      insert_count: {type: number, description: 新增指标数}
+                      update_count: {type: number, description: 更新指标数}
+  /next/api/gateway/easyops.api.collector_service.job.SearchCollectorKitDashboards@1.0.0/api/v1/collector_kit_dashboards:
+    post:
+      tags: [采集参数配置]
+      summary: 查询套件关联仪表盘
+      description: 查询套件已关联的监控仪表盘，保存/激活套件时加载。对应操作指引「四、步骤 3」。
+      operationId: searchCollectorKitDashboards
+      x-relevant: true
+      x-triggered-by-step: 15
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [instanceId]
+              properties:
+                instanceId: {type: string, description: 套件实例 ID, example: 6580559721a0f}
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code: {type: number, example: 0}
+                  data: {type: object, description: 仪表盘列表}
+  /next/api/gateway/easyops.api.collector_service.job.ActivateCollectorKit@1.0.19/api/v1/collector/kit/activate:
+    post:
+      tags: [采集参数配置]
+      summary: 激活采集套件
+      description: 将创建的采集套件激活到关联资源上（可指定是否需要更新采集任务）。对应操作指引「四、步骤 3」，本流程的核心写操作。
+      operationId: activateCollectorKit
+      x-relevant: true
+      x-triggered-by-step: 15
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [instanceId, relateObjectId]
+              properties:
+                instanceId: {type: string, description: 套件实例 ID, example: 6580559721a0f}
+                relateObjectId: {type: string, description: 关联资源对象 ID, example: FIREWALL@ONEMODEL}
+                notRequireJob: {type: boolean, description: 是否不需要创建采集任务, example: true}
+                needUpdateJob: {type: boolean, description: 是否需要更新已有采集任务, example: true}
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code: {type: number, example: 0}
+                  data:
+                    type: object
+                    description: 激活结果（含资源执行结果）

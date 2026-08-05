@@ -1,0 +1,61 @@
+name: postPrometheusAlert
+module: alert_portal
+method: POST
+path: /api/v1/alert/prometheus/{org}/{accessId}
+gateway_path: /api/gateway/alert_portal.webhook/api/v1/alert/prometheus/{org}/{accessId}
+service: logic.alert_portal
+side_effect: create
+path_source: backend_contract
+path_confidence: high
+tags:
+- 三方告警接入
+- webhook
+- Prometheus
+- alert_portal
+summary: 推送 Prometheus Alertmanager 原生格式告警
+description: '对接 Prometheus Alertmanager webhook 原生格式，无需自建转换。path 参数 org/accessId。
+
+  body 必须含 alerts 数组(每条含 status/labels/annotations/startsAt/endsAt/generatorURL)，缺失报错。
+
+  字段映射由 alert_portal 配置 prometheus_config 控制。见 knowledge/modules/alert_portal/third-party-alarm-access.md
+  §3.5。
+
+  '
+request:
+  required:
+  - alerts
+  properties:
+    alerts:
+      type: array
+      desc: Alertmanager alerts 数组，每条含 status/labels/annotations/startsAt/endsAt/generatorURL
+    version:
+      type: string
+      desc: Alertmanager 通知版本
+    groupKey:
+      type: string
+      desc: 分组键
+    commonLabels:
+      type: object
+      desc: 公共标签
+outputs:
+  status:
+    jsonpath: $.data.status
+    desc: 接收状态
+requires:
+- accessId 须为已注册事件源接入ID；body 必含 alerts 数组
+- Prometheus 对接要点见 knowledge/modules/alert_portal/third-party-alarm-access.md §3.5
+rollback: null
+examples: []
+confidence:
+  request: high
+  outputs: high
+  requires: high
+  rollback: low
+  module: high
+  tags: high
+  summary: high
+endpoint:
+  contract_ref: logic.alert_portal|POST|/api/v1/alert/prometheus/{org}/{accessId}
+source:
+  openapi_file: 手工编写(后端契约 logic.alert_portal + 知识文档 §3.5)
+registered_at: '2026-08-03T22:29:01.385686'

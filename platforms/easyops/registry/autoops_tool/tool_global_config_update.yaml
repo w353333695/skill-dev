@@ -1,0 +1,47 @@
+name: tool_global_config_update
+module: autoops_tool
+method: PUT
+path: /object/_TOOLS_CONFIG_GLOBAL/instance/{id}
+gateway_path: /next/api/gateway/cmdb.instance.UpdateInstance/object/_TOOLS_CONFIG_GLOBAL/instance/{id}
+service: cmdb.instance.UpdateInstance
+side_effect: update
+path_source: gateway_strip
+path_confidence: medium
+tags:
+- 工具库
+- 全局配置
+- 基础设置
+summary: 保存工具全局基础设置
+description: 保存某脚本类型（Shell/Python/PowerShell/Bat）的全局基础配置：
+request:
+  required: []
+  properties:
+    defaultExecUser:
+      type: string
+      desc: 默认执行用户
+    execTimeout:
+      type: number
+      desc: 执行超时时间（秒）
+outputs:
+  detail:
+    jsonpath: $.data
+    desc: 保存结果
+requires: []
+rollback: null
+examples: []
+confidence:
+  request: high
+  module: high
+  outputs: high
+  tags: high
+  summary: high
+  requires: medium
+  rollback: medium
+endpoint:
+  contract_ref: ''
+  mode: easyops_gateway
+source:
+  openapi_file: AutoOps-工具库管理-openapi.yaml
+  openapi_hash: 7ed1d5a46514c3b8bc40573042495f3c411417688c19c42fbf739581cf1bb2c6
+  recorded_at: '2026-07-23T14:19:29.887012'
+registered_at: '2026-07-23T14:28:58.209763'

@@ -1,0 +1,37 @@
+# 请求过滤规则（内置最佳实践默认；用户未传 --filter-requests 时生效）。
+#
+# 目的：导出接口清单时自动筛掉「无业务语义」的噪音请求，只保留有意义的接口。
+# 录制期的 NetworkCollector 已按 ResourceType/后缀预过滤静态资源，这里再按 URL 兜底，
+# 并排除埋点/长连接/心跳/特定方法与状态码。
+#
+# 平台中性：只含中性维度（URL 正则/状态码/方法/资源类型），不含任何系统/host/路由。
+# 用户可拷贝本文件、按需增删后用 --filter-requests 指定。
+
+# 按正则排除（匹配即排除）
+exclude_url_patterns:
+  # 静态资源
+  - "\\.(js|css|png|jpe?g|gif|svg|woff2?|ttf|ico|webp|map)(\\?|$)"
+  # source map
+  - "/sourcemap"
+  # 常见埋点 / 日志上报
+  - "/(sentry|beacon|track|log|report)"
+  # websocket / eventsource 长连接
+  - "^wss?://"
+  # 健康检查 / ping
+  - "/(healthz|ping|version)$"
+  # 字体 / 图标 CDN 目录
+  - "/(fonts|icons)/"
+
+# 排除无业务语义的方法
+exclude_methods:
+  - OPTIONS
+
+# 排除这些状态码（304 走缓存、204 无内容，对接口语义无新增信息）
+exclude_status:
+  - 304
+  - 204
+
+# 排除这些资源类型（ResourceType）
+exclude_resource_types:
+  - ping
+  - beacon

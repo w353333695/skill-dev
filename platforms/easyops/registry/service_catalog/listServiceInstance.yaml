@@ -1,0 +1,61 @@
+name: listServiceInstance
+module: service_catalog
+method: GET
+path: /api/flowable_service/v1/service_instance
+gateway_path: /next/api/gateway/flowable_service.service_catalog.ListService/api/flowable_service/v1/service_instance
+service: flowable_service.service_catalog.ListService
+side_effect: read
+path_source: gateway_strip
+path_confidence: medium
+tags:
+- 服务
+- 查询
+- 列表
+- 分页
+- service_instance
+summary: 查询目录下服务列表
+description: 分页查询指定目录下的服务列表。
+request:
+  required: []
+  properties:
+    catalogID:
+      type: string
+      desc: 目录 ID
+    page:
+      type: string
+      desc: ''
+    pageSize:
+      type: string
+      desc: ''
+    Q:
+      type: string
+      desc: 服务关键词
+outputs:
+  list_full:
+    jsonpath: $.data.list
+    desc: 目录下服务实例列表
+  list_ids:
+    jsonpath: $.data.list
+    desc: 服务实例列表，用于投影 instanceId
+  total:
+    jsonpath: $.data.total
+    desc: 服务总数
+requires:
+- catalogID 须是已存在目录 ID
+rollback: null
+examples: []
+confidence:
+  module: high
+  outputs: low
+  requires: medium
+  rollback: high
+  summary: high
+  tags: high
+endpoint:
+  contract_ref: ''
+  mode: easyops_gateway
+source:
+  openapi_file: ITSM-系统管理-服务目录管理-openapi.yaml
+  openapi_hash: a27e0a4e7c6dd1cab5f0e3af9182e873d3ef6a3e84b03f255c424ea97fa2df6e
+  recorded_at: '2026-07-13T16:11:24'
+registered_at: '2026-07-22T10:34:10.494082'

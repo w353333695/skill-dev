@@ -1,0 +1,557 @@
+openapi: 3.0.3
+info:
+  title: EasyOps HyperInsight — 入口与功能预览 API
+  description: |
+    录制自 EasyOps 平台（http://172.30.0.90/）「从门户进入 HyperInsight（超融合监控）并预览七大功能模块」流程。
+    涵盖：HyperInsight 微应用运行时与权限、监控套件资源包、事件中心（告警源/最近告警/事件视图）、
+    资源监控与采集（资源采集配置/采集器套件/日志采集任务/Agent Key/CMDB 实例树）、服务观测（链路追踪套件/SkyWalking Token）。
+
+    - 流程指引见同目录 `HyperInsight-入口与功能预览-操作指引.md`
+    - 通用响应包装：`{ code, codeExplain, error, data }`（cmdb / cmdb_extend 系列为 `{ code, error, message, data }`），`code === 0` 表示成功
+    - 网关接口前缀 `/next/api/gateway/<service>/...`，命名式接口形如 `easyops.api.event_center.event_overview.CountRecentlyAlert@1.0.1`、`logic.micro_app_standalone_service`
+    - ⚠️ 录制时 `event_center` 的两个接口返回 500（`failed to get authorization token`），schema 按实际 500 响应给出
+  version: "1.0.0"
+  x-system: easyops
+  x-recorded-at: 2026-07-31T15:45:10
+  contact:
+    name: 录制生成（browser-recorder）
+
+servers:
+  - url: http://172.30.0.90
+    description: EasyOps 测试环境
+
+tags:
+  - name: 入口与运行时
+    description: HyperInsight 微应用运行时（菜单注入）、监控类微应用搜索、资源包状态、监控配置权限校验
+  - name: 事件中心
+    description: 告警源、最近告警计数、事件查询视图
+  - name: 资源监控与采集
+    description: 资源采集配置、采集器套件、日志采集任务、Agent 安装/下载 Key、可采集对象、CMDB 实例树
+  - name: 服务观测
+    description: 链路追踪套件（APM-eBPF）、SkyWalking 鉴权 Token
+
+paths:
+  # ============ 入口与运行时 ============
+  /next/api/gateway/logic.micro_app_standalone_service/api/v1/micro_app_standalone/runtime/infra-monitor:
+    get:
+      tags: [入口与运行时]
+      summary: HyperInsight 微应用运行时
+      description: |
+        进入 HyperInsight 时加载微应用运行时，返回菜单注入（injectMenus）、默认路由等配置，
+        是渲染监控系统左侧导航与功能入口的核心请求。
+      operationId: hyperinsight_runtime
+      parameters:
+        - name: version
+          in: query
+          description: 微应用版本号
+          schema: {type: string, example: "1.99.8"}
+      responses:
+        "200":
+          description: 运行时配置（含 injectMenus 等）
+          content:
+            application/json:
+              schema:
+                all-of:
+                  - $ref: "#/components/schemas/Result"
+                  - type: object
+                    properties:
+                      data:
+                        type: object
+                        properties:
+                          injectMenus: {type: array, description: 注入的菜单结构}
+      x-relevant: true
+
+  /next/api/gateway/logic.micro_app_standalone_service/api/v1/micro_app_standalone/search:
+    post:
+      tags: [入口与运行时]
+      summary: 搜索监控类微应用
+      description: 按 appId 集合查询监控相关微应用（如 monitor-kit、collect-platform）的当前版本与安装状态。
+      operationId: hyperinsight_search_micro_app
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                query:
+                  type: object
+                  properties:
+                    appId:
+                      type: object
+                      properties:
+                        $in: {type: array, items: {type: string}, example: [monitor-kit, collect-platform]}
+                fields:
+                  type: array
+                  items: {type: string}
+                  example: [appId, currentVersion, installStatus]
+      responses:
+        "200":
+          description: 命中的微应用列表
+          content:
+            application/json:
+              schema:
+                all-of:
+                  - $ref: "#/components/schemas/Result"
+                  - type: object
+                    properties:
+                      data:
+                        type: object
+                        properties:
+                          list:
+                            type: array
+                            items:
+                              type: object
+                              properties:
+                                appId: {type: string, example: monitor-kit}
+                                currentVersion: {type: string, example: "1.28.5"}
+                                instanceId: {type: string}
+      x-relevant: true
+
+  /next/api/gateway/logic.resource_package_service/api/v1/resource-package/monitor-kits-R:
+    get:
+      tags: [入口与运行时]
+      summary: 监控套件资源包状态
+      description: 查询监控套件资源包（monitor-kits-R）的版本、初始化状态、最近导入时间。
+      operationId: hyperinsight_monitor_kits_package
+      responses:
+        "200":
+          description: 资源包状态
+          content:
+            application/json:
+              schema:
+                all-of:
+                  - $ref: "#/components/schemas/Result"
+                  - type: object
+                    properties:
+                      data:
+                        type: object
+                        properties:
+                          name: {type: string, example: monitor-kits-R}
+                          version: {type: string, example: "1.50.12"}
+                          initStatus: {type: string, example: succeeded}
+                          lastImportTime: {type: string}
+      x-relevant: true
+
+  /next/api/gateway/micro_app.permission.ValidatePermissions/api/micro_app/v1/permission/validate:
+    post:
+      tags: [入口与运行时]
+      summary: 监控配置权限校验
+      description: 校验当前用户是否拥有监控相关操作权限（如 `monitor:configuration_access`），用于「设置」等配置入口的准入控制。
+      operationId: hyperinsight_validate_permission
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                actions:
+                  type: array
+                  items: {type: string}
+                  example: [monitor:configuration_access]
+      responses:
+        "200":
+          description: 权限校验结果
+          content:
+            application/json:
+              schema:
+                all-of:
+                  - $ref: "#/components/schemas/Result"
+                  - type: object
+                    properties:
+                      data:
+                        type: object
+                        properties:
+                          actions:
+                            type: array
+                            items:
+                              type: object
+                              properties:
+                                action: {type: string, example: monitor:configuration_access}
+                                authorizationStatus: {type: string, example: authorized}
+      x-relevant: true
+
+  # ============ 事件中心 ============
+  /next/api/gateway/alert_portal.alert_portal.ListSource/api/v1/alert/source/list:
+    get:
+      tags: [事件中心]
+      summary: 告警源列表
+      description: 获取告警数据源清单（如 prometheus、统一数据告警 system 等），供事件中心筛选告警来源。
+      operationId: hyperinsight_alert_source_list
+      responses:
+        "200":
+          description: 告警源清单
+          content:
+            application/json:
+              schema:
+                all-of:
+                  - $ref: "#/components/schemas/Result"
+                  - type: object
+                    properties:
+                      data:
+                        type: object
+                        properties:
+                          sourceList:
+                            type: array
+                            items:
+                              type: object
+                              properties:
+                                source: {type: string, example: prometheus}
+                                showName: {type: string, example: prometheus}
+      x-relevant: true
+
+  /next/api/gateway/easyops.api.event_center.event_overview.CountRecentlyAlert@1.0.1/api/v1/count/alert/recently:
+    get:
+      tags: [事件中心]
+      summary: 最近告警计数
+      description: |
+        统计最近一段时间内的告警数量，用于事件中心概览。
+        ⚠️ 本次录制返回 500（`failed to get authorization token`），属后端鉴权临时异常。
+      operationId: hyperinsight_count_recently_alert
+      parameters:
+        - name: view
+          in: query
+          schema: {type: string, example: ""}
+        - name: before
+          in: query
+          description: 时间窗口（秒），默认近 24h
+          schema: {type: string, example: "86400"}
+      responses:
+        "200":
+          description: 成功（code===0），data 为告警计数
+          content:
+            application/json:
+              schema: {$ref: "#/components/schemas/Result"}
+        "500":
+          description: 录制实测返回 500（鉴权 token 获取失败）
+          content:
+            application/json:
+              schema: {$ref: "#/components/schemas/ErrorResult"}
+      x-relevant: true
+
+  /next/api/gateway/easyops.api.event_center.event_overview.ListEventQueryView@1.0.2/api/v1/event-query-view:
+    get:
+      tags: [事件中心]
+      summary: 事件查询视图
+      description: |
+        获取事件中心的查询视图配置。
+        ⚠️ 本次录制返回 500（`failed to get authorization token`），属后端鉴权临时异常。
+      operationId: hyperinsight_event_query_view
+      responses:
+        "200":
+          description: 成功（code===0），data 为视图配置
+          content:
+            application/json:
+              schema: {$ref: "#/components/schemas/Result"}
+        "500":
+          description: 录制实测返回 500（鉴权 token 获取失败）
+          content:
+            application/json:
+              schema: {$ref: "#/components/schemas/ErrorResult"}
+      x-relevant: true
+
+  # ============ 资源监控与采集 ============
+  /next/api/gateway/easyops.api.collector_service_v2.job.GetResourceConfig@1.0.12/api/v1/list-resource-config:
+    post:
+      tags: [资源监控与采集]
+      summary: 资源采集配置列表
+      description: 分页查询资源采集配置，返回各类资源（平台资源等）的采集启用状态、采集器套件、图标等。录制时 total=56。
+      operationId: hyperinsight_list_resource_config
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                page: {type: number, example: 1}
+                pageSize: {type: number, example: 3000}
+                objectId: {type: array, items: {type: string}, example: []}
+                objectName: {type: string, example: ""}
+      responses:
+        "200":
+          description: 资源采集配置
+          content:
+            application/json:
+              schema:
+                all-of:
+                  - $ref: "#/components/schemas/Result"
+                  - type: object
+                    properties:
+                      data:
+                        type: object
+                        properties:
+                          total: {type: number, example: 56}
+                          data:
+                            type: array
+                            items:
+                              type: object
+                              properties:
+                                category: {type: string, example: 平台资源}
+                                enabled: {type: boolean}
+                                collectorKits: {type: array}
+      x-relevant: true
+
+  /next/api/gateway/easyops.api.collector_service.job.ListCollectorKitInfo@1.0.8/api/v1/collector/kit/info/list:
+    get:
+      tags: [资源监控与采集]
+      summary: 采集器套件信息列表
+      description: 查询采集器套件（Collector Kit）信息，含关联的指标集（metricSets）等。录制时 total=24。
+      operationId: hyperinsight_list_collector_kit_info
+      parameters:
+        - name: page
+          in: query
+          schema: {type: string, example: "1"}
+        - name: pageSize
+          in: query
+          schema: {type: string, example: "3000"}
+        - name: status
+          in: query
+          schema: {type: string, example: enabled}
+        - name: names
+          in: query
+          schema: {type: string}
+        - name: relatedObjectIds
+          in: query
+          schema: {type: string}
+      responses:
+        "200":
+          description: 采集器套件信息
+          content:
+            application/json:
+              schema:
+                all-of:
+                  - $ref: "#/components/schemas/Result"
+                  - type: object
+                    properties:
+                      data:
+                        type: object
+                        properties:
+                          total: {type: number, example: 24}
+                          list:
+                            type: array
+                            items:
+                              type: object
+                              properties:
+                                metricSets: {type: array}
+      x-relevant: true
+
+  /next/api/gateway/collector_service.collector_job.ListCollectorLogJob/api/v1/collector_log_job:
+    get:
+      tags: [资源监控与采集]
+      summary: 日志采集任务列表
+      description: 查询日志采集任务（按 agentType/metricType 过滤），录制时按 filebeat/APM 取前 5 条。
+      operationId: hyperinsight_list_collector_log_job
+      parameters:
+        - name: agentType
+          in: query
+          schema: {type: string, example: filebeat}
+        - name: metricType
+          in: query
+          schema: {type: string, example: APM}
+        - name: page
+          in: query
+          schema: {type: string, example: "1"}
+        - name: pageSize
+          in: query
+          schema: {type: string, example: "5"}
+      responses:
+        "200":
+          description: 日志采集任务
+          content:
+            application/json:
+              schema:
+                all-of:
+                  - $ref: "#/components/schemas/Result"
+                  - type: object
+                    properties:
+                      data:
+                        type: object
+                        properties:
+                          total: {type: number}
+                          list: {type: array}
+      x-relevant: true
+
+  /next/api/gateway/logic.cmdb_extend/agent/install_key:
+    get:
+      tags: [资源监控与采集]
+      summary: Agent 安装 Key
+      description: 获取 Agent 安装密钥与 serverAddress（如 172.30.0.90:8820），用于资源监控 Agent 装机注册。
+      operationId: hyperinsight_agent_install_key
+      responses:
+        "200":
+          description: Agent Key 与服务地址
+          content:
+            application/json:
+              schema: {$ref: "#/components/schemas/CmdbExtendResult"}
+      x-relevant: true
+
+  /next/api/gateway/logic.cmdb_extend/agent/download/key:
+    get:
+      tags: [资源监控与采集]
+      summary: Agent 下载 Key
+      description: 获取 Agent 下载密钥与 serverAddress，用于资源监控 Agent 下载认证。
+      operationId: hyperinsight_agent_download_key
+      responses:
+        "200":
+          description: Agent Key 与服务地址
+          content:
+            application/json:
+              schema: {$ref: "#/components/schemas/CmdbExtendResult"}
+      x-relevant: true
+
+  /next/api/gateway/logic.cmdb.service/object/search_collect:
+    get:
+      tags: [资源监控与采集]
+      summary: 可采集对象 ID 列表
+      description: 查询 CMDB 中可纳入监控采集的对象类型清单（如 HOST、APP、BUSINESS、CLUSTER、SWITCH@ONEMODEL、_SERVICENODE）。
+      operationId: hyperinsight_search_collect_object
+      responses:
+        "200":
+          description: 可采集对象清单
+          content:
+            application/json:
+              schema:
+                all-of:
+                  - $ref: "#/components/schemas/CmdbResult"
+                  - type: object
+                    properties:
+                      data:
+                        type: object
+                        properties:
+                          objectIdList: {type: array, items: {type: string}, example: [HOST, APP, BUSINESS, CLUSTER]}
+      x-relevant: true
+
+  /next/api/gateway/logic.cmdb.service/instance_tree/full:
+    post:
+      tags: [资源监控与采集]
+      summary: CMDB 实例树（完整）
+      description: |
+        按 tree 定义递归查询 CMDB 实例树（如 APP_SYSTEM@ONEMODEL 及其子节点），
+        资源监控用于展示资源拓扑层级。
+      operationId: hyperinsight_instance_tree_full
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                ignore_app: {type: boolean, example: true}
+                ignore_single: {type: boolean, example: false}
+                tree:
+                  type: object
+                  description: 树结构定义（child/fields/relation_field_id）
+      responses:
+        "200":
+          description: 实例树数据
+          content:
+            application/json:
+              schema:
+                all-of:
+                  - $ref: "#/components/schemas/CmdbResult"
+      x-relevant: true
+
+  # ============ 服务观测 ============
+  /next/api/gateway/easyops.api.collector_service.job.GetTraceKitByName@1.0.1/api/v1/get-trace-kit-by-name:
+    get:
+      tags: [服务观测]
+      summary: 按名取链路追踪套件
+      description: 按名称查询链路追踪（Trace）套件状态，如 APM-eBPF，返回 instanceId/status/configId。
+      operationId: hyperinsight_get_trace_kit_by_name
+      parameters:
+        - name: name
+          in: query
+          required: true
+          schema: {type: string, example: APM-eBPF}
+      responses:
+        "200":
+          description: 链路追踪套件信息
+          content:
+            application/json:
+              schema:
+                all-of:
+                  - $ref: "#/components/schemas/Result"
+                  - type: object
+                    properties:
+                      data:
+                        type: object
+                        properties:
+                          instanceId: {type: string}
+                          status: {type: string, example: available}
+                          configId: {type: string}
+      x-relevant: true
+
+  /next/api/gateway/easyops.api.service_observe.application_performance.ListSkywalkingAuthToken@1.0.1/api/v1/skywalking/list-token:
+    get:
+      tags: [服务观测]
+      summary: SkyWalking 鉴权 Token 列表
+      description: 查询服务观测对接 SkyWalking 的鉴权 Token 列表（按 systemId/setId 分页）。
+      operationId: hyperinsight_skywalking_list_token
+      parameters:
+        - name: systemId
+          in: query
+          schema: {type: string, example: all}
+        - name: setId
+          in: query
+          schema: {type: string}
+        - name: page
+          in: query
+          schema: {type: string, example: "1"}
+        - name: pageSize
+          in: query
+          schema: {type: string, example: "2"}
+      responses:
+        "200":
+          description: SkyWalking Token 列表
+          content:
+            application/json:
+              schema:
+                all-of:
+                  - $ref: "#/components/schemas/Result"
+                  - type: object
+                    properties:
+                      data:
+                        type: object
+                        properties:
+                          enabled: {type: boolean}
+                          total: {type: number}
+                          list: {type: array}
+      x-relevant: true
+
+components:
+  schemas:
+    Result:
+      type: object
+      description: 通用响应包装（micro_app/collector/event_center/resource_package 系列共用）
+      properties:
+        code: {type: number, example: 0}
+        codeExplain: {type: string}
+        error: {type: string}
+        data: {type: object}
+    CmdbResult:
+      type: object
+      description: CMDB 系列响应包装
+      properties:
+        code: {type: number, example: 0}
+        error: {type: string}
+        message: {type: string}
+        data: {type: object}
+    CmdbExtendResult:
+      type: object
+      description: cmdb_extend（Agent Key）响应包装
+      properties:
+        code: {type: number, example: 0}
+        error: {type: string}
+        message: {type: string}
+        data: {type: string, description: Agent 密钥（脱敏）}
+        serverAddress: {type: string, example: "172.30.0.90:8820"}
+    ErrorResult:
+      type: object
+      description: 录制实测的 500 错误响应
+      properties:
+        code: {type: number, example: 100010}
+        codeExplain: {type: string, example: ERR_UNKNOWN}
+        error: {type: string, example: failed to get authorization token}
+        data: {type: object, nullable: true}

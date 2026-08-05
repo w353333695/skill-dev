@@ -1,0 +1,56 @@
+name: getNextNodes
+module: process
+method: POST
+path: /api/flowable_service/v1/process_definition_version/next_nodes
+gateway_path: /next/api/gateway/flowable_service.process_definition_version.GetNextNodes/api/flowable_service/v1/process_definition_version/next_nodes
+service: logic.flowable_service
+side_effect: read
+path_source: gateway_strip
+path_confidence: medium
+tags:
+- 流程编排
+- 后继节点
+- 校验
+- bpmn
+summary: 查询节点后继 userTask
+description: 编排时根据 bpmnXML 与 userTaskId 查询某节点的后继节点，用于连线校验。
+request:
+  required:
+  - bpmnXML
+  - userTaskId
+  properties:
+    bpmnXML:
+      type: string
+      desc: BPMN 2.0 XML
+    userTaskId:
+      type: string
+      desc: 当前节点 ID
+    includeSelf:
+      type: bool
+      desc: 返回结果是否包含自己
+      _source: contract
+outputs:
+  userTaskIds:
+    jsonpath: $.data.userTaskIds
+    desc: 用户任务ID列表
+requires:
+- bpmnXML 须为合法 BPMN 2.0 XML
+- userTaskId 须为 bpmnXML 内存在的节点 ID
+rollback: null
+examples: []
+confidence:
+  module: high
+  outputs: high
+  requires: high
+  rollback: high
+  summary: high
+  tags: high
+  request: medium
+endpoint:
+  contract_ref: logic.flowable_service|POST|/api/flowable_service/v1/process_definition_version/next_nodes
+  mode: easyops_gateway
+source:
+  openapi_file: ITSM-系统管理-流程管理-openapi.yaml
+  openapi_hash: be88bdf060789ec422b671fffae672e0754857b66418b48c317c4c55f8e9a77d
+  recorded_at: '2026-07-13T14:31:52'
+registered_at: '2026-07-22T10:34:10.699651'

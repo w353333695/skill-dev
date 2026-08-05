@@ -1,0 +1,47 @@
+name: getServiceInstanceV1
+module: service_catalog
+method: GET
+path: /api/flowable_service/v1/service_instance/{serviceId}
+gateway_path: /next/api/gateway/logic.flowable_service/api/flowable_service/v1/service_instance/{serviceId}
+service: logic.flowable_service
+side_effect: read
+path_source: gateway_strip
+path_confidence: medium
+tags:
+- 服务实例
+- 详情
+- 基础信息
+- 工单名
+- 查询
+summary: 查询服务实例基础信息
+description: 拉取服务实例基础信息（默认工单名、负责人、关联流程等）。
+request:
+  required:
+  - serviceId
+  properties:
+    serviceId:
+      type: string
+      desc: ''
+outputs:
+  detail:
+    jsonpath: $.data
+    desc: 服务实例基础信息（默认工单名、负责人、关联流程等）
+requires:
+- serviceId 须为已存在的服务 ID
+rollback: null
+examples: []
+confidence:
+  module: high
+  outputs: medium
+  requires: medium
+  rollback: high
+  summary: high
+  tags: high
+endpoint:
+  contract_ref: ''
+  mode: easyops_gateway
+source:
+  openapi_file: ITSM-工单发起-openapi.yaml
+  openapi_hash: 1ca484b7e487f62a1c488f8e8b29d32e77b51750fc68f94a51a775d93f09be61
+  recorded_at: '2026-07-13T14:47:07'
+registered_at: '2026-07-22T10:34:09.642601'

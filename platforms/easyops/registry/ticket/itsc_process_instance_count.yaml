@@ -1,0 +1,59 @@
+name: itsc_process_instance_count
+module: ticket
+method: GET
+path: /api/flowable_service/v2/process_instance_count
+gateway_path: /next/api/gateway/logic.flowable_service/api/flowable_service/v2/process_instance_count
+service: logic.flowable_service
+side_effect: read
+path_source: backend_contract
+path_confidence: high
+tags:
+- 工单
+- 流程实例
+- 计数
+- 角标
+- 工作台
+summary: 按状态标签统计流程实例数
+description: 按工单状态标签聚合统计数量，用于工作台待办/进行中等角标。
+request:
+  required:
+  - tags
+  properties:
+    tags:
+      type: string
+      desc: 状态标签，逗号分隔，如 run,cc,unhandled,timeout
+    st:
+      type: datetime
+      desc: 开始时间
+      _source: contract
+    et:
+      type: datetime
+      desc: 结束时间
+      _source: contract
+outputs:
+  list_full:
+    jsonpath: $.data.list
+    desc: 按标签聚合的数量列表
+  list_ids:
+    jsonpath: $.data.list
+    desc: 列表项id集合(配合 ${s.list_full.instanceId} 投影)
+requires:
+- tags 须为有效状态标签(逗号分隔,如 run,cc,unhandled,timeout)
+rollback: null
+examples: []
+confidence:
+  module: high
+  outputs: high
+  requires: high
+  rollback: high
+  summary: high
+  tags: high
+  request: medium
+endpoint:
+  contract_ref: logic.flowable_service|GET|/api/flowable_service/v2/process_instance_count
+  mode: easyops_gateway
+source:
+  openapi_file: ITSM-登录与功能入口-openapi.yaml
+  openapi_hash: ec5d99f1d3772798ed04de980321a11cbf0d5a286894ac6da4acaea855a5904a
+  recorded_at: '2026-07-09T14:05:09'
+registered_at: '2026-07-22T10:34:10.040270'

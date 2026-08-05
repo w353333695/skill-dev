@@ -1,0 +1,50 @@
+name: listWorkCalendar
+module: work_calendar
+method: GET
+path: /api/sys_setting/v1/query/work/calendar
+gateway_path: /next/api/gateway/logic.sys_setting/api/sys_setting/v1/query/work/calendar
+service: logic.sys_setting
+side_effect: read
+path_source: gateway_strip
+path_confidence: medium
+tags:
+- 工作日历
+- 查询
+- 列表
+- 营业时间
+summary: 查询工作日历列表
+description: 分页查询工作日历列表，支持按日历名称或创建人模糊搜索。
+request:
+  required: []
+  properties:
+    Q:
+      type: string
+      desc: 关键词（日历名称或创建人模糊匹配）
+    page:
+      type: string
+      desc: ''
+    pageSize:
+      type: string
+      desc: ''
+outputs:
+  list_full:
+    jsonpath: $.data
+    desc: 工作日历列表
+requires: []
+rollback: null
+examples: []
+confidence:
+  request: high
+  module: high
+  outputs: medium
+  tags: high
+  summary: high
+  requires: low
+endpoint:
+  contract_ref: ''
+  mode: easyops_gateway
+source:
+  openapi_file: ITSM-运行管理-营业时间管理-openapi.yaml
+  openapi_hash: 02467de10e4cd52adcbf8975ca51b51a5a06742b85a95342ca4ffec2ea26481f
+  recorded_at: '2026-07-28T14:13:31.896000'
+registered_at: '2026-07-28T16:48:34.882046'

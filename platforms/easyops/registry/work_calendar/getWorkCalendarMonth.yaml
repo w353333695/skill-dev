@@ -1,0 +1,54 @@
+name: getWorkCalendarMonth
+module: work_calendar
+method: GET
+path: /api/sys_setting/v1/work/calendar_month/{id}
+gateway_path: /next/api/gateway/logic.sys_setting/api/sys_setting/v1/work/calendar_month/{calendarId}
+service: logic.sys_setting
+side_effect: read
+path_source: backend_contract
+path_confidence: high
+tags:
+- 工作日历
+- 月视图
+- 营业时间
+summary: 查询日历月视图
+description: 按月展示某日历的工作日/加班日/假期分布（特殊日期渲染用）。
+request:
+  required:
+  - year
+  - month
+  properties:
+    year:
+      type: string
+      desc: 年份(默认为当前年份)
+    month:
+      type: month
+      desc: 月份
+    id:
+      type: mongo_object_id
+      desc: 日历ID
+      _source: contract
+outputs:
+  list_full:
+    jsonpath: $.data
+    desc: 按月每日展开(合成后最终生效)
+requires:
+- calendarId 须存在
+- year/month 必填
+rollback: null
+examples: []
+confidence:
+  request: high
+  module: high
+  outputs: high
+  tags: high
+  summary: high
+  requires: high
+endpoint:
+  contract_ref: logic.sys_setting|GET|/api/sys_setting/v1/work/calendar_month/{id}
+  mode: easyops_gateway
+source:
+  openapi_file: ITSM-运行管理-营业时间管理-openapi.yaml
+  openapi_hash: 02467de10e4cd52adcbf8975ca51b51a5a06742b85a95342ca4ffec2ea26481f
+  recorded_at: '2026-07-28T14:13:31.896000'
+registered_at: '2026-07-28T16:48:34.882046'
