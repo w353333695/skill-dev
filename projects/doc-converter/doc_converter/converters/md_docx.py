@@ -30,6 +30,7 @@ from .base import BaseConverter, ConvertResult, register
 _CURRENT_INPUT_PATH: Path | None = None
 _MATH_CACHE: list[str] = []   # 公式原文列表（按占位符序号索引）
 _FN_CACHE: list[tuple[int, str, str]] = []  # [(序号, id, 内容)]
+_CHECKBOX_SEQ: int = 0  # 复选框控件 id 递增计数器（每文档重置）
 
 
 # ---------------------------------------------------------------------------
@@ -81,6 +82,40 @@ def _set_style_font(style, font_name: str, font_size=None):
         rFonts = OxmlElement("w:rFonts")
         rPr.insert(0, rFonts)
     rFonts.set(qn("w:eastAsia"), font_name)
+
+
+def _add_checkbox(paragraph, checked: bool, font_name: str, font_size):
+    """向段落插入 Word 复选框内容控件（w14:checkbox），点击即可双向切换 ☑/☐。
+
+    纯文本 ☑/☐ 不可交互；content control 复选框在 Word/WPS 里点击切换状态，
+    Word 据 checkedState/uncheckedState 自动替换显示字符。
+    """
+    from docx.oxml import parse_xml
+    global _CHECKBOX_SEQ
+    _CHECKBOX_SEQ += 1
+
+    sz = f'<w:sz w:val="{int(font_size.pt * 2)}"/>' if font_size is not None else ""
+    sym = "☑" if checked else "☐"
+    chk_val = "1" if checked else "0"
+    xml = (
+        '<w:sdt xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"'
+        ' xmlns:w14="http://schemas.microsoft.com/office/word/2010/wordml">'
+        '<w:sdtPr>'
+        f'<w:rPr><w:rFonts w:ascii="{font_name}" w:hAnsi="{font_name}" w:eastAsia="{font_name}"/>{sz}</w:rPr>'
+        f'<w:id w:val="{_CHECKBOX_SEQ}"/>'
+        '<w14:checkbox>'
+        f'<w14:checked w14:val="{chk_val}"/>'
+        '<w14:checkedState w14:val="2611" w14:font="MS Gothic"/>'
+        '<w14:uncheckedState w14:val="2610" w14:font="MS Gothic"/>'
+        '</w14:checkbox>'
+        '</w:sdtPr>'
+        '<w:sdtContent>'
+        f'<w:r><w:rPr><w:rFonts w:ascii="MS Gothic" w:hAnsi="MS Gothic" w:eastAsia="MS Gothic"/>{sz}</w:rPr>'
+        f'<w:t xml:space="preserve">{sym}</w:t></w:r>'
+        '</w:sdtContent>'
+        '</w:sdt>'
+    )
+    paragraph._p.append(parse_xml(xml))
 
 
 def _add_hyperlink(paragraph, text: str, url: str, font_name: str, font_size):
@@ -617,8 +652,9 @@ class MdToDocx(BaseConverter):
         from docx import Document
         from docx.shared import Pt
 
-        global _CURRENT_INPUT_PATH, _MATH_CACHE, _FN_CACHE
+        global _CURRENT_INPUT_PATH, _MATH_CACHE, _FN_CACHE, _CHECKBOX_SEQ
         _CURRENT_INPUT_PATH = input_path
+        _CHECKBOX_SEQ = 0
         self._embedded_img_count = 0
 
         text = input_path.read_text(encoding="utf-8")
@@ -760,13 +796,16 @@ class MdToDocx(BaseConverter):
                 indent = _get_indent_level(line)
                 checked = m.group(2).lower() == "x"
                 content = m.group(3)
-                prefix = "☑ " if checked else "☐ "
                 # 普通段落（不用 List Bullet，避免叠加项目符号）
                 p = doc.add_paragraph()
                 p.paragraph_format.left_indent = Cm(0.74 + 0.5 * indent)
                 if quote_depth > 0:
                     _apply_quote_style(p, quote_depth)
-                _add_inline_runs(p, prefix + content)
+                # 真复选框内容控件（点击可双向切换），后接空格再接内容
+                _add_checkbox(p, checked, "Microsoft YaHei", None)
+                sep = p.add_run(" ")
+                _set_run_font(sep, "Microsoft YaHei", None)
+                _add_inline_runs(p, content)
                 i += 1
                 continue
 
