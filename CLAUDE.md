@@ -29,6 +29,18 @@
 * 调用 project 的 CLI：`uv run --project projects/<name> <cli> ...`（自动用该 project 的 venv，首次按 lock 建/sync）。
 * **不要**：靠 `source .venv/bin/activate`（shell 状态不跨 Bash 调用持久）；不要共享一个 venv 装所有 project；不要 per-skill 建 venv。
 
+### 3.1 依赖安装加速（本沙箱中国网络，必读）
+
+本工作空间直连 PyPI / GitHub 慢或超时，**装依赖/二进制一律走镜像，别傻等**：
+
+* **PyPI**（pip / uv）：
+  - uv：`UV_INDEX_URL=https://pypi.tuna.tsinghua.edu.cn/simple uv pip install <pkg>`（或 `uv sync --extra X`，命令前缀加该环境变量）
+  - pip：`pip install -i https://pypi.tuna.tsinghua.edu.cn/simple <pkg>`
+* **playwright chromium**：`PLAYWRIGHT_DOWNLOAD_HOST=https://cdn.npmmirror.com/binaries/playwright` 前缀跑 `playwright install chromium`，绕开官方 CDN（官方常超时）。
+* **GitHub 二进制 / release**：直连基本超时。**优先用 PyPI 自带二进制的包避开 github**——要 pandoc 装 `pypandoc-binary`（自带 pandoc 3.x）、要 typst 装 `typst`（PyPI wheel 自带引擎），**别自己从 github release 下 tarball**。
+* **git push**：本仓库即 skill-dev 仓库，push 时须绕过镜像走真实远端（凭证 token 在 `.env`）。
+* **先探测再批量**：`curl -sSL --max-time 10 -o /dev/null -w '%{http_code}' <url>` 先试一两个镜像可达性，再批量用；公共 ghproxy（ghproxy.com 等）多数已 403 限流，别浪费时间。
+
 ## 4. 调试
 
 * 改 project 代码用 editable（`uv sync` 或 `uv pip install -e .`），改完即生效，`uv run --project` 立刻拿到最新。
