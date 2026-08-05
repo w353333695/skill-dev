@@ -15,11 +15,12 @@ tags:
 summary: 搜索模型实例(v3)
 description: 按字段、关键词、高级条件（aq）搜索某模型的实例列表，支持分页、排序、关系展开。
 request:
-  required: []
+  required:
+  - fields
   properties:
     fields:
       type: string[]
-      desc: 返回的字段列表
+      desc: 返回的字段列表（必填，值可为空数组 []）
     page:
       type: number
       desc: 页码
