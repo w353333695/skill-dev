@@ -41,3 +41,5 @@ platforms/easyops/sources/raw/
 
 # SDD scratch
 .superpowers/
+
+.claude/settings.json
