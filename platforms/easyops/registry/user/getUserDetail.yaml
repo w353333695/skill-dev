@@ -1,0 +1,46 @@
+name: getUserDetail
+module: user
+method: GET
+path: /object/USER/instance/{instanceId}
+gateway_path: /next/api/gateway/cmdb.instance.GetDetail/object/USER/instance/{instanceId}
+service: cmdb.instance.GetDetail
+side_effect: read
+path_source: gateway_strip
+path_confidence: medium
+tags:
+- 用户
+- 详情
+- CMDB实例
+- 回填
+summary: 查询用户详情（CMDB实例）
+description: 进入用户编辑页时回填资料用，按用户实例 ID 查询。
+request:
+  required:
+  - instanceId
+  properties:
+    instanceId:
+      type: string
+      desc: 用户实例 ID（如 653baedadb9dd）
+outputs:
+  detail:
+    jsonpath: $.data
+    desc: 用户实例详情
+requires:
+- instanceId 须为已存在的用户实例 ID
+rollback: null
+examples: []
+confidence:
+  module: high
+  outputs: medium
+  requires: low
+  rollback: high
+  summary: high
+  tags: high
+endpoint:
+  contract_ref: ''
+  mode: easyops_gateway
+source:
+  openapi_file: ITSM-系统管理-用户管理-openapi.yaml
+  openapi_hash: 62e3d6c7b4841e3254ee4f78bd899a37d383bbfcfca7613cccddfdbbbe90392e
+  recorded_at: '2026-07-13T11:40:59'
+registered_at: '2026-07-22T10:34:10.925487'

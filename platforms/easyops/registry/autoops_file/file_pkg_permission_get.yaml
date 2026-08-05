@@ -1,0 +1,48 @@
+name: file_pkg_permission_get
+module: autoops_file
+method: GET
+path: /permission/package/{packageId}
+gateway_path: /next/api/gateway/artifact.permission.GetPackagePermission/permission/package/{packageId}
+service: logic.artifact
+side_effect: read
+path_source: backend_contract
+path_confidence: high
+tags:
+- 文件分发
+- 权限
+- 白名单
+summary: 查询文件包权限
+description: 查询指定文件包的权限白名单（包编辑 updateAuthorizers / 包查看 readAuthorizers / 包删除 deleteAuthorizers
+  三类授权对象，各为用户/用户组列表）。
+request:
+  required:
+  - packageId
+  properties:
+    packageId:
+      type: string
+      desc: 文件包 ID（path 参数）
+    permissionType:
+      type: white_permission_type
+      desc: 包权限类型
+      _source: contract
+outputs:
+  detail:
+    jsonpath: $.data
+    desc: 权限详情（updateAuthorizers/deleteAuthorizers/readAuthorizers）
+requires: []
+rollback: null
+examples: []
+confidence:
+  request: medium
+  module: high
+  outputs: medium
+  tags: high
+  summary: high
+endpoint:
+  contract_ref: logic.artifact|GET|/permission/package/{packageId}
+  mode: easyops_internal
+source:
+  openapi_file: AutoOps-文件分发管理-openapi.yaml
+  openapi_hash: edf3872fae57ab16180ccec0257fe32c2d0de09a4a639719250779d5ae96e426
+  recorded_at: '2026-07-29T16:20:10'
+registered_at: '2026-07-29T16:49:25.523907'

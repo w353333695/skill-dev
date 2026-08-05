@@ -1,0 +1,50 @@
+name: getKnowledgeCatalogPerm
+module: knowledge_catalog
+method: GET
+path: /api/flowable_service/v1/knowledge_base/catalog/{catalogId}/perm
+gateway_path: /next/api/gateway/logic.flowable_service/api/flowable_service/v1/knowledge_base/catalog/{catalogId}/perm
+service: logic.flowable_service
+side_effect: read
+path_source: gateway_strip
+path_confidence: medium
+tags:
+- 知识目录
+- 权限
+- perm
+- 查询
+- visitor
+summary: 查询知识目录访问权限
+description: 查询指定目录当前的访问权限（visitor 列表）。设置权限面板打开时调用。
+request:
+  required:
+  - catalogId
+  properties:
+    catalogId:
+      type: string
+      desc: 目录 ID
+outputs:
+  list_full:
+    jsonpath: $.data.visitor
+    desc: 目录当前可访问的 visitor 列表（用户 instanceId 与用户组 :组ID 混合，推断）
+  list_ids:
+    jsonpath: $.data.visitor
+    desc: visitor 列表，可投影得到已有权限主体 ID
+requires:
+- catalogId 须为已存在的目录 ID
+rollback: null
+examples: []
+confidence:
+  module: high
+  outputs: medium
+  requires: medium
+  rollback: high
+  summary: high
+  tags: high
+endpoint:
+  contract_ref: ''
+  mode: easyops_gateway
+source:
+  openapi_file: ITSM-系统管理-知识目录管理-openapi.yaml
+  openapi_hash: cf72ee6896240e33a2a149bf98871adabd5a51cb22b632b8e246d4f5d98d89d2
+  recorded_at: '2026-07-13T13:50:45'
+registered_at: '2026-07-22T10:34:11.335182'

@@ -1,0 +1,55 @@
+name: updateUser
+module: user
+method: PUT
+path: /object/USER/instance/{instanceId}
+gateway_path: /next/api/gateway/cmdb.instance.UpdateInstance/object/USER/instance/{instanceId}
+service: cmdb.instance.UpdateInstance
+side_effect: update
+path_source: gateway_strip
+path_confidence: medium
+tags:
+- 用户
+- 更新
+- 禁用
+- 启用
+- state
+summary: 更新用户（禁用/启用/资料）
+description: 更新 USER 实例字段。禁用/启用通过修改 state（valid↔invalid）实现，
+request:
+  required: []
+  properties:
+    nickname:
+      type: string
+      desc: 昵称
+    user_email:
+      type: string
+      desc: 邮箱
+    user_tel:
+      type: string
+      desc: 手机号
+    state:
+      type: string
+      desc: 禁用传 invalid，启用传 valid
+outputs:
+  detail:
+    jsonpath: $.data
+    desc: 更新结果（无明确返回时兜底）
+requires:
+- instanceId 须为已存在的用户实例 ID
+rollback: null
+examples: []
+confidence:
+  module: high
+  outputs: low
+  requires: low
+  rollback: high
+  summary: high
+  tags: high
+endpoint:
+  contract_ref: ''
+  mode: easyops_gateway
+source:
+  openapi_file: ITSM-系统管理-用户管理-openapi.yaml
+  openapi_hash: 62e3d6c7b4841e3254ee4f78bd899a37d383bbfcfca7613cccddfdbbbe90392e
+  recorded_at: '2026-07-13T11:40:59'
+registered_at: '2026-07-22T10:34:10.925487'

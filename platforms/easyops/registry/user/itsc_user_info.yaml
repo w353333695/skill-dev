@@ -1,0 +1,49 @@
+name: itsc_user_info
+module: user
+method: GET
+path: /api/flowable_service/v1/user/info
+gateway_path: /next/api/gateway/flowable_service.permission.UserInfo/api/flowable_service/v1/user/info
+service: logic.flowable_service
+side_effect: read
+path_source: gateway_strip
+path_confidence: medium
+tags:
+- 用户
+- 权限
+- 角色
+- ITSM
+- 查询
+summary: ITSM用户权限信息(角色/管理员)
+description: ''
+request:
+  required: []
+  properties: {}
+outputs:
+  builtinRole:
+    jsonpath: $.data.builtinRole
+    desc: 用户拥有的内置角色map
+  detail:
+    jsonpath: $.data
+    desc: ITSM用户权限信息
+  isAdmin:
+    jsonpath: $.data.isAdmin
+    desc: 是否管理员
+requires: []
+rollback: null
+examples: []
+confidence:
+  module: high
+  outputs: high
+  requires: high
+  rollback: high
+  summary: high
+  tags: high
+  request: high
+endpoint:
+  contract_ref: logic.flowable_service|GET|/api/flowable_service/v1/user/info
+  mode: easyops_gateway
+source:
+  openapi_file: ITSM-登录与功能入口-openapi.yaml
+  openapi_hash: ec5d99f1d3772798ed04de980321a11cbf0d5a286894ac6da4acaea855a5904a
+  recorded_at: '2026-07-09T14:05:09'
+registered_at: '2026-07-22T10:34:10.040270'

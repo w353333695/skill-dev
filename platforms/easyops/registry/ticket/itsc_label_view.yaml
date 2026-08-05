@@ -1,0 +1,58 @@
+name: itsc_label_view
+module: ticket
+method: GET
+path: /api/flowable_service/v1/global_setting/label_view
+gateway_path: /next/api/gateway/flowable_service.global_setting.GetLabelView/api/flowable_service/v1/global_setting/label_view
+service: logic.flowable_service
+side_effect: read
+path_source: gateway_strip
+path_confidence: medium
+tags:
+- 工单
+- 文案
+- 标签视图
+- label_view
+- 配置
+summary: 标签视图/文案展示配置
+description: ''
+request:
+  required: []
+  properties: {}
+outputs:
+  commonPhrases:
+    jsonpath: $.data.commonPhrases
+    desc: 常用语配置
+  ticketActionButtonLabels:
+    jsonpath: $.data.ticketActionButtonLabels
+    desc: 工单操作按钮文案配置
+  ticketScoreLabels:
+    jsonpath: $.data.ticketScoreLabels
+    desc: 工单评价维度
+  ticketStatusLabels:
+    jsonpath: $.data.ticketStatusLabels
+    desc: 工单状态文案配置
+  userTaskActionButtonLabels:
+    jsonpath: $.data.userTaskActionButtonLabels
+    desc: 任务操作按钮文案配置
+  userTaskStatusLabels:
+    jsonpath: $.data.userTaskStatusLabels
+    desc: 任务状态文案配置
+requires: []
+rollback: null
+examples: []
+confidence:
+  module: high
+  outputs: high
+  requires: high
+  rollback: high
+  summary: high
+  tags: high
+  request: high
+endpoint:
+  contract_ref: logic.flowable_service|GET|/api/flowable_service/v1/global_setting/label_view
+  mode: easyops_gateway
+source:
+  openapi_file: ITSM-登录与功能入口-openapi.yaml
+  openapi_hash: ec5d99f1d3772798ed04de980321a11cbf0d5a286894ac6da4acaea855a5904a
+  recorded_at: '2026-07-09T14:05:09'
+registered_at: '2026-07-22T10:34:10.040270'

@@ -1,0 +1,43 @@
+name: tool_time_window_update
+module: autoops_tool
+method: PUT
+path: /api/tool_service/v1/globalConfigs/timeWindow
+gateway_path: /next/api/gateway/logic.tool_service/api/tool_service/v1/globalConfigs/timeWindow
+service: logic.tool_service
+side_effect: update
+path_source: gateway_strip
+path_confidence: medium
+tags:
+- 工具库
+- 执行时间窗口
+summary: 保存执行时间窗口
+description: 配置工具允许执行的时间段（可多个窗口）。
+request:
+  required: []
+  properties:
+    execTimeWindowConfig:
+      type: array
+      desc: ''
+outputs:
+  detail:
+    jsonpath: $.data
+    desc: 保存结果
+requires: []
+rollback: null
+examples: []
+confidence:
+  request: high
+  module: high
+  outputs: high
+  tags: high
+  summary: high
+  requires: medium
+  rollback: medium
+endpoint:
+  contract_ref: ''
+  mode: easyops_gateway
+source:
+  openapi_file: AutoOps-工具库管理-openapi.yaml
+  openapi_hash: 7ed1d5a46514c3b8bc40573042495f3c411417688c19c42fbf739581cf1bb2c6
+  recorded_at: '2026-07-23T14:19:29.887012'
+registered_at: '2026-07-23T14:28:58.209763'

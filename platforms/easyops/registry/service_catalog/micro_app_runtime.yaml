@@ -1,0 +1,50 @@
+name: micro_app_runtime
+module: service_catalog
+method: GET
+path: /api/v1/micro_app_standalone/runtime/{microApp}
+gateway_path: /next/api/gateway/logic.micro_app_standalone_service/api/v1/micro_app_standalone/runtime/{microApp}
+service: logic.micro_app_standalone_service
+side_effect: read
+path_source: gateway_strip
+path_confidence: medium
+tags:
+- 微应用
+- runtime
+- 菜单
+- 路由
+- 查询
+summary: 微应用运行时清单(菜单/路由)
+description: 获取指定微应用的运行时清单（菜单、路由、provider 等）。`microApp` 取值如
+request:
+  required:
+  - microApp
+  properties:
+    microApp:
+      type: string
+      desc: 微应用 ID，如 portal / itsc-workbench
+    version:
+      type: string
+      desc: 微应用版本，如 1.5.0 / 2.54.10
+outputs:
+  detail:
+    jsonpath: $.data
+    desc: 微应用运行时清单
+requires:
+- microApp 须为平台已安装的微应用 ID
+rollback: null
+examples: []
+confidence:
+  module: medium
+  outputs: low
+  requires: medium
+  rollback: high
+  summary: medium
+  tags: medium
+endpoint:
+  contract_ref: ''
+  mode: easyops_gateway
+source:
+  openapi_file: ITSM-登录与功能入口-openapi.yaml
+  openapi_hash: ec5d99f1d3772798ed04de980321a11cbf0d5a286894ac6da4acaea855a5904a
+  recorded_at: '2026-07-09T14:05:09'
+registered_at: '2026-07-22T10:34:10.040270'

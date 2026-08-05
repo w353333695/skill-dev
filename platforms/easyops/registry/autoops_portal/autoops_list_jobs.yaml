@@ -1,0 +1,41 @@
+name: autoops_list_jobs
+module: autoops_portal
+method: GET
+path: /api/ops_automation/v1/jobs
+gateway_path: /next/api/gateway/ops_automation.jobs.ListJobs/api/ops_automation/v1/jobs
+service: ops_automation.jobs.ListJobs
+side_effect: read
+path_source: gateway_strip
+path_confidence: medium
+tags:
+- AutoOps
+- 作业
+- Job
+summary: 作业列表
+description: 获取 AutoOps 作业（Job）清单。
+request:
+  required: []
+  properties: {}
+outputs:
+  list_full:
+    jsonpath: $.data
+    desc: 作业列表
+requires: []
+rollback: null
+examples: []
+confidence:
+  request: high
+  module: high
+  outputs: high
+  tags: high
+  summary: high
+  requires: medium
+  rollback: medium
+endpoint:
+  contract_ref: ''
+  mode: easyops_gateway
+source:
+  openapi_file: AutoOps-入口与功能预览-openapi.yaml
+  openapi_hash: 83d3bdb67d59bec3aa970fbd014c3aa03c60e8fed470857fa78d2a2613dcbd31
+  recorded_at: '2026-07-23T12:05:14.132308'
+registered_at: '2026-07-23T14:28:57.999092'

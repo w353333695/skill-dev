@@ -1,0 +1,40 @@
+name: getProcessDefinitionVersionV2
+module: process
+method: GET
+path: /api/flowable_service/v2/definition/{definitionId}/version/{versionId}
+service: logic.flowable_service
+side_effect: read
+path_source: backend_contract
+path_confidence: high
+tags:
+- 流程版本
+- 详情
+- V2
+summary: 获取流程版本详情V2(taskInfo合并视图)
+description: 获取流程版本详情（V2）。GET /v2/definition/{definitionId}/version/{versionId}（注意是definition非process_definition）。返回taskInfo(节点+配置+表单绑定+摘要合并视图)+bpmnXML+lineSettings+triggerList。内网8134实测。详见 process_development §2.4。
+request:
+  required:
+  - definitionId
+  - versionId
+  properties:
+    definitionId:
+      type: string
+      desc: 路径
+    versionId:
+      type: string
+      desc: 版本ID
+outputs:
+  taskInfo:
+    jsonpath: $.data.taskInfo
+    desc: 节点合并视图
+  bpmnXML:
+    jsonpath: $.data.bpmnXML
+    desc: 流程XML
+  state:
+    jsonpath: $.data.state
+    desc: 版本状态
+rollback: null
+examples: []
+endpoint:
+  contract_ref: logic.flowable_service|GET|/api/flowable_service/v2/definition/{definitionId}/version/{versionId}
+  mode: easyops_internal

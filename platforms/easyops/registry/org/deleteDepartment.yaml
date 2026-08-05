@@ -1,0 +1,48 @@
+name: deleteDepartment
+module: org
+method: DELETE
+path: /api/sys_setting/v1/organization/department/{departmentId}
+gateway_path: /next/api/gateway/logic.sys_setting/api/sys_setting/v1/organization/department/{departmentId}
+service: logic.sys_setting
+side_effect: delete
+path_source: backend_contract
+path_confidence: high
+tags:
+- 组织架构
+- 科室
+- 删除
+- department
+summary: 删除指定科室
+description: 删除指定科室。前端通常要求输入科室名二次确认后调用。
+request:
+  required:
+  - departmentId
+  properties:
+    departmentId:
+      type: instance_id
+      desc: 待删除科室 ID
+outputs:
+  detail:
+    jsonpath: $.data
+    desc: 删除结果
+requires:
+- departmentId 须是已存在科室 ID
+- 删除前须确认科室无子科室且无关联成员/流程
+rollback: null
+examples: []
+confidence:
+  module: high
+  outputs: low
+  requires: medium
+  rollback: high
+  summary: high
+  tags: high
+  request: high
+endpoint:
+  contract_ref: logic.sys_setting|DELETE|/api/sys_setting/v1/organization/department/{departmentId}
+  mode: easyops_gateway
+source:
+  openapi_file: ITSM-系统管理-组织架构管理-openapi.yaml
+  openapi_hash: ce8f98ceb672cc8ad12ee21d7bce16a4da2c9102ea052588dcf7f67498f67af7
+  recorded_at: '2026-07-13T13:17:55'
+registered_at: '2026-07-22T10:34:11.553276'

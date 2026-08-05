@@ -1,0 +1,71 @@
+name: easyops
+# 默认环境（未指定 --env 时用）
+default_env: "26"
+environments:
+  prod:
+    # adapter.resolve_endpoint 用（spec 1.5 / 3.1）：URL 拼接的平台配置，非代码硬编码
+    # 2026-07-29 切到 0.90（8xxx 内网端口可达，走 internal 免 cookie，org=8888，已实测 8079 真调 200）。
+    # 历史值：host=172.30.5.20 / org=5910（5.20 内网端口已不通）
+    host: 172.30.0.90
+    gateway_base: http://172.30.0.90/next/api/gateway
+    auth:
+      internal:                      # easyops_internal 模式：内网直连（spec 1.6）
+        org: "8888"                  # 组织 ID（manifest 优先；留空则读 agent_conf 兜底）
+        user: "easyops"              # 内网调用身份(defaultUser 无重置密码等管理员权限, 改用 easyops 超管账号)
+        # agent_conf: /usr/local/easyops/agent/conf/conf.yaml  # org 兜底来源（默认此路径），manifest 无 org 时读 base.client_id
+      session_cookie:                # easyops_gateway 模式：前端 cookie（execute_dag 按 Endpoint.auth 选）
+        cookie: ""                   # 跑 extract_auth --env prod 自动填充（旧值 auth/cookies.json 已弃用）
+      # aksk:                        # easyops_aksk 模式：OpenAPI HMAC 签名（MVP-1 未启用，预留）
+      #   ak: ...                    # Access Key
+      #   sk: ...                    # Secret Key
+      #   port_app_map:              # 端口到 app_name 映射（resolve_endpoint aksk 分支用）
+      #     8079: cmdbservice
+    # 调用策略（spec：方案 B 默认 mode 兜底）：
+    # 卡片注册时未显式声明 endpoint.mode 的兜底默认。优先级：
+    #   卡片显式 endpoint.mode > 本默认 > adapter 运行时 contract_ref/port 推断
+    # 配 easyops_internal：内网直连（8xxx 端口，免 cookie，user/org 头鉴权，更快更稳）。
+    # 注意：本默认仅兜"卡片缺 mode"的底；已显式声明 mode 的卡片不受影响。
+    call_policy:
+      default_mode: easyops_internal
+    auth_source: .browser-recorder/profiles/172.30.0.90/   # cookie 来源（recorder profile，extract_auth 读）
+  # qa 环境（2026-07-31 加）：内网 qa 环境直连（结构同 prod）
+  qa:
+    host: 172.30.0.148
+    gateway_base: http://172.30.0.148/next/api/gateway
+    auth:
+      internal:                      # easyops_internal 模式：内网直连（spec 1.6）
+        org: "8888"                  # 组织 ID（manifest 优先；留空则读 agent_conf 兜底）
+        user: "easyops"              # 内网调用身份（沿用 prod 配置，须有相应权限，如系统管理员）
+      session_cookie:                # easyops_gateway 模式：前端 cookie（execute_dag 按 Endpoint.auth 选）
+        cookie: ""                   # 跑 extract_auth --env qa 自动填充（勿手填）
+    call_policy:
+      default_mode: easyops_internal
+    auth_source: tmp/profiles/172.30.0.148/   # cookie 来源（recorder profile，extract_auth 读）
+  # 232 环境（2026-08-01 加）：host=172.30.0.232，org=18832008（profile 已建 .browser-recorder/profiles/172.30.0.232/）
+  # 环境名加引号：纯数字键不加引号会被 YAML 解析为 int，load_manifest 的 env 匹配与 extract_auth 文本级写回都按字符串处理
+  "232":
+    host: 172.30.0.232
+    gateway_base: https://172.30.0.232/next/api/gateway    # 0.232 强制 https（http 会 301 到 https://:443），故与 prod/qa 的 http 不同
+    auth:
+      internal:                      # easyops_internal 模式：内网直连（spec 1.6）
+        org: "18832008"              # 组织 ID（manifest 优先；留空则读 agent_conf 兜底）
+        user: "easyops"              # 内网调用身份（沿用 prod 配置，须有相应权限，如系统管理员）
+      session_cookie:                # easyops_gateway 模式：前端 cookie（execute_dag 按 Endpoint.auth 选）
+        cookie: "CAPTCHAID=cbe034e6d10744b1b91350fa22a537fe; PHPSESSID=TI5CNM5Z2JVBRL4RQB4HXM37HUXDC5GDXUYBQYIUX6ALEJPLKJPA"
+    call_policy:
+      default_mode: easyops_internal
+    auth_source: .browser-recorder/profiles/172.30.0.232/   # cookie 来源（recorder profile，extract_auth 读）
+  # 26 环境（2026-08-03 加）：host=192.168.110.26，org=1888（新环境，内网直连；设为默认环境）
+  # 环境名加引号：纯数字键不加引号会被 YAML 解析为 int
+  "26":
+    host: 192.168.110.26
+    gateway_base: http://192.168.110.26/next/api/gateway
+    auth:
+      internal:                      # easyops_internal 模式：内网直连（spec 1.6），免 cookie（新环境无前端登录态）
+        org: "1888"                  # 组织 ID（manifest 优先；留空则读 agent_conf 兜底）
+        user: "easyops"              # 内网调用身份（沿用 prod 配置，须为系统管理员；新环境若 easyops 账号不存在需改 defaultUser 或建超管）
+      session_cookie:                # easyops_gateway 模式：前端 cookie（execute_dag 按 Endpoint.auth 选）
+        cookie: ""                   # 跑 extract_auth --env 26 自动填充（勿手填）
+    call_policy:
+      default_mode: easyops_internal
+    auth_source: tmp/profiles/192.168.110.26/   # cookie 来源（recorder profile，extract_auth 读）

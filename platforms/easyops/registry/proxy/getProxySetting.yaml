@@ -1,0 +1,51 @@
+name: getProxySetting
+module: proxy
+method: GET
+path: /api/flowable_service/v1/personal_center/proxy_setting/{instanceId}
+gateway_path: /next/api/gateway/flowable_service.personal_center.GetProxySetting/api/flowable_service/v1/personal_center/proxy_setting/{instanceId}
+service: logic.flowable_service
+side_effect: read
+path_source: gateway_strip
+path_confidence: medium
+tags:
+- 代理人
+- proxy
+- 查询
+- 详情
+- 规则
+summary: 查询代理人规则详情
+description: 进入某代理人规则编辑页时，按 instanceId 拉取该规则完整详情。
+request:
+  required:
+  - instanceId
+  properties:
+    instanceId:
+      type: string
+      desc: 代理人规则实例 ID
+outputs:
+  detail:
+    jsonpath: $.data
+    desc: 代理人规则详情
+  services:
+    jsonpath: $.data.services
+    desc: 应用对象（适用服务列表）
+requires:
+- instanceId 须为已存在的代理人规则实例 ID
+rollback: null
+examples: []
+confidence:
+  module: high
+  outputs: high
+  requires: medium
+  rollback: high
+  summary: high
+  tags: high
+  request: high
+endpoint:
+  contract_ref: logic.flowable_service|GET|/api/flowable_service/v1/personal_center/proxy_setting/{instanceId}
+  mode: easyops_gateway
+source:
+  openapi_file: ITSM-系统管理-代理人管理-openapi.yaml
+  openapi_hash: c23f0a565d73f68c3ab5b6a6c72cc2187e5d3e86550ebea4476140ac21827855
+  recorded_at: '2026-07-13T13:34:31'
+registered_at: '2026-07-22T10:34:10.284342'

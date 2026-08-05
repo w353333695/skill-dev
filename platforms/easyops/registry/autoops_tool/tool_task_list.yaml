@@ -1,0 +1,59 @@
+name: tool_task_list
+module: autoops_tool
+method: GET
+path: /api/tool_service/v1/tool_task
+gateway_path: /next/api/gateway/logic.tool_service/api/tool_service/v1/tool_task
+service: logic.tool_service
+side_effect: read
+path_source: gateway_strip
+path_confidence: medium
+tags:
+- 工具库
+- 任务历史
+- 查询
+summary: 任务历史列表
+description: 查询工具执行任务记录，支持按状态/操作人/触发方式/时间范围筛选。
+request:
+  required: []
+  properties:
+    page:
+      type: number
+      desc: ''
+    page_size:
+      type: number
+      desc: ''
+    status:
+      type: string
+      desc: 任务状态，如 failed/success
+    operator:
+      type: string
+      desc: 操作人
+    trigger:
+      type: string
+      desc: 触发方式，如 schedule（定时）
+outputs:
+  list_full:
+    jsonpath: $.data.list
+    desc: 任务列表
+  list_ids:
+    jsonpath: $.data.list
+    desc: 任务 id 列表
+requires: []
+rollback: null
+examples: []
+confidence:
+  request: high
+  module: high
+  outputs: high
+  tags: high
+  summary: high
+  requires: medium
+  rollback: medium
+endpoint:
+  contract_ref: ''
+  mode: easyops_gateway
+source:
+  openapi_file: AutoOps-工具库管理-openapi.yaml
+  openapi_hash: 7ed1d5a46514c3b8bc40573042495f3c411417688c19c42fbf739581cf1bb2c6
+  recorded_at: '2026-07-23T14:19:29.887012'
+registered_at: '2026-07-23T14:28:58.209763'

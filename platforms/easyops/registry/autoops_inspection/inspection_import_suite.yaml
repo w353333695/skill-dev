@@ -1,0 +1,47 @@
+name: inspection_import_suite
+module: autoops_inspection
+method: POST
+path: /api/v1/inspection-import
+gateway_path: ''
+service: logic.inspection
+side_effect: create
+path_source: backend_contract
+path_confidence: high
+tags:
+- AutoOps
+- 巡检
+- 套件
+- 导入
+summary: 导入巡检套件
+description: 上传套件 tar 包完成创建（multipart/form-data，file 字段）。导入是新建而非覆盖更新，同套件重导会冲突；更新套件需先删后导。
+request:
+  required:
+  - file
+  properties:
+    file:
+      type: file
+      desc: 套件 tar.gz 文件（multipart/form-data）
+outputs:
+  detail:
+    jsonpath: $.data
+    desc: 导入结果
+requires:
+- 套件包结构合法（info.yaml/metrics.yaml/models.json/collectors/reports_temp），instanceid 全局唯一
+rollback: null
+examples: []
+confidence:
+  request: medium
+  module: high
+  outputs: medium
+  tags: high
+  summary: high
+  requires: medium
+  rollback: medium
+endpoint:
+  contract_ref: logic.inspection|POST|/api/v1/inspection-import
+  mode: easyops_internal
+source:
+  openapi_file: ''
+  openapi_hash: ''
+  recorded_at: '2026-07-29T00:00:00'
+registered_at: '2026-07-29T14:42:35.155348'

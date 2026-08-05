@@ -1,0 +1,40 @@
+name: updateWorkCalendar
+module: work_calendar
+method: PUT
+path: /api/sys_setting/v1/work/calendar/{id}
+gateway_path: /next/api/gateway/logic.sys_setting/api/sys_setting/v1/work/calendar/{calendarId}
+service: logic.sys_setting
+side_effect: update
+path_source: backend_contract
+path_confidence: high
+tags:
+- 工作日历
+- 编辑
+- 营业时间
+- 写
+summary: 编辑工作日历
+description: 修改已存在的工作日历配置。
+request:
+  required: []
+  properties: {}
+outputs: {}
+requires:
+- calendarId 须存在
+- 全量覆盖config；EditCalendarConfig会重新生成日历,影响在途工单
+rollback: null
+examples: []
+confidence:
+  request: high
+  module: high
+  outputs: medium
+  tags: high
+  summary: high
+  requires: high
+endpoint:
+  contract_ref: logic.sys_setting|PUT|/api/sys_setting/v1/work/calendar/{id}
+  mode: easyops_gateway
+source:
+  openapi_file: ITSM-运行管理-营业时间管理-openapi.yaml
+  openapi_hash: 02467de10e4cd52adcbf8975ca51b51a5a06742b85a95342ca4ffec2ea26481f
+  recorded_at: '2026-07-28T14:13:31.896000'
+registered_at: '2026-07-28T16:48:34.882046'

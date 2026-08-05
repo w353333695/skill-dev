@@ -1,0 +1,59 @@
+name: queryCMDBInstance
+module: domain_model
+method: POST
+path: /api/flowable_service/v1/assistant/cmdb_instance
+gateway_path: /next/api/gateway/flowable_service.assistant.QueryCMDBInstanceV2/api/flowable_service/v1/assistant/cmdb_instance
+service: flowable_service.assistant.QueryCMDBInstanceV2
+side_effect: read
+path_source: gateway_strip
+path_confidence: medium
+tags:
+- CMDB
+- 实例
+- 查询
+- domain_model
+summary: 按关键词查询 CMDB 实例
+description: 节点配置「使用流程表单值」时，按关键词查询 CMDB 实例（表单值候选）。
+request:
+  required: []
+  properties:
+    page:
+      type: number
+      desc: ''
+    page_size:
+      type: number
+      desc: ''
+    fields:
+      type: object
+      desc: ''
+    query:
+      type: object
+      desc: 支持 $or / $like
+outputs:
+  list_full:
+    jsonpath: $.data.list
+    desc: CMDB 实例列表全量
+  list_ids:
+    jsonpath: $.data.list
+    desc: CMDB 实例 id 列表（配合 ${s.list_full.instanceId} 投影）
+  total:
+    jsonpath: $.data.total
+    desc: CMDB 实例总数
+requires: []
+rollback: null
+examples: []
+confidence:
+  module: high
+  outputs: medium
+  requires: high
+  rollback: high
+  summary: high
+  tags: high
+endpoint:
+  contract_ref: ''
+  mode: easyops_gateway
+source:
+  openapi_file: ITSM-系统管理-流程管理-openapi.yaml
+  openapi_hash: be88bdf060789ec422b671fffae672e0754857b66418b48c317c4c55f8e9a77d
+  recorded_at: '2026-07-13T14:31:52'
+registered_at: '2026-07-22T10:34:10.699651'

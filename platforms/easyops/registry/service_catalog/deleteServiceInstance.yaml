@@ -1,0 +1,43 @@
+name: deleteServiceInstance
+module: service_catalog
+method: DELETE
+path: /api/flowable_service/v1/service_instance/{instanceId}
+gateway_path: /next/api/gateway/logic.flowable_service/api/flowable_service/v1/service_instance/{instanceId}
+service: logic.flowable_service
+side_effect: delete
+path_source: backend_contract
+path_confidence: high
+tags:
+- 服务
+- 删除
+- service_instance
+summary: 删除服务
+description: 删除指定服务。前端通常要求二次确认后调用。
+request:
+  required:
+  - instanceId
+  properties:
+    instanceId:
+      type: string
+      desc: 服务实例 ID
+outputs: {}
+requires:
+- instanceId 须是已存在的服务实例 ID
+rollback: null
+examples: []
+confidence:
+  module: high
+  outputs: high
+  requires: medium
+  rollback: high
+  summary: high
+  tags: high
+  request: high
+endpoint:
+  contract_ref: logic.flowable_service|DELETE|/api/flowable_service/v1/service_instance/{instanceId}
+  mode: easyops_gateway
+source:
+  openapi_file: ITSM-系统管理-服务目录管理-openapi.yaml
+  openapi_hash: a27e0a4e7c6dd1cab5f0e3af9182e873d3ef6a3e84b03f255c424ea97fa2df6e
+  recorded_at: '2026-07-13T16:11:24'
+registered_at: '2026-07-22T10:34:10.494082'

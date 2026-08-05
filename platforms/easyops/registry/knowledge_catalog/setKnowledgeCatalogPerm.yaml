@@ -1,0 +1,47 @@
+name: setKnowledgeCatalogPerm
+module: knowledge_catalog
+method: POST
+path: /api/flowable_service/v1/knowledge_base/catalog/{catalogId}/perm
+gateway_path: /next/api/gateway/logic.flowable_service/api/flowable_service/v1/knowledge_base/catalog/{catalogId}/perm
+service: logic.flowable_service
+side_effect: create
+path_source: gateway_strip
+path_confidence: medium
+tags:
+- 知识目录
+- 权限
+- perm
+- 设置
+- visitor
+summary: 设置知识目录访问权限
+description: 设置目录的访问权限。visitor 为用户 instanceId 与用户组 ID（前缀冒号）的混合列表。
+request:
+  required:
+  - visitor
+  properties:
+    visitor:
+      type: array
+      desc: 可访问的用户/用户组列表（用户为 instanceId，用户组为 :组ID）
+outputs:
+  detail:
+    jsonpath: $.data
+    desc: 设置结果（无明确返回时兜底）
+requires:
+- catalogId 须为已存在的目录 ID；visitor 中用户为已存在用户 instanceId，用户组为 :组ID 格式
+rollback: null
+examples: []
+confidence:
+  module: high
+  outputs: low
+  requires: medium
+  rollback: high
+  summary: high
+  tags: high
+endpoint:
+  contract_ref: ''
+  mode: easyops_gateway
+source:
+  openapi_file: ITSM-系统管理-知识目录管理-openapi.yaml
+  openapi_hash: cf72ee6896240e33a2a149bf98871adabd5a51cb22b632b8e246d4f5d98d89d2
+  recorded_at: '2026-07-13T13:50:45'
+registered_at: '2026-07-22T10:34:11.335182'

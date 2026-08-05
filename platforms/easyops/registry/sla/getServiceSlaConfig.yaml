@@ -1,0 +1,46 @@
+name: getServiceSlaConfig
+module: sla
+method: GET
+path: /api/flowable_service/v1/service_instance/{instanceId}/sla_config
+gateway_path: /next/api/gateway/flowable_service.service_catalog.GetServiceSLAConfig/api/flowable_service/v1/service_instance/{serviceInstanceId}/sla_config
+service: logic.flowable_service
+side_effect: read
+path_source: backend_contract
+path_confidence: high
+tags:
+- 服务质量设置
+- 查询
+- sla
+- 服务关联
+summary: 查询服务的 SLA 关联配置
+description: 在「服务质量设置」中回显某服务（流程）各任务节点已关联的 SLA。
+request:
+  required: []
+  properties:
+    instanceId:
+      type: instance_id
+      desc: 服务实例Id
+      _source: contract
+outputs:
+  detail:
+    jsonpath: $.data
+    desc: 服务SLA关联配置
+requires:
+- serviceInstanceId 须存在
+rollback: null
+examples: []
+confidence:
+  request: high
+  module: high
+  outputs: high
+  tags: high
+  summary: high
+  requires: high
+endpoint:
+  contract_ref: logic.flowable_service|GET|/api/flowable_service/v1/service_instance/{instanceId}/sla_config
+  mode: easyops_gateway
+source:
+  openapi_file: ITSM-运行管理-SLA协议管理-openapi.yaml
+  openapi_hash: 932ebe240075b0787316921f641a05f77ac16e8c2d23cb007ae7917133d3aa47
+  recorded_at: '2026-07-28T14:04:57.668523'
+registered_at: '2026-07-28T16:48:34.376143'

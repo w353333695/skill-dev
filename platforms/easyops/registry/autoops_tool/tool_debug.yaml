@@ -1,0 +1,53 @@
+name: tool_debug
+module: autoops_tool
+method: POST
+path: /tools/debug
+gateway_path: /next/api/gateway/tool.execute.ExecuteDebugTool/tools/debug
+service: logic.tool_service
+side_effect: create
+path_source: backend_contract
+path_confidence: high
+tags:
+- 工具库
+- 调试
+- 执行
+summary: 调试工具(试运行)
+description: 在目标主机上试运行工具（不生成正式任务），用于验证脚本。
+request:
+  required: []
+  properties:
+    toolId:
+      type: string
+      desc: ''
+    vId:
+      type: string
+      desc: ''
+    inputs:
+      type: object
+      desc: 输入参数实参
+    agentIps:
+      type: array
+      desc: 调试目标主机 IP
+outputs:
+  detail:
+    jsonpath: $.data
+    desc: 调试结果
+requires: []
+rollback: null
+examples: []
+confidence:
+  request: high
+  module: high
+  outputs: high
+  tags: high
+  summary: high
+  requires: medium
+  rollback: medium
+endpoint:
+  contract_ref: logic.tool_service|POST|/tools/debug
+  mode: easyops_gateway
+source:
+  openapi_file: AutoOps-工具库管理-openapi.yaml
+  openapi_hash: 7ed1d5a46514c3b8bc40573042495f3c411417688c19c42fbf739581cf1bb2c6
+  recorded_at: '2026-07-23T14:19:29.887012'
+registered_at: '2026-07-23T14:28:58.209763'

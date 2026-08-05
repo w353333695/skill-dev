@@ -1,0 +1,52 @@
+name: model_view_update
+module: cmdb_model
+method: PUT
+path: /object_view/{objectId}
+gateway_path: /next/api/gateway/logic.cmdb.service/object_view/{objectId}
+service: logic.cmdb.service
+side_effect: update
+path_source: backend_contract
+path_confidence: high
+tags:
+- CMDB
+- 模型
+- 视图
+summary: 保存模型视图
+description: 更新模型字段的视图配置（分组顺序 attr_category_order、字段启用等）。
+request:
+  required: []
+  properties:
+    view:
+      type: object
+      desc: ''
+    objectId:
+      type: object_id
+      desc: 模型Id
+      _source: contract
+    body:
+      type: object
+      desc: 视图设置
+      _source: contract
+outputs:
+  detail:
+    jsonpath: $.data
+    desc: 保存结果
+requires:
+- objectId 为已存在模型
+rollback: null
+examples: []
+confidence:
+  request: medium
+  module: high
+  outputs: high
+  tags: high
+  summary: high
+  requires: medium
+  rollback: medium
+endpoint:
+  contract_ref: logic.cmdb.service|PUT|/object_view/{objectId}
+source:
+  openapi_file: CMDB-模型管理-openapi.yaml
+  openapi_hash: e422eadfbcf745f98992379d09d3334717c7e3992c54b62f366b7f342e7e08f0
+  recorded_at: '2026-07-23T10:29:50.694479'
+registered_at: '2026-07-23T14:28:58.926734'

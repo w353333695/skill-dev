@@ -1,0 +1,61 @@
+name: listProcessCommon
+module: service_catalog
+method: GET
+path: /api/flowable_service/v1/process_common
+gateway_path: /next/api/gateway/logic.flowable_service/api/flowable_service/v1/process_common
+service: logic.flowable_service
+side_effect: read
+path_source: backend_contract
+path_confidence: high
+tags:
+- 常用服务
+- 列表
+- 查询
+- 发起
+- 快捷入口
+summary: 查询常用/最近发起服务列表
+description: 拉取常用/最近发起的服务列表，用于「发起」入口的快捷服务展示。
+request:
+  required: []
+  properties:
+    hideDisabled:
+      type: boolean
+      desc: ''
+    page:
+      type: integer
+      desc: 页码
+    pageSize:
+      type: integer
+      desc: 每页数据量
+outputs:
+  default_common_id:
+    jsonpath: $.data.defaultCommonId
+    desc: 默认常用服务目录 id（为空则返回用户自定义常用服务）
+  list_full:
+    jsonpath: $.data.list
+    desc: 常用服务列表全量
+  list_ids:
+    jsonpath: $.data.list
+    desc: 常用服务 id 集合（配合 ${s.list_full.instanceId} 投影）
+  total:
+    jsonpath: $.data.total
+    desc: 总数
+requires: []
+rollback: null
+examples: []
+confidence:
+  module: high
+  outputs: high
+  requires: high
+  rollback: high
+  summary: high
+  tags: high
+  request: high
+endpoint:
+  contract_ref: logic.flowable_service|GET|/api/flowable_service/v1/process_common
+  mode: easyops_gateway
+source:
+  openapi_file: ITSM-工单发起-openapi.yaml
+  openapi_hash: 1ca484b7e487f62a1c488f8e8b29d32e77b51750fc68f94a51a775d93f09be61
+  recorded_at: '2026-07-13T14:47:07'
+registered_at: '2026-07-22T10:34:09.642601'

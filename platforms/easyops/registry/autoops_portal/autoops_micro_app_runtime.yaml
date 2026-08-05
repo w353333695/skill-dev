@@ -1,0 +1,57 @@
+name: autoops_micro_app_runtime
+module: autoops_portal
+method: GET
+path: /api/v1/micro_app_standalone/runtime/{appId}
+gateway_path: /next/api/gateway/logic.micro_app_standalone_service/api/v1/micro_app_standalone/runtime/{microApp}
+service: logic.micro_app_standalone_service
+side_effect: read
+path_source: backend_contract
+path_confidence: high
+tags:
+- AutoOps
+- 微应用
+- 运行时
+summary: 微应用运行时清单
+description: 获取指定 AutoOps 微应用的运行时清单（菜单、路由、provider 等）。
+request:
+  required:
+  - microApp
+  properties:
+    microApp:
+      type: string
+      desc: 微应用 ID，如 ops-automation
+    version:
+      type: string
+      desc: version
+    appId:
+      type: string
+      desc: 小产品Id
+      _source: contract
+    showHidden:
+      type: bool
+      desc: 是否显示隐藏菜单
+      _source: contract
+outputs:
+  detail:
+    jsonpath: $.data
+    desc: 运行时清单
+requires:
+- microApp 为合法微应用 ID
+rollback: null
+examples: []
+confidence:
+  request: medium
+  module: high
+  outputs: high
+  tags: high
+  summary: high
+  requires: medium
+  rollback: medium
+endpoint:
+  contract_ref: logic.micro_app_standalone_service|GET|/api/v1/micro_app_standalone/runtime/{appId}
+  mode: easyops_gateway
+source:
+  openapi_file: AutoOps-入口与功能预览-openapi.yaml
+  openapi_hash: 83d3bdb67d59bec3aa970fbd014c3aa03c60e8fed470857fa78d2a2613dcbd31
+  recorded_at: '2026-07-23T12:05:14.132308'
+registered_at: '2026-07-23T14:28:57.999092'

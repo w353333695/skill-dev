@@ -1,0 +1,2905 @@
+[
+  {
+    "_impl_from": [],
+    "_object_id": "FLOW_BUILDER_API_CONTRACT@EASYOPS",
+    "_object_version": 2,
+    "_pre_ts": 1768388065,
+    "_ts": 1773120484,
+    "_version": 4,
+    "configYaml": "{\"eamlVersion\":\"2.0\",\"eamlKind\":\"interface\",\"version\":\"1.3.0\",\"name\":\"SearchDomainModel\",\"description\":\"查询领域模型\",\"import\":[\"easyops.model.flowable_service.DomainModel\",\"easyops.model.flowable_service.StandardField\",\"easyops.model.cmdb.CmdbSort\"],\"endpoint\":{\"method\":\"POST\",\"uri\":\"/api/flowable_service/v1/domain_model/_search\"},\"request\":{\"type\":\"object\",\"fields\":[{\"name\":\"page\",\"type\":\"page\",\"description\":\"页码\"},{\"name\":\"pageSize\",\"type\":\"page_size\",\"description\":\"每页数据量\"},{\"name\":\"instanceIds\",\"type\":\"string[]\",\"description\":\"id查询\"},{\"name\":\"Q\",\"type\":\"string\",\"description\":\"模糊搜索\"},{\"name\":\"key\",\"type\":\"string\",\"description\":\"唯一标识查询\"},{\"type\":\"\",\"description\":\"\",\"ref\":\"DomainModel.name\"},{\"type\":\"\",\"description\":\"\",\"ref\":\"DomainModel.desc\"},{\"type\":\"\",\"description\":\"\",\"ref\":\"DomainModel.creator\"},{\"name\":\"standard_field\",\"type\":\"string\",\"description\":\"根据关联的字段进行查询\"},{\"name\":\"st\",\"type\":\"datetime\",\"description\":\"开始时间\"},{\"name\":\"et\",\"type\":\"datetime\",\"description\":\"结束时间\"},{\"name\":\"sort\",\"type\":\"CmdbSort[]\",\"description\":\"按字段排序， 留空默认按照更新时间降序排序(1表示升序, -1表示降序) e.g.: [{ mtime: -1 }]\"}],\"description\":\"\",\"default\":{\"page\":1,\"pageSize\":10}},\"response\":{\"type\":\"object\",\"fields\":[{\"name\":\"page\",\"type\":\"page\",\"description\":\"页码\"},{\"name\":\"page_size\",\"type\":\"page_size\",\"description\":\"分页大小\"},{\"name\":\"total\",\"type\":\"int\",\"description\":\"总数\"},{\"name\":\"list\",\"type\":\"object[]\",\"description\":\"领域模型列表\",\"fields\":[{\"type\":\"\",\"description\":\"\",\"ref\":\"DomainModel.*\"},{\"name\":\"standardFields\",\"type\":\"StandardField[]\",\"description\":\"关联的标准字段(多对多的关系)\"},{\"name\":\"triggers\",\"type\":\"object[]\",\"description\":\"引用该领域模型的触发器\",\"fields\":[{\"name\":\"id\",\"type\":\"instance_id\",\"description\":\"触发器ID\"},{\"name\":\"name\",\"type\":\"string\",\"description\":\"触发器名称\"}]},{\"name\":\"formVersions\",\"type\":\"object[]\",\"description\":\"引用该领域模型的表单版本\",\"fields\":[{\"name\":\"id\",\"type\":\"instance_id\",\"description\":\"版本ID\"},{\"name\":\"name\",\"type\":\"string\",\"description\":\"版本号（版本名称）\"},{\"name\":\"formId\",\"type\":\"instance_id\",\"description\":\"表单ID\"},{\"name\":\"formName\",\"type\":\"string\",\"description\":\"表单名称\"}]}]}],\"description\":\"\",\"wrapper\":true},\"namespace\":[{\"instanceId\":\"5cf1da1ecf6fc\",\"id\":\"\",\"type\":\"\",\"description\":null,\"apiProject\":null}],\"namespaceId\":\"easyops.api.flowable_service.domain_model\",\"configYaml\":\"\",\"classify\":\"\",\"importModelDefinition\":null,\"serviceName\":\"logic.flowable_service\",\"fullContractName\":\"easyops.api.flowable_service.domain_model@SearchDomainModel\",\"examples\":[{\"description\":{\"en\":\"SearchDomainModel\",\"zh\":\"查询领域模型\"},\"request\":{\"method\":\"POST\",\"uri\":\"/api/flowable_service/v1/domain_model/_search\",\"body\":\"{\\n    \\\"page\\\":1,\\n    \\\"pageSize\\\":10,\\n    \\\"sort\\\": [{ \\\"mtime\\\": -1 }]\\n}\",\"headers\":null},\"response\":{\"body\":\"{}\",\"headers\":{\"Content-Type\":\"application/json; charset=utf-8\"},\"status_code\":200}}],\"status\":\"release\"}",
+    "creator": "defaultUser",
+    "ctime": "2025-05-14 10:33:42",
+    "deleteAuthorizers": [],
+    "description": "查询领域模型",
+    "eamlKind": "interface",
+    "eamlVersion": "2.0",
+    "endpoint": {
+      "ext_fields": null,
+      "method": "POST",
+      "uri": "/api/flowable_service/v1/domain_model/_search"
+    },
+    "examples": [
+      {
+        "description": {
+          "en": "SearchDomainModel",
+          "zh": "查询领域模型"
+        },
+        "request": {
+          "body": "{\n    \"page\":1,\n    \"pageSize\":10,\n    \"sort\": [{ \"mtime\": -1 }]\n}",
+          "headers": null,
+          "method": "POST",
+          "uri": "/api/flowable_service/v1/domain_model/_search"
+        },
+        "response": {
+          "body": "{}",
+          "headers": {
+            "Content-Type": "application/json; charset=utf-8"
+          },
+          "status_code": 200
+        }
+      }
+    ],
+    "fullContractName": "easyops.api.flowable_service.domain_model@SearchDomainModel",
+    "import": [
+      "easyops.model.flowable_service.DomainModel",
+      "easyops.model.flowable_service.StandardField",
+      "easyops.model.cmdb.CmdbSort"
+    ],
+    "importModelDefinition": [
+      {
+        "fields": [
+          {
+            "description": "领域模型实例Id",
+            "name": "instanceId",
+            "type": "string"
+          },
+          {
+            "description": "唯一标识(英文名, 唯一, 不可修改)",
+            "name": "key",
+            "type": "string",
+            "validate": {
+              "pattern": "^[a-zA-Z0-9][.a-zA-Z0-9_-]{0,39}$"
+            }
+          },
+          {
+            "description": "领域模型名称(中文名, 非唯一, 可修改)",
+            "name": "name",
+            "type": "string"
+          },
+          {
+            "description": "领域模型说明",
+            "name": "desc",
+            "type": "string"
+          },
+          {
+            "description": "是否允许修改关联字段（默认值：true）",
+            "name": "allowUpdate",
+            "type": "bool"
+          },
+          {
+            "description": "是否为内置模型（默认值：false）",
+            "name": "builtin",
+            "type": "bool"
+          },
+          {
+            "description": "创建时间 (cmdb 内置字段)",
+            "name": "ctime",
+            "type": "string"
+          },
+          {
+            "description": "更新时间 (cmdb 内置字段)",
+            "name": "mtime",
+            "type": "string"
+          },
+          {
+            "description": "创建人 (cmdb 内置字段)",
+            "name": "creator",
+            "type": "string"
+          }
+        ],
+        "name": "DomainModel"
+      },
+      {
+        "fields": [
+          {
+            "description": "标准字段实例Id",
+            "name": "instanceId",
+            "type": "string"
+          },
+          {
+            "description": "唯一标识(英文名, 不可重复)",
+            "name": "key",
+            "type": "string",
+            "validate": {
+              "pattern": "^[a-zA-Z0-9][.a-zA-Z0-9_-]{0,39}$"
+            }
+          },
+          {
+            "description": "名称(中文名, 可重复)",
+            "name": "name",
+            "type": "string"
+          },
+          {
+            "description": "字段类型(枚举)",
+            "name": "kind",
+            "type": "string"
+          },
+          {
+            "description": "数据源类型",
+            "name": "sourceType",
+            "type": "string"
+          },
+          {
+            "description": "数据源配置（JSON字符串）",
+            "name": "sourceConfig",
+            "type": "string"
+          },
+          {
+            "description": "字段默认值",
+            "name": "default",
+            "type": "string"
+          },
+          {
+            "description": "字段说明",
+            "name": "desc",
+            "type": "string"
+          },
+          {
+            "description": "必填 (true 必填)",
+            "name": "required",
+            "type": "bool"
+          },
+          {
+            "description": "只读 (true 只读)",
+            "name": "readonly",
+            "type": "bool"
+          },
+          {
+            "description": "创建时间 (cmdb 内置字段)",
+            "name": "ctime",
+            "type": "string"
+          },
+          {
+            "description": "创建人 (cmdb 内置字段)",
+            "name": "creator",
+            "type": "string"
+          },
+          {
+            "description": "内置标识 (true 为内置自动)",
+            "name": "builtin",
+            "type": "bool"
+          }
+        ],
+        "name": "StandardField"
+      },
+      {
+        "fields": [
+          {
+            "description": "属性id",
+            "name": "key",
+            "type": "string"
+          },
+          {
+            "description": "1表示升序， -1表示降序, 2表示自然升序， -2表示自然降序",
+            "enum": [
+              -1,
+              1,
+              -2,
+              2
+            ],
+            "name": "order",
+            "type": "int"
+          }
+        ],
+        "name": "CmdbSort"
+      }
+    ],
+    "instanceId": "6350f60a7ded9",
+    "modifier": "easyops",
+    "mtime": "2026-03-10 13:28:04",
+    "name": "SearchDomainModel",
+    "namespaceId": "easyops.api.flowable_service.domain_model",
+    "org": 8888,
+    "produces": [],
+    "provider": "providers-of-flowable-service.domain-model-api-search-domain-model",
+    "providerPackage": "providers-of-flowable-service-NB",
+    "readAuthorizers": [],
+    "request": {
+      "default": {
+        "page": 1,
+        "pageSize": 10
+      },
+      "description": "",
+      "fields": [
+        {
+          "description": "页码",
+          "name": "page",
+          "type": "page"
+        },
+        {
+          "description": "每页数据量",
+          "name": "pageSize",
+          "type": "page_size"
+        },
+        {
+          "description": "id查询",
+          "name": "instanceIds",
+          "type": "string[]"
+        },
+        {
+          "description": "模糊搜索",
+          "name": "Q",
+          "type": "string"
+        },
+        {
+          "description": "唯一标识查询",
+          "name": "key",
+          "type": "string"
+        },
+        {
+          "description": "",
+          "ref": "DomainModel.name",
+          "type": ""
+        },
+        {
+          "description": "",
+          "ref": "DomainModel.desc",
+          "type": ""
+        },
+        {
+          "description": "",
+          "ref": "DomainModel.creator",
+          "type": ""
+        },
+        {
+          "description": "根据关联的字段进行查询",
+          "name": "standard_field",
+          "type": "string"
+        },
+        {
+          "description": "开始时间",
+          "name": "st",
+          "type": "datetime"
+        },
+        {
+          "description": "结束时间",
+          "name": "et",
+          "type": "datetime"
+        },
+        {
+          "description": "按字段排序， 留空默认按照更新时间降序排序(1表示升序, -1表示降序) e.g.: [{ mtime: -1 }]",
+          "name": "sort",
+          "type": "CmdbSort[]"
+        }
+      ],
+      "type": "object"
+    },
+    "response": {
+      "description": "",
+      "fields": [
+        {
+          "description": "页码",
+          "name": "page",
+          "type": "page"
+        },
+        {
+          "description": "分页大小",
+          "name": "page_size",
+          "type": "page_size"
+        },
+        {
+          "description": "总数",
+          "name": "total",
+          "type": "int"
+        },
+        {
+          "description": "领域模型列表",
+          "fields": [
+            {
+              "description": "",
+              "ref": "DomainModel.*",
+              "type": ""
+            },
+            {
+              "description": "关联的标准字段(多对多的关系)",
+              "name": "standardFields",
+              "type": "StandardField[]"
+            },
+            {
+              "description": "引用该领域模型的触发器",
+              "fields": [
+                {
+                  "description": "触发器ID",
+                  "name": "id",
+                  "type": "instance_id"
+                },
+                {
+                  "description": "触发器名称",
+                  "name": "name",
+                  "type": "string"
+                }
+              ],
+              "name": "triggers",
+              "type": "object[]"
+            },
+            {
+              "description": "引用该领域模型的表单版本",
+              "fields": [
+                {
+                  "description": "版本ID",
+                  "name": "id",
+                  "type": "instance_id"
+                },
+                {
+                  "description": "版本号（版本名称）",
+                  "name": "name",
+                  "type": "string"
+                },
+                {
+                  "description": "表单ID",
+                  "name": "formId",
+                  "type": "instance_id"
+                },
+                {
+                  "description": "表单名称",
+                  "name": "formName",
+                  "type": "string"
+                }
+              ],
+              "name": "formVersions",
+              "type": "object[]"
+            }
+          ],
+          "name": "list",
+          "type": "object[]"
+        }
+      ],
+      "type": "object",
+      "wrapper": true
+    },
+    "serviceName": "logic.flowable_service",
+    "status": "release",
+    "updateAuthorizers": [],
+    "version": "1.3.0"
+  },
+  {
+    "_impl_from": [],
+    "_object_id": "FLOW_BUILDER_API_CONTRACT@EASYOPS",
+    "_object_version": 2,
+    "_pre_ts": 1768388065,
+    "_ts": 1773120491,
+    "_version": 4,
+    "configYaml": "{\"eamlVersion\":\"2.0\",\"eamlKind\":\"interface\",\"version\":\"1.1.0\",\"name\":\"CreateDomainModel\",\"description\":\"创建领域模型\",\"import\":[\"easyops.model.flowable_service.DomainModel\"],\"endpoint\":{\"method\":\"POST\",\"uri\":\"/api/flowable_service/v1/domain_model\"},\"request\":{\"type\":\"object\",\"fields\":[{\"type\":\"\",\"description\":\"\",\"ref\":\"DomainModel.key\"},{\"type\":\"\",\"description\":\"\",\"ref\":\"DomainModel.name\"},{\"type\":\"\",\"description\":\"\",\"ref\":\"DomainModel.desc\"},{\"type\":\"\",\"description\":\"\",\"ref\":\"DomainModel.allowUpdate\"},{\"type\":\"\",\"description\":\"\",\"ref\":\"DomainModel.builtin\"},{\"name\":\"standardFieldIds\",\"type\":\"string[]\",\"description\":\"引用的标准字段Id列表\"}],\"description\":\"\",\"required\":[\"DomainModel.key\",\"DomainModel.name\",\"DomainModel.desc\",\"standardFieldIds\"],\"default\":{\"allowUpdate\":true,\"builtin\":false}},\"response\":{\"type\":\"object\",\"fields\":[{\"name\":\"instanceId\",\"type\":\"string\",\"description\":\"领域模型Id\"}],\"description\":\"\",\"wrapper\":true},\"namespace\":[{\"instanceId\":\"5cf1da1ecf6fc\",\"id\":\"\",\"type\":\"\",\"description\":null,\"apiProject\":null}],\"namespaceId\":\"easyops.api.flowable_service.domain_model\",\"configYaml\":\"\",\"classify\":\"\",\"importModelDefinition\":null,\"serviceName\":\"logic.flowable_service\",\"fullContractName\":\"easyops.api.flowable_service.domain_model@CreateDomainModel\",\"examples\":null,\"status\":\"release\"}",
+    "creator": "defaultUser",
+    "ctime": "2025-05-14 10:33:45",
+    "deleteAuthorizers": [],
+    "description": "创建领域模型",
+    "eamlKind": "interface",
+    "eamlVersion": "2.0",
+    "endpoint": {
+      "ext_fields": null,
+      "method": "POST",
+      "uri": "/api/flowable_service/v1/domain_model"
+    },
+    "examples": [],
+    "fullContractName": "easyops.api.flowable_service.domain_model@CreateDomainModel",
+    "import": [
+      "easyops.model.flowable_service.DomainModel"
+    ],
+    "importModelDefinition": [
+      {
+        "fields": [
+          {
+            "description": "领域模型实例Id",
+            "name": "instanceId",
+            "type": "string"
+          },
+          {
+            "description": "唯一标识(英文名, 唯一, 不可修改)",
+            "name": "key",
+            "type": "string",
+            "validate": {
+              "pattern": "^[a-zA-Z0-9][.a-zA-Z0-9_-]{0,39}$"
+            }
+          },
+          {
+            "description": "领域模型名称(中文名, 非唯一, 可修改)",
+            "name": "name",
+            "type": "string"
+          },
+          {
+            "description": "领域模型说明",
+            "name": "desc",
+            "type": "string"
+          },
+          {
+            "description": "是否允许修改关联字段（默认值：true）",
+            "name": "allowUpdate",
+            "type": "bool"
+          },
+          {
+            "description": "是否为内置模型（默认值：false）",
+            "name": "builtin",
+            "type": "bool"
+          },
+          {
+            "description": "创建时间 (cmdb 内置字段)",
+            "name": "ctime",
+            "type": "string"
+          },
+          {
+            "description": "更新时间 (cmdb 内置字段)",
+            "name": "mtime",
+            "type": "string"
+          },
+          {
+            "description": "创建人 (cmdb 内置字段)",
+            "name": "creator",
+            "type": "string"
+          }
+        ],
+        "name": "DomainModel"
+      }
+    ],
+    "instanceId": "6350f60d01561",
+    "modifier": "easyops",
+    "mtime": "2026-03-10 13:28:11",
+    "name": "CreateDomainModel",
+    "namespaceId": "easyops.api.flowable_service.domain_model",
+    "org": 8888,
+    "produces": [],
+    "provider": "providers-of-flowable-service.domain-model-api-create-domain-model",
+    "providerPackage": "providers-of-flowable-service-NB",
+    "readAuthorizers": [],
+    "request": {
+      "default": {
+        "allowUpdate": true,
+        "builtin": false
+      },
+      "description": "",
+      "fields": [
+        {
+          "description": "",
+          "ref": "DomainModel.key",
+          "type": ""
+        },
+        {
+          "description": "",
+          "ref": "DomainModel.name",
+          "type": ""
+        },
+        {
+          "description": "",
+          "ref": "DomainModel.desc",
+          "type": ""
+        },
+        {
+          "description": "",
+          "ref": "DomainModel.allowUpdate",
+          "type": ""
+        },
+        {
+          "description": "",
+          "ref": "DomainModel.builtin",
+          "type": ""
+        },
+        {
+          "description": "引用的标准字段Id列表",
+          "name": "standardFieldIds",
+          "type": "string[]"
+        }
+      ],
+      "required": [
+        "DomainModel.key",
+        "DomainModel.name",
+        "DomainModel.desc",
+        "standardFieldIds"
+      ],
+      "type": "object"
+    },
+    "response": {
+      "description": "",
+      "fields": [
+        {
+          "description": "领域模型Id",
+          "name": "instanceId",
+          "type": "string"
+        }
+      ],
+      "type": "object",
+      "wrapper": true
+    },
+    "serviceName": "logic.flowable_service",
+    "status": "release",
+    "updateAuthorizers": [],
+    "version": "1.1.0"
+  },
+  {
+    "_impl_from": [],
+    "_object_id": "FLOW_BUILDER_API_CONTRACT@EASYOPS",
+    "_object_version": 2,
+    "_pre_ts": 1768388083,
+    "_ts": 1773120478,
+    "_version": 4,
+    "configYaml": "{\"eamlVersion\":\"2.0\",\"eamlKind\":\"interface\",\"version\":\"1.0.0\",\"name\":\"UpdateDomainModel\",\"description\":\"更新领域模型\",\"import\":[\"easyops.model.flowable_service.DomainModel\"],\"endpoint\":{\"method\":\"PUT\",\"uri\":\"/api/flowable_service/v1/domain_model/:instanceId\"},\"request\":{\"type\":\"object\",\"fields\":[{\"type\":\"\",\"description\":\"\",\"ref\":\"DomainModel.instanceId\"},{\"type\":\"\",\"description\":\"\",\"ref\":\"DomainModel.name\"},{\"type\":\"\",\"description\":\"\",\"ref\":\"DomainModel.desc\"},{\"type\":\"\",\"description\":\"\",\"ref\":\"DomainModel.allowUpdate\"},{\"name\":\"standardFieldIds\",\"type\":\"string[]\",\"description\":\"引用的标准字段Id列表\"}],\"description\":\"\",\"required\":[\"DomainModel.instanceId\",\"DomainModel.name\",\"DomainModel.desc\",\"standardFieldIds\"],\"default\":{\"allowUpdate\":true}},\"response\":{\"type\":\"object\",\"fields\":[{\"name\":\"instanceId\",\"type\":\"string\",\"description\":\"领域模型Id\"}],\"description\":\"\",\"wrapper\":true},\"namespace\":[{\"instanceId\":\"5cf1da1ecf6fc\",\"id\":\"\",\"type\":\"\",\"description\":null,\"apiProject\":null}],\"namespaceId\":\"easyops.api.flowable_service.domain_model\",\"configYaml\":\"\",\"classify\":\"\",\"importModelDefinition\":null,\"serviceName\":\"logic.flowable_service\",\"fullContractName\":\"easyops.api.flowable_service.domain_model@UpdateDomainModel\",\"examples\":null,\"status\":\"release\"}",
+    "creator": "defaultUser",
+    "ctime": "2025-05-14 10:33:50",
+    "deleteAuthorizers": [],
+    "description": "更新领域模型",
+    "eamlKind": "interface",
+    "eamlVersion": "2.0",
+    "endpoint": {
+      "ext_fields": null,
+      "method": "PUT",
+      "uri": "/api/flowable_service/v1/domain_model/:instanceId"
+    },
+    "examples": [],
+    "fullContractName": "easyops.api.flowable_service.domain_model@UpdateDomainModel",
+    "import": [
+      "easyops.model.flowable_service.DomainModel"
+    ],
+    "importModelDefinition": [
+      {
+        "fields": [
+          {
+            "description": "领域模型实例Id",
+            "name": "instanceId",
+            "type": "string"
+          },
+          {
+            "description": "唯一标识(英文名, 唯一, 不可修改)",
+            "name": "key",
+            "type": "string",
+            "validate": {
+              "pattern": "^[a-zA-Z0-9][.a-zA-Z0-9_-]{0,39}$"
+            }
+          },
+          {
+            "description": "领域模型名称(中文名, 非唯一, 可修改)",
+            "name": "name",
+            "type": "string"
+          },
+          {
+            "description": "领域模型说明",
+            "name": "desc",
+            "type": "string"
+          },
+          {
+            "description": "是否允许修改关联字段（默认值：true）",
+            "name": "allowUpdate",
+            "type": "bool"
+          },
+          {
+            "description": "是否为内置模型（默认值：false）",
+            "name": "builtin",
+            "type": "bool"
+          },
+          {
+            "description": "创建时间 (cmdb 内置字段)",
+            "name": "ctime",
+            "type": "string"
+          },
+          {
+            "description": "更新时间 (cmdb 内置字段)",
+            "name": "mtime",
+            "type": "string"
+          },
+          {
+            "description": "创建人 (cmdb 内置字段)",
+            "name": "creator",
+            "type": "string"
+          }
+        ],
+        "name": "DomainModel"
+      }
+    ],
+    "instanceId": "6350f611f5d15",
+    "modifier": "easyops",
+    "mtime": "2026-03-10 13:27:58",
+    "name": "UpdateDomainModel",
+    "namespaceId": "easyops.api.flowable_service.domain_model",
+    "org": 8888,
+    "produces": [],
+    "provider": "providers-of-flowable-service.domain-model-api-update-domain-model",
+    "providerPackage": "providers-of-flowable-service-NB",
+    "readAuthorizers": [],
+    "request": {
+      "default": {
+        "allowUpdate": true
+      },
+      "description": "",
+      "fields": [
+        {
+          "description": "",
+          "ref": "DomainModel.instanceId",
+          "type": ""
+        },
+        {
+          "description": "",
+          "ref": "DomainModel.name",
+          "type": ""
+        },
+        {
+          "description": "",
+          "ref": "DomainModel.desc",
+          "type": ""
+        },
+        {
+          "description": "",
+          "ref": "DomainModel.allowUpdate",
+          "type": ""
+        },
+        {
+          "description": "引用的标准字段Id列表",
+          "name": "standardFieldIds",
+          "type": "string[]"
+        }
+      ],
+      "required": [
+        "DomainModel.instanceId",
+        "DomainModel.name",
+        "DomainModel.desc",
+        "standardFieldIds"
+      ],
+      "type": "object"
+    },
+    "response": {
+      "description": "",
+      "fields": [
+        {
+          "description": "领域模型Id",
+          "name": "instanceId",
+          "type": "string"
+        }
+      ],
+      "type": "object",
+      "wrapper": true
+    },
+    "serviceName": "logic.flowable_service",
+    "status": "release",
+    "updateAuthorizers": [],
+    "version": "1.0.0"
+  },
+  {
+    "_impl_from": [],
+    "_object_id": "FLOW_BUILDER_API_CONTRACT@EASYOPS",
+    "_object_version": 2,
+    "_pre_ts": 1768388083,
+    "_ts": 1773120487,
+    "_version": 4,
+    "configYaml": "{\"eamlVersion\":\"2.0\",\"eamlKind\":\"interface\",\"version\":\"1.0.0\",\"name\":\"DeleteDomainModelBatch\",\"description\":\"批量删除领域模型\",\"import\":[\"easyops.model.flowable_service.DomainModel\"],\"endpoint\":{\"method\":\"DELETE\",\"uri\":\"/api/flowable_service/v1/domain_model/_batch/:instanceIds\"},\"request\":{\"type\":\"object\",\"fields\":[{\"name\":\"instanceIds\",\"type\":\"string\",\"description\":\"实例ID, 用分号隔开, e.g. 5ab9f10a6ef88;5abb0dca9971d\"}],\"description\":\"\",\"required\":[\"instanceIds\"]},\"response\":{\"type\":\"\",\"description\":\"\",\"wrapper\":true},\"detail\":\"批量删除领域模型(多个实例用 \\\";\\\" 分隔), 仅超管可以删除领域模型、内置模型和已被引用的模型不可删除\",\"namespace\":[{\"instanceId\":\"5cf1da1ecf6fc\",\"id\":\"\",\"type\":\"\",\"description\":null,\"apiProject\":null}],\"namespaceId\":\"easyops.api.flowable_service.domain_model\",\"configYaml\":\"\",\"classify\":\"\",\"importModelDefinition\":null,\"serviceName\":\"logic.flowable_service\",\"fullContractName\":\"easyops.api.flowable_service.domain_model@DeleteDomainModelBatch\",\"examples\":null,\"status\":\"release\"}",
+    "creator": "defaultUser",
+    "ctime": "2025-05-14 10:33:50",
+    "deleteAuthorizers": [],
+    "description": "批量删除领域模型",
+    "detail": "批量删除领域模型(多个实例用 \";\" 分隔), 仅超管可以删除领域模型、内置模型和已被引用的模型不可删除",
+    "eamlKind": "interface",
+    "eamlVersion": "2.0",
+    "endpoint": {
+      "ext_fields": null,
+      "method": "DELETE",
+      "uri": "/api/flowable_service/v1/domain_model/_batch/:instanceIds"
+    },
+    "examples": [],
+    "fullContractName": "easyops.api.flowable_service.domain_model@DeleteDomainModelBatch",
+    "import": [
+      "easyops.model.flowable_service.DomainModel"
+    ],
+    "importModelDefinition": [
+      {
+        "fields": [
+          {
+            "description": "领域模型实例Id",
+            "name": "instanceId",
+            "type": "string"
+          },
+          {
+            "description": "唯一标识(英文名, 唯一, 不可修改)",
+            "name": "key",
+            "type": "string",
+            "validate": {
+              "pattern": "^[a-zA-Z0-9][.a-zA-Z0-9_-]{0,39}$"
+            }
+          },
+          {
+            "description": "领域模型名称(中文名, 非唯一, 可修改)",
+            "name": "name",
+            "type": "string"
+          },
+          {
+            "description": "领域模型说明",
+            "name": "desc",
+            "type": "string"
+          },
+          {
+            "description": "是否允许修改关联字段（默认值：true）",
+            "name": "allowUpdate",
+            "type": "bool"
+          },
+          {
+            "description": "是否为内置模型（默认值：false）",
+            "name": "builtin",
+            "type": "bool"
+          },
+          {
+            "description": "创建时间 (cmdb 内置字段)",
+            "name": "ctime",
+            "type": "string"
+          },
+          {
+            "description": "更新时间 (cmdb 内置字段)",
+            "name": "mtime",
+            "type": "string"
+          },
+          {
+            "description": "创建人 (cmdb 内置字段)",
+            "name": "creator",
+            "type": "string"
+          }
+        ],
+        "name": "DomainModel"
+      }
+    ],
+    "instanceId": "6350f611f9a69",
+    "modifier": "easyops",
+    "mtime": "2026-03-10 13:28:07",
+    "name": "DeleteDomainModelBatch",
+    "namespaceId": "easyops.api.flowable_service.domain_model",
+    "org": 8888,
+    "produces": [],
+    "provider": "providers-of-flowable-service.domain-model-api-delete-domain-model-batch",
+    "providerPackage": "providers-of-flowable-service-NB",
+    "readAuthorizers": [],
+    "request": {
+      "description": "",
+      "fields": [
+        {
+          "description": "实例ID, 用分号隔开, e.g. 5ab9f10a6ef88;5abb0dca9971d",
+          "name": "instanceIds",
+          "type": "string"
+        }
+      ],
+      "required": [
+        "instanceIds"
+      ],
+      "type": "object"
+    },
+    "response": {
+      "description": "",
+      "type": "",
+      "wrapper": true
+    },
+    "serviceName": "logic.flowable_service",
+    "status": "release",
+    "updateAuthorizers": [],
+    "version": "1.0.0"
+  },
+  {
+    "_impl_from": [],
+    "_object_id": "FLOW_BUILDER_API_CONTRACT@EASYOPS",
+    "_object_version": 2,
+    "_pre_ts": 1768388083,
+    "_ts": 1773120469,
+    "_version": 4,
+    "configYaml": "{\"eamlVersion\":\"2.0\",\"eamlKind\":\"interface\",\"version\":\"1.1.0\",\"name\":\"GetDomainModel\",\"description\":\"获取领域模型实例\",\"import\":[\"easyops.model.flowable_service.DomainModel\",\"easyops.model.flowable_service.StandardField\"],\"endpoint\":{\"method\":\"GET\",\"uri\":\"/api/flowable_service/v1/domain_model/:instanceId\"},\"request\":{\"type\":\"object\",\"fields\":[{\"type\":\"\",\"description\":\"\",\"ref\":\"DomainModel.instanceId\"}],\"description\":\"\",\"required\":[\"DomainModel.instanceId\"]},\"response\":{\"type\":\"object\",\"fields\":[{\"type\":\"\",\"description\":\"\",\"ref\":\"DomainModel.*\"},{\"name\":\"standardFields\",\"type\":\"StandardField[]\",\"description\":\"关联的标准字段(多对多的关系)\"}],\"description\":\"\",\"wrapper\":true},\"namespace\":[{\"instanceId\":\"5cf1da1ecf6fc\",\"id\":\"\",\"type\":\"\",\"description\":null,\"apiProject\":null}],\"namespaceId\":\"easyops.api.flowable_service.domain_model\",\"configYaml\":\"\",\"classify\":\"\",\"importModelDefinition\":null,\"serviceName\":\"logic.flowable_service\",\"fullContractName\":\"easyops.api.flowable_service.domain_model@GetDomainModel\",\"examples\":null,\"status\":\"release\"}",
+    "creator": "defaultUser",
+    "ctime": "2025-05-14 10:33:50",
+    "deleteAuthorizers": [],
+    "description": "获取领域模型实例",
+    "eamlKind": "interface",
+    "eamlVersion": "2.0",
+    "endpoint": {
+      "ext_fields": null,
+      "method": "GET",
+      "uri": "/api/flowable_service/v1/domain_model/:instanceId"
+    },
+    "examples": [],
+    "fullContractName": "easyops.api.flowable_service.domain_model@GetDomainModel",
+    "import": [
+      "easyops.model.flowable_service.DomainModel",
+      "easyops.model.flowable_service.StandardField"
+    ],
+    "importModelDefinition": [
+      {
+        "fields": [
+          {
+            "description": "领域模型实例Id",
+            "name": "instanceId",
+            "type": "string"
+          },
+          {
+            "description": "唯一标识(英文名, 唯一, 不可修改)",
+            "name": "key",
+            "type": "string",
+            "validate": {
+              "pattern": "^[a-zA-Z0-9][.a-zA-Z0-9_-]{0,39}$"
+            }
+          },
+          {
+            "description": "领域模型名称(中文名, 非唯一, 可修改)",
+            "name": "name",
+            "type": "string"
+          },
+          {
+            "description": "领域模型说明",
+            "name": "desc",
+            "type": "string"
+          },
+          {
+            "description": "是否允许修改关联字段（默认值：true）",
+            "name": "allowUpdate",
+            "type": "bool"
+          },
+          {
+            "description": "是否为内置模型（默认值：false）",
+            "name": "builtin",
+            "type": "bool"
+          },
+          {
+            "description": "创建时间 (cmdb 内置字段)",
+            "name": "ctime",
+            "type": "string"
+          },
+          {
+            "description": "更新时间 (cmdb 内置字段)",
+            "name": "mtime",
+            "type": "string"
+          },
+          {
+            "description": "创建人 (cmdb 内置字段)",
+            "name": "creator",
+            "type": "string"
+          }
+        ],
+        "name": "DomainModel"
+      },
+      {
+        "fields": [
+          {
+            "description": "标准字段实例Id",
+            "name": "instanceId",
+            "type": "string"
+          },
+          {
+            "description": "唯一标识(英文名, 不可重复)",
+            "name": "key",
+            "type": "string",
+            "validate": {
+              "pattern": "^[a-zA-Z0-9][.a-zA-Z0-9_-]{0,39}$"
+            }
+          },
+          {
+            "description": "名称(中文名, 可重复)",
+            "name": "name",
+            "type": "string"
+          },
+          {
+            "description": "字段类型(枚举)",
+            "name": "kind",
+            "type": "string"
+          },
+          {
+            "description": "数据源类型",
+            "name": "sourceType",
+            "type": "string"
+          },
+          {
+            "description": "数据源配置（JSON字符串）",
+            "name": "sourceConfig",
+            "type": "string"
+          },
+          {
+            "description": "字段默认值",
+            "name": "default",
+            "type": "string"
+          },
+          {
+            "description": "字段说明",
+            "name": "desc",
+            "type": "string"
+          },
+          {
+            "description": "必填 (true 必填)",
+            "name": "required",
+            "type": "bool"
+          },
+          {
+            "description": "只读 (true 只读)",
+            "name": "readonly",
+            "type": "bool"
+          },
+          {
+            "description": "创建时间 (cmdb 内置字段)",
+            "name": "ctime",
+            "type": "string"
+          },
+          {
+            "description": "创建人 (cmdb 内置字段)",
+            "name": "creator",
+            "type": "string"
+          },
+          {
+            "description": "内置标识 (true 为内置自动)",
+            "name": "builtin",
+            "type": "bool"
+          }
+        ],
+        "name": "StandardField"
+      }
+    ],
+    "instanceId": "6350f61206651",
+    "modifier": "easyops",
+    "mtime": "2026-03-10 13:27:49",
+    "name": "GetDomainModel",
+    "namespaceId": "easyops.api.flowable_service.domain_model",
+    "org": 8888,
+    "produces": [],
+    "provider": "providers-of-flowable-service.domain-model-api-get-domain-model",
+    "providerPackage": "providers-of-flowable-service-NB",
+    "readAuthorizers": [],
+    "request": {
+      "description": "",
+      "fields": [
+        {
+          "description": "",
+          "ref": "DomainModel.instanceId",
+          "type": ""
+        }
+      ],
+      "required": [
+        "DomainModel.instanceId"
+      ],
+      "type": "object"
+    },
+    "response": {
+      "description": "",
+      "fields": [
+        {
+          "description": "",
+          "ref": "DomainModel.*",
+          "type": ""
+        },
+        {
+          "description": "关联的标准字段(多对多的关系)",
+          "name": "standardFields",
+          "type": "StandardField[]"
+        }
+      ],
+      "type": "object",
+      "wrapper": true
+    },
+    "serviceName": "logic.flowable_service",
+    "status": "release",
+    "updateAuthorizers": [],
+    "version": "1.1.0"
+  },
+  {
+    "_impl_from": [],
+    "_object_id": "FLOW_BUILDER_API_CONTRACT@EASYOPS",
+    "_object_version": 2,
+    "_pre_ts": 1768388076,
+    "_ts": 1773120484,
+    "_version": 4,
+    "configYaml": "{\"eamlVersion\":\"2.0\",\"eamlKind\":\"interface\",\"version\":\"1.0.0\",\"name\":\"SearchSourceDataFromConfig\",\"description\":\"从配置文件获取标准字段的源数据\",\"endpoint\":{\"method\":\"POST\",\"uri\":\"/api/flowable_service/v1/standard_field/conf/_search\"},\"request\":{\"type\":\"object\",\"fields\":[{\"name\":\"key\",\"type\":\"string\",\"description\":\"唯一标识\"}],\"description\":\"\"},\"response\":{\"type\":\"object\",\"fields\":[{\"name\":\"sourceDataConf\",\"type\":\"string\",\"description\":\"标准字段源数据配置(josn 字符串)\"}],\"description\":\"\",\"wrapper\":true},\"namespace\":[{\"instanceId\":\"5cf1da2215679\",\"id\":\"\",\"type\":\"\",\"description\":null,\"apiProject\":null}],\"namespaceId\":\"easyops.api.flowable_service.standard_field\",\"configYaml\":\"\",\"classify\":\"\",\"importModelDefinition\":null,\"serviceName\":\"logic.flowable_service\",\"fullContractName\":\"easyops.api.flowable_service.standard_field@SearchSourceDataFromConfig\",\"examples\":null,\"status\":\"release\"}",
+    "creator": "defaultUser",
+    "ctime": "2025-05-14 10:33:42",
+    "deleteAuthorizers": [],
+    "description": "从配置文件获取标准字段的源数据",
+    "eamlKind": "interface",
+    "eamlVersion": "2.0",
+    "endpoint": {
+      "ext_fields": null,
+      "method": "POST",
+      "uri": "/api/flowable_service/v1/standard_field/conf/_search"
+    },
+    "examples": [],
+    "fullContractName": "easyops.api.flowable_service.standard_field@SearchSourceDataFromConfig",
+    "import": [],
+    "importModelDefinition": [],
+    "instanceId": "6350f60a75f81",
+    "modifier": "easyops",
+    "mtime": "2026-03-10 13:28:04",
+    "name": "SearchSourceDataFromConfig",
+    "namespaceId": "easyops.api.flowable_service.standard_field",
+    "org": 8888,
+    "produces": [],
+    "provider": "providers-of-flowable-service.standard-field-api-search-source-data-from-config",
+    "providerPackage": "providers-of-flowable-service-NB",
+    "readAuthorizers": [],
+    "request": {
+      "description": "",
+      "fields": [
+        {
+          "description": "唯一标识",
+          "name": "key",
+          "type": "string"
+        }
+      ],
+      "type": "object"
+    },
+    "response": {
+      "description": "",
+      "fields": [
+        {
+          "description": "标准字段源数据配置(josn 字符串)",
+          "name": "sourceDataConf",
+          "type": "string"
+        }
+      ],
+      "type": "object",
+      "wrapper": true
+    },
+    "serviceName": "logic.flowable_service",
+    "status": "release",
+    "updateAuthorizers": [],
+    "version": "1.0.0"
+  },
+  {
+    "_impl_from": [],
+    "_object_id": "FLOW_BUILDER_API_CONTRACT@EASYOPS",
+    "_object_version": 2,
+    "_pre_ts": 1768388083,
+    "_ts": 1773120482,
+    "_version": 4,
+    "configYaml": "{\"eamlVersion\":\"2.0\",\"eamlKind\":\"interface\",\"version\":\"1.1.0\",\"name\":\"UpdateStandardField\",\"description\":\"更新标准字段\",\"import\":[\"easyops.model.flowable_service.DomainModel\",\"easyops.model.flowable_service.StandardField\"],\"endpoint\":{\"method\":\"PUT\",\"uri\":\"/api/flowable_service/v1/standard_field/:instanceId\"},\"request\":{\"type\":\"object\",\"fields\":[{\"type\":\"\",\"description\":\"\",\"ref\":\"StandardField.instanceId\"},{\"type\":\"\",\"description\":\"\",\"ref\":\"StandardField.key\"},{\"type\":\"\",\"description\":\"\",\"ref\":\"StandardField.name\"},{\"type\":\"\",\"description\":\"\",\"ref\":\"StandardField.kind\"},{\"type\":\"\",\"description\":\"\",\"ref\":\"StandardField.sourceType\"},{\"type\":\"\",\"description\":\"\",\"ref\":\"StandardField.sourceConfig\"},{\"type\":\"\",\"description\":\"\",\"ref\":\"StandardField.default\"},{\"type\":\"\",\"description\":\"\",\"ref\":\"StandardField.desc\"},{\"type\":\"\",\"description\":\"\",\"ref\":\"StandardField.required\"},{\"type\":\"\",\"description\":\"\",\"ref\":\"StandardField.readonly\"},{\"name\":\"domainModelIds\",\"type\":\"string[]\",\"description\":\"领域模型实例Id列表(更新接口必传, 为空则解除关联的领域模型)\"}],\"description\":\"\",\"required\":[\"StandardField.key\",\"StandardField.name\",\"StandardField.kind\",\"StandardField.sourceType\",\"StandardField.sourceConfig\",\"StandardField.default\",\"StandardField.desc\",\"StandardField.required\",\"StandardField.readonly\",\"domainModelIds\"]},\"response\":{\"type\":\"object\",\"fields\":[{\"name\":\"instanceId\",\"type\":\"string\",\"description\":\"标准字段Id\"}],\"description\":\"\",\"wrapper\":true},\"namespace\":[{\"instanceId\":\"5cf1da2215679\",\"id\":\"\",\"type\":\"\",\"description\":null,\"apiProject\":null}],\"namespaceId\":\"easyops.api.flowable_service.standard_field\",\"configYaml\":\"\",\"classify\":\"\",\"importModelDefinition\":null,\"serviceName\":\"logic.flowable_service\",\"fullContractName\":\"easyops.api.flowable_service.standard_field@UpdateStandardField\",\"examples\":[{\"description\":{\"en\":\"UpdateStandardField\",\"zh\":\"更新标准字段\"},\"request\":{\"method\":\"PUT\",\"uri\":\"/api/flowable_service/v1/standard_field/1234567890\",\"body\":\"{\\n    \\\"name\\\": \\\"字段标题\\\",\\n    \\\"readonly\\\": false,\\n    \\\"required\\\": true,\\n    \\\"sourceType\\\": \\\"customize\\\",\\n    \\\"key\\\": \\\"ITSC_xxxxxx\\\",\\n    \\\"desc\\\": \\\"\\\",\\n    \\\"sourceConfig\\\": \\\"{\\\\\\\"key\\\\\\\":\\\\\\\"ITSC_xxxxxx\\\\\\\",\\\\\\\"modelField\\\\\\\":\\\\\\\"ITSC_xxxxxx\\\\\\\",\\\\\\\"label\\\\\\\":\\\\\\\"字段标题\\\\\\\",\\\\\\\"type\\\\\\\":\\\\\\\"INPUT\\\\\\\",\\\\\\\"desc\\\\\\\":\\\\\\\"\\\\\\\",\\\\\\\"sourceType\\\\\\\":\\\\\\\"customize\\\\\\\",\\\\\\\"options\\\\\\\":{\\\\\\\"placeholder\\\\\\\":\\\\\\\"\\\\\\\",\\\\\\\"note\\\\\\\":\\\\\\\"\\\\\\\",\\\\\\\"required\\\\\\\":true,\\\\\\\"disabled\\\\\\\":false,\\\\\\\"highLight\\\\\\\":false,\\\\\\\"only\\\\\\\":false,\\\\\\\"defaultValue\\\\\\\":\\\\\\\"\\\\\\\",\\\\\\\"displayCondition\\\\\\\":\\\\\\\"\\\\\\\",\\\\\\\"pattern\\\\\\\":\\\\\\\"\\\\\\\",\\\\\\\"extraProps\\\\\\\":{},\\\\\\\"layout\\\\\\\":[0,0,12,1],\\\\\\\"labelCol\\\\\\\":3,\\\\\\\"dataType\\\\\\\":\\\\\\\"string\\\\\\\",\\\\\\\"enabled\\\\\\\":true,\\\\\\\"isMore\\\\\\\":true,\\\\\\\"remoteFunc\\\\\\\":{\\\\\\\"toolId\\\\\\\":\\\\\\\"\\\\\\\",\\\\\\\"scriptInputs\\\\\\\":[]},\\\\\\\"rules\\\\\\\":[],\\\\\\\"isEnablePattern\\\\\\\":false}}\\\",\\n    \\\"default\\\": \\\"\\\",\\n    \\\"kind\\\": \\\"INPUT\\\",\\n    \\\"domainModelIds\\\": [\\\"1234567890\\\"]\\n}\",\"headers\":null},\"response\":{\"body\":\"{\\n    \\\"code\\\": 0,\\n    \\\"error\\\": \\\"\\\",\\n    \\\"message\\\": \\\"\\\",\\n    \\\"data\\\": {\\n        \\\"instanceId\\\": \\\"1234567890\\\"\\n    }\\n}\",\"headers\":{\"Content-Type\":\"application/json; charset=utf-8\"},\"status_code\":200}}],\"status\":\"release\"}",
+    "creator": "defaultUser",
+    "ctime": "2025-05-14 10:33:45",
+    "deleteAuthorizers": [],
+    "description": "更新标准字段",
+    "eamlKind": "interface",
+    "eamlVersion": "2.0",
+    "endpoint": {
+      "ext_fields": null,
+      "method": "PUT",
+      "uri": "/api/flowable_service/v1/standard_field/:instanceId"
+    },
+    "examples": [
+      {
+        "description": {
+          "en": "UpdateStandardField",
+          "zh": "更新标准字段"
+        },
+        "request": {
+          "body": "{\n    \"name\": \"字段标题\",\n    \"readonly\": false,\n    \"required\": true,\n    \"sourceType\": \"customize\",\n    \"key\": \"ITSC_xxxxxx\",\n    \"desc\": \"\",\n    \"sourceConfig\": \"{\\\"key\\\":\\\"ITSC_xxxxxx\\\",\\\"modelField\\\":\\\"ITSC_xxxxxx\\\",\\\"label\\\":\\\"字段标题\\\",\\\"type\\\":\\\"INPUT\\\",\\\"desc\\\":\\\"\\\",\\\"sourceType\\\":\\\"customize\\\",\\\"options\\\":{\\\"placeholder\\\":\\\"\\\",\\\"note\\\":\\\"\\\",\\\"required\\\":true,\\\"disabled\\\":false,\\\"highLight\\\":false,\\\"only\\\":false,\\\"defaultValue\\\":\\\"\\\",\\\"displayCondition\\\":\\\"\\\",\\\"pattern\\\":\\\"\\\",\\\"extraProps\\\":{},\\\"layout\\\":[0,0,12,1],\\\"labelCol\\\":3,\\\"dataType\\\":\\\"string\\\",\\\"enabled\\\":true,\\\"isMore\\\":true,\\\"remoteFunc\\\":{\\\"toolId\\\":\\\"\\\",\\\"scriptInputs\\\":[]},\\\"rules\\\":[],\\\"isEnablePattern\\\":false}}\",\n    \"default\": \"\",\n    \"kind\": \"INPUT\",\n    \"domainModelIds\": [\"1234567890\"]\n}",
+          "headers": null,
+          "method": "PUT",
+          "uri": "/api/flowable_service/v1/standard_field/1234567890"
+        },
+        "response": {
+          "body": "{\n    \"code\": 0,\n    \"error\": \"\",\n    \"message\": \"\",\n    \"data\": {\n        \"instanceId\": \"1234567890\"\n    }\n}",
+          "headers": {
+            "Content-Type": "application/json; charset=utf-8"
+          },
+          "status_code": 200
+        }
+      }
+    ],
+    "fullContractName": "easyops.api.flowable_service.standard_field@UpdateStandardField",
+    "import": [
+      "easyops.model.flowable_service.DomainModel",
+      "easyops.model.flowable_service.StandardField"
+    ],
+    "importModelDefinition": [
+      {
+        "fields": [
+          {
+            "description": "领域模型实例Id",
+            "name": "instanceId",
+            "type": "string"
+          },
+          {
+            "description": "唯一标识(英文名, 唯一, 不可修改)",
+            "name": "key",
+            "type": "string",
+            "validate": {
+              "pattern": "^[a-zA-Z0-9][.a-zA-Z0-9_-]{0,39}$"
+            }
+          },
+          {
+            "description": "领域模型名称(中文名, 非唯一, 可修改)",
+            "name": "name",
+            "type": "string"
+          },
+          {
+            "description": "领域模型说明",
+            "name": "desc",
+            "type": "string"
+          },
+          {
+            "description": "是否允许修改关联字段（默认值：true）",
+            "name": "allowUpdate",
+            "type": "bool"
+          },
+          {
+            "description": "是否为内置模型（默认值：false）",
+            "name": "builtin",
+            "type": "bool"
+          },
+          {
+            "description": "创建时间 (cmdb 内置字段)",
+            "name": "ctime",
+            "type": "string"
+          },
+          {
+            "description": "更新时间 (cmdb 内置字段)",
+            "name": "mtime",
+            "type": "string"
+          },
+          {
+            "description": "创建人 (cmdb 内置字段)",
+            "name": "creator",
+            "type": "string"
+          }
+        ],
+        "name": "DomainModel"
+      },
+      {
+        "fields": [
+          {
+            "description": "标准字段实例Id",
+            "name": "instanceId",
+            "type": "string"
+          },
+          {
+            "description": "唯一标识(英文名, 不可重复)",
+            "name": "key",
+            "type": "string",
+            "validate": {
+              "pattern": "^[a-zA-Z0-9][.a-zA-Z0-9_-]{0,39}$"
+            }
+          },
+          {
+            "description": "名称(中文名, 可重复)",
+            "name": "name",
+            "type": "string"
+          },
+          {
+            "description": "字段类型(枚举)",
+            "name": "kind",
+            "type": "string"
+          },
+          {
+            "description": "数据源类型",
+            "name": "sourceType",
+            "type": "string"
+          },
+          {
+            "description": "数据源配置（JSON字符串）",
+            "name": "sourceConfig",
+            "type": "string"
+          },
+          {
+            "description": "字段默认值",
+            "name": "default",
+            "type": "string"
+          },
+          {
+            "description": "字段说明",
+            "name": "desc",
+            "type": "string"
+          },
+          {
+            "description": "必填 (true 必填)",
+            "name": "required",
+            "type": "bool"
+          },
+          {
+            "description": "只读 (true 只读)",
+            "name": "readonly",
+            "type": "bool"
+          },
+          {
+            "description": "创建时间 (cmdb 内置字段)",
+            "name": "ctime",
+            "type": "string"
+          },
+          {
+            "description": "创建人 (cmdb 内置字段)",
+            "name": "creator",
+            "type": "string"
+          },
+          {
+            "description": "内置标识 (true 为内置自动)",
+            "name": "builtin",
+            "type": "bool"
+          }
+        ],
+        "name": "StandardField"
+      }
+    ],
+    "instanceId": "6350f60cfa0f9",
+    "modifier": "easyops",
+    "mtime": "2026-03-10 13:28:02",
+    "name": "UpdateStandardField",
+    "namespaceId": "easyops.api.flowable_service.standard_field",
+    "org": 8888,
+    "produces": [],
+    "provider": "providers-of-flowable-service.standard-field-api-update-standard-field",
+    "providerPackage": "providers-of-flowable-service-NB",
+    "readAuthorizers": [],
+    "request": {
+      "description": "",
+      "fields": [
+        {
+          "description": "",
+          "ref": "StandardField.instanceId",
+          "type": ""
+        },
+        {
+          "description": "",
+          "ref": "StandardField.key",
+          "type": ""
+        },
+        {
+          "description": "",
+          "ref": "StandardField.name",
+          "type": ""
+        },
+        {
+          "description": "",
+          "ref": "StandardField.kind",
+          "type": ""
+        },
+        {
+          "description": "",
+          "ref": "StandardField.sourceType",
+          "type": ""
+        },
+        {
+          "description": "",
+          "ref": "StandardField.sourceConfig",
+          "type": ""
+        },
+        {
+          "description": "",
+          "ref": "StandardField.default",
+          "type": ""
+        },
+        {
+          "description": "",
+          "ref": "StandardField.desc",
+          "type": ""
+        },
+        {
+          "description": "",
+          "ref": "StandardField.required",
+          "type": ""
+        },
+        {
+          "description": "",
+          "ref": "StandardField.readonly",
+          "type": ""
+        },
+        {
+          "description": "领域模型实例Id列表(更新接口必传, 为空则解除关联的领域模型)",
+          "name": "domainModelIds",
+          "type": "string[]"
+        }
+      ],
+      "required": [
+        "StandardField.key",
+        "StandardField.name",
+        "StandardField.kind",
+        "StandardField.sourceType",
+        "StandardField.sourceConfig",
+        "StandardField.default",
+        "StandardField.desc",
+        "StandardField.required",
+        "StandardField.readonly",
+        "domainModelIds"
+      ],
+      "type": "object"
+    },
+    "response": {
+      "description": "",
+      "fields": [
+        {
+          "description": "标准字段Id",
+          "name": "instanceId",
+          "type": "string"
+        }
+      ],
+      "type": "object",
+      "wrapper": true
+    },
+    "serviceName": "logic.flowable_service",
+    "status": "release",
+    "updateAuthorizers": [],
+    "version": "1.1.0"
+  },
+  {
+    "_impl_from": [],
+    "_object_id": "FLOW_BUILDER_API_CONTRACT@EASYOPS",
+    "_object_version": 2,
+    "_pre_ts": 1768388072,
+    "_ts": 1773120469,
+    "_version": 4,
+    "configYaml": "{\"eamlVersion\":\"2.0\",\"eamlKind\":\"interface\",\"version\":\"1.5.0\",\"name\":\"SearchStandardField\",\"description\":\"查询标准字段\",\"import\":[\"easyops.model.flowable_service.DomainModel\",\"easyops.model.flowable_service.StandardField\"],\"endpoint\":{\"method\":\"POST\",\"uri\":\"/api/flowable_service/v1/standard_field/_search\"},\"request\":{\"type\":\"object\",\"fields\":[{\"name\":\"page\",\"type\":\"page\",\"description\":\"页码\"},{\"name\":\"pageSize\",\"type\":\"page_size\",\"description\":\"每页数据量\"},{\"name\":\"Q\",\"type\":\"string\",\"description\":\"模糊搜索\"},{\"name\":\"key\",\"type\":\"string\",\"description\":\"唯一标识查询\"},{\"name\":\"keyList\",\"type\":\"string[]\",\"description\":\"唯一标识列表\"},{\"name\":\"withSource\",\"type\":\"bool\",\"description\":\"是否带数据源信息\"},{\"type\":\"\",\"description\":\"\",\"ref\":\"StandardField.name\"},{\"type\":\"\",\"description\":\"\",\"ref\":\"StandardField.kind\"},{\"type\":\"\",\"description\":\"\",\"ref\":\"StandardField.desc\"},{\"type\":\"\",\"description\":\"\",\"ref\":\"StandardField.creator\"}],\"description\":\"\",\"default\":{\"withSource\":false,\"page\":1,\"pageSize\":10}},\"response\":{\"type\":\"object\",\"fields\":[{\"name\":\"page\",\"type\":\"page\",\"description\":\"页码\"},{\"name\":\"page_size\",\"type\":\"page_size\",\"description\":\"分页大小\"},{\"name\":\"total\",\"type\":\"int\",\"description\":\"总数\"},{\"name\":\"list\",\"type\":\"object[]\",\"description\":\"标准字段列表\",\"fields\":[{\"type\":\"\",\"description\":\"\",\"ref\":\"StandardField.*\"},{\"name\":\"domainModels\",\"type\":\"DomainModel[]\",\"description\":\"关联的领域模型(多对多的关系)\"},{\"name\":\"fileCfgResource\",\"type\":\"string\",\"description\":\"数据源是文件配置的信息(json)\"},{\"name\":\"formVersions\",\"type\":\"object[]\",\"description\":\"引用该标准字段的表单版本\",\"fields\":[{\"name\":\"id\",\"type\":\"instance_id\",\"description\":\"版本ID\"},{\"name\":\"name\",\"type\":\"string\",\"description\":\"版本号（版本名称）\"},{\"name\":\"formId\",\"type\":\"instance_id\",\"description\":\"表单ID\"},{\"name\":\"formName\",\"type\":\"string\",\"description\":\"表单名称\"}]}]}],\"description\":\"\",\"wrapper\":true},\"namespace\":[{\"instanceId\":\"5cf1da2215679\",\"id\":\"\",\"type\":\"\",\"description\":null,\"apiProject\":null}],\"namespaceId\":\"easyops.api.flowable_service.standard_field\",\"configYaml\":\"\",\"classify\":\"\",\"importModelDefinition\":null,\"serviceName\":\"logic.flowable_service\",\"fullContractName\":\"easyops.api.flowable_service.standard_field@SearchStandardField\",\"examples\":null,\"status\":\"release\"}",
+    "creator": "defaultUser",
+    "ctime": "2025-05-14 10:33:45",
+    "deleteAuthorizers": [],
+    "description": "查询标准字段",
+    "eamlKind": "interface",
+    "eamlVersion": "2.0",
+    "endpoint": {
+      "ext_fields": null,
+      "method": "POST",
+      "uri": "/api/flowable_service/v1/standard_field/_search"
+    },
+    "examples": [],
+    "fullContractName": "easyops.api.flowable_service.standard_field@SearchStandardField",
+    "import": [
+      "easyops.model.flowable_service.DomainModel",
+      "easyops.model.flowable_service.StandardField"
+    ],
+    "importModelDefinition": [
+      {
+        "fields": [
+          {
+            "description": "领域模型实例Id",
+            "name": "instanceId",
+            "type": "string"
+          },
+          {
+            "description": "唯一标识(英文名, 唯一, 不可修改)",
+            "name": "key",
+            "type": "string",
+            "validate": {
+              "pattern": "^[a-zA-Z0-9][.a-zA-Z0-9_-]{0,39}$"
+            }
+          },
+          {
+            "description": "领域模型名称(中文名, 非唯一, 可修改)",
+            "name": "name",
+            "type": "string"
+          },
+          {
+            "description": "领域模型说明",
+            "name": "desc",
+            "type": "string"
+          },
+          {
+            "description": "是否允许修改关联字段（默认值：true）",
+            "name": "allowUpdate",
+            "type": "bool"
+          },
+          {
+            "description": "是否为内置模型（默认值：false）",
+            "name": "builtin",
+            "type": "bool"
+          },
+          {
+            "description": "创建时间 (cmdb 内置字段)",
+            "name": "ctime",
+            "type": "string"
+          },
+          {
+            "description": "更新时间 (cmdb 内置字段)",
+            "name": "mtime",
+            "type": "string"
+          },
+          {
+            "description": "创建人 (cmdb 内置字段)",
+            "name": "creator",
+            "type": "string"
+          }
+        ],
+        "name": "DomainModel"
+      },
+      {
+        "fields": [
+          {
+            "description": "标准字段实例Id",
+            "name": "instanceId",
+            "type": "string"
+          },
+          {
+            "description": "唯一标识(英文名, 不可重复)",
+            "name": "key",
+            "type": "string",
+            "validate": {
+              "pattern": "^[a-zA-Z0-9][.a-zA-Z0-9_-]{0,39}$"
+            }
+          },
+          {
+            "description": "名称(中文名, 可重复)",
+            "name": "name",
+            "type": "string"
+          },
+          {
+            "description": "字段类型(枚举)",
+            "name": "kind",
+            "type": "string"
+          },
+          {
+            "description": "数据源类型",
+            "name": "sourceType",
+            "type": "string"
+          },
+          {
+            "description": "数据源配置（JSON字符串）",
+            "name": "sourceConfig",
+            "type": "string"
+          },
+          {
+            "description": "字段默认值",
+            "name": "default",
+            "type": "string"
+          },
+          {
+            "description": "字段说明",
+            "name": "desc",
+            "type": "string"
+          },
+          {
+            "description": "必填 (true 必填)",
+            "name": "required",
+            "type": "bool"
+          },
+          {
+            "description": "只读 (true 只读)",
+            "name": "readonly",
+            "type": "bool"
+          },
+          {
+            "description": "创建时间 (cmdb 内置字段)",
+            "name": "ctime",
+            "type": "string"
+          },
+          {
+            "description": "创建人 (cmdb 内置字段)",
+            "name": "creator",
+            "type": "string"
+          },
+          {
+            "description": "内置标识 (true 为内置自动)",
+            "name": "builtin",
+            "type": "bool"
+          }
+        ],
+        "name": "StandardField"
+      }
+    ],
+    "instanceId": "6350f60d01949",
+    "modifier": "easyops",
+    "mtime": "2026-03-10 13:27:49",
+    "name": "SearchStandardField",
+    "namespaceId": "easyops.api.flowable_service.standard_field",
+    "org": 8888,
+    "produces": [],
+    "provider": "providers-of-flowable-service.standard-field-api-search-standard-field",
+    "providerPackage": "providers-of-flowable-service-NB",
+    "readAuthorizers": [],
+    "request": {
+      "default": {
+        "page": 1,
+        "pageSize": 10,
+        "withSource": false
+      },
+      "description": "",
+      "fields": [
+        {
+          "description": "页码",
+          "name": "page",
+          "type": "page"
+        },
+        {
+          "description": "每页数据量",
+          "name": "pageSize",
+          "type": "page_size"
+        },
+        {
+          "description": "模糊搜索",
+          "name": "Q",
+          "type": "string"
+        },
+        {
+          "description": "唯一标识查询",
+          "name": "key",
+          "type": "string"
+        },
+        {
+          "description": "唯一标识列表",
+          "name": "keyList",
+          "type": "string[]"
+        },
+        {
+          "description": "是否带数据源信息",
+          "name": "withSource",
+          "type": "bool"
+        },
+        {
+          "description": "",
+          "ref": "StandardField.name",
+          "type": ""
+        },
+        {
+          "description": "",
+          "ref": "StandardField.kind",
+          "type": ""
+        },
+        {
+          "description": "",
+          "ref": "StandardField.desc",
+          "type": ""
+        },
+        {
+          "description": "",
+          "ref": "StandardField.creator",
+          "type": ""
+        }
+      ],
+      "type": "object"
+    },
+    "response": {
+      "description": "",
+      "fields": [
+        {
+          "description": "页码",
+          "name": "page",
+          "type": "page"
+        },
+        {
+          "description": "分页大小",
+          "name": "page_size",
+          "type": "page_size"
+        },
+        {
+          "description": "总数",
+          "name": "total",
+          "type": "int"
+        },
+        {
+          "description": "标准字段列表",
+          "fields": [
+            {
+              "description": "",
+              "ref": "StandardField.*",
+              "type": ""
+            },
+            {
+              "description": "关联的领域模型(多对多的关系)",
+              "name": "domainModels",
+              "type": "DomainModel[]"
+            },
+            {
+              "description": "数据源是文件配置的信息(json)",
+              "name": "fileCfgResource",
+              "type": "string"
+            },
+            {
+              "description": "引用该标准字段的表单版本",
+              "fields": [
+                {
+                  "description": "版本ID",
+                  "name": "id",
+                  "type": "instance_id"
+                },
+                {
+                  "description": "版本号（版本名称）",
+                  "name": "name",
+                  "type": "string"
+                },
+                {
+                  "description": "表单ID",
+                  "name": "formId",
+                  "type": "instance_id"
+                },
+                {
+                  "description": "表单名称",
+                  "name": "formName",
+                  "type": "string"
+                }
+              ],
+              "name": "formVersions",
+              "type": "object[]"
+            }
+          ],
+          "name": "list",
+          "type": "object[]"
+        }
+      ],
+      "type": "object",
+      "wrapper": true
+    },
+    "serviceName": "logic.flowable_service",
+    "status": "release",
+    "updateAuthorizers": [],
+    "version": "1.5.0"
+  },
+  {
+    "_impl_from": [],
+    "_object_id": "FLOW_BUILDER_API_CONTRACT@EASYOPS",
+    "_object_version": 2,
+    "_pre_ts": 1768388076,
+    "_ts": 1773120487,
+    "_version": 4,
+    "configYaml": "{\"eamlVersion\":\"2.0\",\"eamlKind\":\"interface\",\"version\":\"1.0.0\",\"name\":\"DeleteStandardField\",\"description\":\"删除标准字段(支持批量, 多个实例用 \\\";\\\" 分隔)\",\"import\":[\"easyops.model.flowable_service.StandardField\"],\"endpoint\":{\"method\":\"DELETE\",\"uri\":\"/api/flowable_service/v1/standard_field/:instanceId\"},\"request\":{\"type\":\"object\",\"fields\":[{\"type\":\"\",\"description\":\"\",\"ref\":\"StandardField.instanceId\"}],\"description\":\"\",\"required\":[\"StandardField.instanceId\"]},\"response\":{\"type\":\"\",\"description\":\"\",\"wrapper\":true},\"namespace\":[{\"instanceId\":\"5cf1da2215679\",\"id\":\"\",\"type\":\"\",\"description\":null,\"apiProject\":null}],\"namespaceId\":\"easyops.api.flowable_service.standard_field\",\"configYaml\":\"\",\"classify\":\"\",\"importModelDefinition\":null,\"serviceName\":\"logic.flowable_service\",\"fullContractName\":\"easyops.api.flowable_service.standard_field@DeleteStandardField\",\"examples\":null,\"status\":\"release\"}",
+    "creator": "defaultUser",
+    "ctime": "2025-05-14 10:33:45",
+    "deleteAuthorizers": [],
+    "description": "删除标准字段(支持批量, 多个实例用 \";\" 分隔)",
+    "eamlKind": "interface",
+    "eamlVersion": "2.0",
+    "endpoint": {
+      "ext_fields": null,
+      "method": "DELETE",
+      "uri": "/api/flowable_service/v1/standard_field/:instanceId"
+    },
+    "examples": [],
+    "fullContractName": "easyops.api.flowable_service.standard_field@DeleteStandardField",
+    "import": [
+      "easyops.model.flowable_service.StandardField"
+    ],
+    "importModelDefinition": [
+      {
+        "fields": [
+          {
+            "description": "标准字段实例Id",
+            "name": "instanceId",
+            "type": "string"
+          },
+          {
+            "description": "唯一标识(英文名, 不可重复)",
+            "name": "key",
+            "type": "string",
+            "validate": {
+              "pattern": "^[a-zA-Z0-9][.a-zA-Z0-9_-]{0,39}$"
+            }
+          },
+          {
+            "description": "名称(中文名, 可重复)",
+            "name": "name",
+            "type": "string"
+          },
+          {
+            "description": "字段类型(枚举)",
+            "name": "kind",
+            "type": "string"
+          },
+          {
+            "description": "数据源类型",
+            "name": "sourceType",
+            "type": "string"
+          },
+          {
+            "description": "数据源配置（JSON字符串）",
+            "name": "sourceConfig",
+            "type": "string"
+          },
+          {
+            "description": "字段默认值",
+            "name": "default",
+            "type": "string"
+          },
+          {
+            "description": "字段说明",
+            "name": "desc",
+            "type": "string"
+          },
+          {
+            "description": "必填 (true 必填)",
+            "name": "required",
+            "type": "bool"
+          },
+          {
+            "description": "只读 (true 只读)",
+            "name": "readonly",
+            "type": "bool"
+          },
+          {
+            "description": "创建时间 (cmdb 内置字段)",
+            "name": "ctime",
+            "type": "string"
+          },
+          {
+            "description": "创建人 (cmdb 内置字段)",
+            "name": "creator",
+            "type": "string"
+          },
+          {
+            "description": "内置标识 (true 为内置自动)",
+            "name": "builtin",
+            "type": "bool"
+          }
+        ],
+        "name": "StandardField"
+      }
+    ],
+    "instanceId": "6350f60d08b59",
+    "modifier": "easyops",
+    "mtime": "2026-03-10 13:28:07",
+    "name": "DeleteStandardField",
+    "namespaceId": "easyops.api.flowable_service.standard_field",
+    "org": 8888,
+    "produces": [],
+    "provider": "providers-of-flowable-service.standard-field-api-delete-standard-field",
+    "providerPackage": "providers-of-flowable-service-NB",
+    "readAuthorizers": [],
+    "request": {
+      "description": "",
+      "fields": [
+        {
+          "description": "",
+          "ref": "StandardField.instanceId",
+          "type": ""
+        }
+      ],
+      "required": [
+        "StandardField.instanceId"
+      ],
+      "type": "object"
+    },
+    "response": {
+      "description": "",
+      "type": "",
+      "wrapper": true
+    },
+    "serviceName": "logic.flowable_service",
+    "status": "release",
+    "updateAuthorizers": [],
+    "version": "1.0.0"
+  },
+  {
+    "_impl_from": [],
+    "_object_id": "FLOW_BUILDER_API_CONTRACT@EASYOPS",
+    "_object_version": 2,
+    "_pre_ts": 1768388076,
+    "_ts": 1773120482,
+    "_version": 4,
+    "configYaml": "{\"eamlVersion\":\"2.0\",\"eamlKind\":\"interface\",\"version\":\"1.0.0\",\"name\":\"AggregateStandardFieldData\",\"description\":\"聚合查询标准字段数据\",\"endpoint\":{\"method\":\"POST\",\"uri\":\"/api/flowable_service/v1/standard_field/data_aggregate\"},\"request\":{\"type\":\"object\",\"fields\":[{\"name\":\"aggregate\",\"type\":\"map[]\",\"description\":\"聚合查询语句, json字符串列表，例如以下语句是聚合所有标准字段的出现次数\\n'[{\\\"$match\\\": {\\\"form_key\\\": \\\"ITSC_AlarmStatus\\\"}},{\\\"$group\\\": { \\\"_id\\\": \\\"$form_value\\\", \\\"total\\\": {\\\"$sum\\\": 1}}}]'\\n\"}],\"description\":\"\"},\"response\":{\"type\":\"object\",\"fields\":[{\"name\":\"aggResult\",\"type\":\"map[]\",\"description\":\"结果集列表\"}],\"description\":\"\",\"wrapper\":true},\"namespace\":[{\"instanceId\":\"5cf1da2215679\",\"id\":\"\",\"type\":\"\",\"description\":null,\"apiProject\":null}],\"namespaceId\":\"easyops.api.flowable_service.standard_field\",\"configYaml\":\"\",\"classify\":\"\",\"importModelDefinition\":null,\"serviceName\":\"logic.flowable_service\",\"fullContractName\":\"easyops.api.flowable_service.standard_field@AggregateStandardFieldData\",\"examples\":null,\"status\":\"release\"}",
+    "creator": "defaultUser",
+    "ctime": "2025-05-14 10:33:47",
+    "deleteAuthorizers": [],
+    "description": "聚合查询标准字段数据",
+    "eamlKind": "interface",
+    "eamlVersion": "2.0",
+    "endpoint": {
+      "ext_fields": null,
+      "method": "POST",
+      "uri": "/api/flowable_service/v1/standard_field/data_aggregate"
+    },
+    "examples": [],
+    "fullContractName": "easyops.api.flowable_service.standard_field@AggregateStandardFieldData",
+    "import": [],
+    "importModelDefinition": [],
+    "instanceId": "6350f60f67535",
+    "modifier": "easyops",
+    "mtime": "2026-03-10 13:28:02",
+    "name": "AggregateStandardFieldData",
+    "namespaceId": "easyops.api.flowable_service.standard_field",
+    "org": 8888,
+    "produces": [],
+    "provider": "providers-of-flowable-service.standard-field-api-aggregate-standard-field-data",
+    "providerPackage": "providers-of-flowable-service-NB",
+    "readAuthorizers": [],
+    "request": {
+      "description": "",
+      "fields": [
+        {
+          "description": "聚合查询语句, json字符串列表，例如以下语句是聚合所有标准字段的出现次数\n'[{\"$match\": {\"form_key\": \"ITSC_AlarmStatus\"}},{\"$group\": { \"_id\": \"$form_value\", \"total\": {\"$sum\": 1}}}]'\n",
+          "name": "aggregate",
+          "type": "map[]"
+        }
+      ],
+      "type": "object"
+    },
+    "response": {
+      "description": "",
+      "fields": [
+        {
+          "description": "结果集列表",
+          "name": "aggResult",
+          "type": "map[]"
+        }
+      ],
+      "type": "object",
+      "wrapper": true
+    },
+    "serviceName": "logic.flowable_service",
+    "status": "release",
+    "updateAuthorizers": [],
+    "version": "1.0.0"
+  },
+  {
+    "_impl_from": [],
+    "_object_id": "FLOW_BUILDER_API_CONTRACT@EASYOPS",
+    "_object_version": 2,
+    "_pre_ts": 1768388083,
+    "_ts": 1773120471,
+    "_version": 4,
+    "configYaml": "{\"eamlVersion\":\"2.0\",\"eamlKind\":\"interface\",\"version\":\"1.1.0\",\"name\":\"CreateStandardField\",\"description\":\"创建标准字段\",\"import\":[\"easyops.model.flowable_service.DomainModel\",\"easyops.model.flowable_service.StandardField\"],\"endpoint\":{\"method\":\"POST\",\"uri\":\"/api/flowable_service/v1/standard_field\"},\"request\":{\"type\":\"object\",\"fields\":[{\"type\":\"\",\"description\":\"\",\"ref\":\"StandardField.key\"},{\"type\":\"\",\"description\":\"\",\"ref\":\"StandardField.name\"},{\"type\":\"\",\"description\":\"\",\"ref\":\"StandardField.kind\"},{\"type\":\"\",\"description\":\"\",\"ref\":\"StandardField.sourceType\"},{\"type\":\"\",\"description\":\"\",\"ref\":\"StandardField.sourceConfig\"},{\"type\":\"\",\"description\":\"\",\"ref\":\"StandardField.default\"},{\"type\":\"\",\"description\":\"\",\"ref\":\"StandardField.desc\"},{\"type\":\"\",\"description\":\"\",\"ref\":\"StandardField.required\"},{\"type\":\"\",\"description\":\"\",\"ref\":\"StandardField.readonly\"},{\"name\":\"domainModelIds\",\"type\":\"string[]\",\"description\":\"领域模型实例Id列表\"}],\"description\":\"\",\"required\":[\"StandardField.key\",\"StandardField.name\",\"StandardField.kind\",\"StandardField.sourceType\",\"StandardField.sourceConfig\",\"StandardField.default\",\"StandardField.desc\",\"StandardField.required\",\"StandardField.readonly\"]},\"response\":{\"type\":\"object\",\"fields\":[{\"name\":\"instanceId\",\"type\":\"string\",\"description\":\"标准字段Id\"}],\"description\":\"\",\"wrapper\":true},\"namespace\":[{\"instanceId\":\"5cf1da2215679\",\"id\":\"\",\"type\":\"\",\"description\":null,\"apiProject\":null}],\"namespaceId\":\"easyops.api.flowable_service.standard_field\",\"configYaml\":\"\",\"classify\":\"\",\"importModelDefinition\":null,\"serviceName\":\"logic.flowable_service\",\"fullContractName\":\"easyops.api.flowable_service.standard_field@CreateStandardField\",\"examples\":[{\"description\":{\"en\":\"CreateStandardField\",\"zh\":\"创建标准字段\"},\"request\":{\"method\":\"POST\",\"uri\":\"/api/flowable_service/v1/standard_field\",\"body\":\"{\\n    \\\"name\\\": \\\"字段标题\\\",\\n    \\\"readonly\\\": false,\\n    \\\"required\\\": true,\\n    \\\"sourceType\\\": \\\"customize\\\",\\n    \\\"key\\\": \\\"ITSC_xxxxxx\\\",\\n    \\\"desc\\\": \\\"\\\",\\n    \\\"sourceConfig\\\": \\\"{\\\\\\\"key\\\\\\\":\\\\\\\"ITSC_xxxxxx\\\\\\\",\\\\\\\"modelField\\\\\\\":\\\\\\\"ITSC_xxxxxx\\\\\\\",\\\\\\\"label\\\\\\\":\\\\\\\"字段标题\\\\\\\",\\\\\\\"type\\\\\\\":\\\\\\\"INPUT\\\\\\\",\\\\\\\"desc\\\\\\\":\\\\\\\"\\\\\\\",\\\\\\\"sourceType\\\\\\\":\\\\\\\"customize\\\\\\\",\\\\\\\"options\\\\\\\":{\\\\\\\"placeholder\\\\\\\":\\\\\\\"\\\\\\\",\\\\\\\"note\\\\\\\":\\\\\\\"\\\\\\\",\\\\\\\"required\\\\\\\":true,\\\\\\\"disabled\\\\\\\":false,\\\\\\\"highLight\\\\\\\":false,\\\\\\\"only\\\\\\\":false,\\\\\\\"defaultValue\\\\\\\":\\\\\\\"\\\\\\\",\\\\\\\"displayCondition\\\\\\\":\\\\\\\"\\\\\\\",\\\\\\\"pattern\\\\\\\":\\\\\\\"\\\\\\\",\\\\\\\"extraProps\\\\\\\":{},\\\\\\\"layout\\\\\\\":[0,0,12,1],\\\\\\\"labelCol\\\\\\\":3,\\\\\\\"dataType\\\\\\\":\\\\\\\"string\\\\\\\",\\\\\\\"enabled\\\\\\\":true,\\\\\\\"isMore\\\\\\\":true,\\\\\\\"remoteFunc\\\\\\\":{\\\\\\\"toolId\\\\\\\":\\\\\\\"\\\\\\\",\\\\\\\"scriptInputs\\\\\\\":[]},\\\\\\\"rules\\\\\\\":[],\\\\\\\"isEnablePattern\\\\\\\":false}}\\\",\\n    \\\"default\\\": \\\"\\\",\\n    \\\"kind\\\": \\\"INPUT\\\",\\n    \\\"domainModelIds\\\": [\\\"1234567890\\\"]\\n}\",\"headers\":null},\"response\":{\"body\":\"{\\n    \\\"code\\\": 0,\\n    \\\"error\\\": \\\"\\\",\\n    \\\"message\\\": \\\"\\\",\\n    \\\"data\\\": {\\n        \\\"instanceId\\\": \\\"1234567890\\\"\\n    }\\n}\",\"headers\":{\"Content-Type\":\"application/json; charset=utf-8\"},\"status_code\":200}}],\"status\":\"release\"}",
+    "creator": "defaultUser",
+    "ctime": "2025-05-14 10:33:50",
+    "deleteAuthorizers": [],
+    "description": "创建标准字段",
+    "eamlKind": "interface",
+    "eamlVersion": "2.0",
+    "endpoint": {
+      "ext_fields": null,
+      "method": "POST",
+      "uri": "/api/flowable_service/v1/standard_field"
+    },
+    "examples": [
+      {
+        "description": {
+          "en": "CreateStandardField",
+          "zh": "创建标准字段"
+        },
+        "request": {
+          "body": "{\n    \"name\": \"字段标题\",\n    \"readonly\": false,\n    \"required\": true,\n    \"sourceType\": \"customize\",\n    \"key\": \"ITSC_xxxxxx\",\n    \"desc\": \"\",\n    \"sourceConfig\": \"{\\\"key\\\":\\\"ITSC_xxxxxx\\\",\\\"modelField\\\":\\\"ITSC_xxxxxx\\\",\\\"label\\\":\\\"字段标题\\\",\\\"type\\\":\\\"INPUT\\\",\\\"desc\\\":\\\"\\\",\\\"sourceType\\\":\\\"customize\\\",\\\"options\\\":{\\\"placeholder\\\":\\\"\\\",\\\"note\\\":\\\"\\\",\\\"required\\\":true,\\\"disabled\\\":false,\\\"highLight\\\":false,\\\"only\\\":false,\\\"defaultValue\\\":\\\"\\\",\\\"displayCondition\\\":\\\"\\\",\\\"pattern\\\":\\\"\\\",\\\"extraProps\\\":{},\\\"layout\\\":[0,0,12,1],\\\"labelCol\\\":3,\\\"dataType\\\":\\\"string\\\",\\\"enabled\\\":true,\\\"isMore\\\":true,\\\"remoteFunc\\\":{\\\"toolId\\\":\\\"\\\",\\\"scriptInputs\\\":[]},\\\"rules\\\":[],\\\"isEnablePattern\\\":false}}\",\n    \"default\": \"\",\n    \"kind\": \"INPUT\",\n    \"domainModelIds\": [\"1234567890\"]\n}",
+          "headers": null,
+          "method": "POST",
+          "uri": "/api/flowable_service/v1/standard_field"
+        },
+        "response": {
+          "body": "{\n    \"code\": 0,\n    \"error\": \"\",\n    \"message\": \"\",\n    \"data\": {\n        \"instanceId\": \"1234567890\"\n    }\n}",
+          "headers": {
+            "Content-Type": "application/json; charset=utf-8"
+          },
+          "status_code": 200
+        }
+      }
+    ],
+    "fullContractName": "easyops.api.flowable_service.standard_field@CreateStandardField",
+    "import": [
+      "easyops.model.flowable_service.DomainModel",
+      "easyops.model.flowable_service.StandardField"
+    ],
+    "importModelDefinition": [
+      {
+        "fields": [
+          {
+            "description": "领域模型实例Id",
+            "name": "instanceId",
+            "type": "string"
+          },
+          {
+            "description": "唯一标识(英文名, 唯一, 不可修改)",
+            "name": "key",
+            "type": "string",
+            "validate": {
+              "pattern": "^[a-zA-Z0-9][.a-zA-Z0-9_-]{0,39}$"
+            }
+          },
+          {
+            "description": "领域模型名称(中文名, 非唯一, 可修改)",
+            "name": "name",
+            "type": "string"
+          },
+          {
+            "description": "领域模型说明",
+            "name": "desc",
+            "type": "string"
+          },
+          {
+            "description": "是否允许修改关联字段（默认值：true）",
+            "name": "allowUpdate",
+            "type": "bool"
+          },
+          {
+            "description": "是否为内置模型（默认值：false）",
+            "name": "builtin",
+            "type": "bool"
+          },
+          {
+            "description": "创建时间 (cmdb 内置字段)",
+            "name": "ctime",
+            "type": "string"
+          },
+          {
+            "description": "更新时间 (cmdb 内置字段)",
+            "name": "mtime",
+            "type": "string"
+          },
+          {
+            "description": "创建人 (cmdb 内置字段)",
+            "name": "creator",
+            "type": "string"
+          }
+        ],
+        "name": "DomainModel"
+      },
+      {
+        "fields": [
+          {
+            "description": "标准字段实例Id",
+            "name": "instanceId",
+            "type": "string"
+          },
+          {
+            "description": "唯一标识(英文名, 不可重复)",
+            "name": "key",
+            "type": "string",
+            "validate": {
+              "pattern": "^[a-zA-Z0-9][.a-zA-Z0-9_-]{0,39}$"
+            }
+          },
+          {
+            "description": "名称(中文名, 可重复)",
+            "name": "name",
+            "type": "string"
+          },
+          {
+            "description": "字段类型(枚举)",
+            "name": "kind",
+            "type": "string"
+          },
+          {
+            "description": "数据源类型",
+            "name": "sourceType",
+            "type": "string"
+          },
+          {
+            "description": "数据源配置（JSON字符串）",
+            "name": "sourceConfig",
+            "type": "string"
+          },
+          {
+            "description": "字段默认值",
+            "name": "default",
+            "type": "string"
+          },
+          {
+            "description": "字段说明",
+            "name": "desc",
+            "type": "string"
+          },
+          {
+            "description": "必填 (true 必填)",
+            "name": "required",
+            "type": "bool"
+          },
+          {
+            "description": "只读 (true 只读)",
+            "name": "readonly",
+            "type": "bool"
+          },
+          {
+            "description": "创建时间 (cmdb 内置字段)",
+            "name": "ctime",
+            "type": "string"
+          },
+          {
+            "description": "创建人 (cmdb 内置字段)",
+            "name": "creator",
+            "type": "string"
+          },
+          {
+            "description": "内置标识 (true 为内置自动)",
+            "name": "builtin",
+            "type": "bool"
+          }
+        ],
+        "name": "StandardField"
+      }
+    ],
+    "instanceId": "6350f611f4f69",
+    "modifier": "easyops",
+    "mtime": "2026-03-10 13:27:51",
+    "name": "CreateStandardField",
+    "namespaceId": "easyops.api.flowable_service.standard_field",
+    "org": 8888,
+    "produces": [],
+    "provider": "providers-of-flowable-service.standard-field-api-create-standard-field",
+    "providerPackage": "providers-of-flowable-service-NB",
+    "readAuthorizers": [],
+    "request": {
+      "description": "",
+      "fields": [
+        {
+          "description": "",
+          "ref": "StandardField.key",
+          "type": ""
+        },
+        {
+          "description": "",
+          "ref": "StandardField.name",
+          "type": ""
+        },
+        {
+          "description": "",
+          "ref": "StandardField.kind",
+          "type": ""
+        },
+        {
+          "description": "",
+          "ref": "StandardField.sourceType",
+          "type": ""
+        },
+        {
+          "description": "",
+          "ref": "StandardField.sourceConfig",
+          "type": ""
+        },
+        {
+          "description": "",
+          "ref": "StandardField.default",
+          "type": ""
+        },
+        {
+          "description": "",
+          "ref": "StandardField.desc",
+          "type": ""
+        },
+        {
+          "description": "",
+          "ref": "StandardField.required",
+          "type": ""
+        },
+        {
+          "description": "",
+          "ref": "StandardField.readonly",
+          "type": ""
+        },
+        {
+          "description": "领域模型实例Id列表",
+          "name": "domainModelIds",
+          "type": "string[]"
+        }
+      ],
+      "required": [
+        "StandardField.key",
+        "StandardField.name",
+        "StandardField.kind",
+        "StandardField.sourceType",
+        "StandardField.sourceConfig",
+        "StandardField.default",
+        "StandardField.desc",
+        "StandardField.required",
+        "StandardField.readonly"
+      ],
+      "type": "object"
+    },
+    "response": {
+      "description": "",
+      "fields": [
+        {
+          "description": "标准字段Id",
+          "name": "instanceId",
+          "type": "string"
+        }
+      ],
+      "type": "object",
+      "wrapper": true
+    },
+    "serviceName": "logic.flowable_service",
+    "status": "release",
+    "updateAuthorizers": [],
+    "version": "1.1.0"
+  },
+  {
+    "_impl_from": [],
+    "_object_id": "FLOW_BUILDER_API_CONTRACT@EASYOPS",
+    "_object_version": 2,
+    "_pre_ts": 1768388087,
+    "_ts": 1773120471,
+    "_version": 4,
+    "configYaml": "{\"eamlVersion\":\"2.0\",\"eamlKind\":\"interface\",\"version\":\"1.1.0\",\"name\":\"GetStandardField\",\"description\":\"获取标准字段实例\",\"import\":[\"easyops.model.flowable_service.DomainModel\",\"easyops.model.flowable_service.StandardField\"],\"endpoint\":{\"method\":\"GET\",\"uri\":\"/api/flowable_service/v1/standard_field/:instanceId\"},\"request\":{\"type\":\"object\",\"fields\":[{\"type\":\"\",\"description\":\"\",\"ref\":\"StandardField.instanceId\"}],\"description\":\"\",\"required\":[\"StandardField.instanceId\"]},\"response\":{\"type\":\"object\",\"fields\":[{\"type\":\"\",\"description\":\"\",\"ref\":\"StandardField.*\"},{\"name\":\"domainModels\",\"type\":\"DomainModel[]\",\"description\":\"关联的领域模型(多对多的关系)\"}],\"description\":\"\",\"wrapper\":true},\"namespace\":[{\"instanceId\":\"5cf1da2215679\",\"id\":\"\",\"type\":\"\",\"description\":null,\"apiProject\":null}],\"namespaceId\":\"easyops.api.flowable_service.standard_field\",\"configYaml\":\"\",\"classify\":\"\",\"importModelDefinition\":null,\"serviceName\":\"logic.flowable_service\",\"fullContractName\":\"easyops.api.flowable_service.standard_field@GetStandardField\",\"examples\":null,\"status\":\"release\"}",
+    "creator": "defaultUser",
+    "ctime": "2025-05-14 10:33:50",
+    "deleteAuthorizers": [],
+    "description": "获取标准字段实例",
+    "eamlKind": "interface",
+    "eamlVersion": "2.0",
+    "endpoint": {
+      "ext_fields": null,
+      "method": "GET",
+      "uri": "/api/flowable_service/v1/standard_field/:instanceId"
+    },
+    "examples": [],
+    "fullContractName": "easyops.api.flowable_service.standard_field@GetStandardField",
+    "import": [
+      "easyops.model.flowable_service.DomainModel",
+      "easyops.model.flowable_service.StandardField"
+    ],
+    "importModelDefinition": [
+      {
+        "fields": [
+          {
+            "description": "标准字段实例Id",
+            "name": "instanceId",
+            "type": "string"
+          },
+          {
+            "description": "唯一标识(英文名, 不可重复)",
+            "name": "key",
+            "type": "string",
+            "validate": {
+              "pattern": "^[a-zA-Z0-9][.a-zA-Z0-9_-]{0,39}$"
+            }
+          },
+          {
+            "description": "名称(中文名, 可重复)",
+            "name": "name",
+            "type": "string"
+          },
+          {
+            "description": "字段类型(枚举)",
+            "name": "kind",
+            "type": "string"
+          },
+          {
+            "description": "数据源类型",
+            "name": "sourceType",
+            "type": "string"
+          },
+          {
+            "description": "数据源配置（JSON字符串）",
+            "name": "sourceConfig",
+            "type": "string"
+          },
+          {
+            "description": "字段默认值",
+            "name": "default",
+            "type": "string"
+          },
+          {
+            "description": "字段说明",
+            "name": "desc",
+            "type": "string"
+          },
+          {
+            "description": "必填 (true 必填)",
+            "name": "required",
+            "type": "bool"
+          },
+          {
+            "description": "只读 (true 只读)",
+            "name": "readonly",
+            "type": "bool"
+          },
+          {
+            "description": "创建时间 (cmdb 内置字段)",
+            "name": "ctime",
+            "type": "string"
+          },
+          {
+            "description": "创建人 (cmdb 内置字段)",
+            "name": "creator",
+            "type": "string"
+          },
+          {
+            "description": "内置标识 (true 为内置自动)",
+            "name": "builtin",
+            "type": "bool"
+          }
+        ],
+        "name": "StandardField"
+      },
+      {
+        "fields": [
+          {
+            "description": "领域模型实例Id",
+            "name": "instanceId",
+            "type": "string"
+          },
+          {
+            "description": "唯一标识(英文名, 唯一, 不可修改)",
+            "name": "key",
+            "type": "string",
+            "validate": {
+              "pattern": "^[a-zA-Z0-9][.a-zA-Z0-9_-]{0,39}$"
+            }
+          },
+          {
+            "description": "领域模型名称(中文名, 非唯一, 可修改)",
+            "name": "name",
+            "type": "string"
+          },
+          {
+            "description": "领域模型说明",
+            "name": "desc",
+            "type": "string"
+          },
+          {
+            "description": "是否允许修改关联字段（默认值：true）",
+            "name": "allowUpdate",
+            "type": "bool"
+          },
+          {
+            "description": "是否为内置模型（默认值：false）",
+            "name": "builtin",
+            "type": "bool"
+          },
+          {
+            "description": "创建时间 (cmdb 内置字段)",
+            "name": "ctime",
+            "type": "string"
+          },
+          {
+            "description": "更新时间 (cmdb 内置字段)",
+            "name": "mtime",
+            "type": "string"
+          },
+          {
+            "description": "创建人 (cmdb 内置字段)",
+            "name": "creator",
+            "type": "string"
+          }
+        ],
+        "name": "DomainModel"
+      }
+    ],
+    "instanceId": "6350f611f9e51",
+    "modifier": "easyops",
+    "mtime": "2026-03-10 13:27:51",
+    "name": "GetStandardField",
+    "namespaceId": "easyops.api.flowable_service.standard_field",
+    "org": 8888,
+    "produces": [],
+    "provider": "providers-of-flowable-service.standard-field-api-get-standard-field",
+    "providerPackage": "providers-of-flowable-service-NB",
+    "readAuthorizers": [],
+    "request": {
+      "description": "",
+      "fields": [
+        {
+          "description": "",
+          "ref": "StandardField.instanceId",
+          "type": ""
+        }
+      ],
+      "required": [
+        "StandardField.instanceId"
+      ],
+      "type": "object"
+    },
+    "response": {
+      "description": "",
+      "fields": [
+        {
+          "description": "",
+          "ref": "StandardField.*",
+          "type": ""
+        },
+        {
+          "description": "关联的领域模型(多对多的关系)",
+          "name": "domainModels",
+          "type": "DomainModel[]"
+        }
+      ],
+      "type": "object",
+      "wrapper": true
+    },
+    "serviceName": "logic.flowable_service",
+    "status": "release",
+    "updateAuthorizers": [],
+    "version": "1.1.0"
+  },
+  {
+    "_impl_from": [],
+    "_object_id": "FLOW_BUILDER_API_CONTRACT@EASYOPS",
+    "_object_version": 2,
+    "_ts": 1773120477,
+    "_version": 1,
+    "configYaml": "{\"eamlVersion\":\"2.0\",\"eamlKind\":\"interface\",\"version\":\"1.1.0\",\"name\":\"CheckCanSave\",\"description\":\"检查是否可以另存为标准字段\",\"import\":[\"easyops.model.flowable_service.StandardField\"],\"endpoint\":{\"method\":\"POST\",\"uri\":\"/api/flowable_service/v1/standard_field/save_check\"},\"request\":{\"type\":\"object\",\"fields\":[{\"type\":\"\",\"description\":\"\",\"ref\":\"StandardField.key\"},{\"type\":\"\",\"description\":\"\",\"ref\":\"StandardField.kind\"}],\"description\":\"\",\"required\":[\"StandardField.key\",\"StandardField.kind\"]},\"response\":{\"type\":\"object\",\"fields\":[{\"name\":\"canCreate\",\"type\":\"bool\",\"description\":\"可以创建\"},{\"name\":\"canUpdate\",\"type\":\"bool\",\"description\":\"可以更新\"},{\"name\":\"updateId\",\"type\":\"string\",\"description\":\"更新ID\"}],\"description\":\"\",\"wrapper\":true},\"namespace\":[{\"instanceId\":\"5cf1da2215679\",\"id\":\"\",\"type\":\"\",\"description\":null,\"apiProject\":null}],\"namespaceId\":\"easyops.api.flowable_service.standard_field\",\"configYaml\":\"\",\"classify\":\"\",\"importModelDefinition\":null,\"serviceName\":\"logic.flowable_service\",\"fullContractName\":\"easyops.api.flowable_service.standard_field@CheckCanSave\",\"examples\":[{\"description\":{\"en\":\"CheckCanSave\",\"zh\":\"检查是否可以保存标准字段\"},\"request\":{\"method\":\"POST\",\"uri\":\"/api/flowable_service/v1/standard_field/save_check\",\"body\":\"{\\n    \\\"key\\\": \\\"ITSC_xxxxxx\\\",\\n    \\\"kind\\\": \\\"INPUT\\\"\\n}\",\"headers\":null},\"response\":{\"body\":\"{\\n    \\\"code\\\": 0,\\n    \\\"error\\\": \\\"\\\",\\n    \\\"message\\\": \\\"\\\",\\n    \\\"data\\\": {\\n        \\\"canCreate\\\": false,\\n        \\\"canUpdate\\\": true,\\n        \\\"updateId\\\": \\\"1234567890\\\"\\n    }\\n}\",\"headers\":{\"Content-Type\":\"application/json; charset=utf-8\"},\"status_code\":200}}],\"status\":\"release\"}",
+    "creator": "easyops",
+    "ctime": "2026-03-10 13:27:57",
+    "deleteAuthorizers": [],
+    "description": "检查是否可以另存为标准字段",
+    "eamlKind": "interface",
+    "eamlVersion": "2.0",
+    "endpoint": {
+      "ext_fields": null,
+      "method": "POST",
+      "uri": "/api/flowable_service/v1/standard_field/save_check"
+    },
+    "examples": [
+      {
+        "description": {
+          "en": "CheckCanSave",
+          "zh": "检查是否可以保存标准字段"
+        },
+        "request": {
+          "body": "{\n    \"key\": \"ITSC_xxxxxx\",\n    \"kind\": \"INPUT\"\n}",
+          "headers": null,
+          "method": "POST",
+          "uri": "/api/flowable_service/v1/standard_field/save_check"
+        },
+        "response": {
+          "body": "{\n    \"code\": 0,\n    \"error\": \"\",\n    \"message\": \"\",\n    \"data\": {\n        \"canCreate\": false,\n        \"canUpdate\": true,\n        \"updateId\": \"1234567890\"\n    }\n}",
+          "headers": {
+            "Content-Type": "application/json; charset=utf-8"
+          },
+          "status_code": 200
+        }
+      }
+    ],
+    "fullContractName": "easyops.api.flowable_service.standard_field@CheckCanSave",
+    "import": [
+      "easyops.model.flowable_service.StandardField"
+    ],
+    "importModelDefinition": [
+      {
+        "fields": [
+          {
+            "description": "标准字段实例Id",
+            "name": "instanceId",
+            "type": "string"
+          },
+          {
+            "description": "唯一标识(英文名, 不可重复)",
+            "name": "key",
+            "type": "string",
+            "validate": {
+              "pattern": "^[a-zA-Z0-9][.a-zA-Z0-9_-]{0,39}$"
+            }
+          },
+          {
+            "description": "名称(中文名, 可重复)",
+            "name": "name",
+            "type": "string"
+          },
+          {
+            "description": "字段类型(枚举)",
+            "name": "kind",
+            "type": "string"
+          },
+          {
+            "description": "数据源类型",
+            "name": "sourceType",
+            "type": "string"
+          },
+          {
+            "description": "数据源配置（JSON字符串）",
+            "name": "sourceConfig",
+            "type": "string"
+          },
+          {
+            "description": "字段默认值",
+            "name": "default",
+            "type": "string"
+          },
+          {
+            "description": "字段说明",
+            "name": "desc",
+            "type": "string"
+          },
+          {
+            "description": "必填 (true 必填)",
+            "name": "required",
+            "type": "bool"
+          },
+          {
+            "description": "只读 (true 只读)",
+            "name": "readonly",
+            "type": "bool"
+          },
+          {
+            "description": "创建时间 (cmdb 内置字段)",
+            "name": "ctime",
+            "type": "string"
+          },
+          {
+            "description": "创建人 (cmdb 内置字段)",
+            "name": "creator",
+            "type": "string"
+          },
+          {
+            "description": "内置标识 (true 为内置自动)",
+            "name": "builtin",
+            "type": "bool"
+          }
+        ],
+        "name": "StandardField"
+      }
+    ],
+    "instanceId": "64ca4c830a4e9",
+    "name": "CheckCanSave",
+    "namespaceId": "easyops.api.flowable_service.standard_field",
+    "org": 8888,
+    "produces": [
+      "application/json"
+    ],
+    "readAuthorizers": [],
+    "request": {
+      "description": "",
+      "fields": [
+        {
+          "description": "",
+          "ref": "StandardField.key",
+          "type": ""
+        },
+        {
+          "description": "",
+          "ref": "StandardField.kind",
+          "type": ""
+        }
+      ],
+      "required": [
+        "StandardField.key",
+        "StandardField.kind"
+      ],
+      "type": "object"
+    },
+    "response": {
+      "description": "",
+      "fields": [
+        {
+          "description": "可以创建",
+          "name": "canCreate",
+          "type": "bool"
+        },
+        {
+          "description": "可以更新",
+          "name": "canUpdate",
+          "type": "bool"
+        },
+        {
+          "description": "更新ID",
+          "name": "updateId",
+          "type": "string"
+        }
+      ],
+      "type": "object",
+      "wrapper": true
+    },
+    "serviceName": "logic.flowable_service",
+    "status": "release",
+    "updateAuthorizers": [],
+    "version": "1.1.0"
+  },
+  {
+    "_impl_from": [],
+    "_object_id": "FLOW_BUILDER_API_CONTRACT@EASYOPS",
+    "_object_version": 2,
+    "_pre_ts": 1768388080,
+    "_ts": 1773120482,
+    "_version": 3,
+    "configYaml": "{\"eamlVersion\":\"2.0\",\"eamlKind\":\"interface\",\"version\":\"1.0.0\",\"name\":\"GetHoliday\",\"description\":\"获取节假日列表\",\"import\":[\"easyops.model.sys_setting.WorkDay\"],\"endpoint\":{\"method\":\"GET\",\"uri\":\"/api/sys_setting/v1/holiday\"},\"request\":{\"type\":\"object\",\"fields\":[{\"name\":\"st\",\"type\":\"string\",\"description\":\"开始时间\"},{\"name\":\"ed\",\"type\":\"string\",\"description\":\"结束时间\"},{\"name\":\"key\",\"type\":\"string\",\"description\":\"节假日的key(区分不同的工作日历,为空使用默认的工作日历)\"}],\"description\":\"\"},\"response\":{\"type\":\"object\",\"fields\":[{\"name\":\"result\",\"type\":\"WorkDay[]\",\"description\":\"节假日列表\"}],\"description\":\"\",\"wrapper\":true},\"namespace\":[{\"instanceId\":\"5efb184ea4e3e\",\"id\":\"\",\"type\":\"\",\"description\":null,\"apiProject\":null}],\"namespaceId\":\"easyops.api.sys_setting.work_calendar\",\"configYaml\":\"\",\"classify\":\"\",\"importModelDefinition\":null,\"serviceName\":\"logic.sys_setting\",\"fullContractName\":\"easyops.api.sys_setting.work_calendar@GetHoliday\",\"examples\":null,\"status\":\"release\"}",
+    "creator": "easyops",
+    "ctime": "2025-07-01 09:04:01",
+    "deleteAuthorizers": [],
+    "description": "获取节假日列表",
+    "eamlKind": "interface",
+    "eamlVersion": "2.0",
+    "endpoint": {
+      "ext_fields": null,
+      "method": "GET",
+      "uri": "/api/sys_setting/v1/holiday"
+    },
+    "examples": [],
+    "fullContractName": "easyops.api.sys_setting.work_calendar@GetHoliday",
+    "import": [
+      "easyops.model.sys_setting.WorkDay"
+    ],
+    "importModelDefinition": [
+      {
+        "fields": [
+          {
+            "description": "具体日期",
+            "name": "date",
+            "type": "date"
+          },
+          {
+            "description": "是否休假(1是,0否)",
+            "name": "isOff",
+            "type": "int"
+          },
+          {
+            "description": "时间范围(09:00~12:00;14:00~18:00)",
+            "name": "workHours",
+            "type": "string",
+            "validate": {
+              "pattern": "^((?:[01]\\d|2[0-3]):[0-5]\\d)~((?:[01]\\d|2[0-3]):[0-5]\\d)"
+            }
+          },
+          {
+            "description": "休假时间，同上",
+            "name": "offHours",
+            "type": "string",
+            "validate": {
+              "pattern": "^((?:[01]\\d|2[0-3]):[0-5]\\d)~((?:[01]\\d|2[0-3]):[0-5]\\d)"
+            }
+          }
+        ],
+        "name": "WorkDay"
+      }
+    ],
+    "instanceId": "5f05243a134a3",
+    "modifier": "easyops",
+    "mtime": "2026-03-10 13:28:02",
+    "name": "GetHoliday",
+    "namespaceId": "easyops.api.sys_setting.work_calendar",
+    "org": 8888,
+    "produces": [],
+    "readAuthorizers": [],
+    "request": {
+      "description": "",
+      "fields": [
+        {
+          "description": "开始时间",
+          "name": "st",
+          "type": "string"
+        },
+        {
+          "description": "结束时间",
+          "name": "ed",
+          "type": "string"
+        },
+        {
+          "description": "节假日的key(区分不同的工作日历,为空使用默认的工作日历)",
+          "name": "key",
+          "type": "string"
+        }
+      ],
+      "type": "object"
+    },
+    "response": {
+      "description": "",
+      "fields": [
+        {
+          "description": "节假日列表",
+          "name": "result",
+          "type": "WorkDay[]"
+        }
+      ],
+      "type": "object",
+      "wrapper": true
+    },
+    "serviceName": "logic.sys_setting",
+    "status": "release",
+    "updateAuthorizers": [],
+    "version": "1.0.0"
+  },
+  {
+    "_impl_from": [],
+    "_object_id": "FLOW_BUILDER_API_CONTRACT@EASYOPS",
+    "_object_version": 2,
+    "_pre_ts": 1768388083,
+    "_ts": 1773120478,
+    "_version": 2,
+    "configYaml": "{\"eamlVersion\":\"2.0\",\"eamlKind\":\"interface\",\"version\":\"1.1.0\",\"name\":\"CheckHolidayByDate\",\"description\":\"验证日期是否是节假日\",\"import\":[\"easyops.model.sys_setting.WorkCalendar\"],\"endpoint\":{\"method\":\"POST\",\"uri\":\"/api/sys_setting/v1/work/calendar/holiday\"},\"request\":{\"type\":\"object\",\"fields\":[{\"name\":\"date\",\"type\":\"string\",\"description\":\"年月日，如 2023-01-01\"},{\"name\":\"calendarId\",\"type\":\"string\",\"description\":\"日历id,为空则默认取国家法定节假日日历\"}],\"description\":\"\",\"required\":[\"date\"]},\"response\":{\"type\":\"object\",\"fields\":[{\"name\":\"isHoliday\",\"type\":\"bool\",\"description\":\"是否是节假日\"}],\"description\":\"\",\"wrapper\":true},\"namespace\":[{\"instanceId\":\"5efb184ea4e3e\",\"id\":\"\",\"type\":\"\",\"description\":null,\"apiProject\":null}],\"namespaceId\":\"easyops.api.sys_setting.work_calendar\",\"configYaml\":\"\",\"classify\":\"\",\"importModelDefinition\":null,\"serviceName\":\"logic.sys_setting\",\"fullContractName\":\"easyops.api.sys_setting.work_calendar@CheckHolidayByDate\",\"examples\":[{\"description\":{\"en\":\"CheckHolidayByDate\",\"zh\":\"验证日期是否是节假日\"},\"request\":{\"method\":\"POST\",\"uri\":\"http://127.0.0.1:8134/api/sys_setting/v1/work/calendar/holiday\",\"body\":\"{\\n  \\\"data\\\": \\\"2024-05-01\\\",\\n}\",\"headers\":null},\"response\":{\"body\":\"{\\n    \\\"code\\\": 0,\\n    \\\"error\\\": \\\"\\\",\\n    \\\"message\\\": \\\"\\\",\\n    \\\"data\\\": {\\n      \\\"isHoliday\\\": true,\\n    }\\n}\",\"headers\":{\"Content-Type\":\"application/json; charset=utf-8\"},\"status_code\":200}}],\"status\":\"release\"}",
+    "creator": "defaultUser",
+    "ctime": "2026-01-14 18:54:43",
+    "deleteAuthorizers": [],
+    "description": "验证日期是否是节假日",
+    "eamlKind": "interface",
+    "eamlVersion": "2.0",
+    "endpoint": {
+      "ext_fields": null,
+      "method": "POST",
+      "uri": "/api/sys_setting/v1/work/calendar/holiday"
+    },
+    "examples": [
+      {
+        "description": {
+          "en": "CheckHolidayByDate",
+          "zh": "验证日期是否是节假日"
+        },
+        "request": {
+          "body": "{\n  \"data\": \"2024-05-01\",\n}",
+          "headers": null,
+          "method": "POST",
+          "uri": "http://127.0.0.1:8134/api/sys_setting/v1/work/calendar/holiday"
+        },
+        "response": {
+          "body": "{\n    \"code\": 0,\n    \"error\": \"\",\n    \"message\": \"\",\n    \"data\": {\n      \"isHoliday\": true,\n    }\n}",
+          "headers": {
+            "Content-Type": "application/json; charset=utf-8"
+          },
+          "status_code": 200
+        }
+      }
+    ],
+    "fullContractName": "easyops.api.sys_setting.work_calendar@CheckHolidayByDate",
+    "import": [
+      "easyops.model.sys_setting.WorkCalendar"
+    ],
+    "importModelDefinition": [
+      {
+        "fields": [
+          {
+            "description": "ID(objectId类型)",
+            "name": "id",
+            "type": "string"
+          },
+          {
+            "description": "名称",
+            "name": "name",
+            "type": "string"
+          },
+          {
+            "description": "创建人",
+            "name": "creator",
+            "type": "string"
+          },
+          {
+            "description": "创建时间",
+            "name": "ctime",
+            "type": "int64"
+          },
+          {
+            "description": "备注",
+            "name": "memo",
+            "type": "string"
+          },
+          {
+            "description": "工作日详情",
+            "name": "days",
+            "type": "WorkDay[]"
+          },
+          {
+            "description": "日历配置",
+            "name": "config",
+            "type": "WorkCalendarConfig"
+          },
+          {
+            "description": "日历标识（可为空，不可修改；一般用于初始化时导入使用）",
+            "name": "key",
+            "type": "string"
+          },
+          {
+            "description": "是否内置",
+            "name": "builtin",
+            "type": "bool"
+          },
+          {
+            "description": "状态",
+            "name": "status",
+            "type": "bool"
+          },
+          {
+            "description": "年份",
+            "name": "year",
+            "type": "string"
+          },
+          {
+            "description": "已经新建的年份",
+            "name": "dataYears",
+            "type": "string[]"
+          },
+          {
+            "description": "修改人",
+            "name": "modifier",
+            "type": "string"
+          },
+          {
+            "description": "修改时间",
+            "name": "mtime",
+            "type": "string"
+          }
+        ],
+        "name": "WorkCalendar"
+      },
+      {
+        "fields": [
+          {
+            "description": "编辑模式",
+            "name": "mode",
+            "type": "string"
+          },
+          {
+            "description": "工作日配置",
+            "fields": [
+              {
+                "description": "星期(0~6)",
+                "name": "weekday",
+                "type": "int"
+              },
+              {
+                "description": "工作时间(09:00~12:00;14:00~18:00)",
+                "name": "hours",
+                "type": "string",
+                "validate": {
+                  "pattern": "^((?:[01]\\d|2[0-3]):[0-5]\\d)~((?:[01]\\d|2[0-3]):[0-5]\\d)"
+                }
+              }
+            ],
+            "name": "workDayList",
+            "type": "object[]"
+          },
+          {
+            "description": "假期配置",
+            "name": "holidayList",
+            "type": "WorkDayConfig[]"
+          },
+          {
+            "description": "补班配置",
+            "name": "extraDayList",
+            "type": "WorkDayConfig[]"
+          },
+          {
+            "description": "独立日配置",
+            "fields": [
+              {
+                "description": "具体日期",
+                "name": "date",
+                "type": "date"
+              },
+              {
+                "description": "是否休假(1是,0否)",
+                "name": "isOff",
+                "type": "int"
+              },
+              {
+                "description": "时间范围(09:00~12:00;14:00~18:00)",
+                "name": "hours",
+                "type": "string",
+                "validate": {
+                  "pattern": "^((?:[01]\\d|2[0-3]):[0-5]\\d)~((?:[01]\\d|2[0-3]):[0-5]\\d)"
+                }
+              }
+            ],
+            "name": "independenceDayList",
+            "type": "object[]"
+          }
+        ],
+        "name": "WorkCalendarConfig"
+      },
+      {
+        "fields": [
+          {
+            "description": "起始日期",
+            "name": "from",
+            "type": "date"
+          },
+          {
+            "description": "结束日期",
+            "name": "to",
+            "type": "date"
+          },
+          {
+            "description": "备注",
+            "name": "memo",
+            "type": "string"
+          },
+          {
+            "description": "时间范围(09:00~12:00;14:00~18:00)",
+            "name": "hours",
+            "type": "string",
+            "validate": {
+              "pattern": "^((?:[01]\\d|2[0-3]):[0-5]\\d)~((?:[01]\\d|2[0-3]):[0-5]\\d)"
+            }
+          }
+        ],
+        "name": "WorkDayConfig"
+      },
+      {
+        "fields": [
+          {
+            "description": "具体日期",
+            "name": "date",
+            "type": "date"
+          },
+          {
+            "description": "是否休假(1是,0否)",
+            "name": "isOff",
+            "type": "int"
+          },
+          {
+            "description": "时间范围(09:00~12:00;14:00~18:00)",
+            "name": "workHours",
+            "type": "string",
+            "validate": {
+              "pattern": "^((?:[01]\\d|2[0-3]):[0-5]\\d)~((?:[01]\\d|2[0-3]):[0-5]\\d)"
+            }
+          },
+          {
+            "description": "休假时间，同上",
+            "name": "offHours",
+            "type": "string",
+            "validate": {
+              "pattern": "^((?:[01]\\d|2[0-3]):[0-5]\\d)~((?:[01]\\d|2[0-3]):[0-5]\\d)"
+            }
+          }
+        ],
+        "name": "WorkDay"
+      }
+    ],
+    "instanceId": "64856ef842d29",
+    "modifier": "easyops",
+    "mtime": "2026-03-10 13:27:58",
+    "name": "CheckHolidayByDate",
+    "namespaceId": "easyops.api.sys_setting.work_calendar",
+    "org": 8888,
+    "produces": [
+      "application/json"
+    ],
+    "readAuthorizers": [],
+    "request": {
+      "description": "",
+      "fields": [
+        {
+          "description": "年月日，如 2023-01-01",
+          "name": "date",
+          "type": "string"
+        },
+        {
+          "description": "日历id,为空则默认取国家法定节假日日历",
+          "name": "calendarId",
+          "type": "string"
+        }
+      ],
+      "required": [
+        "date"
+      ],
+      "type": "object"
+    },
+    "response": {
+      "description": "",
+      "fields": [
+        {
+          "description": "是否是节假日",
+          "name": "isHoliday",
+          "type": "bool"
+        }
+      ],
+      "type": "object",
+      "wrapper": true
+    },
+    "serviceName": "logic.sys_setting",
+    "status": "release",
+    "updateAuthorizers": [],
+    "version": "1.1.0"
+  },
+  {
+    "_impl_from": [],
+    "_object_id": "FLOW_BUILDER_API_CONTRACT@EASYOPS",
+    "_object_version": 2,
+    "_ts": 1773120477,
+    "_version": 1,
+    "configYaml": "{\"eamlVersion\":\"2.0\",\"eamlKind\":\"interface\",\"version\":\"1.0.0\",\"name\":\"GetHoliday\",\"description\":\"获取节假日\",\"endpoint\":{\"method\":\"GET\",\"uri\":\"/api/topboard/v1/holiday\"},\"request\":{\"type\":\"object\",\"fields\":[{\"name\":\"from\",\"type\":\"string\",\"description\":\"开始时间(格式 yyyy-mm-dd eg:2022-06-03)\"},{\"name\":\"to\",\"type\":\"string\",\"description\":\"结束时间(格式 yyyy-mm-dd eg:2022-06-03)\"}],\"description\":\"\"},\"response\":{\"type\":\"object\",\"fields\":[{\"name\":\"data\",\"type\":\"string[]\",\"description\":\"日期列表\"},{\"name\":\"total\",\"type\":\"int\",\"description\":\"总数\"}],\"description\":\"\",\"wrapper\":true},\"namespace\":[{\"instanceId\":\"5cf1da3694d1a\",\"id\":\"\",\"type\":\"\",\"description\":null,\"apiProject\":null}],\"namespaceId\":\"easyops.api.topboard.topboard\",\"configYaml\":\"\",\"classify\":\"\",\"importModelDefinition\":null,\"serviceName\":\"logic.topboard\",\"fullContractName\":\"easyops.api.topboard.topboard@GetHoliday\",\"examples\":null,\"status\":\"release\"}",
+    "creator": "easyops",
+    "ctime": "2026-03-10 13:27:57",
+    "deleteAuthorizers": [],
+    "description": "获取节假日",
+    "eamlKind": "interface",
+    "eamlVersion": "2.0",
+    "endpoint": {
+      "ext_fields": null,
+      "method": "GET",
+      "uri": "/api/topboard/v1/holiday"
+    },
+    "examples": [],
+    "fullContractName": "easyops.api.topboard.topboard@GetHoliday",
+    "import": [],
+    "importModelDefinition": [],
+    "instanceId": "64ca4c830a6dd",
+    "name": "GetHoliday",
+    "namespaceId": "easyops.api.topboard.topboard",
+    "org": 8888,
+    "produces": [
+      "application/json"
+    ],
+    "readAuthorizers": [],
+    "request": {
+      "description": "",
+      "fields": [
+        {
+          "description": "开始时间(格式 yyyy-mm-dd eg:2022-06-03)",
+          "name": "from",
+          "type": "string"
+        },
+        {
+          "description": "结束时间(格式 yyyy-mm-dd eg:2022-06-03)",
+          "name": "to",
+          "type": "string"
+        }
+      ],
+      "type": "object"
+    },
+    "response": {
+      "description": "",
+      "fields": [
+        {
+          "description": "日期列表",
+          "name": "data",
+          "type": "string[]"
+        },
+        {
+          "description": "总数",
+          "name": "total",
+          "type": "int"
+        }
+      ],
+      "type": "object",
+      "wrapper": true
+    },
+    "serviceName": "logic.topboard",
+    "status": "release",
+    "updateAuthorizers": [],
+    "version": "1.0.0"
+  }
+]

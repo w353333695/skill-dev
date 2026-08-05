@@ -1,0 +1,481 @@
+concepts:
+- name: api-calling
+  file: concepts/api-calling/api-calling.md
+  tags:
+  - API调用
+  - 脚本开发
+  - 鉴权
+  - 内网直连
+  - OpenAPI
+  - AK/SK
+  - HMAC-SHA1
+  - 签名
+  - 翻页
+  - 跨模块
+  completeness: partial
+  gaps:
+  - OpenAPI(AK/SK)签名模式未持有凭证实测（内网模式已真调验证）
+  - PORT_APP_MAP 仅含 8079→cmdbservice，其他端口的 app_name 映射待补
+  last_verified: '2026-07-23'
+  note: EasyOps 平台 API 调用脚本开发参考（客户自研脚本仿照用）。三种访问方式：内网直连 (host:port + user/org 头，推荐)/网关代理(80端口+cookie，不宜脚本依赖)/OpenAPI签名(AK/SK+HMAC-SHA1，跨网络)。
+    同目录 api-samples.py 为可跑参考实现（EasyOpsClient：双模式鉴权、签名算法、自动翻页、CMDB搜索/计数具体方法）。 切面对照：本概念面向「客户独立脚本」（脱离skill体系），registry卡片+execute_dag
+    已封装同样三种方式供编排调用—— 编排走卡片，独立脚本仿照本样例。内网模式已真调验证，OpenAPI签名未实测。 交付脚本形态规范（独立调用脚本必遵）：①独立可执行自包含（不
+    import 项目内模块，客户端传输层完整内联 EasyOpsClient 类，禁重构骨架） ②不动态引用 api_calling ③默认不用 argparse（参数放 if __name__=="__main__"
+    下）。
+- name: instance-id
+  file: concepts/instance-id.md
+  tags:
+  - instanceId
+  - ID生成
+  - 跨模块
+  - modelId别名
+  completeness: full
+  gaps: []
+  last_verified: '2026-07-22'
+- name: cmdb-model
+  file: concepts/cmdb-model.md
+  tags:
+  - CMDB
+  - 模型
+  - objectId
+  - attrList
+  - 值类型
+  - value.type
+  - enum
+  - struct
+  - relation_list
+  - 跨级关系
+  - trans_hier_relation_list
+  - view
+  - 对象类型
+  - CI类型
+  - 资源模型
+  completeness: partial
+  gaps:
+  - 跨级关系query_path确切语法（样例为null，无真实跨级关系样本）
+  - indexList与*Authorizers确切结构（样例为空[]）
+  - relation_groups完整字段（仅反推含id/name）
+  - 命名规则未证实（objectId大写/属性id小写仍属样例归纳，非规则级铁证；relation_id命名规则已由样例逐段吻合+用户确认，见§5.1）
+  - default_type="series"序列号语义（推断，代码仅见!=="value"判断，无series字样）
+  - struct_define子项是否固定6字段（样本归纳，前端列定义仅展示4列）
+  last_verified: '2026-08-03'
+  note: easyops CMDB 平台「模型」（对象类型/CI类型）结构知识：objectId / attrList属性(12种值类型) / relation_list关系(左右双向)
+    / 跨级关系(挂view.trans_hier_relation_list) / view视图。同目录 cmdb-model-sample.json 为真实模型导出样例(TESTWWH：15属性覆盖12值类型+1关系)。
+    ⚠️概念边界：本概念是 CMDB 资源建模，非 ITSM 领域模型(registry/domain_model，走flowable_service、关联standard_field)——二者独立体系，
+    domain_model 通过 queryCMDBInstance 反向引用 CMDB 实例。字段结构经真实样例+前端TS接口双佐证；命名规则/default_type=series等
+    推断项见 frontmatter gaps。§0.1 模型创建接口（2026-08-03 真调）：前端 model_create/attr_create 细粒度接口；脚本/批量建模走 model_import(POST /v2/object_import) 自行组装完整 json，导出用 model_export。
+- name: order-info
+  file: concepts/order-info.md
+  tags:
+  - orderInfo
+  - 工单全景
+  - 脚本入参
+  - 跨模块
+  - 表单脚本
+  - 节点前后置脚本
+  - processInstance
+  - stepList
+  completeness: partial
+  gaps:
+  - orderInfo 顶层字段经 2026-07-28 真实工单样本核对（formData 结构已实测修正：list[{key,values}]）；个别边缘字段是否存在/为空仍待更多样本佐证
+  - orderNum 工单号格式（如 ITSC-YYYYMMDD-NNN）为源码摘录示例，本环境实际工单号格式未核对
+  - rTime 的 Go duration 格式在异常工单（如未开始计时）下的取值未核对
+  last_verified: '2026-07-28'
+  note: ITSM 工单「全景 + 当前步骤上下文」运行时数据结构（JSON 字符串，脚本中需 json.loads）。由 flowable_service
+    GetOrderInfo 组装，语义 = 当前工单全量 + 当前步骤上下文。是三类脚本的核心入参：表单生命周期脚本（afterDataLoad/ preSubmitCheck/onValueChange/componentLoad，非首节点）、流程节点前后置脚本（preScript/postScript）、控件联动脚本（经
+    scriptInputs 间接取 currentNode/history）。⚠️ 首节点发起时工单尚未创建，orderInfo 不存在。来源：源码归纳，未以真实工单
+    完整实例逐字段核对。消费方：modules/form_development/form-advanced.md（表单脚本）、modules/process_development/
+    process-definition-v2-dev.md §4.4（节点脚本）。
+- name: cmdb-instance
+  file: concepts/cmdb-instance.md
+  tags:
+  - CMDB
+  - 实例
+  - instance
+  - 写入
+  - importInstance
+  - failed_count
+  - 跨模块
+  completeness: partial
+  gaps:
+  - importInstance 的 datas 每行字段约束（值类型/枚举/必填/正则）来自模型定义，跨字段组合校验规则（如 A 字段依赖 B 字段）未展开
+  - updateInstance 与 importInstance 的失败判定是否一致（updateInstance 是否也 code=0 + failed_count）未实测
+  - 批量导入的 failed 行 detail 结构未以真实失败样本核对
+  last_verified: '2026-07-28'
+  note: 'CMDB 实例「写」操作规范（importInstance/updateInstance）：写之前必须 GET 模型定义核对字段约束（值类型 value.type /
+    枚举候选 value.regex / 必填 required / 正则 regex，约束细节见 concepts/cmdb-model §2-§4），按约束构造实例数据；写入后失败判定
+    必须看 data.failed_count（code=0 也可能部分行失败）。跨模块通用：流程脚本回写、编排、独立脚本都适用。来源：2026-07-28 主机申请流程
+    验收脚本回写 HOST 实测。'
+modules:
+  standard_field:
+  - name: standard-field-types
+    file: modules/standard_field/standard-field-types.md
+    tags:
+    - 标准字段
+    - standard_field
+    - 字段类型
+    - kind
+    - sourceConfig
+    - ITSC_前缀
+    - 跨表单复用
+    completeness: partial
+    gaps:
+    - 各 kind 的 sourceConfig 专属 options.extraProps 配置（如 SELECT 的候选、DATE 的 format）复用表单控件结构，未逐
+      kind 列出（见 form_development §3.2/§3.3，按控件类型而定）
+    - sourceType 枚举仅知 customize（自定义），其他取值（如内置/系统）未核对
+    - fileCfgResource（文件类字段配置资源）的具体结构未展开
+    - 未以真实标准字段实例端到端验证（字段模型/接口为 flowable_service 源码 + 领域模型 openapi 归纳，非真机实测）
+    last_verified: ''
+    note: ITSM 标准字段（跨表单/跨工单复用字段）知识：字段模型（key 必须 ITSC_ 前缀、全局唯一）、kind 枚举（取值同表单控件 field_kind，完整列表在
+      modules/form_development/form-schema-v2-dev.md §3.3）、sourceConfig（= 控件定义 JSON
+      模板）、 CRUD + 聚合接口、表单引用方式。切面定位：标准字段「模型/契约」，registry/standard_field 描述运行态接口卡片。
+      来源：flowable_service 源码 + 领域模型 openapi StandardFieldDetail 归纳，未真机实测。
+  process_design:
+  - name: bpmn-compliance-rules
+    file: modules/process_design/compliance-rules.md
+    tags:
+    - ITSM
+    - 流程
+    - BPMN
+    - 合规检测
+    - bpmnlint
+    - flowable
+    - 网关
+    - 开始事件
+    - 流程设计
+    completeness: full
+    gaps: []
+    last_verified: ''
+    note: 'easyops itsc 后台 bpmn-js-bpmnlint 27 条规则的等价知识（15 条默认启用 / 12 条 off）。 同目录
+      check_compliance.py / check_layout.py 为可执行配套（零依赖，对 BPMN XML 做语义合规 + 图形布局静态校验）；sample.bpmn
+      为测试样例。 语义对照：本模块描述流程「设计态」（BPMN XML 的静态规则），registry/process 描述流程「运行态」（flowable
+      引擎的创建/保存/查询/跳转接口）；同名对象不同切面， 非重复。规则集为平台特定，归 knowledge/modules 作为领域知识延伸，不进 skill。
+
+      '
+  process_development:
+  - name: process-definition-v2-dev
+    file: modules/process_development/process-definition-v2-dev.md
+    tags:
+    - ITSM
+    - 流程开发
+    - flowable_service
+    - process_definition_version
+    - bpmnXML
+    - processSetting
+    - 接口契约
+    completeness: partial
+    gaps:
+    - ⚠️ 「首个 state=done 版本自动设主版本并部署」未在实测复现：定稿 done 后部署已发生（版本层 deploymentId/flowableDefinitionId），但 isMain 未自动置 true——「部署」与「设主」实测为两个动作。**显式设主内网 path 已找到并验证**：`PUT /api/flowable_service/v1/definition/{definitionId}/version/{versionId}`（8134，user/org 头，**注意是 /v1/definition/ 不是 /v2/**，设主会触发部署，超时设 120s）。设主后版本层 isMain=True，但**定义列表层 list_process_definition 的 isMain/deploymentId 仍有延迟/不同步**（平台特性，gap-034 原记"定义列表层空"即此）——以版本层 isMain/deploymentId 为准。
+    - 处理人 userType 三件套在工单实际流转中的解析行为未验证（真调建库时 GET 已见 userType 正确解析如 loginUser / historyExecLeader / assigneeGroups，但未发起工单验证流转）
+    - dataVersion 固定写入 AssignListVariant 为源码摘录，其他 dataVersion 取值未核对
+    - 权限 action 名（processDefinitionCreateAction / processDefinitionUpdateAction / processDefinitionAccessAction）为源码归纳，本环境用 defaultUser + org 未遇权限拒绝但 action 名未单独核对
+    - cleanSetting 清洗规则的精确边界（nextAssignees / rejectNodes 指向不存在节点时的剔除逻辑）未实测（真调中 PUT 回传原样被接受，未构造脏数据验证清洗）
+    - set_form_version / set_process_version_stages / set_focus_field_v2 / set_main_version 等附带接口的精确契约未展开（仅指明分工）
+    - ✅ 已纠正（2026-07-28）：§5.1/§5.2 示例原画了驳回 sequenceFlow（Flow_4 Task_audit→Task_apply），与真实环境不符。**驳回是运行时动态跳转，靠 nodeSettings.rejectNodes 配置，bpmnXML 不画反向驳回连线**。铁证：host-apply 真实流程 bpmnXML 只有前进连线（0 条驳回），3 个审批节点驳回到 Task_apply 全靠 rejectNodes。已删除示例的 Flow_4，新增 §5.4 驳回机制实证，同步修正 §4.2/§7 表述。
+    - ✅ 已补（2026-07-28）：§4.5 脚本选型补「脚本按需配置」原则（非每节点必配）+ 新增「动态指定下个节点处理人」场景（按表单值组合/匹配/查表算处理人 → 前置+同步）。区分：表单值能直接当处理人用 assignee={{.formValue}}，复杂规则才用脚本。
+    last_verified: '2026-07-28'
+    note: EasyOps ITSM 流程定义 V2 开发指南：flowable_service.process_definition_version 模块四个核心接口
+      （EditProcessDefinition / GetProcessDefinitionVersionV2 / CreateProcessDefinitionVersionV2
+      / EditProcessDefinitionVersionV2）的契约、 bpmnXML 详解（元素清单 / userTask 属性全表 / 处理人三件套
+      / 分支条件 / 子流程 / 图合法性约束）、processSetting 详解 （lineSettings / nodeSettings 字段逐项 /
+      allowedOps 取值 / candidateSettings / nextAssigneeSetting / scriptSettings / suspendSetting）、
+      流程节点脚本编写（§4.4：节点前后置脚本入参 action/scriptType/orderInfo、执行链路、与表单事件脚本的区别）+ §4.2 operations 触发方式完整取值（pass/reject/withdraw/claim/jump/assignee/distribute/cc/add，非 allowedOps 的 done）+ isAsync 执行方式、 端到端示例与完整交付顺序、LLM
+      组织请求体检查清单、真调验证记录（§8）。 切面定位：本知识描述流程「开发态 / 契约态」（接口字段深层语义 + 请求体如何组装），与 modules/process_design（设计态
+      BPMN 静态合规规则）、registry/process（运行态接口卡片）三切面互补， 同名对象不同切面，非重复。节点脚本共享入参 orderInfo
+      见 concepts/order-info；表单事件脚本（与节点脚本区分）见 modules/form_development/form-advanced.md。来源：源码整理；2026-07-27
+      已真调验证核心接口 path/字段/请求体/taskInfo 视图；自动设主规则未复现、 处理人工单流转 / 附带接口契约仍待验证（详见正文 §8）。
+  form_design:
+  - name: form-design-spec
+    file: modules/form_design/form-design-spec.md
+    tags:
+    - ITSM
+    - 表单
+    - form
+    - 表单设计
+    - 控件
+    - widget
+    - 容器
+    - container
+    - 栅格
+    - CMDB容器
+    completeness: full
+    gaps: []
+    last_verified: '2026-07-28'
+    note: easyops itsc 表单「设计态」结构知识：formDefinition JSON 的数据结构 / 7 容器 / 31 控件 / 12 栏栅格布局
+      / 24 条生产红线。同目录 check_form_design.py 为可执行配套（零依赖，对表单 JSON 做设计期 schema 静态校验）； sample.json
+      为合规样例，sample.invalid.json 为反例。 切面对照：本模块描述表单「设计态」（formDefinition 结构规则）， modules/form_development
+      描述表单「开发态/契约态 + 进阶运行时」（接口契约/请求体组织/数据继承/条件显示/表单脚本）， registry/form 描述表单「运行态」（createForm/getFormVersion
+      等接口）；同名对象不同切面，非重复。高级特性（条件显示/ 数据继承/绑定脚本）已于 2026-07-27 迁移至 form_development/form-advanced.md，本模块
+      §7 仅留速查指针。结构规则为平台特定，归 knowledge/modules 作为领域知识延伸，不进 skill。
+  form_development:
+  - name: form-schema-v2-dev
+    file: modules/form_development/form-schema-v2-dev.md
+    tags:
+    - ITSM
+    - 表单开发
+    - flowable_service
+    - form_schema
+    - formDefinition
+    - 表单接口契约
+    - SetFormVersion
+    - form_data_source
+    completeness: partial
+    gaps:
+    - 未在真实 EasyOps 环境端到端真调验证（表单版本 V2 接口的请求体组织为 flowable_service 源码归纳，非真机实测）
+    - UpdateFormSchemaVersionV2 对 done 版本「自动新建版本」与草稿「原地更新」的分支行为为源码归纳，未构造两种 state 实测对照
+    - businessRules 字段服务端原样存储不解析，其前端规则引擎 DSL 具体语法未展开（平台不解析，消费方约定）
+    - dataSourceIdList 引用数据源后，控件 options.extraProps 中数据源引用的具体 key 由前端约定，服务端不校验，本知识未记录该
+      key 名
+    - 权限 action 名（formManagementAccessAction / formManagementCreateAction / formManagementUpdateAction
+      / processDefinitionUpdateAction）为源码归纳，本环境权限配置未核对
+    last_verified: ''
+    note: EasyOps ITSM 表单 schema V2 开发指南：表单版本三接口（Save/Update/Get FormSchemaVersionV2）契约、formDefinition
+      字段全表（容器/控件/field_kind 枚举/派生处理）、流程节点绑定 SetFormVersion、表单数据源 form_data_source、端到端示例与
+      检查清单。切面定位：表单「开发态/契约态」（接口字段语义 + 请求体组织），与 modules/form_design（设计态结构规则）、 registry/form（运行态接口卡片）三切面互补，非重复。标准字段模型/接口归
+      modules/standard_field。来源：flowable_service 源码整理，未真机核对。
+  - name: form-advanced
+    file: modules/form_development/form-advanced.md
+    tags:
+    - ITSM
+    - 表单进阶
+    - 数据继承
+    - 条件显示
+    - displayCondition
+    - 表单生命周期脚本
+    - remoteFunc
+    - afterDataLoad
+    - preSubmitCheck
+    - formConfig
+    completeness: partial
+    gaps:
+    - 未在真实 EasyOps 环境端到端真调验证（表单生命周期脚本 / 数据继承运行为 flowable_service 源码归纳，非真机实测）
+    - displayCondition 表达式语法（不支持跨字段 OR、AND 规则、字段优先级）为产品手册规范归纳，未构造多种表达式实测求值
+    - formConfig 动态改写的「与原表单定义同构的裁剪数组」规则为产品手册原文要点，未以真实脚本输出验证前端合并行为
+    - CMDB 变更容器的「删除标记 / 只读继承」运行时行为为源码（mergeData / ExecuteScriptTools）归纳，未构造变更实例实测
+    - 父子工单数据传递（service_subinst_deliver_config）与工单转换（update_service_convertible_config）仅指明分工，精确契约未展开
+    - 跨表单容器继承（实施表单容器 default 指向另一张申请表单的容器）+「继承容器+额外控件」的运行时数据回填行为为源码语义推断，未发起工单端到端实测（主机申请流程已配此结构，待真实工单验证继承是否生效 + 新增列数据共存）
+    last_verified: ''
+    note: EasyOps ITSM 表单「进阶/运行时行为」：数据继承三种机制（容器继承/父子工单/工单转换）、条件显示 displayCondition
+      深化 （两种配置位置/表达式语法/服务端行为）、表单生命周期脚本（事件/入参/返回约定/formConfig 动态改写/执行链路）、速查配置落点。 切面定位：表单「运行时行为/脚本」，与
+      form-schema-v2-dev（开发态接口契约）、form_design（设计态结构规则）三切面互补。 ⚠️ 流程节点前后置脚本的编写态归 modules/process_development（本文件仅区分边界+交叉引用）；脚本共享入参
+      orderInfo 归 concepts/order-info。来源：flowable_service 源码（process_script/internal/form/internal/tool）+
+      产品手册整理，未真机核对。
+  autoops_tool:
+  - name: tool-package-dev
+    file: modules/autoops_tool/tool-package-dev.md
+    tags:
+    - AutoOps
+    - 工具包
+    - 工具开发
+    - tool_service
+    - 脚本工具
+    - 打包
+    - 导入
+    completeness: partial
+    gaps:
+    - 脚本在目标机端到端执行未测（包构造/预检/导入/回查已真机验证 2026-07-29~30，工具「文件分发包下载」v1.0.0~v1.0.3）
+    - 预装第三方 Python 库版本为平台开发教程摘录（如 psutil 4.3.0 / requests 2.8.1 / PyMySQL 0.7.9），实际运行环境版本未核对
+    - containerSandbox.image 是否生效取决于目标环境平台配置 containerSandboxConfig.enableCustom，本环境实际配置未核对
+    - sandbox.service_name / sandbox.exec_user / sandbox.tools / sandbox.ips 等服务端配置项具体取值未核对
+    - 附录 C 内置变量 EASYOPS_* 未全量实测，已反证 EASYOPS_DEPLOY_REPO_HOST 未按预期注入（2026-07-30）——引用前先跑「变量探针版本」或用显式 HOST 常量
+    - cmdbInstance 单选参数注入值形态（instanceId/packageId/dict）未实测，脚本需三形态兼容解析
+    last_verified: '2026-07-30'
+    note: EasyOps AutoOps 工具包（.tool.tar.gz）开发说明：包结构（._easyPackageConfig.dat/config/script/libs）、
+      config 字段白名单与取值、inputs 输入参数（枚举型 type:enum+primitive:true、cmdbInstance 单选实测结构）、
+      导入端处理流程与冲突校验、相关 API、手工打造工具包步骤、 工具输出（outputDefs/tableDefs
+      + PutStr/PutRow）、沙箱执行（sandboxRun/containerSandbox，默认不沙箱）、脚本运行环境（内置变量/函数/预装库）、
+      脚本默认规范（py2.7 shebang、不加 u 前缀、变量探针先行）。 来源：tool_service
+      源码（import_export 模块）+ tool.import_export.* API + 工具平台开发教程整理 + 2026-07-29~30「文件分发包下载」实战回流。
+      切面定位：本知识描述工具包「构造/开发态」，registry/autoops_tool
+      描述「运行态」接口（导入/导出/执行/列表）-- 同名对象不同切面，互补参照，非重复。开发工具包时先读本知识定结构/字段，再用 registry 卡片调导入接口。
+  - name: inspection-suite-dev
+    file: modules/autoops_tool/inspection-suite-dev.md
+    tags:
+    - AutoOps
+    - 巡检套件
+    - 巡检包
+    - inspection
+    - InspectionInfo
+    - 采集脚本
+    - 指标组
+    - 阈值
+    - 巡检报告
+    completeness: partial
+    gaps:
+    - 复合套件（composition，多原子套件组合）的结构未整理
+    - 巡检任务（InspectionTask）创建接口未整理（任务引用套件、不属于套件包）
+    - info.yaml 全字段中 isapp/issystem/type(builtIn)/identifiers/subplugins/suffix/pathid/pathmodel/*authorizers 等字段语义来自示例归纳，未逐项源码核对
+    - 报告模板 detail.yaml 的 displaytype/abscissaid/transposed 等展示字段取值集未核对
+    - metrics.yaml 指标 type，对象层记 int/string、导出包记 num/string，以导出包（num/string）为准
+    last_verified: '2026-07-29'
+    note: EasyOps AutoOps 巡检套件（agent 方式，inspector_<name>.tar.gz）开发说明，融合概念/接口层（InspectionInfo/Collector/MetricGroup
+      + Export/Import/Delete/DebugCollector API + 运行时链路 + status 自检）与包结构/字段层（tar 包内 info.yaml/metrics.yaml/models.json/
+      collectors/script.py/reports_temp/detail.yaml 逐字段说明 + 采集脚本 content 与输出格式 + args 注入规则 + instanceid 全局唯一约束 +
+      relationidwithhost 填法）。覆盖开发→打包→导入→调试→修改→更新（先删后导）全流程。切面：本知识描述巡检套件「构造/开发态+生命周期管理」，
+      manage_suite.py 为配套管理脚本。来源：inspection proto/接口与执行链路源码 + inspection-kit skill（含 redis 示例），未端到端真机核对。
+  sso_adapter:
+  - name: sso-adapter-plugin-dev
+    file: modules/sso_adapter/sso-adapter-plugin-dev.md
+    tags:
+    - SSO
+    - 单点登录
+    - sso_adapter
+    - 插件
+    - provider
+    - OAuth2
+    - CAS
+    - SAML
+    - 统一门户
+    - 移动端
+    - 单点登出
+    - CMDB-USER
+    - 登录回调
+    - 端口8211
+    - easy_tornado
+    - Python2.7
+    completeness: partial
+    gaps:
+    - 基于 sso_adapter 组件源码 + README 归纳，未在真实 sso_adapter 部署环境端到端导入插件包验证（插件加载/接口冒泡/浏览器回跳为源码逻辑推导，非真机实测）
+    - 内置 oauth2/cas/demo/easy_work 插件源码未直接读取，可复用点与重写方法对照表为源码 README 归纳，方法签名以基类 base_provider.py
+      契约为准
+    - redirect_uri 端口补全规则（demo 无端口补 80 / cas 无端口不补）未读到源码实现，两者差异原因未确认
+    - userinfo 返回字段名（preferred_username/username/sub 等）依 OAuth2 通用约定，三方 SSO 实际返回字段未核对
+    - APPLICATION 监听配置（listen_port/processes_num）默认值为源码摘录，本环境实际部署配置未核对
+    last_verified: '2026-07-27'
+    note: EasyOps sso_adapter 统一登录适配服务的三方 SSO 对接开发说明：组件定位与运行模型（端口 8211、easy_tornado、
+      Python2.7）、8 个 HTTP 接口路由与调用插件方法映射、登录全流程时序（brick_next→api_gateway→sso_adapter→三方SSO）、
+      Provider 插件开发规范（加载机制三一致、基类契约、配置 settings 机制、py2.7/内置库/日志约束）、内置插件参考（oauth2/cas/demo/easy_work）、
+      交付物 zip 包结构与现场部署步骤、LLM 开发引导决策流程。来源：sso_adapter 组件源码 + README 整理，未真机端到端实测。 切面定位：本知识描述
+      sso_adapter 「对接开发态」（如何新增一个三方 SSO 插件，含统一门户/移动端单点登录），同模块 sso-enable-ops 描述对接完成后的
+      「运维开启态」（改 api_gateway conf.yaml 开启 sso-enabled + 重启组件），registry 若有 sso_adapter 接口卡片则描述「运行态」——
+      同名对象不同切面，互补参照，非重复。
+  - name: sso-enable-ops
+    file: modules/sso_adapter/sso-enable-ops.md
+    tags:
+    - SSO
+    - 单点登录
+    - sso_adapter
+    - api_gateway
+    - 开启SSO
+    - conf.yaml
+    - feature_flags
+    - sso-enabled
+    - intercepted-query-strings
+    - 组件重启
+    - 运维配置
+    completeness: full
+    gaps:
+    - conf.yaml 完整配置项（附录所称"详细配置文件"）未提供，本知识仅覆盖「开启 SSO」所需的最小配置块
+    - 重启命令 `easyops restart <部署目录>` 的适用范围（是否所有 EasyOps 版本通用）未逐一核对，以现场 easyops 命令行工具为准
+    last_verified: ''
+    note: EasyOps 平台 SSO 对接完成后「开启 SSO」的运维操作：改 api_gateway conf.yaml（auth.bootstrap.sys_settings
+      下 feature_flags.sso-enabled=true + misc.intercepted-query-strings 加 code），再分别重启 api_gateway 与
+      sso_adapter 组件。效果：无 session 时默认跳转单点登录授权。切面定位：本知识描述「运维开启态」（部署后配置），
+      同模块 sso-adapter-plugin-dev 描述「对接开发态」（如何做三方 SSO 插件）——同一 sso_adapter 模块的前后两个环节，
+      先开发部署插件，再按本篇开启。来源：用户提供的平台部署文档（4.3/4.4 节），未在真实环境执行核对。
+  itsm_service_dev:
+  - name: itsm-service-dev-workflow
+    file: modules/itsm_service_dev/itsm-service-dev-workflow.md
+    tags:
+    - ITSM
+    - 服务开发
+    - 工作流
+    - 流程
+    - 表单
+    - 脚本
+    - 服务目录
+    - 编排指南
+    completeness: partial
+    gaps:
+    - 工作流各阶段基于主机申请场景实战沉淀，其他 ITSM 场景（如问题/变更/发布管理）的特有节点/角色未覆盖
+    - 验收点 URL 模板基于当前前端路由，前端版本升级后路由可能变
+    - ✅ 已补（2026-07-28）阶段三「表单按需绑定」原则（按数据填写/回填需求决定绑不绑，纯审批节点不绑）+ 解绑接口 DELETE /v1/process/form/relation/{relationId}
+    - ✅ 已补（2026-07-28）阶段四「脚本按需配置」原则（非每节点必配）+ 两类用途（自动化动作/动态指定下个节点处理人，后者用前置+同步）
+    last_verified: '2026-07-28'
+    note: 'EasyOps ITSM 服务开发端到端工作流（场景知识，归平台包不进 skill）：6 阶段（需求拆解→流程建模→表单设计→
+      脚本开发→服务挂载→迭代优化），每阶段含目标/call_card 步骤/知识引用/验收点。是「编排指南」——不重复领域知识细节，
+      各操作原理/字段/坑见附录B知识引用地图（唯一来源）。API 优先用 skill call_card 单步调。源自主机申请流程实战沉淀，
+      已去环境特定产物（跨环境无意义），保留通用工作流+知识引用。'
+  notify_trigger:
+  - name: notify-trigger-dev
+    file: modules/notify_trigger/notify-trigger-dev.md
+    tags:
+    - ITSM
+    - 通知策略
+    - notify_policy
+    - 触发器
+    - trigger
+    - flowable_service
+    - send_message
+    - actionList
+    - condition
+    - notifyRange
+    - notifyMode
+    - 触发信号
+    - triggerSignal
+    - 领域模型
+    completeness: partial
+    gaps:
+    - 数据模型/枚举/接口契约基于 flowable_service 组件 notify_policy、trigger 模块源码归纳，未端到端真机实测（接口路径/请求体字段已与本次通知触发器录制场景的真调结果交叉验证一致）
+    - notifyType=process_node/process_line（节点/线条信号）为二期功能，接口不加载，完整字段未展开
+    - notifyMode 动态渠道（email/wechat_work/ding_talk 等）的完整 key 列表随环境 msgsender 配置变化，需运行时调 ListEnums(name=notifyMode) 获取，本知识仅列常见值
+    - 各 triggerSignal 的中文文案随全局配置动态化（ListNotifyTypeV2 返回），本知识枚举为源码 key，非当前环境实际展示文案
+    - SLA 规则（sla 模块）引用通知策略的精确字段契约未展开（仅指明为另一消费方）
+    last_verified: '2026-07-28'
+    note: 'EasyOps ITSM 通知策略（NotifyPolicy）与触发器（ITSCTrigger）开发说明：二者关系（触发器→动作→引用通知策略）、
+      通知策略数据模型（notifyType/triggerSignal/notifyRange/notifyMode/subject-content 变量语法）、触发器数据模型（scope/event/status/config.actionList/condition 两层逻辑结构）、
+      7 种动作 name 及 args 约定、条件变量表（含 xxx_change 系列的「值必须变化」约束）、触发器三类绑定方式（服务实例/流程定义/流程节点，反向引用）、
+      CRUD 接口一览、端到端示例、LLM 操作检查清单。切面定位：本知识描述通知/触发器「开发态/契约态」（字段深层语义+请求体组织），registry/notify_trigger
+      描述「运行态」接口卡片——同名对象不同切面，互补参照，非重复。删除/改名查重、关联拦截、全量覆盖等约束为源码实证。来源：flowable_service
+      源码（notify_policy/trigger 模块）整理，接口路径与录制真调交叉验证。'
+  sla:
+  - name: sla-dev
+    file: modules/sla/sla-dev.md
+    tags:
+    - ITSM
+    - SLA
+    - sla_rule
+    - 工作日历
+    - working_calendar
+    - 营业时间
+    - flowable_service
+    - levelConfig
+    - criticalRate
+    - duration
+    - notifyPolicy
+    - 预警
+    - 超时
+    - 优先级集
+    completeness: partial
+    gaps:
+    - 数据模型/枚举/接口契约基于 flowable_service 组件 sla 模块（internal/sla）源码归纳，未端到端真机实测（接口路径/请求体字段已与本次 SLA 协议管理、营业时间管理录制场景的真调结果交叉验证一致）
+    - 工作日历 config 的 independenceDayList（独立设置日）运行时合成优先级为源码逻辑归纳，未构造多种日期组合实测 GetWorkdayByDate
+    - step 类型 SLA 每节点计时（响应时限+完成时限）与流程 nodeSettings.suspendSetting 挂起时限的联动运行为源码归纳，未发起工单端到端实测
+    - autoUpdate 超时自动处理的具体动作集（自动流转/更新）随平台版本变化，未核对当前环境能力
+    - SLA 报表接口（§3）为只读数据看板，仅列接口清单，返回字段结构未展开
+    - type=step 时流程改版后 SLA 配置里节点失效的检测/修复机制为源码语义推断，未实测
+    last_verified: '2026-07-28'
+    note: 'EasyOps ITSM SLA 管理（工作日历 + SLA 规则）开发说明：总体模型（SLA 计时只算营业时间、SLA↔通知衔接、优先级联动）、工作日历数据模型（workingDayList/holidayList/extraDayList/independenceDayList
+      四类配置 + 日期合成优先级）、SLA 规则数据模型（basicInfo/slaConfig/levelConfig 时限+预警比例/notifyPolicy 通知/highlight/autoUpdate）、
+      SLA 与服务/工单生效链路（绑定→计时→预警超时→通知→状态呈现）、CRUD 接口一览、SLA 报表接口、端到端示例、LLM 操作检查清单。
+      切面定位：本知识描述 SLA「开发态/契约态」（字段深层语义+请求体组织+计时机制），registry/sla 描述「运行态」接口卡片——同名对象不同切面，互补参照，非重复。
+      SLA 规则 notifyPolicy 引用通知策略、SLA 信号可作触发器事件源，与 notify-trigger-dev 联动。来源：flowable_service 源码（sla 模块）整理，接口路径与录制真调交叉验证。'
+  alert_portal:
+  - name: third-party-alarm-access
+    file: modules/alert_portal/third-party-alarm-access.md
+    tags:
+    - 三方告警接入
+    - 第三方事件接入
+    - 事件源
+    - webhook
+    - 资源关联
+    - 告警重定级
+    - alert_portal
+    - 接入策略
+    completeness: partial
+    gaps:
+    - 告警重定级 level 枚举实测仅 critical/warning/info 三种(_EVENT_ACCESS_RULE.rule schema anyOf)，区别于平台等级全集5种(§6.3)
+    - 接入策略 filters 告警筛选器 JSON 子结构未展开(隐藏模型字段已探明 _EVENT_ACCESS_HANDLER/_EVENT_ACCESS_RULE)
+    last_verified: '2026-08-03'
+    note: '三方告警接入（第三方事件接入）全链路：事件源注册(RegisterAccessDefine)→接入策略→资源关联规则(cmdb-translate,查CMDB实例)→告警重定级规则→webhook
+      上报(PostAlert,ThirdPartyAlert 字段/alertId 去重/time 30min 约束/isRecover)→告警规则(必须配否则当前告警不显示)→事件入库(MonitorEvent)→排查(SearchFailRecords)。组件:alert_portal(8149接入网关)/alert_channel_go(6608消费)。切面定位:本知识为「配置态/字段语义」,registry/alert_portal 为「运行态」接口卡片,互补非重复。related: api-calling(webhook推送脚本基座)、cmdb-instance(资源关联查实例)。'

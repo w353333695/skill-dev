@@ -1,0 +1,56 @@
+name: createKnowledgeCatalog
+module: knowledge_catalog
+method: POST
+path: /api/flowable_service/v1/knowledge_base/catalog
+gateway_path: /next/api/gateway/logic.flowable_service/api/flowable_service/v1/knowledge_base/catalog
+service: logic.flowable_service
+side_effect: create
+path_source: backend_contract
+path_confidence: high
+tags:
+- 知识目录
+- catalog
+- 新建
+- 创建
+- create
+summary: 新建知识目录或子目录
+description: 新建知识目录。不带 parentId（或为空）表示顶层目录；
+request:
+  required:
+  - name
+  properties:
+    name:
+      type: string
+      desc: 目录名称
+    description:
+      type: string
+      desc: 目录描述
+    parentId:
+      type: string
+      desc: 父目录 ID（顶层为空）
+outputs:
+  instanceId:
+    jsonpath: $.data.instanceId
+    desc: 新建目录的 instanceId（推断，契约未给字段名）
+requires:
+- parentId 须为已存在目录的 instanceId，顶层目录留空
+rollback:
+  api: deleteKnowledgeCatalog
+  param_from_output: instanceId
+examples: []
+confidence:
+  module: high
+  outputs: medium
+  requires: medium
+  rollback: high
+  summary: high
+  tags: high
+  request: high
+endpoint:
+  contract_ref: logic.flowable_service|POST|/api/flowable_service/v1/knowledge_base/catalog
+  mode: easyops_gateway
+source:
+  openapi_file: ITSM-系统管理-知识目录管理-openapi.yaml
+  openapi_hash: cf72ee6896240e33a2a149bf98871adabd5a51cb22b632b8e246d4f5d98d89d2
+  recorded_at: '2026-07-13T13:50:45'
+registered_at: '2026-07-22T10:34:11.335182'

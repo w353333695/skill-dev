@@ -1,0 +1,38 @@
+name: setFormVersion
+module: form
+method: POST
+path: /api/flowable_service/v1/version/{versionId}/form_version/{formId}
+service: logic.flowable_service
+side_effect: create
+path_source: backend_contract
+path_confidence: high
+tags:
+- 表单
+- 绑定
+- 流程节点
+summary: 流程节点绑定表单(自动取表单主版本)
+description: 流程节点绑定表单。POST /v1/version/{versionId}/form_version/{formId}，body{userTaskId}。绑的是表单ID(非版本ID),运行时自动取表单当前主版本。表单主版本切换后重新调本接口刷新绑定。内网8134实测。⚠️versionId是流程定义版本(非表单版本)。详见 form_development/form-schema-v2-dev §4。
+request:
+  required:
+  - versionId
+  - formId
+  - userTaskId
+  properties:
+    versionId:
+      type: string
+      desc: 流程定义版本ID(路径)
+    formId:
+      type: string
+      desc: 表单ID(路径,非版本ID)
+    userTaskId:
+      type: string
+      desc: bpmnXML节点id
+outputs:
+  detail:
+    jsonpath: $.data
+    desc: 绑定结果
+rollback: null
+examples: []
+endpoint:
+  contract_ref: logic.flowable_service|POST|/api/flowable_service/v1/version/{versionId}/form_version/{formId}
+  mode: easyops_internal

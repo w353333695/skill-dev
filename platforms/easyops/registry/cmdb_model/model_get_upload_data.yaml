@@ -1,0 +1,45 @@
+name: model_get_upload_data
+module: cmdb_model
+method: POST
+path: /api/abjectGetUploadData
+gateway_path: /next/api/gateway/cmdb_extend.custom.GetObjectUploadData/api/abjectGetUploadData
+service: logic.cmdb_extend
+side_effect: read
+path_source: gateway_strip
+path_confidence: medium
+tags:
+- CMDB
+- 模型
+- 导入
+- 上传参数
+summary: 获取模型导入上传参数
+description: 导入模型前获取文件上传所需的参数（上传地址/凭证等）。
+request:
+  required: []
+  properties:
+    fields:
+      type: file[]
+      desc: 模型文件
+      _source: contract
+outputs:
+  detail:
+    jsonpath: $.data
+    desc: 上传参数
+requires: []
+rollback: null
+examples: []
+confidence:
+  request: medium
+  module: high
+  outputs: high
+  tags: high
+  summary: high
+  requires: medium
+  rollback: medium
+endpoint:
+  contract_ref: logic.cmdb_extend|POST|/api/abjectGetUploadData
+source:
+  openapi_file: CMDB-模型管理-openapi.yaml
+  openapi_hash: e422eadfbcf745f98992379d09d3334717c7e3992c54b62f366b7f342e7e08f0
+  recorded_at: '2026-07-23T10:29:50.694479'
+registered_at: '2026-07-23T14:28:58.926734'

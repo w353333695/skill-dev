@@ -1,0 +1,58 @@
+name: file_pkg_version_list
+module: autoops_file
+method: GET
+path: /version/list
+gateway_path: /next/api/gateway/artifact.version.ListVersion/version/list
+service: artifact.version.ListVersion
+side_effect: read
+path_source: gateway_strip
+path_confidence: medium
+tags:
+- 文件分发
+- 版本
+- 列表
+summary: 查询文件包版本列表
+description: 分页查询指定文件包的版本列表，支持按版本号搜索、按版本类型（开发/测试/预发布/生产）过滤。返回含版本 ID/名称/类型/备注/作者/基线版本等。
+request:
+  required:
+  - packageId
+  properties:
+    packageId:
+      type: string
+      desc: 文件包 ID
+    name:
+      type: string
+      desc: 按版本号搜索
+    env_type:
+      type: string
+      desc: 按版本类型（环境）过滤
+    page:
+      type: string
+      desc: 页码，从 1 开始
+    pageSize:
+      type: string
+      desc: 每页条数，默认 20
+outputs:
+  total:
+    jsonpath: $.data.total
+    desc: 版本总数
+  list_full:
+    jsonpath: $.data.list
+    desc: 版本列表全量（含版本 ID/name/env_type/message 等）
+requires: []
+rollback: null
+examples: []
+confidence:
+  request: high
+  module: high
+  outputs: medium
+  tags: high
+  summary: high
+endpoint:
+  contract_ref: ''
+  mode: easyops_gateway
+source:
+  openapi_file: AutoOps-文件分发管理-openapi.yaml
+  openapi_hash: edf3872fae57ab16180ccec0257fe32c2d0de09a4a639719250779d5ae96e426
+  recorded_at: '2026-07-29T16:20:10'
+registered_at: '2026-07-29T16:49:25.523907'
