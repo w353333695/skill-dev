@@ -1,11 +1,11 @@
 ---
 name: doc-converter
-description: This skill should be used when the user asks to "转换格式", "转PDF", "转图片", "导出Excel", "MD转PDF", "Word转Markdown", "docx转md", "提取Word图片", "Mermaid转图片", "CSV转Excel", "JSON转表格", "代码高亮", "提取表格", "格式转换", "PDF转Word", "convert to PDF", "export as image", "markdown to word", "docx to markdown", "word to md", "pdf to docx", or needs to convert documents between formats or extract content from files.
+description: This skill should be used when the user asks to "转换格式", "转PDF", "转图片", "导出Excel", "MD转PDF", "Word转Markdown", "docx转md", "提取Word图片", "Mermaid转图片", "CSV转Excel", "JSON转表格", "代码高亮", "提取表格", "提取大纲", "提取链接", "提取图片", "MD转JSON", "MD转纯文本", "格式转换", "PDF转Word", "convert to PDF", "export as image", "markdown to word", "docx to markdown", "word to md", "pdf to docx", or needs to convert documents between formats or extract content from files.
 ---
 
 # 文档格式转换 (Doc Converter)
 
-把文档在格式间互转、或从文档中提取部分内容（mermaid/表格/代码）。转换能力由 `doc-converter` CLI 提供（能力 project：`projects/doc-converter`）。本 skill 只做意图→CLI 参数的编排，不携带转换代码。
+把文档在格式间互转、或从文档中提取部分内容（mermaid/表格/大纲/链接/图片/代码）。转换能力由 `doc-converter` CLI 提供（能力 project：`projects/doc-converter`）。本 skill 只做意图→CLI 参数的编排，不携带转换代码。
 
 ## 何时使用
 
@@ -15,7 +15,7 @@ description: This skill should be used when the user asks to "转换格式", "�
 
 **开发态**（workspace 内，用 dev 壳转发到 project venv）:
 ```bash
-bash skills/doc-converter/scripts/run.sh doc-converter convert <输入> -t <目标格式> [-o 输出] [--extract mermaid|table|code] [--options k=v]
+bash skills/doc-converter/scripts/run.sh doc-converter convert <输入> -t <目标格式> [-o 输出] [--extract mermaid|table|outline|links|images|code] [--options k=v]
 bash skills/doc-converter/scripts/run.sh doc-converter list           # 列出所有支持的转换
 bash skills/doc-converter/scripts/run.sh doc-converter check <源> <目标>   # 检查是否支持 + 依赖
 bash skills/doc-converter/scripts/run.sh doc-converter doctor         # 全量依赖自检
@@ -28,7 +28,7 @@ doc-converter convert <输入> -t <目标格式> [-o 输出] [--extract ...] [--
 
 ## 工作流
 
-1. **识别需求**：源文件路径/格式、目标格式、是否提取部分内容（`--extract mermaid|table|code`）、额外选项（主题/编码/横向等，用 `--options k=v`）。
+1. **识别需求**：源文件路径/格式、目标格式、是否提取部分内容（`--extract mermaid|table|outline|links|images|code`）、额外选项（主题/编码/横向等，用 `--options k=v`）。
 2. **检查依赖**：先 `doctor` 或 `check <源> <目标>`。chromium 缺失跑 `doc-converter install-deps`；pandoc 缺失（docx→md 用）提示系统安装（`brew install pandoc` / `apt install pandoc`）。
 3. **执行转换**：构造 `convert` 命令；不指定 `-o` 则默认同名换后缀。
 4. **产物后处理**：多 mermaid 块会输出多张图到目录；Word→Markdown 的图片默认在输出同目录 `_assets/<文件名>/`，md 内为相对引用（可用 `--options media_dir=...` 自定义）。

@@ -48,7 +48,7 @@ def main() -> None:
 @click.option("-t", "--target", required=True, help="目标格式 (如 pdf/png/xlsx)")
 @click.option("-s", "--source", default=None, help="源格式 (默认从扩展名推断)")
 @click.option("-o", "--output", default=None, help="输出文件路径")
-@click.option("--extract", default=None, help="提取模式 (mermaid/table/code)")
+@click.option("--extract", default=None, help="提取模式 (mermaid/table/outline/links/images/code)")
 @click.option("--options", "options", multiple=True, help="额外选项 key=value")
 def convert(input, target, source, output, extract, options):
     """执行转换。"""

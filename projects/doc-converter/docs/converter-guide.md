@@ -6,7 +6,7 @@
 
 ### 步骤
 
-1. 在 `scripts/converters/` 下新建 Python 文件
+1. 在 `doc_converter/converters/` 下新建 Python 文件
 2. 继承 `BaseConverter`
 3. 用 `@register` 装饰器注册
 4. 框架自动发现并加载
@@ -54,7 +54,7 @@ class BaseConverter(abc.ABC):
     source_formats: list    # 支持的源格式扩展名 (不含点)
     target_formats: list    # 支持的目标格式扩展名
     description: str        # 简短描述
-    dependencies: list      # 所需 pip 包名 (import 名)
+    dependencies: list      # 所需 pip 包名（缺失拼进 pip install 提示）
 
     # 必须实现
     def convert(self, input_path: Path, output_path: Path, **options) -> ConvertResult: ...
@@ -101,30 +101,38 @@ html_to_image(html_string, output_path, selector="body", width=1200, device_scal
 ### 提取模式
 
 转换器可通过 `options.get("extract")` 支持部分内容提取：
-- `mermaid`: 提取 Mermaid 代码块
-- `table`: 提取表格
-- `code`: 提取代码块
+- `mermaid`: 提取 Mermaid 代码块（Mermaid→图片、MD→PDF）
+- `table`: 提取表格（MD→Excel）
+- `outline`: 提取标题大纲树（MD→JSON）
+- `links`: 提取所有链接（MD→JSON）
+- `images`: 提取所有图片引用（MD→JSON）
+- `code`: 提取 fenced 代码块，跳过 mermaid（MD→JSON）
 
 ### 依赖声明
 
-`dependencies` 列表使用 **import 名**（不是 pip 包名）：
-- `python-docx` → 写 `"docx"`
-- `pymupdf` → 写 `"fitz"`
-- `Pillow` → 写 `"PIL"`
+`dependencies` 列表使用 **pip 包名**（缺失时直接拼进 `pip install` 提示）；
+`base.py` 的 `check_dependencies` 经 `PIP_TO_IMPORT` 映射到 import 名探测：
+- `python-docx`（pip 名）→ 探测 import `docx`
+- `pymupdf`（pip 名）→ 探测 import `fitz`
+- `Pillow`（pip 名）→ 探测 import `PIL`
 
 ### 文件结构
 
 ```
-scripts/converters/
+doc_converter/converters/
 ├── __init__.py          # 自动发现 (勿修改)
 ├── base.py              # 基类 + 注册表 (勿修改)
 ├── renderer.py          # Playwright 渲染工具 (共享)
 ├── mermaid_image.py     # Mermaid → PNG/SVG
-├── md_html.py           # Markdown → HTML
+├── md_html.py           # Markdown → HTML（含代码高亮）
 ├── md_pdf.py            # Markdown → PDF
 ├── md_docx.py           # Markdown → Word
 ├── md_table_excel.py    # MD表格 → Excel
+├── md_extract.py        # Markdown → JSON（提取大纲/链接/图片/代码）
+├── md_txt.py            # Markdown → 纯文本
+├── docx_md.py           # Word → Markdown
 ├── html_pdf.py          # HTML → PDF
+├── pdf_docx.py          # PDF → Word
 ├── csv_excel.py         # CSV ↔ Excel
 ├── json_table.py        # JSON/YAML → Excel/CSV
 ├── code_highlight.py    # 代码 → 高亮HTML/PNG

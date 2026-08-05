@@ -197,11 +197,15 @@ class MdToPdf(BaseConverter):
 
         text = input_path.read_text(encoding="utf-8")
         title = options.get("title", input_path.stem)
-        body, has_mermaid = md_to_html_body(text, input_path=input_path)
+        body, has_mermaid, extra_css = md_to_html_body(text, input_path=input_path)
 
+        # 高亮 CSS（若有代码块）+ mermaid 脚本都注入 <head>，
+        # 否则 PDF 里代码块只有 .codehilite class 却无颜色
         extra_head = ""
+        if extra_css:
+            extra_head += f"<style>\n{extra_css}\n</style>\n"
         if has_mermaid:
-            extra_head = (
+            extra_head += (
                 '<script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>\n'
                 '<script>mermaid.initialize({startOnLoad: true});</script>'
             )
