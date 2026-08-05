@@ -218,17 +218,6 @@ def _get_indent_level(line: str) -> int:
     return 0
 
 
-def _render_mermaid_images(mermaid_blocks: list[str], tmp_dir: Path) -> list[Path]:
-    """将 mermaid 代码块渲染为图片，返回图片路径列表。"""
-    from .mermaid_image import render_mermaid_to_image
-    images = []
-    for i, code in enumerate(mermaid_blocks):
-        img_path = tmp_dir / f"mermaid_{i}.png"
-        render_mermaid_to_image(code, img_path)
-        images.append(img_path)
-    return images
-
-
 # ---------------------------------------------------------------------------
 # 预处理：公式 / 脚注 / 引用式链接
 # ---------------------------------------------------------------------------
@@ -678,18 +667,20 @@ class MdToDocx(BaseConverter):
             _set_style_font(heading_style, "Microsoft YaHei", Pt(self.HEADING_SIZES[level]))
             heading_style.font.bold = True
 
-        # 预提取 mermaid 块并渲染为图片
-        mermaid_pattern = r"```mermaid\s*\n(.*?)```"
-        mermaid_blocks = re.findall(mermaid_pattern, text, re.DOTALL)
+        # 预提取 mermaid 块并逐块渲染为图片（单块失败不影响其余，与 md-pdf 对齐）
+        from .mermaid_image import extract_mermaid_blocks, render_mermaid_to_image
+        mermaid_blocks = extract_mermaid_blocks(text)
         mermaid_images = {}
         if mermaid_blocks:
-            try:
-                tmp_dir = Path(tempfile.mkdtemp(prefix="mermaid_"))
-                images = _render_mermaid_images(mermaid_blocks, tmp_dir)
-                for i, img in enumerate(images):
-                    mermaid_images[i] = img
-            except Exception:
-                pass
+            tmp_dir = Path(tempfile.mkdtemp(prefix="mermaid_"))
+            for i, code in enumerate(mermaid_blocks):
+                try:
+                    img = tmp_dir / f"mermaid_{i}.png"
+                    render_mermaid_to_image(code, img)
+                    if img.exists():
+                        mermaid_images[i] = img
+                except Exception:
+                    pass  # 该块渲染失败 → _render_blocks 回退为代码块
 
         # 块级渲染（递归，引用块内部会递归调用）
         self._mermaid_images = mermaid_images
