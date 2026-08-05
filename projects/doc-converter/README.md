@@ -38,10 +38,12 @@ doc-converter install-deps    # 封装 playwright install chromium
 |------|---------|------|
 | Mermaid -> PNG/SVG | `convert x.md -t png` | 需 `[render]`；`--extract mermaid` 提取 |
 | Markdown -> PDF | `convert x.md -t pdf` | 默认 pandoc+xelatex（核心）；回退 `[render]` |
-| Markdown -> HTML | `convert x.md -t html` | 核心，含样式和 Mermaid |
+| Markdown -> HTML | `convert x.md -t html` | 核心，含样式/Mermaid/**代码高亮** |
 | Markdown -> Word | `convert x.md -t docx` | 核心 |
 | Word -> Markdown | `convert x.docx -t md` | 核心，需系统 pandoc；图片提取到 `_assets/<文件名>/` |
 | Markdown -> Excel | `convert x.md -t xlsx` | 核心，`--extract table` |
+| Markdown -> 纯文本 | `convert x.md -t txt` | 核心，去标记保留段落结构 |
+| Markdown -> JSON | `convert x.md -t json` | 核心，`--extract outline/links/images/code` |
 | HTML -> PDF | `convert x.html -t pdf` | 需 `[render]` |
 | CSV/TSV -> Excel | `convert x.csv -t xlsx` | 核心 |
 | Excel -> CSV | `convert x.xlsx -t csv` | 核心 |
@@ -57,8 +59,8 @@ doc-converter install-deps    # 封装 playwright install chromium
 # 基础转换
 doc-converter convert <输入文件> -t <目标格式> [-o 输出路径]
 
-# 提取部分内容转换
-doc-converter convert <输入文件> -t <目标格式> --extract <mermaid|table|code>
+# 提取部分内容转换（mermaid/表格/代码；md->json 还可提取大纲/链接/图片）
+doc-converter convert <输入文件> -t <目标格式> --extract <mermaid|table|outline|links|images|code>
 
 # 列出所有支持的转换
 doc-converter list
@@ -85,6 +87,13 @@ doc-converter convert doc.md -t png --extract mermaid -o diagram.png
 **JSON 转 Excel**:
 ```bash
 doc-converter convert data.json -t xlsx -o data.xlsx
+```
+
+**从 MD 提取结构化数据 / 纯文本**:
+```bash
+doc-converter convert doc.md -t json --extract outline -o outline.json  # 标题大纲树
+doc-converter convert doc.md -t json --extract code    -o code.json     # 所有代码块（跳过 mermaid）
+doc-converter convert doc.md -t txt  -o doc.txt                         # 纯文本（去标记）
 ```
 
 **Word 转 Markdown（提取图片）**:

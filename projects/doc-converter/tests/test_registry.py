@@ -15,6 +15,8 @@ def test_registry_non_empty():
     assert "csv-excel" in names
     assert "json-csv" in names
     assert "md-html" in names
+    assert "md-txt" in names
+    assert "md-json" in names
 
 
 def test_get_converter():
@@ -33,6 +35,8 @@ def test_list_conversions_contains_known():
     paths = list_conversions()
     assert ("json", "csv", "json-csv") in paths
     assert ("csv", "xlsx", "csv-excel") in paths
+    assert ("md", "txt", "md-txt") in paths
+    assert ("md", "json", "md-json") in paths
 
 
 def test_converter_dependencies_use_pip_names():

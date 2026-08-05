@@ -9,10 +9,12 @@
 |------|---------|---------|
 | Mermaid -> PNG/SVG | `convert x.md -t png` | 从 MD 提取 mermaid 块: `--extract mermaid` |
 | Markdown -> PDF | `convert x.md -t pdf` | 全量；Mermaid 需 [render] 嵌入 |
-| Markdown -> HTML | `convert x.md -t html` | 全量，含样式和 Mermaid |
+| Markdown -> HTML | `convert x.md -t html` | 全量，含样式/Mermaid/代码高亮 |
 | Markdown -> Word | `convert x.md -t docx` | 全量 |
 | Word -> Markdown | `convert x.docx -t md` | 全量，图片提取到 `_assets/<文件名>/` |
 | Markdown -> Excel | `convert x.md -t xlsx` | 提取表格: `--extract table` |
+| Markdown -> 纯文本 | `convert x.md -t txt` | 全量，去标记保留段落结构 |
+| Markdown -> JSON | `convert x.md -t json` | `--extract outline/links/images/code` |
 | HTML -> PDF | `convert x.html -t pdf` | 全量 |
 | CSV/TSV -> Excel | `convert x.csv -t xlsx` | 全量 |
 | Excel -> CSV | `convert x.xlsx -t csv` | 全量 |
@@ -33,6 +35,10 @@ doc-converter convert doc.md -t png --extract mermaid -o diagram.png
 
 # JSON 转 Excel
 doc-converter convert data.json -t xlsx -o data.xlsx
+
+# 从 MD 提取结构化数据 / 纯文本
+doc-converter convert doc.md -t json --extract outline -o outline.json
+doc-converter convert doc.md -t txt -o doc.txt
 
 # Word 转 Markdown（图片提取）
 doc-converter convert 手册.docx -t md -o 手册.md

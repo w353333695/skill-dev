@@ -7,6 +7,22 @@ from .base import BaseConverter, ConvertResult, register, load_template
 # Mermaid 占位符前缀
 _MERMAID_PLACEHOLDER = "MERMAID_BLOCK_{idx}_PLACEHOLDER"
 
+# md 内代码块语法高亮的 Pygments 配色：浅底 friendly，协调 base.html 的浅底 pre
+# （与 code_highlight.py 整文件高亮用的 monokai 深底区分场景）。
+HIGHLIGHT_STYLE = "friendly"
+
+
+def _codehilite_css() -> str:
+    """生成 codehilite 代码高亮的 CSS（friendly 浅底，scope=.codehilite）。
+
+    无 pygments 或失败时返回空串，调用方据此决定是否注入 <style>。
+    """
+    try:
+        from pygments.formatters import HtmlFormatter
+        return HtmlFormatter(style=HIGHLIGHT_STYLE).get_style_defs(".codehilite")
+    except Exception:
+        return ""
+
 
 def _extract_mermaid_blocks(md_text: str) -> tuple[str, list[str]]:
     """
@@ -33,18 +49,23 @@ def _restore_mermaid_blocks(html: str, blocks: list[str]) -> str:
 
 
 def md_to_html_body(md_text: str, with_mermaid: bool = True,
-                    input_path: Path | None = None) -> tuple[str, bool]:
+                    input_path: Path | None = None,
+                    highlight: bool = True) -> tuple[str, bool, str]:
     """
     将 Markdown 转为 HTML body 内容。
-    返回 (html, has_mermaid)
+    返回 (html, has_mermaid, extra_css)
 
     Args:
         md_text: Markdown 文本
         with_mermaid: 是否处理 mermaid 代码块
         input_path: 源 md 文件路径；传入时会把相对路径的本地图片
             内嵌为 base64 data URI，避免渲染时相对路径失效
+        highlight: 是否对 ```代码块``` 做语法高亮（codehilite + Pygments）。
+            为 True 且文档真含代码块时，extra_css 返回高亮 CSS 供调用方注入。
+
+    extra_css: 代码高亮 CSS（仅 highlight=True、含代码块、pygments 可用时非空）。
     """
-    # 先提取 mermaid 块
+    # 先提取 mermaid 块（必须在 markdown.markdown 之前，否则 codehilite 会误染）
     has_mermaid = "```mermaid" in md_text
     if has_mermaid and with_mermaid:
         md_text, mermaid_blocks = _extract_mermaid_blocks(md_text)
@@ -55,10 +76,24 @@ def md_to_html_body(md_text: str, with_mermaid: bool = True,
     if input_path is not None:
         md_text = _embed_local_images(md_text, input_path)
 
+    extra_css = ""
     try:
         import markdown
-        extensions = ["tables", "fenced_code", "toc", "attr_list"]
-        html = markdown.markdown(md_text, extensions=extensions)
+        # extra 内含 tables/fenced_code/footnotes/def_list/attr_list/abbr；
+        # 再叠 admonition(告示块)/smarty(智能标点)/toc(目录锚点)。
+        extensions = ["extra", "admonition", "smarty", "toc"]
+        extension_configs: dict = {}
+        if highlight:
+            extensions.append("codehilite")
+            # 关闭乱猜语言和行号：文章内代码块按标注语言高亮、不要行号
+            # （整文件高亮 code_highlight.py 走 linenos=True，场景不同）
+            extension_configs["codehilite"] = {"guess_lang": False, "linenums": False}
+        html = markdown.markdown(
+            md_text, extensions=extensions, extension_configs=extension_configs
+        )
+        # 仅当确有代码块被高亮时才生成 CSS，避免无代码块文档注入空样式
+        if highlight and "codehilite" in html:
+            extra_css = _codehilite_css()
     except ImportError:
         html = _fallback_md_to_html(md_text)
 
@@ -66,7 +101,7 @@ def md_to_html_body(md_text: str, with_mermaid: bool = True,
     if mermaid_blocks:
         html = _restore_mermaid_blocks(html, mermaid_blocks)
 
-    return html, has_mermaid
+    return html, has_mermaid, extra_css
 
 
 def _embed_local_images(md_text: str, input_path: Path) -> str:
@@ -199,11 +234,18 @@ class MdToHtml(BaseConverter):
         text = input_path.read_text(encoding="utf-8")
         title = options.get("title", input_path.stem)
 
-        body, has_mermaid = md_to_html_body(text, input_path=input_path)
+        body, has_mermaid, extra_css = md_to_html_body(
+            text,
+            input_path=input_path,
+            highlight=options.get("highlight", True),
+        )
 
+        # 高亮 CSS 与 mermaid 脚本都累加进 <head>（互不冲突）
         extra_head = ""
+        if extra_css:
+            extra_head += f"<style>\n{extra_css}\n</style>\n"
         if has_mermaid:
-            extra_head = (
+            extra_head += (
                 '<script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>\n'
                 '<script>mermaid.initialize({startOnLoad: true});</script>'
             )
