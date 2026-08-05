@@ -59,7 +59,7 @@ def html_to_pdf(html_content: str, output_path: Path, **options) -> Path:
         browser = p.chromium.launch()
         page = browser.new_page()
         page.goto(f"file://{tmp_html}")
-        page.wait_for_load_state("networkidle")
+        page.wait_for_load_state("load")
         # 等待可能的异步渲染 (如 Mermaid)
         wait_ms = options.get("wait_ms", 1000)
         if wait_ms:
@@ -105,7 +105,7 @@ def html_to_image(html_content: str, output_path: Path, **options) -> Path:
             device_scale_factor=scale,
         )
         page.goto(f"file://{tmp_html}")
-        page.wait_for_load_state("networkidle")
+        page.wait_for_load_state("load")
         if wait_ms:
             page.wait_for_timeout(wait_ms)
 
