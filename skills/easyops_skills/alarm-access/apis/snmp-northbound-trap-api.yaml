@@ -1,0 +1,200 @@
+openapi: 3.0.3
+info:
+  title: SNMP北向Trap告警接口
+  description: |
+    共济(GU/KE)系统SNMP北向服务规格说明。
+
+    ## 通信模式
+    - **Trap推送（事件）**: 共济系统主动将事件以SNMP Trap方式推送到客户指定的IP+端口(通常162)
+    - **GET/Walk（测点数据）**: 客户通过SNMP GET/Walk从共济服务器(通常端口161)拉取测点数据
+
+    ## 协议版本
+    支持SNMP v1、v2c、v3
+
+    ## 本文档覆盖Trap事件推送和SNMPWalk轮询两种接入方式
+  version: "1.1.0"
+
+servers:
+  - url: snmp://0.0.0.0:162
+    description: SNMP Trap接收端（由客户提供IP+端口）
+  - url: snmp://{host}:161
+    description: SNMP Walk轮询端（共济服务器地址）
+
+paths:
+  /trap:
+    post:
+      summary: 接收SNMP Trap事件
+      description: |
+        共济系统主动推送的Trap事件，包含以下字段：
+        - resource_id: 共济测点ID
+        - device_tag: 设备标识（第三方提供）
+        - device_name: 设备名称
+        - oid_name: 信号点名称
+        - event_level: 事件等级
+        - event_snapshot: 事件值
+        - unit: 值单位
+        - event_type: 事件类型(0通信错误/2过高告警/3不正常值/4过低报警/5错误数据/7普通事件)
+        - event_time: 事件产生时间
+        - recover_time: 告警恢复时间
+        - event_content: 事件内容描述
+        - event_location: 设备位置(测点ID结构)
+        - event_source: 事件来源(汉字结构)
+        - guid: 事件唯一ID
+        - trap_oid: 测点对应的Trap OID
+      responses:
+        "200":
+          description: Trap已接收并处理
+
+components:
+  schemas:
+    SnmpTrapEvent:
+      type: object
+      description: SNMP Trap事件数据结构
+      properties:
+        resource_id:
+          type: string
+          description: 共济测点ID
+          example: "0_123_321_1_0"
+        device_tag:
+          type: string
+          description: 设备标识，用于映射第三方设备
+          example: "TH-SENSOR-01"
+        device_name:
+          type: string
+          description: 设备名称
+          example: "温度监控设备"
+        oid_name:
+          type: string
+          description: 信号点名称（共济测点名称）
+          example: "温度"
+        event_level:
+          type: string
+          description: 事件等级
+          example: "warning"
+        event_snapshot:
+          type: string
+          description: 事件值/告警值
+          example: "35.6"
+        unit:
+          type: string
+          description: 值单位
+          example: "℃"
+        event_type:
+          type: integer
+          description: |
+            事件类型:
+            - 0: 通信错误
+            - 2: 过高告警
+            - 3: 不正常值（对于状态量）
+            - 4: 过低报警
+            - 5: 错误数据
+            - 7: 普通事件
+          enum: [0, 2, 3, 4, 5, 7]
+          example: 2
+        event_time:
+          type: string
+          description: 事件产生时间
+          example: "2024-01-15 10:30:00"
+        recover_time:
+          type: string
+          description: 告警恢复时间，无则为0
+          example: "0"
+        event_content:
+          type: string
+          description: 事件内容描述
+          example: "温度过高告警，当前值35.6℃"
+        event_location:
+          type: string
+          description: 设备位置（测点ID结构）
+          example: "project/0_101_1_0/0_123_321_1_0"
+        event_source:
+          type: string
+          description: 事件来源（汉字结构路径）
+          example: "共济研发中心/深圳研发中心/软件园一期/4楼/总部机房/温度监控设备"
+        guid:
+          type: string
+          description: 事件唯一ID，每条事件唯一
+          example: "a1b2c3d4-e5f6-7890-abcd-ef1234567890"
+        trap_oid:
+          type: string
+          description: 针对测点唯一的Trap OID
+          example: "1.3.6.1.4.1.41475.3.1.2.1.2.1.1.1"
+
+    SnmpWalkAlarmTable:
+      type: object
+      description: |
+        通过SNMPWalk轮询获取的告警事件表。
+        基础OID: 1.3.6.1.4.1.41475.1.1
+        每条告警记录由相同行索引的12个OID字段组成。
+      properties:
+        resource_id:
+          type: string
+          description: 测点ID
+          x-snmp-oid: "1.3.6.1.4.1.41475.1.1.1"
+          x-snmp-type: DisplayString
+        oid:
+          type: string
+          description: 测点OID
+          x-snmp-oid: "1.3.6.1.4.1.41475.1.1.2"
+          x-snmp-type: Oid
+        device_tag:
+          type: string
+          description: 设备ID
+          x-snmp-oid: "1.3.6.1.4.1.41475.1.1.3"
+          x-snmp-type: DisplayString
+        device_name:
+          type: string
+          description: 测点全路径+名称
+          x-snmp-oid: "1.3.6.1.4.1.41475.1.1.4"
+          x-snmp-type: DisplayString
+        oid_name:
+          type: string
+          description: 信号点名称
+          x-snmp-oid: "1.3.6.1.4.1.41475.1.1.5"
+          x-snmp-type: DisplayString
+        event_level:
+          type: integer
+          description: 告警级别
+          x-snmp-oid: "1.3.6.1.4.1.41475.1.1.6"
+          x-snmp-type: Integer32
+        event_snapshot:
+          type: string
+          description: 告警值
+          x-snmp-oid: "1.3.6.1.4.1.41475.1.1.7"
+          x-snmp-type: DisplayString
+        unit:
+          type: string
+          description: 单位
+          x-snmp-oid: "1.3.6.1.4.1.41475.1.1.8"
+          x-snmp-type: DisplayString
+        alarm_type:
+          type: string
+          description: 告警类型
+          x-snmp-oid: "1.3.6.1.4.1.41475.1.1.9"
+          x-snmp-type: DisplayString
+        alarm_time:
+          type: string
+          description: 告警时间
+          x-snmp-oid: "1.3.6.1.4.1.41475.1.1.10"
+          x-snmp-type: DisplayString
+        alarm_recover_time:
+          type: string
+          description: 告警恢复时间
+          x-snmp-oid: "1.3.6.1.4.1.41475.1.1.11"
+          x-snmp-type: DisplayString
+        content:
+          type: string
+          description: 告警描述
+          x-snmp-oid: "1.3.6.1.4.1.41475.1.1.12"
+          x-snmp-type: DisplayString
+
+    TrapEventType:
+      type: integer
+      description: 事件类型枚举
+      enum:
+        - 0  # 通信错误
+        - 2  # 过高告警
+        - 3  # 不正常值（状态量）
+        - 4  # 过低报警
+        - 5  # 错误数据
+        - 7  # 普通事件
