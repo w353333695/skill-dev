@@ -150,7 +150,9 @@ projects/api-cli/
 ├── examples/
 │   ├── cmdb.yaml                     # 示例清单：前后端双 endpoint
 │   └── auth.d/                       # 鉴权配置模板(环境变量占位，无真实密钥)
-└── tests/integration/                # mockserver.go + cmdb_test.go 端到端
+├── tests/integration/                # mockserver.go + cmdb_test.go 端到端
+└── docs/                             # 项目设计文档（与代码同仓隔离）
+    └── 2026-08-07-api-cli-design.md  # 本设计文档
 ```
 
 **`internal/` vs `pkg/` 分界**：`internal/` 私有实现；`pkg/adapter/` 是对外契约——三方写 go-plugin adapter 时 import 这里的接口和 proto。
@@ -617,6 +619,8 @@ mock server 关键职责：模拟 cursor/offset/隐式三种分页响应、各�
 > `projects/` 默认 Python；`api-cli` 为 golang 例外。打包走 `go build` 单二进制，不走 whl；通用打包脚本 `pack-dist.sh` 暂不覆盖。skill 编排层（如有）调用方式为 `go run ./cmd/api-cli`（开发态）或裸二进制（分发态），不走 `uv run`。
 
 本 spec 仅记录该决策，CLAUDE.md 的实际修改属于实现阶段动作。
+
+**文档位置**：本 spec 及后续 api-cli 设计文档放 `projects/api-cli/docs/`，遵循项目自包含原则（各 project 文档隔离，不占全局 `docs/`）。
 
 ---
 
