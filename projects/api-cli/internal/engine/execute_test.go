@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
+	"time"
 
 	"api-cli/internal/output"
 	"api-cli/internal/spec"
@@ -313,5 +314,36 @@ resources: { r: { path: /r, operations: { list: { method: GET, path: "", paginat
 	// table 输出应是表格（多列 tab 分隔），非每行一个 JSON
 	if !bytes.Contains(out.Bytes(), []byte("\t")) {
 		t.Fatalf("format=table 未生效（无 tab）: %s", out.String())
+	}
+}
+
+// TestExecuteTimeout 验证 --timeout 生效：mock 慢响应（200ms）+ Options.Timeout=50ms
+// → ctx 在 50ms 到期，http.Do 尊重 ctx deadline 返回 net 错误，归一化成 *output.APIError{ExitCode:ExitNetTimeout}。
+//
+// 触发条件：Options.Timeout > 0 → Execute 开头用 context.WithTimeout 包装 ctx。
+// 旧实现：Options 无 Timeout 字段；http.Client 无 deadline → 请求等满 200ms 才返回，超时机制缺失。
+func TestExecuteTimeout(t *testing.T) {
+	// mock 慢响应（>100ms），--timeout=50ms → 超时错误
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		time.Sleep(200 * time.Millisecond)
+		w.Write([]byte(`{}`))
+	}))
+	defer srv.Close()
+	raw := []byte(`spec: api-cli/v1
+service: { name: x, default_endpoint: e, endpoints: { e: { base_url: BASE, auth: none, path_prefix: "" } } }
+resources: { r: { path: /r, operations: { read: { method: GET, path: "/{id}", params: { id: { in: path, required: true } } } } } }`)
+	raw = bytes.ReplaceAll(raw, []byte("BASE"), []byte(srv.URL))
+	tr, _ := spec.Parse(raw)
+	e := New(tr)
+	op := tr.Resources["r"].Operations["read"]
+	ep, _ := tr.SelectEndpoint("")
+	err := e.Execute(context.Background(), ep, tr.Resources["r"], op, map[string]string{"id": "1"}, nil,
+		Options{Format: "json", Out: &bytes.Buffer{}, Timeout: 50 * time.Millisecond})
+	if err == nil {
+		t.Fatal("应超时报错")
+	}
+	ae, ok := err.(*output.APIError)
+	if !ok || ae.ExitCode != output.ExitNetTimeout {
+		t.Fatalf("应是 net timeout，got %#v", err)
 	}
 }

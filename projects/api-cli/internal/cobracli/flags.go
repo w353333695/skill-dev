@@ -2,6 +2,7 @@ package cobracli
 
 import (
 	"fmt"
+	"time"
 
 	"api-cli/internal/engine"
 	"api-cli/internal/output"
@@ -103,6 +104,7 @@ func bindGlobalFlags(root *cobra.Command) {
 	root.PersistentFlags().Bool("all", false, "拉全部分页（受硬上限约束）")
 	root.PersistentFlags().String("body-file", "", "请求 body JSON 文件路径（覆盖 body 参数，支持复杂/嵌套 body）")
 	root.PersistentFlags().Bool("insecure", false, "跳过 TLS 证书校验（自签证书）")
+	root.PersistentFlags().Duration("timeout", 0, "HTTP 超时（如 30s、500ms；0=不限）")
 }
 
 // globalOpts 从 cobra command 取全局 flag → engine.Options。
@@ -120,6 +122,7 @@ func globalOpts(cmd *cobra.Command) (engine.Options, error) {
 		Limit:     intFlag(f, "limit"),
 		BodyFile:  strFlag(f, "body-file"),
 		Insecure:  boolFlag(f, "insecure"),
+		Timeout:   durationFlag(f, "timeout"),
 		Out:       stdout(),
 	}
 	if err := validateFormat(opts.Format); err != nil {
@@ -140,6 +143,10 @@ func boolFlag(f *pflag.FlagSet, name string) bool {
 }
 func intFlag(f *pflag.FlagSet, name string) int {
 	v, _ := f.GetInt(name)
+	return v
+}
+func durationFlag(f *pflag.FlagSet, name string) time.Duration {
+	v, _ := f.GetDuration(name)
 	return v
 }
 

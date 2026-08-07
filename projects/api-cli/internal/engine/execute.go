@@ -11,6 +11,7 @@ import (
 	"os"
 	"strings"
 	"sync"
+	"time"
 
 	"api-cli/internal/auth"
 	"api-cli/internal/output"
@@ -30,6 +31,7 @@ type Options struct {
 	BodyFile  string    // 请求 body JSON 文件路径（覆盖 body 参数；支持复杂/嵌套 body）
 	BodyBytes []byte    // 请求 body 字节（MCP _body marshal 后注入；优先级最高，覆盖 --body-file/body flag）
 	Insecure  bool      // 跳过 TLS 证书校验（自签证书场景）
+	Timeout   time.Duration // HTTP 超时（0 = 不限）；用 context.WithTimeout 包装 ctx，http.Do 尊重 deadline
 	Out       io.Writer // 输出目标（默认 os.Stdout；测试注入 bytes.Buffer）
 }
 
@@ -65,6 +67,15 @@ func (e *Engine) Execute(ctx context.Context, ep *tree.Endpoint, r *tree.Resourc
 	pathVals, flags map[string]string, opts Options) error {
 	if opts.Out == nil {
 		return &output.APIError{Code: "engine_options", Message: "Options.Out 未设置", ExitCode: output.ExitParamError}
+	}
+	// --timeout：>0 时用 context.WithTimeout 包装 ctx，http.Do 尊重 ctx deadline。
+	// 放在 Out 检查之后、resolve 之前：让超时也约束 auth.Apply 与后续 do（含分页迭代）。
+	// 不用 http.Client.Timeout：那只覆盖单次 do 的读响应阶段，不覆盖 resolve/auth；
+	// 且 client 是 Engine 共享字段，改其 Timeout 会污染其它请求。ctx deadline 是请求级隔离的正确手段。
+	if opts.Timeout > 0 {
+		var cancel context.CancelFunc
+		ctx, cancel = context.WithTimeout(ctx, opts.Timeout)
+		defer cancel()
 	}
 	req, err := resolve(e.tr, ep, r, op, pathVals, flags)
 	if err != nil {
