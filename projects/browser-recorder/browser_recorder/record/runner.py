@@ -13,7 +13,7 @@ from pathlib import Path
 from .. import paths
 from ..browser import launch, new_context
 from ..config import load_screenshot_policy
-from ..settle import _SETTLE_INJECT
+from ..settle import _SETTLE_INJECT, wait_for_settled
 from ..auth import scope as auth_scope
 from .injector import INJECT_SCRIPT
 from .capture import EventToAction, NetworkCollector
@@ -190,11 +190,13 @@ async def _record_async(url, session_dir, out_dir, profile, keep_auth,
             shots: dict[str, str] = {}
             for pt in points:
                 if pt == "after":
-                    # after 等渲染稳定；但 click/submit 用【短等待】（事件瞬时）——
-                    # 这些动作常触发跳转/开浮层，长等会截到「目标页/浮层打开后」的结构，
-                    # 导致标注错位；短等截到的「动作前源页面」与 bbox 对齐更准。
+                    # after 等渲染稳定。click/submit 用三信号 settle（网络+DOM+CPU）：
+                    # 这类动作常触发弹层（如 launchpad）异步加载内容，仅等 DOM/CPU 会截到
+                    # 内容未加载的白屏（用户报「截图白屏」）。三信号 settle 会等到 XHR 返回、
+                    # DOM 渲染完再截。settle 自带监听器清理，可安全每动作调用。
+                    # 其它动作（input/navigation 等）用 _wait_render_settled（DOM/CPU）即可。
                     if a.type in ("click", "submit"):
-                        await _wait_render_settled(page, timeout_ms=700)
+                        await wait_for_settled(page, timeout_ms=3000, debounce_ms=300)
                     else:
                         await _wait_render_settled(page, timeout_ms=2500)
                 else:

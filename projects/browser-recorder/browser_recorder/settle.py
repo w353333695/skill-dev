@@ -107,21 +107,31 @@ async def wait_for_settled(page: "Page", *, timeout_ms: int,
     page.on("request", _on_request)
     page.on("requestfinished", _on_done)
     page.on("requestfailed", _on_done)
-
-    deadline = start + timeout_ms / 1000.0
-    while time.monotonic() < deadline:
-        ts = int((time.monotonic() - start) * 1000)
-        info = await page.evaluate(
-            "() => ({dom_idle: window.__br_dom_idle === true, cpu_idle: window.__br_cpu_idle === true, dom_changed: window.__br_dom_changed})")
-        if info.get("dom_changed"):
-            decider.on_dom_change(ts)
-        else:
-            decider.mark_dom_idle(ts)
-        decider.on_cpu_change(bool(info.get("cpu_idle")), ts)
-        if decider.is_settled(ts):
-            return SettleResult(settled=True, settled_by="network_dom_cpu", elapsed_ms=ts)
-        await page.wait_for_timeout(50)
-    return SettleResult(settled=False, settled_by="timeout", elapsed_ms=timeout_ms)
+    try:
+        deadline = start + timeout_ms / 1000.0
+        while time.monotonic() < deadline:
+            ts = int((time.monotonic() - start) * 1000)
+            info = await page.evaluate(
+                "() => ({dom_idle: window.__br_dom_idle === true, cpu_idle: window.__br_cpu_idle === true, dom_changed: window.__br_dom_changed})")
+            if info.get("dom_changed"):
+                decider.on_dom_change(ts)
+            else:
+                decider.mark_dom_idle(ts)
+            decider.on_cpu_change(bool(info.get("cpu_idle")), ts)
+            if decider.is_settled(ts):
+                return SettleResult(settled=True, settled_by="network_dom_cpu", elapsed_ms=ts)
+            await page.wait_for_timeout(50)
+        return SettleResult(settled=False, settled_by="timeout", elapsed_ms=timeout_ms)
+    finally:
+        # 清理监听器：本函数会被每个动作的截图反复调用（record 期 click/submit after），
+        # 不清理会随录制时长线性泄漏（每次网络事件触发所有历史 handler）。
+        for _evt, _fn in (("request", _on_request),
+                          ("requestfinished", _on_done),
+                          ("requestfailed", _on_done)):
+            try:
+                page.remove_listener(_evt, _fn)
+            except Exception:
+                pass
 
 
 _SETTLE_INJECT = r"""
