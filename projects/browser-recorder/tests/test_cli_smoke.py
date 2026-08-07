@@ -43,7 +43,7 @@ def test_cli_record_then_export_on_demo_site(serve_demo_site, tmp_path, monkeypa
         session=str(session_dir.name), out_dir=tmp_path / ".browser-recorder",
         name="smoke", filter_path=None, keep_raw_bodies=False,
         annotate_style="verbose", annotate_opacity=60,
-        tmp_root=tmp_path / "tmp",
+        tmp_root=tmp_path / "tmp", fmt="both",
     )
     assert (out / "report.html").exists()
     assert (out / "report.md").exists()

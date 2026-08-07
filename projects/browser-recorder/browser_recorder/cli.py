@@ -110,16 +110,18 @@ def replay(session, profile, pace, delay_overrides, policy_path, video, video_fo
               help="画标风格：verbose（半透明填充+描边+序号）/ compact（仅描边+序号）。默认 verbose")
 @click.option("--annotate-opacity", type=int, default=60,
               help="半透明填充透明度 0–100。默认 60")
+@click.option("--format", "fmt", type=click.Choice(["md", "html", "both"]), default="md",
+              help="导出报告格式：md（默认）/ html / both")
 @click.option("--out-dir", "out_dir", default=None, help="产物根目录（默认 ./.browser-recorder）")
 @click.option("--name", default=None, help="导出目录名（默认同 session 名）")
-def export(session, filter_path, keep_raw_bodies, annotate_style, annotate_opacity, out_dir, name):
+def export(session, filter_path, keep_raw_bodies, annotate_style, annotate_opacity, fmt, out_dir, name):
     """导出图文报告 + 接口清单。"""
     from . import paths
     from .export import runner
     od = paths.resolve_out_dir(out_dir)
     ed = runner.run_export(session, od, name,
                            Path(filter_path) if filter_path else None,
-                           keep_raw_bodies, annotate_style, annotate_opacity)
+                           keep_raw_bodies, annotate_style, annotate_opacity, fmt=fmt)
     click.echo(f"导出完成：{ed}")
 
 

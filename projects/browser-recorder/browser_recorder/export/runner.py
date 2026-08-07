@@ -65,8 +65,14 @@ def apply_filter(records: list[RequestRecord], flt: dict,
 
 
 def run_export(session, out_dir, name, filter_path, keep_raw_bodies,
-               annotate_style, annotate_opacity, tmp_root=None) -> Path:
-    """导出入口：返回 export 目录。session 是 session_id 或 name。"""
+               annotate_style, annotate_opacity, tmp_root=None, fmt="md") -> Path:
+    """导出入口：返回 export 目录。session 是 session_id 或 name。
+
+    ``fmt``：``"md"``（默认，只写 report.md）/ ``"html"``（只写 report.html）/
+    ``"both"``（都写）。其余产物（requests.json / structure.json / 画标截图）不受影响。
+    """
+    if fmt not in ("md", "html", "both"):
+        raise ValueError(f"未知 format: {fmt}（应为 md|html|both）")
     out_dir = Path(out_dir) if not isinstance(out_dir, Path) else out_dir
     old_tmp = paths.TMP_ROOT
     if tmp_root is not None:
@@ -133,10 +139,12 @@ def run_export(session, out_dir, name, filter_path, keep_raw_bodies,
         (edir / "requests.json").write_text(
             json.dumps(groups, ensure_ascii=False, indent=2), encoding="utf-8")
 
-        (edir / "report.md").write_text(
-            report_md.render(actions, groups, annotated_map, meta), encoding="utf-8")
-        (edir / "report.html").write_text(
-            report_html.render(actions, groups, annotated_map, meta), encoding="utf-8")
+        if fmt in ("md", "both"):
+            (edir / "report.md").write_text(
+                report_md.render(actions, groups, annotated_map, meta), encoding="utf-8")
+        if fmt in ("html", "both"):
+            (edir / "report.html").write_text(
+                report_html.render(actions, groups, annotated_map, meta), encoding="utf-8")
         return edir
     finally:
         paths.TMP_ROOT = old_tmp
