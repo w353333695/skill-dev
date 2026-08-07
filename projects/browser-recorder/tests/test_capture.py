@@ -109,3 +109,25 @@ def test_network_collector_accepts_keep_raw_bodies():
                                   current_action_seq=lambda: None,
                                   keep_raw_bodies=True)
     assert nc.keep_raw_bodies is True
+
+
+def test_flush_pending_emits_held_input():
+    """Bug 1：未失焦的挂起输入，flush_pending 应能产出（页面侧 __br_flush 竞态兜底）。"""
+    planner = ScreenshotPlanner(DEFAULT_SCREENSHOT_POLICY)
+    e2a = capture.EventToAction(planner)
+    node = {"tag": "input", "css": "#q", "bbox": {"x": 0, "y": 0, "w": 1, "h": 1}}
+    # 连续输入但从不失焦/不提交（模拟用户输完直接关浏览器）
+    e2a.process({"type": "input", "target_node": node, "value": "a", "ts": 1000}, "u", {})
+    e2a.process({"type": "input", "target_node": node, "value": "abc", "ts": 1100}, "u", {})
+    # flush_pending 从 Python 侧兜底收尾
+    a = e2a.flush_pending("u", {}, 2000)
+    assert a is not None
+    assert a.type == "input"
+    assert a.value == "abc"
+
+
+def test_flush_pending_noop_when_nothing_held():
+    """无挂起输入时 flush_pending 返回 None（幂等，可安全重复调用）。"""
+    planner = ScreenshotPlanner(DEFAULT_SCREENSHOT_POLICY)
+    e2a = capture.EventToAction(planner)
+    assert e2a.flush_pending("u", {}, 1000) is None
