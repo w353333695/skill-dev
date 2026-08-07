@@ -259,3 +259,33 @@ resources:
 		t.Fatalf("嵌套 body 未到达服务端: %s", out.String())
 	}
 }
+
+// TestIterateFormatTable 验证分页 + format=table 走缓冲路径（收集所有 items 再 FormatTable），
+// 输出 tab 分隔的表格（含表头），而非默认的流式 NDJSON（每行一个 JSON）。
+//
+// 触发条件：op 有 pagination 且 opts.Format=="table" → iterate 分支缓冲 collected []map[string]any。
+// 旧实现：iterate 无视 format 强制 NDJSON（fmt.Fprintln 每行 it.Raw），无 tab → 测试 FAIL。
+func TestIterateFormatTable(t *testing.T) {
+	// mock 分页：2 条，format=table → 输出表格（含表头），非 NDJSON
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Write([]byte(`{"data":{"list":[{"id":"1","name":"a"},{"id":"2","name":"b"}]}}`))
+	}))
+	defer srv.Close()
+	raw := []byte(`spec: api-cli/v1
+service: { name: x, default_endpoint: e, endpoints: { e: { base_url: BASE, auth: none, path_prefix: "" } } }
+resources: { r: { path: /r, operations: { list: { method: GET, path: "", pagination: { type: offset, items_path: data.list, page_param: page, size_param: size, size: 10 } } } } }`)
+	raw = bytes.ReplaceAll(raw, []byte("BASE"), []byte(srv.URL))
+	tr, _ := spec.Parse(raw)
+	e := New(tr)
+	op := tr.Resources["r"].Operations["list"]
+	ep, _ := tr.SelectEndpoint("")
+	var out bytes.Buffer
+	err := e.Execute(context.Background(), ep, tr.Resources["r"], op, nil, map[string]string{}, Options{Format: "table", Out: &out, Limit: 10})
+	if err != nil {
+		t.Fatal(err)
+	}
+	// table 输出应是表格（多列 tab 分隔），非每行一个 JSON
+	if !bytes.Contains(out.Bytes(), []byte("\t")) {
+		t.Fatalf("format=table 未生效（无 tab）: %s", out.String())
+	}
+}

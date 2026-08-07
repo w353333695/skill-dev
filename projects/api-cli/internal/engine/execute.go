@@ -204,9 +204,31 @@ func (e *Engine) iterate(ctx context.Context, req *resolvedReq, op *tree.Operati
 		limit = 0 // 0 = 不限，受 paging.Options.MaxItems 硬上限约束
 	}
 	items := paging.Iter(ctx, op.Pagination, do, req.Body, first, paging.Options{Limit: limit})
+	// format=table|yaml：缓冲全部 items（json.Unmarshal 成 map 收集），末尾整体 FormatTable/Format。
+	// 取舍：缓冲换确定性表头/列对齐；json 默认仍走流式 NDJSON（大列表不爆内存）。
+	if opts.Format == "table" || opts.Format == "yaml" {
+		var collected []map[string]any
+		for it := range items {
+			if it.Err != nil {
+				// do 已归一化；若上层传入非 *output.APIError，兜底包一层保证带 exit code。
+				if _, ok := it.Err.(*output.APIError); ok {
+					return it.Err
+				}
+				return &output.APIError{Code: "paging", Message: it.Err.Error(), ExitCode: output.ExitNetTimeout}
+			}
+			var m map[string]any
+			if err := json.Unmarshal(it.Raw, &m); err == nil {
+				collected = append(collected, m)
+			}
+		}
+		if opts.Format == "table" {
+			return output.FormatTable(opts.Out, collected, responseHeaders(op))
+		}
+		return output.Format(opts.Out, "yaml", collected)
+	}
+	// 默认 json：流式 NDJSON（每行一个 item.Raw，大列表不爆内存）
 	for it := range items {
 		if it.Err != nil {
-			// do 已归一化；若上层传入非 *output.APIError，兜底包一层保证带 exit code。
 			if _, ok := it.Err.(*output.APIError); ok {
 				return it.Err
 			}
