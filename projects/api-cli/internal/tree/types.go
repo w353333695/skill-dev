@@ -43,6 +43,7 @@ type Operation struct {
 	Path       string // 相对 resource.Path，含 {param} 模板
 	Params     []Param
 	Body       *Schema     // nil = 无 body
+	Response   *Schema     // nil = 无 response schema（outputSchema）
 	Pagination *Pagination // nil = 无分页
 }
 
@@ -67,13 +68,16 @@ type Pagination struct {
 	SizeParam     string // offset：请求每页大小参数名
 	Size          int    // offset：每页大小
 	HasMorePath   string // 空 → 引擎用 "本轮条数 < size 或 items 空" 隐式判断
+	PageIn        string // page 在哪：空/"query" 默认 / "body"
 }
 
-// Schema 参数/body 的结构描述（MVP 用最小子集，支持 type/required/properties）。
+// Schema 参数/body/response 的结构描述（MVP 用最小子集，支持 type/required/properties）。
 type Schema struct {
-	Type        string
-	Required    []string
-	Properties  map[string]*Schema
-	Items       *Schema // type=array 时
-	Description string
+	Type                 string
+	Required             []string
+	Properties           map[string]*Schema
+	Items                *Schema // type=array 时
+	Description          string
+	Example              any   // 动态结构示例（LLM 理解核心）
+	AdditionalProperties *bool // 允许任意 key（MongoDB query 等）；nil = 不出现该字段
 }

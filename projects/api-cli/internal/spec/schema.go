@@ -37,6 +37,7 @@ type yamlOperation struct {
 	Path       string               `yaml:"path"`
 	Params     map[string]yamlParam `yaml:"params"`
 	Body       *yamlSchema          `yaml:"body"`
+	Response   *yamlSchema          `yaml:"response"`
 	Pagination *yamlPagination      `yaml:"pagination"`
 }
 
@@ -57,12 +58,15 @@ type yamlPagination struct {
 	SizeParam     string `yaml:"size_param"`
 	Size          int    `yaml:"size"`
 	HasMorePath   string `yaml:"has_more_path"`
+	PageIn        string `yaml:"page_in"`
 }
 
 type yamlSchema struct {
-	Type        string                 `yaml:"type"`
-	Required    []string               `yaml:"required"`
-	Properties  map[string]*yamlSchema `yaml:"properties"`
-	Items       *yamlSchema            `yaml:"items"`
-	Description string                 `yaml:"description"`
+	Type                 string                 `yaml:"type"`
+	Required             []string               `yaml:"required"`
+	Properties           map[string]*yamlSchema `yaml:"properties"`
+	Items                *yamlSchema            `yaml:"items"`
+	Description          string                 `yaml:"description"`
+	Example              any                    `yaml:"example"`
+	AdditionalProperties *bool                  `yaml:"additional_properties"`
 }
