@@ -168,6 +168,51 @@ func TestServeMethodNotFound(t *testing.T) {
 	}
 }
 
+// TestToolsListBodySchema 验证 operation.Body 嵌套 Schema 被展开进
+// inputSchema.properties._body（让 LLM 看到完整的 body 字段结构）。
+func TestToolsListBodySchema(t *testing.T) {
+	raw := []byte(`
+spec: api-cli/v1
+service: { name: cmdb, default_endpoint: e, endpoints: { e: { base_url: http://h, auth: none, path_prefix: "" } } }
+resources:
+  inst:
+    path: /inst
+    operations:
+      search:
+        method: POST
+        path: ""
+        params:
+          object_id: { in: path, type: string, required: true }
+        body:
+          type: object
+          required: [q]
+          description: 搜索请求
+          properties:
+            q: { type: string, description: 关键词 }
+`)
+	tr, _ := spec.Parse(raw)
+	s := New(tr)
+	tools := s.ToolsList()
+	if len(tools) != 1 {
+		t.Fatalf("want 1 tool, got %d", len(tools))
+	}
+	props, ok := tools[0].InputSchema["properties"].(map[string]any)
+	if !ok {
+		t.Fatal("inputSchema.properties 缺失")
+	}
+	body, ok := props["_body"].(map[string]any)
+	if !ok {
+		t.Fatal("inputSchema.properties._body 缺失（嵌套 body 未展开）")
+	}
+	if body["description"] != "搜索请求" {
+		t.Fatalf("_body.description want 搜索请求, got %#v", body["description"])
+	}
+	bodyProps, _ := body["properties"].(map[string]any)
+	if bodyProps["q"] == nil {
+		t.Fatal("_body.properties.q 缺失")
+	}
+}
+
 // TestServeToolsCallDryRun 用未知 tool 名触发 -32602，验证 tools/call 路由 + 错误码。
 // 真发链路（命中 mock 后端）由 engine 包自己测；mcp 层只验路由/反查/分参。
 func TestServeToolsCallDryRun(t *testing.T) {
