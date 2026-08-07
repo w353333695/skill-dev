@@ -7,7 +7,7 @@ import logging
 import time
 from pathlib import Path
 from typing import Callable, TYPE_CHECKING
-from ..models import Action, RequestRecord
+from ..models import Action, RequestRecord, Target
 from ..selectors import build_target_from_dom, target_fingerprint
 from ..response_schema import parse as parse_response
 from .screenshot import ScreenshotPlanner
@@ -21,6 +21,18 @@ _STATIC_TYPES = {"image", "font", "stylesheet", "media", "manifest"}
 _RAW_THRESHOLD = 1_048_576  # 1 MiB：响应原始体超过此阈值则落盘
 
 logger = logging.getLogger(__name__)
+
+
+def _same_position(a: Target, b: Target) -> bool:
+    """同一位置判定（用于「连续同位置点击」去重）：bbox 完全相同，或非退化指纹相同。
+
+    bbox 完全相同 → 同位置（同元素连点，或不同元素恰好重叠）；
+    否则比较指纹（含 null-selector 的 bbox 兜底）——退化指纹 ``tag:|text:`` 不算。
+    """
+    if a.bbox and b.bbox and a.bbox == b.bbox:
+        return True
+    fpa, fpb = target_fingerprint(a), target_fingerprint(b)
+    return bool(fpa) and fpa == fpb and fpa != "tag:|text:"
 
 
 def is_static(url: str, resource_type: str) -> bool:
@@ -55,6 +67,7 @@ class EventToAction:
         self._input_value: str = ""
         self._pending: list[Action] = []
         self._last_click_ts: int | None = None   # 用于 submit 合并判定
+        self._last_click_target: Target | None = None  # 用于「连续同位置点击」去重
 
     def _flush_input(self, url: str, page_info: dict, ts: int) -> Action | None:
         """结束当前输入聚合，产出一条 input Action；无挂起输入时返回 None。"""
@@ -64,6 +77,7 @@ class EventToAction:
         value = self._input_value
         self._input_node = None
         self._input_value = ""
+        self._last_click_target = None  # 输入动作打断「连续同位置点击」
         self._seq += 1
         return Action(
             seq=self._seq, ts=ts, type="input", url=url,
@@ -116,6 +130,12 @@ class EventToAction:
         # click / select / keypress / hover / navigation：去重
         target = build_target_from_dom(node)
         fp = target_fingerprint(target)
+        # 连续点击同一位置（无视时间间隔，间隔数秒也丢）→ 丢弃，清理无效重复点击。
+        # 仅当上一个落库动作是 click 且本 click 与之同位置；中间任何输入/导航等动作
+        # 会经 _flush_input 或下方 else 分支把 _last_click_target 置 None，从而打断。
+        if t == "click" and self._last_click_target is not None \
+                and _same_position(target, self._last_click_target):
+            return flushed
         if self.planner.is_duplicate(t, fp, ts):
             # 去重也要刷新 click 时间戳（连点同一按钮，submit 仍应合并到最近一次）
             if t == "click":
@@ -128,6 +148,9 @@ class EventToAction:
         )
         if t == "click":
             self._last_click_ts = ts   # 记录最近 click，供后续 submit 合并
+            self._last_click_target = target
+        else:
+            self._last_click_target = None   # 非 click 动作打断「连续同位置」
         if flushed:
             # flush 的 input 优先返回；新 action 暂存，由 drain_pending 取出
             self._pending.append(action)
