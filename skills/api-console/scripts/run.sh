@@ -20,5 +20,5 @@ PROJ=""
 for entry in "${PROJECTS[@]}"; do
   if [ "${entry#*=}" = "$CLI" ]; then PROJ="${entry%%=*}"; break; fi
 done
-[ -n "$PROJ" ] || { echo "[run] 未知 cli: $CLI（manifest 未声明）" >&2; exit 1; }
+[ -n "$PROJ" ] || { echo "[run] 未知 cli: ${CLI}（manifest 未声明）" >&2; exit 1; }
 exec uv run --project "$REPO_ROOT/projects/$PROJ" "$CLI" "$@"
