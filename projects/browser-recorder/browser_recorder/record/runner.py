@@ -108,7 +108,7 @@ async def _interactive_login(pw, url, headless, ignore_https_errors=False):
 async def _record_async(url, session_dir, out_dir, profile, keep_auth,
                         screenshot_policy_path, video, name, headless, auto_actions,
                         keep_raw_bodies=False, ignore_https_errors=False,
-                        record_timeout_s: float = 600.0, capture_all_clicks: bool = False):
+                        record_timeout_s: float = 600.0, interactive_only: bool = False):
     from playwright.async_api import async_playwright
     from ..auth import store
 
@@ -254,9 +254,10 @@ async def _record_async(url, session_dir, out_dir, profile, keep_auth,
         if video:
             from ..marker import MARKER_INJECT
             await ctx.add_init_script(MARKER_INJECT)
-        # 逃生开关：--capture-all-clicks 时关掉交互过滤，记录所有 click（默认关）
-        if capture_all_clicks:
-            await ctx.add_init_script("window.__br_capture_all = true;")
+        # --interactive-only：关闭空白点击兜底，恢复「点纯空白丢弃」的旧行为。
+        # 新默认（不传）= 全捕：先取最小可点击元素，无果时兜底记最深有盒节点。
+        if interactive_only:
+            await ctx.add_init_script("window.__br_interactive_only = true;")
 
         nc = NetworkCollector(page, _sink_request, session_dir / "responses",
                               current_action_seq=lambda: current_seq_box["v"],
@@ -315,7 +316,7 @@ async def _record_async(url, session_dir, out_dir, profile, keep_auth,
 def run_record(url, out_dir, profile, keep_auth, screenshot_policy_path,
                video, name, headless=False, auto_actions=None,
                keep_raw_bodies=False, ignore_https_errors=False,
-               record_timeout_s: float = 600.0, capture_all_clicks: bool = False) -> Path:
+               record_timeout_s: float = 600.0, interactive_only: bool = False) -> Path:
     """录制入口：返回 session_dir。``out_dir`` 为 Path 或 str。"""
     out_dir = Path(out_dir) if not isinstance(out_dir, Path) else out_dir
     session_id = name or paths.new_session_id()
@@ -330,5 +331,5 @@ def run_record(url, out_dir, profile, keep_auth, screenshot_policy_path,
                               keep_raw_bodies=keep_raw_bodies,
                               ignore_https_errors=ignore_https_errors,
                               record_timeout_s=record_timeout_s,
-                              capture_all_clicks=capture_all_clicks))
+                              interactive_only=interactive_only))
     return session_dir

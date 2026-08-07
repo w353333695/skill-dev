@@ -33,13 +33,17 @@ def main() -> None:
 @click.option("--timeout", "record_timeout_s", type=float, default=None,
               help="人工录制兜底超时（秒）；不传则 headed=600、headless=10。"
                    "结束录制：Ctrl/Cmd+Shift+X，或直接关浏览器")
+@click.option("--interactive-only", "interactive_only", is_flag=True,
+              help="关闭空白点击兜底：点纯空白/容器不记（恢复旧默认）。"
+                   "默认关（全捕，由用户后期清理无效点击）")
 @click.option("--capture-all-clicks", "capture_all_clicks", is_flag=True,
-              help="逃生开关：关掉交互过滤、记录所有 click（含点空白，噪音大）。"
-                   "默认关；仅当 A+B（自定义按钮/tabindex 识别）仍漏动作时启用")
+              help="(已废弃，现为 no-op) 新默认即捕获所有点击；保留参数仅为不破坏旧脚本")
 def record(url, profile, keep_auth_events, screenshot_policy, no_video, out_dir, name,
            headless, keep_raw_bodies, ignore_https_errors, record_timeout_s,
-           capture_all_clicks):
+           interactive_only, capture_all_clicks):
     """录制浏览器操作。"""
+    if capture_all_clicks:
+        click.echo("[record] 提示：--capture-all-clicks 已废弃（新默认即捕获所有点击），本次忽略该参数。")
     if keep_auth_events:
         # spec §4.3：登录过程默认剔除；保留需识别登录阶段，复杂度高，暂不实现
         click.echo("[record] 警告：--keep-auth-events 当前为 reserved，暂未生效（登录动作仍会被剔除）")
@@ -61,7 +65,7 @@ def record(url, profile, keep_auth_events, screenshot_policy, no_video, out_dir,
                            keep_raw_bodies=keep_raw_bodies,
                            ignore_https_errors=ignore_https_errors,
                            record_timeout_s=record_timeout_s,
-                           capture_all_clicks=capture_all_clicks)
+                           interactive_only=interactive_only)
     click.echo(f"录制完成：{sd}")
 
 

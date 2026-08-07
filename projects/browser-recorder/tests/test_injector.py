@@ -40,8 +40,8 @@ def test_inject_script_emits_input_finalize_on_focusout_and_blur():
 
 
 def test_inject_script_custom_button_and_tabindex_signals():
-    """A+B+C：isInteractiveSelf 识别自定义按钮标签名(-button/-link 等)、tabindex、
-    capture-all 逃生开关、composedPath 穿透 shadow。"""
+    """A+B：isInteractiveSelf 识别自定义按钮标签名(-button/-link 等)、tabindex；
+    新默认全捕兜底（__br_interactive_only 关闭兜底）；composedPath 穿透 shadow。"""
     s = injector.INJECT_SCRIPT
     import re
     # A：标签名模式（平台中性，不硬编码厂商前缀）
@@ -49,7 +49,9 @@ def test_inject_script_custom_button_and_tabindex_signals():
         "INJECT_SCRIPT 未按标签名模式识别自定义按钮"
     # B：tabindex 作为交互信号
     assert "hasAttribute('tabindex')" in s
-    # C：capture-all 逃生开关
-    assert "__br_capture_all" in s
+    # interactive_only 开关（关闭空白兜底）
+    assert "__br_interactive_only" in s, "INJECT_SCRIPT 未支持 __br_interactive_only"
     # shadow 穿透
     assert "composedPath" in s
+    # 旧 __br_capture_all 已退役
+    assert "__br_capture_all" not in s
