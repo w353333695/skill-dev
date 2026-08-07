@@ -1,3 +1,6 @@
 # build 产物
 /bin/
 /api-cli
+
+# 本地凭证/临时配置（cookie、AK/SK、测试清单等，严禁入 git）
+.local/
