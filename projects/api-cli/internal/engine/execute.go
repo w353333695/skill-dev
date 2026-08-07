@@ -175,7 +175,8 @@ func responseHeaders(op *tree.Operation) map[string]string {
 }
 
 // iterate 走 paging.Iter 流式 NDJSON：每行一个 item.Raw（已是 JSON）。
-// firstReq = req.Query 作为翻页种子（cursor/offset 参数由 paging 引擎注入/递增）。
+// firstQuery = req.Query 作为翻页种子（cursor/offset 参数由 paging 引擎注入/递增）；
+// firstBody = req.Body 用于 page-in-body（PageIn=body 时翻页改 body 副本的 page 号）。
 //
 // 错误反馈：paging.Iter 的 DoFunc（即下方 do）出错时，Iter 会发一个 Item{Err}
 // 再 close channel。do 已把网络错误归一化成 *output.APIError{ExitNetTimeout}、
@@ -183,23 +184,26 @@ func responseHeaders(op *tree.Operation) map[string]string {
 // 保证翻页中途失败时 Execute 返回非 nil err（exit 非 0），不让截断数据蒙混过关。
 func (e *Engine) iterate(ctx context.Context, req *resolvedReq, op *tree.Operation, opts Options, hc *http.Client) error {
 	first := copySS(req.Query)
-	do := func(ctx context.Context, q map[string]string) ([]byte, error) {
+	do := func(ctx context.Context, body []byte, q map[string]string) ([]byte, error) {
 		r2 := *req
 		r2.Query = q
-		body, status, err := e.do(ctx, &r2, hc)
+		if len(body) > 0 {
+			r2.Body = body // page-in-body 翻页改 body（bumpBodyPage 递增后的副本）
+		}
+		b, status, err := e.do(ctx, &r2, hc)
 		if err != nil {
 			return nil, err
 		}
 		if status >= 400 {
-			return nil, output.NormalizeAPIError(status, body)
+			return nil, output.NormalizeAPIError(status, b)
 		}
-		return body, nil
+		return b, nil
 	}
 	limit := opts.Limit
 	if opts.All {
 		limit = 0 // 0 = 不限，受 paging.Options.MaxItems 硬上限约束
 	}
-	items := paging.Iter(ctx, op.Pagination, do, first, paging.Options{Limit: limit})
+	items := paging.Iter(ctx, op.Pagination, do, req.Body, first, paging.Options{Limit: limit})
 	for it := range items {
 		if it.Err != nil {
 			// do 已归一化；若上层传入非 *output.APIError，兜底包一层保证带 exit code。

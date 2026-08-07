@@ -3,6 +3,7 @@ package paging
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 
 	"api-cli/internal/tree"
@@ -29,14 +30,15 @@ type Options struct {
 	NoDedupe bool // 关闭按 id 去重
 }
 
-// DoFunc 执行一次请求，返回响应 body。req 是可变的翻页参数（cursor token 或 page 号）。
-type DoFunc func(ctx context.Context, req map[string]string) ([]byte, error)
+// DoFunc 执行一次请求，返回响应 body。body/query 是可变翻页参数（PageIn 决定改哪个）。
+type DoFunc func(ctx context.Context, body []byte, query map[string]string) ([]byte, error)
 
 // Iter 流式迭代所有分页 items。
 //   - pg：分页声明（来自 operation.Pagination）
-//   - firstReq：首次请求的 query 参数种子
+//   - firstBody：首次请求的 body 种子（page-in-body 翻页在此基础上改 page 号）
+//   - firstQuery：首次请求的 query 参数种子（cursor/offset-in-query 在此基础上翻页）
 //   - opts：MaxPages/Limit 等
-func Iter(ctx context.Context, pg *tree.Pagination, do DoFunc, firstReq map[string]string, opts Options) <-chan Item {
+func Iter(ctx context.Context, pg *tree.Pagination, do DoFunc, firstBody []byte, firstQuery map[string]string, opts Options) <-chan Item {
 	if opts.MaxPages == 0 {
 		opts.MaxPages = 1000
 	}
@@ -46,11 +48,12 @@ func Iter(ctx context.Context, pg *tree.Pagination, do DoFunc, firstReq map[stri
 	out := make(chan Item, 100)
 	go func() {
 		defer close(out)
-		req := copyMap(firstReq)
+		body := append([]byte(nil), firstBody...) // 拷贝，翻页改副本
+		req := copyMap(firstQuery)
 		seen := map[string]bool{}
 		count := 0
 		for page := 0; page < opts.MaxPages; page++ {
-			body, err := do(ctx, req)
+			respBody, err := do(ctx, body, req)
 			if err != nil {
 				// 错误不能静默吞：发一个 Item{Err} 让消费方感知失败，
 				// 再 close。select 兼顾 ctx 已取消的快路径。
@@ -60,7 +63,7 @@ func Iter(ctx context.Context, pg *tree.Pagination, do DoFunc, firstReq map[stri
 				}
 				return
 			}
-			items := gjson.GetBytes(body, pg.ItemsPath).Array()
+			items := gjson.GetBytes(respBody, pg.ItemsPath).Array()
 			for _, it := range items {
 				id := gjson.Get(it.Raw, "id").String()
 				if !opts.NoDedupe && id != "" {
@@ -82,49 +85,81 @@ func Iter(ctx context.Context, pg *tree.Pagination, do DoFunc, firstReq map[stri
 					return
 				}
 			}
-			// 判断是否还有下一页 + 算下一页参数
-			nextReq, more := planNext(body, items, pg, req)
+			// 判断是否还有下一页 + 算下一页参数（body / query）
+			nextBody, nextReq, more := planNext(respBody, items, pg, body, req)
 			if !more {
 				return
 			}
+			body = nextBody
 			req = nextReq
 		}
 	}()
 	return out
 }
 
-// planNext 决定是否翻页 + 下一页参数。
-func planNext(body []byte, items []gjson.Result, pg *tree.Pagination, req map[string]string) (map[string]string, bool) {
+// planNext 决定是否翻页 + 下一页参数（可能改 body，可能改 query）。
+//   - cursor：从响应抽 next token，写入 query.page_token
+//   - offset + PageIn=body：终止判断后用 bumpBodyPage 改 body 副本的 page 号
+//   - offset + 其他：page 号自增加入 query
+//   - implicit：本轮条数 < size 或空 → 结束
+func planNext(respBody []byte, items []gjson.Result, pg *tree.Pagination, body []byte, req map[string]string) ([]byte, map[string]string, bool) {
 	nextReq := copyMap(req)
 	switch pg.Type {
 	case "cursor":
-		token := gjson.GetBytes(body, pg.NextTokenPath).String()
+		token := gjson.GetBytes(respBody, pg.NextTokenPath).String()
 		if token == "" {
-			return nextReq, false
+			return body, nextReq, false
 		}
 		nextReq["page_token"] = token
-		return nextReq, true
+		return body, nextReq, true
 	case "offset":
-		// offset 用 page 号自增
+		// 隐式终止判断（条数 < size）
+		if pg.Size > 0 && len(items) < pg.Size {
+			return body, nextReq, false
+		}
+		// 翻页参数位置：body 还是 query
+		if pg.PageIn == "body" {
+			nextBody := bumpBodyPage(body, pg.PageParam)
+			return nextBody, nextReq, true
+		}
 		cur := 0
 		fmt.Sscanf(req[pg.PageParam], "%d", &cur)
 		nextReq[pg.PageParam] = fmt.Sprintf("%d", cur+1)
-		// 隐式判断：取到的条数 < size → 结束
-		if pg.Size > 0 && len(items) < pg.Size {
-			return nextReq, false
-		}
-		return nextReq, true
+		return body, nextReq, true
 	case "implicit":
 		// 不配 has_more → 本轮条数 < size 或空 → 结束
 		if pg.Size > 0 && len(items) < pg.Size {
-			return nextReq, false
+			return body, nextReq, false
 		}
 		if len(items) == 0 {
-			return nextReq, false
+			return body, nextReq, false
 		}
-		return nextReq, true
+		return body, nextReq, true
 	}
-	return nextReq, false
+	return body, nextReq, false
+}
+
+// bumpBodyPage 把 body JSON 里 page_param 的数字 +1（page-in-body 翻页）。
+// 用于 PageIn=body 的 offset 分页：每翻一页把 body 里的 page 号递增。
+// body 非 JSON / 字段缺失 / 类型异常时原样返回（不阻塞翻页，由 MaxPages 兜底）。
+func bumpBodyPage(body []byte, pageParam string) []byte {
+	var m map[string]any
+	if err := json.Unmarshal(body, &m); err != nil {
+		return body
+	}
+	cur := 0
+	switch v := m[pageParam].(type) {
+	case float64:
+		cur = int(v)
+	case string:
+		fmt.Sscanf(v, "%d", &cur)
+	}
+	m[pageParam] = cur + 1
+	out, err := json.Marshal(m)
+	if err != nil {
+		return body
+	}
+	return out
 }
 
 // copyMap 浅拷贝一个 map[string]string，避免翻页间共享底层数据。
