@@ -60,7 +60,7 @@ func (e *Engine) insecureClient() *http.Client {
 // Execute 执行一次操作。cobracli（Task 10）/mcp（Task 12）的唯一入口。
 // 返回归一化错误（*output.APIError 携 ExitCode）；调用方用 output.ExitCode 取退出码。
 //
-// 流程：resolve → body-file 覆盖 → gateWrite → dry-run/print-curl → auth.Apply → 选 client → 分页 or 单次 → 错误归一化 → 输出。
+// 流程：resolve → body-file 覆盖 → BodyBytes → dry-run/print-curl（先于写闸门）→ gateWrite → auth.Apply → 选 client → 分页 or 单次 → 错误归一化 → 输出。
 func (e *Engine) Execute(ctx context.Context, ep *tree.Endpoint, r *tree.Resource, op *tree.Operation,
 	pathVals, flags map[string]string, opts Options) error {
 	if opts.Out == nil {
@@ -87,15 +87,16 @@ func (e *Engine) Execute(ctx context.Context, ep *tree.Endpoint, r *tree.Resourc
 		req.Body = opts.BodyBytes
 	}
 
-	// 写操作闸门（create/update/delete 需 --yes 或 TTY 交互确认）。
-	if err := gateWrite(op.Verb, opts); err != nil {
-		return err
-	}
-
 	// dry-run / print-curl：渲染预览，不发请求。
+	// 必须先于写闸门：dry-run 是安全预览（不发请求），update/delete --dry-run 非 TTY 不该被 gateWrite 拦。
 	if opts.DryRun || opts.PrintCurl {
 		fmt.Fprintln(opts.Out, renderPreview(req, opts))
 		return nil
+	}
+
+	// 写操作闸门（create/update/delete 需 --yes 或 TTY 交互确认）。
+	if err := gateWrite(op.Verb, opts); err != nil {
+		return err
 	}
 
 	// auth.Apply：endpoint.Auth 空 / "none" 时跳过；其余按名加载 provider。
