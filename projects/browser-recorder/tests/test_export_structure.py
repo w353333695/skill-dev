@@ -2,8 +2,18 @@
 """A3：build_segments 按 navigation/URL path 切段；run_export 写 structure.json。"""
 import json
 from pathlib import Path
+import pytest
+from browser_recorder import paths
 from browser_recorder.models import Action, Target
 from browser_recorder.export.structure import build_segments
+
+
+@pytest.fixture(autouse=True)
+def _restore_tmp_root():
+    """部分用例会改全局 paths.TMP_ROOT；每个用例后还原，避免污染其它测试。"""
+    saved = paths.TMP_ROOT
+    yield
+    paths.TMP_ROOT = saved
 
 
 def _act(seq, atype, url):

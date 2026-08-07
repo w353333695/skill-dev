@@ -55,6 +55,21 @@ uv run browser-recorder replay demo --video
 
 ---
 
+## 配套 skill：browser-manual（推荐的生产用法）
+
+「录制 → 出操作手册」的端到端流水线，封装在 `skills/browser-manual/`：按系统复用登录态、
+按主题过滤后台请求、自动生成统一格式操作手册。详见 `skills/browser-manual/SKILL.md`。
+
+```bash
+bash skills/browser-manual/scripts/run.sh \
+  --system <系统> --url <起始页> --scenario <场景> --theme "<主题>"
+# 脚本跑完步骤 1-3（登录态保障 + record + export），再由 skill 内 Claude 做
+# 步骤 4（主题过滤 → requests.theme.json + 接口清单.md）+ 步骤 5（手册分章 → manual.md）。
+# 产物落在 <root>/<system>/exports/<scenario>/，<root> 默认 ./.browser-recordories/（--root 可改）。
+```
+
+---
+
 ## 子命令用法
 
 ### `record` —— 录制
@@ -84,6 +99,7 @@ uv run browser-recorder record \
 
 ```bash
 uv run browser-recorder export my-rec \
+  --format md \                 # md（默认）/ html / both
   --annotate-style verbose \   # 或 compact
   --annotate-opacity 60 \      # 0–100，半透明填充透明度
   --filter-requests filter.yaml
@@ -91,6 +107,7 @@ uv run browser-recorder export my-rec \
 
 | 选项                   | 说明                                                                  |
 | ---------------------- | --------------------------------------------------------------------- |
+| `--format`           | `md`（默认，只产 report.md）/ `html` / `both`                       |
 | `--annotate-style`   | `verbose`（半透明填充 + 描边 + 序号）/ `compact`（仅描边 + 序号） |
 | `--annotate-opacity` | 0–100，半透明填充透明度                                              |
 | `--filter-requests`  | 请求过滤规则 yaml（见下），用于排除第三方/静态/特定状态码             |
@@ -120,7 +137,7 @@ uv run browser-recorder replay my-rec \
 - 浏览器：**locale=zh-CN**（中文界面/Accept-Language）、viewport 1280×720、headless。
 - 截图策略 / 请求过滤：不传 `--screenshot-policy` / `--filter-requests` 时用**内置最佳实践默认**（见「配置文件示例」）。
 - 回放：pace=`human`、video-format=`webm`、video-width=`1024`。
-- 导出：annotate-style=`verbose`、annotate-opacity=`60`。
+- 导出：format=`md`、annotate-style=`verbose`、annotate-opacity=`60`。
 - 产物根目录：`./.browser-recorder`；会话名/导出名缺省用时间戳。
 
 ### `auth` —— 登录态管理
@@ -150,9 +167,10 @@ uv run browser-recorder auth show my-profile
 │       └── storage_state.json
 └── exports/
     └── <name>/                        # 最终产物（export 输出）
-        ├── report.html                # 图文报告（内联 CSS，步骤+画标截图+接口折叠）
-        ├── report.md
+        ├── report.md                  # 图文报告（默认产物；--format html/both 才额外产 report.html）
+        ├── report.html                # 仅 --format html/both 时产出
         ├── requests.json              # 聚合后的接口清单（按 method+url_template 分组）
+        ├── structure.json             # 确定性页面分段（供 browser-manual skill 分章）
         ├── screenshots_annotated/     # 画标截图（半透明标注 + 序号）
         └── video.mp4 / video.webm     # 可选录屏
 
@@ -245,8 +263,10 @@ settle_debounce_ms: 300
   窗口内的两者合并为一条、保留 click（bbox 是按钮更精准），不再产生重复动作/标注。通用 DOM 行为。
 - **mp4 分辨率**：`--video-format mp4` 时 `--video-width`（默认 **1024**）控制宽度，高度按原比例
   自动计算；`0` 表示不缩放、保持原分辨率。
-- **逃生开关 `--capture-all-clicks`**（默认关）：上述识别仍漏动作时，开启后会**关掉交互过滤、记录所有 click**
-  （含点空白，噪音大）。仅作兜底，正常录制不要开。
+- **默认捕获所有点击**：点交互元素 → 记「最小可点击元素」（向上找首个自身可交互+真实盒子节点，bbox 最准）；
+  点纯空白/容器 → 兜底记「最深的、有真实盒子的节点」，让无效点击留痕供后期清理。
+  `--interactive-only` 关闭空白兜底（恢复「点空白丢弃」旧行为）。
+  旧 `--capture-all-clicks` 已废弃（新默认即全捕），保留为 no-op+提示。
 
 ---
 

@@ -35,7 +35,9 @@ def profile_dir(out_dir: Path, profile: str) -> Path:
 
 
 def new_session_id() -> str:
-    """时间戳 + 4 位随机，提高可读性同时避免并发碰撞。"""
+    """时间戳 + 6 位随机，提高可读性同时避免并发/采样碰撞。"""
     ts = time.strftime("%Y%m%d-%H%M%S")
-    suffix = secrets.token_hex(2)  # 4 个十六进制字符
+    # 6 个十六进制字符（16M 取值）：原 4 位（65536）在 50 次采样下有约 2% 生日碰撞，会让
+    # test_new_session_id_unique 偶发失败；6 位把碰撞概率降到可忽略。
+    suffix = secrets.token_hex(3)  # 6 个十六进制字符
     return f"{ts}-{suffix}"

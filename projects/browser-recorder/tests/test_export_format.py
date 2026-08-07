@@ -2,8 +2,18 @@
 """A1：export 默认产物 Markdown；--format html/both 控制是否额外产 html。"""
 import json
 from pathlib import Path
+import pytest
+from browser_recorder import paths
 from browser_recorder.models import Action, Target
 from browser_recorder.export import runner as exp
+
+
+@pytest.fixture(autouse=True)
+def _restore_tmp_root():
+    """_seed_session 会改全局 paths.TMP_ROOT；每个用例后还原，避免污染其它测试。"""
+    saved = paths.TMP_ROOT
+    yield
+    paths.TMP_ROOT = saved
 
 
 def _seed_session(tmp_root: Path, name: str = "s1") -> Path:
