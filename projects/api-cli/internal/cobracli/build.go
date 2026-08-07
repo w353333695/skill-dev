@@ -1,0 +1,91 @@
+// Package cobracli 把 OperationTree 动态编译成 cobra 命令树。
+//
+// 入口：Build(*tree.OperationTree) → *cobra.Command。
+// 行为：每个 resource → 一个 resource 命令（递归 children → N 层），
+// 每个 operation → 一个 verb 子命令，non-path 参数注册成 flag，
+// RunE 调 engine.Execute 完成请求组装/执行/输出。
+// 全局 Persistent flag（--endpoint/--format/--help-format/--dry-run/--print-curl/--yes/--limit/--all）
+// 在 root 注册，子命令继承。--help-format=json 时 root 的 HelpFunc 把叶子命令
+// 反查 OperationTree 后序列化成结构化 JSON（供 LLM 发现）。
+package cobracli
+
+import (
+	"api-cli/internal/engine"
+	"api-cli/internal/tree"
+
+	"github.com/spf13/cobra"
+)
+
+// Build 构建根命令树并绑定全局 flag 与 help 钩子。
+func Build(tr *tree.OperationTree) (*cobra.Command, error) {
+	root := &cobra.Command{
+		Use:           tr.Service.Name,
+		Short:         tr.Service.Name + " CLI（声明式生成）",
+		SilenceUsage:  true,
+		SilenceErrors: true,
+	}
+	bindGlobalFlags(root)
+	e := engine.New(tr)
+	for _, r := range tr.Resources {
+		root.AddCommand(resourceCmd(tr, e, r, nil))
+	}
+	root.SetHelpFunc(helpFunc(tr))
+	return root, nil
+}
+
+// resourceCmd 递归构建资源命令（含 children → N 层）。
+// parentKeys：累积的父 ID 注入键（{parent_key} → 父命令 args[0]）。
+func resourceCmd(tr *tree.OperationTree, e *engine.Engine, r *tree.Resource, parentKeys []parentKV) *cobra.Command {
+	c := &cobra.Command{Use: r.Name, Short: desc(r)}
+	for verb, op := range r.Operations {
+		c.AddCommand(operationCmd(tr, e, r, op, verb, parentKeys))
+	}
+	for _, child := range r.Children {
+		// 进入 child 时把当前 resource 的 ParentKey 累积进 parentKeys；
+		// child path 模板里的 {parent_key} 用父命令 args[0] 填。
+		c.AddCommand(resourceCmd(tr, e, child, append(parentKeys, parentKV{key: r.ParentKey})))
+	}
+	return c
+}
+
+// operationCmd 构建 operation 子命令：注册 flag，RunE 调 engine。
+// Annotations 把 resource/verb 别在命令上，供 help-format=json 反查。
+func operationCmd(tr *tree.OperationTree, e *engine.Engine, r *tree.Resource, op *tree.Operation, verb string, parentKeys []parentKV) *cobra.Command {
+	pathParams, otherParams := splitParams(op)
+	bag := newFlagBag()
+
+	c := &cobra.Command{
+		Use:   verb,
+		Short: op.Verb + " " + r.Singular,
+		Annotations: map[string]string{
+			"resource": r.Name,
+			"verb":     verb,
+		},
+		RunE: func(cmd *cobra.Command, args []string) error {
+			opts, err := globalOpts(cmd)
+			if err != nil {
+				return err
+			}
+			pathVals := buildPathVals(pathParams, args, parentKeys)
+			flags := bag.values(otherParams)
+			// endpoint 名取自 --endpoint flag（空 → SelectEndpoint 走 service.default_endpoint）。
+			// Task 9 engine.Options 无 Endpoint 字段，所以这里单独取 flag 后传 *tree.Endpoint 进 engine。
+			epName, _ := cmd.Flags().GetString("endpoint")
+			ep, err := tr.SelectEndpoint(epName)
+			if err != nil {
+				return err
+			}
+			return e.Execute(cmd.Context(), ep, r, op, pathVals, flags, opts)
+		},
+	}
+	registerParams(c, op, bag)
+	return c
+}
+
+// desc 给 resource 命令拼一句中文短描述。
+func desc(r *tree.Resource) string {
+	if r.Singular != "" {
+		return r.Singular + " 资源"
+	}
+	return r.Name + " 资源"
+}
