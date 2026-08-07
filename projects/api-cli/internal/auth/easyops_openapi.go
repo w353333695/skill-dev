@@ -78,7 +78,10 @@ func (e *EasyOpsOpenAPI) Apply(_ context.Context, r *adapter.AuthRequest) (*adap
 			"signature": signature,
 			"expires":   timestamp,
 		},
-		Headers: map[string]string{"host": e.host},
+		Headers: map[string]string{
+			"host":         e.host,
+			"content-type": contentType, // docx 要求 headers 总含 content-type（GET 也带，且与签名串的 Content-Type 段一致）
+		},
 	}, nil
 }
 

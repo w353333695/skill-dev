@@ -7,14 +7,16 @@ service:
   version: "1.0"
   default_endpoint: frontend          # 用户 curl 是前端，先默认前端调通
   endpoints:
-    frontend:                         # 浏览器/前端：走网关 + cookie
-      base_url: https://admin.easyops.local
+    frontend:                         # 浏览器/前端：走网关 + cookie（IP 直连 + Host header）
+      base_url: https://172.30.0.232
+      host: admin.easyops.local       # IP 直连，Host 由 endpoint.Host 注入（网关按 host 路由）
       path_prefix: /next/api/gateway/cmdb.instance.PostSearchV3
       auth: easyops-cookie
-    backend:                          # CLI 友好：直连 :8079
-      base_url: https://admin.easyops.local:8079
+    backend:                          # 直连后端 :8079（HTTP）
+      base_url: http://172.30.0.232:8079
+      host: admin.easyops.local
       path_prefix: ""
-      auth: easyops-cookie            # 先复用 cookie；后端若改 token 再换 auth 引用
+      auth: easyops-cookie
 
 resources:
   object_instance:

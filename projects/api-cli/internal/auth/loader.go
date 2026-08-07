@@ -100,7 +100,11 @@ func configPath(name string) string {
 	return filepath.Join(authDir(), name+".yaml")
 }
 
+// authDir 返回 auth.d 目录。API_CLI_AUTH_D 优先（项目内统一管理凭证，gitignore）；否则用 ~/.api-cli/auth.d。
 func authDir() string {
+	if d := os.Getenv("API_CLI_AUTH_D"); d != "" {
+		return d
+	}
 	home, _ := os.UserHomeDir()
 	return filepath.Join(home, ".api-cli", "auth.d")
 }
