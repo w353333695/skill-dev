@@ -4,8 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"reflect"
-	"sort"
 )
 
 // Exit code 语义（spec §11.2）。
@@ -73,40 +71,8 @@ func mapStatusCode(c int) int {
 }
 
 // formatTable 把 slice of map 打成简易表格。
-func formatTable(w io.Writer, data any) error {
-	v := reflect.ValueOf(data)
-	if v.Kind() != reflect.Slice {
-		// 非 slice：当作单行
-		return Format(w, "json", data)
-	}
-	if v.Len() == 0 {
-		return nil
-	}
-	// 取第一条的 keys 作表头
-	first := v.Index(0)
-	if first.Kind() != reflect.Map {
-		return Format(w, "json", data)
-	}
-	keys := []string{}
-	for _, k := range first.MapKeys() {
-		keys = append(keys, k.String())
-	}
-	// 排序固化表头顺序：MapKeys 返回顺序未定义，不排序会导致同输入列序随机、不可重现。
-	sort.Strings(keys)
-	fmt.Fprintln(w, joinRow(keys))
-	for i := 0; i < v.Len(); i++ {
-		row := make([]string, len(keys))
-		m := v.Index(i)
-		for j, k := range keys {
-			vv := m.MapIndex(reflect.ValueOf(k))
-			if vv.IsValid() {
-				row[j] = fmt.Sprint(vv.Interface())
-			}
-		}
-		fmt.Fprintln(w, joinRow(row))
-	}
-	return nil
-}
+// 已重构为导出的 FormatTable（见 format.go），支持 headers 中文表头映射。
+// joinRow 仍在此文件供 FormatTable 复用。
 
 func joinRow(cols []string) string {
 	out := ""
