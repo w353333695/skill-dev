@@ -140,11 +140,11 @@ resources:
 //   - 其余 token（子命令 + 其 flag）原样进 rest
 func TestParseTopFlags(t *testing.T) {
 	cases := []struct {
-		name   string
-		args   []string
-		spec   string
-		mcp    bool
-		rest   []string
+		name string
+		args []string
+		spec string
+		mcp  bool
+		rest []string
 	}{
 		{
 			name: "spec+subcommand",

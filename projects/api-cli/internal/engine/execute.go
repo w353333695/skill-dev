@@ -22,17 +22,17 @@ import (
 
 // Options 单次执行选项（来自全局/命令 flag）。
 type Options struct {
-	Format    string    // json|yaml|table（空 = json）
-	DryRun    bool      // 不真发，打印请求预览
-	PrintCurl bool      // 不真发，打印等价 curl 命令
-	Yes       bool      // 跳过写操作确认
-	All       bool      // 分页：拉到尽头（受 paging.MaxItems 硬上限约束）
-	Limit     int       // 分页：拉够 N 条就停（0 = 不限）
-	BodyFile  string    // 请求 body JSON 文件路径（覆盖 body 参数；支持复杂/嵌套 body）
-	BodyBytes []byte    // 请求 body 字节（MCP _body marshal 后注入；优先级最高，覆盖 --body-file/body flag）
-	Insecure  bool      // 跳过 TLS 证书校验（自签证书场景）
+	Format    string        // json|yaml|table（空 = json）
+	DryRun    bool          // 不真发，打印请求预览
+	PrintCurl bool          // 不真发，打印等价 curl 命令
+	Yes       bool          // 跳过写操作确认
+	All       bool          // 分页：拉到尽头（受 paging.MaxItems 硬上限约束）
+	Limit     int           // 分页：拉够 N 条就停（0 = 不限）
+	BodyFile  string        // 请求 body JSON 文件路径（覆盖 body 参数；支持复杂/嵌套 body）
+	BodyBytes []byte        // 请求 body 字节（MCP _body marshal 后注入；优先级最高，覆盖 --body-file/body flag）
+	Insecure  bool          // 跳过 TLS 证书校验（自签证书场景）
 	Timeout   time.Duration // HTTP 超时（0 = 不限）；用 context.WithTimeout 包装 ctx，http.Do 尊重 deadline
-	Out       io.Writer // 输出目标（默认 os.Stdout；测试注入 bytes.Buffer）
+	Out       io.Writer     // 输出目标（默认 os.Stdout；测试注入 bytes.Buffer）
 }
 
 // Engine 执行器。可被 cobracli/mcp 共用。

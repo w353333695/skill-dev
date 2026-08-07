@@ -66,9 +66,9 @@ func TestFindOperation(t *testing.T) {
 // scheme:// 双斜杠必须保留，中间多余的斜杠要合并。
 func TestJoinPathNormalization(t *testing.T) {
 	cases := []struct {
-		name  string
-		segs  []string
-		want  string
+		name string
+		segs []string
+		want string
 	}{
 		{"single segment", []string{"https://x.com"}, "https://x.com"},
 		{"two abs segments", []string{"https://x.com", "/a", "/b"}, "https://x.com/a/b"},

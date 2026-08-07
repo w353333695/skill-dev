@@ -71,7 +71,7 @@ func TestLoadMissingFile(t *testing.T) {
 
 // TestLoadReturnsCachedInstance 验证 provider cache：同名（同配置路径）多次 Load
 // 必须返回同一实例，避免外部 go-plugin adapter 每次 Load 启新子进程泄漏
-//（engine.Execute 每个请求都调 auth.Load）。
+// （engine.Execute 每个请求都调 auth.Load）。
 func TestLoadReturnsCachedInstance(t *testing.T) {
 	writeCleanAuthConfig(t, "cacheprobe", "provider: bearer\nconfig:\n  token: tk\n")
 	p1, err := Load("cacheprobe")

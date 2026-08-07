@@ -4,6 +4,7 @@
 // 顶层 flag（--spec / --mcp）必须在 cobra 命令树构建之前解析：
 //   - --spec 决定加载哪份清单，而清单决定整棵命令树的结构（resource/operation）；
 //   - --mcp 改变整个入口（不再走 cobra，改跑 MCP server）。
+//
 // 所以这两个 flag 不能作为 cobra 的 persistent flag（cobra 解析时树已建好），
 // 而是用 parseTopFlags 从 os.Args 起始段先抽走，剩余 token 再交给 cobra。
 package main
