@@ -51,12 +51,14 @@ func helpFunc(tr *tree.OperationTree) func(c *cobra.Command, args []string) {
 		if hf == "json" {
 			ann := c.Annotations
 			if rname, verb, ok := fromAnnotations(ann); ok {
-				if r, op, err := locate(tr, rname, verb); err == nil {
-					if err := emitHelpJSON(stdout(), r, op); err == nil {
+				if r, op, locErr := locate(tr, rname, verb); locErr == nil {
+					encErr := emitHelpJSON(stdout(), r, op)
+					if encErr == nil {
 						return
 					}
 					// emitHelpJSON 出错时回退默认帮助（避免死寂）。
-					fmt.Fprintln(os.Stderr, "help: 序列化失败，回退默认帮助:", err)
+					// 注意用 encErr：旧代码用同名 err 遮蔽，会打印外层 locate 的 nil err。
+					fmt.Fprintln(os.Stderr, "help: 序列化失败，回退默认帮助:", encErr)
 				}
 			}
 		}

@@ -289,6 +289,42 @@ resources:
 	}
 }
 
+// TestInputSchemaRequiredOmittedWhenEmpty 验证 operation 无必填字段时
+// inputSchema 不含 required 字段（而非 "required":null，违反 JSON Schema）。
+//
+// 回归点：collectRequired 返回 nil；旧实现直接塞进 map →
+// json.Marshal 出 "required":null（JSON Schema 要求 required 必须是数组）。
+// 修法：ToolsList 里 len(req)>0 才设该字段。
+// 这里直接序列化整个 Tool 走 JSON 路径，断言字符串里不含 "required"，
+// 比 map 层断言更贴近 wire 真相（map 里没 key 不代表 marshal 后也不出现）。
+func TestInputSchemaRequiredOmittedWhenEmpty(t *testing.T) {
+	raw := []byte(`
+spec: api-cli/v1
+service: { name: x, default_endpoint: e, endpoints: { e: { base_url: http://h, auth: none, path_prefix: "" } } }
+resources:
+  r:
+    path: /r
+    operations:
+      list: { method: GET, path: "", params: { q: { in: query, type: string } } }
+`)
+	tr, _ := spec.Parse(raw)
+	tools := New(tr).ToolsList()
+	if len(tools) != 1 {
+		t.Fatalf("want 1 tool, got %d", len(tools))
+	}
+	if _, present := tools[0].InputSchema["required"]; present {
+		t.Fatalf("无必填字段时 inputSchema 不应有 required key, got %#v", tools[0].InputSchema)
+	}
+	// 走 JSON wire 路径再确认一次（防 omitempty/自定义 marshal 等盲点）
+	b, err := json.Marshal(tools[0])
+	if err != nil {
+		t.Fatal(err)
+	}
+	if bytes.Contains(b, []byte("required")) {
+		t.Fatalf("无必填字段时序列化后不应出现 required, got %s", b)
+	}
+}
+
 // TestServeToolsCallBodyDirect 验证 tools/call 收到嵌套 _body 对象时，经 server marshal
 // 成字节、经 engine.Options.BodyBytes 直传到请求 body（绕过单层 body flag）。
 //
@@ -322,10 +358,10 @@ resources:
 		},
 	}
 	params, _ := json.Marshal(map[string]any{
-		"jsonrpc":   "2.0",
-		"id":        5,
-		"method":    "tools/call",
-		"params":    map[string]any{"name": "x_r_search", "arguments": args},
+		"jsonrpc": "2.0",
+		"id":      5,
+		"method":  "tools/call",
+		"params":  map[string]any{"name": "x_r_search", "arguments": args},
 	})
 	in := bytes.NewReader(append(params, '\n'))
 	var out bytes.Buffer
