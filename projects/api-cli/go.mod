@@ -2,7 +2,10 @@ module api-cli
 
 go 1.22.5
 
-require github.com/hashicorp/go-plugin v1.6.0
+require (
+	github.com/hashicorp/go-plugin v1.6.0
+	gopkg.in/yaml.v3 v3.0.1
+)
 
 require (
 	github.com/fatih/color v1.7.0 // indirect
