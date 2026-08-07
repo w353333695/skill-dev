@@ -7,6 +7,8 @@
 ``extract=code`` 真正落地。
 """
 
+from __future__ import annotations
+
 import json
 import re
 from html.parser import HTMLParser

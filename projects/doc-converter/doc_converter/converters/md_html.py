@@ -1,5 +1,7 @@
 """Markdown → HTML 转换器"""
 
+from __future__ import annotations
+
 import re
 from pathlib import Path
 from .base import BaseConverter, ConvertResult, register, load_template
