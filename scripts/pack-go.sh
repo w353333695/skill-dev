@@ -110,7 +110,7 @@ detect_cmd() {
     fi
   fi
   # 4. 都不命中 → 报错列候选
-  echo "[pack-go] ✗ 无法确定 go 入口包，请用 --cmd <path> 显式指定（如 --cmd ./cmd/$NAME）" >&2
+  echo "[pack-go] ✗ 无法确定 go 入口包，请用 --cmd <path> 显式指定（如 --cmd ./cmd/${NAME}）" >&2
   if [ -d "$PROJ_DIR/cmd" ]; then
     echo "  cmd/ 下子目录：" >&2
     ( cd "$PROJ_DIR/cmd" && ls -d */ ) >&2 2>/dev/null || true

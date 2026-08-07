@@ -4,6 +4,9 @@
 #
 # 可选环境变量:
 #   SKILL_INDEX_URL  内部 PyPI index URL（透传给 uv/pipx/pip；不设用默认源）
+#   PYTHON_VERSION   指定 Python 版本（如 3.9）：uv 透传 --python（可自动拉取），
+#                    pipx 透传 --python python${VER}（需系统已装），pip 用 python${VER} -m pip。
+#                    不设则用工具默认（uv/pipx 最新可用，pip 用系统 python3）。
 set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 SKILL_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
@@ -19,9 +22,13 @@ else
   echo "[setup] 需 uv / pipx / pip（装 uv: curl -LsSf https://astral.sh/uv/install.sh | sh）" >&2
   exit 1
 fi
-# pip 模式检查 Python>=3.9（uv/pipx 自带 python 管理）
+# pip 模式：选解释器并检查 >=3.9（uv/pipx 的 python 版本由 --python 另传）
 if [ "$TOOL" = pip ]; then
-  PY="$(command -v python3 || command -v python)"
+  if [ -n "${PYTHON_VERSION:-}" ] && command -v "python${PYTHON_VERSION}" >/dev/null 2>&1; then
+    PY="python${PYTHON_VERSION}"
+  else
+    PY="$(command -v python3 || command -v python)"
+  fi
   "$PY" -c 'import sys;sys.exit(0 if sys.version_info>=(3,9) else 1)' \
     || { echo "[setup] Python < 3.9，不支持" >&2; exit 1; }
 fi
@@ -42,11 +49,15 @@ install_one() {
   local uscore="${name//-/_}" src whl
   whl="$(ls "$VENDOR/$name"-*.whl "$VENDOR/$uscore"-*.whl 2>/dev/null | head -1 || true)"
   if [ -n "$whl" ]; then src="$whl"; else src="$name"; fi
-  echo "[setup] 用 $TOOL 安装 $name（CLI: $cli）：$src"
+  echo "[setup] 用 $TOOL 安装 ${name}（CLI: ${cli}）：$src"
   case "$TOOL" in
-    uv)   uv tool install "$src" ;;
-    pipx) pipx install "$src" ;;
-    pip)  pip3 install --user "$src" 2>/dev/null || pip install --user "$src" ;;
+    uv)
+      if [ -n "${PYTHON_VERSION:-}" ]; then uv tool install --python "$PYTHON_VERSION" "$src"
+      else uv tool install "$src"; fi ;;
+    pipx)
+      if [ -n "${PYTHON_VERSION:-}" ]; then pipx install --python "python${PYTHON_VERSION}" "$src"
+      else pipx install "$src"; fi ;;
+    pip) "$PY" -m pip install --user "$src" ;;
   esac
 }
 
