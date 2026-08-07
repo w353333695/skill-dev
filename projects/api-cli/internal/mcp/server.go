@@ -62,6 +62,7 @@ func (s *Server) ToolsList() []Tool {
 			InputSchema: map[string]any{
 				"type":       "object",
 				"properties": props,
+				"required":   collectRequired(op),
 			},
 			OutputSchema: op.Response.ToJSONSchema(), // nil 时 ToJSONSchema 返回 nil，omitempty 不出现
 		})
@@ -79,6 +80,28 @@ func walk(resources map[string]*tree.Resource, prefix string,
 		}
 		walk(r.Children, prefix+"_"+rname, visit)
 	}
+}
+
+// collectRequired 聚合 path/参数 required + body schema required（去重，保持插入序）。
+// MCP 客户端容忍空数组（operation 无 required 时）；返回 nil 会被序列化成 []。
+func collectRequired(op *tree.Operation) []string {
+	seen := map[string]bool{}
+	var req []string
+	for _, p := range op.Params {
+		if p.Required && !seen[p.Name] {
+			seen[p.Name] = true
+			req = append(req, p.Name)
+		}
+	}
+	if op.Body != nil {
+		for _, r := range op.Body.Required {
+			if !seen[r] {
+				seen[r] = true
+				req = append(req, r)
+			}
+		}
+	}
+	return req
 }
 
 // orDefault 空字符串回落到默认值。

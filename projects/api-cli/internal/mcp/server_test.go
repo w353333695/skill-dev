@@ -259,6 +259,36 @@ resources:
 	}
 }
 
+// TestInputSchemaRequired 验证 inputSchema.required 聚合 path 参数 required +
+// body schema required（去重）。LLM 据此判断必填字段，缺失会导致 tool 调用漏参。
+func TestInputSchemaRequired(t *testing.T) {
+	raw := []byte(`
+spec: api-cli/v1
+service: { name: x, default_endpoint: e, endpoints: { e: { base_url: http://h, auth: none, path_prefix: "" } } }
+resources:
+  r:
+    path: /r
+    operations:
+      search: { method: POST, path: "",
+        params: { object_id: { in: path, required: true } },
+        body: { type: object, required: [q, page], properties: { q: { type: string }, page: { type: integer } } } }
+`)
+	tr, _ := spec.Parse(raw)
+	tools := New(tr).ToolsList()
+	req, ok := tools[0].InputSchema["required"].([]string)
+	if !ok {
+		t.Fatalf("inputSchema.required 缺失，got %#v", tools[0].InputSchema["required"])
+	}
+	// path required (object_id) + body required (q, page)，去重
+	want := map[string]bool{"object_id": true, "q": true, "page": true}
+	for _, r := range req {
+		delete(want, r)
+	}
+	if len(want) != 0 {
+		t.Fatalf("required 不全，缺 %v，got %v", want, req)
+	}
+}
+
 // TestServeToolsCallBodyDirect 验证 tools/call 收到嵌套 _body 对象时，经 server marshal
 // 成字节、经 engine.Options.BodyBytes 直传到请求 body（绕过单层 body flag）。
 //
