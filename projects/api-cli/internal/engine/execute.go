@@ -129,11 +129,12 @@ func (e *Engine) Execute(ctx context.Context, ep *tree.Endpoint, r *tree.Resourc
 	if op.Pagination != nil {
 		return e.iterate(ctx, req, op, opts, hc)
 	}
-	return e.single(ctx, req, opts, hc)
+	return e.single(ctx, req, op, opts, hc)
 }
 
 // single 发一次请求，把响应 decode 后整体交给 output.Format。
-func (e *Engine) single(ctx context.Context, req *resolvedReq, opts Options, hc *http.Client) error {
+// format=table 时用 responseHeaders(op) 抽 Response schema 的字段 description 作中文表头。
+func (e *Engine) single(ctx context.Context, req *resolvedReq, op *tree.Operation, opts Options, hc *http.Client) error {
 	body, status, err := e.do(ctx, req, hc)
 	if err != nil {
 		return err
@@ -142,7 +143,35 @@ func (e *Engine) single(ctx context.Context, req *resolvedReq, opts Options, hc 
 		return output.NormalizeAPIError(status, body)
 	}
 	data := decodeLoose(body)
+	if opts.Format == "table" {
+		return output.FormatTable(opts.Out, data, responseHeaders(op))
+	}
 	return output.Format(opts.Out, opts.Format, data)
+}
+
+// responseHeaders 从 op.Response 抽 字段→description 映射（table 中文表头）。
+// 响应若是 {data:{list:[{...}]}}，取 list 元素的 properties（这才是表格行对应的 schema）；
+// 否则取 Response 顶层 properties。无 Response / 无 properties 返回空 map（退回用字段名）。
+func responseHeaders(op *tree.Operation) map[string]string {
+	h := map[string]string{}
+	if op == nil || op.Response == nil || op.Response.Properties == nil {
+		return h
+	}
+	target := op.Response
+	if d := op.Response.Properties["data"]; d != nil && d.Properties != nil {
+		if lst := d.Properties["list"]; lst != nil && lst.Items != nil {
+			target = lst.Items
+		}
+	}
+	if target.Properties == nil {
+		return h
+	}
+	for k, v := range target.Properties {
+		if v != nil && v.Description != "" {
+			h[k] = v.Description
+		}
+	}
+	return h
 }
 
 // iterate 走 paging.Iter 流式 NDJSON：每行一个 item.Raw（已是 JSON）。
