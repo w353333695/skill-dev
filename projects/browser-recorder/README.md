@@ -61,7 +61,7 @@ uv run browser-recorder replay demo --video
 按主题过滤后台请求、自动生成统一格式操作手册。详见 `skills/browser-manual/SKILL.md`。
 
 ```bash
-bash skills/browser-manual/scripts/run.sh \
+bash skills/browser-manual/scripts/record-export.sh \
   --system <系统> --url <起始页> --scenario <场景> --theme "<主题>"
 # 脚本跑完步骤 1-3（登录态保障 + record + export），再由 skill 内 Claude 做
 # 步骤 4（主题过滤 → requests.theme.json + 接口清单.md）+ 步骤 5（手册分章 → manual.md）。

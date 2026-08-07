@@ -5,7 +5,7 @@ version: 0.1.0
 ---
 # browser-manual
 
-`browser-recorder` 的配套编排 skill。把「按系统录制 + 复用登录态 + 按主题过滤后台请求 + 生成统一格式操作手册」串成一条流水线。沿用 api-console 范式：**脚本（`scripts/run.sh`）做确定性脏活，Claude 做语义**。
+`browser-recorder` 的配套编排 skill。把「按系统录制 + 复用登录态 + 按主题过滤后台请求 + 生成统一格式操作手册」串成一条流水线。沿用 api-console 范式：**脚本（`scripts/record-export.sh`）做确定性脏活，Claude 做语义**。
 
 ## 何时用
 
@@ -17,10 +17,10 @@ version: 0.1.0
 
 输入：`--system`（必填，同时作登录态 profile 名）、`--url`（起始页）、`--scenario`（场景名）、`--theme`（自然语言主题，如「资产导入流程」）、可选 `--login-url`（缺省=`--url`）、`--reauth`（强制重登）、`--root`（缺省 `./.browser-recordories/` 或 `$BROWSER_RECORDINGS_ROOT`）、`--headed/--headless`（缺省 headed）。
 
-### 步骤 1-3：确定性（跑 scripts/run.sh）
+### 步骤 1-3：确定性（跑 scripts/record-export.sh）
 
 ```bash
-bash skills/browser-manual/scripts/run.sh \
+bash skills/browser-manual/scripts/record-export.sh \
   --system <sys> --url <url> --scenario <scn> [--login-url <u>] [--root <dir>] [--reauth]
 ```
 

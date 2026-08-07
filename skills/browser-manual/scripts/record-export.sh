@@ -2,7 +2,7 @@
 # browser-manual：步骤 1-3 确定性 CLI 编排。
 #
 # 用法：
-#   scripts/run.sh --system <sys> --url <url> --scenario <scn>
+#   scripts/record-export.sh --system <sys> --url <url> --scenario <scn>
 #                  [--login-url <u>] [--root <dir>] [--reauth] [--headed|--headless]
 #
 # 产出：<root>/<system>/exports/<scenario>/{report.md,requests.json,structure.json,screenshots_annotated/}
