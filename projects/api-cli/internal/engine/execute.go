@@ -105,6 +105,11 @@ func (e *Engine) single(ctx context.Context, req *resolvedReq, opts Options) err
 
 // iterate 走 paging.Iter 流式 NDJSON：每行一个 item.Raw（已是 JSON）。
 // firstReq = req.Query 作为翻页种子（cursor/offset 参数由 paging 引擎注入/递增）。
+//
+// 错误反馈：paging.Iter 的 DoFunc（即下方 do）出错时，Iter 会发一个 Item{Err}
+// 再 close channel。do 已把网络错误归一化成 *output.APIError{ExitNetTimeout}、
+// 把 HTTP >= 400 归一化成 NormalizeAPIError；这里收到 it.Err 直接返回，
+// 保证翻页中途失败时 Execute 返回非 nil err（exit 非 0），不让截断数据蒙混过关。
 func (e *Engine) iterate(ctx context.Context, req *resolvedReq, op *tree.Operation, opts Options) error {
 	first := copySS(req.Query)
 	do := func(ctx context.Context, q map[string]string) ([]byte, error) {
@@ -125,6 +130,13 @@ func (e *Engine) iterate(ctx context.Context, req *resolvedReq, op *tree.Operati
 	}
 	items := paging.Iter(ctx, op.Pagination, do, first, paging.Options{Limit: limit})
 	for it := range items {
+		if it.Err != nil {
+			// do 已归一化；若上层传入非 *output.APIError，兜底包一层保证带 exit code。
+			if _, ok := it.Err.(*output.APIError); ok {
+				return it.Err
+			}
+			return &output.APIError{Code: "paging", Message: it.Err.Error(), ExitCode: output.ExitNetTimeout}
+		}
 		fmt.Fprintln(opts.Out, string(it.Raw))
 	}
 	return nil

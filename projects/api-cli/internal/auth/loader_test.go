@@ -68,3 +68,47 @@ func TestLoadMissingFile(t *testing.T) {
 		t.Fatal("want error for missing config")
 	}
 }
+
+// TestLoadReturnsCachedInstance 验证 provider cache：同名（同配置路径）多次 Load
+// 必须返回同一实例，避免外部 go-plugin adapter 每次 Load 启新子进程泄漏
+//（engine.Execute 每个请求都调 auth.Load）。
+func TestLoadReturnsCachedInstance(t *testing.T) {
+	writeCleanAuthConfig(t, "cacheprobe", "provider: bearer\nconfig:\n  token: tk\n")
+	p1, err := Load("cacheprobe")
+	if err != nil {
+		t.Fatalf("首次 Load 失败: %v", err)
+	}
+	p2, err := Load("cacheprobe")
+	if err != nil {
+		t.Fatalf("第二次 Load 失败: %v", err)
+	}
+	if p1 != p2 {
+		t.Fatalf("Load 同名应返回同一缓存实例（避免子进程泄漏），got 不同指针: %p vs %p", p1, p2)
+	}
+}
+
+// TestLoadDifferentPathNotCached 验证 cache 按配置路径隔离：
+// 不同 HOME 下同名 provider 应各自构造（缓存键含路径，不跨 HOME 串台）。
+// 这同时保证既有测试在引入全局 cache 后不被串扰。
+func TestLoadDifferentPathNotCached(t *testing.T) {
+	// 第一份配置
+	writeCleanAuthConfig(t, "iso", "provider: bearer\nconfig:\n  token: one\n")
+	p1, err := Load("iso")
+	if err != nil {
+		t.Fatal(err)
+	}
+	resp1, _ := p1.Apply(context.Background(), &adapter.AuthRequest{Method: "GET", URL: "http://x"})
+	// 换一个 HOME（writeCleanAuthConfig 重新 t.Setenv 到新 tempdir），同名为 iso
+	writeCleanAuthConfig(t, "iso", "provider: bearer\nconfig:\n  token: two\n")
+	p2, err := Load("iso")
+	if err != nil {
+		t.Fatal(err)
+	}
+	resp2, _ := p2.Apply(context.Background(), &adapter.AuthRequest{Method: "GET", URL: "http://x"})
+	if p1 == p2 {
+		t.Fatalf("不同配置路径不应命中同一缓存实例（应按路径隔离）")
+	}
+	if resp1.Headers["Authorization"] != "Bearer one" || resp2.Headers["Authorization"] != "Bearer two" {
+		t.Fatalf("配置隔离失败: resp1=%v resp2=%v", resp1, resp2)
+	}
+}
