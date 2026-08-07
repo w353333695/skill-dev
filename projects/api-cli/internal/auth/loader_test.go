@@ -52,8 +52,12 @@ config:
 	if err == nil {
 		t.Fatal("want error for unknown provider")
 	}
-	if !strings.Contains(err.Error(), "Task 11") {
-		t.Fatalf("want Task 11 placeholder error, got %v", err)
+	// default 分支已接入 LoadPlugin；找不到外部二进制时应在错误中带 provider 名。
+	if strings.Contains(err.Error(), "Task 11") {
+		t.Fatalf("default 分支不应再返回 Task 11 占位错误：got %v", err)
+	}
+	if !strings.Contains(err.Error(), "custom-foo") {
+		t.Fatalf("错误应包含 provider 名 custom-foo：got %v", err)
 	}
 }
 
