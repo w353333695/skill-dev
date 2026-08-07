@@ -3,10 +3,13 @@ package paging
 import (
 	"context"
 	"fmt"
+	"reflect"
 	"strings"
 	"testing"
 
 	"api-cli/internal/tree"
+
+	"github.com/tidwall/gjson"
 )
 
 // 模拟服务端：3 页，每页 2 条，第 3 页 next 为空。
@@ -26,10 +29,10 @@ func cursorDo(req map[string]string) (body []byte, next string, err error) {
 func TestCursorPaging(t *testing.T) {
 	pg := &tree.Pagination{Type: "cursor", ItemsPath: "data.list", NextTokenPath: "data.next", HasMorePath: "data.next"}
 	var got []string
-	for it := range Iter(context.Background(), pg, func(ctx context.Context, req map[string]string) ([]byte, error) {
+	for it := range Iter(context.Background(), pg, func(ctx context.Context, body []byte, req map[string]string) ([]byte, error) {
 		b, _, err := cursorDo(req)
 		return b, err
-	}, map[string]string{}, Options{MaxPages: 100, Limit: 1000}) {
+	}, nil, map[string]string{}, Options{MaxPages: 100, Limit: 1000}) {
 		got = append(got, it.ID)
 	}
 	if len(got) != 5 {
@@ -42,7 +45,7 @@ func TestImplicitPaging(t *testing.T) {
 	pages := [][]string{{"1", "2"}, {"3"}}
 	call := 0
 	pg := &tree.Pagination{Type: "implicit", ItemsPath: "data", Size: 2}
-	do := func(ctx context.Context, req map[string]string) ([]byte, error) {
+	do := func(ctx context.Context, body []byte, req map[string]string) ([]byte, error) {
 		if call >= len(pages) {
 			return []byte(`{"data":[]}`), nil
 		}
@@ -59,7 +62,7 @@ func TestImplicitPaging(t *testing.T) {
 		return []byte(s), nil
 	}
 	var got []string
-	for it := range Iter(context.Background(), pg, do, map[string]string{"page": "0"}, Options{MaxPages: 100, Limit: 1000}) {
+	for it := range Iter(context.Background(), pg, do, nil, map[string]string{"page": "0"}, Options{MaxPages: 100, Limit: 1000}) {
 		got = append(got, it.ID)
 	}
 	if len(got) != 3 {
@@ -70,11 +73,11 @@ func TestImplicitPaging(t *testing.T) {
 func TestLimitTruncation(t *testing.T) {
 	// 提供 5 条，limit=3 → 只得 3 条
 	pg := &tree.Pagination{Type: "implicit", ItemsPath: "data", Size: 5}
-	do := func(ctx context.Context, req map[string]string) ([]byte, error) {
+	do := func(ctx context.Context, body []byte, req map[string]string) ([]byte, error) {
 		return []byte(`{"data":[{"id":"1"},{"id":"2"},{"id":"3"},{"id":"4"},{"id":"5"}]}`), nil
 	}
 	n := 0
-	for range Iter(context.Background(), pg, do, map[string]string{}, Options{Limit: 3, MaxPages: 10}) {
+	for range Iter(context.Background(), pg, do, nil, map[string]string{}, Options{Limit: 3, MaxPages: 10}) {
 		n++
 	}
 	if n != 3 {
@@ -89,7 +92,7 @@ func TestLimitTruncation(t *testing.T) {
 func TestIterPropagatesError(t *testing.T) {
 	pg := &tree.Pagination{Type: "implicit", ItemsPath: "data", Size: 2}
 	calls := 0
-	do := func(ctx context.Context, req map[string]string) ([]byte, error) {
+	do := func(ctx context.Context, body []byte, req map[string]string) ([]byte, error) {
 		calls++
 		if calls == 1 {
 			return []byte(`{"data":[{"id":"1"},{"id":"2"}]}`), nil
@@ -98,7 +101,7 @@ func TestIterPropagatesError(t *testing.T) {
 	}
 	var got []string
 	var iterErr error
-	for it := range Iter(context.Background(), pg, do, map[string]string{}, Options{MaxPages: 10}) {
+	for it := range Iter(context.Background(), pg, do, nil, map[string]string{}, Options{MaxPages: 10}) {
 		if it.Err != nil {
 			iterErr = it.Err
 			break
@@ -120,14 +123,14 @@ func TestIterPropagatesError(t *testing.T) {
 // （消费方 range 能终止，不死锁）。
 func TestIterErrorClosesChannel(t *testing.T) {
 	pg := &tree.Pagination{Type: "implicit", ItemsPath: "data", Size: 2}
-	do := func(ctx context.Context, req map[string]string) ([]byte, error) {
+	do := func(ctx context.Context, body []byte, req map[string]string) ([]byte, error) {
 		return nil, fmt.Errorf("immediate failure")
 	}
 	done := make(chan struct{})
 	var sawErr bool
 	go func() {
 		defer close(done)
-		for it := range Iter(context.Background(), pg, do, map[string]string{}, Options{MaxPages: 10}) {
+		for it := range Iter(context.Background(), pg, do, nil, map[string]string{}, Options{MaxPages: 10}) {
 			if it.Err != nil {
 				sawErr = true
 			}
@@ -136,5 +139,42 @@ func TestIterErrorClosesChannel(t *testing.T) {
 	<-done
 	if !sawErr {
 		t.Fatal("首请求即出错：应收到 Item{Err} 且 channel 随后 close")
+	}
+}
+
+// TestPageInBodyPaging 验证 page 在 body 时翻页改 body 不改 query。
+// page_in=body：do 收 body，按 body.page 翻页；3 页（page=1→2→3），
+// 第 3 页返回 < size 终止。下一页的 page 号由 bumpBodyPage 改 body 副本。
+func TestPageInBodyPaging(t *testing.T) {
+	// page 在 body：do 收 body，按 body.page 翻页；3 页（page=1→2→3），第 3 页返回 < size 终止
+	pages := map[string][]string{
+		"1": {"a", "b"},
+		"2": {"c", "d"},
+		"3": {"e"}, // < size=2 → 终止
+	}
+	pg := &tree.Pagination{Type: "offset", PageIn: "body", ItemsPath: "data", PageParam: "page", SizeParam: "page_size", Size: 2}
+	do := func(ctx context.Context, body []byte, query map[string]string) ([]byte, error) {
+		page := gjson.GetBytes(body, "page").String()
+		if page == "" {
+			page = "1"
+		}
+		items := pages[page]
+		s := `{"data":[`
+		for i, id := range items {
+			if i > 0 {
+				s += ","
+			}
+			s += fmt.Sprintf(`{"id":%q}`, id)
+		}
+		s += `]}`
+		return []byte(s), nil
+	}
+	var got []string
+	for it := range Iter(context.Background(), pg, do, []byte(`{"page":1,"page_size":2}`), map[string]string{}, Options{MaxPages: 10}) {
+		got = append(got, it.ID)
+	}
+	want := []string{"a", "b", "c", "d", "e"}
+	if !reflect.DeepEqual(got, want) {
+		t.Fatalf("got %v want %v", got, want)
 	}
 }
