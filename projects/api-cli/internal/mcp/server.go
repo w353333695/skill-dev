@@ -18,11 +18,13 @@ import (
 	"api-cli/internal/tree"
 )
 
-// Tool MCP tool 描述。InputSchema 用 map[string]any 直接序列化为 JSON Schema object。
+// Tool MCP tool 描述。InputSchema/OutputSchema 用 map[string]any 直接序列化为 JSON Schema object。
+// OutputSchema omitempty：operation.Response 为 nil 时 ToJSONSchema 返回 nil，字段不出现。
 type Tool struct {
-	Name        string         `json:"name"`
-	Description string         `json:"description"`
-	InputSchema map[string]any `json:"inputSchema"`
+	Name         string         `json:"name"`
+	Description  string         `json:"description"`
+	InputSchema  map[string]any `json:"inputSchema"`
+	OutputSchema map[string]any `json:"outputSchema,omitempty"`
 }
 
 // Server MCP server（持有 tree + engine；engine 内含 http.Client，可复用）。
@@ -61,6 +63,7 @@ func (s *Server) ToolsList() []Tool {
 				"type":       "object",
 				"properties": props,
 			},
+			OutputSchema: op.Response.ToJSONSchema(), // nil 时 ToJSONSchema 返回 nil，omitempty 不出现
 		})
 	})
 	return tools

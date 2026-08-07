@@ -235,6 +235,30 @@ func TestServeToolsCallDryRun(t *testing.T) {
 	}
 }
 
+// TestToolsListOutputSchema 验证 operation.Response 被展开进 tool.outputSchema，
+// 让 LLM 看到响应字段结构（复用 Schema.ToJSONSchema，nil 时 omitempty 不出现）。
+func TestToolsListOutputSchema(t *testing.T) {
+	raw := []byte(`
+spec: api-cli/v1
+service: { name: cmdb, default_endpoint: e, endpoints: { e: { base_url: http://h, auth: none, path_prefix: "" } } }
+resources:
+  inst:
+    path: /inst
+    operations:
+      read: { method: GET, path: "/{id}", params: { id: { in: path, required: true } },
+              response: { type: object, properties: { id: { type: string, description: 实例ID }, name: { type: string, description: 名称 } } } }
+`)
+	tr, _ := spec.Parse(raw)
+	tools := New(tr).ToolsList()
+	if tools[0].OutputSchema == nil {
+		t.Fatal("outputSchema 缺失")
+	}
+	props, _ := tools[0].OutputSchema["properties"].(map[string]any)
+	if props["id"] == nil {
+		t.Fatal("outputSchema.properties.id 缺失")
+	}
+}
+
 // TestServeToolsCallBodyDirect 验证 tools/call 收到嵌套 _body 对象时，经 server marshal
 // 成字节、经 engine.Options.BodyBytes 直传到请求 body（绕过单层 body flag）。
 //
