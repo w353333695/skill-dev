@@ -2,7 +2,7 @@
 
 声明式 golang CLI：三方提交一份 YAML 接口清单，自动生成分层命令树，覆盖系统全部 API（CRUD + 自定义 action + 分页），鉴权与分页可插拔，并导出 MCP tools 供 LLM 直接调用。
 
-> **本 project 是 `projects/` 目录的 golang 破例**（见工作空间 CLAUDE.md）。打包走 `go build` 单二进制，不走 whl。
+> **本 project 是 `projects/` 目录的 golang project**（与 Python project 平行支持，见工作空间 `AGENTS.md` §2）。打包走 `scripts/pack-go.sh` 多平台二进制大礼包，不走 whl。
 
 ## 核心命题
 - **verb 是身份，method 是配置**：`operations` 是 map，key 是动词；method 是属性。

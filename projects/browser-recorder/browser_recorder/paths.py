@@ -5,7 +5,7 @@ import secrets
 import time
 from pathlib import Path
 
-# 过程产物根（可被测试 monkeypatch）。CLAUDE.md 约定产物落 tmp/。
+# 过程产物根（可被测试 monkeypatch）。AGENTS.md 约定产物落 tmp/。
 TMP_ROOT = Path("tmp")
 
 DEFAULT_OUT_DIR_NAME = ".browser-recorder"
