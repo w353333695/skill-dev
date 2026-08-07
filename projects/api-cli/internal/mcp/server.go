@@ -49,6 +49,10 @@ func (s *Server) ToolsList() []Tool {
 				"description": p.Description,
 			}
 		}
+		// body schema 展开 → _body（嵌套完整结构给 LLM）
+		if op.Body != nil {
+			props["_body"] = op.Body.ToJSONSchema()
+		}
 		desc := verb + " " + orDefault(r.Singular, r.Name)
 		tools = append(tools, Tool{
 			Name:        toolName,

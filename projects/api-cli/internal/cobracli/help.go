@@ -17,7 +17,7 @@ func stdout() io.Writer { return os.Stdout }
 
 // emitHelpJSON 把命令树片段（resource+operation+params）序列化成 JSON，
 // 供 --help-format=json 的 LLM 发现场景消费（spec §11.3）。
-// controller #5：字段含 resource/verb/method/path/params/has_paging。
+// controller #5：字段含 resource/verb/method/path/params/has_paging/body（嵌套 body schema）。
 func emitHelpJSON(w io.Writer, r *tree.Resource, op *tree.Operation) error {
 	doc := map[string]any{
 		"resource":   r.Name,
@@ -26,6 +26,9 @@ func emitHelpJSON(w io.Writer, r *tree.Resource, op *tree.Operation) error {
 		"path":       op.Path,
 		"params":     op.Params,
 		"has_paging": op.Pagination != nil,
+	}
+	if op.Body != nil {
+		doc["body"] = op.Body.ToJSONSchema()
 	}
 	enc := json.NewEncoder(w)
 	enc.SetIndent("", "  ")
