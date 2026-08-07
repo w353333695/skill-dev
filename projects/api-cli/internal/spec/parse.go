@@ -41,7 +41,7 @@ func Parse(raw []byte) (*tree.OperationTree, error) {
 	for name, ep := range y.Service.Endpoints {
 		tr.Service.Endpoints[name] = &tree.Endpoint{
 			Name: name, BaseURL: expandEnv(ep.BaseURL), Auth: ep.Auth,
-			PathPrefix: ep.PathPrefix, AllowOperations: ep.AllowOperations,
+			PathPrefix: ep.PathPrefix, Host: ep.Host, AllowOperations: ep.AllowOperations,
 		}
 	}
 	for name, r := range y.Resources {

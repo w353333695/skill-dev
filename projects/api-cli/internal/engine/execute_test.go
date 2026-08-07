@@ -88,6 +88,81 @@ func TestDryRunDoesNotCall(t *testing.T) {
 	}
 }
 
+// TestDoHostHeaderFromHeader 验证 auth provider 回传的 "host" header 经 do 转写回 httpReq.Host
+// 真正上到 wire（Go client 默认丢弃 Header map 里的 Host，必须显式写 req.Host）。
+//
+// 触发条件：resolvedReq.Header["host"] 非空（provider 返回 Headers{"host":...}，engine 合并进 req.Header）。
+func TestDoHostHeaderFromHeader(t *testing.T) {
+	var sawHost string
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		sawHost = r.Host
+		w.Write([]byte(`{}`))
+	}))
+	t.Cleanup(srv.Close)
+
+	e := New(nil)
+	req := &resolvedReq{
+		Method: "GET",
+		URL:    srv.URL + "/api/v1/ping",
+		Header: map[string]string{"host": "openapi.easyops-only.com"},
+	}
+	if _, _, err := e.do(context.Background(), req, e.hc); err != nil {
+		t.Fatal(err)
+	}
+	if sawHost != "openapi.easyops-only.com" {
+		t.Fatalf("wire Host = %q, want openapi.easyops-only.com（host header 必须转写回 httpReq.Host）", sawHost)
+	}
+}
+
+// TestDoHostHeaderFromEndpoint 验证 endpoint.Host（resolvedReq.Host）路径也正确设 httpReq.Host。
+// 与上一测试互斥覆盖：两条路径（endpoint YAML host / provider host header）各自可达。
+func TestDoHostHeaderFromEndpoint(t *testing.T) {
+	var sawHost string
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		sawHost = r.Host
+		w.Write([]byte(`{}`))
+	}))
+	t.Cleanup(srv.Close)
+
+	e := New(nil)
+	req := &resolvedReq{
+		Method: "GET",
+		URL:    srv.URL + "/api/v1/ping",
+		Host:   "via-endpoint.example.com",
+	}
+	if _, _, err := e.do(context.Background(), req, e.hc); err != nil {
+		t.Fatal(err)
+	}
+	if sawHost != "via-endpoint.example.com" {
+		t.Fatalf("wire Host = %q, want via-endpoint.example.com", sawHost)
+	}
+}
+
+// TestDoHostHeaderAuthOverridesEndpoint 验证 auth provider 的 host header 覆盖 endpoint.Host
+// （auth 是接入方案的权威声明；若两者都设，以 auth 为准）。
+func TestDoHostHeaderAuthOverridesEndpoint(t *testing.T) {
+	var sawHost string
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		sawHost = r.Host
+		w.Write([]byte(`{}`))
+	}))
+	t.Cleanup(srv.Close)
+
+	e := New(nil)
+	req := &resolvedReq{
+		Method: "GET",
+		URL:    srv.URL + "/api/v1/ping",
+		Host:   "endpoint.example.com",
+		Header: map[string]string{"host": "auth.example.com"},
+	}
+	if _, _, err := e.do(context.Background(), req, e.hc); err != nil {
+		t.Fatal(err)
+	}
+	if sawHost != "auth.example.com" {
+		t.Fatalf("wire Host = %q, want auth.example.com（auth host 应覆盖 endpoint.Host）", sawHost)
+	}
+}
+
 // TestExecutePagingMidwayError 验证翻页中途 mock 返回 500 时 engine.Execute
 // 返回非 nil err（且 exit code 非 0）。
 //

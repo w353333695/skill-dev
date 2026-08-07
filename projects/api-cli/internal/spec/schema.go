@@ -20,6 +20,7 @@ type yamlEndpoint struct {
 	BaseURL         string   `yaml:"base_url"`
 	Auth            string   `yaml:"auth"`
 	PathPrefix      string   `yaml:"path_prefix"`
+	Host            string   `yaml:"host"`
 	AllowOperations []string `yaml:"allow_operations"`
 }
 

@@ -13,9 +13,11 @@ import (
 // resolvedReq 组装好的请求各部分。
 //   - Method/URL 已填 path 参数（ResolveURL 物化）
 //   - Query/Header/Body 来自 flag（按 param.In 分发）
+//   - Host 来自 endpoint.Host（自定义 Host header，IP 直连场景）
 type resolvedReq struct {
 	Method string
 	URL    string
+	Host   string
 	Query  map[string]string
 	Header map[string]string
 	Body   []byte
@@ -33,7 +35,7 @@ func resolve(tr *tree.OperationTree, ep *tree.Endpoint, r *tree.Resource, op *tr
 	if err != nil {
 		return nil, err
 	}
-	req := &resolvedReq{Method: op.Method, URL: url, Query: map[string]string{}, Header: map[string]string{}}
+	req := &resolvedReq{Method: op.Method, URL: url, Host: ep.Host, Query: map[string]string{}, Header: map[string]string{}}
 
 	// body 参数：MVP 单层 JSON 对象（key=param.Name, value=flag 字符串）。
 	// 命中任意 body 参数才 marshal，避免无 body 时打印 "null"。

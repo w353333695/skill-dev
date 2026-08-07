@@ -9,6 +9,7 @@ import (
 	"io"
 	"net/http"
 	"os"
+	"strings"
 	"sync"
 
 	"api-cli/internal/auth"
@@ -97,7 +98,7 @@ func (e *Engine) Execute(ctx context.Context, ep *tree.Endpoint, r *tree.Resourc
 			return &output.APIError{Code: "auth_load", Message: err.Error(), ExitCode: output.ExitAuthError}
 		}
 		ar, err := provider.Apply(ctx, &adapter.AuthRequest{
-			Method: req.Method, URL: req.URL, Body: req.Body, Headers: req.Header,
+			Method: req.Method, URL: req.URL, Body: req.Body, Headers: req.Header, Query: req.Query,
 		})
 		if err != nil {
 			return &output.APIError{Code: "auth_apply", Message: err.Error(), ExitCode: output.ExitAuthError}
@@ -185,7 +186,19 @@ func (e *Engine) do(ctx context.Context, req *resolvedReq, hc *http.Client) ([]b
 	if err != nil {
 		return nil, 0, &output.APIError{Code: "build_request", Message: err.Error(), ExitCode: output.ExitParamError}
 	}
+	// endpoint.Host 设了就覆盖 httpReq.Host（Go 的 Request.Host 优先于 Header["Host"]），
+	// 用于 IP 直连 + 自定义 Host 的场景（如 EasyOps openapi 走 openapi.easyops-only.com）。
+	if req.Host != "" {
+		httpReq.Host = req.Host
+	}
 	for k, v := range req.Header {
+		// Go 的 client 不会发 Header map 里的 Host（Request.Write 用 req.Host，忽略 Header["Host"]）；
+		// 故 auth provider（如 easyops-openapi）回传的 host header 在此转写回 httpReq.Host，否则被静默丢弃。
+		// auth host 覆盖 endpoint.Host：auth 是接入方案的权威声明。
+		if strings.EqualFold(k, "host") {
+			httpReq.Host = v
+			continue
+		}
 		httpReq.Header.Set(k, v)
 	}
 	q := httpReq.URL.Query()

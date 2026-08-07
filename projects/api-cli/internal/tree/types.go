@@ -19,9 +19,10 @@ type Service struct {
 // Endpoint 接入面：同一资源模型挂不同接入面的差异打包于此。
 type Endpoint struct {
 	Name            string
-	BaseURL         string   // 支持 ${ENV} 占位（parse 阶段展开）
-	Auth            string   // 引用 ~/.api-cli/auth.d/<name>.yaml
+	BaseURL         string // 支持 ${ENV} 占位（parse 阶段展开）
+	Auth            string // 引用 ~/.api-cli/auth.d/<name>.yaml
 	PathPrefix      string
+	Host            string   // 自定义 Host header（如 openapi 走 IP 直连 + 改 host 的场景）
 	AllowOperations []string // 预留，MVP 不启用
 }
 

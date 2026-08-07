@@ -48,6 +48,7 @@ type applyArgs struct {
 	URL     string
 	Body    []byte
 	Headers map[string]string
+	Query   map[string]string
 }
 
 // applyReply 是 Apply 方法的回包。Err 非空表示 adapter 内部出错（transport 层仍 return nil）。
@@ -79,6 +80,7 @@ func (s *authRPCServer) Apply(args applyArgs, reply *applyReply) error {
 		URL:     args.URL,
 		Body:    args.Body,
 		Headers: args.Headers,
+		Query:   args.Query,
 	})
 	if err != nil {
 		reply.Err = err.Error()
@@ -113,6 +115,7 @@ func (c *authRPCClient) Apply(_ context.Context, r *AuthRequest) (*AuthResponse,
 		URL:     r.URL,
 		Body:    r.Body,
 		Headers: r.Headers,
+		Query:   r.Query,
 	}, &rep); err != nil {
 		return nil, fmt.Errorf("rpc Apply 调用失败: %w", err)
 	}
