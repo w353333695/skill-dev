@@ -260,6 +260,32 @@ resources:
 	}
 }
 
+// TestDryRunSkipsGateWrite update --dry-run 非 TTY：dry-run 应在 gateWrite 前拦截，不应报"需 --yes"。
+// dry-run 是安全预览（不发请求），不该被写闸门拦。
+func TestDryRunSkipsGateWrite(t *testing.T) {
+	// update --dry-run 非 TTY：dry-run 应在 gateWrite 前拦截，不应报"需 --yes"
+	called := false
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) { called = true }))
+	defer srv.Close()
+	raw := []byte(`spec: api-cli/v1
+service: { name: x, default_endpoint: e, endpoints: { e: { base_url: BASE, auth: none, path_prefix: "" } } }
+resources: { r: { path: /r, operations: { update: { method: PUT, path: "/{id}", params: { id: { in: path, required: true } } } } } }`)
+	raw = bytes.ReplaceAll(raw, []byte("BASE"), []byte(srv.URL))
+	tr, _ := spec.Parse(raw)
+	e := New(tr)
+	op := tr.Resources["r"].Operations["update"]
+	ep, _ := tr.SelectEndpoint("")
+	var out bytes.Buffer
+	err := e.Execute(context.Background(), ep, tr.Resources["r"], op, map[string]string{"id": "1"}, nil,
+		Options{DryRun: true, Out: &out}) // 不传 Yes
+	if err != nil {
+		t.Fatalf("dry-run 不应被 gateWrite 拦（应直接预览）: %v", err)
+	}
+	if called {
+		t.Fatal("dry-run 不应真发请求")
+	}
+}
+
 // TestIterateFormatTable 验证分页 + format=table 走缓冲路径（收集所有 items 再 FormatTable），
 // 输出 tab 分隔的表格（含表头），而非默认的流式 NDJSON（每行一个 JSON）。
 //
