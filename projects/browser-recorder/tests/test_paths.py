@@ -33,7 +33,7 @@ def test_auth_dirs(tmp_out_dir):
 
 def test_new_session_id_format():
     sid = paths.new_session_id()
-    assert re.fullmatch(r"\d{8}-\d{6}-[a-z0-9]{4}", sid), sid
+    assert re.fullmatch(r"\d{8}-\d{6}-[a-z0-9]{6}", sid), sid
 
 
 def test_new_session_id_unique():

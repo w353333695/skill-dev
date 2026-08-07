@@ -118,16 +118,30 @@ INJECT_SCRIPT = r"""
     }
     return null;
   }
-  document.addEventListener('click', function(e){
-    var target;
-    if (window.__br_capture_all) {
-      // 逃生开关（--capture-all-clicks）：关掉交互过滤，记录所有 click（含点空白）。
-      // 取 composedPath 最深节点作为目标，最具体。默认关闭，仅在 A+B 仍漏时启用。
-      target = (e.composedPath && e.composedPath()[0]) || e.target;
-    } else {
-      target = pickInteractive(e);
+  // 兜底：路径里无「自身可交互」节点时（点了纯空白/容器），取 composedPath 里最深的、
+  // 有真实盒子的节点（用户实际点中的东西），让无效点击也留痕供后期清理。
+  // composedPath 从深到浅，故首个有真实盒子的即最深者。
+  function pickDeepestWithBox(e){
+    var path = (e.composedPath && e.composedPath()) || [e.target];
+    for (var i = 0; i < path.length && i < 12; i++){
+      var n = path[i];
+      if (!n || n.nodeType !== 1) continue;
+      try {
+        var r = n.getBoundingClientRect();
+        if (r.width > 0 && r.height > 0) return n;
+      } catch(_) {}
     }
-    if (!target) return;  // 点空白处不记 click、不截图
+    return null;
+  }
+  document.addEventListener('click', function(e){
+    // 优先：最小可点击元素（向上找首个自身可交互 + 真实盒子节点，bbox 最准）。
+    var target = pickInteractive(e);
+    if (!target && !window.__br_interactive_only){
+      // 默认全捕：无可交互节点时兜底记「最深有盒节点」；
+      // --interactive-only（window.__br_interactive_only）关闭此兜底，恢复「点空白丢弃」。
+      target = pickDeepestWithBox(e);
+    }
+    if (!target) return;
     emit('click', target, null);
   }, true);
   // 仅 <select> 的 change 才记为 select；普通 <input> 的 change（含失焦校验）
