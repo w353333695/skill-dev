@@ -45,3 +45,56 @@ func TestExpandEnv(t *testing.T) {
 		t.Fatalf("env not expanded: %q", got)
 	}
 }
+
+func TestParseIter2Fields(t *testing.T) {
+	raw := []byte(`
+spec: api-cli/v1
+service: { name: x, default_endpoint: e, endpoints: { e: { base_url: http://h, auth: none, path_prefix: "" } } }
+resources:
+  r:
+    path: /r
+    operations:
+      search:
+        method: POST
+        path: ""
+        body:
+          type: object
+          example: { q: "foo" }
+          additional_properties: true
+          properties:
+            q: { type: string, description: 关键词 }
+        response:
+          type: object
+          properties:
+            data: { type: array, description: 结果列表 }
+        pagination:
+          type: offset
+          page_in: body
+          items_path: data
+          page_param: page
+          size_param: page_size
+          size: 10
+`)
+	tr, err := Parse(raw)
+	if err != nil {
+		t.Fatal(err)
+	}
+	op := tr.Resources["r"].Operations["search"]
+	// Schema 新字段
+	if op.Body == nil || op.Body.Example == nil {
+		t.Fatal("body.example 未解析")
+	}
+	if op.Body.AdditionalProperties == nil || !*op.Body.AdditionalProperties {
+		t.Fatal("body.additional_properties 未解析")
+	}
+	// Operation.Response
+	if op.Response == nil || op.Response.Properties["data"] == nil {
+		t.Fatal("response 未解析")
+	}
+	// Pagination.PageIn
+	if op.Pagination == nil || op.Pagination.PageIn != "body" {
+		t.Fatalf("page_in want body, got %q", ternary(op.Pagination == nil, "<nil>", op.Pagination.PageIn))
+	}
+}
+
+func ternary(b bool, a, c string) string { if b { return a }; return c }

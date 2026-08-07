@@ -78,11 +78,15 @@ func convertOperation(verb string, y *yamlOperation) *tree.Operation {
 	if y.Body != nil {
 		op.Body = convertSchema(y.Body)
 	}
+	if y.Response != nil {
+		op.Response = convertSchema(y.Response)
+	}
 	if y.Pagination != nil {
 		op.Pagination = &tree.Pagination{
 			Type: y.Pagination.Type, ItemsPath: y.Pagination.ItemsPath,
 			NextTokenPath: y.Pagination.NextTokenPath, PageParam: y.Pagination.PageParam,
 			SizeParam: y.Pagination.SizeParam, Size: y.Pagination.Size, HasMorePath: y.Pagination.HasMorePath,
+			PageIn: y.Pagination.PageIn,
 		}
 	}
 	return op
@@ -99,6 +103,8 @@ func convertSchema(y *yamlSchema) *tree.Schema {
 	if y.Items != nil {
 		s.Items = convertSchema(y.Items)
 	}
+	s.Example = y.Example
+	s.AdditionalProperties = y.AdditionalProperties
 	return s
 }
 
