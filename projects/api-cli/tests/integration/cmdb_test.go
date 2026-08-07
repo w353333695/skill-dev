@@ -198,3 +198,21 @@ func TestE2EDryRunDoesNotDelete(t *testing.T) {
 		t.Fatal("dry-run 不应真正删除 i-1，但 mock.db 中已不存在")
 	}
 }
+
+// TestGlobalFlagTraverseChildren 验证 root 开了 TraverseChildren：使全局 flag
+// （--insecure/--spec 等）可放在子命令之前（`api-cli --insecure inst search`）
+// 也被 cobra 正确解析，而不被当作子命令位置参数。
+func TestGlobalFlagTraverseChildren(t *testing.T) {
+	// --insecure 放最前（root 位置）应生效（TraverseChildren=true）
+	mock := NewCMDBMock()
+	defer mock.Close()
+	tr := loadCMDBTree(t, mock.URL())
+	root, err := cobracli.Build(tr)
+	if err != nil {
+		t.Fatal(err)
+	}
+	// 断言 root 开了 TraverseChildren
+	if !root.TraverseChildren {
+		t.Fatal("root.TraverseChildren 应为 true")
+	}
+}

@@ -23,10 +23,11 @@ import (
 // Build 构建根命令树并绑定全局 flag 与 help 钩子。
 func Build(tr *tree.OperationTree) (*cobra.Command, error) {
 	root := &cobra.Command{
-		Use:           tr.Service.Name,
-		Short:         tr.Service.Name + " CLI（声明式生成）",
-		SilenceUsage:  true,
-		SilenceErrors: true,
+		Use:              tr.Service.Name,
+		Short:            tr.Service.Name + " CLI（声明式生成）",
+		SilenceUsage:     true,
+		SilenceErrors:    true,
+		TraverseChildren: true, // 全局 flag（--insecure/--spec）可放子命令前
 	}
 	bindGlobalFlags(root)
 	e := engine.New(tr)
