@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"reflect"
+	"sort"
 )
 
 // Exit code 语义（spec §11.2）。
@@ -90,6 +91,8 @@ func formatTable(w io.Writer, data any) error {
 	for _, k := range first.MapKeys() {
 		keys = append(keys, k.String())
 	}
+	// 排序固化表头顺序：MapKeys 返回顺序未定义，不排序会导致同输入列序随机、不可重现。
+	sort.Strings(keys)
 	fmt.Fprintln(w, joinRow(keys))
 	for i := 0; i < v.Len(); i++ {
 		row := make([]string, len(keys))
