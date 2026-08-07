@@ -10,6 +10,10 @@
 package cobracli
 
 import (
+	"encoding/json"
+	"fmt"
+	"os"
+
 	"api-cli/internal/engine"
 	"api-cli/internal/tree"
 
@@ -29,6 +33,7 @@ func Build(tr *tree.OperationTree) (*cobra.Command, error) {
 	for _, r := range tr.Resources {
 		root.AddCommand(resourceCmd(tr, e, r, nil))
 	}
+	root.AddCommand(explainCmd(tr))
 	root.SetHelpFunc(helpFunc(tr))
 	return root, nil
 }
@@ -88,4 +93,41 @@ func desc(r *tree.Resource) string {
 		return r.Singular + " 资源"
 	}
 	return r.Name + " 资源"
+}
+
+// explainCmd: api-cli explain <resource> <verb> → 输出 operation 的 input+output schema（json）。
+// 给人/LLM 一份结构化描述（resource/verb/method/path/params/input_body/output），
+// 不发请求、不需要 endpoint；从 OperationTree 直接查。资源/操作不存在 → 非零退出。
+func explainCmd(tr *tree.OperationTree) *cobra.Command {
+	return &cobra.Command{
+		Use:   "explain [resource] [verb]",
+		Short: "输出某 operation 的 input/output schema（给人/LLM）",
+		Args:  cobra.ExactArgs(2),
+		RunE: func(cmd *cobra.Command, args []string) error {
+			r, ok := tr.Resources[args[0]]
+			if !ok {
+				return fmt.Errorf("资源 %q 不存在", args[0])
+			}
+			op, ok := r.Operations[args[1]]
+			if !ok {
+				return fmt.Errorf("操作 %q 不存在", args[1])
+			}
+			doc := map[string]any{
+				"resource": r.Name,
+				"verb":     op.Verb,
+				"method":   op.Method,
+				"path":     op.Path,
+				"params":   op.Params,
+			}
+			if op.Body != nil {
+				doc["input_body"] = op.Body.ToJSONSchema()
+			}
+			if op.Response != nil {
+				doc["output"] = op.Response.ToJSONSchema()
+			}
+			enc := json.NewEncoder(os.Stdout)
+			enc.SetIndent("", "  ")
+			return enc.Encode(doc)
+		},
+	}
 }
