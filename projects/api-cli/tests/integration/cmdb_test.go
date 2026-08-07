@@ -22,12 +22,14 @@ package integration
 import (
 	"bytes"
 	"context"
+	"encoding/json"
 	"io"
 	"os"
 	"strings"
 	"testing"
 
 	"api-cli/internal/cobracli"
+	"api-cli/internal/mcp"
 	"api-cli/internal/spec"
 	"api-cli/internal/tree"
 )
@@ -56,6 +58,77 @@ resources:
           items_path: data.list
           next_token_path: data.next
           has_more_path: data.next
+`)
+	raw = bytes.ReplaceAll(raw, []byte("BASE"), []byte(baseURL))
+	tr, err := spec.Parse(raw)
+	if err != nil {
+		t.Fatalf("spec.Parse 失败: %v", err)
+	}
+	return tr
+}
+
+// loadEasyOpsCMDBTree 构造一份 EasyOps CMDB 风格清单（嵌套 body schema + response schema +
+// page_in: body 的 offset 分页），base_url 用 mock 地址替换。给 TestE2EMCPBodySchemaAndPaging
+// 用：通过 mcp.Server 验证 tools/list 的 _body / required / outputSchema + tools/call 的
+// _body 直传 + page-in-body 翻页。
+//
+// 与 examples/easyops-cmdb.yaml 同构（手动镜像，而非读文件）：测试自带 size:1 以让 2 条 mock
+// 数据确定性地翻 2 页（example 的 size:20 是生产默认值，不适合少数据单测）。default_endpoint
+// 取 backend（HTTP）以适配 httptest mock（frontend 是 HTTPS）。
+func loadEasyOpsCMDBTree(t *testing.T, baseURL string) *tree.OperationTree {
+	t.Helper()
+	raw := []byte(`
+spec: api-cli/v1
+service:
+  name: easyops-cmdb
+  default_endpoint: backend
+  endpoints:
+    backend: { base_url: BASE, auth: none, path_prefix: "" }
+resources:
+  object_instance:
+    path: /v3/object/{object_id}/instance
+    operations:
+      search:
+        method: POST
+        path: /_search
+        params:
+          object_id: { in: path, type: string, required: true, description: 对象模型 ID }
+        body:
+          type: object
+          required: [page, page_size]
+          description: CMDB 实例搜索请求
+          properties:
+            page:      { type: integer, description: 页码（从1起） }
+            page_size: { type: integer, description: 每页条数 }
+            query:
+              type: object
+              description: 查询条件，MongoDB 风格
+              additional_properties: true
+              example: { "$and": [{ "$or": [{ "namespaceId": { "$like": "%easyops.%" } }] }] }
+        response:
+          type: object
+          properties:
+            data:
+              type: object
+              description: 响应数据
+              properties:
+                list:
+                  type: array
+                  description: 实例列表
+                  items:
+                    type: object
+                    properties:
+                      instanceId: { type: string, description: 实例ID }
+                      name:       { type: string, description: 名称 }
+                      namespaceId: { type: string, description: 命名空间ID }
+                total: { type: integer, description: 总条数 }
+        pagination:
+          type: offset
+          page_in: body
+          items_path: data.list
+          page_param: page
+          size_param: page_size
+          size: 1
 `)
 	raw = bytes.ReplaceAll(raw, []byte("BASE"), []byte(baseURL))
 	tr, err := spec.Parse(raw)
@@ -172,7 +245,7 @@ func TestE2EDryRunDoesNotDelete(t *testing.T) {
 	root, err := cobracli.Build(tr)
 	if err != nil {
 		t.Fatalf("cobracli.Build 失败: %v", err)
-}
+	}
 	// 不需要捕获 stdout：用副作用断言。
 	// 临时重定向 stdout 只为静默 dry-run 预览噪声（不参与断言）。
 	old := os.Stdout
@@ -214,5 +287,170 @@ func TestGlobalFlagTraverseChildren(t *testing.T) {
 	// 断言 root 开了 TraverseChildren
 	if !root.TraverseChildren {
 		t.Fatal("root.TraverseChildren 应为 true")
+	}
+}
+
+// TestE2EMCPBodySchemaAndPaging 通过 mcp.Server 端到端验证 iter2 的 body/output schema
+// 与 page-in-body 分页（不直接调 engine，走 MCP tools/list + tools/call 的真链路）。
+//
+// 三个 tools/list 断言：
+//  1. _body 嵌套展开（properties.query 含 additionalProperties + example，非空对象）
+//  2. required 聚合（object_id 来自 path required；page/page_size 来自 body schema required）
+//  3. outputSchema 在（data.list[].{instanceId,name,namespaceId} 的字段声明）
+//
+// 一个 tools/call 断言：_body（嵌套 query + page=1,page_size=1）经 marshal → engine.BodyBytes
+// 直传 → paging.Iter 翻页（page_in:body，bumpBodyPage 递增 body 里的 page 号）→ 翻够 2 页。
+// mock 按 body.page 切片，2 条数据 × page_size=1 → 必须翻到第 2 页才能拿全 i-1 + i-2。
+func TestE2EMCPBodySchemaAndPaging(t *testing.T) {
+	mock := NewCMDBMock()
+	defer mock.Close()
+	tr := loadEasyOpsCMDBTree(t, mock.URL())
+	srv := mcp.New(tr)
+
+	tools := srv.ToolsList()
+	if len(tools) != 1 {
+		t.Fatalf("want 1 tool, got %d", len(tools))
+	}
+	const wantName = "easyops-cmdb_object_instance_search"
+	tool := tools[0]
+	if tool.Name != wantName {
+		t.Fatalf("tool name want %s, got %s", wantName, tool.Name)
+	}
+
+	// tools/list 断言 1：_body 嵌套（query 含 additionalProperties + example）
+	props, ok := tool.InputSchema["properties"].(map[string]any)
+	if !ok {
+		t.Fatalf("inputSchema.properties 缺失: %#v", tool.InputSchema)
+	}
+	body, ok := props["_body"].(map[string]any)
+	if !ok {
+		t.Fatalf("inputSchema.properties._body 缺失（嵌套 body 未展开）")
+	}
+	bodyProps, _ := body["properties"].(map[string]any)
+	query, ok := bodyProps["query"].(map[string]any)
+	if !ok {
+		t.Fatalf("_body.properties.query 缺失: %#v", bodyProps)
+	}
+	if query["additionalProperties"] != true {
+		t.Errorf("_body.query.additionalProperties want true, got %v", query["additionalProperties"])
+	}
+	if query["example"] == nil {
+		t.Error("_body.query.example 缺失（LLM 理解核心）")
+	}
+
+	// tools/list 断言 2：required 含 object_id（path）+ page/page_size（body schema）
+	reqList, ok := tool.InputSchema["required"].([]string)
+	if !ok {
+		t.Fatalf("inputSchema.required 缺失或类型错: %#v", tool.InputSchema["required"])
+	}
+	wantReq := map[string]bool{"object_id": true, "page": true, "page_size": true}
+	for _, r := range reqList {
+		delete(wantReq, r)
+	}
+	if len(wantReq) != 0 {
+		t.Fatalf("required 缺少 %v, got %v", wantReq, reqList)
+	}
+
+	// tools/list 断言 3：outputSchema 在（data.list[].字段 嵌套展开）
+	if tool.OutputSchema == nil {
+		t.Fatal("outputSchema 缺失")
+	}
+	outProps, _ := tool.OutputSchema["properties"].(map[string]any)
+	data, _ := outProps["data"].(map[string]any)
+	dataProps, _ := data["properties"].(map[string]any)
+	lst, _ := dataProps["list"].(map[string]any)
+	lstItems, _ := lst["items"].(map[string]any)
+	lstItemProps, _ := lstItems["properties"].(map[string]any)
+	for _, f := range []string{"instanceId", "name", "namespaceId"} {
+		if lstItemProps[f] == nil {
+			t.Errorf("outputSchema.data.list.items.properties.%s 缺失: %#v", f, lstItemProps)
+		}
+	}
+
+	// tools/call：_body 直传 + page-in-body 翻页。
+	// _body 含嵌套 query（$and/$or，单层 flag 表达不了，必须经 BodyBytes 直传）+
+	// page/page_size（page_in:body 翻页靠 bumpBodyPage 改它）。
+	args := map[string]any{
+		"object_id": "FLOW_BUILDER_API_CONTRACT@EASYOPS",
+		"_body": map[string]any{
+			"page":      1,
+			"page_size": 1,
+			"query": map[string]any{
+				"$and": []any{
+					map[string]any{"$or": []any{map[string]any{"namespaceId": map[string]any{"$like": "%easyops.%"}}}},
+				},
+			},
+		},
+	}
+	params, _ := json.Marshal(map[string]any{
+		"jsonrpc": "2.0",
+		"id":      7,
+		"method":  "tools/call",
+		"params":  map[string]any{"name": wantName, "arguments": args},
+	})
+	in := bytes.NewReader(append(params, '\n'))
+	var out bytes.Buffer
+	if err := srv.Serve(context.Background(), in, &out); err != nil {
+		t.Fatalf("Serve: %v", err)
+	}
+	var resp struct {
+		Result struct {
+			Content []struct {
+				Text string `json:"text"`
+			} `json:"content"`
+		} `json:"result"`
+		Error map[string]any `json:"error"`
+	}
+	if err := json.Unmarshal(out.Bytes(), &resp); err != nil {
+		t.Fatalf("unmarshal: %v (out=%s)", err, out.String())
+	}
+	if resp.Error != nil {
+		t.Fatalf("tools/call 返回 error: %#v (out=%s)", resp.Error, out.String())
+	}
+	if len(resp.Result.Content) == 0 {
+		t.Fatalf("result.content 空: %s", out.String())
+	}
+	text := resp.Result.Content[0].Text
+	// page 1 → [i-1], page 2 → [i-2], page 3 → 空（隐式终止）。
+	// 同时含 i-1 与 i-2 才证明翻页真的到了第二页（单页只能拿一条）。
+	if !strings.Contains(text, `"i-1"`) {
+		t.Errorf("翻页第1页数据缺失（无 i-1）: %s", text)
+	}
+	if !strings.Contains(text, `"i-2"`) {
+		t.Errorf("翻页未到第2页（无 i-2）: %s", text)
+	}
+}
+
+// TestEasyOpsExampleParses 兜底保护 examples/easyops-cmdb.yaml 这个交付物：
+// 从磁盘读真实文件，断言 spec.Parse 成功且 search op 有 body/response/pagination 三件套。
+// 防止后续手改示例时 YAML 缩进 / schema 字段名笔误无人发现（inline 测试覆盖不到文件）。
+func TestEasyOpsExampleParses(t *testing.T) {
+	raw, err := os.ReadFile("../../examples/easyops-cmdb.yaml")
+	if err != nil {
+		t.Fatalf("读示例文件失败（CWD 应为 tests/integration）: %v", err)
+	}
+	tr, err := spec.Parse(raw)
+	if err != nil {
+		t.Fatalf("spec.Parse 失败: %v", err)
+	}
+	r := tr.Resources["object_instance"]
+	if r == nil {
+		t.Fatal("资源 object_instance 缺失")
+	}
+	op := r.Operations["search"]
+	if op == nil {
+		t.Fatal("object_instance.search 操作缺失")
+	}
+	if op.Body == nil || op.Body.Properties["query"] == nil {
+		t.Fatal("search.body.query 缺失（示例未补全嵌套 body schema）")
+	}
+	if op.Body.Properties["query"].AdditionalProperties == nil {
+		t.Error("search.body.query.additional_properties 应为 true（MongoDB 风格任意 key）")
+	}
+	if op.Response == nil || op.Response.Properties["data"] == nil {
+		t.Fatal("search.response.data 缺失（示例未补全 response schema）")
+	}
+	if op.Pagination == nil || op.Pagination.PageIn != "body" {
+		t.Fatal("search.pagination.page_in 应为 body（EasyOps 翻页号在 body）")
 	}
 }
