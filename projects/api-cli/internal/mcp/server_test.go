@@ -5,6 +5,9 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"io"
+	"net/http"
+	"net/http/httptest"
 	"strings"
 	"testing"
 
@@ -229,5 +232,67 @@ func TestServeToolsCallDryRun(t *testing.T) {
 	}
 	if code, _ := errObj["code"].(float64); code != -32602 {
 		t.Errorf("code want -32602, got %v", errObj["code"])
+	}
+}
+
+// TestServeToolsCallBodyDirect 验证 tools/call 收到嵌套 _body 对象时，经 server marshal
+// 成字节、经 engine.Options.BodyBytes 直传到请求 body（绕过单层 body flag）。
+//
+// mock 后端回显收到的 body；断言嵌套结构（$and/$or）原样到达 wire。
+func TestServeToolsCallBodyDirect(t *testing.T) {
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		body, _ := io.ReadAll(r.Body)
+		w.Write([]byte(`{"echo":` + string(body) + `}`))
+	}))
+	t.Cleanup(srv.Close)
+
+	raw := strings.NewReader(strings.NewReplacer("BASE", srv.URL).Replace(`
+spec: api-cli/v1
+service: { name: x, default_endpoint: e, endpoints: { e: { base_url: BASE, auth: none, path_prefix: "" } } }
+resources:
+  r: { path: /r, operations: { search: { method: POST, path: "" } } }
+`))
+	rawBytes, _ := io.ReadAll(raw)
+	tr, _ := spec.Parse(rawBytes)
+	s := New(tr)
+
+	// _body 是嵌套对象（含 $and/$or）—— resolve 的单层 body flag 无法表达。
+	args := map[string]any{
+		"_body": map[string]any{
+			"query": map[string]any{
+				"$and": []any{
+					map[string]any{"$or": []any{map[string]any{"x": map[string]any{"$like": "%a%"}}}},
+				},
+			},
+			"page": 1,
+		},
+	}
+	params, _ := json.Marshal(map[string]any{
+		"jsonrpc":   "2.0",
+		"id":        5,
+		"method":    "tools/call",
+		"params":    map[string]any{"name": "x_r_search", "arguments": args},
+	})
+	in := bytes.NewReader(append(params, '\n'))
+	var out bytes.Buffer
+	if err := s.Serve(context.Background(), in, &out); err != nil {
+		t.Fatal(err)
+	}
+	var resp struct {
+		Result struct {
+			Content []struct {
+				Text string `json:"text"`
+			} `json:"content"`
+		} `json:"result"`
+	}
+	if err := json.Unmarshal(out.Bytes(), &resp); err != nil {
+		t.Fatalf("unmarshal: %v (out=%s)", err, out.String())
+	}
+	if len(resp.Result.Content) == 0 {
+		t.Fatalf("result.content 空: %s", out.String())
+	}
+	// 嵌套结构必须原样到达服务端（被回显进 text）。
+	if !strings.Contains(resp.Result.Content[0].Text, `"$and"`) {
+		t.Fatalf("嵌套 body 未到达服务端: %s", resp.Result.Content[0].Text)
 	}
 }

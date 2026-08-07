@@ -3,6 +3,7 @@ package engine
 import (
 	"bytes"
 	"context"
+	"io"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -219,5 +220,42 @@ resources:
 	// 错误应归一化成 *output.APIError（携带 500 状态码）
 	if ae, ok := execErr.(*output.APIError); !ok || ae.StatusCode != 500 {
 		t.Fatalf("错误应归一化成 *output.APIError{StatusCode:500}，got %#v", execErr)
+	}
+}
+
+// TestExecuteBodyBytes 验证 MCP _body 注入路径：Options.BodyBytes（嵌套对象 marshal 后的字节）
+// 直接成为请求 body，绕过单层 body flag（resolve 里的 bodyParams 仅支持 flat string map）。
+//
+// 触发条件：Options.BodyBytes 非空 → Execute 覆盖 req.Body（优先级高于 --body-file 和 body flag）。
+// 服务端回显收到的 body，断言嵌套结构（$and/$or/$like）原样到达。
+func TestExecuteBodyBytes(t *testing.T) {
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		body, _ := io.ReadAll(r.Body)
+		// 回显收到的 body，验证嵌套结构原样到达
+		w.Write([]byte(`{"echo":` + string(body) + `}`))
+	}))
+	defer srv.Close()
+	raw := []byte(`
+spec: api-cli/v1
+service: { name: x, default_endpoint: e, endpoints: { e: { base_url: BASE, auth: none, path_prefix: "" } } }
+resources:
+  r: { path: /r, operations: { create: { method: POST, path: "" } } }
+`)
+	raw = bytes.ReplaceAll(raw, []byte("BASE"), []byte(srv.URL))
+	tr, _ := spec.Parse(raw)
+	e := New(tr)
+	op := tr.Resources["r"].Operations["create"]
+	r := tr.Resources["r"]
+	ep, _ := tr.SelectEndpoint("")
+	var out bytes.Buffer
+	nestedBody := []byte(`{"query":{"$and":[{"$or":[{"x":{"$like":"%a%"}}]}]},"page":1}`)
+	err := e.Execute(context.Background(), ep, r, op, nil, nil, Options{
+		Format: "json", Out: &out, BodyBytes: nestedBody, Yes: true,
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !bytes.Contains(out.Bytes(), []byte(`"$and"`)) {
+		t.Fatalf("嵌套 body 未到达服务端: %s", out.String())
 	}
 }

@@ -28,6 +28,7 @@ type Options struct {
 	All       bool      // 分页：拉到尽头（受 paging.MaxItems 硬上限约束）
 	Limit     int       // 分页：拉够 N 条就停（0 = 不限）
 	BodyFile  string    // 请求 body JSON 文件路径（覆盖 body 参数；支持复杂/嵌套 body）
+	BodyBytes []byte    // 请求 body 字节（MCP _body marshal 后注入；优先级最高，覆盖 --body-file/body flag）
 	Insecure  bool      // 跳过 TLS 证书校验（自签证书场景）
 	Out       io.Writer // 输出目标（默认 os.Stdout；测试注入 bytes.Buffer）
 }
@@ -77,6 +78,13 @@ func (e *Engine) Execute(ctx context.Context, ep *tree.Endpoint, r *tree.Resourc
 			return &output.APIError{Code: "body_file", Message: err.Error(), ExitCode: output.ExitParamError}
 		}
 		req.Body = b
+	}
+
+	// BodyBytes（MCP _body）：最高优先级，覆盖 --body-file 和 body 参数。
+	// 用途：MCP tools/call 的 _body 是嵌套对象，单层 body flag（string map）marshal 不出来；
+	// 由 mcp/server.go 提前 marshal 成字节，经此通道直传，绕过 resolve 的 flat 限制。
+	if len(opts.BodyBytes) > 0 {
+		req.Body = opts.BodyBytes
 	}
 
 	// 写操作闸门（create/update/delete 需 --yes 或 TTY 交互确认）。

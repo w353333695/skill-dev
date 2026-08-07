@@ -171,10 +171,18 @@ func (s *Server) toolsCall(ctx context.Context, params json.RawMessage) map[stri
 		return map[string]any{"error": map[string]any{"code": -32602, "message": "endpoint: " + err.Error()}}
 	}
 	pathVals, flags := splitArgs(op, p.Arguments)
+	// _body（嵌套对象）→ marshal 成 body bytes，绕过单层 flag。
+	// engine.resolve 的 body 参数只支持 flat string map；嵌套结构（$and/$or 等）必须
+	// 在这层提前序列化成字节，经 engine.Options.BodyBytes 直传（优先级最高）。
+	var bodyBytes []byte
+	if bb, ok := p.Arguments["_body"]; ok {
+		bodyBytes, _ = json.Marshal(bb)
+	}
 	var buf bytes.Buffer
 	if err := s.e.Execute(ctx, ep, r, op, pathVals, flags, engine.Options{
-		Format: "json",
-		Out:    &buf,
+		Format:    "json",
+		BodyBytes: bodyBytes,
+		Out:       &buf,
 	}); err != nil {
 		return map[string]any{"error": map[string]any{"code": -32603, "message": err.Error()}}
 	}
