@@ -15,6 +15,7 @@ from ..models import Action, RequestRecord
 from ..request_aggregator import aggregate
 from .annotator import annotate_screenshot, VERBOSE, COMPACT
 from . import report_html, report_md
+from .structure import build_segments
 
 
 
@@ -138,6 +139,11 @@ def run_export(session, out_dir, name, filter_path, keep_raw_bodies,
                                       if r.linked_action_seq is not None and _tmpl_of(r.url) == tmpl})
         (edir / "requests.json").write_text(
             json.dumps(groups, ensure_ascii=False, indent=2), encoding="utf-8")
+
+        # structure.json：按 navigation/URL path 切段的确定性分章输入，供 skill 分章
+        (edir / "structure.json").write_text(
+            json.dumps(build_segments(actions, groups), ensure_ascii=False, indent=2),
+            encoding="utf-8")
 
         if fmt in ("md", "both"):
             (edir / "report.md").write_text(
