@@ -1,0 +1,38 @@
+spec: api-cli/v1
+service:
+  name: cmdb
+  version: "1.0"
+  default_endpoint: backend
+  endpoints:
+    backend:
+      base_url: ${CMDB_BACKEND_URL}
+      auth: backend-sign
+      path_prefix: /api/v1
+    frontend:
+      base_url: ${CMDB_FRONTEND_URL}
+      auth: frontend-token
+      path_prefix: /web/api/v1
+resources:
+  inst:
+    path: /instances
+    singular: instance
+    operations:
+      create: { method: POST, path: "" }
+      read:   { method: GET, path: "/{id}", params: { id: { in: path, type: string, required: true, description: 实例 ID } } }
+      update: { method: PATCH, path: "/{id}", params: { id: { in: path, required: true } } }
+      delete: { method: DELETE, path: "/{id}", params: { id: { in: path, required: true } } }
+      search:
+        method: POST
+        path: /search
+        pagination:
+          type: cursor
+          items_path: data.list
+          next_token_path: data.next
+          has_more_path: data.next
+    children:
+      relation:
+        path: "/{instance_id}/relations"
+        parent_key: instance_id
+        operations:
+          create: { method: POST, path: "" }
+          read:   { method: GET, path: "/{id}", params: { id: { in: path, required: true } } }
