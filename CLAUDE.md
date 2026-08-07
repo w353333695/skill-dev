@@ -21,6 +21,7 @@
 
 * **命名**：project 名 = 能力名 = dist 名（连字符，如 `browser-recorder`）；Python 包目录用下划线（如 `browser_recorder`）。
 * skill 产物默认放 `tmp/`，不写进 plugin/skill 目录（除非固化）。
+* **golang 例外**：`projects/api-cli/` 为 golang project（破例）。打包走 `go build` 单二进制，不走 whl；通用打包脚本 `pack-dist.sh` 暂不覆盖它。skill 编排层调用方式为 `go run ./cmd/api-cli`（开发态）或裸二进制（分发态），不走 `uv run`。项目文档隔离在 `projects/<name>/docs/`。
 
 ## 3. 开发：虚拟环境与依赖
 
