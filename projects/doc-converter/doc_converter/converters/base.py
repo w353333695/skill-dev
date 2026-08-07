@@ -10,6 +10,8 @@
 框架会自动发现并注册所有转换器。
 """
 
+from __future__ import annotations
+
 import abc
 import logging
 from pathlib import Path

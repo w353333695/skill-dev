@@ -16,6 +16,8 @@
 - 软换行（行尾两空格 → 段内换行）
 """
 
+from __future__ import annotations
+
 import html as _html_lib
 import re
 import tempfile

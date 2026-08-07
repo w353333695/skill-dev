@@ -18,7 +18,7 @@ source "$SKILL_DIR/manifest.sh"
 
 ZIP="$REPO_ROOT/tmp/${SKILL_NAME}-dist-${SKILL_VERSION}.zip"
 VENDOR="$SKILL_DIR/vendor"
-echo "[pack] $SKILL_NAME v$SKILL_VERSION，projects: ${PROJECTS[*]}"
+echo "[pack] ${SKILL_NAME} v${SKILL_VERSION}，projects: ${PROJECTS[*]}"
 
 # 1. 打每个 project 的 whl，塞进 skill 的 vendor/
 mkdir -p "$VENDOR"
