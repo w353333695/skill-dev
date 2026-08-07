@@ -36,6 +36,12 @@
 ## 3. 开发：Python project 的 venv 与依赖
 
 * **每个 project 一个独立 venv**，用 **uv** 管（`uv venv` + `uv sync`）。能力 project 之间依赖隔离，互不污染。
+* **Python 版本基线（强制）**：每个 Python project 的开发 venv **钉到 `requires-python` 的下限版本**（当前基线 **3.9**），用 `.python-version` 固化并提交。
+  - **原因**：`requires-python` 只是**安装时**校验的元数据，**不验证代码兼容性**；uv 按 `.python-version` 只在**一个**版本上开发/构建/跑测试，不会自动测下限。钉到下限 = 开发即验证下限：写了 `X | None`（无 future）/`match`/`zip(strict=True)` 等 3.10+ 语法，保存跑一下就当场炸，强制兑现 `>=3.9` 契约（doc-converter 曾因 `X | None` 在 3.9 炸，见 commit 4c61f0c）。
+  - **落地**：`.python-version` 写下限版本（如 `3.9`）；切换时 `rm -rf .venv uv.lock && UV_INDEX_URL=https://pypi.tuna.tsinghua.edu.cn/simple uv sync` 重建（镜像见 §3.1）。类型注解用 `X | None` 时配合 `from __future__ import annotations`（注解惰性化为字符串，3.9 运行时不再求值）。
+  - **新建 Python project**：直接 `echo 3.9 > .python-version` + 建 3.9 venv 起步，别从 3.12 建再降级（降级时会撞语法雷）。
+  - **不再需要老版本**时：**优先提高 `requires-python` 下限**（如 `>=3.11`）并同步 `.python-version`，而不是留在 3.9 靠 future import 硬撑。
+  - whl 是 `py3-none-any`，build 用的版本**不影响**产物的兼容性标记；但仍建议偶尔在高版本（如 3.12）跑次测试防反向不兼容。
 * **skill 不拥有 venv、不 `pip install` 任何依赖**。要装的东西属于某个 project。
 * 调用 project 的 CLI：`uv run --project projects/<name> <cli> ...`（自动用该 project 的 venv，首次按 lock 建/sync）。
 * **不要**：靠 `source .venv/bin/activate`（shell 状态不跨 Bash 调用持久）；不要共享一个 venv 装所有 project；不要 per-skill 建 venv。
