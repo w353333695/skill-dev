@@ -30,8 +30,8 @@ func Load(name string) (adapter.AuthProvider, error) {
 	case "hmac":
 		return configured(&HMACSign{}, cfg.Config)
 	default:
-		// 外部 adapter：Task 11 实现 LoadPlugin。
-		return nil, fmt.Errorf("外部 adapter %q 暂未实现（Task 11）", cfg.Provider)
+		// 外部 adapter：go-plugin 启动子进程装载（net/rpc 模式）。
+		return LoadPlugin(name)
 	}
 }
 
