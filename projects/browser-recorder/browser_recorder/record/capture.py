@@ -84,6 +84,15 @@ class EventToAction:
             target=build_target_from_dom(node), value=value, page_info=page_info,
         )
 
+    def flush_pending(self, url: str, page_info: dict, ts: int) -> Action | None:
+        """显式收尾 flush 挂起的输入。
+
+        录制结束时页面侧 ``__br_flush``（beforeunload/快捷键）是异步派发的，若浏览器
+        关闭得快，该 Task 可能未完成 → 最后一段未失焦的输入丢失。runner 在收尾阶段
+        调本方法从 Python 侧同步兜底 flush（``_flush_input`` 幂等：无挂起返回 None）。
+        """
+        return self._flush_input(url, page_info, ts)
+
     def process(self, event: dict, url: str, page_info: dict) -> Action | None:
         """返回应落库的 Action 或 None（被去重 / 聚合中）。
 

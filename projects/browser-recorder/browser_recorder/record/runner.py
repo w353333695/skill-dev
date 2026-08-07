@@ -300,6 +300,21 @@ async def _record_async(url, session_dir, out_dir, profile, keep_auth,
         except Exception:
             pass
 
+        # 收尾兜底：从 Python 侧显式 flush 挂起的输入。页面侧 __br_flush
+        # （beforeunload/快捷键）是异步派发的，浏览器关得快时该 Task 可能未完成 →
+        # 最后一段未失焦的输入丢失（"输入没捕获"）。此处幂等兜底（无挂起则 no-op）。
+        try:
+            final = e2a.flush_pending(page.url, {"viewport": [1280, 720], "scroll_x": 0, "scroll_y": 0},
+                                      int(time.time() * 1000))
+            if final:
+                try:
+                    await _capture_for_action(final)
+                except Exception as e:
+                    logger.warning("收尾截图失败（seq=%s）: %s", final.seq, e)
+                _sink_action(final)
+        except Exception as e:
+            logger.warning("收尾 flush 挂起输入失败: %s", e)
+
         # 视频落盘 + 关闭。用户已关浏览器时这些是 no-op（异常吞掉）。
         if video:
             try:
