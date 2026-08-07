@@ -3,6 +3,7 @@ package paging
 import (
 	"context"
 	"fmt"
+	"strings"
 	"testing"
 
 	"api-cli/internal/tree"
@@ -78,5 +79,62 @@ func TestLimitTruncation(t *testing.T) {
 	}
 	if n != 3 {
 		t.Fatalf("want 3 (limit), got %d", n)
+	}
+}
+
+// TestIterPropagatesError 验证 do 出错时错误经 Item.Err 反馈给消费方，
+// 而不是静默 close channel（旧实现：错误被吞，消费方拿到截断数据无感）。
+// 第一页正常返回 2 条，第二页 do 返回 "server exploded" → 应在收到首页 2 条后
+// 收到一个 Item{Err:...}，消费方据此感知失败。
+func TestIterPropagatesError(t *testing.T) {
+	pg := &tree.Pagination{Type: "implicit", ItemsPath: "data", Size: 2}
+	calls := 0
+	do := func(ctx context.Context, req map[string]string) ([]byte, error) {
+		calls++
+		if calls == 1 {
+			return []byte(`{"data":[{"id":"1"},{"id":"2"}]}`), nil
+		}
+		return nil, fmt.Errorf("server exploded")
+	}
+	var got []string
+	var iterErr error
+	for it := range Iter(context.Background(), pg, do, map[string]string{}, Options{MaxPages: 10}) {
+		if it.Err != nil {
+			iterErr = it.Err
+			break
+		}
+		got = append(got, it.ID)
+	}
+	if iterErr == nil {
+		t.Fatal("want error propagated via Item.Err, got nil（错误被静默吞掉）")
+	}
+	if !strings.Contains(iterErr.Error(), "server exploded") {
+		t.Fatalf("错误信息丢失，got %v", iterErr)
+	}
+	if len(got) != 2 {
+		t.Fatalf("错误前应已投递首页 2 条，got %d 条", len(got))
+	}
+}
+
+// TestIterErrorClosesChannel 验证发出 Item{Err} 后 channel 正常 close
+// （消费方 range 能终止，不死锁）。
+func TestIterErrorClosesChannel(t *testing.T) {
+	pg := &tree.Pagination{Type: "implicit", ItemsPath: "data", Size: 2}
+	do := func(ctx context.Context, req map[string]string) ([]byte, error) {
+		return nil, fmt.Errorf("immediate failure")
+	}
+	done := make(chan struct{})
+	var sawErr bool
+	go func() {
+		defer close(done)
+		for it := range Iter(context.Background(), pg, do, map[string]string{}, Options{MaxPages: 10}) {
+			if it.Err != nil {
+				sawErr = true
+			}
+		}
+	}()
+	<-done
+	if !sawErr {
+		t.Fatal("首请求即出错：应收到 Item{Err} 且 channel 随后 close")
 	}
 }

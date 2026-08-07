@@ -11,9 +11,14 @@ import (
 )
 
 // Item 一条数据。ID 用于去重（若有）。
+//
+// Err 非 nil 时表示翻页中途出错（DoFunc 返回 error）：此时 Raw 为空，
+// 消费方（engine.iterate）应据此归一化错误返回，而非把截断数据当成完整结果。
+// 出错的 Item 发出后 channel 立即 close。
 type Item struct {
 	ID  string
 	Raw []byte // 原始 JSON 字节
+	Err error // 翻页中途错误（DoFunc 失败）；非 nil 时 Raw 为空
 }
 
 // Options 翻页选项。
@@ -47,7 +52,13 @@ func Iter(ctx context.Context, pg *tree.Pagination, do DoFunc, firstReq map[stri
 		for page := 0; page < opts.MaxPages; page++ {
 			body, err := do(ctx, req)
 			if err != nil {
-				return // 错误经 ctx 或单独 channel 传递；MVP 直接终止
+				// 错误不能静默吞：发一个 Item{Err} 让消费方感知失败，
+				// 再 close。select 兼顾 ctx 已取消的快路径。
+				select {
+				case out <- Item{Err: err}:
+				case <-ctx.Done():
+				}
+				return
 			}
 			items := gjson.GetBytes(body, pg.ItemsPath).Array()
 			for _, it := range items {
