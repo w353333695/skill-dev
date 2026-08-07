@@ -2,7 +2,7 @@
 
 本文件为**项目级**规则，与用户全局 `~/.claude/CLAUDE.md` 并存；冲突时以本文件为准。
 
-本工作空间用「**能力 project + 编排 skill**」两层结构组织：`projects/<name>/` 是可独立打包的 Python 能力包（提供 CLI），`skills/<name>/` 是把它们串起来的编排层。下列规范适用于所有 agent。
+本工作空间用「**能力 project + 编排 skill**」两层结构组织：`projects/<name>/` 是可独立打包的能力包（**Python 或 golang**，提供 CLI），`skills/<name>/` 是把它们串起来的编排层。下列规范适用于所有 agent。
 
 ## 1. 通用约定
 
@@ -14,16 +14,20 @@
 
 | 目录 | 职责 |
 |---|---|
-| `projects/<name>/` | **能力层**：可独立打包的 Python 包，提供 CLI/库，有自己的 venv |
+| `projects/<name>/` | **能力层**：可独立打包的能力包，提供 CLI/库（Python 或 golang） |
 | `skills/<name>/` | **编排层**：SKILL.md + 轻量脚本，调 project 的 CLI，不携带能力代码 |
 | `platforms/` | 跨 skill 共享的平台产物（API 契约、模型等） |
 | `tmp/` | 临时产物；按 scope 分子目录，不长期沉淀 |
 
-* **命名**：project 名 = 能力名 = dist 名（连字符，如 `browser-recorder`）；Python 包目录用下划线（如 `browser_recorder`）。
+* **命名与识别**：project 名 = 能力名 = dist 名（连字符，如 `browser-recorder`）。**识别 project 类型**：有 `go.mod` → golang，有 `pyproject.toml` → Python。Python 包目录用下划线（`browser_recorder`），golang 包目录随 module 名。
 * skill 产物默认放 `tmp/`，不写进 plugin/skill 目录（除非固化）。
-* **golang 例外**：`projects/api-cli/` 为 golang project（破例）。打包走 `go build` 单二进制，不走 whl；通用打包脚本 `pack-dist.sh` 暂不覆盖它。skill 编排层调用方式为 `go run ./cmd/api-cli`（开发态）或裸二进制（分发态），不走 `uv run`。项目文档隔离在 `projects/<name>/docs/`。
+* **golang project**（有 `go.mod`，如 `projects/api-cli/`）与 Python project **平行支持，不再算"例外"**：
+  - 打包：`scripts/pack-go.sh`（多平台交叉编译二进制 + zip 大礼包 + checksums，CGO=0 纯静态），**不走** whl / `pack-dist.sh`。
+  - 编排层调用：开发态 `go run ./cmd/<name>` 或 `go build` 出单二进制；分发态裸二进制（从大礼包挑对应平台）。**不走** `uv run`。
+  - 本沙箱 go 在 `/usr/local/go/bin/go`（go 1.22.5），**不在 PATH**，用前 `export PATH="/usr/local/go/bin:$PATH"`；拉 module 慢可设 `GOPROXY=https://goproxy.cn,direct`。
+  - 项目文档隔离在 `projects/<name>/docs/`。
 
-## 3. 开发：虚拟环境与依赖
+## 3. 开发：Python project 的 venv 与依赖
 
 * **每个 project 一个独立 venv**，用 **uv** 管（`uv venv` + `uv sync`）。能力 project 之间依赖隔离，互不污染。
 * **skill 不拥有 venv、不 `pip install` 任何依赖**。要装的东西属于某个 project。
@@ -42,11 +46,20 @@
 * **git push**：本仓库即 skill-dev 仓库，push 时须绕过镜像走真实远端（凭证 token 在 `.env`）。
 * **先探测再批量**：`curl -sSL --max-time 10 -o /dev/null -w '%{http_code}' <url>` 先试一两个镜像可达性，再批量用；公共 ghproxy（ghproxy.com 等）多数已 403 限流，别浪费时间。
 
+### 3.2 golang project 的开发与依赖
+
+* 依赖走 `go.mod` / `go.sum`，`go mod download` 拉取；本沙箱 go 在 `/usr/local/go/bin`（**不在 PATH**，用前 `export PATH="/usr/local/go/bin:$PATH"`）。
+* 调 CLI 验证：`cd projects/<name> && go run ./cmd/<name>`；`go build -o bin/<name> ./cmd/<name>` 出二进制。
+* 跑测试：`cd projects/<name> && go test ./...`。
+* 国内拉 module 慢：`GOPROXY=https://goproxy.cn,direct`（七牛镜像）。module cache 全局共享在 `~/go/pkg/mod`。
+* **不用** venv / uv / pip——golang 有自己的工具链。
+
 ## 4. 调试
 
 * 改 project 代码用 editable（`uv sync` 或 `uv pip install -e .`），改完即生效，`uv run --project` 立刻拿到最新。
 * 跑测试：`cd projects/<name> && uv run pytest`。
 * 调 CLI 验证：`uv run --project projects/<name> <cli> ...`。
+* golang project：`cd projects/<name> && go run ./cmd/<name>` 调 CLI、`go test ./...` 跑测试（详见 §3.2）。
 * **改完立即手动 `git commit`**：工作空间有自动 `chore(ai):` 提交机制，会扫描工作区未提交改动并打包成 message 不准的 commit（还可能混入并发变更）。别留未提交改动去跑长任务。
 
 ## 5. skill 与 project 的边界
@@ -64,6 +77,7 @@
 * **运行时大件**（chromium 等）不进 whl：project 提供 `doctor` / `install-deps` 子命令封装（如内部跑 `playwright install chromium`），缓存在 `~/.cache`（如 `~/.cache/ms-playwright`）全局共享。skill 开头自检调 `doctor`。
 * **版本锁定**：skill 在 SKILL.md 声明依赖范围（`<name>>=x,<y`），关键路径用 `@<ver>` 钉死，避免上游 breaking change 暗算。
 * 目标环境前置：只需 uv（或 pip/pipx）+ 指向内部 PyPI 的 index；chromium 等由 project 子命令补。
+* **golang project 分发**：`scripts/pack-go.sh <name> -o <dir>` 交叉编译多平台二进制（CGO=0 纯静态）+ zip 大礼包 + `checksums.txt`。分发态：解压大礼包 → 挑对应平台二进制（**arm64 = aarch64 = Apple Silicon**）→ `chmod +x` → 拷 `~/.local/bin/<name>`。详见 `projects/api-cli/README.md`「分发打包」。
 
 ## 7. skill 分发打包（通用脚本）
 
@@ -79,3 +93,4 @@
 * **`scripts/pack-dist.sh <skill>`**（workspace 根通用打包）：读 manifest，对每个 project `uv build` 打 whl 塞进 `skills/<skill>/vendor/`，连 skill 整体 zip 到 `tmp/<skill>-dist-<ver>.zip`。**排除 `scripts/run.sh`（dev 壳）和 `__pycache__`**。
 * **`platforms/` 不在通用打包范围**：它是 skill 的外部可拔插部件（如 api-console 的平台资产），由 skill 方自行手动分发，通用脚本不处理。
 * 用户使用：解压 zip 到 workspace 根 → `bash skills/<skill>/scripts/setup.sh` → n 个 CLI 就位 → skill 直接调。
+* **golang project 不走本套**：用独立的 `scripts/pack-go.sh`（多平台二进制大礼包），不读 `manifest.sh`、不进 `vendor/` whl。若一个 skill 同时依赖 Python 和 golang project，Python 走上述流程，golang 另跑 `pack-go.sh`，两套产物独立分发。
