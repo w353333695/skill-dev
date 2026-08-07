@@ -19,7 +19,7 @@ import (
 type Item struct {
 	ID  string
 	Raw []byte // 原始 JSON 字节
-	Err error // 翻页中途错误（DoFunc 失败）；非 nil 时 Raw 为空
+	Err error  // 翻页中途错误（DoFunc 失败）；非 nil 时 Raw 为空
 }
 
 // Options 翻页选项。

@@ -97,4 +97,9 @@ resources:
 	}
 }
 
-func ternary(b bool, a, c string) string { if b { return a }; return c }
+func ternary(b bool, a, c string) string {
+	if b {
+		return a
+	}
+	return c
+}

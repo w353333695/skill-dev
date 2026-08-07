@@ -8,10 +8,10 @@ import (
 func TestSchemaToJSONSchema(t *testing.T) {
 	b := true
 	s := &Schema{
-		Type:        "object",
-		Description: "搜索请求",
-		Required:    []string{"q"},
-		Example:     map[string]any{"q": "foo"},
+		Type:                 "object",
+		Description:          "搜索请求",
+		Required:             []string{"q"},
+		Example:              map[string]any{"q": "foo"},
 		AdditionalProperties: &b,
 		Properties: map[string]*Schema{
 			"q":    {Type: "string", Description: "关键词"},

@@ -18,10 +18,10 @@ const (
 
 // APIError 业务错误（归一化后）。
 type APIError struct {
-	StatusCode int      `json:"status_code"`
-	Code       string   `json:"code"`
-	Message    string   `json:"message"`
-	ExitCode   int      `json:"-"`
+	StatusCode int    `json:"status_code"`
+	Code       string `json:"code"`
+	Message    string `json:"message"`
+	ExitCode   int    `json:"-"`
 }
 
 func (e *APIError) Error() string { return fmt.Sprintf("api error %d: %s", e.StatusCode, e.Message) }
