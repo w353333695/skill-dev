@@ -102,7 +102,7 @@ api-console ...              # 无 uv：pipx / pip install 后裸调
 - **中文优先**：沟通、文档、注释用中文。
 - **改完即提交**：工作空间有自动 `chore(ai)` 提交机制，改完代码立即手动 commit，避免混入不准的自动提交。
 
-完整规范见 [`CLAUDE.md`](CLAUDE.md)。
+完整规范见 [`AGENTS.md`](AGENTS.md)。
 
 ## .gitignore 要点
 
