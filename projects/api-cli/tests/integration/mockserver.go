@@ -10,6 +10,7 @@ import (
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
+	"strings"
 	"sync"
 )
 
@@ -44,10 +45,11 @@ func (m *CMDBMock) Close() { m.srv.Close() }
 // handle 统一入口：剥 /api/v1 或 /web/api/v1 前缀后按 (path, method) 路由。
 //
 // 路由表（剥前缀后的 path）：
-//   - POST   /instances             → 创建（简易 id 生成）
-//   - POST   /instances/search      → cursor 分页查询（query page_token=p2 切第二页）
-//   - GET    /instances/{id}        → 读取单条
-//   - DELETE /instances/{id}        → 删除（204）
+//   - POST   /instances                          → 创建（简易 id 生成）
+//   - POST   /instances/search                   → cursor 分页查询（query page_token=p2 切第二页）
+//   - POST   .../instance/_search                → EasyOps 风格 offset 分页（page-in-body：读 body.page 切片）
+//   - GET    /instances/{id}                     → 读取单条
+//   - DELETE /instances/{id}                     → 删除（204）
 //   - 其余 → 404
 func (m *CMDBMock) handle(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
@@ -88,6 +90,34 @@ func (m *CMDBMock) handle(w http.ResponseWriter, r *http.Request) {
 			next = "p2"
 		}
 		_ = json.NewEncoder(w).Encode(map[string]any{"data": map[string]any{"list": list, "next": next}})
+	case strings.HasSuffix(path, "/instance/_search") && r.Method == "POST":
+		// EasyOps 风格 offset 分页（page-in-body）：翻页号在请求 body 而非 query。
+		// 读 body.page / body.page_size 决定切哪一段；越界返回空 list（让引擎按
+		// "条数 < size" 隐式终止）。响应包成 {data:{list,total}}（items_path=data.list）。
+		var body struct {
+			Page     int `json:"page"`
+			PageSize int `json:"page_size"`
+		}
+		_ = json.NewDecoder(r.Body).Decode(&body)
+		if body.Page <= 0 {
+			body.Page = 1
+		}
+		if body.PageSize <= 0 {
+			body.PageSize = 20
+		}
+		all := sortedValues(m.db)
+		start := (body.Page - 1) * body.PageSize
+		end := start + body.PageSize
+		if start > len(all) {
+			start = len(all)
+		}
+		if end > len(all) {
+			end = len(all)
+		}
+		list := all[start:end]
+		_ = json.NewEncoder(w).Encode(map[string]any{
+			"data": map[string]any{"list": list, "total": len(all)},
+		})
 	case len(path) > len("/instances/") && path[:len("/instances/")] == "/instances/" && r.Method == "GET":
 		id := path[len("/instances/"):]
 		if v, ok := m.db[id]; ok {
