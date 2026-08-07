@@ -1,0 +1,194 @@
+package engine
+
+import (
+	"bytes"
+	"context"
+	"encoding/json"
+	"fmt"
+	"io"
+	"net/http"
+
+	"api-cli/internal/auth"
+	"api-cli/internal/output"
+	"api-cli/internal/paging"
+	"api-cli/internal/tree"
+	"api-cli/pkg/adapter"
+)
+
+// Options 单次执行选项（来自全局/命令 flag）。
+type Options struct {
+	Format    string    // json|yaml|table（空 = json）
+	DryRun    bool      // 不真发，打印请求预览
+	PrintCurl bool      // 不真发，打印等价 curl 命令
+	Yes       bool      // 跳过写操作确认
+	All       bool      // 分页：拉到尽头（受 paging.MaxItems 硬上限约束）
+	Limit     int       // 分页：拉够 N 条就停（0 = 不限）
+	Out       io.Writer // 输出目标（默认 os.Stdout；测试注入 bytes.Buffer）
+}
+
+// Engine 执行器。无状态（除 http.Client），可被 cobracli/mcp 共用。
+type Engine struct {
+	tr *tree.OperationTree
+	hc *http.Client
+}
+
+// New 构造执行器。
+func New(tr *tree.OperationTree) *Engine {
+	return &Engine{tr: tr, hc: &http.Client{}}
+}
+
+// Execute 执行一次操作。cobracli（Task 10）/mcp（Task 12）的唯一入口。
+// 返回归一化错误（*output.APIError 携 ExitCode）；调用方用 output.ExitCode 取退出码。
+//
+// 流程：resolve → gateWrite → dry-run/print-curl → auth.Apply → 分页 or 单次 → 错误归一化 → 输出。
+func (e *Engine) Execute(ctx context.Context, ep *tree.Endpoint, r *tree.Resource, op *tree.Operation,
+	pathVals, flags map[string]string, opts Options) error {
+	if opts.Out == nil {
+		return &output.APIError{Code: "engine_options", Message: "Options.Out 未设置", ExitCode: output.ExitParamError}
+	}
+	req, err := resolve(e.tr, ep, r, op, pathVals, flags)
+	if err != nil {
+		return &output.APIError{Code: "resolve", Message: err.Error(), ExitCode: output.ExitParamError}
+	}
+
+	// 写操作闸门（create/update/delete 需 --yes 或 TTY 交互确认）。
+	if err := gateWrite(op.Verb, opts); err != nil {
+		return err
+	}
+
+	// dry-run / print-curl：渲染预览，不发请求。
+	if opts.DryRun || opts.PrintCurl {
+		fmt.Fprintln(opts.Out, renderPreview(req, opts))
+		return nil
+	}
+
+	// auth.Apply：endpoint.Auth 空 / "none" 时跳过；其余按名加载 provider。
+	// 直接 import pkg/adapter 构造 AuthRequest，删去 authReqAdapter/mergeAuth 迂回（controller 修正 #2）。
+	if ep.Auth != "" && ep.Auth != "none" {
+		provider, err := auth.Load(ep.Auth)
+		if err != nil {
+			return &output.APIError{Code: "auth_load", Message: err.Error(), ExitCode: output.ExitAuthError}
+		}
+		ar, err := provider.Apply(ctx, &adapter.AuthRequest{
+			Method: req.Method, URL: req.URL, Body: req.Body, Headers: req.Header,
+		})
+		if err != nil {
+			return &output.APIError{Code: "auth_apply", Message: err.Error(), ExitCode: output.ExitAuthError}
+		}
+		for k, v := range ar.Headers {
+			req.Header[k] = v
+		}
+		for k, v := range ar.Query {
+			req.Query[k] = v
+		}
+	}
+
+	// 分页 vs 单次。
+	if op.Pagination != nil {
+		return e.iterate(ctx, req, op, opts)
+	}
+	return e.single(ctx, req, opts)
+}
+
+// single 发一次请求，把响应 decode 后整体交给 output.Format。
+func (e *Engine) single(ctx context.Context, req *resolvedReq, opts Options) error {
+	body, status, err := e.do(ctx, req)
+	if err != nil {
+		return err
+	}
+	if status >= 400 {
+		return output.NormalizeAPIError(status, body)
+	}
+	data := decodeLoose(body)
+	return output.Format(opts.Out, opts.Format, data)
+}
+
+// iterate 走 paging.Iter 流式 NDJSON：每行一个 item.Raw（已是 JSON）。
+// firstReq = req.Query 作为翻页种子（cursor/offset 参数由 paging 引擎注入/递增）。
+func (e *Engine) iterate(ctx context.Context, req *resolvedReq, op *tree.Operation, opts Options) error {
+	first := copySS(req.Query)
+	do := func(ctx context.Context, q map[string]string) ([]byte, error) {
+		r2 := *req
+		r2.Query = q
+		body, status, err := e.do(ctx, &r2)
+		if err != nil {
+			return nil, err
+		}
+		if status >= 400 {
+			return nil, output.NormalizeAPIError(status, body)
+		}
+		return body, nil
+	}
+	limit := opts.Limit
+	if opts.All {
+		limit = 0 // 0 = 不限，受 paging.Options.MaxItems 硬上限约束
+	}
+	items := paging.Iter(ctx, op.Pagination, do, first, paging.Options{Limit: limit})
+	for it := range items {
+		fmt.Fprintln(opts.Out, string(it.Raw))
+	}
+	return nil
+}
+
+// do 发一次 HTTP 请求，返回 body + status。网络错误归一化成 ExitNetTimeout/ExitNet 类。
+func (e *Engine) do(ctx context.Context, req *resolvedReq) ([]byte, int, error) {
+	var bodyReader io.Reader
+	if req.Body != nil {
+		bodyReader = bytes.NewReader(req.Body)
+	}
+	httpReq, err := http.NewRequestWithContext(ctx, req.Method, req.URL, bodyReader)
+	if err != nil {
+		return nil, 0, &output.APIError{Code: "build_request", Message: err.Error(), ExitCode: output.ExitParamError}
+	}
+	for k, v := range req.Header {
+		httpReq.Header.Set(k, v)
+	}
+	q := httpReq.URL.Query()
+	for k, v := range req.Query {
+		q.Set(k, v)
+	}
+	httpReq.URL.RawQuery = q.Encode()
+
+	resp, err := e.hc.Do(httpReq)
+	if err != nil {
+		return nil, 0, &output.APIError{Code: "net", Message: err.Error(), ExitCode: output.ExitNetTimeout}
+	}
+	defer resp.Body.Close()
+	body, _ := io.ReadAll(resp.Body)
+	return body, resp.StatusCode, nil
+}
+
+// renderPreview 渲染 dry-run / curl 预览。
+func renderPreview(req *resolvedReq, opts Options) string {
+	if opts.PrintCurl {
+		curl := "curl -X " + req.Method + " '" + req.URL + "'"
+		for k, v := range req.Header {
+			curl += " -H '" + k + ": " + v + "'"
+		}
+		if req.Body != nil {
+			curl += " -d '" + string(req.Body) + "'"
+		}
+		return curl
+	}
+	return fmt.Sprintf("DRY-RUN %s %s query=%v header=%v body=%s",
+		req.Method, req.URL, req.Query, req.Header, req.Body)
+}
+
+// copySS 浅拷贝 map[string]string。
+func copySS(m map[string]string) map[string]string {
+	out := make(map[string]string, len(m))
+	for k, v := range m {
+		out[k] = v
+	}
+	return out
+}
+
+// decodeLoose 宽松 decode：JSON 成功就用对象，失败原样当字符串（避免非 JSON 响应炸）。
+// 直接调标准库 json.Unmarshal，去掉 jsonUnmarshal 包装（controller 修正 #4）。
+func decodeLoose(b []byte) any {
+	var v any
+	if err := json.Unmarshal(b, &v); err != nil {
+		return string(b)
+	}
+	return v
+}
