@@ -30,7 +30,7 @@
 * **golang project**（有 `go.mod`，如 `projects/api-cli/`）与 Python project **平行支持，不再算"例外"**：
   - 打包：`scripts/pack-go.sh`（多平台交叉编译二进制 + zip 大礼包 + checksums，CGO=0 纯静态），**不走** whl / `pack-dist.sh`。
   - 编排层调用：开发态 `go run ./cmd/<name>` 或 `go build` 出单二进制；分发态裸二进制（从大礼包挑对应平台）。**不走** `uv run`。
-  - 本沙箱 go 在 `/usr/local/go/bin/go`（go 1.22.5），**不在 PATH**，用前 `export PATH="/usr/local/go/bin:$PATH"`；拉 module 慢可设 `GOPROXY=https://goproxy.cn,direct`。
+  - 本沙箱 go 在 `$HOME/.local/go-parent/go/bin/go`（go 1.22.5），**不在 PATH**，用前 `export PATH="$HOME/.local/go-parent/go/bin:$PATH"`；拉 module 慢可设 `GOPROXY=https://goproxy.cn,direct`。
   - 项目文档隔离在 `projects/<name>/docs/`。
 
 ## 3. 开发：Python project 的 venv 与依赖
@@ -60,7 +60,7 @@
 
 ### 3.2 golang project 的开发与依赖
 
-* 依赖走 `go.mod` / `go.sum`，`go mod download` 拉取；本沙箱 go 在 `/usr/local/go/bin`（**不在 PATH**，用前 `export PATH="/usr/local/go/bin:$PATH"`）。
+* 依赖走 `go.mod` / `go.sum`，`go mod download` 拉取；本沙箱 go 在 `$HOME/.local/go-parent/go/bin`（**不在 PATH**，用前 `export PATH="$HOME/.local/go-parent/go/bin:$PATH"`）。
 * 调 CLI 验证：`cd projects/<name> && go run ./cmd/<name>`；`go build -o bin/<name> ./cmd/<name>` 出二进制。
 * 跑测试：`cd projects/<name> && go test ./...`。
 * 国内拉 module 慢：`GOPROXY=https://goproxy.cn,direct`（七牛镜像）。module cache 全局共享在 `~/go/pkg/mod`。
