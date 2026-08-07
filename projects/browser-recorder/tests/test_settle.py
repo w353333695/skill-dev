@@ -1,5 +1,6 @@
 # tests/test_settle.py
 import inspect
+import pytest
 from browser_recorder.settle import (
     SettleDecider, SignalState, wait_for_settled, _SETTLE_INJECT,
 )
@@ -83,3 +84,51 @@ def test_wait_for_settled_does_not_add_init_script():
             assert node.func.attr != "add_init_script", (
                 "wait_for_settled 不得调用 add_init_script（应在 runner 创建 ctx 后一次性注入）"
             )
+
+
+@pytest.mark.asyncio
+async def test_wait_for_settled_waits_for_xhr_popup(tmp_path):
+    """Bug 2：click 触发的 XHR 弹层，wait_for_settled 应等到内容加载完再返回
+    （runner 现在用它给 click/submit 截图，避免截到内容未加载的白屏）。"""
+    import tempfile
+    from playwright.async_api import async_playwright
+    from browser_recorder.browser import launch, new_context
+
+    # 用 file:// goto（与真实 runner 一致；set_content 不会触发 add_init_script）
+    html = ('<html><body><button id="open">开</button><div id="pop">empty</div>'
+            '<script>document.getElementById("open").addEventListener("click", async () => {'
+            '  const r = await fetch("data.txt");'
+            '  document.getElementById("pop").textContent = await r.text();'
+            '});</script></body></html>')
+    page_file = tmp_path / "t.html"
+    page_file.write_text(html, encoding="utf-8")
+
+    async with async_playwright() as pw:
+        b = await launch(pw, headless=True)
+        ctx = await new_context(b)
+        await ctx.add_init_script(_SETTLE_INJECT)
+        page = await ctx.new_page()
+
+        async def handler(route):
+            await page.wait_for_timeout(600)   # 模拟弹层内容异步加载
+            await route.fulfill(body="LOADED", content_type="text/plain")
+        await page.route("**/data.txt", handler)
+
+        await page.goto(f"file://{page_file}", wait_until="domcontentloaded")
+        await page.click("#open")
+        result = await wait_for_settled(page, timeout_ms=3000, debounce_ms=300)
+        text = await page.text_content("#pop")
+        await b.close()
+    assert result.settled is True
+    assert text == "LOADED", f"settle 未等到 XHR 弹层内容（got {text!r}）"
+
+
+def test_wait_for_settled_removes_listeners_in_finally():
+    """Bug 2 配套：wait_for_settled 现会被每个动作的截图反复调用，必须在 finally
+    清理 request/requestfinished/requestfailed 监听器，否则随录制时长线性泄漏。"""
+    src = inspect.getsource(wait_for_settled)
+    assert "finally" in src, "wait_for_settled 缺少 finally 清理块"
+    assert "remove_listener" in src, "wait_for_settled 必须调用 remove_listener 清理监听器"
+    assert "requestfinished" in src and "requestfailed" in src, (
+        "wait_for_settled 必须移除 requestfinished/requestfailed 监听器"
+    )
