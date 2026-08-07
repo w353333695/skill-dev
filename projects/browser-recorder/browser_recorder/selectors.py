@@ -26,12 +26,21 @@ def build_target_from_dom(node_info: dict[str, Any]) -> Target:
 
 
 def target_fingerprint(target: Target) -> str:
-    """去重指纹：忽略 bbox（位置变化不代表新元素）。优先 css，回退 xpath，再回退 tag+text。"""
+    """去重指纹：优先 css，回退 xpath，再回退 tag+text（无选择器时附 bbox 兜底）。
+
+    有 css/xpath 时**忽略 bbox**（位置变化不代表新元素，见 test_stable_across_bbox_change）。
+    无 css/xpath 时（如旧录制只有 bbox），bbox 是唯一身份信号：附上位置，避免不同位置的
+    null-selector 点击被误并成一个。
+    """
     if target.css:
         return f"css:{target.css}"
     if target.xpath:
         return f"xpath:{target.xpath}"
-    return f"tag:{target.tag or ''}|text:{target.text or ''}"
+    base = f"tag:{target.tag or ''}|text:{target.text or ''}"
+    if target.bbox:
+        b = target.bbox
+        base += f"|bbox:{b.get('x')},{b.get('y')},{b.get('w')},{b.get('h')}"
+    return base
 
 
 async def locate(page: "Page", target: Target) -> "Locator | None":
