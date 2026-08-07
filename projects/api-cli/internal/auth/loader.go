@@ -72,6 +72,8 @@ func loadUncached(name string) (adapter.AuthProvider, error) {
 		return configured(&OAuth2CC{}, cfg.Config)
 	case "hmac":
 		return configured(&HMACSign{}, cfg.Config)
+	case "cookie":
+		return configured(&CookieAuth{}, cfg.Config)
 	default:
 		// 外部 adapter：go-plugin 启动子进程装载（net/rpc 模式）。
 		return LoadPlugin(name)

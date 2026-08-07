@@ -101,6 +101,8 @@ func bindGlobalFlags(root *cobra.Command) {
 	root.PersistentFlags().Bool("yes", false, "跳过写操作确认")
 	root.PersistentFlags().Int("limit", 0, "分页拉取上限（条数）")
 	root.PersistentFlags().Bool("all", false, "拉全部分页（受硬上限约束）")
+	root.PersistentFlags().String("body-file", "", "请求 body JSON 文件路径（覆盖 body 参数，支持复杂/嵌套 body）")
+	root.PersistentFlags().Bool("insecure", false, "跳过 TLS 证书校验（自签证书）")
 }
 
 // globalOpts 从 cobra command 取全局 flag → engine.Options。
@@ -116,6 +118,8 @@ func globalOpts(cmd *cobra.Command) (engine.Options, error) {
 		Yes:       boolFlag(f, "yes"),
 		All:       boolFlag(f, "all"),
 		Limit:     intFlag(f, "limit"),
+		BodyFile:  strFlag(f, "body-file"),
+		Insecure:  boolFlag(f, "insecure"),
 		Out:       stdout(),
 	}
 	if err := validateFormat(opts.Format); err != nil {

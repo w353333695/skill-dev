@@ -1,0 +1,42 @@
+# EasyOps CMDB - object instance search 清单
+# 由真实 curl 请求推断（前端走网关 + 后端直连双 endpoint）。
+# 资源定义一份；endpoint 差异在 base_url(端口) + path_prefix(网关前缀) + auth。
+spec: api-cli/v1
+service:
+  name: easyops-cmdb
+  version: "1.0"
+  default_endpoint: frontend          # 用户 curl 是前端，先默认前端调通
+  endpoints:
+    frontend:                         # 浏览器/前端：走网关 + cookie
+      base_url: https://admin.easyops.local
+      path_prefix: /next/api/gateway/cmdb.instance.PostSearchV3
+      auth: easyops-cookie
+    backend:                          # CLI 友好：直连 :8079
+      base_url: https://admin.easyops.local:8079
+      path_prefix: ""
+      auth: easyops-cookie            # 先复用 cookie；后端若改 token 再换 auth 引用
+
+resources:
+  object_instance:
+    path: /v3/object/{object_id}/instance     # object_id 路径参数（如 FLOW_BUILDER_API_CONTRACT@EASYOPS）
+    operations:
+      search:                                  # 对应 PostSearchV3
+        method: POST
+        path: /_search
+        params:
+          object_id: { in: path, type: string, required: true, description: 对象模型 ID（如 FLOW_BUILDER_API_CONTRACT@EASYOPS） }
+        body:
+          type: object
+          properties:
+            fields:         { type: array,   items: { type: string } }
+            page:           { type: integer }
+            page_size:      { type: integer }
+            sort:           { type: array }
+            query:          { type: object }
+            relation_limit: { type: integer }
+        pagination:
+          type: offset
+          items_path: data.list            # ⚠️ 待实测响应确认（也可能是 data.items / result）
+          page_param: page
+          size_param: page_size
+          size: 20

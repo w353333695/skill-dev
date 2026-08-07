@@ -3,10 +3,13 @@ package engine
 import (
 	"bytes"
 	"context"
+	"crypto/tls"
 	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
+	"os"
+	"sync"
 
 	"api-cli/internal/auth"
 	"api-cli/internal/output"
@@ -23,13 +26,17 @@ type Options struct {
 	Yes       bool      // 跳过写操作确认
 	All       bool      // 分页：拉到尽头（受 paging.MaxItems 硬上限约束）
 	Limit     int       // 分页：拉够 N 条就停（0 = 不限）
+	BodyFile  string    // 请求 body JSON 文件路径（覆盖 body 参数；支持复杂/嵌套 body）
+	Insecure  bool      // 跳过 TLS 证书校验（自签证书场景）
 	Out       io.Writer // 输出目标（默认 os.Stdout；测试注入 bytes.Buffer）
 }
 
-// Engine 执行器。无状态（除 http.Client），可被 cobracli/mcp 共用。
+// Engine 执行器。可被 cobracli/mcp 共用。
 type Engine struct {
-	tr *tree.OperationTree
-	hc *http.Client
+	tr         *tree.OperationTree
+	hc         *http.Client // 默认安全 client
+	insecureHC *http.Client // --insecure 时用（lazy，sync.Once）
+	once       sync.Once
 }
 
 // New 构造执行器。
@@ -37,10 +44,21 @@ func New(tr *tree.OperationTree) *Engine {
 	return &Engine{tr: tr, hc: &http.Client{}}
 }
 
+// insecureClient lazy 构造跳过 TLS 校验的 client（自签证书场景）。
+// sync.Once 保证全局只创建一个，MCP 长驻高频也复用。
+func (e *Engine) insecureClient() *http.Client {
+	e.once.Do(func() {
+		e.insecureHC = &http.Client{Transport: &http.Transport{
+			TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+		}}
+	})
+	return e.insecureHC
+}
+
 // Execute 执行一次操作。cobracli（Task 10）/mcp（Task 12）的唯一入口。
 // 返回归一化错误（*output.APIError 携 ExitCode）；调用方用 output.ExitCode 取退出码。
 //
-// 流程：resolve → gateWrite → dry-run/print-curl → auth.Apply → 分页 or 单次 → 错误归一化 → 输出。
+// 流程：resolve → body-file 覆盖 → gateWrite → dry-run/print-curl → auth.Apply → 选 client → 分页 or 单次 → 错误归一化 → 输出。
 func (e *Engine) Execute(ctx context.Context, ep *tree.Endpoint, r *tree.Resource, op *tree.Operation,
 	pathVals, flags map[string]string, opts Options) error {
 	if opts.Out == nil {
@@ -49,6 +67,15 @@ func (e *Engine) Execute(ctx context.Context, ep *tree.Endpoint, r *tree.Resourc
 	req, err := resolve(e.tr, ep, r, op, pathVals, flags)
 	if err != nil {
 		return &output.APIError{Code: "resolve", Message: err.Error(), ExitCode: output.ExitParamError}
+	}
+
+	// body-file：覆盖 req.Body（支持复杂/嵌套 body，弥补单层 body 参数的不足）。
+	if opts.BodyFile != "" {
+		b, err := os.ReadFile(opts.BodyFile)
+		if err != nil {
+			return &output.APIError{Code: "body_file", Message: err.Error(), ExitCode: output.ExitParamError}
+		}
+		req.Body = b
 	}
 
 	// 写操作闸门（create/update/delete 需 --yes 或 TTY 交互确认）。
@@ -83,16 +110,22 @@ func (e *Engine) Execute(ctx context.Context, ep *tree.Endpoint, r *tree.Resourc
 		}
 	}
 
+	// 选 client：--insecure 用跳过 TLS 校验的（自签证书）。
+	hc := e.hc
+	if opts.Insecure {
+		hc = e.insecureClient()
+	}
+
 	// 分页 vs 单次。
 	if op.Pagination != nil {
-		return e.iterate(ctx, req, op, opts)
+		return e.iterate(ctx, req, op, opts, hc)
 	}
-	return e.single(ctx, req, opts)
+	return e.single(ctx, req, opts, hc)
 }
 
 // single 发一次请求，把响应 decode 后整体交给 output.Format。
-func (e *Engine) single(ctx context.Context, req *resolvedReq, opts Options) error {
-	body, status, err := e.do(ctx, req)
+func (e *Engine) single(ctx context.Context, req *resolvedReq, opts Options, hc *http.Client) error {
+	body, status, err := e.do(ctx, req, hc)
 	if err != nil {
 		return err
 	}
@@ -110,12 +143,12 @@ func (e *Engine) single(ctx context.Context, req *resolvedReq, opts Options) err
 // 再 close channel。do 已把网络错误归一化成 *output.APIError{ExitNetTimeout}、
 // 把 HTTP >= 400 归一化成 NormalizeAPIError；这里收到 it.Err 直接返回，
 // 保证翻页中途失败时 Execute 返回非 nil err（exit 非 0），不让截断数据蒙混过关。
-func (e *Engine) iterate(ctx context.Context, req *resolvedReq, op *tree.Operation, opts Options) error {
+func (e *Engine) iterate(ctx context.Context, req *resolvedReq, op *tree.Operation, opts Options, hc *http.Client) error {
 	first := copySS(req.Query)
 	do := func(ctx context.Context, q map[string]string) ([]byte, error) {
 		r2 := *req
 		r2.Query = q
-		body, status, err := e.do(ctx, &r2)
+		body, status, err := e.do(ctx, &r2, hc)
 		if err != nil {
 			return nil, err
 		}
@@ -143,7 +176,7 @@ func (e *Engine) iterate(ctx context.Context, req *resolvedReq, op *tree.Operati
 }
 
 // do 发一次 HTTP 请求，返回 body + status。网络错误归一化成 ExitNetTimeout/ExitNet 类。
-func (e *Engine) do(ctx context.Context, req *resolvedReq) ([]byte, int, error) {
+func (e *Engine) do(ctx context.Context, req *resolvedReq, hc *http.Client) ([]byte, int, error) {
 	var bodyReader io.Reader
 	if req.Body != nil {
 		bodyReader = bytes.NewReader(req.Body)
@@ -161,7 +194,7 @@ func (e *Engine) do(ctx context.Context, req *resolvedReq) ([]byte, int, error) 
 	}
 	httpReq.URL.RawQuery = q.Encode()
 
-	resp, err := e.hc.Do(httpReq)
+	resp, err := hc.Do(httpReq)
 	if err != nil {
 		return nil, 0, &output.APIError{Code: "net", Message: err.Error(), ExitCode: output.ExitNetTimeout}
 	}
@@ -180,10 +213,13 @@ func renderPreview(req *resolvedReq, opts Options) string {
 		if req.Body != nil {
 			curl += " -d '" + string(req.Body) + "'"
 		}
+		if opts.Insecure {
+			curl += " --insecure"
+		}
 		return curl
 	}
-	return fmt.Sprintf("DRY-RUN %s %s query=%v header=%v body=%s",
-		req.Method, req.URL, req.Query, req.Header, req.Body)
+	return fmt.Sprintf("DRY-RUN %s %s insecure=%v query=%v header=%v body=%s",
+		req.Method, req.URL, opts.Insecure, req.Query, req.Header, req.Body)
 }
 
 // copySS 浅拷贝 map[string]string。
@@ -196,7 +232,6 @@ func copySS(m map[string]string) map[string]string {
 }
 
 // decodeLoose 宽松 decode：JSON 成功就用对象，失败原样当字符串（避免非 JSON 响应炸）。
-// 直接调标准库 json.Unmarshal，去掉 jsonUnmarshal 包装（controller 修正 #4）。
 func decodeLoose(b []byte) any {
 	var v any
 	if err := json.Unmarshal(b, &v); err != nil {
