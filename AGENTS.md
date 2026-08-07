@@ -10,6 +10,11 @@
 * 只能操作项目内文件，项目外文件只读；删除非本次会话产生的临时文件前先确认。
 * 不指定 superpowers，不主动介入。
 * **严禁向项目工作目录外写文件**（`/etc`、`$HOME`、`/tmp`、`/workspace` 根等都算"外"）；各 project 的临时文件、凭证、本地配置一律放**项目目录内**统一管理（如 `projects/<name>/.local/`，gitignore），不污染工作区根或系统目录。需要改系统配置（如 `/etc/hosts`）时先征得用户同意，用完恢复。
+* **多会话/agent 并行时各自隔离**（共识规则，所有会话遵守）：
+  - **git worktree 隔离**：每个会话/任务用独立 git worktree（`git worktree add <path> <branch>` 或平台 worktree 工具），**不共用主工作区**；固定自己分支，**不 `git checkout` 别的会话在用的分支**（一个 checkout 全局生效，会把对方的 commit 跑飞）。
+  - **系统级资源用环境变量隔离**：go/python 路径、`/usr/local`、`/etc`、`$HOME` 下的全局工具，各会话用独立路径或环境变量（如各自 `GOROOT` / `export PATH=...`），**绝不移动/重装全局安装**（一移所有会话全挂）。
+  - **共享规则文件**（本 AGENTS.md）改动：先在自己 worktree 改 + commit + **通知并行方拉取**；不要两个会话同时改。
+  - **已踩过的坑**（本工作空间真实经历）：并发写同一工作区导致分支被切（commit 跑到别的分支）、commit 串味（merge 时混入无关 commit）、工具路径被改（go 被移走，正在用的会话全挂）。开 worktree 能根治前两类；系统级靠环境变量；规则文件靠通知协调。
 
 ## 2. 工作空间结构
 
