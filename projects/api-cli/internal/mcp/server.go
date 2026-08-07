@@ -56,14 +56,20 @@ func (s *Server) ToolsList() []Tool {
 			props["_body"] = op.Body.ToJSONSchema()
 		}
 		desc := verb + " " + orDefault(r.Singular, r.Name)
+		inputSchema := map[string]any{
+			"type":       "object",
+			"properties": props,
+		}
+		// required 仅在有必填字段时出现：collectRequired 无必填返回 nil，
+		// 直接塞进 map 会序列化成 "required":null（违反 JSON Schema，required 必须是数组）。
+		// 缺省整字段比 null/空数组都干净。
+		if req := collectRequired(op); len(req) > 0 {
+			inputSchema["required"] = req
+		}
 		tools = append(tools, Tool{
-			Name:        toolName,
-			Description: desc,
-			InputSchema: map[string]any{
-				"type":       "object",
-				"properties": props,
-				"required":   collectRequired(op),
-			},
+			Name:         toolName,
+			Description:  desc,
+			InputSchema:  inputSchema,
 			OutputSchema: op.Response.ToJSONSchema(), // nil 时 ToJSONSchema 返回 nil，omitempty 不出现
 		})
 	})
@@ -83,7 +89,8 @@ func walk(resources map[string]*tree.Resource, prefix string,
 }
 
 // collectRequired 聚合 path/参数 required + body schema required（去重，保持插入序）。
-// MCP 客户端容忍空数组（operation 无 required 时）；返回 nil 会被序列化成 []。
+// 无必填时返回 nil；调用方（ToolsList）负责判断 len>0 再设进 inputSchema，
+// 否则 nil 进 map 会序列化成 "required":null（违反 JSON Schema：required 必须是数组）。
 func collectRequired(op *tree.Operation) []string {
 	seen := map[string]bool{}
 	var req []string
