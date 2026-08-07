@@ -17,11 +17,13 @@ type AuthProvider interface {
 }
 
 // AuthRequest 是给 adapter 的请求快照。用 []byte 而非 io.Reader，因跨进程要能序列化。
+// Query 让签名类 adapter（如 easyops-openapi）能把已有 query 参数纳入签名串。
 type AuthRequest struct {
 	Method  string
 	URL     string
 	Body    []byte
 	Headers map[string]string
+	Query   map[string]string
 }
 
 // AuthResponse 是 adapter 算出的注入项。
@@ -38,8 +40,8 @@ type PaginationProvider interface {
 
 // PagingResult 是 PaginationProvider.Next 的返回。
 type PagingResult struct {
-	Items   []any         // 本页数据条目
-	HasNext bool          // 是否还有下一页
+	Items   []any          // 本页数据条目
+	HasNext bool           // 是否还有下一页
 	State   map[string]any // 下一页状态（透传回下一次 Next）
 }
 
