@@ -18,7 +18,7 @@ iter2 完成并进入 main 后（注：iter2 成果随大文件清理重建 comm
 1. **bug1 `--help-format=json` 不隐含 `--help`**：`--help-format` 是 root PersistentFlag（默认 `text`），仅 cobra 内置 `--help` 触发 `helpFunc` 时才被读取；单独给 `--help-format=json`（无 `--help`）走到 RunE → resolve 报错。必须 `--help --help-format=json` 才输出 JSON help。违背"help-format 即 help 修饰"的直觉。
 2. **bug2 全局 flag 放子命令前 → root help**：`--spec xxx --endpoint backend object_instance search` 输出 root help 而非执行。根因在 `main.go` `parseTopFlags` 的 `isFlagToken` 分支（`:134`）：遇 `--endpoint` 只 `i++` 跳过本身、不吞值 → `--endpoint` 被丢、`backend` 被当成子命令起点 → `rest` 残缺 → cobra 回落 root help。`TraverseChildren=true` 没救（args 到 cobra 时已坏）。
 3. **LLM 抉择弱**：MCP `tools/list` 的 tool description 仅 `verb + " " + singular`（如 `"search instance"`），不含 resource 用途链、operation 用途、行为（写/分页）→ LLM 难仅凭 description 精准抉择，需反复探查 inputSchema。
-4. **N 层 path 缺陷**：`ResolveURL`（`resolve.go:41`）只拼 `base + prefix + 叶子 r.Path + op.Path`，**漏拼祖先 resource.Path**。对嵌套 child resource（如 `cmdb.yaml` 的 `inst>relation`），URL 缺父级段（`/instances`）→ 调用错误。现状潜伏：实际对接的 `easyops-cmdb.yaml` 是单层 resource，未暴露。
+4. **N 层 path 缺陷（双重）**：`ResolveURL`（`resolve.go:41`）只拼 `base + prefix + 叶子 r.Path + op.Path`，**漏拼祖先 resource.Path**；且 `{param}` 填充只遍历 `op.Params`，**parent_key 占位（命令位置注入、不在 child 的 `op.Params`）漏填**。对嵌套 child resource（如 `cmdb.yaml` 的 `inst>relation`），URL 既缺父级段（`/instances`）又留未填的 `{instance_id}` → 调用错误。现状潜伏：实际对接的 `easyops-cmdb.yaml` 是单层 resource，未暴露。
 
 **本迭代目标**：修 2 bug（CLI 体验）+ LLM 抉择富化（tool description 含用途链 + 行为标签）+ N 层 path 祖先链拼接（嵌套 resource URL 正确）。
 
@@ -120,17 +120,16 @@ inst:
 
 **`--explain`**（`build.go explainCmd`）：输出 map 补 `resource_description` / `operation_description`，给人/LLM 更完整语义。
 
-### 4.4 T4 — N 层 path（祖先链拼接）
+### 4.4 T4 — N 层 path（祖先链拼接 + 占位填充修复）
 
 **Parent 回填**：`convertResource`（`spec/parse.go`）递归 children 时 `child.Parent = r`。
 
-**ResolveURL 改造**（`resolve.go:30`）：
-- 新增 `ancestorPaths(r *Resource) []string`：沿 `r.Parent` 上溯到顶层，收集各 `Resource.Path`，反转为顶→叶顺序。
-- 拼接改为 `joinPath(ep.BaseURL, ep.PathPrefix, 祖先链顶→叶…, r.Path, op.Path)`。
-- `{param}` 填充逻辑不变：遍历 `op.Params` 填 path 参数；`parent_key` 占位（由 `buildPathVals` 的 parentVals 提供）若出现在祖先链或 `r.Path` 里，`strings.ReplaceAll` 命中。
+**ResolveURL 改造**（`resolve.go:30`）—— 同时修两个缺陷：
+- **祖先链拼接**：新增 `ancestorPaths(r *Resource) []string`，沿 `r.Parent` 上溯到顶层、收集各 `Resource.Path`、反转为顶→叶；拼接改为 `joinPath(ep.BaseURL, ep.PathPrefix, 祖先链顶→叶…, r.Path, op.Path)`。
+- **parent_key 占位填充**（现状 bug）：现状 `{param}` 填充只遍历 `op.Params`（`resolve.go:43`），而 `parent_key`（如 `instance_id`）由命令位置注入进 `vals`、**不在 child operation 的 `op.Params` 里**（见 `cmdb.yaml` `relation.read` 只有 `id`）→ 占位 `{instance_id}` 漏填。T4 改：**必填校验仍遍历 `op.Params`**（保留 path 参数 required 检查），**填充阶段改为遍历 `vals`**——对每个 `vals[name]=v` 做 `strings.ReplaceAll(full, "{"+name+"}", v)`，parent_key 注入值即可命中祖先链/`r.Path` 里的占位。
 - **签名不变**（仍传单个 `r`）→ engine 调用方（`request.go:32`）零改动。
 
-**lint**（`spec.Parse` 内）：对每个 `ParentKey` 非空的 resource，检查其 `Path` 含 `{<ParentKey>}` 占位；不含则 parse warning。catch "child 漏占位 → URL 静默缺父 id"。
+**lint**（`spec.Parse` 内）：对每个 child resource `c`（`c.Parent != nil`），设 `pk = c.Parent.ParentKey`；若 `pk != ""` 且 `c.Path` 不含 `{<pk>}` 占位 → parse warning。catch "child 漏占位 → URL 静默缺父 id"。
 
 **清单 path 约定**（写入文档）：child 的 `Path` 写**自己段 + `{parent_key}` 占位**，不含父级纯段（如 `/{instance_id}/relations`，父级 `/instances` 由祖先链补）。
 
@@ -157,7 +156,7 @@ inst:
 | **T1 单测** | `--help-format=json` 单独给叶子命令 → 输出 JSON help、不 RunE、不 resolve 报错；默认 `text` 行为不变；非叶子命令 `--help-format=json` 走默认帮助 |
 | **T2 单测** | `parseTopFlags`：`--spec a --endpoint b sub`→rest=`[--endpoint,b,sub]`；`--spec a sub`→rest=`[sub]`；`--mcp --spec a`→mcpMode+specPath；`--` 分隔符；端到端 `--spec x --endpoint y inst read` 跑通（mock） |
 | **T3 单测** | MCP description：多层 children + Description 祖先链串联；无 Description 回退 Name；行为标签（写/分页）正确；cobra Short 用 Description（无则回退）；`--explain` 含 description |
-| **T4 单测** | `ResolveURL`：多层 child URL 含全部祖先段；`parent_key` 占位填充；lint：`parent_key` 非空但 `Path` 缺占位 → 警告 |
+| **T4 单测** | `ResolveURL`：多层 child URL 含全部祖先段 + parent_key 占位填充（vals 遍历，非仅 op.Params）；lint：child `c.Path` 缺 `{c.Parent.ParentKey}` 占位 → 警告 |
 | **集成** | `cmdb.yaml` 嵌套 `inst>relation`：`relation read` URL 正确含 `/instances/{id}/relations`；MCP `tools/list` description 含链+标签；`easyops-cmdb` search description 富化 |
 | **契约** | MCP tool description 结构（`链 · 用途 · [标签]`）；`ResolveURL` 多层 URL 正确 |
 
