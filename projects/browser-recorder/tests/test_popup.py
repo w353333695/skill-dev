@@ -28,5 +28,9 @@ def test_popup_action_captured(tmp_path):
         trace = [json.loads(l) for l in (sd / "trace.jsonl").read_text(encoding="utf-8").splitlines() if l.strip]
         click_urls = [a.get("url", "") for a in trace if a.get("type") == "click"]
         assert any("p.html" in u for u in click_urls), f"popup 内动作未捕获: {click_urls}"
+        # popup 动作也应有截图（_capture 对 source.page=popup 截图）
+        popup_clicks = [a for a in trace if a.get("type") == "click" and "p.html" in a.get("url", "")]
+        assert popup_clicks and popup_clicks[0].get("screenshot"), \
+            f"popup click 无截图: {popup_clicks}"
     finally:
         paths.TMP_ROOT = saved

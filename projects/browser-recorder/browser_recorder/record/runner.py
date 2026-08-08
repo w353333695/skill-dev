@@ -325,7 +325,7 @@ async def _record_async(url, session_dir, out_dir, profile, keep_auth,
             try:
                 if act_type == "click":
                     await page.click(sel, timeout=8000)
-                await page.wait_for_timeout(2000)
+                await page.wait_for_timeout(5000)
             except Exception:
                 pass
         if not auto_actions and not headless:
