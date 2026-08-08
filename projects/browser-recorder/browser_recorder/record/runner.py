@@ -264,15 +264,21 @@ async def _record_async(url, session_dir, out_dir, profile, keep_auth,
             _popup_injects.append(MARKER_INJECT)
 
         def _on_new_page(pg):
+            logger.info("★ popup 创建: %s", pg.url[:60] if pg.url else "(about:blank)")
             async def _reinject_loop():
+                _round = 0
                 while not stop_event.is_set() and not pg.is_closed():
+                    _round += 1
                     try:
                         installed = await pg.evaluate("document.__br_inject_count > 0")
                         if not installed:
                             for script in _popup_injects:
                                 await pg.evaluate(script)
-                    except Exception:
-                        pass
+                            logger.info("★ popup 轮询[%d] 注入成功: %s", _round, pg.url[:50])
+                        elif _round <= 2:
+                            logger.info("★ popup 轮询[%d] 已有注入: %s", _round, pg.url[:50])
+                    except Exception as e:
+                        logger.warning("★ popup 轮询[%d] 失败: %s", _round, str(e)[:80])
                     try:
                         await asyncio.wait_for(stop_event.wait(), timeout=2)
                     except asyncio.TimeoutError:
