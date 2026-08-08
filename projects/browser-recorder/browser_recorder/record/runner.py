@@ -8,6 +8,7 @@ from __future__ import annotations
 import asyncio
 import json
 import logging
+import shutil
 import time
 from pathlib import Path
 from .. import paths
@@ -330,6 +331,25 @@ async def _record_async(url, session_dir, out_dir, profile, keep_auth,
             pass
 
 
+def clear_stale_artifacts(session_dir: Path) -> None:
+    """复用同名 session 时清空旧产物，避免 trace/requests 以 append 模式叠加（双录）。
+
+    Bug：同名 session 二次录制时，trace.jsonl/requests.jsonl 以 ``"a"`` 打开不清空 →
+    两次录制的 action 共享同名 ``step-XXXX-after.png`` → export 在一张图上画多个
+    序号/框（用户报「一个点击框两个序号」）。清除：trace.jsonl、requests.jsonl、
+    screenshots/、responses/。meta.json 由 run_record 覆盖写、视频由 ctx.close 落盘，
+    无需在此处理。
+    """
+    for name in ("trace.jsonl", "requests.jsonl"):
+        p = session_dir / name
+        if p.exists():
+            p.unlink()
+    for sub in ("screenshots", "responses"):
+        d = session_dir / sub
+        if d.exists():
+            shutil.rmtree(d)
+
+
 def run_record(url, out_dir, profile, keep_auth, screenshot_policy_path,
                video, name, headless=False, auto_actions=None,
                keep_raw_bodies=False, ignore_https_errors=False,
@@ -339,6 +359,7 @@ def run_record(url, out_dir, profile, keep_auth, screenshot_policy_path,
     session_id = name or paths.new_session_id()
     session_dir = paths.session_dir(session_id)
     session_dir.mkdir(parents=True, exist_ok=True)
+    clear_stale_artifacts(session_dir)  # 复用同名 session：清旧 trace/screenshots，防双录
     meta = {"url": url, "started_at": time.time(), "profile": profile,
             "keep_auth": keep_auth, "video": video, "session_id": session_id}
     (session_dir / "meta.json").write_text(

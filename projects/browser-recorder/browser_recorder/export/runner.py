@@ -65,6 +65,29 @@ def apply_filter(records: list[RequestRecord], flt: dict,
     return out
 
 
+def dedupe_double_recorded_actions(actions: list[Action]) -> list[Action]:
+    """去除同名 session 二次录制造成的双录。
+
+    Bug现场：session "easyops" 录了两次（间隔数分钟），第二次 trace append 到第一次
+    后面；两段 action 共享同名 ``step-XXXX-after.png``（二次录制截图覆盖同名文件）→
+    ``marks_by_file`` 把两段 action 都画到同一张图 → 一图多序号/框。
+
+    策略：同一 screenshot.after 只保留【最后】一条 action（二次录制覆盖了截图，故
+    最后一条与当前截图匹配）；无截图的 action（如 navigation）按 seq 去重保留最后。
+    顺序按各 key 首次出现的位置。
+    """
+    last_by_key: dict[str, Action] = {}
+    order: list[str] = []
+    for a in actions:
+        sc = a.screenshot or {}
+        shot = sc.get("after") or sc.get("before")
+        key = shot if shot else f"__seq_{a.seq}"
+        if key not in last_by_key:
+            order.append(key)
+        last_by_key[key] = a
+    return [last_by_key[k] for k in order]
+
+
 def run_export(session, out_dir, name, filter_path, keep_raw_bodies,
                annotate_style, annotate_opacity, tmp_root=None, fmt="md") -> Path:
     """导出入口：返回 export 目录。session 是 session_id 或 name。
@@ -90,6 +113,7 @@ def run_export(session, out_dir, name, filter_path, keep_raw_bodies,
         actions = ([Action.from_dict(json.loads(l))
                     for l in trace_path.read_text(encoding="utf-8").splitlines() if l.strip()]
                    if trace_path.exists() else [])
+        actions = dedupe_double_recorded_actions(actions)  # 去双录（同名 session 二次录制会 append）
         records = ([RequestRecord.from_dict(json.loads(l))
                     for l in req_path.read_text(encoding="utf-8").splitlines() if l.strip()]
                    if req_path.exists() else [])
