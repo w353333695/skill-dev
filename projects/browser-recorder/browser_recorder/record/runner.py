@@ -245,6 +245,14 @@ async def _record_async(url, session_dir, out_dir, profile, keep_auth,
             except Exception as e:
                 logger.warning("事件处理失败（type=%s）: %s", ev.get("type"), e)
                 return
+            # marker 在 emit 时立即 flash（点击瞬间 video 标注），而非等到 _capture 截图后——
+            # 否则视频里标记比点击动作晚一截（截图 settle 耗时）。
+            if video and a and a.target and a.target.bbox:
+                from ..marker import flash_marker
+                try:
+                    await flash_marker(page, a.target.bbox, a.seq, a.type)
+                except Exception:
+                    pass
             # 截图与落库分离：截图抛错（导航中常见）不应丢失 action。emit_actions
             # 内部隔离截图异常，落库无条件执行。
             acts = ([a] if a else []) + e2a.drain_pending()
@@ -291,18 +299,22 @@ async def _record_async(url, session_dir, out_dir, profile, keep_auth,
         except Exception as e:
             # 极端情况（连 DOM 都没解析完）兜底：记录后继续，页面可能已部分可交互
             logger.warning("goto 超时/失败（%s），尝试继续录制: %s", url, e)
-        # scrolling-snapshot：后台每 ~300ms 截图入 _snapshot_buffer。click emit 时
-        # _capture_for_action 从中取【emit 之前最近帧】作为真·点击前截图（_on_event 在
-        # JS handler 后执行，直接截只会拿到 click 后的白屏/跳转后画面）。
+        # scrolling-snapshot：后台截图入 _snapshot_buffer。click emit 时 _capture_for_action
+        # 从中取【emit 之前最近帧】作为真·点击前截图（_on_event 在 JS handler 后执行，直接截
+        # 只会拿到 click 后的白屏/跳转后画面）。频率 1.5s（非 300ms）——page.screenshot 在
+        # headed 会闪屏，降频减少视觉干扰；buffer maxlen=4 仍覆盖 6s，点击前停顿能截到。
         async def _snapshot_loop():
             while not stop_event.is_set():
                 try:
+                    if video:
+                        from ..marker import clear_marker
+                        await clear_marker(page)   # buffer 帧不带 marker（保持干净）
                     png = await page.screenshot(timeout=2000)
                     _snapshot_buffer.append((int(time.time() * 1000), png))
                 except Exception:
                     pass
                 try:
-                    await asyncio.wait_for(stop_event.wait(), timeout=0.3)
+                    await asyncio.wait_for(stop_event.wait(), timeout=1.5)
                 except asyncio.TimeoutError:
                     pass
         snapshot_task = asyncio.ensure_future(_snapshot_loop())
