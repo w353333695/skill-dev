@@ -83,6 +83,7 @@
 ## 6. 分发
 
 * project 打包 whl：`cd projects/<name> && uv build` → `dist/*.whl`，发到**内部 PyPI**（主）；无内部源 / 离线分发时，whl 随 skill 包 vendor。
+* **打包前自增版本号**：用户每次要求打包（迭代完发版），**先把 `pyproject.toml` 的 `version` 自增一个 patch**（如 `0.1.1→0.1.2`）再 `uv build`，并把版本号变更一并 commit。原因：同版本号重打 whl，pip 端会判 `already satisfied` 不替换（pip 只看版本号、不看 whl 内容），自增版本号才能让 `pip install` 识别为新版自动升级替换，且便于追溯。golang project 同理（同步 `manifest.sh` 的 `SKILL_VERSION` / 二进制 tag）。
 * 分发态调用（去掉对本地路径的依赖）：
   - 有 uv：`uvx <name> ...`（免安装，自动拉包建隔离环境）；锁版本 `uvx <name>@<ver> ...`。
   - 无 uv：裸调 `<name> ...`，安装三选一 —— `uv tool install <name>` / `pipx install <name>` / `pip install --user <name>`，装到 `~/.local` 隔离工具环境，CLI 进 `~/.local/bin`。
