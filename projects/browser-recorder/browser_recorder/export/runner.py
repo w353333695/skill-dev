@@ -6,6 +6,7 @@
 """
 from __future__ import annotations
 import json
+import logging
 import re
 import shutil
 from pathlib import Path
@@ -17,6 +18,8 @@ from ..request_aggregator import aggregate
 from .annotator import annotate_screenshot, VERBOSE, COMPACT
 from . import report_html, report_md
 from .structure import build_segments
+
+logger = logging.getLogger(__name__)
 
 
 

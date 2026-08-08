@@ -40,9 +40,14 @@ def matches(target_url: str, scope_dict: dict) -> bool:
     """判断 target_url 是否落在 profile 的 scope 内。"""
     u = parse_url(target_url)
 
-    # 协议
+    # 协议：http/https 互通（内网自签证书 HTTP→HTTPS 跳转常见，不应因 scheme 不匹配而要求重新登录）
     allowed_schemes = scope_dict.get("scheme") or ["https"]
-    if u.scheme not in allowed_schemes:
+    allowed_schemes_expanded = set(allowed_schemes)
+    if "http" in allowed_schemes_expanded:
+        allowed_schemes_expanded.add("https")
+    if "https" in allowed_schemes_expanded:
+        allowed_schemes_expanded.add("http")
+    if u.scheme not in allowed_schemes_expanded:
         return False
 
     # host 匹配
