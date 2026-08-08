@@ -202,14 +202,10 @@ async def _record_async(url, session_dir, out_dir, profile, keep_auth,
                         else:
                             await _wait_render_settled(page, timeout_ms=2500)
                     else:
-                        # before：立即截当前帧，抢在导航/异步渲染前——保留"点击瞬间上下文"
-                        # （launchpad 菜单+被点项）。before 在 emit→handler 后执行（CDP 异步）：
-                        # 同步弹窗此时已显示；导航异步加载未完，DOM 仍是点击前画面。若用 settle
-                        # 等待反而会截到异步加载完成后的新页面，错过点击前画面。
-                        try:
-                            await page.wait_for_timeout(30)   # 仅保当前帧提交
-                        except Exception:
-                            pass
+                        # before：短等保当前帧渲染完，不长等（"事件瞬间"语义）。
+                        # 注意：_on_event 在 JS handler 之后执行，before 实为 click 后帧，
+                        # 并非真正"点击前"——点击前画面需 scrolling-snapshot。
+                        await _wait_render_settled(page, timeout_ms=600)
                     fn = f"step-{a.seq:04d}-{pt}.png"
                     # timeout：截图本身限 5s，避免 Playwright 默认等 fonts.ready 卡 30s
                     await page.screenshot(path=str(screenshots / fn), timeout=5000)

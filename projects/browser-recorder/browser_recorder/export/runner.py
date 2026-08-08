@@ -67,12 +67,8 @@ def apply_filter(records: list[RequestRecord], flt: dict,
 
 
 def _pick_shot(action: Action) -> str | None:
-    """选 action 的标注截图：click 优先 before（点击瞬间/跳转前画面，避免标注落在
-    跳转后的页面上），其他类型优先 after。无 before 时退回 after（旧 trace 兼容）。
-    """
+    """选 action 的标注截图：统一优先 after（渲染稳定），退回 before。"""
     sc = action.screenshot or {}
-    if action.type == "click" and sc.get("before"):
-        return sc["before"]
     return sc.get("after") or sc.get("before")
 
 

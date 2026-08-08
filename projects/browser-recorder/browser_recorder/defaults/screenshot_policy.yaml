@@ -2,13 +2,13 @@
 # 动作类型 -> 截图点：before / after / [before,after] / []（不截）。
 #
 # 设计要点：
-#   - click 截 before+after：before 抢在导航/异步渲染前（点击瞬间上下文），
-#     after 等加载完；标注优先 before（见 export._pick_shot）。
+#   - click 只截 after：before 实为 click 后帧（导航中白屏），抓不到点击前；
+#     点击前画面需 scrolling-snapshot（后台截图，click 取前帧）。
 #   - submit 截 before+after（提交前后都留，便于看表单与结果）。
 #   - input/select 截 after（显示已输入/已选值）。
 #   - scroll 不截（无业务语义）。
 points:
-  click: [before, after]
+  click: [after]
   submit: [before, after]
   input: [after]
   select: [after]
