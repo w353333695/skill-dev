@@ -24,11 +24,14 @@ import (
 	"context"
 	"encoding/json"
 	"io"
+	"net/http"
+	"net/http/httptest"
 	"os"
 	"strings"
 	"testing"
 
 	"api-cli/internal/cobracli"
+	"api-cli/internal/engine"
 	"api-cli/internal/mcp"
 	"api-cli/internal/spec"
 	"api-cli/internal/tree"
@@ -452,5 +455,146 @@ func TestEasyOpsExampleParses(t *testing.T) {
 	}
 	if op.Pagination == nil || op.Pagination.PageIn != "body" {
 		t.Fatal("search.pagination.page_in 应为 body（EasyOps 翻页号在 body）")
+	}
+}
+
+// loadCMDBRelationTree 构造含 inst > relation 嵌套的最小清单：
+//   - inst.path = /instances，ParentKey = instance_id
+//   - relation.path = /{instance_id}/relations，read.path = /{id}
+//
+// 同 examples/cmdb.yaml 的嵌套结构（手动镜像而非读文件）：
+// (a) 测试不依赖 ${CMDB_BACKEND_URL} 等环境变量；
+// (b) base_url 内联替换成 mock 地址，可控可断言。
+// 给 TestIntegrationRelationReadAncestorURL 用：验证 iter3 Task 5 修复后，
+// relation.read 物化出的 URL 含完整祖先链 + parent_key 占位真被填上。
+func loadCMDBRelationTree(t *testing.T, baseURL string) *tree.OperationTree {
+	t.Helper()
+	raw := []byte(`
+spec: api-cli/v1
+service: { name: cmdb, default_endpoint: backend, endpoints: { backend: { base_url: BASE, auth: none, path_prefix: /api/v1 } } }
+resources:
+  inst:
+    description: CMDB 实例
+    path: /instances
+    singular: instance
+    parent_key: instance_id
+    operations:
+      read: { method: GET, path: "/{id}", description: 读取单个实例, params: { id: { in: path, type: string, required: true, description: 实例 ID } } }
+    children:
+      relation:
+        description: 实例的关系
+        path: "/{instance_id}/relations"
+        operations:
+          read: { method: GET, path: "/{id}", description: 读取实例的某个关系, params: { id: { in: path, type: string, required: true, description: 关系 ID } } }
+`)
+	raw = bytes.ReplaceAll(raw, []byte("BASE"), []byte(baseURL))
+	tr, err := spec.Parse(raw)
+	if err != nil {
+		t.Fatalf("spec.Parse 失败: %v", err)
+	}
+	return tr
+}
+
+// TestIntegrationRelationReadAncestorURL 端到端验证嵌套 child resource（inst > relation）
+// 的祖先链 URL 拼接 + parent_key 占位填充：起一个 httptest mock 收 GET
+// /api/v1/instances/{iid}/relations/{rid}，跑 engine.Execute(relation, read,
+// pathVals={instance_id:INST1, id:REL1})，断言 mock 收到的 r.URL.Path 是完整的
+// `/api/v1/instances/INST1/relations/REL1`。
+//
+// 同时验证 iter3 Task 5 的两处修复都生效：
+//  1. ancestorPaths 把父级 resource.Path（/instances）拼进 URL（修复前会漏掉，URL 缺 /instances 段）；
+//  2. parent_key 占位填充改为遍历 vals（修复前只遍历 op.Params，命令位置注入的
+//     instance_id 不在 relation.read 的 op.Params 里 → {instance_id} 留为字面占位）。
+//
+// 不走 cobracli.Build：cobra 默认子命令解析不容忍 `inst INST1 relation read REL1`
+// 里夹在中间的位置 ID（会把 INST1 当 inst 的未知子命令），这是 cobra 层的已知缺口，
+// 不在 iter3 范围。engine.Execute 是 cobracli/mcp 共用的唯一入口，直接驱动它已能
+// 端到端覆盖 resolve → http.Do → mock 收到请求 这条链路。
+func TestIntegrationRelationReadAncestorURL(t *testing.T) {
+	var gotPath, gotMethod string
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		gotPath = r.URL.Path
+		gotMethod = r.Method
+		w.Header().Set("Content-Type", "application/json")
+		// 任意 GET 都回 200 + 一份固定关系体（断言关心的是请求路径，不是响应内容）。
+		_ = json.NewEncoder(w).Encode(map[string]any{"id": "REL1", "target": "i-2"})
+	}))
+	defer srv.Close()
+
+	tr := loadCMDBRelationTree(t, srv.URL)
+	inst := tr.Resources["inst"]
+	if inst == nil {
+		t.Fatal("资源 inst 缺失")
+	}
+	rel := inst.Children["relation"]
+	if rel == nil {
+		t.Fatal("inst.children.relation 缺失（清单嵌套结构未正确解析）")
+	}
+	op := rel.Operations["read"]
+	if op == nil {
+		t.Fatal("relation.read 操作缺失")
+	}
+	ep, err := tr.SelectEndpoint("") // 默认 backend
+	if err != nil {
+		t.Fatalf("SelectEndpoint: %v", err)
+	}
+
+	e := engine.New(tr)
+	var out bytes.Buffer
+	// pathVals 同时含 instance_id（parent_key 命令位置注入值）与 id（read 自身 path 参数）。
+	// 这是 cobracli.buildPathVals 在嵌套场景下会构造出的同一份 vals。
+	pathVals := map[string]string{"instance_id": "INST1", "id": "REL1"}
+	if err := e.Execute(context.Background(), ep, rel, op, pathVals, nil, engine.Options{
+		Format: "json",
+		Out:    &out,
+	}); err != nil {
+		t.Fatalf("engine.Execute 返回错误: %v\nstdout: %s", err, out.String())
+	}
+
+	const wantPath = "/api/v1/instances/INST1/relations/REL1"
+	if gotPath != wantPath {
+		t.Errorf("祖先链 URL 不正确:\n want %q\n got  %q\n（说明 ancestorPaths 漏拼 /instances 或 {instance_id} 占位未填）",
+			wantPath, gotPath)
+	}
+	if gotMethod != http.MethodGet {
+		t.Errorf("HTTP method want GET, got %s", gotMethod)
+	}
+	// 反向断言：响应确实落到 Out（端到端链路完整，不只 URL 拼对了）。
+	if !strings.Contains(out.String(), `"REL1"`) {
+		t.Errorf("engine.Out 缺响应 id=REL1（mock 响应未回流）: %s", out.String())
+	}
+}
+
+// TestCMDBExampleResourceDescriptions 兜底保护 examples/cmdb.yaml 这个交付物：
+// 断言补的 description 字段在 spec.Parse 后真的进到 tree.Resource / tree.Operation。
+// 防止后续手改示例时把 description 字段名 / 缩进改歪（inline 测试覆盖不到文件）。
+func TestCMDBExampleResourceDescriptions(t *testing.T) {
+	raw, err := os.ReadFile("../../examples/cmdb.yaml")
+	if err != nil {
+		t.Fatalf("读示例文件失败（CWD 应为 tests/integration）: %v", err)
+	}
+	tr, err := spec.Parse(raw)
+	if err != nil {
+		t.Fatalf("spec.Parse 失败: %v", err)
+	}
+	inst := tr.Resources["inst"]
+	if inst == nil {
+		t.Fatal("资源 inst 缺失")
+	}
+	if inst.Description != "CMDB 实例" {
+		t.Errorf("inst.Description want %q, got %q", "CMDB 实例", inst.Description)
+	}
+	if got := inst.Operations["read"].Description; got == "" {
+		t.Error("inst.read.Description 为空（示例未补 operation description）")
+	}
+	rel := inst.Children["relation"]
+	if rel == nil {
+		t.Fatal("inst.children.relation 缺失")
+	}
+	if rel.Description != "实例的关系" {
+		t.Errorf("relation.Description want %q, got %q", "实例的关系", rel.Description)
+	}
+	if got := rel.Operations["read"].Description; got == "" {
+		t.Error("relation.read.Description 为空（示例未补 operation description）")
 	}
 }
