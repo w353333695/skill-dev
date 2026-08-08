@@ -28,23 +28,26 @@ type Endpoint struct {
 
 // Resource 资源定义（命令树节点）。
 type Resource struct {
-	Name       string
-	Path       string
-	Singular   string
-	ParentKey  string // 父 ID 注入到子命令 path 模板的键名
-	Operations map[string]*Operation
-	Children   map[string]*Resource // 递归 → N 层
+	Name        string
+	Description string // 资源用途（LLM 抉择 + cobra Short）；空 = 回退旧文案
+	Path        string
+	Singular    string
+	ParentKey   string // 父 ID 注入到子命令 path 模板的键名
+	Operations  map[string]*Operation
+	Children    map[string]*Resource // 递归 → N 层
+	Parent      *Resource            // 祖先链上溯指针（spec.Parse 回填）；顶层 resource 为 nil
 }
 
 // Operation 一个动作（verb 是身份，method 是配置）。
 type Operation struct {
-	Verb       string
-	Method     string // 内部模型永远必填（parse 阶段对标准 verb 填默认值）
-	Path       string // 相对 resource.Path，含 {param} 模板
-	Params     []Param
-	Body       *Schema     // nil = 无 body
-	Response   *Schema     // nil = 无 response schema（outputSchema）
-	Pagination *Pagination // nil = 无分页
+	Verb        string
+	Method      string // 内部模型永远必填（parse 阶段对标准 verb 填默认值）
+	Path        string // 相对 resource.Path，含 {param} 模板
+	Description string // 操作用途（LLM 抉择 + cobra Short）；空 = 回退 verb+singular
+	Params      []Param
+	Body        *Schema     // nil = 无 body
+	Response    *Schema     // nil = 无 response schema（outputSchema）
+	Pagination  *Pagination // nil = 无分页
 }
 
 // Param 一个入参。

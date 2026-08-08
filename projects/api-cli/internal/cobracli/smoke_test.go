@@ -78,3 +78,28 @@ func captureExecute(root *cobra.Command, args []string) string {
 	os.Stdout = old
 	return <-done
 }
+
+// TestHelpFormatJSONWithoutHelpFlag 验证 bug1 修复：单独 --help-format=json
+// （不带 --help、也不带必填 path 参数）应触发 helpFunc 输出 JSON，
+// 不再走到 RunE 的 resolve 报"缺少 path 参数"。
+func TestHelpFormatJSONWithoutHelpFlag(t *testing.T) {
+	raw := []byte(`
+spec: api-cli/v1
+service: { name: cmdb, default_endpoint: backend, endpoints: { backend: { base_url: http://x, auth: none, path_prefix: /api/v1 } } }
+resources:
+  inst:
+    path: /instances
+    operations:
+      read: { path: "/{id}", params: { id: { in: path, type: string, required: true } } }
+`)
+	tr, err := spec.Parse(raw)
+	if err != nil {
+		t.Fatal(err)
+	}
+	root, _ := Build(tr)
+	// 单独 --help-format=json，不带 --help、不带 id → 旧行为 RunE 报错；新行为输出 JSON help
+	out := captureExecute(root, []string{"inst", "read", "--help-format=json"})
+	if !strings.Contains(out, `"resource": "inst"`) || !strings.Contains(out, `"verb": "read"`) {
+		t.Errorf("单独 --help-format=json 应输出 JSON help，got:\n%s", out)
+	}
+}
