@@ -33,3 +33,13 @@ def test_md_renders_linked_requests():
     md = report_md.render(actions=[a], request_groups=groups, annotated_img_map={}, meta={"url": "u"})
     assert "/api/x" in md
     assert "GET" in md
+
+
+def test_md_uses_annotated_map_not_hardcoded_after():
+    """report_md 引用 img_map（与标注图同源 _pick_shot），不硬取 screenshot.after——
+    否则 click 步骤（标注图是 before）会引用不存在的 after 标注图 → 图裂。"""
+    a = _action(1, "click")  # screenshot=None
+    md = report_md.render(actions=[a], request_groups=[],
+                          annotated_img_map={1: "step-0001-before.png"}, meta={"url": "u"})
+    assert "step-0001-before.png" in md
+    assert "after" not in md

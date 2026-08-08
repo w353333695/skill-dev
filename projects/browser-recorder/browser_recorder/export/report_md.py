@@ -17,8 +17,10 @@ def _step_line(a: Action, img_map: dict[int, str], reqs_for_seq: list[dict]) -> 
         desc_bits.append(f"- 输入: `{a.value}`")
     desc_bits.append(f"- URL: `{a.url}`")
     lines.append("\n".join(desc_bits))
-    img = (a.screenshot or {}).get("after") or (a.screenshot or {}).get("before")
-    if img and a.seq in img_map:
+    # 与标注图（marks_by_file→annotated_map）同源：img_map[seq] 已由 _pick_shot 决定
+    # （click→before，其余→after）。不能硬取 screenshot.after——会与标注图不一致 → 图裂。
+    img = img_map.get(a.seq)
+    if img:
         lines.append(f"\n![步骤{a.seq}](screenshots_annotated/{img})")
     if reqs_for_seq:
         lines.append("\n**触发的接口：**")
