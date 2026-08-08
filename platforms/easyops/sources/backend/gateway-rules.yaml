@@ -1,6 +1,0 @@
-strip_prefix:
-  - "/next"
-  - "/api/gateway/{service}"
-service_map:
-  logic.flowable_service: flowable_service
-  logic.sys_setting: sys_setting
