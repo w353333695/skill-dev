@@ -254,6 +254,32 @@ async def _record_async(url, session_dir, out_dir, profile, keep_auth,
         if interactive_only:
             await ctx.add_init_script("window.__br_interactive_only = true;")
 
+        # popup/新标签页自愈注入：ctx.add_init_script 对 window.open popup + EasyOps 多段
+        # navigation 的注入不稳定——INJECT_SCRIPT 可能没进当前 document（__br_emit 在但
+        # click handler 不在 → 新标签页动作全丢）。用轮询循环自愈：每 2s 检查 __br_installed
+        # 标志，不在就 evaluate 重新注入。配合各 IIFE 的防重复标志，幂等安全。
+        _popup_injects = [INJECT_SCRIPT, _SETTLE_INJECT]
+        if video:
+            from ..marker import MARKER_INJECT
+            _popup_injects.append(MARKER_INJECT)
+
+        def _on_new_page(pg):
+            async def _reinject_loop():
+                while not stop_event.is_set() and not pg.is_closed():
+                    try:
+                        installed = await pg.evaluate("document.__br_installed === true")
+                        if not installed:
+                            for script in _popup_injects:
+                                await pg.evaluate(script)
+                    except Exception:
+                        pass
+                    try:
+                        await asyncio.wait_for(stop_event.wait(), timeout=2)
+                    except asyncio.TimeoutError:
+                        pass
+            asyncio.ensure_future(_reinject_loop())
+        ctx.on("page", _on_new_page)
+
         nc = NetworkCollector(page, _sink_request, session_dir / "responses",
                               current_action_seq=lambda: current_seq_box["v"],
                               keep_raw_bodies=keep_raw_bodies)

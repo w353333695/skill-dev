@@ -35,8 +35,8 @@ _DEFAULT_COLOR = "#dc2828"
 
 MARKER_INJECT = r"""
 (function(){
-  if (window.__br_marker_installed) return;
-  window.__br_marker_installed = true;
+  if (document.__br_marker_installed) return;
+  document.__br_marker_installed = true;
   function host(){
     var h = document.getElementById('__br_vmarker');
     if(!h){

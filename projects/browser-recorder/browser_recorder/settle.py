@@ -136,6 +136,8 @@ async def wait_for_settled(page: "Page", *, timeout_ms: int,
 
 _SETTLE_INJECT = r"""
 (function(){
+  if (document.__br_settle_done) return;
+  document.__br_settle_done = true;
   window.__br_dom_idle = false;
   window.__br_cpu_idle = false;
   window.__br_dom_changed = false;

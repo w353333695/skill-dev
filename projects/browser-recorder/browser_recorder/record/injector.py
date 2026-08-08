@@ -10,8 +10,8 @@ def build_event(node_dict: dict, type: str, value: str | None) -> dict:
 
 INJECT_SCRIPT = r"""
 (function(){
-  if (window.__br_installed) return;
-  window.__br_installed = true;
+  if (document.__br_installed) return;
+  document.__br_installed = true;
   function cssPath(el){
     if (el.id) return '#' + CSS.escape(el.id);
     var parts = [];
