@@ -7,6 +7,7 @@
 from __future__ import annotations
 import json
 import re
+import shutil
 from pathlib import Path
 from urllib.parse import urlparse
 import yaml
@@ -88,6 +89,15 @@ def dedupe_double_recorded_actions(actions: list[Action]) -> list[Action]:
     return [last_by_key[k] for k in order]
 
 
+def filter_empty_input(actions: list[Action]) -> list[Action]:
+    """过滤空输入 action（focus/JS 置空，无实际内容）——与 capture._flush_input 的
+    空值忽略一致，防御历史 trace 里的空 input 污染产物（用户报 step-0010 白屏：
+    launchpad 搜索框 focus 触发的空 input 被录成独立白屏步骤）。
+    """
+    return [a for a in actions
+            if not (a.type == "input" and not (a.value or "").strip())]
+
+
 def run_export(session, out_dir, name, filter_path, keep_raw_bodies,
                annotate_style, annotate_opacity, tmp_root=None, fmt="md") -> Path:
     """导出入口：返回 export 目录。session 是 session_id 或 name。
@@ -106,7 +116,10 @@ def run_export(session, out_dir, name, filter_path, keep_raw_bodies,
         export_name = name or session
         edir = paths.export_dir(out_dir, export_name)
         edir.mkdir(parents=True, exist_ok=True)
-        (edir / "screenshots_annotated").mkdir(exist_ok=True)
+        ann = edir / "screenshots_annotated"
+        if ann.exists():          # 重 export 清空旧标注图，避免已过滤/去重 action 的残留
+            shutil.rmtree(ann)
+        ann.mkdir(parents=True, exist_ok=True)
 
         trace_path = sdir / "trace.jsonl"
         req_path = sdir / "requests.jsonl"
@@ -114,6 +127,7 @@ def run_export(session, out_dir, name, filter_path, keep_raw_bodies,
                     for l in trace_path.read_text(encoding="utf-8").splitlines() if l.strip()]
                    if trace_path.exists() else [])
         actions = dedupe_double_recorded_actions(actions)  # 去双录（同名 session 二次录制会 append）
+        actions = filter_empty_input(actions)  # 过滤空输入（launchpad 搜索框 focus 空 input 等）
         records = ([RequestRecord.from_dict(json.loads(l))
                     for l in req_path.read_text(encoding="utf-8").splitlines() if l.strip()]
                    if req_path.exists() else [])

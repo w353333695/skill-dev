@@ -131,3 +131,24 @@ def test_flush_pending_noop_when_nothing_held():
     planner = ScreenshotPlanner(DEFAULT_SCREENSHOT_POLICY)
     e2a = capture.EventToAction(planner)
     assert e2a.flush_pending("u", {}, 1000) is None
+
+
+def test_flush_input_empty_value_not_emitted():
+    """空输入（focus/JS 置空等无实际内容）不落库——避免 launchpad 搜索框等初始
+    空 input 生成无意义的白屏步骤（用户报 step-0010 白屏应并入下一步）。"""
+    planner = ScreenshotPlanner(DEFAULT_SCREENSHOT_POLICY)
+    e2a = capture.EventToAction(planner)
+    node = {"tag": "input", "css": "#q", "bbox": {"x": 0, "y": 0, "w": 1, "h": 1}}
+    e2a.process({"type": "input", "target_node": node, "value": "", "ts": 1000}, "u", {})
+    a = e2a.flush_pending("u", {}, 2000)
+    assert a is None
+
+
+def test_flush_input_nonempty_still_emitted():
+    """非空输入正常落库（回归保护，勿误伤）。"""
+    planner = ScreenshotPlanner(DEFAULT_SCREENSHOT_POLICY)
+    e2a = capture.EventToAction(planner)
+    node = {"tag": "input", "css": "#q", "bbox": {"x": 0, "y": 0, "w": 1, "h": 1}}
+    e2a.process({"type": "input", "target_node": node, "value": "abc", "ts": 1000}, "u", {})
+    a = e2a.flush_pending("u", {}, 2000)
+    assert a is not None and a.value == "abc"

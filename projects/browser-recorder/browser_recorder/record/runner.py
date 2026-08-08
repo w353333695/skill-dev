@@ -221,19 +221,21 @@ async def _record_async(url, session_dir, out_dir, profile, keep_auth,
                 await flash_marker(page, a.target.bbox, a.seq, a.type)
 
         async def _on_event(ev: dict):
-            # 经 ensure_future 派发为独立 Task；任何异常须在此吞掉，否则成为
-            # "Task exception was never retrieved"，且会让后续事件截图持续失败。
+            # page.url 在导航中可能抛错（execution context destroyed）→ 容错取空串
             try:
-                page_info = {"viewport": [1280, 720], "scroll_x": 0, "scroll_y": 0}
-                a = e2a.process(ev, url=page.url, page_info=page_info)
-                if a:
-                    await _capture_for_action(a)
-                    _sink_action(a)
-                for p in e2a.drain_pending():
-                    await _capture_for_action(p)
-                    _sink_action(p)
+                url = page.url
+            except Exception:
+                url = ""
+            page_info = {"viewport": [1280, 720], "scroll_x": 0, "scroll_y": 0}
+            try:
+                a = e2a.process(ev, url=url, page_info=page_info)
             except Exception as e:
                 logger.warning("事件处理失败（type=%s）: %s", ev.get("type"), e)
+                return
+            # 截图与落库分离：截图抛错（导航中常见）不应丢失 action。emit_actions
+            # 内部隔离截图异常，落库无条件执行。
+            acts = ([a] if a else []) + e2a.drain_pending()
+            await emit_actions(acts, _capture_for_action, _sink_action)
 
         # expose_function 传 lambda → 把 async 回调派发为 Task，使 _on_event 真正执行
         await page.expose_function("__br_emit", lambda ev: asyncio.ensure_future(_on_event(ev)))
@@ -329,6 +331,23 @@ async def _record_async(url, session_dir, out_dir, profile, keep_auth,
             await browser.close()
         except Exception:
             pass
+
+
+async def emit_actions(actions, capture_fn, sink_fn) -> None:
+    """逐个截图并落库 action；截图抛错不阻断落库。
+
+    点击触发导航（如登录提交）时，``capture_fn`` 内的 settle/screenshot 在导航中
+    会抛错（execution context destroyed）。若 sink 紧随 capture 且被同一 try 包裹，
+    整条 action 丢失（用户报「step-0006 后面一个点击登陆没有捕获到」——登录 click
+    触发导航，截图抛错把 click 一起吞了）。故截图 try/except 隔离，落库无条件执行
+    （截图失败时 action.screenshot 为空，但 action 不丢）。
+    """
+    for act in actions:
+        try:
+            await capture_fn(act)
+        except Exception as e:
+            logger.warning("截图失败（seq=%s type=%s）: %s", act.seq, act.type, e)
+        sink_fn(act)
 
 
 def clear_stale_artifacts(session_dir: Path) -> None:

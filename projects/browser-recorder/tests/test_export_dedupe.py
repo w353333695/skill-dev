@@ -64,3 +64,52 @@ def test_dedupe_action_without_screenshot_kept_by_seq():
     out = dedupe_double_recorded_actions(actions)
     assert len(out) == 1
     assert out[0].ts == 20
+
+
+def test_filter_empty_input_removes_blank_keeps_real():
+    """空/纯空白 input 被过滤；click 和有内容的 input 保留。"""
+    from browser_recorder.export.runner import filter_empty_input
+
+    def mk(seq, t, val=None):
+        return Action(seq=seq, ts=0, type=t, url="u", value=val,
+                      target=Target(css="#a", bbox={"x": 1, "y": 1, "w": 2, "h": 2}),
+                      screenshot={"after": f"s{seq}.png"})
+
+    out = filter_empty_input([
+        mk(1, "click"),
+        mk(2, "input", ""),        # 空 → 过滤
+        mk(3, "input", "abc"),     # 有内容 → 保留
+        mk(4, "input", None),      # None → 过滤
+        mk(5, "input", "   "),     # 纯空白 → 过滤
+    ])
+    assert [a.seq for a in out] == [1, 3]
+
+
+def test_export_clears_stale_annotated_on_reexport(tmp_path):
+    """重 export 清空旧标注图，避免已过滤/去重 action 的标注图残留
+    （用户报 step-0010 被过滤但旧标注图仍在）。"""
+    import json as _json
+    from browser_recorder.export import runner as exp
+    from browser_recorder import paths
+
+    saved = paths.TMP_ROOT
+    paths.TMP_ROOT = tmp_path / "tmp"
+    try:
+        sd = paths.session_dir("s1")
+        sd.mkdir(parents=True)
+        a = Action(seq=1, ts=0, type="click", url="u",
+                   target=Target(css="#g", bbox={"x": 1, "y": 1, "w": 2, "h": 2}),
+                   screenshot={"after": "step-0001-after.png"})
+        (sd / "trace.jsonl").write_text(_json.dumps(a.to_dict(), ensure_ascii=False) + "\n")
+        (sd / "requests.jsonl").write_text("")
+        (sd / "meta.json").write_text(_json.dumps({"url": "u"}))
+        out_root = tmp_path / "out" / ".browser-recorder"
+        ann = out_root / "exports" / "s1" / "screenshots_annotated"
+        ann.mkdir(parents=True)
+        (ann / "step-9999-after.png").write_bytes(b"STALE")   # 模拟上次 export 的残留标注图
+        exp.run_export(session="s1", out_dir=out_root, name="s1", filter_path=None,
+                       keep_raw_bodies=False, annotate_style="verbose",
+                       annotate_opacity=60, tmp_root=tmp_path / "tmp")
+        assert not (ann / "step-9999-after.png").exists(), "重 export 应清空旧标注图"
+    finally:
+        paths.TMP_ROOT = saved

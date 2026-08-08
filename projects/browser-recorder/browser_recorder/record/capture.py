@@ -78,6 +78,10 @@ class EventToAction:
         self._input_node = None
         self._input_value = ""
         self._last_click_target = None  # 输入动作打断「连续同位置点击」
+        if value == "":
+            # 空输入（focus/JS 置空，从未有实际内容）不落库——避免 launchpad 搜索框等
+            # 初始空 input 生成无意义白屏步骤（用户报 step-0010 白屏应并入下一步）。
+            return None
         self._seq += 1
         return Action(
             seq=self._seq, ts=ts, type="input", url=url,
