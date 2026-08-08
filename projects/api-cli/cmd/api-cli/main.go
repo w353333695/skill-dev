@@ -11,6 +11,7 @@ package main
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -52,7 +53,13 @@ func run() error {
 		return err
 	}
 	root.SetArgs(rest)
-	return root.Execute()
+	if err := root.Execute(); err != nil {
+		if errors.Is(err, cobracli.ErrHelpRequested) {
+			return nil // help 正常退出（exit 0），不打印错误
+		}
+		return err
+	}
+	return nil
 }
 
 func runMCP(specPath string) error {
