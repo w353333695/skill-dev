@@ -75,8 +75,13 @@ PROJ_DIR="$REPO_ROOT/projects/$NAME"
 [ -f "$PROJ_DIR/go.mod" ] || {
   echo "[pack-go] ✗ 不是 golang project（缺 go.mod）: projects/$NAME" >&2; exit 1; }
 
-# 输出根目录
+# 输出根目录（转绝对：build 在 PROJ_DIR 子 shell 跑，相对 OUT_DIR 会被解析到
+# projects/<name>/ 下而非调用方 cwd，导致产物写到错处）
 [ -n "$OUT_DIR" ] || OUT_DIR="$REPO_ROOT/tmp"
+case "$OUT_DIR" in
+  /*) ;;
+  *)  OUT_DIR="$PWD/$OUT_DIR" ;;
+esac
 
 # 版本回退链: --version → VERSION env → git describe --tags --always → dev
 if [ -n "$OPT_VERSION" ]; then
@@ -153,9 +158,14 @@ command -v go >/dev/null 2>&1 || {
   exit 1
 }
 
-# 预下载依赖（fail-fast 网络问题，别等编译到一半才挂）
-echo "[pack-go] go mod download..."
-(cd "$PROJ_DIR" && go mod download) >/dev/null
+# 预下载依赖（best-effort，cache-only）：无外网或 go.sum 含其他平台专用依赖
+# （如 cobra 的 windows-only mousetrap）导致全量 download 失败时，不阻断——
+# go build 按目标平台用 cache，cache 真缺才在 build 阶段报错。
+echo "[pack-go] go mod download（cache-only，best-effort）..."
+if ! (cd "$PROJ_DIR" && GOPROXY=off go mod download) >/dev/null 2>&1; then
+  echo "[pack-go]   本地 cache 不全或含其他平台专用依赖；build 改 cache-only（GOPROXY=off）" >&2
+  export GOPROXY=off
+fi
 
 # 逐 target 编译（单 target 失败即退出）
 ok_count=0
