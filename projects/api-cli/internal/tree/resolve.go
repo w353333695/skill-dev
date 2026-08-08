@@ -19,7 +19,20 @@ func (t *OperationTree) SelectEndpoint(name string) (*Endpoint, error) {
 	return ep, nil
 }
 
-// ResolveURL 物化完整 URL：base_url + path_prefix + resource.path + operation.path，
+// ancestorPaths 返回顶→叶顺序的祖先 resource.Path 段（不含 r 自身）。
+// 沿 r.Parent 上溯收集后翻转；顶层 resource（Parent==nil）返回 nil。
+func ancestorPaths(r *Resource) []string {
+	var segs []string
+	for cur := r.Parent; cur != nil; cur = cur.Parent {
+		segs = append(segs, cur.Path)
+	}
+	for i, j := 0, len(segs)-1; i < j; i, j = i+1, j-1 {
+		segs[i], segs[j] = segs[j], segs[i]
+	}
+	return segs
+}
+
+// ResolveURL 物化完整 URL：base_url + path_prefix + 祖先链（顶→叶）+ resource.path + operation.path，
 // 再把 {param} 模板替换成 vals 提供的值。
 //
 // 签名说明（相对 brief 的修正）：op 不持有 resource 引用，但物化 URL 必须含
@@ -27,6 +40,8 @@ func (t *OperationTree) SelectEndpoint(name string) (*Endpoint, error) {
 // 显式参数传入。后续 Task 9 engine 调用处需相应多传一个 r。
 //
 // 注：vals 只覆盖 path 参数；query/header/body 由 engine 单独处理。
+// 注：填充阶段遍历 vals（而非 op.Params），让命令位置注入的 parent_key（在 vals、
+// 不在 op.Params）也能命中祖先链/r.Path 里的 {parent_key} 占位。
 func (t *OperationTree) ResolveURL(ep *Endpoint, r *Resource, op *Operation, vals map[string]string) (string, error) {
 	if ep == nil {
 		return "", fmt.Errorf("endpoint 为空")
@@ -37,22 +52,26 @@ func (t *OperationTree) ResolveURL(ep *Endpoint, r *Resource, op *Operation, val
 	if op == nil {
 		return "", fmt.Errorf("operation 为空")
 	}
-	// 1. 拼接 base + prefix + resource.path + operation.path
-	full := joinPath(ep.BaseURL, ep.PathPrefix, r.Path, op.Path)
-	// 2. 填 {param} 模板：仅 path 类参数；缺值且必填时报错
+	// 1. 拼接 base + prefix + 祖先链（顶→叶）+ 叶子 r.Path + op.Path
+	segs := []string{ep.BaseURL, ep.PathPrefix}
+	segs = append(segs, ancestorPaths(r)...)
+	segs = append(segs, r.Path, op.Path)
+	full := joinPath(segs...)
+
+	// 2. 必填校验：op.Params 里 path 参数缺值且必填 → 报错
+	//    （仍遍历 op.Params：保留对 path 参数的 required 检查；填充改在下面遍历 vals）
 	for _, p := range op.Params {
 		if p.In != "path" {
 			continue
 		}
-		v, ok := vals[p.Name]
-		if !ok {
-			if p.Required {
-				return "", fmt.Errorf("缺少 path 参数 %s", p.Name)
-			}
-			// 可选 path 参数缺值：原样保留 {name}，由调用方自行处理（MVP 罕见）
-			continue
+		if _, ok := vals[p.Name]; !ok && p.Required {
+			return "", fmt.Errorf("缺少 path 参数 %s", p.Name)
 		}
-		full = strings.ReplaceAll(full, "{"+p.Name+"}", v)
+	}
+	// 3. 填充：遍历 vals 填所有已知占位（含 parent_key 命令位置注入值——
+	//    它不在 op.Params 里，必须遍历 vals 才能命中祖先链/r.Path 里的 {parent_key}）。
+	for name, v := range vals {
+		full = strings.ReplaceAll(full, "{"+name+"}", v)
 	}
 	return full, nil
 }
