@@ -20,9 +20,11 @@ service:
 
 resources:
   object_instance:
+    description: CMDB 对象实例
     path: /v3/object/{object_id}/instance     # object_id 路径参数（如 FLOW_BUILDER_API_CONTRACT@EASYOPS）
     operations:
       search:                                  # 对应 PostSearchV3
+        description: 按条件搜索实例（MongoDB 风格 query）
         method: POST
         path: /_search
         params:
