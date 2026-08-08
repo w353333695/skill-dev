@@ -52,20 +52,22 @@ func Parse(raw []byte) (*tree.OperationTree, error) {
 
 func convertResource(name string, y *yamlResource) *tree.Resource {
 	r := &tree.Resource{
-		Name: name, Path: y.Path, Singular: y.Singular, ParentKey: y.ParentKey,
+		Name: name, Description: y.Description, Path: y.Path, Singular: y.Singular, ParentKey: y.ParentKey,
 		Operations: map[string]*tree.Operation{}, Children: map[string]*tree.Resource{},
 	}
 	for verb, op := range y.Operations {
 		r.Operations[verb] = convertOperation(verb, op)
 	}
 	for cname, c := range y.Children {
-		r.Children[cname] = convertResource(cname, c)
+		child := convertResource(cname, c)
+		child.Parent = r // 回填祖先链指针（T4 ResolveURL 与 T3 description 富化共用）
+		r.Children[cname] = child
 	}
 	return r
 }
 
 func convertOperation(verb string, y *yamlOperation) *tree.Operation {
-	op := &tree.Operation{Verb: verb, Method: y.Method, Path: y.Path}
+	op := &tree.Operation{Verb: verb, Method: y.Method, Path: y.Path, Description: y.Description}
 	if op.Method == "" {
 		op.Method = defaultMethod[verb] // 标准 verb 默认填充；自定义 verb 空 method 在 Validate 阶段报错
 	}

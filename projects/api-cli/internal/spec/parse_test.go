@@ -103,3 +103,50 @@ func ternary(b bool, a, c string) string {
 	}
 	return c
 }
+
+func TestParseResourceAndOperationDescription(t *testing.T) {
+	raw := []byte(`
+spec: api-cli/v1
+service: { name: s, default_endpoint: be, endpoints: { be: { base_url: http://x, auth: none } } }
+resources:
+  inst:
+    description: 实例资源
+    path: /instances
+    operations:
+      read: { description: 读取单个实例, path: "/{id}", params: { id: { in: path, required: true } } }
+`)
+	tr, err := Parse(raw)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got := tr.Resources["inst"].Description; got != "实例资源" {
+		t.Errorf("resource description: want %q got %q", "实例资源", got)
+	}
+	if got := tr.Resources["inst"].Operations["read"].Description; got != "读取单个实例" {
+		t.Errorf("operation description: want %q got %q", "读取单个实例", got)
+	}
+}
+
+func TestParseParentBackfill(t *testing.T) {
+	raw := []byte(`
+spec: api-cli/v1
+service: { name: s, default_endpoint: be, endpoints: { be: { base_url: http://x, auth: none } } }
+resources:
+  inst:
+    path: /instances
+    parent_key: instance_id
+    children:
+      relation:
+        path: "/{instance_id}/relations"
+        operations:
+          read: { path: "/{id}", params: { id: { in: path, required: true } } }
+`)
+	tr, err := Parse(raw)
+	if err != nil {
+		t.Fatal(err)
+	}
+	rel := tr.Resources["inst"].Children["relation"]
+	if rel.Parent == nil || rel.Parent.Name != "inst" {
+		t.Errorf("child.Parent 未回填到 inst，got %v", rel.Parent)
+	}
+}
