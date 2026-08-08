@@ -5,7 +5,7 @@ version: 0.1.0
 ---
 # browser-manual
 
-`browser-recorder` 的配套编排 skill。把「按系统录制 + 复用登录态 + 按主题过滤后台请求 + 生成统一格式操作手册」串成一条流水线。沿用 api-console 范式：**脚本（`scripts/record-export.sh`）做确定性脏活，Claude 做语义**。
+`browser-recorder` 的配套编排 skill。把「按系统录制 + 复用登录态 + 按主题过滤后台请求 + 生成统一格式操作手册」串成一条流水线。范式：**脚本（`scripts/record-export.sh`）做确定性脏活，Claude 做语义**。
 
 ## 何时用
 
