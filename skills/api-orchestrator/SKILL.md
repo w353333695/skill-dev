@@ -1,9 +1,9 @@
 ---
-name: orchestrator
+name: api-orchestrator
 description: 通用 API 编排 skill——自然语言需求 → 跨系统调用编排。两个模式：onboarding（从 API 文档/抓包/源码/场景 生成 platforms 资料，接入新能力域）+ orchestration（用已有资料把需求编排成调用执行）。调度靠 LLM 读本 SKILL 的决策树，执行靠 bash 调 api-cli，领域知识靠 platforms/ 资料。当用户要做跨系统 API 串联/对接新系统/批量编排/流程开发与迭代时使用，即便没明说"编排"。
 ---
 
-# orchestrator（通用 API 编排）
+# api-orchestrator（通用 API 编排）
 
 把自然语言需求翻译成跨系统调用编排。**通用**——不知道任何具体系统/格式，全靠 `platforms/` 资料驱动。
 
