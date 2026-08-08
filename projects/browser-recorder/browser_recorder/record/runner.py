@@ -290,24 +290,50 @@ async def _record_async(url, session_dir, out_dir, profile, keep_auth,
         except Exception as e:
             # 极端情况（连 DOM 都没解析完）兜底：记录后继续，页面可能已部分可交互
             logger.warning("goto 超时/失败（%s），尝试继续录制: %s", url, e)
-        # scrolling-snapshot：后台截图入 _snapshot_buffer。click emit 时 _capture_for_action
-        # 从中取【emit 之前最近帧】作为真·点击前截图（_on_event 在 JS handler 后执行，直接截
-        # 只会拿到 click 后的白屏/跳转后画面）。频率 1.5s（非 300ms）——page.screenshot 在
-        # headed 会闪屏，降频减少视觉干扰；buffer maxlen=4 仍覆盖 6s，点击前停顿能截到。
-        async def _snapshot_loop():
+        # scrolling-snapshot：click emit 时 _capture_for_action 取【emit 之前最近帧】作真·点击前截图。
+        # headed 用 CDP startScreencast（旁路订阅渲染，不触发 compositing → 不闪）；
+        # headless 用 page.screenshot（无显示本就不闪，且 startScreencast 在 headless 不推帧）。
+        async def _ps_into_buffer():
             while not stop_event.is_set():
                 try:
-                    if video:
-                        from ..marker import clear_marker
-                        await clear_marker(page)   # buffer 帧不带 marker（保持干净）
-                    png = await page.screenshot(timeout=2000)
-                    _snapshot_buffer.append((int(time.time() * 1000), png))
+                    _snapshot_buffer.append(
+                        (int(time.time() * 1000), await page.screenshot(timeout=2000)))
                 except Exception:
                     pass
                 try:
                     await asyncio.wait_for(stop_event.wait(), timeout=1.5)
                 except asyncio.TimeoutError:
                     pass
+
+        async def _snapshot_loop():
+            if headless:
+                await _ps_into_buffer()
+                return
+            import base64
+            client = None
+            try:
+                client = await page.context.new_cdp_session(page)
+                def _on_frame(params):
+                    try:
+                        _snapshot_buffer.append(
+                            (int(time.time() * 1000), base64.b64decode(params["data"])))
+                    except Exception:
+                        pass
+                    asyncio.ensure_future(
+                        client.send("Page.screencastFrameAck", {"sessionId": params["sessionId"]}))
+                client.on("Page.screencastFrame", _on_frame)
+                await client.send("Page.startScreencast", {
+                    "format": "png", "maxWidth": 1280, "maxHeight": 720, "everyNthFrame": 10})
+                await stop_event.wait()
+            except Exception as e:
+                logger.warning("headed screencast 失败，回退 page.screenshot: %s", e)
+                await _ps_into_buffer()
+            finally:
+                if client:
+                    try:
+                        await client.send("Page.stopScreencast")
+                    except Exception:
+                        pass
         snapshot_task = asyncio.ensure_future(_snapshot_loop())
         # auto_actions 模式：等 scrolling-snapshot 截首帧（否则首个 click 无点击前截图；
         # 人工 headed 无需等，用户操作慢，loop 早已有帧）
