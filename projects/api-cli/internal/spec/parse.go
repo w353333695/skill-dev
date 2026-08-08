@@ -2,8 +2,10 @@ package spec
 
 import (
 	"fmt"
+	"io"
 	"os"
 	"regexp"
+	"strings"
 
 	"api-cli/internal/tree"
 
@@ -47,7 +49,23 @@ func Parse(raw []byte) (*tree.OperationTree, error) {
 	for name, r := range y.Resources {
 		tr.Resources[name] = convertResource(name, r)
 	}
+	// lint：child resource 缺 parent_key 占位 → 警告（URL 可能缺父 ID）
+	for _, r := range tr.Resources {
+		lintParentKey(r, os.Stderr)
+	}
 	return tr, nil
+}
+
+// lintParentKey 递归检查：对每个有 ParentKey 的 resource，其每个 child 的 Path
+// 应含 {<ParentKey>} 占位（否则祖先链拼出的 URL 会缺父 ID，且无报错——声明式静默错）。
+func lintParentKey(r *tree.Resource, w io.Writer) {
+	for _, c := range r.Children {
+		if r.ParentKey != "" && !strings.Contains(c.Path, "{"+r.ParentKey+"}") {
+			fmt.Fprintf(w, "警告: resource %q 的 parent_key %q 未在子资源 %q 的 path %q 中出现（URL 可能缺父 ID）\n",
+				r.Name, r.ParentKey, c.Name, c.Path)
+		}
+		lintParentKey(c, w)
+	}
 }
 
 func convertResource(name string, y *yamlResource) *tree.Resource {

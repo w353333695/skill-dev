@@ -1,7 +1,10 @@
 package spec
 
 import (
+	"bytes"
+	"io"
 	"os"
+	"strings"
 	"testing"
 )
 
@@ -148,5 +151,44 @@ resources:
 	rel := tr.Resources["inst"].Children["relation"]
 	if rel.Parent == nil || rel.Parent.Name != "inst" {
 		t.Errorf("child.Parent 未回填到 inst，got %v", rel.Parent)
+	}
+}
+
+// TestParseLintMissingParentKeyPlaceholder 验证 Parse 末尾的 lint：
+// relation 的 path 漏了 {instance_id}（inst.ParentKey=instance_id），
+// 应在 stderr 输出含 "instance_id" 与 "relation" 的警告。
+func TestParseLintMissingParentKeyPlaceholder(t *testing.T) {
+	// relation 的 path 漏了 {instance_id}（inst.ParentKey=instance_id）
+	raw := []byte(`
+spec: api-cli/v1
+service: { name: s, default_endpoint: be, endpoints: { be: { base_url: http://x, auth: none } } }
+resources:
+  inst:
+    path: /instances
+    parent_key: instance_id
+    children:
+      relation:
+        path: /relations
+        operations:
+          read: { path: "/{id}", params: { id: { in: path, required: true } } }
+`)
+	orig := os.Stderr
+	r, w, _ := os.Pipe()
+	os.Stderr = w
+	done := make(chan string)
+	go func() {
+		var b bytes.Buffer
+		_, _ = io.Copy(&b, r)
+		done <- b.String()
+	}()
+	_, err := Parse(raw)
+	_ = w.Close()
+	os.Stderr = orig
+	captured := <-done
+	if err != nil {
+		t.Fatalf("Parse err: %v", err)
+	}
+	if !strings.Contains(captured, "instance_id") || !strings.Contains(captured, "relation") {
+		t.Errorf("应警告 relation 缺 {instance_id} 占位，stderr=\n%s", captured)
 	}
 }
