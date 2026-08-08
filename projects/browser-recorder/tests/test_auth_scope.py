@@ -33,10 +33,14 @@ def test_matches_different_registrable_domain_rejected():
     assert not scope.matches("https://other.com/x", s)
 
 
-def test_matches_scheme_http_rejected_by_default():
+def test_matches_scheme_http_https_interchangeable():
+    """http/https 互通（内网自签证书 HTTP→HTTPS 跳转常见，不应因 scheme 不匹配而要求重新登录）。"""
     s = {"registrable_domain": "example.com", "hosts": ["example.com"],
          "host_match": "suffix", "scheme": ["https"]}
-    assert not scope.matches("http://example.com/x", s)
+    assert scope.matches("http://example.com/x", s)   # https scope 兼容 http
+    s2 = {"registrable_domain": "example.com", "hosts": ["example.com"],
+          "host_match": "suffix", "scheme": ["http"]}
+    assert scope.matches("https://example.com/x", s2)  # http scope 兼容 https
 
 
 def test_matches_scheme_http_allowed_when_configured():
