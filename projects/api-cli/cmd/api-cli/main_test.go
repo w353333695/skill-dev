@@ -188,6 +188,18 @@ func TestParseTopFlags(t *testing.T) {
 			spec: "/p.yaml",
 			rest: []string{"inst"},
 		},
+		{
+			name: "global flag before subcommand kept for cobra (bug2)",
+			args: []string{"--spec", "/a.yaml", "--endpoint", "backend", "inst", "read"},
+			spec: "/a.yaml",
+			rest: []string{"--endpoint", "backend", "inst", "read"},
+		},
+		{
+			name: "multiple global flags before subcommand",
+			args: []string{"--spec", "/a.yaml", "--insecure", "--format", "yaml", "inst", "read", "i1"},
+			spec: "/a.yaml",
+			rest: []string{"--insecure", "--format", "yaml", "inst", "read", "i1"},
+		},
 	}
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
