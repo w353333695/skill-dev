@@ -1,7 +1,10 @@
 package spec
 
 import (
+	"bytes"
+	"io"
 	"os"
+	"strings"
 	"testing"
 )
 
@@ -102,4 +105,90 @@ func ternary(b bool, a, c string) string {
 		return a
 	}
 	return c
+}
+
+func TestParseResourceAndOperationDescription(t *testing.T) {
+	raw := []byte(`
+spec: api-cli/v1
+service: { name: s, default_endpoint: be, endpoints: { be: { base_url: http://x, auth: none } } }
+resources:
+  inst:
+    description: 实例资源
+    path: /instances
+    operations:
+      read: { description: 读取单个实例, path: "/{id}", params: { id: { in: path, required: true } } }
+`)
+	tr, err := Parse(raw)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got := tr.Resources["inst"].Description; got != "实例资源" {
+		t.Errorf("resource description: want %q got %q", "实例资源", got)
+	}
+	if got := tr.Resources["inst"].Operations["read"].Description; got != "读取单个实例" {
+		t.Errorf("operation description: want %q got %q", "读取单个实例", got)
+	}
+}
+
+func TestParseParentBackfill(t *testing.T) {
+	raw := []byte(`
+spec: api-cli/v1
+service: { name: s, default_endpoint: be, endpoints: { be: { base_url: http://x, auth: none } } }
+resources:
+  inst:
+    path: /instances
+    parent_key: instance_id
+    children:
+      relation:
+        path: "/{instance_id}/relations"
+        operations:
+          read: { path: "/{id}", params: { id: { in: path, required: true } } }
+`)
+	tr, err := Parse(raw)
+	if err != nil {
+		t.Fatal(err)
+	}
+	rel := tr.Resources["inst"].Children["relation"]
+	if rel.Parent == nil || rel.Parent.Name != "inst" {
+		t.Errorf("child.Parent 未回填到 inst，got %v", rel.Parent)
+	}
+}
+
+// TestParseLintMissingParentKeyPlaceholder 验证 Parse 末尾的 lint：
+// relation 的 path 漏了 {instance_id}（inst.ParentKey=instance_id），
+// 应在 stderr 输出含 "instance_id" 与 "relation" 的警告。
+func TestParseLintMissingParentKeyPlaceholder(t *testing.T) {
+	// relation 的 path 漏了 {instance_id}（inst.ParentKey=instance_id）
+	raw := []byte(`
+spec: api-cli/v1
+service: { name: s, default_endpoint: be, endpoints: { be: { base_url: http://x, auth: none } } }
+resources:
+  inst:
+    path: /instances
+    parent_key: instance_id
+    children:
+      relation:
+        path: /relations
+        operations:
+          read: { path: "/{id}", params: { id: { in: path, required: true } } }
+`)
+	orig := os.Stderr
+	r, w, _ := os.Pipe()
+	os.Stderr = w
+	done := make(chan string)
+	go func() {
+		var b bytes.Buffer
+		_, _ = io.Copy(&b, r)
+		done <- b.String()
+	}()
+	_, err := Parse(raw)
+	_ = w.Close()
+	os.Stderr = orig
+	captured := <-done
+	if err != nil {
+		t.Fatalf("Parse err: %v", err)
+	}
+	if !strings.Contains(captured, "instance_id") || !strings.Contains(captured, "relation") {
+		t.Errorf("应警告 relation 缺 {instance_id} 占位，stderr=\n%s", captured)
+	}
 }

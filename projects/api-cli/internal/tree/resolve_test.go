@@ -64,6 +64,41 @@ func TestFindOperation(t *testing.T) {
 
 // TestJoinPathNormalization 校验 joinPath 的斜杠归一化：
 // scheme:// 双斜杠必须保留，中间多余的斜杠要合并。
+// TestResolveURLAncestorChainAndParentKey 验证 N 层 path 的两个修复：
+//  1. ResolveURL 沿祖先链拼 path（不只拼叶子 r.Path）——relation 是 inst 的 child，
+//     拼出的 URL 必须含 inst.Path（/instances）。
+//  2. {param} 填充改为遍历 vals（而非 op.Params）——parent_key（instance_id）由
+//     命令位置注入到 vals、但不在 relOp.Params，遍历 vals 才能命中。
+func TestResolveURLAncestorChainAndParentKey(t *testing.T) {
+	tr := &OperationTree{
+		Service: Service{Endpoints: map[string]*Endpoint{
+			"be": {Name: "be", BaseURL: "http://x", PathPrefix: "/api/v1"},
+		}},
+		Resources: map[string]*Resource{},
+	}
+	inst := &Resource{Name: "inst", Path: "/instances", ParentKey: "instance_id",
+		Operations: map[string]*Operation{}, Children: map[string]*Resource{}}
+	rel := &Resource{Name: "relation", Path: "/{instance_id}/relations", Parent: inst,
+		Operations: map[string]*Operation{}, Children: map[string]*Resource{}}
+	inst.Children["relation"] = rel
+	tr.Resources["inst"] = inst
+	relOp := &Operation{Verb: "read", Method: "GET", Path: "/{id}",
+		Params: []Param{{Name: "id", In: "path", Required: true}}}
+	rel.Operations["read"] = relOp
+
+	ep := tr.Service.Endpoints["be"]
+	// instance_id 由命令位置注入（不在 relOp.Params），靠 vals 填充
+	vals := map[string]string{"instance_id": "INST1", "id": "REL1"}
+	got, err := tr.ResolveURL(ep, rel, relOp, vals)
+	if err != nil {
+		t.Fatalf("ResolveURL err: %v", err)
+	}
+	want := "http://x/api/v1/instances/INST1/relations/REL1"
+	if got != want {
+		t.Errorf("ancestor chain + parent_key URL:\n want %q\n got  %q", want, got)
+	}
+}
+
 func TestJoinPathNormalization(t *testing.T) {
 	cases := []struct {
 		name string

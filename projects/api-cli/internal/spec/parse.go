@@ -2,8 +2,10 @@ package spec
 
 import (
 	"fmt"
+	"io"
 	"os"
 	"regexp"
+	"strings"
 
 	"api-cli/internal/tree"
 
@@ -47,25 +49,43 @@ func Parse(raw []byte) (*tree.OperationTree, error) {
 	for name, r := range y.Resources {
 		tr.Resources[name] = convertResource(name, r)
 	}
+	// lint：child resource 缺 parent_key 占位 → 警告（URL 可能缺父 ID）
+	for _, r := range tr.Resources {
+		lintParentKey(r, os.Stderr)
+	}
 	return tr, nil
+}
+
+// lintParentKey 递归检查：对每个有 ParentKey 的 resource，其每个 child 的 Path
+// 应含 {<ParentKey>} 占位（否则祖先链拼出的 URL 会缺父 ID，且无报错——声明式静默错）。
+func lintParentKey(r *tree.Resource, w io.Writer) {
+	for _, c := range r.Children {
+		if r.ParentKey != "" && !strings.Contains(c.Path, "{"+r.ParentKey+"}") {
+			fmt.Fprintf(w, "警告: resource %q 的 parent_key %q 未在子资源 %q 的 path %q 中出现（URL 可能缺父 ID）\n",
+				r.Name, r.ParentKey, c.Name, c.Path)
+		}
+		lintParentKey(c, w)
+	}
 }
 
 func convertResource(name string, y *yamlResource) *tree.Resource {
 	r := &tree.Resource{
-		Name: name, Path: y.Path, Singular: y.Singular, ParentKey: y.ParentKey,
+		Name: name, Description: y.Description, Path: y.Path, Singular: y.Singular, ParentKey: y.ParentKey,
 		Operations: map[string]*tree.Operation{}, Children: map[string]*tree.Resource{},
 	}
 	for verb, op := range y.Operations {
 		r.Operations[verb] = convertOperation(verb, op)
 	}
 	for cname, c := range y.Children {
-		r.Children[cname] = convertResource(cname, c)
+		child := convertResource(cname, c)
+		child.Parent = r // 回填祖先链指针（T4 ResolveURL 与 T3 description 富化共用）
+		r.Children[cname] = child
 	}
 	return r
 }
 
 func convertOperation(verb string, y *yamlOperation) *tree.Operation {
-	op := &tree.Operation{Verb: verb, Method: y.Method, Path: y.Path}
+	op := &tree.Operation{Verb: verb, Method: y.Method, Path: y.Path, Description: y.Description}
 	if op.Method == "" {
 		op.Method = defaultMethod[verb] // 标准 verb 默认填充；自定义 verb 空 method 在 Validate 阶段报错
 	}

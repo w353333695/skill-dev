@@ -25,20 +25,22 @@ type yamlEndpoint struct {
 }
 
 type yamlResource struct {
-	Path       string                    `yaml:"path"`
-	Singular   string                    `yaml:"singular"`
-	ParentKey  string                    `yaml:"parent_key"`
-	Operations map[string]*yamlOperation `yaml:"operations"`
-	Children   map[string]*yamlResource  `yaml:"children"`
+	Description string                    `yaml:"description"`
+	Path        string                    `yaml:"path"`
+	Singular    string                    `yaml:"singular"`
+	ParentKey   string                    `yaml:"parent_key"`
+	Operations  map[string]*yamlOperation `yaml:"operations"`
+	Children    map[string]*yamlResource  `yaml:"children"`
 }
 
 type yamlOperation struct {
-	Method     string               `yaml:"method"`
-	Path       string               `yaml:"path"`
-	Params     map[string]yamlParam `yaml:"params"`
-	Body       *yamlSchema          `yaml:"body"`
-	Response   *yamlSchema          `yaml:"response"`
-	Pagination *yamlPagination      `yaml:"pagination"`
+	Description string               `yaml:"description"`
+	Method      string               `yaml:"method"`
+	Path        string               `yaml:"path"`
+	Params      map[string]yamlParam `yaml:"params"`
+	Body        *yamlSchema          `yaml:"body"`
+	Response    *yamlSchema          `yaml:"response"`
+	Pagination  *yamlPagination      `yaml:"pagination"`
 }
 
 type yamlParam struct {

@@ -4,6 +4,8 @@ import (
 	"testing"
 
 	"api-cli/internal/spec"
+
+	"github.com/spf13/cobra"
 )
 
 // TestBuildCommandTree 验证 OperationTree → cobra 命令树形状：
@@ -62,6 +64,54 @@ resources:
 		t.Fatalf("tree shape wrong: inst=%v read=%v relation=%v relation.read=%v",
 			foundInst, foundRead, foundRelation, foundRelationRead)
 	}
+}
+
+// TestResourceShortUsesDescription 验证 cobra Short 优先用 Description：
+//   - resource Short = r.Description（去掉「资源」后缀，更简洁）
+//   - operation Short = op.Description（去掉 verb+singular 的回退文案）
+//
+// 让人看 help 时直接看到用途，而不是干巴巴的 "instance 资源 / read instance"。
+func TestResourceShortUsesDescription(t *testing.T) {
+	raw := []byte(`
+spec: api-cli/v1
+service: { name: cmdb, default_endpoint: be, endpoints: { be: { base_url: http://x, auth: none } } }
+resources:
+  inst:
+    description: CMDB 实例
+    path: /instances
+    operations:
+      read: { description: 读取实例, path: "/{id}", params: { id: { in: path, required: true } } }
+`)
+	tr, err := spec.Parse(raw)
+	if err != nil {
+		t.Fatal(err)
+	}
+	root, _ := Build(tr)
+	// inst 子命令的 Short 应是 Description，而非 "instance 资源"
+	inst := findChild(root, "inst")
+	if inst == nil {
+		t.Fatal("未找到 inst 子命令")
+	}
+	if inst.Short != "CMDB 实例" {
+		t.Errorf("inst Short 应为 Description %q，got %q", "CMDB 实例", inst.Short)
+	}
+	readCmd := findChild(inst, "read")
+	if readCmd == nil {
+		t.Fatal("未找到 read 子命令")
+	}
+	if readCmd.Short != "读取实例" {
+		t.Errorf("read Short 应为 operation Description %q，got %q", "读取实例", readCmd.Short)
+	}
+}
+
+// findChild 在 cmd 的子命令里按名字找一个。
+func findChild(parent *cobra.Command, name string) *cobra.Command {
+	for _, c := range parent.Commands() {
+		if c.Name() == name {
+			return c
+		}
+	}
+	return nil
 }
 
 // TestBuildGlobalFlagsBound 验证全局 Persistent flag 在 root 上注册；
