@@ -99,11 +99,11 @@
 * **`skills/<skill>/manifest.sh`**：声明 skill 依赖的 project（bash 数组，不用 yaml——`setup.sh` 在用户环境跑，不能依赖 pyyaml 解析）：
   ```bash
   SKILL_NAME="<skill>"; SKILL_VERSION="<ver>"
-  PROJECTS=("api-console=api-console" "browser-recorder=browser-recorder")  # project名=cli名
+  PROJECTS=("api-cli=api-cli" "browser-recorder=browser-recorder")  # project名=cli名
   ```
 * **`skills/<skill>/scripts/setup.sh`**（分发态，每 skill 复制一份通用脚本）：读 manifest，对每个 project 幂等装好 CLI（vendor whl 优先离线，否则 PyPI 名；工具 uv>pipx>pip；pip 模式查 Python>=3.9）。部署阶段跑一次。
 * **`skills/<skill>/scripts/run.sh`**（仅开发态，**不进分发包**）：`run.sh <cli> [args]` → `uv run --project projects/<对应project> <cli> [args]`，方便开发时直接测 skill。分发态裸调 CLI，不用本壳。
 * **`scripts/pack-dist.sh <skill>`**（workspace 根通用打包）：读 manifest，对每个 project `uv build` 打 whl 塞进 `skills/<skill>/vendor/`，连 skill 整体 zip 到 `tmp/<skill>-dist-<ver>.zip`。**排除 `scripts/run.sh`（dev 壳）和 `__pycache__`**。
-* **`platforms/` 不在通用打包范围**：它是 skill 的外部可拔插部件（如 api-console 的平台资产），由 skill 方自行手动分发，通用脚本不处理。
+* **`platforms/` 不在通用打包范围**：它是 skill 的外部可拔插部件（如 api-orchestrator 的平台资产），由 skill 方自行手动分发，通用脚本不处理。
 * 用户使用：解压 zip 到 workspace 根 → `bash skills/<skill>/scripts/setup.sh` → n 个 CLI 就位 → skill 直接调。
 * **golang project 不走本套**：用独立的 `scripts/pack-go.sh`（多平台二进制大礼包），不读 `manifest.sh`、不进 `vendor/` whl。若一个 skill 同时依赖 Python 和 golang project，Python 走上述流程，golang 另跑 `pack-go.sh`，两套产物独立分发。
