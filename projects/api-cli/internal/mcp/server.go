@@ -13,6 +13,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"strings"
 
 	"api-cli/internal/engine"
 	"api-cli/internal/tree"
@@ -55,7 +56,7 @@ func (s *Server) ToolsList() []Tool {
 		if op.Body != nil {
 			props["_body"] = op.Body.ToJSONSchema()
 		}
-		desc := verb + " " + orDefault(r.Singular, r.Name)
+		desc := buildToolDescription(r, op)
 		inputSchema := map[string]any{
 			"type":       "object",
 			"properties": props,
@@ -117,6 +118,45 @@ func orDefault(s, d string) string {
 		return d
 	}
 	return s
+}
+
+// buildToolDescription 富化 tool description：祖先链用途 · operation 用途 · [行为标签]。
+// 祖先链沿 r.Parent 上溯（无 Description 的层用 Name，确保链不断）；行为标签从
+// method（写操作）与 Pagination（可分页）自动推断，不需清单额外声明。
+func buildToolDescription(r *tree.Resource, op *tree.Operation) string {
+	// 祖先链：叶→顶收集，再翻转为顶→叶
+	var chain []string
+	for cur := r; cur != nil; cur = cur.Parent {
+		chain = append(chain, orDefault(cur.Description, cur.Name))
+	}
+	for i, j := 0, len(chain)-1; i < j; i, j = i+1, j-1 {
+		chain[i], chain[j] = chain[j], chain[i]
+	}
+	ancestor := strings.Join(chain, " > ")
+
+	opDesc := orDefault(op.Description, op.Verb+" "+orDefault(r.Singular, r.Name))
+	s := ancestor + " · " + opDesc
+
+	var tags []string
+	if isWriteMethod(op.Method) {
+		tags = append(tags, "[写操作]")
+	}
+	if op.Pagination != nil {
+		tags = append(tags, "[可分页]")
+	}
+	if len(tags) > 0 {
+		s += " " + strings.Join(tags, " ")
+	}
+	return s
+}
+
+// isWriteMethod 判断是否写操作（用于行为标签推断）。
+func isWriteMethod(m string) bool {
+	switch strings.ToUpper(m) {
+	case "POST", "PUT", "PATCH", "DELETE":
+		return true
+	}
+	return false
 }
 
 // Serve 启动 stdio JSON-RPC 循环（initialize / tools/list / tools/call）。
