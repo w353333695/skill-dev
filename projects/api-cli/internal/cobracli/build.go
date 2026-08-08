@@ -11,6 +11,7 @@ package cobracli
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"os"
 
@@ -20,6 +21,11 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// ErrHelpRequested 表示 --help-format != text 触发了 help（非错误，main 据此 exit 0）。
+// cobra 的内置 --help 检查在 PersistentPreRunE 之前，无法靠它；改为在此主动拦截：
+// help-format 非 text 时调 cmd.Help()（复用 helpFunc）并返回 sentinel，让 cobra 跳过 RunE。
+var ErrHelpRequested = errors.New("help requested via --help-format")
+
 // Build 构建根命令树并绑定全局 flag 与 help 钩子。
 func Build(tr *tree.OperationTree) (*cobra.Command, error) {
 	root := &cobra.Command{
@@ -28,6 +34,16 @@ func Build(tr *tree.OperationTree) (*cobra.Command, error) {
 		SilenceUsage:     true,
 		SilenceErrors:    true,
 		TraverseChildren: true, // 全局 flag（--insecure/--spec）可放子命令前
+		PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
+			hf, _ := cmd.Flags().GetString("help-format")
+			if hf != "text" {
+				if err := cmd.Help(); err != nil {
+					return err
+				}
+				return ErrHelpRequested
+			}
+			return nil
+		},
 	}
 	bindGlobalFlags(root)
 	e := engine.New(tr)
