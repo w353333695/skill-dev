@@ -34,10 +34,13 @@ workspace-all.zip
 .browser-recorder/
 
 # 敏感凭证与公司内部源码（绝不进版本库）
-platforms/easyops/auth/
-platforms/easyops/sources/raw/
+platforms/*/auth/
+platforms/*/sources/raw/
 .env
 .env.*
+
+# 参考资料（onboarding 输入：API 文档/抓包/源码/场景，公司内部，不入库）
+data/
 
 # SDD scratch
 .superpowers/
