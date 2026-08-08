@@ -10,8 +10,9 @@ def build_event(node_dict: dict, type: str, value: str | None) -> dict:
 
 INJECT_SCRIPT = r"""
 (function(){
-  if (document.__br_installed) return;
-  document.__br_installed = true;
+  try { console.log('[browser-recorder] INJECT_SCRIPT on', location.href); } catch(_){}
+  document.__br_inject_count = (document.__br_inject_count || 0) + 1;
+  if (!window.__br_evt_seen) window.__br_evt_seen = new WeakSet();
   function cssPath(el){
     if (el.id) return '#' + CSS.escape(el.id);
     var parts = [];
@@ -135,6 +136,7 @@ INJECT_SCRIPT = r"""
   }
   var __br_mark_seq = 0;
   document.addEventListener('click', function(e){
+    if (window.__br_evt_seen.has(e)) return; window.__br_evt_seen.add(e);
     // 优先：最小可点击元素（向上找首个自身可交互 + 真实盒子节点，bbox 最准）。
     var target = pickInteractive(e);
     if (!target && !window.__br_interactive_only){
@@ -160,7 +162,7 @@ INJECT_SCRIPT = r"""
   document.addEventListener('change', function(e){
     if (e.target && e.target.tagName === 'SELECT') emit('select', e.target, e.target.value);
   }, true);
-  document.addEventListener('input', function(e){ emit('input', e.target, e.target.value); }, true);
+  document.addEventListener('input', function(e){ if (window.__br_evt_seen.has(e)) return; window.__br_evt_seen.add(e); emit('input', e.target, e.target.value); }, true);
   // 失焦/切换元素时发 input_finalize，避免最后一段输入因始终未失焦而丢失
   // （spec §5.3.1：按"焦点切换/失焦/提交/超时"边界聚合为一条 input）
   function finalizeInput(e){
@@ -176,6 +178,7 @@ INJECT_SCRIPT = r"""
   // 这样用户名框里按 Enter 触发登录提交时，记为一条 submit 动作，
   // 而 Enter 键本身不再单独 emit（避免登录页 Enter 误提交后录制中断）。
   document.addEventListener('submit', function(e){
+    if (window.__br_evt_seen.has(e)) return; window.__br_evt_seen.add(e);
     var el = e.target || (document.activeElement && document.activeElement.closest ?
                           document.activeElement.closest('form') : null) || e.target;
     if (el) emit('submit', el, null);

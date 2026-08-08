@@ -267,7 +267,7 @@ async def _record_async(url, session_dir, out_dir, profile, keep_auth,
             async def _reinject_loop():
                 while not stop_event.is_set() and not pg.is_closed():
                     try:
-                        installed = await pg.evaluate("document.__br_installed === true")
+                        installed = await pg.evaluate("document.__br_inject_count > 0")
                         if not installed:
                             for script in _popup_injects:
                                 await pg.evaluate(script)
