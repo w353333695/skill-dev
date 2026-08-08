@@ -78,7 +78,7 @@ func operationCmd(tr *tree.OperationTree, e *engine.Engine, r *tree.Resource, op
 
 	c := &cobra.Command{
 		Use:   verb,
-		Short: op.Verb + " " + r.Singular,
+		Short: opShort(op, r),
 		Annotations: map[string]string{
 			"resource": r.Name,
 			"verb":     verb,
@@ -105,11 +105,31 @@ func operationCmd(tr *tree.OperationTree, e *engine.Engine, r *tree.Resource, op
 }
 
 // desc 给 resource 命令拼一句中文短描述。
+// 有 Description 时直接用（不再加"资源"后缀）；否则回退 singular/name + "资源"。
 func desc(r *tree.Resource) string {
+	if r.Description != "" {
+		return r.Description
+	}
 	if r.Singular != "" {
 		return r.Singular + " 资源"
 	}
 	return r.Name + " 资源"
+}
+
+// opShort 给 operation 子命令拼短描述：优先 operation.Description，否则回退 verb + singular。
+func opShort(op *tree.Operation, r *tree.Resource) string {
+	if op.Description != "" {
+		return op.Description
+	}
+	return op.Verb + " " + orDefaultCobra(r.Singular, r.Name)
+}
+
+// orDefaultCobra 空字符串回落（cobracli 包内的本地版，避免依赖 mcp 包）。
+func orDefaultCobra(s, d string) string {
+	if s == "" {
+		return d
+	}
+	return s
 }
 
 // explainCmd: api-cli explain <resource> <verb> → 输出 operation 的 input+output schema（json）。
@@ -130,11 +150,13 @@ func explainCmd(tr *tree.OperationTree) *cobra.Command {
 				return fmt.Errorf("操作 %q 不存在", args[1])
 			}
 			doc := map[string]any{
-				"resource": r.Name,
-				"verb":     op.Verb,
-				"method":   op.Method,
-				"path":     op.Path,
-				"params":   op.Params,
+				"resource":              r.Name,
+				"resource_description":  r.Description,
+				"verb":                  op.Verb,
+				"operation_description": op.Description,
+				"method":                op.Method,
+				"path":                  op.Path,
+				"params":                op.Params,
 			}
 			if op.Body != nil {
 				doc["input_body"] = op.Body.ToJSONSchema()

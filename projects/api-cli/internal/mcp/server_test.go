@@ -325,6 +325,59 @@ resources:
 	}
 }
 
+// TestToolDescriptionEnrichment 验证 MCP tool description 富化：
+//   - 祖先链用途 + operation 用途（让 LLM 看到语义链而非干 verb）
+//   - 行为标签：写操作（POST/PUT/PATCH/DELETE）→ [写操作]，有 pagination → [可分页]
+//
+// 这是 LLM 抉择的关键信号：description 越具体，LLM 选 tool 越准。
+func TestToolDescriptionEnrichment(t *testing.T) {
+	raw := []byte(`
+spec: api-cli/v1
+service: { name: cmdb, default_endpoint: be, endpoints: { be: { base_url: http://x, auth: none } } }
+resources:
+  inst:
+    description: CMDB 实例
+    path: /instances
+    operations:
+      search:
+        description: 按条件搜索实例
+        method: POST
+        path: /search
+        pagination: { type: offset, items_path: data.list, page_param: page, size_param: page_size, size: 20 }
+      read:
+        description: 读取单个实例
+        method: GET
+        path: /{id}
+        params: { id: { in: path, required: true } }
+`)
+	tr, err := spec.Parse(raw)
+	if err != nil {
+		t.Fatal(err)
+	}
+	tools := New(tr).ToolsList()
+	byName := map[string]Tool{}
+	for _, tl := range tools {
+		byName[tl.Name] = tl
+	}
+	st, ok := byName["cmdb_inst_search"]
+	if !ok {
+		t.Fatalf("未找到 search tool，got tools: %v", tools)
+	}
+	// 祖先链用途 + operation 用途
+	if !strings.Contains(st.Description, "CMDB 实例") || !strings.Contains(st.Description, "按条件搜索实例") {
+		t.Errorf("search description 缺用途链: %q", st.Description)
+	}
+	// 行为标签：POST → [写操作]，有 pagination → [可分页]
+	if !strings.Contains(st.Description, "[写操作]") || !strings.Contains(st.Description, "[可分页]") {
+		t.Errorf("search description 缺行为标签: %q", st.Description)
+	}
+	// read（GET）不应有 [写操作]
+	rd := byName["cmdb_inst_read"]
+	if strings.Contains(rd.Description, "[写操作]") {
+		t.Errorf("read（GET）不应标 [写操作]: %q", rd.Description)
+	}
+}
+
 // TestServeToolsCallBodyDirect 验证 tools/call 收到嵌套 _body 对象时，经 server marshal
 // 成字节、经 engine.Options.BodyBytes 直传到请求 body（绕过单层 body flag）。
 //
