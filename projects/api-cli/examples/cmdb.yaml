@@ -17,6 +17,7 @@ resources:
     description: CMDB 实例
     path: /instances
     singular: instance
+    parent_key: instance_id # 声明在 parent 上：子 resource（relation）path 里的 {instance_id} 占位由此键注入
     operations:
       create: { method: POST, path: "", description: 创建实例 }
       read:   { method: GET, path: "/{id}", description: 读取单个实例, params: { id: { in: path, type: string, required: true, description: 实例 ID } } }
@@ -35,7 +36,6 @@ resources:
       relation:
         description: 实例的关系
         path: "/{instance_id}/relations"
-        parent_key: instance_id
         operations:
           create: { method: POST, path: "", description: 为实例创建一条关系 }
           read:   { method: GET, path: "/{id}", description: 读取实例的某个关系, params: { id: { in: path, required: true, description: 关系 ID } } }

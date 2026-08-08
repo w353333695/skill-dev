@@ -565,6 +565,50 @@ func TestIntegrationRelationReadAncestorURL(t *testing.T) {
 	}
 }
 
+// TestCMDBExampleParentKeyConvention 锁 parent_key 的 spec 约定：声明在 **parent**
+// resource 上（inst），不在 child（relation）上。
+//
+// 动机：整个 codebase 都从 parent 读 ParentKey——
+//   - internal/cobracli/build.go: descend into child 时 append(parentKeys, {key: r.ParentKey})
+//   - internal/spec/parse.go T5 lint: r.ParentKey != "" && child.Path 含 {<ParentKey>}
+//   - 所有 test fixture 都把 parent_key 放在 parent
+//
+// 若示例把 parent_key 写到 relation（child）上（历史遗留笔误），inst.ParentKey == ""，
+// 会导致 T5 lint 在这份 canonical demo 上静默失效（不校验 relation.path 含 {instance_id}），
+// 同时教错 spec 作者约定。本测试从磁盘读真实 examples/cmdb.yaml 锁住正确约定，防回归。
+func TestCMDBExampleParentKeyConvention(t *testing.T) {
+	raw, err := os.ReadFile("../../examples/cmdb.yaml")
+	if err != nil {
+		t.Fatalf("读示例文件失败（CWD 应为 tests/integration）: %v", err)
+	}
+	tr, err := spec.Parse(raw)
+	if err != nil {
+		t.Fatalf("spec.Parse 失败: %v", err)
+	}
+	inst := tr.Resources["inst"]
+	if inst == nil {
+		t.Fatal("资源 inst 缺失")
+	}
+	// parent_key 必须在 parent（inst）上。
+	if inst.ParentKey != "instance_id" {
+		t.Errorf("inst.ParentKey want %q（parent_key 应声明在 parent inst 上）, got %q\n",
+			"instance_id", inst.ParentKey)
+	}
+	rel := inst.Children["relation"]
+	if rel == nil {
+		t.Fatal("inst.children.relation 缺失")
+	}
+	// 反向断言：child（relation）上不应再声明 parent_key（防历史笔误回归）。
+	if rel.ParentKey != "" {
+		t.Errorf("relation.ParentKey 应为空（parent_key 不在 child 上声明）, got %q\n",
+			rel.ParentKey)
+	}
+	// 占位仍在 child path 上（由 parent 的 ParentKey 声明注入键，T5 lint 据此校验）。
+	if !strings.Contains(rel.Path, "{instance_id}") {
+		t.Errorf("relation.Path 应含 {instance_id} 占位, got %q\n", rel.Path)
+	}
+}
+
 // TestCMDBExampleResourceDescriptions 兜底保护 examples/cmdb.yaml 这个交付物：
 // 断言补的 description 字段在 spec.Parse 后真的进到 tree.Resource / tree.Operation。
 // 防止后续手改示例时把 description 字段名 / 缩进改歪（inline 测试覆盖不到文件）。
