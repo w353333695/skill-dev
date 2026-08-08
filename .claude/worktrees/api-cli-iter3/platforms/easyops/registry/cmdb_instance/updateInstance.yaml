@@ -1,0 +1,58 @@
+name: updateInstance
+module: cmdb_instance
+method: PUT
+path: /cmdb.instance.UpdateInstance/object/{objectId}/instance/{instanceId}
+gateway_path: /cmdb.instance.UpdateInstance/object/{objectId}/instance/{instanceId}
+service: ''
+side_effect: update
+path_source: frontend_raw
+path_confidence: low
+tags:
+- CMDB
+- 实例
+- 更新
+- 编辑
+summary: 更新实例
+description: 更新单个实例的字段值。请求体为该实例可编辑字段的键值
+request:
+  required: []
+  properties:
+    hostname:
+      type: string
+      desc: ''
+    use:
+      type: string
+      desc: ''
+    memo:
+      type: string
+      desc: ''
+    _agentStatus:
+      type: string
+      desc: ''
+    osDistro:
+      type: string
+      desc: ''
+outputs:
+  detail:
+    jsonpath: $.data
+    desc: 更新结果
+requires:
+- objectId+instanceId 为已存在实例
+rollback: null
+examples: []
+confidence:
+  request: high
+  module: high
+  outputs: high
+  tags: high
+  summary: high
+  requires: medium
+  rollback: medium
+endpoint:
+  contract_ref: ''
+  mode: easyops_gateway
+source:
+  openapi_file: CMDB-实例管理-openapi.yaml
+  openapi_hash: 0f1741417809ce6690bddf864f29e2910089ee2cbb6bf48ac0da2e0f124b8753
+  recorded_at: '2026-07-23T10:03:34'
+registered_at: '2026-07-23T14:28:58.536078'

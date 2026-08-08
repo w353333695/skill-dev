@@ -1,0 +1,33 @@
+{
+  "version": "0.1.0",
+  "evals": [
+    {
+      "id": "theme-filter-keeps-relevant-drops-unrelated",
+      "prompt": "theme=资产导入流程。requests.json 含：POST /api/assets/import、GET /api/import/tasks、GET /api/user/menu、GET /api/notifications。按 references/theme-filter.md 产出 requests.theme.json 与 接口清单.md。",
+      "expect": {
+        "theme_json_keeps": ["POST /api/assets/import", "GET /api/import/tasks"],
+        "theme_json_drops": ["GET /api/user/menu", "GET /api/notifications"],
+        "清单_md_has_table": true
+      }
+    },
+    {
+      "id": "manual-chaptered-and-uniform",
+      "prompt": "theme=工单查询。structure.json 有 2 段（搜索页 / 详情页），report.md 有 4 步含截图。按 references/manual-format.md 产出 manual.md。",
+      "expect": {
+        "has_h1_title": "# 工单系统 · 工单查询 操作手册",
+        "chapter_headings_are_semantic_not_mechanical": true,
+        "step_headlines_are_intent_phrases": true,
+        "references_theme_endpoints_only": true,
+        "embeds_screenshots": true
+      }
+    },
+    {
+      "id": "manual-drops-noise-clicks",
+      "prompt": "trace 含一次点空白（A2 全捕留下）+ 正常 3 步。产出 manual.md。",
+      "expect": {
+        "noise_click_not_in_manual": true,
+        "step_count": 3
+      }
+    }
+  ]
+}

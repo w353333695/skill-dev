@@ -1,0 +1,46 @@
+name: getKnowledgeCatalogTree
+module: knowledge_catalog
+method: GET
+path: /api/flowable_service/v1/knowledge_base/catalog_tree
+gateway_path: /next/api/gateway/flowable_service.knowledge_base.GetCatalogTree/api/flowable_service/v1/knowledge_base/catalog_tree
+service: logic.flowable_service
+side_effect: read
+path_source: gateway_strip
+path_confidence: medium
+tags:
+- 知识目录
+- catalog_tree
+- 树
+- 查询
+- tree
+summary: 获取完整知识目录树
+description: 返回完整知识目录树（含父子层级）。进入知识目录管理页、目录变更后刷新时调用。
+request:
+  required: []
+  properties: {}
+outputs:
+  list_full:
+    jsonpath: $.data.catalogTree
+    desc: 完整知识目录树（KnowledgeBaseCatalog[]）含父子层级
+  list_ids:
+    jsonpath: $.data.catalogTree
+    desc: 目录树节点列表，可投影 instanceId 用于新建子目录时定位 parentId
+requires: []
+rollback: null
+examples: []
+confidence:
+  module: high
+  outputs: high
+  requires: high
+  rollback: high
+  summary: high
+  tags: high
+  request: high
+endpoint:
+  contract_ref: logic.flowable_service|GET|/api/flowable_service/v1/knowledge_base/catalog_tree
+  mode: easyops_gateway
+source:
+  openapi_file: ITSM-系统管理-知识目录管理-openapi.yaml
+  openapi_hash: cf72ee6896240e33a2a149bf98871adabd5a51cb22b632b8e246d4f5d98d89d2
+  recorded_at: '2026-07-13T13:50:45'
+registered_at: '2026-07-22T10:34:11.335182'

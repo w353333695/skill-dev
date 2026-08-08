@@ -1,0 +1,59 @@
+name: createSlaRule
+module: sla
+method: POST
+path: /api/flowable_service/v1/sla/rule
+gateway_path: /next/api/gateway/flowable_service.sla.CreateSLARule/api/flowable_service/v1/sla/rule
+service: logic.flowable_service
+side_effect: create
+path_source: backend_contract
+path_confidence: high
+tags:
+- SLA
+- 创建
+- sla_rule
+- 写
+- working_calendar
+summary: 新建 SLA 协议
+description: 创建一条 SLA 协议。basicInfo 含名称/状态/负责人/类型/优先级；
+request:
+  required: []
+  properties:
+    basicInfo:
+      type: object
+      desc: 协议基本信息
+      _source: contract
+    slaConfig:
+      type: SLAConfig[]
+      desc: 协议配置信息
+      _source: contract
+outputs:
+  ruleId:
+    jsonpath: $.data.ruleId
+    desc: 新建SLA规则id
+requires:
+- workingCalendarId 来自工作日历(agreementType=calendar时必填)
+- notifyPolicyId 来自通知策略(notifyType须为process_instance_sla/process_task_sla)
+- priorityId 来自优先级集(绑定后不可改绑)
+- 'type: service=工单整体/step=任务节点'
+rollback:
+  api: deleteSlaRule
+  params:
+  - param_key: ruleIds
+    from_output: ruleId
+    from_field: ''
+examples: []
+confidence:
+  request: high
+  module: high
+  outputs: high
+  tags: high
+  summary: high
+  requires: high
+endpoint:
+  contract_ref: logic.flowable_service|POST|/api/flowable_service/v1/sla/rule
+  mode: easyops_gateway
+source:
+  openapi_file: ITSM-运行管理-SLA协议管理-openapi.yaml
+  openapi_hash: 932ebe240075b0787316921f641a05f77ac16e8c2d23cb007ae7917133d3aa47
+  recorded_at: '2026-07-28T14:04:57.668523'
+registered_at: '2026-07-28T16:48:34.376143'

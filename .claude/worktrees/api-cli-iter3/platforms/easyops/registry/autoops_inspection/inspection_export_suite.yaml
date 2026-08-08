@@ -1,0 +1,47 @@
+name: inspection_export_suite
+module: autoops_inspection
+method: GET
+path: /api/v1/inspection-export/{pluginId}
+gateway_path: ''
+service: logic.inspection
+side_effect: read
+path_source: backend_contract
+path_confidence: high
+tags:
+- AutoOps
+- 巡检
+- 套件
+- 导出
+summary: 导出巡检套件
+description: 导出套件完整定义为 tar 包（基本信息+采集脚本+指标组+报告模板）。用途：跨环境分发、版本备份、修改套件的起点（导出→改→重打包→重导）。
+request:
+  required:
+  - pluginId
+  properties:
+    pluginId:
+      type: string
+      desc: 套件 id，如 inspector_mysql
+outputs:
+  detail:
+    jsonpath: $.data
+    desc: tar 文件流
+requires:
+- pluginId 为已存在套件
+rollback: null
+examples: []
+confidence:
+  request: high
+  module: high
+  outputs: medium
+  tags: high
+  summary: high
+  requires: high
+  rollback: medium
+endpoint:
+  contract_ref: logic.inspection|GET|/api/v1/inspection-export/{pluginId}
+  mode: easyops_internal
+source:
+  openapi_file: ''
+  openapi_hash: ''
+  recorded_at: '2026-07-29T00:00:00'
+registered_at: '2026-07-29T14:42:35.155348'

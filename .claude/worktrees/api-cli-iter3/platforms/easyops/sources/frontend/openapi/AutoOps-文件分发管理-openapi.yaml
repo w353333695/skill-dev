@@ -1,0 +1,379 @@
+openapi: 3.0.3
+info:
+  title: AutoOps-文件分发管理 API
+  version: "1.0"
+  description: EasyOps AutoOps「文件分发」模块文件包管理相关接口，来自浏览器录制（操作指引见 guides/AutoOps-文件分发管理/）。
+  x-system: autoops-file-distribute
+  x-recorded-at: "2026-07-29T16:20:10"
+tags:
+  - name: 文件包列表与分类
+    description: 文件包列表查询、搜索与分类统计
+  - name: 文件包创建与编辑
+    description: 文件包新建、详情与编辑
+  - name: 文件包删除
+    description: 删除文件包（连带其下所有版本）
+  - name: 版本管理
+    description: 版本列表、重名校验、下载与删除
+  - name: 文件上传与提交
+    description: 工作区文件上传与提交为新版本
+  - name: 权限管理
+    description: 文件包权限查询与批量授权
+paths:
+  /next/api/gateway/artifact.pkgservice.Search/package/search:
+    get:
+      tags: [文件包列表与分类]
+      summary: 搜索文件包列表
+      x-relevant: true
+      parameters:
+        - {name: name, in: query, schema: {type: string}, description: 按文件包名称模糊搜索}
+        - {name: category, in: query, schema: {type: string}, description: 按分类过滤}
+        - {name: creator, in: query, schema: {type: string}, description: 按作者过滤}
+        - {name: exact, in: query, schema: {type: string, example: "false"}, description: 是否精确匹配}
+        - {name: order, in: query, schema: {type: string}, description: 排序字段}
+        - {name: page, in: query, schema: {type: string, example: "1"}}
+        - {name: pageSize, in: query, schema: {type: string, example: "20"}}
+        - {name: type, in: query, schema: {type: string, example: "4"}, description: 包类型（4=文件分发）}
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code: {type: number, example: 0}
+                  codeExplain: {type: string}
+                  error: {type: string}
+                  data:
+                    type: object
+                    properties:
+                      page: {type: number}
+                      page_size: {type: number}
+                      total: {type: number}
+                      list: {type: array, items: {type: object}, description: 文件包条目（含 lastVersionInfo 等）}
+  /next/api/gateway/logic.artifact/package/categories_and_count:
+    get:
+      tags: [文件包列表与分类]
+      summary: 查询文件包分类及数量
+      x-relevant: true
+      parameters:
+        - {name: type, in: query, schema: {type: string, example: "4"}, description: 包类型（4=文件分发）}
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code: {type: number, example: 0}
+                  data:
+                    type: object
+                    properties:
+                      total: {type: number}
+                      list:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            name: {type: string, example: 默认}
+                            count: {type: number}
+  /next/api/gateway/artifact.pkgservice.Create/package:
+    post:
+      tags: [文件包创建与编辑]
+      summary: 新建文件包
+      x-relevant: true
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name: {type: string, example: tmp-llm, description: 文件包名称}
+                category: {type: string, example: 默认, description: 分类}
+                platform: {type: string, example: linux, description: 平台类型 linux/windows/other}
+                installPath: {type: string, example: /tmp/llm, description: 默认部署路径}
+                memo: {type: string, example: 测试用, description: 说明}
+                type: {type: number, example: 4, description: 包类型（4=文件分发）}
+                cId: {type: number, example: 1}
+      responses:
+        '200':
+          description: 成功，返回新建包信息（含 packageId）
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code: {type: number, example: 0}
+                  data:
+                    type: object
+                    properties:
+                      packageId: {type: string, example: 82211a8437d349a09e4cfe13a81ebfb3}
+                      instanceId: {type: string}
+                      name: {type: string}
+  /next/api/gateway/artifact.pkgservice.GetPackageDetail/package/package/{packageId}:
+    get:
+      tags: [文件包创建与编辑]
+      summary: 查询文件包详情
+      x-relevant: true
+      parameters:
+        - {name: packageId, in: path, required: true, schema: {type: string}}
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code: {type: number, example: 0}
+                  data:
+                    type: object
+                    properties:
+                      packageId: {type: string}
+                      name: {type: string}
+                      memo: {type: string}
+                      installPath: {type: string}
+                      creator: {type: string}
+                      hasVersion: {type: boolean}
+  /next/api/gateway/artifact.pkgservice.Update/package/{packageId}:
+    put:
+      tags: [文件包创建与编辑]
+      summary: 编辑文件包
+      x-relevant: true
+      parameters:
+        - {name: packageId, in: path, required: true, schema: {type: string}}
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name: {type: string, example: tmp-llm}
+                category: {type: string, example: 默认}
+                platform: {type: string, example: linux}
+                installPath: {type: string, example: /tmp/llm}
+                memo: {type: string, example: 测试用,更改}
+      responses:
+        '200':
+          description: 成功，data 为 packageId
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code: {type: number, example: 0}
+                  data: {type: string, example: 82211a8437d349a09e4cfe13a81ebfb3}
+  /next/api/gateway/artifact.pkgservice.DeletePackage/package/package/{packageId}:
+    delete:
+      tags: [文件包删除]
+      summary: 删除文件包
+      x-relevant: true
+      parameters:
+        - {name: packageId, in: path, required: true, schema: {type: string}}
+      responses:
+        '200':
+          description: 成功，data 为 packageId
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code: {type: number, example: 0}
+                  data: {type: string}
+  /next/api/gateway/artifact.version.ListVersion/version/list:
+    get:
+      tags: [版本管理]
+      summary: 查询文件包版本列表
+      x-relevant: true
+      parameters:
+        - {name: packageId, in: query, required: true, schema: {type: string}}
+        - {name: name, in: query, schema: {type: string}, description: 按版本号搜索}
+        - {name: env_type, in: query, schema: {type: string}, description: 按版本类型（环境）过滤}
+        - {name: page, in: query, schema: {type: string, example: "1"}}
+        - {name: pageSize, in: query, schema: {type: string, example: "20"}}
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code: {type: number, example: 0}
+                  data:
+                    type: object
+                    properties:
+                      page: {type: number}
+                      total: {type: number}
+                      list: {type: array, items: {type: object}}
+  /next/api/gateway/artifact.version_extends.CheckVersionName/api/artifact/v1/version/check_name/{packageId}:
+    get:
+      tags: [版本管理]
+      summary: 校验版本名是否可用
+      x-relevant: true
+      parameters:
+        - {name: packageId, in: path, required: true, schema: {type: string}}
+        - {name: name, in: query, required: true, schema: {type: string, example: 1.0.0}}
+      responses:
+        '200':
+          description: 成功（data 为 null 表示可用）
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code: {type: number, example: 0}
+                  data: {nullable: true}
+  /next/api/gateway/file_repository.workspace.UploadFile/workspace/{packageId}/upload:
+    post:
+      tags: [文件上传与提交]
+      summary: 上传文件到版本工作区
+      x-relevant: true
+      parameters:
+        - {name: packageId, in: path, required: true, schema: {type: string}}
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file: {type: string, format: binary, description: 单个文件不超过 4000 MB}
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code: {type: number, example: 0}
+                  data: {type: string, example: Success}
+  /next/api/gateway/file_repository.workspace.CommitWorkspaceV2/v2/workspace/{packageId}:
+    post:
+      tags: [文件上传与提交]
+      summary: 将工作区提交为新版本
+      x-relevant: true
+      parameters:
+        - {name: packageId, in: path, required: true, schema: {type: string}}
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name: {type: string, example: 1.0.0, description: 版本名称}
+                env_type: {type: number, example: 15, description: 版本类型位掩码（开发/测试/预发布/生产）}
+                message: {type: string, example: init, description: 版本备注}
+      responses:
+        '200':
+          description: 成功，data 为新版本 ID
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code: {type: number, example: 0}
+                  data: {type: string, example: 35f900d5e80440368bf6d84326f2c2e9}
+  /next/api/gateway/file_repository.archive.DownloadArchive/archive/{packageId}/{versionId}:
+    get:
+      tags: [版本管理]
+      summary: 下载版本归档包
+      x-relevant: true
+      parameters:
+        - {name: packageId, in: path, required: true, schema: {type: string}}
+        - {name: versionId, in: path, required: true, schema: {type: string}}
+        - {name: redirect, in: query, schema: {type: string, example: "false"}}
+      responses:
+        '200':
+          description: 成功，返回二进制归档文件流
+          content:
+            application/octet-stream:
+              schema: {type: string, format: binary}
+  /next/api/gateway/artifact.version.DeleteVersionV1/version/{packageId}/{versionId}:
+    delete:
+      tags: [版本管理]
+      summary: 删除版本
+      x-relevant: true
+      parameters:
+        - {name: packageId, in: path, required: true, schema: {type: string}}
+        - {name: versionId, in: path, required: true, schema: {type: string}}
+        - {name: deleteRepoFlag, in: query, schema: {type: string, example: "true"}, description: 是否彻底删除（同时删除备份文件）}
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code: {type: number, example: 0}
+                  data:
+                    type: object
+                    properties:
+                      code: {type: number}
+                      err_info: {type: string}
+  /next/api/gateway/artifact.permission.GetPackagePermission/permission/package/{packageId}:
+    get:
+      tags: [权限管理]
+      summary: 查询文件包权限
+      x-relevant: true
+      parameters:
+        - {name: packageId, in: path, required: true, schema: {type: string}}
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code: {type: number, example: 0}
+                  data:
+                    type: object
+                    properties:
+                      packageId: {type: string}
+                      updateAuthorizers: {type: array, items: {type: object}}
+                      deleteAuthorizers: {type: array, items: {type: object}}
+                      readAuthorizers: {type: array, items: {type: object}}
+  /next/api/gateway/artifact.permission.BatchUpdatePackagePermission/permission/packages:
+    post:
+      tags: [权限管理]
+      summary: 批量设置文件包权限
+      x-relevant: true
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                method: {type: string, example: overwrite, description: 更新方式（overwrite=覆盖）}
+                permissions:
+                  type: array
+                  items: {type: string}
+                  example: [updateAuthorizers, readAuthorizers]
+                  description: 要设置的权限项（updateAuthorizers=包编辑 / readAuthorizers=包查看 / deleteAuthorizers=包删除）
+                packageIds:
+                  type: array
+                  items: {type: string}
+                  description: 目标文件包 ID 列表
+      responses:
+        '200':
+          description: 成功，data.list 逐项返回每个包的处理结果
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code: {type: number, example: 0}
+                  data:
+                    type: object
+                    properties:
+                      list:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            code: {type: number}
+                            message: {type: string}
+                            packageId: {type: string}

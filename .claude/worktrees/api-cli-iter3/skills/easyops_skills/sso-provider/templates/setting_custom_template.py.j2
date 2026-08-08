@@ -1,0 +1,25 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
+# {{ provider_name }} SSO Provider 配置文件
+# 部署说明：将此文件放置到 sso_adapter/settings/setting_custom.py
+# 注意：此文件会与 setting.py 合并（通过 merge_setting），所以只需写差异部分
+
+PLUGIN_CONFIG = {
+    # 默认使用的 provider，部署时一般改为 "{{ provider_name }}"
+    "default": "{{ provider_name }}",
+
+    "{{ provider_name }}": {
+        {% for config_item in config_items %}
+        # {{ config_item.comment }}
+        "{{ config_item.key }}": {{ config_item.value }},
+        {% endfor %}
+    },
+}
+
+# 服务监听配置（按需取消注释并修改）
+# IPv4
+# APPLICATION = {"debug": False, "listen_host": "0.0.0.0", "listen_port": 8211, "processes_num": 4, "application": {}}
+
+# IPv6
+# APPLICATION = {"debug": False, "listen_host": "::", "listen_port": 8211, "processes_num": 4, "application": {}}

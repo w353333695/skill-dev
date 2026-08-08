@@ -1,0 +1,53 @@
+name: setServiceSlaConfig
+module: sla
+method: PUT
+path: /api/flowable_service/v1/service_instance/{instanceId}/sla_config
+gateway_path: /next/api/gateway/flowable_service.service_catalog.SetServiceSLAConfig/api/flowable_service/v1/service_instance/{serviceInstanceId}/sla_config
+service: logic.flowable_service
+side_effect: update
+path_source: backend_contract
+path_confidence: high
+tags:
+- 服务质量设置
+- 保存
+- sla
+- 服务关联
+- 写
+summary: 保存服务的 SLA 关联配置
+description: 为服务（流程）的任务节点绑定 SLA。scope=step 表示按任务节点关联；
+request:
+  required: []
+  properties:
+    instanceId:
+      type: instance_id
+      desc: 服务实例Id
+      _source: contract
+    scope:
+      type: string
+      desc: 适用范围, 二选一, 工单实例(服务)-inst, 任务节点-step
+      _source: contract
+    slaConfig:
+      type: object[]
+      desc: sla设置, service模式下,长度为一,userTaskId为空
+      _source: contract
+outputs: {}
+requires:
+- 'scope: step=任务节点'
+- slaConfig[] 每项{userTaskId, slaId}把流程节点绑定到SLA
+rollback: null
+examples: []
+confidence:
+  request: high
+  module: high
+  outputs: medium
+  tags: high
+  summary: high
+  requires: high
+endpoint:
+  contract_ref: logic.flowable_service|PUT|/api/flowable_service/v1/service_instance/{instanceId}/sla_config
+  mode: easyops_gateway
+source:
+  openapi_file: ITSM-运行管理-SLA协议管理-openapi.yaml
+  openapi_hash: 932ebe240075b0787316921f641a05f77ac16e8c2d23cb007ae7917133d3aa47
+  recorded_at: '2026-07-28T14:04:57.668523'
+registered_at: '2026-07-28T16:48:34.376143'

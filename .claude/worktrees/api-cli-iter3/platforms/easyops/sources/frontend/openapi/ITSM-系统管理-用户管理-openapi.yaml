@@ -1,0 +1,364 @@
+openapi: 3.0.3
+info:
+  title: ITSM 系统管理 · 用户管理 API
+  version: "1.0"
+  description: |
+    ITSM「系统管理 → 用户管理」涉及的后端接口。涵盖用户搜索、详情、
+    资料更新（禁用/启用/编辑）、密码重置、角色查询与分配。
+    路径前缀均为 `/next/api/gateway/...`，网关按「服务.方法」路由到后端微服务。
+  x-system: itsm
+
+# ============ 标签 ============
+tags:
+  - name: 用户查询
+    description: 用户列表与搜索
+  - name: 用户详情
+    description: 查询单个用户资料
+  - name: 用户更新
+    description: 更新用户实例（禁用 / 启用 / 编辑资料）
+  - name: 用户密码
+    description: 管理员重置用户密码
+  - name: 用户角色
+    description: 角色配置查询、用户角色查询与分配
+
+# ============ 路径 ============
+paths:
+
+  # ---------- 用户查询 ----------
+  /next/api/gateway/cmdb.instance.PostSearchV3/v3/object/USER/instance/_search:
+    post:
+      tags: [用户查询]
+      operationId: searchUser
+      summary: 搜索用户（CMDB USER 实例检索）
+      description: |
+        按关键词/高级条件分页搜索用户。USER 以 CMDB 实例模型存储，
+        支持字段过滤与关系展开。列表页加载、关键词搜索、高级搜索均走此接口。
+      x-relevant: true
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                fields:
+                  type: array
+                  items: { type: string }
+                  description: 返回字段，如 name/nickname/user_email/user_tel/state/instanceId
+                  example: [name, nickname, user_icon, user_email, user_tel, state, instanceId]
+                page:
+                  type: number
+                  example: 1
+                page_size:
+                  type: number
+                  example: 10
+                ignore_missing_field_error:
+                  type: boolean
+                  example: true
+                relation_limit:
+                  type: number
+                  example: 6
+      responses:
+        '200':
+          description: 用户列表
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      list:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            instanceId: { type: string, example: "653547e2782c3" }
+                            name: { type: string, example: "easyops", description: 用户名（登录名） }
+                            nickname: { type: string, example: "鲲鹏3046" }
+                            user_email: { type: string, example: "easyops@easyops.cn" }
+                            user_tel: { type: string, example: "13612345678" }
+                            state: { type: string, enum: [valid, invalid], description: "valid=有效/启用, invalid=无效/禁用" }
+
+  # ---------- 用户详情 ----------
+  /next/api/gateway/cmdb.instance.GetDetail/object/USER/instance/{instanceId}:
+    get:
+      tags: [用户详情]
+      operationId: getUserDetail
+      summary: 查询用户详情（CMDB 实例）
+      description: 进入用户编辑页时回填资料用，按用户实例 ID 查询。
+      x-relevant: true
+      parameters:
+        - name: instanceId
+          in: path
+          required: true
+          schema: { type: string }
+          description: 用户实例 ID（如 653baedadb9dd）
+          example: "653baedadb9dd"
+      responses:
+        '200':
+          description: 用户详情
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code: { type: number, example: 0 }
+                  data:
+                    type: object
+                    description: 用户全量字段（含关系引用列表）
+
+  /next/api/gateway/logic.user_service/api/v1/users/detail/{username}:
+    get:
+      tags: [用户详情]
+      operationId: getUserServiceDetail
+      summary: 查询用户服务侧详情
+      description: |
+        user_service 服务侧的用户详情，含 email/phone/role/state 等，
+        修改密码、修改角色前会调用。
+      x-relevant: true
+      parameters:
+        - name: username
+          in: path
+          required: true
+          schema: { type: string }
+          description: 用户名（name，如 easyops）
+          example: "easyops"
+        - name: org
+          in: query
+          required: false
+          schema: { type: string }
+          description: 组织 ID
+          example: "5910"
+      responses:
+        '200':
+          description: 用户服务详情
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code: { type: number, example: 0 }
+                  data:
+                    type: object
+                    properties:
+                      _object_id: { type: string, example: "USER" }
+                      instanceId: { type: string, example: "653547e2782c3" }
+                      name: { type: string, example: "easyops" }
+                      nickname: { type: string, example: "鲲鹏3046" }
+                      email: { type: string, example: "easyops@easyops.cn" }
+                      phone: { type: string, example: "13612345678" }
+                      org: { type: number, example: 5910 }
+                      role: { type: string, description: 角色摘要 }
+                      state: { type: string, example: "valid" }
+
+  /next/api/gateway/logic.user_service/api/v1/users/orgs:
+    get:
+      tags: [用户详情]
+      operationId: getUserOrgs
+      summary: 查询用户所属组织
+      description: 获取当前用户可见的组织列表（登录态初始化用）。
+      x-relevant: false
+      responses:
+        '200':
+          description: 组织列表
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code: { type: number, example: 0 }
+
+  # ---------- 用户更新 ----------
+  /next/api/gateway/cmdb.instance.UpdateInstance/object/USER/instance/{instanceId}:
+    put:
+      tags: [用户更新]
+      operationId: updateUser
+      summary: 更新用户实例（禁用 / 启用 / 编辑资料）
+      description: |
+        更新 USER 实例字段。禁用/启用通过修改 state（valid↔invalid）实现，
+        编辑资料则提交 nickname/user_email/user_tel 等字段。
+      x-relevant: true
+      parameters:
+        - name: instanceId
+          in: path
+          required: true
+          schema: { type: string }
+          description: 用户实例 ID
+          example: "653baedadb9dd"
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              description: 只传需修改的字段
+              properties:
+                nickname: { type: string, example: "test0001", description: 昵称 }
+                user_email: { type: string, example: "test0001@qq.com", description: 邮箱 }
+                user_tel: { type: string, example: "110", description: 手机号 }
+                state: { type: string, enum: [valid, invalid], description: "禁用传 invalid，启用传 valid" }
+      responses:
+        '200':
+          description: 更新结果
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code: { type: number, example: 0 }
+                  error: { type: string, example: "" }
+                  message: { type: string, example: "" }
+                  data: { type: object }
+
+  # ---------- 用户密码 ----------
+  /next/api/gateway/user_service.user_admin.AlterPassword/api/v1/users/alter_password:
+    post:
+      tags: [用户密码]
+      operationId: alterPassword
+      summary: 管理员重置用户密码
+      description: |
+        管理员侧修改指定用户的登录密码，密码字段以 Base64 编码传输。
+        ⚠️ 录制中该接口返回 500（error: 查询无结果），实际使用时需确认
+        用户名正确且用户为有效态。
+      x-relevant: true
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name, password]
+              properties:
+                name: { type: string, example: "test0001", description: 用户名 }
+                password: { type: string, example: "YXNkZmFzZGY=", description: 新密码的 Base64 编码 }
+      responses:
+        '200':
+          description: 修改结果（成功 code=0）
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code: { type: number, example: 500, description: "0=成功；500=服务异常（如用户查询无结果）" }
+                  codeExplain: { type: string, example: "ERR_UNKNOWN_ERROR" }
+                  error: { type: string, example: "查询无结果" }
+                  data: { type: object, nullable: true }
+
+  # ---------- 用户角色 ----------
+  /next/api/gateway/permission.role.GetPermissionRoleList/api/v1/permission_role/config:
+    get:
+      tags: [用户角色]
+      operationId: getPermissionRoleList
+      summary: 查询可分配角色列表
+      description: 分页获取系统全部角色配置（含角色名、组织、权限、禁用菜单等），分配角色与列表初始化时调用。
+      x-relevant: true
+      parameters:
+        - name: fields
+          in: query
+          required: false
+          schema: { type: string }
+          description: 返回字段，逗号分隔
+          example: "org,role,user_group"
+        - name: page
+          in: query
+          required: false
+          schema: { type: string, example: "1" }
+        - name: page_size
+          in: query
+          required: false
+          schema: { type: string, example: "1000" }
+      responses:
+        '200':
+          description: 角色列表
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code: { type: number, example: 0 }
+                  total: { type: number, example: 104 }
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id: { type: string, example: "65354eb0b23b2" }
+                        org: { type: number, example: 5910 }
+                        role: { type: string, example: "系统管理员", description: 角色名 }
+                        user: { type: array, items: { type: string } }
+                        permission: { type: array, items: { type: string } }
+                        forbidden_menu: { type: array, items: { type: string } }
+
+  /next/api/gateway/permission.role.GetUserRole/api/v1/permission_role/user_role/{username}:
+    get:
+      tags: [用户角色]
+      operationId: getUserRole
+      summary: 查询用户当前角色
+      description: 获取指定用户已分配的角色名列表。
+      x-relevant: true
+      parameters:
+        - name: username
+          in: path
+          required: true
+          schema: { type: string }
+          description: 用户名（name）
+          example: "test0001"
+      responses:
+        '200':
+          description: 用户角色
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code: { type: number, example: 0 }
+                  data:
+                    type: object
+                    properties:
+                      roles:
+                        type: array
+                        items: { type: string }
+                        example: ["普通用户", "工具使用人员"]
+
+  /next/api/gateway/permission.role.RoleSetUser/api/v1/permission_role/user_set_roles/{username}:
+    put:
+      tags: [用户角色]
+      operationId: setUserRoles
+      summary: 设置用户角色（覆盖式）
+      description: 为指定用户分配角色，roles 为覆盖式全量设置（传最终应有的全部角色）。
+      x-relevant: true
+      parameters:
+        - name: username
+          in: path
+          required: true
+          schema: { type: string }
+          description: 用户名（name）
+          example: "test0001"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [roles]
+              properties:
+                roles:
+                  type: array
+                  items: { type: string }
+                  description: 角色名全量列表（覆盖原角色）
+                  example: ["普通用户", "工具使用人员", "工具管理人员"]
+      responses:
+        '200':
+          description: 设置结果
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code: { type: number, example: 0 }
+                  data:
+                    type: object
+                    properties:
+                      count: { type: number, example: 3, description: 成功设置的角色数 }

@@ -1,0 +1,45 @@
+name: getNotifyPolicyDetail
+module: notify_trigger
+method: GET
+path: /api/itsc_trigger/v1/notify_policy/{instanceId}
+gateway_path: /next/api/gateway/flowable_service.notify_policy.GetNotifyPolicyDetail/api/itsc_trigger/v1/notify_policy/{notifyPolicyId}
+service: logic.flowable_service
+side_effect: read
+path_source: backend_contract
+path_confidence: high
+tags:
+- 通知策略
+- 详情
+- notify_policy
+summary: 查询通知配置详情
+description: 获取单条通知配置详情（编辑回填用）。
+request:
+  required: []
+  properties:
+    instanceId:
+      type: instance_id
+      desc: 实例Id
+      _source: contract
+outputs:
+  detail:
+    jsonpath: $.data
+    desc: 通知策略详情
+requires:
+- notifyPolicyId 须存在
+rollback: null
+examples: []
+confidence:
+  request: high
+  module: high
+  outputs: high
+  tags: high
+  summary: high
+  requires: high
+endpoint:
+  contract_ref: logic.flowable_service|GET|/api/itsc_trigger/v1/notify_policy/{instanceId}
+  mode: easyops_gateway
+source:
+  openapi_file: ITSM-系统管理-通知触发器管理与配置-openapi.yaml
+  openapi_hash: ae0110221a16aa578e8cf3aa607cf35cde035cde487c63a42d5985e4e23ddeb5
+  recorded_at: '2026-07-28T15:42:50.151408'
+registered_at: '2026-07-28T16:49:10.333379'

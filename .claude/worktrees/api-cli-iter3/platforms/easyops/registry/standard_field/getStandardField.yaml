@@ -1,0 +1,53 @@
+name: getStandardField
+module: standard_field
+method: GET
+path: /api/flowable_service/v1/standard_field/{fieldId}
+gateway_path: /next/api/gateway/logic.flowable_service/api/flowable_service/v1/standard_field/{fieldId}
+service: logic.flowable_service
+side_effect: read
+path_source: gateway_strip
+path_confidence: medium
+tags:
+- 标准字段
+- 详情
+- 查询
+summary: 查询标准字段详情
+description: '按 fieldId 拉取该标准字段的完整定义（key/name/kind/sourceType/sourceConfig/domainModels/formVersions
+  等）。
+
+  进入字段编辑页时调用，亦可用于编排中校验字段存在性或读取属性配置。
+
+  '
+request:
+  required:
+  - fieldId
+  properties:
+    fieldId:
+      type: string
+      desc: 字段实例 ID
+outputs:
+  detail:
+    jsonpath: $.data
+    desc: 标准字段详情全量（instanceId/key/name/kind/sourceConfig/domainModels 等）
+  instanceId:
+    jsonpath: $.data.instanceId
+    desc: 字段实例 ID
+requires:
+- fieldId 须是已存在的标准字段 instanceId
+rollback: null
+examples:
+- fieldId: 656788ffdaf71
+confidence:
+  request: high
+  module: high
+  outputs: high
+  tags: high
+  summary: high
+endpoint:
+  contract_ref: ''
+  mode: easyops_gateway
+source:
+  openapi_file: ITSM-标准字段管理-openapi.yaml
+  openapi_hash: 387aa55af18b53ce727c08ec645af9355804749d8cb47a4623d0d06772bfbe74
+  recorded_at: '2026-07-13T14:59:06'
+registered_at: '2026-07-21T15:38:35.474878'

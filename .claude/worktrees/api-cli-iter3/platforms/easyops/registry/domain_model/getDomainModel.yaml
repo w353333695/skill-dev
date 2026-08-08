@@ -1,0 +1,48 @@
+name: getDomainModel
+module: domain_model
+method: GET
+path: /api/flowable_service/v1/domain_model/{modelId}
+gateway_path: /next/api/gateway/logic.flowable_service/api/flowable_service/v1/domain_model/{modelId}
+service: logic.flowable_service
+side_effect: read
+path_source: gateway_strip
+path_confidence: medium
+tags:
+- 领域模型
+- 详情
+- 查询
+- domain_model
+- detail
+summary: 按 modelId 查询领域模型详情
+description: 进入模型详情/编辑页时，按 modelId 拉取该模型完整定义，含关联的标准字段完整配置（key/name/kind/sourceType/sourceConfig
+  等）。
+request:
+  required:
+  - modelId
+  properties:
+    modelId:
+      type: string
+      desc: 领域模型实例 ID
+outputs:
+  detail:
+    jsonpath: $.data
+    desc: 领域模型完整定义（含 key/name/kind/standardFieldIds 等关联字段配置）
+requires:
+- modelId 须为已存在的领域模型 instanceId
+rollback: null
+examples: []
+confidence:
+  module: high
+  outputs: medium
+  requires: medium
+  rollback: high
+  summary: high
+  tags: high
+endpoint:
+  contract_ref: ''
+  mode: easyops_gateway
+source:
+  openapi_file: ITSM-领域模型管理-openapi.yaml
+  openapi_hash: 2c727e582c56d2ceefcda28e2b27cc852459f15ccd68dc641f01486da86c8e16
+  recorded_at: '2026-07-13T15:06:27'
+registered_at: '2026-07-22T10:33:48.773422'

@@ -1,0 +1,54 @@
+name: search_installed_micro_app
+module: service_catalog
+method: POST
+path: /v3/object/_INSTALLED_MICRO_APP/instance/_search
+gateway_path: /next/api/gateway/logic.cmdb.service/v3/object/_INSTALLED_MICRO_APP/instance/_search
+service: logic.cmdb.service
+side_effect: read
+path_source: gateway_strip
+path_confidence: medium
+tags:
+- 微应用
+- CMDB
+- 已安装
+- 查询
+- 列表
+summary: CMDB查询已安装微应用
+description: CMDB 检索 `_INSTALLED_MICRO_APP` 实例，得到平台已安装的微应用清单（appId/版本）。
+request:
+  required: []
+  properties:
+    page:
+      type: number
+      desc: ''
+    page_size:
+      type: number
+      desc: ''
+    ignore_missing_field_error:
+      type: boolean
+      desc: ''
+outputs:
+  list_full:
+    jsonpath: $.data.list
+    desc: 已安装微应用实例列表
+  list_ids:
+    jsonpath: $.data.list
+    desc: 列表项id集合(配合 ${s.list_full.instanceId} 投影)
+requires: []
+rollback: null
+examples: []
+confidence:
+  module: medium
+  outputs: low
+  requires: high
+  rollback: high
+  summary: medium
+  tags: medium
+endpoint:
+  contract_ref: ''
+  mode: easyops_gateway
+source:
+  openapi_file: ITSM-登录与功能入口-openapi.yaml
+  openapi_hash: ec5d99f1d3772798ed04de980321a11cbf0d5a286894ac6da4acaea855a5904a
+  recorded_at: '2026-07-09T14:05:09'
+registered_at: '2026-07-22T10:34:10.040270'

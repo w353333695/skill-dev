@@ -1,0 +1,44 @@
+name: setUserRoles
+module: user
+method: PUT
+path: /api/v1/permission_role/user_set_roles/{username}
+gateway_path: /next/api/gateway/permission.role.RoleSetUser/api/v1/permission_role/user_set_roles/{username}
+service: permission.role.RoleSetUser
+side_effect: update
+path_source: gateway_strip
+path_confidence: medium
+tags:
+- 用户
+- 角色
+- 设置
+- 覆盖式
+summary: 设置用户角色（覆盖式）
+description: 为指定用户分配角色，roles 为覆盖式全量设置（传最终应有的全部角色）。
+request:
+  required:
+  - roles
+  properties:
+    roles:
+      type: array
+      desc: 角色名全量列表（覆盖原角色）
+outputs: {}
+requires:
+- username 须为已存在的用户名
+- roles 须为已存在的角色名（来自 getPermissionRoleList）
+rollback: null
+examples: []
+confidence:
+  module: high
+  outputs: low
+  requires: medium
+  rollback: high
+  summary: high
+  tags: high
+endpoint:
+  contract_ref: ''
+  mode: easyops_gateway
+source:
+  openapi_file: ITSM-系统管理-用户管理-openapi.yaml
+  openapi_hash: 62e3d6c7b4841e3254ee4f78bd899a37d383bbfcfca7613cccddfdbbbe90392e
+  recorded_at: '2026-07-13T11:40:59'
+registered_at: '2026-07-22T10:34:10.925487'

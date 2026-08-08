@@ -1,0 +1,58 @@
+name: post_api_v1_users_group_all
+module: user_group
+method: POST
+path: /api/v1/users/group/all
+gateway_path: /api/gateway/user_service.user_admin.SearchAllUserGroup/api/v1/users/group/all
+service: logic.user_service
+side_effect: create
+path_source: gateway_strip
+path_confidence: medium
+tags:
+- 用户组
+- 列表
+- 查询
+- user_group
+- list
+summary: 查询当前org全部用户组列表
+description: 查询当前 org 下全部用户组列表，用于用户组列表页渲染；进入列表页、创建/删除后均会刷新调用。
+request:
+  required: []
+  properties:
+    fields:
+      type: object
+      desc: 指定返回字段
+    query:
+      type: map
+      desc: 'e.g.: { name: { $like: ''%q%'' } }, { $or: [{ name: { $like: ''%q%''
+        }}] }'
+      _source: contract
+    sort:
+      type: map
+      desc: '按字段排序, 留空默认按照实例ID降序排序(1表示升序, -1表示降序) e.g.: { instanceId: 1 }'
+      _source: contract
+outputs:
+  list_full:
+    jsonpath: $.data.list
+    desc: 用户组列表全量
+  list_ids:
+    jsonpath: $.data.list
+    desc: 用户组 instanceId 集合（由 list_full 投影）
+requires: []
+rollback: null
+examples: []
+confidence:
+  module: high
+  outputs: high
+  requires: medium
+  rollback: high
+  summary: high
+  tags: medium
+  request: medium
+endpoint:
+  contract_ref: logic.user_service|POST|/api/v1/users/group/all
+  mode: easyops_gateway
+source:
+  openapi_file: ITSM-系统管理-用户组管理-openapi.yaml
+  openapi_hash: f7ae9bf59c2ee6a055c6eaafe9861ec2a3b675a02c198985d484c494e59282f0
+  recorded_at: '2026-07-13T12:06:27'
+registered_at: '2026-07-22T10:44:46.114590'

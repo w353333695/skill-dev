@@ -1,0 +1,54 @@
+name: setDepartmentStaffPosition
+module: org
+method: POST
+path: /api/sys_setting/v1/organization/bulk/{departmentId}/staff_position
+gateway_path: /next/api/gateway/logic.sys_setting/api/sys_setting/v1/organization/bulk/{departmentId}/staff_position
+service: logic.sys_setting
+side_effect: create
+path_source: backend_contract
+path_confidence: high
+tags:
+- 组织架构
+- 科室职务
+- 主管
+- 设置
+- position
+summary: 批量设置科室成员职务
+description: 批量为指定科室设置成员的职务。position=leader 表示设为主管。
+request:
+  required:
+  - position
+  - userIds
+  properties:
+    position:
+      type: string
+      desc: 职务标识（leader=主管）
+    userIds:
+      type: instance_id[]
+      desc: 担任该职务的用户 instanceId 列表
+    departmentId:
+      type: instance_id
+      desc: 部门id
+      _source: contract
+outputs: {}
+requires:
+- departmentId 须是已存在科室 ID
+- userIds 须是该科室已有成员的 instanceId
+rollback: null
+examples: []
+confidence:
+  module: high
+  outputs: low
+  requires: medium
+  rollback: high
+  summary: high
+  tags: high
+  request: medium
+endpoint:
+  contract_ref: logic.sys_setting|POST|/api/sys_setting/v1/organization/bulk/{departmentId}/staff_position
+  mode: easyops_gateway
+source:
+  openapi_file: ITSM-系统管理-组织架构管理-openapi.yaml
+  openapi_hash: ce8f98ceb672cc8ad12ee21d7bce16a4da2c9102ea052588dcf7f67498f67af7
+  recorded_at: '2026-07-13T13:17:55'
+registered_at: '2026-07-22T10:34:11.553276'

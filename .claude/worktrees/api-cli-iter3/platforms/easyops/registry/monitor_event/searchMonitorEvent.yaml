@@ -1,0 +1,79 @@
+name: searchMonitorEvent
+module: monitor_event
+method: POST
+path: /api/v1/monitor_event/_search
+gateway_path: /api/gateway/alert_service.SearchMonitorEvent/api/v1/monitor_event/_search
+service: logic.alert_service
+side_effect: read
+path_source: backend_contract
+path_confidence: high
+tags:
+- 告警事件
+- 查询
+- MonitorEvent
+- alert_service
+- 排查
+summary: 查询标准化告警事件(MonitorEvent)
+description: '查询告警事件库(monitor_event)，返回标准化告警事件列表。用于核对第三方告警是否入库、查 instanceId/objectId(资源关联结果)。
+
+  st/et 支持相对时间(-1h/-1d)或 Unix 时间戳；query 与 mongo 语法一致。
+
+  事件字段结构见 knowledge/modules/alert_portal/third-party-alarm-access.md §8。
+
+  '
+request:
+  required: []
+  properties:
+    query:
+      type: object
+      desc: 搜索条件，mongo 语法
+    fields:
+      type: array
+      desc: 选择返回字段，不传返回全部
+    sort:
+      type: string
+      desc: 排序
+    page:
+      type: integer
+      desc: 页码
+    page_size:
+      type: integer
+      desc: 分页大小
+    st:
+      type: string
+      desc: 开始时间，如 -1h/-1d 或 unix 时间戳
+    et:
+      type: string
+      desc: 结束时间
+    parentObjects:
+      type: array
+      desc: 父模型；监控资源为父模型时传，子模型传空
+outputs:
+  list_full:
+    jsonpath: $.data.list
+    desc: 告警事件列表(MonitorEvent[])
+  total:
+    jsonpath: $.data.total
+    desc: 总数
+requires:
+- MonitorEvent 字段结构见 knowledge/modules/alert_portal/third-party-alarm-access.md §8
+rollback: null
+examples:
+- page: 1
+  page_size: 50
+  st: -1h
+  query:
+    source: zabbix
+confidence:
+  request: high
+  outputs: high
+  requires: medium
+  rollback: low
+  module: high
+  tags: high
+  summary: high
+endpoint:
+  contract_ref: logic.alert_service|POST|/api/v1/monitor_event/_search
+source:
+  openapi_file: 手工编写(后端契约 logic.alert_service + 知识文档 §8)
+registered_at: '2026-08-03T22:29:01.385686'

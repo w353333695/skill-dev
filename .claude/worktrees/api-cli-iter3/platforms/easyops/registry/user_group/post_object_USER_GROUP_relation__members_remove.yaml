@@ -1,0 +1,49 @@
+name: post_object_USER_GROUP_relation__members_remove
+module: user_group
+method: POST
+path: /object/USER_GROUP/relation/_members/remove
+gateway_path: /api/gateway/cmdb.instance_relation.Remove/object/USER_GROUP/relation/_members/remove
+service: cmdb.instance_relation.Remove
+side_effect: create
+path_source: gateway_strip
+path_confidence: medium
+tags:
+- 用户组
+- 成员
+- 移除
+- member
+- remove
+summary: 从用户组移除成员关联
+description: 将指定用户从用户组的成员关系（_members）中移除，仅解除关联，不删除用户本身。
+request:
+  required:
+  - instance_ids
+  - related_instance_ids
+  properties:
+    instance_ids:
+      type: array
+      desc: 用户组实例 ID 列表
+    related_instance_ids:
+      type: array
+      desc: 要移除的用户 instanceId 列表
+outputs: {}
+requires:
+- instance_ids
+- related_instance_ids
+rollback: null
+examples: []
+confidence:
+  module: high
+  outputs: low
+  requires: high
+  rollback: high
+  summary: high
+  tags: medium
+endpoint:
+  contract_ref: ''
+  mode: easyops_gateway
+source:
+  openapi_file: ITSM-系统管理-用户组管理-openapi.yaml
+  openapi_hash: f7ae9bf59c2ee6a055c6eaafe9861ec2a3b675a02c198985d484c494e59282f0
+  recorded_at: '2026-07-13T12:06:27'
+registered_at: '2026-07-22T10:44:46.114590'

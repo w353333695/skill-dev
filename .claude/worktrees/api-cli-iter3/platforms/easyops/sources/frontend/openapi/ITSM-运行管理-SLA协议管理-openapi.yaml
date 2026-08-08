@@ -1,0 +1,414 @@
+openapi: 3.0.3
+info:
+  title: ITSM-运行管理-SLA协议管理
+  description: |
+    EasyOps ITSM「SLA 协议管理（服务级别协议）」相关接口。SLA 协议定义工单在不同优先级/任务节点下的
+    响应时效(answer)与完成时效(done)，以及达到预警(warning)/超时(timeout)时的通知策略和适用服务时段。
+
+    覆盖能力：SLA 协议的 列表查询 / 详情 / 新建 / 编辑 / 删除，
+    以及服务时段(工作日历)、优先级算法、通知策略等依赖查询，
+    和在「服务质量设置」中为流程任务节点关联 SLA。
+  version: "1.0.0"
+  x-flow: ITSM-运行管理-SLA协议管理
+  x-system: EasyOps ITSM
+  x-host: http://172.30.0.90
+  x-entry: /next/itsc-workbench/workbench
+
+servers:
+  - url: http://172.30.0.90
+
+tags:
+  - name: SLA协议管理
+    description: SLA 协议（sla/rule）的增删改查
+  - name: 服务质量设置
+    description: 在服务管理中为流程任务节点关联 SLA
+  - name: 优先级与服务时段
+    description: SLA 依赖的优先级算法、服务时段(工作日历)
+  - name: 通知策略
+    description: SLA 预警/超时通知选用
+
+paths:
+  /next/api/gateway/logic.flowable_service/api/flowable_service/v1/sla/rule/_search:
+    post:
+      tags: [SLA协议管理]
+      operationId: searchSlaRuleLogic
+      summary: 查询 SLA 协议列表（列表页）
+      description: |
+        SLA 协议列表页查询，支持按名称、协议负责人、服务名称、关键词搜索。
+        与 SearchSLARule 路由等价，列表页使用本路由。
+      x-relevant: true
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                Q: { type: string, description: 关键词 }
+                name: { type: string, description: 协议名称 }
+                ownerName: { type: string, description: 协议负责人账号 }
+                serviceName: { type: string, description: 服务名称 }
+                page: { type: integer, example: 1 }
+                pageSize: { type: integer, example: 10 }
+      responses:
+        "200":
+          description: SLA 协议列表
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ApiEnvelope" }
+
+  /next/api/gateway/flowable_service.sla.SearchSLARule/api/flowable_service/v1/sla/rule/_search:
+    post:
+      tags: [SLA协议管理]
+      operationId: searchSlaRule
+      summary: 查询 SLA 协议列表（服务质量设置选用）
+      description: 服务质量设置中可选 SLA 列表查询，与列表页路由等价。
+      x-relevant: true
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                page: { type: integer, example: 1 }
+                pageSize: { type: integer, example: 3000 }
+      responses:
+        "200":
+          description: SLA 协议列表
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ApiEnvelope" }
+
+  /next/api/gateway/flowable_service.sla.GetSLARule/api/flowable_service/v1/sla/rule/{ruleId}:
+    get:
+      tags: [SLA协议管理]
+      operationId: getSlaRule
+      summary: 查询 SLA 协议详情
+      description: 获取单条 SLA 协议详情（编辑表单回填用）。
+      x-relevant: true
+      parameters:
+        - $ref: "#/components/parameters/RuleId"
+      responses:
+        "200":
+          description: SLA 协议详情
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/ApiEnvelope"
+                  - type: object
+                    properties:
+                      data: { $ref: "#/components/schemas/SlaRuleDetail" }
+
+  /next/api/gateway/flowable_service.sla.CreateSLARule/api/flowable_service/v1/sla/rule:
+    post:
+      tags: [SLA协议管理]
+      operationId: createSlaRule
+      summary: 新建 SLA 协议
+      description: |
+        创建一条 SLA 协议。basicInfo 含名称/状态/负责人/类型/优先级；
+        slaConfig 数组定义每个优先级等级的时效(levelConfig)与通知(notifyPolicy)。
+      x-relevant: true
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/SlaRuleUpsert" }
+      responses:
+        "200":
+          description: 创建结果，返回 ruleId
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/ApiEnvelope"
+                  - type: object
+                    properties:
+                      data:
+                        type: object
+                        properties:
+                          ruleId: { type: string }
+
+  /next/api/gateway/flowable_service.sla.UpdateSLARule/api/flowable_service/v1/sla/rule/{ruleId}:
+    put:
+      tags: [SLA协议管理]
+      operationId: updateSlaRule
+      summary: 编辑 SLA 协议
+      description: 修改已存在的 SLA 协议，body 结构同 create。
+      x-relevant: true
+      parameters:
+        - $ref: "#/components/parameters/RuleId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/SlaRuleUpsert" }
+      responses:
+        "200":
+          description: 编辑结果
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ApiEnvelope" }
+
+  /next/api/gateway/logic.flowable_service/api/flowable_service/v1/sla/rule/{ruleId}:
+    delete:
+      tags: [SLA协议管理]
+      operationId: deleteSlaRule
+      summary: 删除 SLA 协议
+      description: 删除指定 SLA 协议。
+      x-relevant: true
+      parameters:
+        - $ref: "#/components/parameters/RuleId"
+      responses:
+        "200":
+          description: 删除结果
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ApiEnvelope" }
+
+  /next/api/gateway/flowable_service.sla.ListWorkingCalendar/api/flowable_service/v1/sla/calendar:
+    get:
+      tags: [优先级与服务时段]
+      operationId: listWorkingCalendar
+      summary: 查询服务时段（工作日历）
+      description: 获取可选的服务时段/工作日历列表，SLA 时效按此时段计算（如「全年无休」「工作日」）。
+      x-relevant: true
+      parameters:
+        - name: page
+          in: query
+          schema: { type: string, example: "1" }
+        - name: pageSize
+          in: query
+          schema: { type: string, example: "3000" }
+      responses:
+        "200":
+          description: 工作日历列表
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ApiEnvelope" }
+
+  /next/api/gateway/flowable_service.service_priority.ListServiceCatlogPriority/api/flowable_service/v1/service_priority:
+    get:
+      tags: [优先级与服务时段]
+      operationId: listServicePriority
+      summary: 查询优先级列表
+      description: 获取可选的优先级算法列表。
+      x-relevant: true
+      parameters:
+        - name: page
+          in: query
+          schema: { type: string, example: "1" }
+        - name: pageSize
+          in: query
+          schema: { type: string, example: "20" }
+      responses:
+        "200":
+          description: 优先级列表
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ApiEnvelope" }
+
+  /next/api/gateway/flowable_service.service_priority.GetPriorityAlgorithm/api/flowable_service/v2/service_priority/{priorityId}:
+    get:
+      tags: [优先级与服务时段]
+      operationId: getPriorityAlgorithm
+      summary: 查询优先级算法详情
+      description: 获取指定优先级算法的配置（等级定义等）。
+      x-relevant: true
+      parameters:
+        - name: priorityId
+          in: path
+          required: true
+          schema: { type: string, example: 5b8af20a1ac64 }
+      responses:
+        "200":
+          description: 优先级算法详情
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ApiEnvelope" }
+
+  /next/api/gateway/flowable_service.notify_policy.ListNotifyPolicy/api/itsc_trigger/v1/notify_policy:
+    get:
+      tags: [通知策略]
+      operationId: listNotifyPolicyForSla
+      summary: 查询通知策略列表
+      description: 获取 SLA 4 种通知（响应预警/超时、完成预警/超时）可选的通知策略。
+      x-relevant: true
+      responses:
+        "200":
+          description: 通知策略列表
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ApiEnvelope" }
+
+  /next/api/gateway/flowable_service.service_catalog.GetServiceSLAConfig/api/flowable_service/v1/service_instance/{serviceInstanceId}/sla_config:
+    get:
+      tags: [服务质量设置]
+      operationId: getServiceSlaConfig
+      summary: 查询服务的 SLA 关联配置
+      description: 在「服务质量设置」中回显某服务（流程）各任务节点已关联的 SLA。
+      x-relevant: true
+      parameters:
+        - $ref: "#/components/parameters/ServiceInstanceId"
+      responses:
+        "200":
+          description: 服务的 SLA 关联配置
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/ApiEnvelope"
+                  - type: object
+                    properties:
+                      data: { $ref: "#/components/schemas/ServiceSlaConfig" }
+
+  /next/api/gateway/flowable_service.service_catalog.SetServiceSLAConfig/api/flowable_service/v1/service_instance/{serviceInstanceId}/sla_config:
+    put:
+      tags: [服务质量设置]
+      operationId: setServiceSlaConfig
+      summary: 保存服务的 SLA 关联配置
+      description: |
+        为服务（流程）的任务节点绑定 SLA。scope=step 表示按任务节点关联；
+        slaConfig 中每项把一个 userTaskId（流程节点）绑定到一个 slaId（SLA 协议）。
+      x-relevant: true
+      parameters:
+        - $ref: "#/components/parameters/ServiceInstanceId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/ServiceSlaConfig" }
+      responses:
+        "200":
+          description: 保存结果
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ApiEnvelope" }
+
+components:
+  parameters:
+    RuleId:
+      name: ruleId
+      in: path
+      required: true
+      description: SLA 协议 ID（创建时返回）
+      schema: { type: string, example: 657a58e33dbf1 }
+    ServiceInstanceId:
+      name: serviceInstanceId
+      in: path
+      required: true
+      description: 服务实例 ID（流程）
+      schema: { type: string, example: 65639d7bd9b21 }
+
+  schemas:
+    ApiEnvelope:
+      type: object
+      properties:
+        code: { type: number, example: 0 }
+        codeExplain: { type: string, example: "" }
+        error: { type: string, example: "" }
+        data:
+          nullable: true
+
+    SlaRuleUpsert:
+      type: object
+      description: 新建/编辑 SLA 协议的请求体
+      required: [basicInfo, slaConfig]
+      properties:
+        basicInfo:
+          type: object
+          description: SLA 协议基本信息
+          properties:
+            name: { type: string, description: 协议名称, example: test }
+            memo: { type: string, description: 协议描述, example: 测试 }
+            status: { type: string, description: "状态：enabled / disabled", example: enabled }
+            ownerId: { type: string, description: 协议负责人实例ID, example: 6350f7b16cba9 }
+            type: { type: string, description: "适用类型：step=任务节点", example: step }
+            priorityId: { type: string, description: 优先级算法ID, example: 5b8af20a1ac64 }
+        slaConfig:
+          type: array
+          description: SLA 配置（每个优先级等级的时效与通知）
+          items:
+            type: object
+            properties:
+              levelConfig:
+                type: array
+                description: 时效配置（响应/完成）
+                items:
+                  type: object
+                  properties:
+                    agreementType:
+                      type: string
+                      description: "协议类型：answer=响应时效 / done=完成时效"
+                      example: answer
+                    duration:
+                      type: string
+                      description: 时效（数值+单位），如 2h、4h
+                      example: 2h
+                    criticalRate:
+                      type: number
+                      description: 临界比例/达标率
+                      example: 89
+                    levelName:
+                      type: string
+                      description: 优先级等级名称
+                      example: common
+                    workingCalendarId:
+                      type: string
+                      description: 服务时段(工作日历)ID
+                      example: 68b16788eca1c1f342a871b0
+              notifyPolicy:
+                type: array
+                description: 通知配置（4 种：响应预警/超时、完成预警/超时）
+                items:
+                  type: object
+                  properties:
+                    notifyType:
+                      type: string
+                      description: "通知类型：answer_warning / answer_timeout / done_warning / done_timeout"
+                      example: answer_warning
+                    notifyPolicyId:
+                      type: string
+                      description: 通知策略ID
+                      example: 5bfd5845e710a
+                    count:
+                      type: integer
+                      description: 通知次数
+                      example: 1
+                    interval:
+                      type: string
+                      description: 通知间隔
+                      example: 1h
+
+    SlaRuleDetail:
+      allOf:
+        - $ref: "#/components/schemas/SlaRuleUpsert"
+        - type: object
+          properties:
+            ruleId: { type: string, example: 657a58e33dbf1 }
+            ownerName: { type: string }
+            creator: { type: string }
+            ctime: { type: string }
+
+    ServiceSlaConfig:
+      type: object
+      description: 服务的 SLA 关联配置（服务质量设置）
+      properties:
+        scope:
+          type: string
+          description: "关联维度：step=任务节点"
+          example: step
+        slaConfig:
+          type: array
+          items:
+            type: object
+            properties:
+              userTaskId:
+                type: string
+                description: 流程任务节点 ID
+                example: Activity_1chy6kb
+              slaId:
+                type: string
+                description: 关联的 SLA 协议 ID
+                example: 63d7d2dc7f519

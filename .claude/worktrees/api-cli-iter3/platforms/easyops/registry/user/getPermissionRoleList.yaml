@@ -1,0 +1,78 @@
+name: getPermissionRoleList
+module: user
+method: GET
+path: /api/v1/permission_role/config
+gateway_path: /next/api/gateway/permission.role.GetPermissionRoleList/api/v1/permission_role/config
+service: logic.permission
+side_effect: read
+path_source: gateway_strip
+path_confidence: medium
+tags:
+- 角色
+- 列表
+- 权限
+- 分页
+- 可分配
+summary: 查询可分配角色列表
+description: 分页获取系统全部角色配置（含角色名、组织、权限、禁用菜单等），分配角色与列表初始化时调用。
+request:
+  required: []
+  properties:
+    fields:
+      type: string
+      desc: 返回字段，逗号分隔
+    page:
+      type: page
+      desc: 分页
+    page_size:
+      type: page_size
+      desc: 分页大小
+    user:
+      type: string
+      desc: 用户名
+      _source: contract
+    role:
+      type: string
+      desc: 角色名
+      _source: contract
+    role__in:
+      type: string
+      desc: 查询的role名称(逗号分隔)
+      _source: contract
+    ignoreRelation:
+      type: bool
+      desc: 忽略关系数据
+      _source: contract
+    XXX_RestFieldMask:
+      type: string[]
+      desc: sdk限制字段使用
+      _source: contract
+outputs:
+  list_full:
+    jsonpath: $.data.data
+    desc: 系统全部角色配置列表全量
+  list_ids:
+    jsonpath: $.data.data
+    desc: 角色列表，配合 ${s.list_full.name} 投影取角色名
+  total:
+    jsonpath: $.data.total
+    desc: 角色数据总数
+requires: []
+rollback: null
+examples: []
+confidence:
+  module: high
+  outputs: high
+  requires: high
+  rollback: high
+  summary: high
+  tags: high
+  request: medium
+endpoint:
+  contract_ref: logic.permission|GET|/api/v1/permission_role/config
+  mode: easyops_gateway
+source:
+  openapi_file: ITSM-系统管理-用户管理-openapi.yaml
+  openapi_hash: 62e3d6c7b4841e3254ee4f78bd899a37d383bbfcfca7613cccddfdbbbe90392e
+  recorded_at: '2026-07-13T11:40:59'
+registered_at: '2026-07-22T10:34:10.925487'

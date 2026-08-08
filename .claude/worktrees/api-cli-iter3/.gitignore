@@ -1,0 +1,45 @@
+# Workspace Git repository
+# 取消从父目录继承的所有忽略规则（workspace 是独立仓库）
+!*
+!*/
+
+# Dependencies
+node_modules/
+
+# Build outputs
+build/
+out/
+
+# IDE
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db
+.text-to-image
+.confluence_cookie
+.fetch_state.json
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+
+# Temp & build artifacts
+tmp/
+workspace-all.zip
+
+# Runtime artifacts（工具运行产物：录制/导出结果等，按工具追加）
+.browser-recorder/
+
+# 敏感凭证与公司内部源码（绝不进版本库）
+platforms/easyops/auth/
+platforms/easyops/sources/raw/
+.env
+.env.*
+
+# SDD scratch
+.superpowers/
+
+.claude/settings.json

@@ -1,0 +1,464 @@
+openapi: 3.0.3
+info:
+  title: ITSM 工单搜索与处理 API
+  description: |
+    EasyOps ITSM 工单工作台（`/next/itsc-workbench`、`/next/itsc-ticket-center`）
+    在「工单搜索 + 工单处理」流程中实际调用的后端接口集合。
+
+    - 网关前缀：`/next/api/gateway/<service>/...`，`<service>` 形如 `flowable_service.process_instance.Xxx`
+      （语义路由）或 `logic.flowable_service`（直连 logic 层）。
+    - 工单（process_instance）主键示例：`6556f2266415d`；任务节点（task/step）主键示例：`6556f98c5acc1`。
+      录制样本中的具体 ID 仅作示例，实际调用时替换为目标工单/任务 ID。
+    - 统一响应结构：`{ code, codeExplain, error, data }`，`code==0`（或对应业务成功码）视为成功。
+    - `x-relevant: true` 表示与「工单搜索/处理」流程直接相关（已纳入 paths）；`false` 为流程加载时顺带
+      拉取的支撑性接口（菜单、配置、用户、站点消息等），保留在 apis.json 供回溯，不进 paths。
+  version: 1.0.0
+  contact:
+    name: recorded by browser-recorder
+servers:
+  - url: http://172.30.0.90
+    description: EasyOps ITSM
+
+tags:
+  - name: 工单列表查询
+    description: 按关键词/高级条件/状态查询工单列表与计数
+  - name: 工单详情
+    description: 工单详情加载、任务领取、关联信息查询
+  - name: 工单处理
+    description: 审批提交与工单流转
+  - name: 工单配置
+    description: 服务分类、流程定义、优先级等工单基础配置
+
+paths:
+
+  # ============== 工单列表查询 ==============
+
+  /next/api/gateway/flowable_service.process_instance.ListProcessInstanceFilterV4/api/flowable_service/v4/process_instance_filter:
+    post:
+      tags: [工单列表查询]
+      summary: 高级搜索/关键词搜索工单列表（V4）
+      description: |
+        工单列表核心查询接口。关键词搜索（`Q`）、高级搜索（`filter` 内含 `process_fields` 条件组）、
+        按状态/发起人筛选均走此接口。`filter.process_fields` 每项形如
+        `{ field, operator, value }`，operator 取值 `=~`（包含）/`==`（等于）。
+      x-relevant: true
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                Q: { type: string, description: 关键词（搜索框输入值） }
+                creator: { type: string, description: 发起人 }
+                filter:
+                  type: object
+                  description: 高级搜索条件容器
+                  properties:
+                    process_fields:
+                      type: array
+                      items:
+                        type: object
+                        properties:
+                          field: { type: string, description: 字段名 name/orderNum/creator/status/serviceCategory/serviceId/processId/ctime/etime/slaStatus }
+                          operator: { type: string, description: "=~ | ==" }
+                          value: { type: string }
+                    standard_fields: { type: array, items: { type: object } }
+                handleWay: { type: string }
+                isShowSub: { type: boolean }
+      responses:
+        '200':
+          description: 工单列表
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResult'
+
+  /next/api/gateway/flowable_service.process_instance.ListProcessInstanceStepFilterV3/api/flowable_service/v3/process_instance_step:
+    post:
+      tags: [工单列表查询]
+      summary: 查询「我经手」的任务节点列表（V3）
+      description: 工作台「我经手/已处理」Tab 的数据来源，按 tag 区分（run/done/oDone/oRunning 等）。
+      x-relevant: true
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                filter: { type: object }
+                page: { type: integer }
+                pageSize: { type: integer }
+                tag: { type: string, description: "run | done | oDone | oRunning" }
+                token: { type: string }
+      responses:
+        '200':
+          description: 任务节点列表
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResult'
+
+  /next/api/gateway/logic.flowable_service/api/flowable_service/v2/relation_ticket:
+    post:
+      tags: [工单列表查询]
+      summary: 批量查询工单的关联工单
+      description: 列表展示时补充每个工单的关联关系（前端聚合调用）。
+      x-relevant: true
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                ticketRelations:
+                  type: array
+                  items: { type: string, description: 工单 ID }
+      responses:
+        '200':
+          description: 关联工单映射
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResult'
+
+  /next/api/gateway/logic.flowable_service/api/flowable_service/v1/process_type_count:
+    get:
+      tags: [工单列表查询]
+      summary: 按状态统计工单分类计数
+      description: 工作台各 Tab（待办/已完成/流转中）的角标数字。`tag` 取值 run/done/oDone/oRunning 等。
+      x-relevant: true
+      parameters:
+        - in: query
+          name: tag
+          schema: { type: string }
+      responses:
+        '200':
+          description: 分类计数
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResult'
+
+  /next/api/gateway/logic.flowable_service/api/flowable_service/v2/process_instance_count:
+    get:
+      tags: [工单列表查询]
+      summary: 按多标签批量统计工单数
+      description: 工作台顶部多状态汇总（cc/waitComment/unhandled/supervision/oRunning/emergency/run/timeout）。
+      x-relevant: true
+      parameters:
+        - in: query
+          name: tags
+          schema: { type: string, description: 逗号分隔的标签 }
+      responses:
+        '200':
+          description: 多状态计数
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResult'
+
+  # ============== 工单详情 ==============
+
+  /next/api/gateway/flowable_service.process_instance.GetTaskDetail/api/flowable_service/v1/ticket/{ticketId}/task/{taskId}:
+    get:
+      tags: [工单详情]
+      summary: 获取工单任务详情
+      description: 进入工单详情页时加载当前任务节点的表单与流程信息。
+      x-relevant: true
+      parameters:
+        - $ref: '#/components/parameters/TicketId'
+        - $ref: '#/components/parameters/TaskId'
+      responses:
+        '200':
+          description: 任务详情
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResult'
+
+  /next/api/gateway/flowable_service.process_instance.AckProcessInstanceStep/api/flowable_service/v1/process_instance_step_ack/{stepId}:
+    put:
+      tags: [工单详情]
+      summary: 领取/确认待办任务节点
+      description: 打开工单详情时自动调用，标记当前用户已领取该任务（防漏处理）。
+      x-relevant: true
+      parameters:
+        - in: path
+          name: stepId
+          required: true
+          schema: { type: string }
+      responses:
+        '200':
+          description: 领取结果
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResult'
+
+  /next/api/gateway/flowable_service.process_instance.ListProcessInstanceFile/api/flowable_service/v1/process_instance_file/{ticketId}:
+    get:
+      tags: [工单详情]
+      summary: 工单附件列表
+      description: 详情页「附件管理」Tab 数据源。
+      x-relevant: true
+      parameters:
+        - $ref: '#/components/parameters/TicketId'
+        - in: query
+          name: page
+          schema: { type: integer }
+        - in: query
+          name: pageSize
+          schema: { type: integer }
+      responses:
+        '200':
+          description: 附件列表
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResult'
+
+  /next/api/gateway/logic.flowable_service/api/flowable_service/v1/ticket/{ticketId}/relevance:
+    get:
+      tags: [工单详情]
+      summary: 工单的服务关联单
+      description: 详情页「服务关联单」Tab 数据源。
+      x-relevant: true
+      parameters:
+        - $ref: '#/components/parameters/TicketId'
+      responses:
+        '200':
+          description: 关联单列表
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResult'
+
+  /next/api/gateway/logic.flowable_service/api/flowable_service/v1/knowledge_base/knowledge:
+    get:
+      tags: [工单详情]
+      summary: 工单引用的知识库条目
+      description: 详情页「引用知识」Tab 数据源。
+      x-relevant: true
+      parameters:
+        - in: query
+          name: relevanceTicketId
+          required: true
+          schema: { type: string }
+      responses:
+        '200':
+          description: 引用知识列表
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResult'
+
+  /next/api/gateway/logic.flowable_service/api/flowable_service/v1/ticket/{ticketId}/sla_record:
+    get:
+      tags: [工单详情]
+      summary: 工单 SLA 达标/超时记录
+      description: 详情页「SLA信息」Tab 数据源。
+      x-relevant: true
+      parameters:
+        - $ref: '#/components/parameters/TicketId'
+      responses:
+        '200':
+          description: SLA 记录
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResult'
+
+  /next/api/gateway/logic.flowable_service/api/flowable_service/v1/process_instance_discuss/{ticketId}/read_record:
+    get:
+      tags: [工单详情]
+      summary: 工单讨论已读记录
+      description: 进入详情时同步工单讨论（评论）的已读状态。
+      x-relevant: true
+      parameters:
+        - $ref: '#/components/parameters/TicketId'
+      responses:
+        '200':
+          description: 已读记录
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResult'
+
+  # ============== 工单处理 ==============
+
+  /next/api/gateway/logic.flowable_service/api/flowable_service/v2/process_instance/{ticketId}/task/{taskId}:
+    post:
+      tags: [工单处理]
+      summary: 提交任务节点（审批通过/退回/挂起，流转工单）
+      description: |
+        工单审批「提交」的核心接口。携带表单数据与流转变量，完成当前节点处理并流转到下一节点。
+        提交前通常先调用 `turn_group_conf` 获取流转目标配置。
+      x-relevant: true
+      parameters:
+        - $ref: '#/components/parameters/TicketId'
+        - $ref: '#/components/parameters/TaskId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                formData: { type: object, description: 表单数据 }
+                variables: { type: object, description: 流转变量 }
+                variableName: { type: string }
+                variableValue: { type: string }
+                memo: { type: string, description: 审批意见 }
+                assigneeUsers: { type: array, items: { type: string }, description: 下一节点处理人 }
+      responses:
+        '200':
+          description: 流转结果
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResult'
+
+  /next/api/gateway/flowable_service.process_instance.GetProcessTurnGroupConf/api/flowable_service/v2/process_instance/turn_group_conf:
+    post:
+      tags: [工单处理]
+      summary: 获取工单流转目标配置
+      description: 提交审批前，查询可流转的节点/处理人组配置。
+      x-relevant: true
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                stepId: { type: string }
+                variables: { type: object }
+      responses:
+        '200':
+          description: 流转配置
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResult'
+
+  # ============== 工单配置 ==============
+
+  /next/api/gateway/logic.flowable_service/api/flowable_service/v1/service_category:
+    get:
+      tags: [工单配置]
+      summary: 服务分类列表
+      description: 高级搜索「服务分类」下拉、工单分类的数据源（如「变更管理」「事件管理」）。
+      x-relevant: true
+      parameters:
+        - in: query
+          name: page
+          schema: { type: integer }
+        - in: query
+          name: pageSize
+          schema: { type: integer }
+      responses:
+        '200':
+          description: 服务分类
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResult'
+
+  /next/api/gateway/logic.flowable_service/api/flowable_service/v1/process_common:
+    get:
+      tags: [工单配置]
+      summary: 流程定义公共列表
+      description: 可用的工单流程模板，用于新建工单与分类筛选。
+      x-relevant: true
+      parameters:
+        - in: query
+          name: hideDisabled
+          schema: { type: boolean }
+        - in: query
+          name: page
+          schema: { type: integer }
+        - in: query
+          name: pageSize
+          schema: { type: integer }
+      responses:
+        '200':
+          description: 流程定义列表
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResult'
+
+  /next/api/gateway/logic.flowable_service/api/flowable_service/v1/priority_set_all:
+    get:
+      tags: [工单配置]
+      summary: 全部优先级集
+      description: 工单优先级定义（高/中/低等），列表与详情展示用。
+      x-relevant: true
+      responses:
+        '200':
+          description: 优先级集
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResult'
+
+  /next/api/gateway/logic.flowable_service/api/flowable_service/v1/global_setting/workbench_tag_conf:
+    get:
+      tags: [工单配置]
+      summary: 工作台 Tab 标签配置
+      description: 工作台「待办/我经手/已完成/流转中」等 Tab 的展示配置。
+      x-relevant: true
+      responses:
+        '200':
+          description: 标签配置
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResult'
+
+  # ---- 以下为流程加载时顺带调用的支撑性接口（x-relevant: false，不展开 schema） ----
+  # GET  /next/api/gateway/logic.flowable_service/api/flowable_service/v1/global_setting/ticket_urge_conf  —— 工单催办配置
+  # GET  /next/api/gateway/flowable_service.global_setting.GetItscConfig/.../global_setting/config        —— ITSM 全局配置
+  # GET  /next/api/gateway/flowable_service.global_setting.GetLabelView/.../global_setting/label_view     —— 标签视图配置
+  # GET  /next/api/gateway/flowable_service.permission.ListMenuV3/.../v3/menus                            —— 权限菜单
+  # GET  /next/api/gateway/flowable_service.permission.UserInfo/.../v1/user/info                         —— 当前用户权限信息
+  # GET  /next/api/gateway/logic.user_service/api/v1/users/orgs                                           —— 用户组织
+  # GET  /next/api/gateway/logic.user_service/api/v1/users/detail/{username}                             —— 用户详情
+  # GET  /next/api/gateway/cmdb.cmdb_object.GetDetail/object/USER                                         —— CMDB 用户对象详情
+  # GET  /next/api/gateway/cmdb.cmdb_object.GetObjectRef/object_ref                                       —— CMDB 对象引用关系
+  # POST /next/api/gateway/cmdb.instance.PostSearchV3/v3/object/USER/instance/_search                    —— CMDB 用户实例搜索
+  # POST /next/api/gateway/cmdb.instance.PostSearchV3/v3/object/MICRO_APP_CATEGORY@EASYOPS/...           —— 微应用分类搜索
+  # GET  /next/api/gateway/logic.micro_app_standalone_service/.../runtime/itsc-ticket-center             —— 工单中心微应用运行时
+  # GET  /next/api/gateway/logic.micro_app_standalone_service/.../runtime/itsc-workbench                 —— 工作台微应用运行时
+  # GET  /next/api/gateway/micro_app_standalone.launchpad.GetLaunchpadInfo/.../launchpad_info            —— 启动台信息
+  # GET  /next/api/gateway/logic.user_service/api/v2/launchpad/collection                                —— 启动台收藏
+  # GET  /next/api/gateway/logic.sys_setting/api/sys_setting/v1/site_msg_count                           —— 站点消息计数
+  # GET  /next/api/gateway/logic.sys_setting/api/sys_setting/v1/announce/count                           —— 公告计数
+  # GET  /next/api/gateway/sys_setting.announce.ListEffectiveAnnounce/.../announce/effective             —— 生效中公告
+  # GET  /next/api/auth/login                                                                            —— 登录态校验
+  # GET  /next/api/v1/runtime_standalone                                                                 —— 独立运行时上下文
+
+components:
+  parameters:
+    TicketId:
+      in: path
+      name: ticketId
+      required: true
+      schema: { type: string, description: 工单(process_instance) ID }
+    TaskId:
+      in: path
+      name: taskId
+      required: true
+      schema: { type: string, description: 任务节点(task/step) ID }
+  schemas:
+    ApiResult:
+      type: object
+      properties:
+        code: { type: integer, description: "0 表示成功" }
+        codeExplain: { type: string }
+        error: { type: string }
+        message: { type: string }
+        data: { type: object, description: 业务数据，结构随接口而异 }

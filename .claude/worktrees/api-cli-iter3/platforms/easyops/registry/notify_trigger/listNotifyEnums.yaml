@@ -1,0 +1,45 @@
+name: listNotifyEnums
+module: notify_trigger
+method: GET
+path: /api/itsc_trigger/v1/enums
+gateway_path: /next/api/gateway/flowable_service.notify_policy.ListEnums/api/itsc_trigger/v1/enums
+service: logic.flowable_service
+side_effect: read
+path_source: backend_contract
+path_confidence: high
+tags:
+- 通知枚举
+- 查询
+- notify_policy
+- 依赖
+summary: 查询通知枚举
+description: 获取通知相关枚举（如 notify_mode 通知模式代号）。
+request:
+  required: []
+  properties:
+    name:
+      type: string
+      desc: 枚举名，如 notify_mode
+outputs:
+  detail:
+    jsonpath: $.data
+    desc: 通知枚举(如notify_mode渠道)
+requires:
+- name=notify_mode 查通知渠道
+rollback: null
+examples: []
+confidence:
+  request: high
+  module: high
+  outputs: high
+  tags: high
+  summary: high
+  requires: high
+endpoint:
+  contract_ref: logic.flowable_service|GET|/api/itsc_trigger/v1/enums
+  mode: easyops_gateway
+source:
+  openapi_file: ITSM-系统管理-通知触发器管理与配置-openapi.yaml
+  openapi_hash: ae0110221a16aa578e8cf3aa607cf35cde035cde487c63a42d5985e4e23ddeb5
+  recorded_at: '2026-07-28T15:42:50.151408'
+registered_at: '2026-07-28T16:49:10.333379'

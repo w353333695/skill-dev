@@ -1,0 +1,47 @@
+name: deleteStandardField
+module: standard_field
+method: DELETE
+path: /api/flowable_service/v1/standard_field/{fieldId}
+gateway_path: /next/api/gateway/logic.flowable_service/api/flowable_service/v1/standard_field/{fieldId}
+service: logic.flowable_service
+side_effect: delete
+path_source: gateway_strip
+path_confidence: medium
+tags:
+- 标准字段
+- 删除
+- 写操作
+summary: 删除标准字段
+description: '按 fieldId 删除单个标准字段。列表中对字段执行删除、前端二次确认后调用。
+
+  响应 data 为 null。删除前应确认字段未被表单引用（formVersions 为空），否则可能影响引用该字段的表单。
+
+  '
+request:
+  required:
+  - fieldId
+  properties:
+    fieldId:
+      type: string
+      desc: 字段实例 ID
+outputs: {}
+requires:
+- fieldId 须是已存在的标准字段 instanceId
+- 删除前确认字段未被表单引用（formVersions 为空）
+rollback: null
+examples:
+- fieldId: 654e1f0fad767
+confidence:
+  request: high
+  module: high
+  outputs: medium
+  tags: high
+  summary: high
+endpoint:
+  contract_ref: ''
+  mode: easyops_gateway
+source:
+  openapi_file: ITSM-标准字段管理-openapi.yaml
+  openapi_hash: 387aa55af18b53ce727c08ec645af9355804749d8cb47a4623d0d06772bfbe74
+  recorded_at: '2026-07-13T14:59:06'
+registered_at: '2026-07-21T15:38:35.474878'

@@ -1,0 +1,65 @@
+name: attr_create
+module: cmdb_model
+method: POST
+path: /object/{objectId}/attr
+gateway_path: /next/api/gateway/cmdb.object_attribute.Create/object/{objectId}/attr
+service: logic.cmdb.service
+side_effect: create
+path_source: gateway_strip
+path_confidence: medium
+tags:
+- CMDB
+- 模型
+- 字段
+- 属性
+- 创建
+summary: 新建模型属性
+description: 为模型新建一个属性（字段）。关键字段：
+request:
+  required: []
+  properties:
+    id:
+      type: string
+      desc: ''
+    name:
+      type: string
+      desc: ''
+    value:
+      type: object
+      desc: ''
+    tag:
+      type: array
+      desc: ''
+    required:
+      type: boolean
+      desc: ''
+    objectId:
+      type: object_id
+      desc: 模型Id
+      _source: contract
+outputs:
+  instanceId:
+    jsonpath: $.data.id
+    desc: 属性 id
+  detail:
+    jsonpath: $.data
+    desc: 创建结果
+requires:
+- objectId 为已存在模型
+rollback: null
+examples: []
+confidence:
+  request: medium
+  module: high
+  outputs: high
+  tags: high
+  summary: high
+  requires: medium
+  rollback: medium
+endpoint:
+  contract_ref: logic.cmdb.service|POST|/object/{objectId}/attr
+source:
+  openapi_file: CMDB-模型管理-openapi.yaml
+  openapi_hash: e422eadfbcf745f98992379d09d3334717c7e3992c54b62f366b7f342e7e08f0
+  recorded_at: '2026-07-23T10:29:50.694479'
+registered_at: '2026-07-23T14:28:58.926734'

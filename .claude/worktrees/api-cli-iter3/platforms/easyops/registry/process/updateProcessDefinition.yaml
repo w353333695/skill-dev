@@ -1,0 +1,58 @@
+name: updateProcessDefinition
+module: process
+method: PUT
+path: /api/flowable_service/v2/process_definition
+gateway_path: /next/api/gateway/logic.flowable_service/api/flowable_service/v2/process_definition
+service: logic.flowable_service
+side_effect: update
+path_source: gateway_strip
+path_confidence: medium
+tags:
+- 流程定义
+- 编辑
+- 更新
+- process
+summary: 编辑流程定义基本信息
+description: 修改流程名称、分类、说明、触发器等基本信息。
+request:
+  required: []
+  properties:
+    name:
+      type: string
+      desc: ''
+    category:
+      type: string
+      desc: ''
+    memo:
+      type: string
+      desc: ''
+    triggerIdList:
+      type: array
+      desc: ''
+    useFormBuilder:
+      type: boolean
+      desc: ''
+outputs:
+  detail:
+    jsonpath: $.data
+    desc: 更新后的流程定义信息
+requires:
+- 须先 createProcessDefinition 取得流程 instanceId
+- triggerIdList 须是已存在触发器 ID
+rollback: null
+examples: []
+confidence:
+  module: high
+  outputs: medium
+  requires: high
+  rollback: medium
+  summary: high
+  tags: high
+endpoint:
+  contract_ref: ''
+  mode: easyops_gateway
+source:
+  openapi_file: ITSM-系统管理-流程管理-openapi.yaml
+  openapi_hash: be88bdf060789ec422b671fffae672e0754857b66418b48c317c4c55f8e9a77d
+  recorded_at: '2026-07-13T14:31:52'
+registered_at: '2026-07-22T10:34:10.699651'

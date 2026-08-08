@@ -1,0 +1,65 @@
+name: createDomainModel
+module: domain_model
+method: POST
+path: /api/flowable_service/v1/domain_model
+gateway_path: /next/api/gateway/logic.flowable_service/api/flowable_service/v1/domain_model
+service: logic.flowable_service
+side_effect: create
+path_source: backend_contract
+path_confidence: high
+tags:
+- 领域模型
+- 新建
+- 创建
+- domain_model
+- create
+summary: 创建领域模型并关联标准字段
+description: 创建领域模型，需指定唯一标识（key）、模型名称（name），并关联一个或多个标准字段（standardFieldIds）。
+request:
+  required:
+  - key
+  - name
+  - standardFieldIds
+  properties:
+    key:
+      type: string
+      desc: 唯一标识（英文，不可重复）
+    name:
+      type: string
+      desc: 模型名称（中文）
+    standardFieldIds:
+      type: string[]
+      desc: 关联的标准字段 instanceId 列表
+    allowUpdate:
+      type: boolean
+      desc: 是否允许后续修改
+    desc:
+      type: string
+      desc: 模型说明
+outputs:
+  instanceId:
+    jsonpath: $.data.instanceId
+    desc: 新建领域模型的实例 ID
+requires:
+- standardFieldIds 须为已存在的标准字段 instanceId 列表
+- key 须全局唯一（英文标识，不可重复）
+rollback:
+  api: deleteDomainModel
+  param_from_output: instanceId
+examples: []
+confidence:
+  module: high
+  outputs: high
+  requires: medium
+  rollback: high
+  summary: high
+  tags: high
+  request: high
+endpoint:
+  contract_ref: logic.flowable_service|POST|/api/flowable_service/v1/domain_model
+  mode: easyops_gateway
+source:
+  openapi_file: ITSM-领域模型管理-openapi.yaml
+  openapi_hash: 2c727e582c56d2ceefcda28e2b27cc852459f15ccd68dc641f01486da86c8e16
+  recorded_at: '2026-07-13T15:06:27'
+registered_at: '2026-07-22T10:33:48.773422'

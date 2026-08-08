@@ -1,0 +1,61 @@
+name: attr_update
+module: cmdb_model
+method: PUT
+path: /object/{objectId}/attr/{attrId}
+gateway_path: /next/api/gateway/cmdb.cmdb_object.UpdateProperty/object/{objectId}/attr/{attrId}
+service: logic.cmdb.service
+side_effect: update
+path_source: gateway_strip
+path_confidence: medium
+tags:
+- CMDB
+- 模型
+- 字段
+- 属性
+- 更新
+summary: 更新模型属性
+description: 修改已存在属性的名称、类型、标签等。
+request:
+  required: []
+  properties:
+    name:
+      type: string
+      desc: ''
+    value:
+      type: object
+      desc: ''
+    objectId:
+      type: object_id
+      desc: 模型Id
+      _source: contract
+    attrId:
+      type: attr_id
+      desc: 属性id
+      _source: contract
+    body:
+      type: object
+      desc: 属性信息
+      _source: contract
+outputs:
+  detail:
+    jsonpath: $.data
+    desc: 更新结果
+requires:
+- objectId+attrId 为已存在属性
+rollback: null
+examples: []
+confidence:
+  request: medium
+  module: high
+  outputs: high
+  tags: high
+  summary: high
+  requires: medium
+  rollback: medium
+endpoint:
+  contract_ref: logic.cmdb.service|PUT|/object/{objectId}/attr/{attrId}
+source:
+  openapi_file: CMDB-模型管理-openapi.yaml
+  openapi_hash: e422eadfbcf745f98992379d09d3334717c7e3992c54b62f366b7f342e7e08f0
+  recorded_at: '2026-07-23T10:29:50.694479'
+registered_at: '2026-07-23T14:28:58.926734'

@@ -1,0 +1,410 @@
+openapi: 3.0.3
+info:
+  title: ITSM-定时工单管理
+  description: |
+    EasyOps ITSM「定时工单管理」相关接口。定时工单（scheduled ticket）按 cron 表达式
+    周期性自动发起指定流程的工单，无需人工逐次发起。
+
+    覆盖能力：定时工单的 列表查询 / 详情 / 新建 / 编辑 / 启停（启用·禁用）/ 删除，
+    以及新建时依赖的 服务目录/服务实例/流程发起参数、通知策略 等配置查询。
+  version: "1.0.0"
+  x-flow: ITSM-定时工单管理
+  x-system: EasyOps ITSM
+  x-host: http://172.30.0.90
+  x-entry: /next/itsc-workbench/workbench
+
+servers:
+  - url: http://172.30.0.90
+
+tags:
+  - name: 定时工单管理
+    description: 定时工单（scheduled_ticket）的增删改查与启停
+  - name: 服务目录与流程
+    description: 新建定时工单时选择触发流程所依赖的服务目录/实例/发起参数
+  - name: 通知策略
+    description: 定时工单触发时的通知策略选择
+
+paths:
+  /next/api/gateway/logic.flowable_service/api/flowable_service/v1/scheduled_ticket/list:
+    get:
+      tags: [定时工单管理]
+      operationId: listScheduledTicket
+      summary: 查询定时工单列表
+      description: |
+        分页查询定时工单列表，支持按关键字、创建人、状态筛选。
+        `status` 取值：`0`=全部、`enabled`=启用、`disabled`=禁用。
+      x-relevant: true
+      parameters:
+        - name: page
+          in: query
+          schema: { type: string, example: "1" }
+        - name: pageSize
+          in: query
+          schema: { type: string, example: "10" }
+        - name: Q
+          in: query
+          description: 名称关键字（模糊匹配）
+          schema: { type: string }
+        - name: status
+          in: query
+          description: "状态筛选：0=全部 / enabled=启用 / disabled=禁用"
+          schema: { type: string, example: "0" }
+        - name: ticketCreator
+          in: query
+          description: 工单创建人（发起人）账号
+          schema: { type: string, example: easyops }
+        - name: myRelated
+          in: query
+          schema: { type: string, example: "true" }
+        - name: st
+          in: query
+          description: 起始时间
+          schema: { type: string }
+        - name: et
+          in: query
+          description: 结束时间
+          schema: { type: string }
+      responses:
+        "200":
+          description: 定时工单列表
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ScheduledTicketListResp"
+
+  /next/api/gateway/logic.flowable_service/api/flowable_service/v1/scheduled_ticket/{instanceId}:
+    get:
+      tags: [定时工单管理]
+      operationId: getScheduledTicket
+      summary: 查询定时工单详情
+      description: 获取单个定时工单详情（编辑表单回填用）。
+      x-relevant: true
+      parameters:
+        - $ref: "#/components/parameters/InstanceId"
+      responses:
+        "200":
+          description: 定时工单详情
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/ApiEnvelope"
+                  - type: object
+                    properties:
+                      data:
+                        $ref: "#/components/schemas/ScheduledTicketDetail"
+    put:
+      tags: [定时工单管理]
+      operationId: updateScheduledTicket
+      summary: 编辑定时工单
+      description: 修改已存在的定时工单配置（名称、流程、cron、通知、创建人等）。
+      x-relevant: true
+      parameters:
+        - $ref: "#/components/parameters/InstanceId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ScheduledTicketUpsert"
+      responses:
+        "200":
+          description: 编辑结果
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ApiEnvelope" }
+    delete:
+      tags: [定时工单管理]
+      operationId: deleteScheduledTicket
+      summary: 删除定时工单
+      description: 彻底删除定时工单配置。
+      x-relevant: true
+      parameters:
+        - $ref: "#/components/parameters/InstanceId"
+      responses:
+        "200":
+          description: 删除结果
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ApiEnvelope" }
+
+  /next/api/gateway/logic.flowable_service/api/flowable_service/v1/scheduled_ticket/create:
+    post:
+      tags: [定时工单管理]
+      operationId: createScheduledTicket
+      summary: 新建定时工单
+      description: |
+        创建一条定时工单。`taskType` 固定为 `crontab`；
+        `taskScheduler` 为标准 cron 表达式（分 时 日 月 周）；
+        `serviceInstanceId` / `serviceCatalogId` 来自服务目录与实例；
+        `notifyPolicyId` 来自通知策略。
+      x-relevant: true
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ScheduledTicketUpsert"
+      responses:
+        "200":
+          description: 创建结果，返回 instanceId
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/ApiEnvelope"
+                  - type: object
+                    properties:
+                      data:
+                        type: object
+                        properties:
+                          instanceId:
+                            type: string
+                            example: 657a55467faa1
+
+  /next/api/gateway/logic.flowable_service/api/flowable_service/v1/scheduled_ticket/{instanceId}/status:
+    put:
+      tags: [定时工单管理]
+      operationId: toggleScheduledTicketStatus
+      summary: 启用 / 禁用定时工单
+      description: "切换定时工单状态。`status=true` 启用（到点自动发起），`status=false` 禁用。"
+      x-relevant: true
+      parameters:
+        - $ref: "#/components/parameters/InstanceId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [status]
+              properties:
+                status:
+                  type: boolean
+                  description: "true=启用 / false=禁用"
+                  example: false
+      responses:
+        "200":
+          description: 状态切换结果
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ApiEnvelope" }
+
+  /next/api/gateway/logic.flowable_service/api/flowable_service/v1/service_catalog:
+    get:
+      tags: [服务目录与流程]
+      operationId: listServiceCatalog
+      summary: 查询服务目录
+      description: 新建定时工单时，获取服务目录树（分类），用于选择触发流程所属分类。
+      x-relevant: true
+      responses:
+        "200":
+          description: 服务目录列表
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ApiEnvelope" }
+
+  /next/api/gateway/logic.flowable_service/api/flowable_service/v1/service_instance:
+    get:
+      tags: [服务目录与流程]
+      operationId: listServiceInstance
+      summary: 查询服务实例（可发起的服务）
+      description: 按服务目录 ID（catalogID）查询该分类下可发起的服务实例。
+      x-relevant: true
+      parameters:
+        - name: catalogID
+          in: query
+          schema: { type: string, example: 5b55f857c6551 }
+        - name: page
+          in: query
+          schema: { type: string, example: "1" }
+        - name: pageSize
+          in: query
+          schema: { type: string, example: "50" }
+        - name: hideDisabled
+          in: query
+          schema: { type: string, example: "true" }
+      responses:
+        "200":
+          description: 服务实例列表
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ApiEnvelope" }
+
+  /next/api/gateway/flowable_service.service_catalog.GetStartServiceParams/api/flowable_service/v2/service_instance/{serviceId}:
+    get:
+      tags: [服务目录与流程]
+      operationId: getStartServiceParams
+      summary: 查询流程发起参数
+      description: 选定服务实例后，获取该流程的发起参数（表单字段、变量、处理方式等）。
+      x-relevant: true
+      parameters:
+        - name: serviceId
+          in: path
+          required: true
+          schema: { type: string, example: 65572b7fc19a1 }
+      responses:
+        "200":
+          description: 流程发起参数（含 catalogName、表单模板等）
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ApiEnvelope" }
+
+  /next/api/gateway/logic.flowable_service/api/itsc_trigger/v1/notify_policy:
+    get:
+      tags: [通知策略]
+      operationId: listNotifyPolicy
+      summary: 查询通知策略列表
+      description: |
+        获取通知配置管理中预创建的通知策略，供定时工单选择「通知名称」。
+        定时工单场景下 notifyType=process_instance、triggerSignal=start。
+      x-relevant: true
+      parameters:
+        - name: notifyType
+          in: query
+          schema: { type: string, example: process_instance }
+        - name: triggerSignal
+          in: query
+          schema: { type: string, example: start }
+        - name: page
+          in: query
+          schema: { type: string, example: "1" }
+        - name: pageSize
+          in: query
+          schema: { type: string, example: "3000" }
+      responses:
+        "200":
+          description: 通知策略列表
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ApiEnvelope" }
+
+components:
+  parameters:
+    InstanceId:
+      name: instanceId
+      in: path
+      required: true
+      description: 定时工单实例 ID（创建时返回的 instanceId）
+      schema: { type: string, example: 657a55467faa1 }
+
+  schemas:
+    ApiEnvelope:
+      type: object
+      properties:
+        code: { type: number, example: 0 }
+        codeExplain: { type: string, example: "" }
+        error: { type: string, example: "" }
+        data:
+          nullable: true
+
+    ScheduledTicketUpsert:
+      type: object
+      description: 新建/编辑定时工单的请求体（新建走 create，编辑走 put {instanceId}）
+      required: [name, taskType, taskScheduler, serviceInstanceId, serviceCatalogId]
+      properties:
+        name:
+          type: string
+          description: 任务名称
+          example: test
+        taskType:
+          type: string
+          description: 任务类型，定时工单固定 crontab
+          example: crontab
+        taskScheduler:
+          type: string
+          description: cron 表达式（分 时 日 月 周），如 `0 0 * * */5`
+          example: "0 0 * * */5"
+        memo:
+          type: string
+          description: 备注
+          example: 测试用
+        ticketCreator:
+          type: string
+          description: 工单创建人（定时触发时以该身份发起）
+          example: easyops
+        serviceInstanceId:
+          type: string
+          description: 触发的服务实例 ID（流程）
+          example: 65572b7fc19a1
+        serviceCatalogId:
+          type: string
+          description: 服务目录 ID（分类）
+          example: 5b55f857c6551
+        notifyPolicyId:
+          type: string
+          description: 通知策略 ID（在通知配置管理中创建）
+          example: 5bfc30620ca95
+        crontabExtConfig:
+          type: object
+          description: cron 扩展配置（日历等高级周期）
+          properties:
+            calendar:
+              type: object
+              properties:
+                calendarId: { type: string, nullable: true }
+                dayOfCalendar: { type: string, nullable: true }
+                period: { type: string, nullable: true }
+        startTicketParams:
+          type: object
+          description: 发起工单的参数（表单数据、处理人、变量等）
+          properties:
+            serviceId: { type: string, example: 65572b7fc19a1 }
+            formData: { type: string, description: 表单数据 JSON 字符串, example: "[]" }
+            variables:
+              type: array
+              items:
+                type: object
+                properties:
+                  name: { type: string, example: pass }
+                  value: { type: string, example: "0" }
+            handleWay: { type: string, example: common }
+            visibleRange: { type: string, example: operator }
+            isSupervision: { type: boolean, example: false }
+            assigneeUsers: { type: array, items: { type: string } }
+            assigneeGroups: { type: array, items: { type: string } }
+            subsequentAssignee: { type: array, items: { type: string } }
+            supervisorUserList: { type: array, items: { type: string } }
+
+    ScheduledTicketDetail:
+      type: object
+      description: 定时工单详情/列表项
+      properties:
+        instanceId: { type: string, example: 6457f27102ab1 }
+        scheduleId: { type: string, example: 8a51ca9bbbb246148f58ee7ad99fd1e0 }
+        scheduledTicketId: { type: string, example: "1765262278734369219" }
+        name: { type: string, example: gawainTest }
+        status: { type: boolean, description: "true=启用 / false=禁用", example: false }
+        ticketCreator: { type: string, example: easyops }
+        memo: { type: string, example: "1213" }
+        taskType: { type: string, example: crontab }
+        taskScheduler: { type: string, example: "*/30 * * * *" }
+        creator: { type: string, example: easyops }
+        ctime: { type: string, example: "2025-12-09 14:37:58" }
+        serviceInstance:
+          type: object
+          properties:
+            instanceId: { type: string }
+            name: { type: string }
+        notifyPolicy:
+          type: object
+          properties:
+            instanceId: { type: string }
+            name: { type: string }
+            notifyType: { type: string }
+            triggerSignal: { type: string }
+
+    ScheduledTicketListResp:
+      allOf:
+        - $ref: "#/components/schemas/ApiEnvelope"
+        - type: object
+          properties:
+            data:
+              type: object
+              properties:
+                page: { type: integer, example: 1 }
+                page_size: { type: integer, example: 10 }
+                total: { type: integer, example: 1 }
+                list:
+                  type: array
+                  items: { $ref: "#/components/schemas/ScheduledTicketDetail" }

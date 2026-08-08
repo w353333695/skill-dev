@@ -1,0 +1,57 @@
+name: file_pkg_permission_batch_update
+module: autoops_file
+method: POST
+path: /permission/packages
+gateway_path: /next/api/gateway/artifact.permission.BatchUpdatePackagePermission/permission/packages
+service: logic.artifact
+side_effect: create
+path_source: backend_contract
+path_confidence: high
+tags:
+- 文件分发
+- 权限
+- 批量
+- 白名单
+summary: 批量设置文件包权限
+description: 对多个文件包批量覆盖式设置权限白名单。permissions 指定要设置的权限项（updateAuthorizers=包编辑 / readAuthorizers=包查看
+  / deleteAuthorizers=包删除）；authorizers 为授权对象（用户或用户组，格式如 user:easyops / user_group:xxx）；method=overwrite
+  覆盖原有配置。返回逐包处理结果。
+request:
+  required:
+  - packageIds
+  - permissions
+  properties:
+    method:
+      type: string
+      desc: 更新方式（overwrite=覆盖）
+    permissions:
+      type: white_permission_type[]
+      desc: 要设置的权限项（updateAuthorizers=包编辑 / readAuthorizers=包查看 / deleteAuthorizers=包删除）
+    packageIds:
+      type: string[]
+      desc: 目标文件包 ID 列表
+    authorizers:
+      type: string[]
+      desc: 需要权限变动的用户, 不能定义为user_name[], 因为更新时可以为用户、用户组, 这两个类型的正则校验不一样
+      _source: contract
+outputs:
+  list_full:
+    jsonpath: $.data.list
+    desc: 逐包处理结果（每项含 packageId/code/message）
+requires: []
+rollback: null
+examples: []
+confidence:
+  request: medium
+  module: high
+  outputs: high
+  tags: high
+  summary: high
+endpoint:
+  contract_ref: logic.artifact|POST|/permission/packages
+  mode: easyops_internal
+source:
+  openapi_file: AutoOps-文件分发管理-openapi.yaml
+  openapi_hash: edf3872fae57ab16180ccec0257fe32c2d0de09a4a639719250779d5ae96e426
+  recorded_at: '2026-07-29T16:20:10'
+registered_at: '2026-07-29T16:49:25.523907'

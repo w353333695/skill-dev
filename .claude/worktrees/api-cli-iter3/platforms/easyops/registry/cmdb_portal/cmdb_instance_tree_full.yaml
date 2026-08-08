@@ -1,0 +1,64 @@
+name: cmdb_instance_tree_full
+module: cmdb_portal
+method: POST
+path: /instance_tree/full
+gateway_path: /next/api/gateway/logic.cmdb.service/instance_tree/full
+service: logic.cmdb.service
+side_effect: create
+path_source: backend_contract
+path_confidence: high
+tags:
+- CMDB
+- 架构树
+- 实例树
+summary: 实例树(架构树全量)
+description: 获取应用系统架构树的完整实例树（系统→子系统→模块→资源的层级关系），
+request:
+  required: []
+  properties:
+    objectId:
+      type: string
+      desc: 根模型，如 APPLICATION@ONEMODEL
+    tree:
+      type: InstanceTreeRootNode
+      desc: 树定义
+      _source: contract
+    ignore_single:
+      type: bool
+      desc: 全局忽略与父级无关联实例,默认false
+      _source: contract
+    ignore_app:
+      type: bool
+      desc: 是否忽略应用模型数据
+      _source: contract
+    validate_permission:
+      type: bool
+      desc: 是否校验实例权限
+      _source: contract
+    remove_no_permission_tree:
+      type: bool
+      desc: 移除无权限的树，不返回无权限节点及其子节点
+      _source: contract
+outputs:
+  detail:
+    jsonpath: $.data
+    desc: 实例树
+requires: []
+rollback: null
+examples: []
+confidence:
+  request: medium
+  module: high
+  outputs: high
+  tags: high
+  summary: high
+  requires: medium
+  rollback: medium
+endpoint:
+  contract_ref: logic.cmdb.service|POST|/instance_tree/full
+  mode: easyops_gateway
+source:
+  openapi_file: CMDB-登录与功能入口-openapi.yaml
+  openapi_hash: 03368b8fed81615f7835509bbeb28ad4bc3b44520f5e837fe3383ab4c85a3bbf
+  recorded_at: '2026-07-23T09:55:56.715723'
+registered_at: '2026-07-23T14:28:59.247623'

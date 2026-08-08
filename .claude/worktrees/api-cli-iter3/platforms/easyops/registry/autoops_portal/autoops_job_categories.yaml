@@ -1,0 +1,44 @@
+name: autoops_job_categories
+module: autoops_portal
+method: GET
+path: /api/ops_automation/v1/jobCategories
+gateway_path: /next/api/gateway/ops_automation.jobs.GetJobCategories/api/ops_automation/v1/jobCategories
+service: logic.ops_automation
+side_effect: read
+path_source: gateway_strip
+path_confidence: medium
+tags:
+- AutoOps
+- 作业分类
+summary: 作业分类
+description: 获取作业的分类（用于任务页 tab 分组）。
+request:
+  required: []
+  properties:
+    menuId:
+      type: string
+      desc: menuId过虑
+      _source: contract
+outputs:
+  list_full:
+    jsonpath: $.data
+    desc: 作业分类
+requires: []
+rollback: null
+examples: []
+confidence:
+  request: medium
+  module: high
+  outputs: high
+  tags: high
+  summary: high
+  requires: medium
+  rollback: medium
+endpoint:
+  contract_ref: logic.ops_automation|GET|/api/ops_automation/v1/jobCategories
+  mode: easyops_gateway
+source:
+  openapi_file: AutoOps-入口与功能预览-openapi.yaml
+  openapi_hash: 83d3bdb67d59bec3aa970fbd014c3aa03c60e8fed470857fa78d2a2613dcbd31
+  recorded_at: '2026-07-23T12:05:14.132308'
+registered_at: '2026-07-23T14:28:57.999092'

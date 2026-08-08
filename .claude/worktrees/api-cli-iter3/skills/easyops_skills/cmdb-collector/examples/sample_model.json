@@ -1,0 +1,210 @@
+[
+    {
+        "objectId": "CLUSTER@CLOUD",
+        "name": "云集群",
+        "category": "云资源",
+        "memo": "云平台集群资源",
+        "protected": false,
+        "isAbstract": false,
+        "system": "",
+        "wordIndexDenied": false,
+        "notifyDenied": false,
+        "view": {
+            "attr_category_order": ["基本信息"],
+            "attr_order": ["cluster_id", "name", "status"],
+            "show_key": ["cluster_id", "name"],
+            "visible": true,
+            "icon": {
+                "category": "second-menu",
+                "icon": "placeholder-second-menu",
+                "lib": "easyops"
+            }
+        },
+        "attrList": [
+            {
+                "id": "cluster_id",
+                "name": "集群ID",
+                "description": "集群唯一标识",
+                "tag": ["基本信息"],
+                "required": "true",
+                "readonly": "false",
+                "unique": "true",
+                "value": {
+                    "type": "str",
+                    "default": "",
+                    "mode": "default",
+                    "default_type": "value"
+                }
+            },
+            {
+                "id": "name",
+                "name": "集群名称",
+                "description": "集群名称",
+                "tag": ["基本信息"],
+                "required": "true",
+                "readonly": "false",
+                "unique": "false",
+                "value": {
+                    "type": "str",
+                    "default": "",
+                    "mode": "default",
+                    "default_type": "value"
+                }
+            }
+        ],
+        "relation_list": []
+    },
+    {
+        "objectId": "VM@CLOUD",
+        "name": "云主机",
+        "category": "云资源",
+        "memo": "云平台虚拟机资源",
+        "protected": false,
+        "isAbstract": false,
+        "system": "",
+        "wordIndexDenied": false,
+        "notifyDenied": false,
+        "view": {
+            "attr_category_order": ["基本信息", "配置信息"],
+            "attr_order": ["instance_id", "name", "status", "ip", "cpu", "memory"],
+            "show_key": ["instance_id", "name"],
+            "visible": true,
+            "icon": {
+                "category": "second-menu",
+                "icon": "placeholder-second-menu",
+                "lib": "easyops"
+            }
+        },
+        "attrList": [
+            {
+                "id": "instance_id",
+                "name": "实例ID",
+                "description": "云主机实例唯一标识",
+                "tag": ["基本信息"],
+                "required": "true",
+                "readonly": "false",
+                "unique": "true",
+                "value": {
+                    "type": "str",
+                    "default": "",
+                    "mode": "default",
+                    "default_type": "value"
+                }
+            },
+            {
+                "id": "name",
+                "name": "实例名称",
+                "description": "云主机名称",
+                "tag": ["基本信息"],
+                "required": "true",
+                "readonly": "false",
+                "unique": "false",
+                "value": {
+                    "type": "str",
+                    "default": "",
+                    "mode": "default",
+                    "default_type": "value"
+                }
+            },
+            {
+                "id": "status",
+                "name": "状态",
+                "description": "运行状态",
+                "tag": ["基本信息"],
+                "required": "false",
+                "readonly": "false",
+                "unique": "false",
+                "value": {
+                    "type": "enum",
+                    "regex": ["running", "stopped", "pending"],
+                    "mode": "default"
+                }
+            },
+            {
+                "id": "ip",
+                "name": "IP地址",
+                "description": "内网IP",
+                "tag": ["基本信息"],
+                "required": "false",
+                "readonly": "false",
+                "unique": "false",
+                "value": {
+                    "type": "ip"
+                }
+            },
+            {
+                "id": "cpu",
+                "name": "CPU核数",
+                "description": "CPU核心数",
+                "tag": ["配置信息"],
+                "required": "false",
+                "readonly": "false",
+                "unique": "false",
+                "value": {
+                    "type": "int",
+                    "default": 0
+                }
+            },
+            {
+                "id": "memory",
+                "name": "内存GB",
+                "description": "内存大小",
+                "tag": ["配置信息"],
+                "required": "false",
+                "readonly": "false",
+                "unique": "false",
+                "value": {
+                    "type": "float",
+                    "default": 0
+                }
+            },
+            {
+                "id": "tags",
+                "name": "标签",
+                "description": "资源标签",
+                "tag": ["基本信息"],
+                "required": "false",
+                "readonly": "false",
+                "unique": "false",
+                "value": {
+                    "type": "arr",
+                    "mode": "default"
+                }
+            }
+        ],
+        "relation_list": [
+            {
+                "relation_id": "VM@CLOUD_clusters_vms_CLUSTER@CLOUD",
+                "name": "",
+                "protected": false,
+                "notifyDenied": false,
+                "isInherit": false,
+                "left_object_id": "VM@CLOUD",
+                "leftInheritObjectId": "",
+                "left_id": "clusters",
+                "left_description": "关联云主机实例",
+                "left_remark": "",
+                "left_name": "关联集群",
+                "left_min": 0,
+                "left_max": 1,
+                "left_groups": [],
+                "left_tags": [],
+                "left_required": false,
+                "right_object_id": "CLUSTER@CLOUD",
+                "rightInheritObjectId": "",
+                "right_id": "vms",
+                "right_description": "关联集群",
+                "right_remark": "",
+                "right_name": "关联云主机实例",
+                "right_min": 0,
+                "right_max": -1,
+                "right_groups": [],
+                "right_tags": [],
+                "right_required": false,
+                "_version": 1,
+                "attrList": [],
+                "indexList": []
+            }
+        ]
+    }
+]

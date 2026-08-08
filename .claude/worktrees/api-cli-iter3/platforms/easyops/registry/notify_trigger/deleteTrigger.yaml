@@ -1,0 +1,44 @@
+name: deleteTrigger
+module: notify_trigger
+method: DELETE
+path: /api/flowable_service/v1/trigger/{triggerIds}
+gateway_path: /next/api/gateway/logic.flowable_service/api/flowable_service/v1/trigger/{triggerId}
+service: logic.flowable_service
+side_effect: delete
+path_source: backend_contract
+path_confidence: high
+tags:
+- 触发器
+- 删除
+- trigger
+- 写
+summary: 删除触发器
+description: 删除指定触发器。
+request:
+  required: []
+  properties:
+    triggerIds:
+      type: string
+      desc: 要删除的触发器列表，以;分割
+      _source: contract
+outputs: {}
+requires:
+- triggerId 路径参数
+- 有关联资源(服务/流程/节点)的触发器禁止删除,删前查ListTrigger三类绑定
+rollback: null
+examples: []
+confidence:
+  request: high
+  module: high
+  outputs: medium
+  tags: high
+  summary: high
+  requires: high
+endpoint:
+  contract_ref: logic.flowable_service|DELETE|/api/flowable_service/v1/trigger/{triggerIds}
+  mode: easyops_gateway
+source:
+  openapi_file: ITSM-系统管理-通知触发器管理与配置-openapi.yaml
+  openapi_hash: ae0110221a16aa578e8cf3aa607cf35cde035cde487c63a42d5985e4e23ddeb5
+  recorded_at: '2026-07-28T15:42:50.151408'
+registered_at: '2026-07-28T16:49:10.333379'

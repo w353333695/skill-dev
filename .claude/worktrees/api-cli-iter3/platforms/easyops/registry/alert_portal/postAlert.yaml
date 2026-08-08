@@ -1,0 +1,103 @@
+name: postAlert
+module: alert_portal
+method: POST
+path: /api/v1/alert/common/{org}/{accessId}
+gateway_path: /api/gateway/alert_portal.webhook/api/v1/alert/common/{org}/{accessId}
+service: logic.alert_portal
+side_effect: create
+path_source: backend_contract
+path_confidence: high
+tags:
+- 三方告警接入
+- webhook
+- 推送告警
+- alert_portal
+- ThirdPartyAlert
+summary: 推送一条第三方告警到接入网关(webhook)
+description: '把一条第三方告警(ThirdPartyAlert) POST 到事件源 webhook，path 参数 org=机构ID、accessId=事件源接入ID。
+
+  网关接收后走"接入策略匹配→资源关联→重定级→入库"。status:success 仅代表已接收，不代表入库；入库失败查 searchFailRecords。
+
+  alertId 为去重键(相同累加计数)；time 偏差超 30 分钟被丢弃；恢复须显式 isRecover:true。
+
+  字段详解见 knowledge/modules/alert_portal/third-party-alarm-access.md §3。
+
+  '
+request:
+  required:
+  - alertId
+  - time
+  - source
+  properties:
+    alertId:
+      type: string
+      desc: 告警去重键；相同 alertId 视为同一告警(累加次数)，建议规则+实例+指标+时间构造
+    source:
+      type: string
+      desc: 告警源，必须与注册事件源 source 一致
+    subject:
+      type: string
+      desc: 告警标题
+    content:
+      type: string
+      desc: 告警内容
+    metricName:
+      type: string
+      desc: 告警指标名，如 node.cpu.usage
+    value:
+      type: string
+      desc: 告警值
+    metricUnit:
+      type: string
+      desc: 值单位，如 %/bytes，可空
+    time:
+      type: number
+      desc: 告警时间 Unix 秒；与平台偏差不能超 30 分钟
+    isRecover:
+      type: boolean
+      desc: 是否恢复事件；恢复须显式 true
+    level:
+      type: string
+      desc: 第三方等级(info/warning/critical)，由重定级规则映射为平台等级
+    alertDims:
+      type: object
+      desc: 告警维度键值对，供告警规则按维度过滤、通知模板取用
+    extInfo:
+      type: object
+      desc: 扩展信息，填入事件 field，供通知模板/重定级取值
+    originInfo:
+      type: object
+      desc: 原始告警数据，供过滤条件/资源关联 value_path 取值
+outputs:
+  status:
+    jsonpath: $.data.status
+    desc: 接收状态(success=网关已接收)
+requires:
+- accessId 须为已注册事件源的接入ID；org 为机构ID
+- ThirdPartyAlert 字段/约束(30min/isRecover/去重)见 knowledge/modules/alert_portal/third-party-alarm-access.md
+  §3
+rollback: null
+examples:
+- alertId: bbe540e74e2452511f8bb978544fe037729f9681
+  source: prometheus
+  subject: CPU usage high
+  content: CPU above 50%
+  metricName: node.cpu.usage
+  value: '59.18'
+  time: 1587783926
+  isRecover: false
+  originInfo:
+    ip: 192.168.100.163
+confidence:
+  request: high
+  outputs: high
+  requires: high
+  rollback: low
+  module: high
+  tags: high
+  summary: high
+endpoint:
+  contract_ref: logic.alert_portal|POST|/api/v1/alert/common/{org}/{accessId}
+source:
+  openapi_file: 手工编写(后端契约 logic.alert_portal + 知识文档 §3)
+registered_at: '2026-08-03T22:29:01.385686'

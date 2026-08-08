@@ -1,0 +1,58 @@
+name: tool_update
+module: autoops_tool
+method: PUT
+path: /tools/{toolId}
+gateway_path: /next/api/gateway/tool.basic.UpdateTool/tools/{toolId}
+service: logic.tool_service
+side_effect: update
+path_source: backend_contract
+path_confidence: high
+tags:
+- 工具库
+- 编辑工具
+- 更新
+summary: 编辑工具(生成新版本)
+description: 修改工具内容，生成新版本。`vId` 指定基于哪个版本编辑。
+request:
+  required: []
+  properties:
+    name:
+      type: string
+      desc: ''
+    content:
+      type: string
+      desc: ''
+    inputs:
+      type: array
+      desc: ''
+    outputs:
+      type: array
+      desc: ''
+    tool:
+      type: map
+      desc: 要更新的实例，如果需要新增toolLib关系，使用relationToolLibs字段
+      _source: contract
+outputs:
+  detail:
+    jsonpath: $.data
+    desc: 更新结果
+requires:
+- toolId 为已存在工具
+rollback: null
+examples: []
+confidence:
+  request: medium
+  module: high
+  outputs: high
+  tags: high
+  summary: high
+  requires: medium
+  rollback: medium
+endpoint:
+  contract_ref: logic.tool_service|PUT|/tools/{toolId}
+  mode: easyops_gateway
+source:
+  openapi_file: AutoOps-工具库管理-openapi.yaml
+  openapi_hash: 7ed1d5a46514c3b8bc40573042495f3c411417688c19c42fbf739581cf1bb2c6
+  recorded_at: '2026-07-23T14:19:29.887012'
+registered_at: '2026-07-23T14:28:58.209763'

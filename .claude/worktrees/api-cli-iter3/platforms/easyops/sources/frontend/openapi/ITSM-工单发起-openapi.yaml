@@ -1,0 +1,496 @@
+openapi: 3.0.3
+info:
+  title: ITSM 工单发起 API
+  version: "1.0.0"
+  description: |
+    EasyOps ITSM「工作台 -> 发起」相关接口。
+
+    覆盖从服务目录选择服务、加载发起表单、提交发起工单、查看发起结果的完整链路。
+    工单发起的核心接口为 `StartProcessInstanceV2`（POST v2/process_instance）。
+
+    - 录制来源：http://172.30.5.20/next/itsc-workbench/workbench（发起 -> 服务「实例选择控件-从当前表单获取值」）
+    - 每条 `x-relevant: true` 表示与本流程强相关；`false` 的条目（心跳、公告、菜单、静态资源等）已从 paths 中剔除，可在 apis.json 中回溯。
+servers:
+  - url: http://172.30.5.20
+    description: ITSM 测试环境
+tags:
+  - name: 服务目录与服务实例
+    description: 服务目录树、服务实例详情、发起参数
+  - name: 表单模板
+    description: 按服务/流程节点查询表单模板
+  - name: 工单发起
+    description: 提交发起工单（StartProcessInstance）及转办组校验
+  - name: 工单任务详情
+    description: 发起后查看工单任务详情、步骤确认、关联
+paths:
+  /next/api/gateway/logic.flowable_service/api/flowable_service/v1/service_catalog_tree:
+    get:
+      tags: [服务目录与服务实例]
+      operationId: getServiceCatalogTree
+      summary: 查询服务目录树
+      description: 拉取服务目录树（分类 + 服务），点击「发起」时加载。树节点含 isService 标识区分分类与可发起服务。
+      x-relevant: true
+      x-triggered-by-step: [1]
+      responses:
+        '200':
+          description: 查询成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code: { type: integer, example: 0 }
+                  data:
+                    type: object
+                    properties:
+                      treeList:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/CatalogNode'
+  /next/api/gateway/logic.flowable_service/api/flowable_service/v1/process_common:
+    get:
+      tags: [服务目录与服务实例]
+      operationId: listProcessCommon
+      summary: 查询常用服务
+      description: 拉取常用/最近发起的服务列表，用于「发起」入口的快捷服务展示。
+      x-relevant: true
+      x-triggered-by-step: [1]
+      parameters:
+        - name: hideDisabled
+          in: query
+          schema: { type: boolean, example: true }
+        - name: page
+          in: query
+          schema: { type: integer, example: 1 }
+        - name: pageSize
+          in: query
+          schema: { type: integer, example: 1000 }
+      responses:
+        '200':
+          description: 查询成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code: { type: integer, example: 0 }
+                  data:
+                    type: object
+                    properties:
+                      total: { type: integer, example: 2 }
+                      defaultCommonId: { type: string, example: 6567762903ded }
+                      list:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            type: { type: string, example: service }
+                            processService:
+                              type: object
+                              properties:
+                                serviceName: { type: string, example: 创建知识 }
+                                serviceId: { type: string, example: 5bf71d5c39e92 }
+                                serviceCategory: { type: string, example: 知识管理 }
+  /next/api/gateway/logic.flowable_service/api/flowable_service/v2/service_instance/{serviceId}:
+    get:
+      tags: [服务目录与服务实例]
+      operationId: getServiceInstanceV2
+      summary: 查询服务实例详情（v2）
+      description: 拉取服务实例详情，含 taskInfo（任务节点配置：formId/formVersionId/userTaskId 等），用于渲染发起表单。
+      x-relevant: true
+      x-triggered-by-step: [3, 5]
+      parameters:
+        - name: serviceId
+          in: path
+          required: true
+          schema: { type: string }
+          example: 608f94db73be5
+      responses:
+        '200':
+          description: 查询成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code: { type: integer, example: 0 }
+                  data:
+                    $ref: '#/components/schemas/ServiceInstance'
+  /next/api/gateway/logic.flowable_service/api/flowable_service/v1/service_instance/{serviceId}:
+    get:
+      tags: [服务目录与服务实例]
+      operationId: getServiceInstanceV1
+      summary: 查询服务实例基础信息（v1）
+      description: 拉取服务实例基础信息（默认工单名、负责人、关联流程等）。
+      x-relevant: true
+      x-triggered-by-step: [3, 5]
+      parameters:
+        - name: serviceId
+          in: path
+          required: true
+          schema: { type: string }
+          example: 608f94db73be5
+      responses:
+        '200':
+          description: 查询成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code: { type: integer, example: 0 }
+                  data:
+                    type: object
+                    properties:
+                      processsInstanceDefaultName: { type: string, example: 实例选择控件-从当前表单获取值 }
+                      collect: { type: boolean, example: false }
+                      owner:
+                        type: object
+                        properties:
+                          instanceId: { type: string }
+                          name: { type: string }
+                          nickname: { type: string }
+                      associatedProcess:
+                        type: object
+                        properties:
+                          instanceId: { type: string }
+                          name: { type: string }
+                          category: { type: string }
+  /next/api/gateway/flowable_service.service_catalog.GetStartServiceParams/api/flowable_service/v2/service_instance/{serviceId}:
+    get:
+      tags: [服务目录与服务实例]
+      operationId: getStartServiceParams
+      summary: 查询发起服务参数
+      description: 进入发起表单页时拉取，获取该服务的发起参数（taskInfo/formId/formVersionId/userTaskId），用于加载表单。
+      x-relevant: true
+      x-triggered-by-step: [6]
+      parameters:
+        - name: serviceId
+          in: path
+          required: true
+          schema: { type: string }
+          example: 608f94db73be5
+      responses:
+        '200':
+          description: 查询成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code: { type: integer, example: 0 }
+                  data:
+                    $ref: '#/components/schemas/ServiceInstance'
+  /next/api/gateway/flowable_service.form_template.SearchFormTemplate/api/flowable_service/v1/form_template/_search:
+    post:
+      tags: [表单模板]
+      operationId: searchFormTemplate
+      summary: 查询表单模板
+      description: |
+        按服务 ID、流程版本 ID、流程节点（userTaskId）查询表单模板，用于加载发起表单定义。
+      x-relevant: true
+      x-triggered-by-step: [3, 6]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                page: { type: integer, example: 1 }
+                pageSize: { type: integer, example: 3000 }
+                serviceId: { type: string, example: 608f94db73be5 }
+                serviceName: { type: string, example: 实例选择控件-从当前表单获取值 }
+                processVersionId: { type: string, example: 608f94b64caf1 }
+                formVersionId: { type: string, example: 608fa784acb69 }
+                userTaskId: { type: string, example: Activity_09pv72e }
+      responses:
+        '200':
+          description: 查询成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code: { type: integer, example: 0 }
+                  data:
+                    type: object
+                    properties:
+                      total: { type: integer, example: 0 }
+                      list:
+                        type: array
+                        items: { type: object }
+  /next/api/gateway/flowable_service.process_instance.GetProcessTurnGroupConf/api/flowable_service/v2/process_instance/turn_group_conf:
+    post:
+      tags: [工单发起]
+      operationId: getProcessTurnGroupConf
+      summary: 查询转办组配置
+      description: 提交工单前校验转办组配置（根据表单变量判断是否需转办）。
+      x-relevant: true
+      x-triggered-by-step: [20]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                serviceId: { type: string, example: 608f94db73be5 }
+                variables:
+                  type: array
+                  description: 表单变量（name/value）
+                  items:
+                    type: object
+                    properties:
+                      name: { type: string, example: pass }
+                      value: { type: string, example: "0" }
+      responses:
+        '200':
+          description: 查询成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code: { type: integer, example: 0 }
+                  data:
+                    type: object
+                    properties:
+                      turnGroupConf:
+                        type: array
+                        items: { type: object }
+  /next/api/gateway/flowable_service.process_instance.StartProcessInstanceV2/api/flowable_service/v2/process_instance:
+    post:
+      tags: [工单发起]
+      operationId: startProcessInstance
+      summary: 发起工单
+      description: |
+        **工单发起的核心接口**。提交表单数据创建流程实例，返回工单 instanceId 与工单号 orderNum。
+        body 中 `formData` 为表单字段值 JSON 字符串，`variableName/variableValue/variables` 为流程变量（控制流向，如 pass=0）。
+      x-relevant: true
+      x-triggered-by-step: [20]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name, formData, serviceId]
+              properties:
+                name:
+                  type: string
+                  description: 工单标题（默认取服务名）
+                  example: 实例选择控件-从当前表单获取值
+                serviceId:
+                  type: string
+                  description: 服务 ID
+                  example: 608f94db73be5
+                formData:
+                  type: string
+                  description: 表单字段值 JSON 字符串（key/values 结构）
+                  example: '[{"key":"gq47o27umx","values":[{"a":{"key":"option-57","label":"a2","value":"a2"}}]}]'
+                variableName:
+                  type: string
+                  description: 流程变量名（控制流向）
+                  example: pass
+                variableValue:
+                  type: string
+                  description: 流程变量值
+                  example: "0"
+                variables:
+                  type: array
+                  description: 流程变量数组
+                  items:
+                    type: object
+                    properties:
+                      name: { type: string, example: pass }
+                      value: { type: string, example: "0" }
+                visibleRange:
+                  type: string
+                  description: 可见范围
+                  example: operator
+                originTicketInfo:
+                  type: object
+                  description: 来源工单信息（无则为空对象）
+      responses:
+        '200':
+          description: 发起成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code: { type: integer, example: 0 }
+                  data:
+                    $ref: '#/components/schemas/ProcessInstance'
+  /next/api/gateway/flowable_service.process_instance.GetTaskDetail/api/flowable_service/v1/ticket/{ticketId}/task/{taskId}:
+    get:
+      tags: [工单任务详情]
+      operationId: getTaskDetail
+      summary: 查询工单任务详情
+      description: 发起后点击工单号进入详情时拉取，返回 mainTask（当前任务节点信息）等。
+      x-relevant: true
+      x-triggered-by-step: [22]
+      parameters:
+        - name: ticketId
+          in: path
+          required: true
+          schema: { type: string }
+          description: 工单实例 ID（非工单号）
+          example: 6567866c77cab
+        - name: taskId
+          in: path
+          required: true
+          schema: { type: string }
+          description: 任务步骤 ID
+          example: 6567866d3d91f
+      responses:
+        '200':
+          description: 查询成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code: { type: integer, example: 0 }
+                  data:
+                    type: object
+                    properties:
+                      mainTask:
+                        type: object
+                        properties:
+                          instanceId: { type: string, example: 6567866d3d91f }
+                          userTaskId: { type: string, example: Activity_1jbjom7 }
+                          taskName: { type: string, example: "2" }
+                          creator: { type: string, example: easyops }
+                          ctime: { type: string, example: "2026-07-13 14:43:01" }
+  /next/api/gateway/flowable_service.process_instance.AckProcessInstanceStep/api/flowable_service/v1/process_instance_step_ack/{stepId}:
+    put:
+      tags: [工单任务详情]
+      operationId: ackProcessInstanceStep
+      summary: 确认工单步骤
+      description: 进入工单任务详情时自动确认（ack）该步骤，标记已读。
+      x-relevant: true
+      x-triggered-by-step: [22]
+      parameters:
+        - name: stepId
+          in: path
+          required: true
+          schema: { type: string }
+          example: 6567866d3d91f
+      responses:
+        '200':
+          description: 确认成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code: { type: integer, example: 0 }
+                  data: { type: object, nullable: true, example: null }
+  /next/api/gateway/logic.flowable_service/api/flowable_service/v1/ticket/{ticketId}/relevance:
+    get:
+      tags: [工单任务详情]
+      operationId: getTicketRelevance
+      summary: 查询工单关联
+      description: 查询工单关联的服务/工单列表。
+      x-relevant: true
+      x-triggered-by-step: [22]
+      parameters:
+        - name: ticketId
+          in: path
+          required: true
+          schema: { type: string }
+          example: 6567866c77cab
+      responses:
+        '200':
+          description: 查询成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code: { type: integer, example: 0 }
+                  data:
+                    type: object
+                    properties:
+                      serviceRelevanceOrder:
+                        type: array
+                        items: { type: object }
+  /next/api/gateway/logic.flowable_service/api/flowable_service/v1/process_instance_discuss/{instanceId}/read_record:
+    get:
+      tags: [工单任务详情]
+      operationId: markDiscussRead
+      summary: 标记工单评论已读
+      description: 进入工单详情时标记该工单的评论为已读。
+      x-relevant: true
+      x-triggered-by-step: [22]
+      parameters:
+        - name: instanceId
+          in: path
+          required: true
+          schema: { type: string }
+          example: 6567866c77cab
+      responses:
+        '200':
+          description: 查询成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code: { type: integer, example: 0 }
+                  data: { type: object, nullable: true, example: null }
+components:
+  schemas:
+    CatalogNode:
+      type: object
+      description: 服务目录树节点
+      properties:
+        instanceId: { type: string, example: 5b55f855d236a }
+        name: { type: string, example: 事件管理 }
+        isService: { type: boolean, description: true=可发起服务，false=分类节点, example: false }
+        hide: { type: boolean, example: false }
+        children:
+          type: array
+          items:
+            $ref: '#/components/schemas/CatalogNode'
+    ServiceInstance:
+      type: object
+      description: 服务实例（发起参数）
+      properties:
+        catalogName: { type: string, example: 标准事件 }
+        standardFields:
+          type: array
+          items: { type: object }
+        taskInfo:
+          type: array
+          description: 任务节点配置
+          items:
+            type: object
+            properties:
+              instanceId: { type: string, example: 608f94c7a930d }
+              userTaskId: { type: string, example: Activity_09pv72e }
+              taskName: { type: string, example: "1" }
+              isSet: { type: boolean, example: true }
+              formId: { type: string, example: 608f947530d01 }
+              formName: { type: string, example: 实例选择控件-从当前表单获取值 }
+              formVersionId: { type: string, example: 608fa784acb69 }
+              formVersionName: { type: string, example: 1.0.5 }
+    ProcessInstance:
+      type: object
+      description: 发起后的工单实例
+      properties:
+        instanceId: { type: string, example: 6567866c77cab }
+        orderNum: { type: string, description: 工单号, example: INC26071300003 }
+        name: { type: string, example: 实例选择控件-从当前表单获取值 }
+        category: { type: string, example: "" }
+        creator: { type: string, example: easyops }
+        ctime: { type: string, example: "2026-07-13 14:43:00" }
+        flowableInstanceId: { type: string, example: "" }
+        userTaskList:
+          type: array
+          items: { type: object }
+        stepList:
+          type: array
+          items: { type: object }

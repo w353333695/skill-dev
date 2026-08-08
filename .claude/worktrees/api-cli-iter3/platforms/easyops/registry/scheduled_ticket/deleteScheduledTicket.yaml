@@ -1,0 +1,39 @@
+name: deleteScheduledTicket
+module: scheduled_ticket
+method: DELETE
+path: /api/flowable_service/v1/scheduled_ticket/{instanceId}
+gateway_path: /next/api/gateway/logic.flowable_service/api/flowable_service/v1/scheduled_ticket/{instanceId}
+service: logic.flowable_service
+side_effect: delete
+path_source: backend_contract
+path_confidence: high
+tags:
+- 定时工单
+- 删除
+- scheduled_ticket
+- 写
+summary: 删除定时工单
+description: 彻底删除定时工单配置。
+request:
+  required: []
+  properties: {}
+outputs: {}
+requires:
+- instanceId 须存在
+rollback: null
+examples: []
+confidence:
+  request: high
+  module: high
+  outputs: medium
+  tags: high
+  summary: high
+  requires: high
+endpoint:
+  contract_ref: logic.flowable_service|DELETE|/api/flowable_service/v1/scheduled_ticket/{instanceId}
+  mode: easyops_gateway
+source:
+  openapi_file: ITSM-定时工单管理-openapi.yaml
+  openapi_hash: 7c164daae27a4e69b941b437666023c3db3c53beb1fbfb69014783779a4f02ec
+  recorded_at: '2026-07-28T13:50:10.276651'
+registered_at: '2026-07-28T16:49:09.576472'
