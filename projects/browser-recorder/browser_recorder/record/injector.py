@@ -152,7 +152,13 @@ INJECT_SCRIPT = r"""
   document.addEventListener('change', function(e){
     if (e.target && e.target.tagName === 'SELECT') emit('select', e.target, e.target.value);
   }, true);
-  document.addEventListener('input', function(e){ if (window.__br_evt_seen.has(e)) return; window.__br_evt_seen.add(e); emit('input', e.target, e.target.value); }, true);
+  document.addEventListener('input', function(e){
+    if (window.__br_evt_seen.has(e)) return; window.__br_evt_seen.add(e);
+    // radio/checkbox 的状态变化已由 click handler 捕获，跳过 input 事件避免重复
+    var tag = e.target.tagName, ty = e.target.type;
+    if (tag === 'INPUT' && (ty === 'radio' || ty === 'checkbox')) return;
+    emit('input', e.target, e.target.value);
+  }, true);
   // 失焦/切换元素时发 input_finalize，避免最后一段输入因始终未失焦而丢失
   // （spec §5.3.1：按"焦点切换/失焦/提交/超时"边界聚合为一条 input）
   function finalizeInput(e){

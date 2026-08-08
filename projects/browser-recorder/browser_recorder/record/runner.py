@@ -187,6 +187,15 @@ async def _record_async(url, session_dir, out_dir, profile, keep_auth,
                             await wait_for_settled(active_page, timeout_ms=3000, debounce_ms=300)
                         else:
                             await _wait_render_settled(active_page, timeout_ms=2500)
+                        fn = f"step-{a.seq:04d}-{pt}.png"
+                        # headed 模式：用 screencast buffer 最新帧（避免 page.screenshot 的
+                        # compositing 闪烁）；headless 无 screencast，用 page.screenshot。
+                        # popup 页（active_page is not page）无 screencast buffer → page.screenshot。
+                        if not headless and active_page is page and _snapshot_buffer:
+                            (screenshots / fn).write_bytes(_snapshot_buffer[-1][1])
+                        else:
+                            await active_page.screenshot(path=str(screenshots / fn), timeout=5000)
+                        shots[pt] = fn
                     else:
                         # before（scrolling-snapshot）：popup 无独立 screencast → 跳过用 after
                         if active_page is not page:
@@ -197,10 +206,6 @@ async def _record_async(url, session_dir, out_dir, profile, keep_auth,
                         fn = f"step-{a.seq:04d}-before.png"
                         (screenshots / fn).write_bytes(prev_png)
                         shots[pt] = fn
-                        continue
-                    fn = f"step-{a.seq:04d}-{pt}.png"
-                    await active_page.screenshot(path=str(screenshots / fn), timeout=5000)
-                    shots[pt] = fn
                 except Exception as e:
                     logger.warning("截图失败（%s/%s）: %s", a.seq, pt, e)
                     continue
