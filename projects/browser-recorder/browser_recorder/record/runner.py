@@ -6,6 +6,7 @@
 """
 from __future__ import annotations
 import asyncio
+import collections
 import json
 import logging
 import shutil
@@ -143,6 +144,8 @@ async def _record_async(url, session_dir, out_dir, profile, keep_auth,
     screenshots.mkdir(parents=True, exist_ok=True)
 
     current_seq_box = {"v": None}
+    # scrolling-snapshot 缓冲：(ts_ms, png_bytes) 环形，供 click 取"点击前"帧
+    _snapshot_buffer = collections.deque(maxlen=4)
 
     def _sink_action(a):
         with open(trace_path, "a", encoding="utf-8") as f:
@@ -202,10 +205,16 @@ async def _record_async(url, session_dir, out_dir, profile, keep_auth,
                         else:
                             await _wait_render_settled(page, timeout_ms=2500)
                     else:
-                        # before：短等保当前帧渲染完，不长等（"事件瞬间"语义）。
-                        # 注意：_on_event 在 JS handler 之后执行，before 实为 click 后帧，
-                        # 并非真正"点击前"——点击前画面需 scrolling-snapshot。
-                        await _wait_render_settled(page, timeout_ms=600)
+                        # before（scrolling-snapshot）：从后台缓冲取【点击前】最近帧——
+                        # _on_event 在 JS handler 后执行，直接截是 click 后帧（导航白屏）；
+                        # 后台 _snapshot_loop 持续截图，取 emit 之前最近帧=真点击前画面。
+                        prev_png = _pick_pre_click_snapshot(_snapshot_buffer, a.ts)
+                        if prev_png is None:
+                            continue  # 缓冲空（录制刚开始）→ 跳过 before
+                        fn = f"step-{a.seq:04d}-before.png"
+                        (screenshots / fn).write_bytes(prev_png)
+                        shots[pt] = fn
+                        continue  # before 已从缓冲写，跳过下方 page.screenshot
                     fn = f"step-{a.seq:04d}-{pt}.png"
                     # timeout：截图本身限 5s，避免 Playwright 默认等 fonts.ready 卡 30s
                     await page.screenshot(path=str(screenshots / fn), timeout=5000)
@@ -282,6 +291,28 @@ async def _record_async(url, session_dir, out_dir, profile, keep_auth,
         except Exception as e:
             # 极端情况（连 DOM 都没解析完）兜底：记录后继续，页面可能已部分可交互
             logger.warning("goto 超时/失败（%s），尝试继续录制: %s", url, e)
+        # scrolling-snapshot：后台每 ~300ms 截图入 _snapshot_buffer。click emit 时
+        # _capture_for_action 从中取【emit 之前最近帧】作为真·点击前截图（_on_event 在
+        # JS handler 后执行，直接截只会拿到 click 后的白屏/跳转后画面）。
+        async def _snapshot_loop():
+            while not stop_event.is_set():
+                try:
+                    png = await page.screenshot(timeout=2000)
+                    _snapshot_buffer.append((int(time.time() * 1000), png))
+                except Exception:
+                    pass
+                try:
+                    await asyncio.wait_for(stop_event.wait(), timeout=0.3)
+                except asyncio.TimeoutError:
+                    pass
+        snapshot_task = asyncio.ensure_future(_snapshot_loop())
+        # auto_actions 模式：等 scrolling-snapshot 截首帧（否则首个 click 无点击前截图；
+        # 人工 headed 无需等，用户操作慢，loop 早已有帧）
+        if auto_actions:
+            try:
+                await page.wait_for_timeout(500)
+            except Exception:
+                pass
         # auto_actions（烟测用）：执行若干点击
         for act_type, sel in (auto_actions or []):
             try:
@@ -302,6 +333,14 @@ async def _record_async(url, session_dir, out_dir, profile, keep_auth,
         # 也无人关浏览器，等 stop_event 必然空等满兜底超时（曾导致烟测/自签 HTTPS
         # 用例卡死 10 分钟）。需要 headless 定时录制时，显式传 auto_actions 或由
         # 调用方自行控制会话时长。
+
+        # 停止 scrolling-snapshot 后台 loop。CancelledError 在 3.8+ 继承 BaseException，
+        # except Exception 捕获不到，需显式列出，否则冒泡中断收尾。
+        snapshot_task.cancel()
+        try:
+            await snapshot_task
+        except (asyncio.CancelledError, Exception):
+            pass
 
         # 给悬挂中的 response Task（async body()）流出收尾时间，避免丢失 schema。
         # 用户直接关浏览器时 page 可能已关闭 → 全程容错，不让收尾抛错。
@@ -335,6 +374,25 @@ async def _record_async(url, session_dir, out_dir, profile, keep_auth,
             await browser.close()
         except Exception:
             pass
+
+
+def _pick_pre_click_snapshot(buffer, emit_ts: int):
+    """从滚动截图缓冲取 emit 时间戳【之前】最近的一帧（真·点击前画面）。
+
+    buffer: ``[(ts_ms, png_bytes), ...]`` 按 ts 升序。``emit_ts`` 时刻的帧不算
+    （可能已含点击副作用）。返回 png_bytes 或 None（无前帧）。
+
+    解决：录制被动监听，``_on_event`` 在 JS click handler 之后执行，直接截图拿到
+    的是 click 后帧（导航中白屏）。改为后台 ``_snapshot_loop`` 持续截图入缓冲，
+    click emit 时取 emit 之前最近帧——那才是用户点击时屏幕上的画面。
+    """
+    prev = None
+    for ts, png in buffer:
+        if ts < emit_ts:
+            prev = png
+        else:
+            break
+    return prev
 
 
 async def emit_actions(actions, capture_fn, sink_fn) -> None:

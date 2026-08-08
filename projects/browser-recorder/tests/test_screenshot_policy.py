@@ -7,10 +7,10 @@ def make_planner():
     return ScreenshotPlanner(DEFAULT_SCREENSHOT_POLICY)
 
 
-def test_click_captures_only_after():
-    # click 只截 after：before 实为 click 后帧（_on_event 在 JS handler 后），导航中白屏。
+def test_click_captures_before_and_after():
+    # click 截 before+after：before 由 scrolling-snapshot 提供（后台截图，点击前帧）。
     p = make_planner()
-    assert p.should_capture({"type": "click"}) == ["after"]
+    assert p.should_capture({"type": "click"}) == ["before", "after"]
 
 
 def test_input_captures_only_after():

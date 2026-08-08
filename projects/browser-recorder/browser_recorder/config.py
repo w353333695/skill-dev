@@ -31,9 +31,9 @@ DEFAULTS_DIR = Path(__file__).parent / "defaults"
 
 DEFAULT_SCREENSHOT_POLICY = ScreenshotPolicy(
     points={
-        # click 只截 after：_on_event 在 JS handler 之后执行，"before"实为 click 后帧
-        # （导航中常为白屏），抓不到点击前画面。真·点击前需 scrolling-snapshot。
-        "click": ["after"],
+        # click 截 before+after：before 由 scrolling-snapshot 提供（后台截图取点击前帧），
+        # after 等加载完。标注优先 before（_pick_shot），避免落在跳转后页面。
+        "click": ["before", "after"],
         "submit": ["before", "after"],
         "input": ["after"],
         "select": ["after"],

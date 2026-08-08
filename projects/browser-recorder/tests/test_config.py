@@ -4,9 +4,9 @@ from browser_recorder import config
 
 
 def test_default_screenshot_policy_points():
-    # click 只截 after（before 实为 click 后帧，导航中白屏，无意义）；submit 留 before+after。
+    # click 截 before+after（before 由 scrolling-snapshot 提供真·点击前帧）；submit 同。
     p = config.DEFAULT_SCREENSHOT_POLICY
-    assert p.points["click"] == ["after"]
+    assert p.points["click"] == ["before", "after"]
     assert p.points["submit"] == ["before", "after"]
     assert p.points["input"] == ["after"]
     assert p.points["scroll"] == []
