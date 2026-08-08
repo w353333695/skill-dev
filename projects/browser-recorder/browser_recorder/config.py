@@ -31,10 +31,10 @@ DEFAULTS_DIR = Path(__file__).parent / "defaults"
 
 DEFAULT_SCREENSHOT_POLICY = ScreenshotPolicy(
     points={
-        # click 只截 after：事件在 capture 阶段触发，before 实为"事件瞬间"非"点击前"
-        # （spec §5.2），且 before+after 雷同帧在连续点击时呈闪烁感。需要 before 的
-        # 场景（如点击触发弹窗的"点击前上下文"）可在 --screenshot-policy 中开启。
-        "click": ["after"],
+        # click 截 before+after：before 在 emit→handler 后立即截（_capture_for_action），
+        # 抢在导航/异步渲染前——保留点击瞬间上下文（如 launchpad 菜单+被点项）；after
+        # 等加载完。标注优先用 before（见 export._pick_shot），避免落在跳转后页面。
+        "click": ["before", "after"],
         "submit": ["before", "after"],
         "input": ["after"],
         "select": ["after"],

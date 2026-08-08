@@ -4,10 +4,10 @@ from browser_recorder import config
 
 
 def test_default_screenshot_policy_points():
-    # spec §5.2：click 只截 after（事件在 capture 阶段触发，before 实为事件瞬间，
-    # 与 after 雷同且连续点击闪烁）；submit 留 before+after。
+    # click 截 before+after：before 抢在导航/异步渲染前（点击瞬间上下文，如 launchpad
+    # 菜单+被点项；after 已是跳转后画面，标注位置会失去上下文）；submit 同。
     p = config.DEFAULT_SCREENSHOT_POLICY
-    assert p.points["click"] == ["after"]
+    assert p.points["click"] == ["before", "after"]
     assert p.points["submit"] == ["before", "after"]
     assert p.points["input"] == ["after"]
     assert p.points["scroll"] == []

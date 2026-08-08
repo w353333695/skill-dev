@@ -113,3 +113,26 @@ def test_export_clears_stale_annotated_on_reexport(tmp_path):
         assert not (ann / "step-9999-after.png").exists(), "重 export 应清空旧标注图"
     finally:
         paths.TMP_ROOT = saved
+
+
+def test_pick_shot_click_prefers_before():
+    """click 标注图优先用 before（点击瞬间/跳转前画面）。"""
+    from browser_recorder.export.runner import _pick_shot
+    a = Action(seq=1, ts=0, type="click", url="u",
+               screenshot={"before": "b.png", "after": "a.png"})
+    assert _pick_shot(a) == "b.png"
+
+
+def test_pick_shot_click_without_before_falls_back_after():
+    """click 无 before（旧 trace 兼容）时退回 after。"""
+    from browser_recorder.export.runner import _pick_shot
+    a = Action(seq=1, ts=0, type="click", url="u", screenshot={"after": "a.png"})
+    assert _pick_shot(a) == "a.png"
+
+
+def test_pick_shot_non_click_prefers_after():
+    """非 click（input/submit 等）仍优先 after。"""
+    from browser_recorder.export.runner import _pick_shot
+    a = Action(seq=1, ts=0, type="input", url="u",
+               screenshot={"before": "b.png", "after": "a.png"})
+    assert _pick_shot(a) == "a.png"

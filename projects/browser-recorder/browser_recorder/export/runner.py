@@ -66,6 +66,16 @@ def apply_filter(records: list[RequestRecord], flt: dict,
     return out
 
 
+def _pick_shot(action: Action) -> str | None:
+    """选 action 的标注截图：click 优先 before（点击瞬间/跳转前画面，避免标注落在
+    跳转后的页面上），其他类型优先 after。无 before 时退回 after（旧 trace 兼容）。
+    """
+    sc = action.screenshot or {}
+    if action.type == "click" and sc.get("before"):
+        return sc["before"]
+    return sc.get("after") or sc.get("before")
+
+
 def dedupe_double_recorded_actions(actions: list[Action]) -> list[Action]:
     """去除同名 session 二次录制造成的双录。
 
@@ -80,8 +90,7 @@ def dedupe_double_recorded_actions(actions: list[Action]) -> list[Action]:
     last_by_key: dict[str, Action] = {}
     order: list[str] = []
     for a in actions:
-        sc = a.screenshot or {}
-        shot = sc.get("after") or sc.get("before")
+        shot = _pick_shot(a)
         key = shot if shot else f"__seq_{a.seq}"
         if key not in last_by_key:
             order.append(key)
@@ -142,7 +151,7 @@ def run_export(session, out_dir, name, filter_path, keep_raw_bodies,
         style = VERBOSE if annotate_style == "verbose" else COMPACT
         marks_by_file: dict[str, list[dict]] = {}
         for a in actions:
-            shot = (a.screenshot or {}).get("after") or (a.screenshot or {}).get("before")
+            shot = _pick_shot(a)
             if not shot or not a.target or not a.target.bbox:
                 continue
             marks_by_file.setdefault(shot, []).append(

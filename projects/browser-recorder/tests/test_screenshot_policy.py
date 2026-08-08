@@ -7,11 +7,11 @@ def make_planner():
     return ScreenshotPlanner(DEFAULT_SCREENSHOT_POLICY)
 
 
-def test_click_captures_only_after():
-    # spec §5.2：click 只截 after（事件在 capture 阶段触发，before 实为事件瞬间，
-    # 与 after 雷同且连续点击闪烁）
+def test_click_captures_before_and_after():
+    # click 截 before+after：before 抢在导航/异步渲染前（点击瞬间上下文），
+    # after 等加载完。
     p = make_planner()
-    assert p.should_capture({"type": "click"}) == ["after"]
+    assert p.should_capture({"type": "click"}) == ["before", "after"]
 
 
 def test_input_captures_only_after():

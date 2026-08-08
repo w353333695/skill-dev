@@ -190,28 +190,36 @@ async def _record_async(url, session_dir, out_dir, profile, keep_auth,
                 await clear_marker(page)
             shots: dict[str, str] = {}
             for pt in points:
-                if pt == "after":
-                    # after 等渲染稳定。click/submit 用三信号 settle（网络+DOM+CPU）：
-                    # 这类动作常触发弹层（如 launchpad）异步加载内容，仅等 DOM/CPU 会截到
-                    # 内容未加载的白屏（用户报「截图白屏」）。三信号 settle 会等到 XHR 返回、
-                    # DOM 渲染完再截。settle 自带监听器清理，可安全每动作调用。
-                    # 其它动作（input/navigation 等）用 _wait_render_settled（DOM/CPU）即可。
-                    if a.type in ("click", "submit"):
-                        await wait_for_settled(page, timeout_ms=3000, debounce_ms=300)
-                    else:
-                        await _wait_render_settled(page, timeout_ms=2500)
-                else:
-                    # before：短等保当前帧渲染完，不长等（其语义是"事件瞬间"）
-                    await _wait_render_settled(page, timeout_ms=600)
-                fn = f"step-{a.seq:04d}-{pt}.png"
                 try:
+                    if pt == "after":
+                        # after 等渲染稳定。click/submit 用三信号 settle（网络+DOM+CPU）：
+                        # 这类动作常触发弹层（如 launchpad）异步加载内容，仅等 DOM/CPU 会截到
+                        # 内容未加载的白屏（用户报「截图白屏」）。三信号 settle 会等到 XHR 返回、
+                        # DOM 渲染完再截。settle 自带监听器清理，可安全每动作调用。
+                        # 其它动作（input/navigation 等）用 _wait_render_settled（DOM/CPU）即可。
+                        if a.type in ("click", "submit"):
+                            await wait_for_settled(page, timeout_ms=3000, debounce_ms=300)
+                        else:
+                            await _wait_render_settled(page, timeout_ms=2500)
+                    else:
+                        # before：立即截当前帧，抢在导航/异步渲染前——保留"点击瞬间上下文"
+                        # （launchpad 菜单+被点项）。before 在 emit→handler 后执行（CDP 异步）：
+                        # 同步弹窗此时已显示；导航异步加载未完，DOM 仍是点击前画面。若用 settle
+                        # 等待反而会截到异步加载完成后的新页面，错过点击前画面。
+                        try:
+                            await page.wait_for_timeout(30)   # 仅保当前帧提交
+                        except Exception:
+                            pass
+                    fn = f"step-{a.seq:04d}-{pt}.png"
                     # timeout：截图本身限 5s，避免 Playwright 默认等 fonts.ready 卡 30s
                     await page.screenshot(path=str(screenshots / fn), timeout=5000)
+                    shots[pt] = fn
                 except Exception as e:
-                    # 截图失败（字体/页面卸载/导航中等）→ 跳过该图，不阻断录制
+                    # 该 pt 的 settle/截图失败（导航中 page 关闭等）→ 跳过此 pt，不阻断
+                    # 同次其它 pt 回填（如 click 的 before 已成功时仍回填，避免整条
+                    # action 因 after 失败而丢全部截图）。
                     logger.warning("截图失败（%s/%s）: %s", a.seq, pt, e)
                     continue
-                shots[pt] = fn
             if shots:
                 a.screenshot = shots
             # 录视频时：截图后再闪现内联标记（事件在 capture 阶段才到，无法真正 lead，
