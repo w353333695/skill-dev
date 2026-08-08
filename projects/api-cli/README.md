@@ -4,6 +4,8 @@
 
 经 iter2/iter3 演进，MCP tool 已是 **schema 驱动 + 用途富化**的 LLM 接口：inputSchema 展开嵌套 body（`_body`）、outputSchema 解释响应、tool description 含祖先链用途 + 行为标签（写操作/可分页），LLM 一次 `tools/list` 即可精准抉择；嵌套 resource 的 N 层相对 path 也已正确拼接。
 
+📖 面向使用者的详细指南（安装、首次调用、对接新系统、MCP、排错）：[`docs/USAGE.md`](docs/USAGE.md)。
+
 > **本 project 是 `projects/` 目录的 golang project**（与 Python project 平行支持，见工作空间 `AGENTS.md` §2）。打包走 `scripts/pack-go.sh` 多平台二进制大礼包，不走 whl。
 
 ## 核心命题
@@ -92,6 +94,7 @@ scripts/pack-go.sh api-cli -o dist/ --targets linux/amd64,darwin/arm64 --version
 - CGO=0 用纯 Go 的 DNS / TLS：少数公司 split-DNS、或老旧 `ca-certificates` 的 Linux 镜像可能解析失败 / 证书校验失败。遇此重编：`CGO_ENABLED=1` + 对应平台 C 工具链（失去交叉编译便利，按需取舍）。
 
 ## 文档
+- **使用指南**（面向使用者）：`docs/USAGE.md` —— 安装、首次调用、命令用法、常见场景、对接新系统、MCP、排错
 - MVP 设计：`docs/2026-08-07-api-cli-design.md` / 计划：`docs/2026-08-07-api-cli-plan.md`
 - iter2 设计：`docs/2026-08-07-api-cli-iter2-design.md`（schema 驱动 LLM + 真实翻页 + 体验打磨）
 - iter3 设计：`docs/2026-08-08-api-cli-iter3-design.md` / 计划：`docs/2026-08-08-api-cli-iter3-plan.md`（2 bug + LLM 抉择富化 + N 层 path）
