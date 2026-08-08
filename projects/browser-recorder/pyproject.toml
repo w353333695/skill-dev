@@ -1,6 +1,6 @@
 [project]
 name = "browser-recorder"
-version = "0.1.11"
+version = "0.1.12"
 description = "跨平台、平台中性的浏览器操作录制/回放/导出 CLI"
 # 下限 3.9：代码硬底是 3.7（from __future__ annotations + dataclasses），
 # 但 3.9 是依赖健康甜点（playwright 1.44+、pillow 10+ 原生支持）；

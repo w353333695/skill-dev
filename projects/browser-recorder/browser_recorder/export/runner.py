@@ -131,14 +131,24 @@ def run_export(session, out_dir, name, filter_path, keep_raw_bodies,
 
         trace_path = sdir / "trace.jsonl"
         req_path = sdir / "requests.jsonl"
-        actions = ([Action.from_dict(json.loads(l))
-                    for l in trace_path.read_text(encoding="utf-8").splitlines() if l.strip()]
-                   if trace_path.exists() else [])
+        # 容错读取：trace/requests 最后一行可能被进程退出截断，跳过坏行而非整体崩溃
+        def _read_jsonl(path):
+            results = []
+            if not path.exists():
+                return results
+            for i, l in enumerate(path.read_text(encoding="utf-8").splitlines()):
+                if not l.strip():
+                    continue
+                try:
+                    results.append(json.loads(l))
+                except json.JSONDecodeError as e:
+                    logger.warning("%s 行 %d 跳过（JSON 解析失败: %s）: %s",
+                                   path.name, i, str(e)[:50], l[:80])
+            return results
+        actions = [Action.from_dict(d) for d in _read_jsonl(trace_path)]
         actions = dedupe_double_recorded_actions(actions)  # 去双录（同名 session 二次录制会 append）
         actions = filter_empty_input(actions)  # 过滤空输入（launchpad 搜索框 focus 空 input 等）
-        records = ([RequestRecord.from_dict(json.loads(l))
-                    for l in req_path.read_text(encoding="utf-8").splitlines() if l.strip()]
-                   if req_path.exists() else [])
+        records = [RequestRecord.from_dict(d) for d in _read_jsonl(req_path)]
 
         meta = {"url": ""}
         mpath = sdir / "meta.json"
