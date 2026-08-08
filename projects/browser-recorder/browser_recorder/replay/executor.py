@@ -71,14 +71,9 @@ class ReplayExecutor:
         return loc is not None
 
     async def replay(self, actions: list[Action]) -> ReplayStats:
-        from ..marker import flash_marker, clear_marker
         stats = ReplayStats(total=len(actions))
         for a in actions:
             await asyncio.sleep(self.resolver.before(a.type) / 1000.0)
-            # 视频 lead 标记：动作前在目标位置闪现（"先标后点"）
-            if self.mark and a.target and a.target.bbox:
-                await flash_marker(self.page, a.target.bbox, a.seq, a.type)
-                await self.page.wait_for_timeout(280)   # 让标记渲染稳定再动作
             ok = await self._do_action(a)
             if ok:
                 # after = settle 超时上限
@@ -87,8 +82,6 @@ class ReplayExecutor:
                                        debounce_ms=300)
                 if self.screenshot_dir:
                     self.screenshot_dir.mkdir(parents=True, exist_ok=True)
-                    if self.mark:
-                        await clear_marker(self.page)   # 截图前清掉，保持干净
                     await self.page.screenshot(path=str(self.screenshot_dir / f"step-{a.seq:04d}-after.png"))
                 await asyncio.sleep(self.resolver.idle() / 1000.0)
                 stats.succeeded += 1
@@ -98,7 +91,5 @@ class ReplayExecutor:
                                        "css": a.target.css if a.target else None})
                 if self.screenshot_dir:
                     self.screenshot_dir.mkdir(parents=True, exist_ok=True)
-                    if self.mark:
-                        await clear_marker(self.page)
                     await self.page.screenshot(path=str(self.screenshot_dir / f"step-{a.seq:04d}-failed.png"))
         return stats

@@ -247,8 +247,10 @@ async def _record_async(url, session_dir, out_dir, profile, keep_auth,
         # 注入钩子 + settle DOM/CPU 上报脚本（必须在 goto 前，对所有导航生效）
         await ctx.add_init_script(INJECT_SCRIPT)
         await ctx.add_init_script(_SETTLE_INJECT)
-        # 标记功能已移除（用户反馈闪烁 + 不需要视频导出标记）。
-        # --interactive-only：关闭空白点击兜底，恢复「点纯空白丢弃」的旧行为。
+        # 模拟鼠标光标（仅 video 模式）：注入跟随 mousemove 的 SVG 箭头，被 webm 捕获。
+        if video:
+            from ..marker import CURSOR_INJECT
+            await ctx.add_init_script(CURSOR_INJECT)
         # 新默认（不传）= 全捕：先取最小可点击元素，无果时兜底记最深有盒节点。
         if interactive_only:
             await ctx.add_init_script("window.__br_interactive_only = true;")
@@ -258,6 +260,9 @@ async def _record_async(url, session_dir, out_dir, profile, keep_auth,
         # click handler 不在 → 新标签页动作全丢）。用轮询循环自愈：每 2s 检查 __br_installed
         # 标志，不在就 evaluate 重新注入。配合各 IIFE 的防重复标志，幂等安全。
         _popup_injects = [INJECT_SCRIPT, _SETTLE_INJECT]
+        if video:
+            from ..marker import CURSOR_INJECT
+            _popup_injects.append(CURSOR_INJECT)
 
         def _on_new_page(pg):
             logger.info("★ popup 创建: %s", pg.url[:60] if pg.url else "(about:blank)")
