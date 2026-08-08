@@ -166,74 +166,55 @@ async def _record_async(url, session_dir, out_dir, profile, keep_auth,
         ctx = await new_context(browser, ignore_https_errors=ignore_https_errors, **ctx_kwargs)
         page = await ctx.new_page()
 
-        async def _capture_for_action(a) -> None:
+        async def _capture_for_action(a, active_page=None) -> None:
             """按截图策略为 Action 产 before/after 原图，回填 a.screenshot。
 
-            文件名 ``step-{seq:04d}-{before|after}.png``，与 export 侧读取的
-            ``screenshot['before'/'after']`` 及 executor 失败截图命名风格一致。
-            事件回调在动作发生后触发，"before" 实际捕获的是事件瞬间的页面快照
-            （spec §5.2 已说明事件已发生，before 不可得）；"after" 在等渲染稳定后截，
-            捕获异步副作用（如 XHR 返回后渲染）。
-
-            关键：截图前用 ``_wait_render_settled`` 等 DOM 渲染完成，避免截到导航/
-            重渲染中的白屏（spec §5.2：before 短等保当前帧，after 长等覆盖异步渲染）。
-
-            容错：截图全程 try/except。本回调经 ``ensure_future`` 派发为独立 Task，
-            若截图抛异常（如 Playwright 截图等 ``document.fonts.ready`` 时遇到加载
-            不出的 webfont，内网站点常见 → 卡满超时）而无人 await，会变成
-            "Task exception was never retrieved" 并使后续截图持续失败、录制僵死。
-            故任一截图点失败仅跳过该图、不影响动作落库与后续录制。
+            active_page 为触发动作的页面（popup 支持）：截图/settle/marker 都对它操作。
+            before（scrolling-snapshot）只在主 page 取——popup 无独立 screencast，跳过
+            before 改用 after（避免取到主 page 的错位帧）。
+            容错：任一截图点失败仅跳过该图、不影响动作落库与后续录制。
             """
+            if active_page is None:
+                active_page = page
             points = planner.should_capture({"type": a.type})
             if not points:
                 return
-            # 录视频时：先清掉上一步常驻的内联标记，保证本步截图干净
             if video:
                 from ..marker import clear_marker
-                await clear_marker(page)
+                await clear_marker(active_page)
             shots: dict[str, str] = {}
             for pt in points:
                 try:
                     if pt == "after":
-                        # after 等渲染稳定。click/submit 用三信号 settle（网络+DOM+CPU）：
-                        # 这类动作常触发弹层（如 launchpad）异步加载内容，仅等 DOM/CPU 会截到
-                        # 内容未加载的白屏（用户报「截图白屏」）。三信号 settle 会等到 XHR 返回、
-                        # DOM 渲染完再截。settle 自带监听器清理，可安全每动作调用。
-                        # 其它动作（input/navigation 等）用 _wait_render_settled（DOM/CPU）即可。
                         if a.type in ("click", "submit"):
-                            await wait_for_settled(page, timeout_ms=3000, debounce_ms=300)
+                            await wait_for_settled(active_page, timeout_ms=3000, debounce_ms=300)
                         else:
-                            await _wait_render_settled(page, timeout_ms=2500)
+                            await _wait_render_settled(active_page, timeout_ms=2500)
                     else:
-                        # before（scrolling-snapshot）：从后台缓冲取【点击前】最近帧——
-                        # _on_event 在 JS handler 后执行，直接截是 click 后帧（导航白屏）；
-                        # 后台 _snapshot_loop 持续截图，取 emit 之前最近帧=真点击前画面。
+                        # before（scrolling-snapshot）：popup 无独立 screencast → 跳过用 after
+                        if active_page is not page:
+                            continue
                         prev_png = _pick_pre_click_snapshot(_snapshot_buffer, a.ts)
                         if prev_png is None:
-                            continue  # 缓冲空（录制刚开始）→ 跳过 before
+                            continue
                         fn = f"step-{a.seq:04d}-before.png"
                         (screenshots / fn).write_bytes(prev_png)
                         shots[pt] = fn
-                        continue  # before 已从缓冲写，跳过下方 page.screenshot
+                        continue
                     fn = f"step-{a.seq:04d}-{pt}.png"
-                    # timeout：截图本身限 5s，避免 Playwright 默认等 fonts.ready 卡 30s
-                    await page.screenshot(path=str(screenshots / fn), timeout=5000)
+                    await active_page.screenshot(path=str(screenshots / fn), timeout=5000)
                     shots[pt] = fn
                 except Exception as e:
-                    # 该 pt 的 settle/截图失败（导航中 page 关闭等）→ 跳过此 pt，不阻断
-                    # 同次其它 pt 回填（如 click 的 before 已成功时仍回填，避免整条
-                    # action 因 after 失败而丢全部截图）。
                     logger.warning("截图失败（%s/%s）: %s", a.seq, pt, e)
                     continue
             if shots:
                 a.screenshot = shots
-            # marker 的 flash 已由 injector 在 capture phase（点击瞬间、导航前）完成，
-            # 此处不再截图后 flash（会落错跳转后页面）。截图前 clear 已保证截图干净。
 
-        async def _on_event(ev: dict):
-            # page.url 在导航中可能抛错（execution context destroyed）→ 容错取空串
+        async def _on_event(ev: dict, source=None):
+            # source 由 ctx.expose_binding 注入（dict: page/frame/context）；popup 动作的 page 是弹出页
+            active_page = (source["page"] if isinstance(source, dict) else None) or page
             try:
-                url = page.url
+                url = active_page.url
             except Exception:
                 url = ""
             page_info = {"viewport": [1280, 720], "scroll_x": 0, "scroll_y": 0}
@@ -242,23 +223,20 @@ async def _record_async(url, session_dir, out_dir, profile, keep_auth,
             except Exception as e:
                 logger.warning("事件处理失败（type=%s）: %s", ev.get("type"), e)
                 return
-            # marker 的 flash 已由 injector 在 capture phase（导航前、点击瞬间）完成，
-            # 此处不再 Python 侧 flash（_on_event 在 JS handler 后，flash 会落错页面）。
             # 截图与落库分离：截图抛错（导航中常见）不应丢失 action。emit_actions
-            # 内部隔离截图异常，落库无条件执行。
+            # 内部隔离截图异常，落库无条件执行。截图对 active_page（popup 支持）。
             acts = ([a] if a else []) + e2a.drain_pending()
-            await emit_actions(acts, _capture_for_action, _sink_action)
+            await emit_actions(acts, lambda act: _capture_for_action(act, active_page), _sink_action)
 
-        # expose_function 传 lambda → 把 async 回调派发为 Task，使 _on_event 真正执行
-        await page.expose_function("__br_emit", lambda ev: asyncio.ensure_future(_on_event(ev)))
+        # ctx.expose_binding（context 级）：popup/新标签页也继承 __br_emit → 动作不丢。
+        # （page.expose_function 是 page 级，popup 不继承，新标签页动作会全丢。）
+        await ctx.expose_binding("__br_emit", lambda source, ev: asyncio.ensure_future(_on_event(ev, source)))
         # __br_flush：beforeunload 时让挂起的输入聚合收尾（spec §5.3.1）
-        await page.expose_function("__br_flush",
-                                   lambda: asyncio.ensure_future(_on_event({"type": "input_finalize", "ts": int(time.time() * 1000)})))
+        await ctx.expose_binding("__br_flush",
+                                 lambda source: asyncio.ensure_future(_on_event({"type": "input_finalize", "ts": int(time.time() * 1000)}, source)))
         # __br_stop：页面侧按 Ctrl/Cmd+Shift+X 结束录制 → set 事件，主循环退出。
-        # 与 __br_flush 同风格（同步 lambda 包 ensure_future），保持 expose_function 行为一致。
         stop_event = asyncio.Event()
-        await page.expose_function("__br_stop",
-                                   lambda: stop_event.set() or None)
+        await ctx.expose_binding("__br_stop", lambda source: stop_event.set() or None)
         # 关闭浏览器/页面 = 结束录制（兜底，与快捷键等价）
         def _on_close():
             stop_event.set()
@@ -386,7 +364,7 @@ async def _record_async(url, session_dir, out_dir, profile, keep_auth,
                                       int(time.time() * 1000))
             if final:
                 try:
-                    await _capture_for_action(final)
+                    await _capture_for_action(final, page)
                 except Exception as e:
                     logger.warning("收尾截图失败（seq=%s）: %s", final.seq, e)
                 _sink_action(final)
