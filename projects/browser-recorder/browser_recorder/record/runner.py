@@ -227,11 +227,8 @@ async def _record_async(url, session_dir, out_dir, profile, keep_auth,
                     continue
             if shots:
                 a.screenshot = shots
-            # 录视频时：截图后再闪现内联标记（事件在 capture 阶段才到，无法真正 lead，
-            # 这里做「近瞬时」标注，常驻到下一步 clear），使视频也能标注动作位置。
-            if video and a.target and a.target.bbox:
-                from ..marker import flash_marker
-                await flash_marker(page, a.target.bbox, a.seq, a.type)
+            # marker 的 flash 已由 injector 在 capture phase（点击瞬间、导航前）完成，
+            # 此处不再截图后 flash（会落错跳转后页面）。截图前 clear 已保证截图干净。
 
         async def _on_event(ev: dict):
             # page.url 在导航中可能抛错（execution context destroyed）→ 容错取空串
@@ -245,14 +242,8 @@ async def _record_async(url, session_dir, out_dir, profile, keep_auth,
             except Exception as e:
                 logger.warning("事件处理失败（type=%s）: %s", ev.get("type"), e)
                 return
-            # marker 在 emit 时立即 flash（点击瞬间 video 标注），而非等到 _capture 截图后——
-            # 否则视频里标记比点击动作晚一截（截图 settle 耗时）。
-            if video and a and a.target and a.target.bbox:
-                from ..marker import flash_marker
-                try:
-                    await flash_marker(page, a.target.bbox, a.seq, a.type)
-                except Exception:
-                    pass
+            # marker 的 flash 已由 injector 在 capture phase（导航前、点击瞬间）完成，
+            # 此处不再 Python 侧 flash（_on_event 在 JS handler 后，flash 会落错页面）。
             # 截图与落库分离：截图抛错（导航中常见）不应丢失 action。emit_actions
             # 内部隔离截图异常，落库无条件执行。
             acts = ([a] if a else []) + e2a.drain_pending()

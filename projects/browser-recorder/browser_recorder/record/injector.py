@@ -133,6 +133,7 @@ INJECT_SCRIPT = r"""
     }
     return null;
   }
+  var __br_mark_seq = 0;
   document.addEventListener('click', function(e){
     // 优先：最小可点击元素（向上找首个自身可交互 + 真实盒子节点，bbox 最准）。
     var target = pickInteractive(e);
@@ -143,6 +144,16 @@ INJECT_SCRIPT = r"""
     }
     if (!target) return;
     emit('click', target, null);
+    // marker 在 capture phase（导航同步发生前）立即 flash——保证标记出现在【点击前页面】
+    // 且是【点击瞬间】。Python _on_event 在 JS handler 后执行，那时已导航，标记会落错页面。
+    // 仅 video 模式（__br_flash_marker 由 MARKER_INJECT 注入）。seq 用 injector 侧 click 计数。
+    if (window.__br_flash_marker) {
+      try {
+        __br_mark_seq++;
+        var info = nodeInfo(target);
+        window.__br_flash_marker(info.bbox, String(__br_mark_seq));
+      } catch(_){}
+    }
   }, true);
   // 仅 <select> 的 change 才记为 select；普通 <input> 的 change（含失焦校验）
   // 不应被误当成"选中值"，避免把用户名文本等当成 select 的 value（spec §5.1）。
