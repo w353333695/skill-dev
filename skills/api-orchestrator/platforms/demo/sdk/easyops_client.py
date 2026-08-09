@@ -366,6 +366,31 @@ class EasyOpsClient(object):
         self.logger.info("OK 导入 %s status=%s", file_path, r.status_code)
         return result
 
+    # ------------------------------------------------------------------
+    # cmdb 便捷方法（工具脚本常调 cmdb 查实例/模型；与 autoops 方法共用同一 client，
+    # 仅 base_url 指向 cmdb_service:8079）
+    # ------------------------------------------------------------------
+    def search_instances(self, object_id, fields, query=None, page=1, page_size=30, **kw):
+        """cmdb 实例搜索（POST /v3/object/{objectId}/instance/_search）。
+
+        :param object_id: 模型 id（如 HOST / APP_SYSTEM@ONEMODEL）
+        :param fields: 返回字段（属性 id 列表）——【必填】，留空后端报 100000
+        :param query: MongoDB 风格过滤（$and/$or/$like/$regex/$in/$eq...），如 {'name': {'$like': 'dev'}}
+        :param page/page_size: 分页（page_size 上限 3000）
+        :return: 后端响应 {code,data:{list,total,...}}；实例总数读 data.total
+        ⚠️ openapi 模式需后端在 api_gateway/conf/openapi.yaml 的 app_route 放行
+           cmdb service + 本 uri（POST /v3/object/{objectId}/instance/_search），否则 403/404。
+        """
+        body = {'fields': fields, 'page': page, 'page_size': page_size}
+        if query:
+            body['query'] = query
+        body.update(kw)
+        return self.call('POST', '/v3/object/%s/instance/_search' % object_id, body=body)
+
+    def get_object(self, object_id):
+        """cmdb 模型详情（GET /object/{objectId}，含 attrList/relation_list/indexList/view）。"""
+        return self.call('GET', '/object/%s' % object_id)
+
 
 # ---------------------------------------------------------------------------
 # 自测：python easyops_client.py（不真调，验证 import/构造/签名/便捷方法存在）
