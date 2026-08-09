@@ -1,0 +1,144 @@
+# onboarding.md —— 接入新系统 / 录入 platforms
+
+> onboarding 的目标：把「系统资料」（契约/抓包/源码/场景）整理录入 `platforms/<deployment>/`（符合 `asset-schema.md`），让 skill + platforms 能分发到**任意系统、任意 LLM**，读资料即能编排用户需求。
+>
+> 本文件是 skill 本体，**零系统耦合**——流程通用；完整实战范例见 `platforms/demo/`（一个配置管理系统的 onboarding 产物，含全部坑）。
+
+---
+
+## 1. 输入启动包（引导用户按最佳实践提供）
+
+onboarding 的速度和质量取决于输入完整度。**开工前按此清单核对，缺什么先问用户要什么**——不要在缺关键输入时硬猜。
+
+### 必提供（缺一不开工）
+
+| # | 输入 | 为什么需要 | 形式 |
+|---|---|---|---|
+| 1 | **API 真相来源**（至少一种）| 端点/method/请求/响应的权威定义 | OpenAPI/Swagger、EAML/契约 JSON、抓包（HAR/curl）、接口文档 URL |
+| 2 | **鉴权凭证 + 用法** | 真调验证必备 | cookie/token/AK-SK；哪个 header 或 cookie 字段承载 |
+| 3 | **有效账号（有写权限）** | 写路径 e2e 验证 | 管理员级账号标识 |
+| 4 | **e2e 场景** | 编排覆盖的标尺 | 3-5 条自然语言「我想能做什么」（含查/建/改/删）|
+
+### 强推荐（大幅提速提质，缺失会踩坑）
+
+| # | 输入 | 为什么 |
+|---|---|---|
+| 5 | **后端源码位置** | 契约常不完整——源码补全缺失端点 + 拿到**权威结构体/校验规则**（契约里的字段类型常是弱描述）|
+| 6 | **测试环境 / 隔离租户** | 写路径要落库验证，**绝不能动生产/系统自带数据**。要一个可写的测试空间（org/namespace/project）|
+| 7 | **验收方式** | 确认编排结果可见 | 前端 URL、校验命令、或查询语句 |
+
+### 可选（增量更新 / 特殊约束）
+
+| # | 输入 | 场景 |
+|---|---|---|
+| 8 | 已有 platforms 资料 | 更新而非新建（先读现状，按 schema 增量）|
+| 9 | 特殊约束 | 多租户隔离、命名空间约定、权限模型、声明式语义（upsert？）|
+
+> **输入引导话术**：用户若只甩一句「接入 X 系统」，用上表反问——尤其 1/2/3/6（API 来源、凭证、有效账号、测试空间）缺了就停下来问，别空跑。
+
+---
+
+## 2. onboarding 流程（7 步）
+
+对应 SKILL.md 决策树 [1]。每步产出可校验。
+
+### 步 1：核对输入 + 识别系统形态
+- 按「输入启动包」核对；缺关键项 → 问用户（§5 的盲点往往就是缺输入）。
+- 识别形态：契约格式（OpenAPI? EAML? 抓包?）、鉴权模型（cookie? token? AK/SK? 是否多租户?）、数据模型（CRUD? 声明式 upsert?）。
+
+### 步 2：理解 API 面（契约 → 端点表）
+- 从契约抽：每个端点的 method/path/请求体/响应。
+- **关键意识：契约常不完整**。把场景需要、契约没有的端点列出来（典型：delete/get-detail），留到步 3 用源码补。
+
+### 步 3：探源码补全 + 拿权威结构（若有源码）
+- **补端点**：找路由注册（gin/echo/http router `.GET/.POST/...` 或路由表），补全契约缺的端点。
+- **权威结构体**：找契约里引用的模型（如 `<ModelType>[]`）的 Go/源码定义——拿到**全部字段 + json tag + 校验 tag**（required/regex/enum），比契约的字段描述准。
+- **校验/约束**：找 validator + service 层的运行时检查（重复、依赖、副作用）。
+- 派 `Explore` 子代理大面积扫，要结论 + `file:line` 引证，别 dump 全文。
+
+### 步 4：写 api-cli 清单（`<system>.yaml`）
+- 按 api-cli spec 格式（见 api-cli USAGE）：`service/endpoints` + `resources/<resource>/operations`。
+- 写作纪律（踩过的坑，见 api-cli USAGE「清单编写要点」）：
+  - **无 `$ref`**——body/response schema 全部**内联**；多 operation 共用结构只能重复。
+  - **`required` 双义**——`params.required` 是 bool；schema 的 `required` 是 `[]string`（父列必填子字段名）。在 schema 属性上写 `required: true` 会解析报错。
+  - **disparate 路由**用 `resource.path: ""` + 每 operation 持完整路径。
+  - **每个 resource/operation 写 `description`**——它进 MCP tool description，决定 LLM 抉择准不准。
+- 验证：`api-cli --spec X --help`（resource/verb 渲染）+ `explain R V`（schema 透传）+ `R V --dry-run`（URL/body 构造）。
+
+### 步 5：录入 platforms（按 asset-schema 归位）
+知识分文件，**别堆 README**：
+
+| 知识 | 归位 |
+|---|---|
+| 接入面/鉴权/端口/租户/用户/环境变量 | `systems.yaml`（endpoints + `runtime:` 段）|
+| 对象结构/字段/关系/约束/**操作副作用**/**接口行为** | `objects.yaml`（`fields`/`relations`/`constraints`/`side_effects`/`api_behavior`）|
+| 主键/关键字段格式 + 跨实体、跨 step 接力 | `entities.yaml`（`anchor`/`transitions`）|
+| build/change 端到端步骤 | `flows/*.yaml`（`steps`/`dataflow`/`rollback`）|
+| 命令树 + body schema | `<system>.yaml`（api-cli 清单）|
+| 资料地图导航 | `README.md`（**只索引，不承载知识**）|
+
+> 副作用规则（upsert、删除依赖、级联、分页格式、必填 query）是**真相来源核心**——这些最容易被契约漏掉、最值得记进 `objects.yaml.side_effects`。
+
+### 步 6：e2e 真调验证（阶梯式，踩坑即时回流）
+1. **连通 + 鉴权**：一个只读 GET 真调。失败先查鉴权（凭证？额外 header？租户/用户？）。
+2. **读路径**：list/detail/search 真调，确认返回结构（wrapper? 流式 NDJSON? 字段?）。
+3. **写路径**（用户授权 + 测试空间）：预检 → 建 → 改 → 删（清理）。每个失败都回溯源码/问用户，**坑即时写进 objects.yaml/systems.yaml**。
+- 读通了再写；写要在可丢弃的测试空间，全程可回滚。
+
+### 步 7：交付
+- README 作资料地图索引（指向各文件）。
+- e2e 场景逐条标注用哪个 resource.verb（覆盖标尺）。
+- 验收 URL / 校验命令记录在 systems.yaml。
+- 提交；坑已回流 platforms（**不进记忆**——platforms 是唯一真相来源）。
+
+---
+
+## 3. 产物核对表（onboarding 完成应具备）
+
+```
+platforms/<deployment>/
+├── README.md         索引（资料地图），无知识主体
+├── systems.yaml      接入：endpoints/auth/runtime(端口/租户/用户/env)/capabilities/acceptance
+├── objects.yaml      对象：fields/relations/constraints/side_effects/api_behavior
+├── entities.yaml     字段：anchor/transitions
+├── flows/*.yaml      流程：build/change 步骤序列
+├── <system>.yaml     api-cli 清单：resource/verb/body schema
+└── formats/<fmt>/    （有跨部署格式才需要）
+```
+自检：换个 LLM 只读这些文件，能否无坑接上系统、复现场景？能 → onboarding 合格。
+
+---
+
+## 4. 常见盲点（实战归纳，通用）
+
+这些是契约/文档常漏、e2e 才暴露的坑——onboarding 时主动查，别等用户撞上：
+
+1. **契约不完整**：常只覆盖部分端点（缺 delete/detail/batch）。→ 用源码路由表补。
+2. **鉴权有隐藏要求**：cookie/token 之外，常还要**租户/用户 header**（多租户系统几乎必有）。契约不写，要 e2e + 源码（grep `Header.Get`）。缺了报「empty org/user」「unauthorized」。
+3. **凭证 ≠ 全部**：光有 token 不够，还要**租户号 + 有效用户标识 + 测试空间**。这些要问用户。
+4. **写操作有副作用约束**：删除可能依赖「先删子/关系」、导入可能是 upsert、有 protected 不可删。→ 源码 validator/service + e2e。
+5. **系统自带数据绝不能动**：生产库、系统内置租户/命名空间。→ 要用户指测试空间，或查「查租户」接口找非系统空间。
+6. **声明式 vs CRUD**：有的系统建/改走「声明式导入」（一次提交整体定义，upsert），不是逐字段 CRUD。→ 影响编排设计（建模型 = import 整体，不是 N 个 create-attr）。
+7. **响应格式不定**：分页可能是流式 NDJSON（非 `{data:{list}}`）、单对象可能是 wrapper、必填 query（如 `fields`）。→ e2e 确认，记进 `objects.yaml.api_behavior`。
+8. **默认值在配置中心**：默认租户/org/namespace 常在运行时配置（agollo/apollo/env），源码只看到 fallback。→ 实测扫描或问用户。
+
+---
+
+## 5. 需要用户进一步提供的输入（优化 onboarding）
+
+onboarding 卡住或质量不足时，按缺失向用户要：
+
+| 症状 | 向用户要 |
+|---|---|
+| 端点不全 / 字段类型弱 | 后端源码位置（或更全的契约）|
+| 鉴权报 empty/unauthorized | 多租户 header 名 + 租户号 + 有效账号 |
+| 不知在哪测写操作 | 可写测试空间（org/namespace/project）|
+| 不知默认租户/命名空间 | 默认 org/namespace 值，或「查租户」接口 |
+| 场景覆盖存疑 | 补充 e2e 场景 + 验收方式 |
+| 副作用不明（删/改行为）| 确认级联/依赖/protected 规则 |
+
+---
+
+## 6. 完整实战范例
+
+`platforms/demo/` 是一次完整 onboarding 的产物（一个配置管理系统），覆盖：契约解析、源码补全端点、权威结构体、声明式导入、多租户鉴权、e2e 读写全路径、副作用规则、流程模板。**遇到具体问题时，参照它对应文件怎么写的**。
