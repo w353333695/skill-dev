@@ -1,0 +1,60 @@
+# =============================================================================
+# platforms/demo/systems.yaml
+# deployment=demo 下接入的系统清单 + 各自 api-cli spec 路径 + 接入面 + 鉴权。
+# 编排挡（orchestration.md）查本文件获知「有哪些系统可用」与「spec 在哪」。
+# =============================================================================
+deployment: demo
+
+systems:
+  easyops-cmdb:
+    description: |
+      EasyOps CMDB（配置管理数据库）—— 三层体系：
+      ① 模型 object（object_model）：定义「有什么资源类」，含属性 attrList / 关系 relation_list / 关系分组 relation_groups / 索引 indexList / 视图 view；
+      ② 关系 relation（object_relation）：模型间的关联（细粒度 CRUD）；
+      ③ 实例 instance（object_instance）：模型下的具体数据记录。
+      核心范式：模型通过「声明式导入 import」一次性定义/更新（upsert），而非逐属性 CRUD。
+
+    spec: easyops-cmdb.yaml              # api-cli 清单，相对本目录
+    default_endpoint: backend            # 默认直连 cmdb_service :8079（object 域全 verb 干净命中）
+
+    endpoints:
+      backend:                           # 直连后端（HTTP，无网关前缀，object 域全 verb 通用）
+        base_url: ${EASYOPS_CMDB_BACKEND_URL}
+        host: admin.easyops.local        # IP 直连，网关按 Host 路由
+      frontend:                          # 前端网关（HTTPS）—— 注意：网关 per-API 路由，仅 instance.search 通用
+        base_url: ${EASYOPS_CMDB_FRONTEND_URL}
+        host: admin.easyops.local
+
+    auth: easyops-cookie                 # ~/.api-cli/auth.d/easyops-cookie.yaml：provider=cookie，持 PHPSESSID
+
+    env:                                 # 部署所需环境变量（供 run.sh / shell 注入）
+      EASYOPS_CMDB_BACKEND_URL: "http://172.30.0.90:8079"
+      EASYOPS_CMDB_FRONTEND_URL: "https://172.30.0.90"
+
+    # 能力清单（resource.verb）—— 编排挡据此判断意图可达性
+    capabilities:
+      object_model:
+        list:         "查询模型基本信息列表（关键词 q / 分类 category / ID objectIds，分页）"
+        detail:       "读取单个模型完整详情（attrList/relation_list/indexList/view）"
+        import:       "声明式建/改模型（upsert）—— 一次定义属性+关系+视图+索引"
+        import_check: "导入预检（dry-run，不落库）"
+        export:       "按 ID 批量导出完整模型定义"
+        delete:       "删除模型（protected 模型不可删；forceDelete 强删）"
+      object_attr:
+        create: "给模型新增属性"
+        read:   "读取模型单个属性"
+        update: "更新模型单个属性"
+        delete: "删除模型单个属性"
+      object_relation:
+        list:   "列出所有关系"
+        create: "新建关系（连两个模型 left/right）"
+        read:   "读取单条关系"
+        update: "更新关系"
+        delete: "删除关系"
+      object_instance:
+        search: "按 MongoDB 风格 query 搜索实例（分页）"
+
+    # e2e 验收 URL（前端）—— 模型类操作后在此可视化校验
+    acceptance_urls:
+      model_list:   "http://172.30.0.90/next/cmdb-model-management?hidden=true&page=1&q=测试&pageSize=20&category=应用资源"
+      model_detail: "http://172.30.0.90/next/cmdb-model-management/object/{objectId}/detail"   # objectId 形如 OCEANBASE@EASYOPS
