@@ -76,6 +76,7 @@ def test_record_and_replay(tmp_path, demo_server):
     assert "s3cret" not in doc
     assert "点击【登录】" in doc
     assert "![步骤" in doc
+    assert "附：关键请求" in doc and "/api/echo" in doc  # 请求附录
 
     # --- 回放断言 ---
     report = Replayer(session_dir).run()

@@ -19,9 +19,10 @@ def main() -> None:
 @click.option("--url", default=None, help="起始 URL（headed 新开浏览器时使用）")
 @click.option("--cdp", default=None, help="CDP endpoint，attach 已开的浏览器，如 http://localhost:9222")
 @click.option("--auth/--no-auth", default=True, help="是否自动加载/维护登录态（默认开）")
+@click.option("--headless", is_flag=True, help="无头模式（无 UI 环境调试用；正常录制勿用）")
 @click.option("-o", "--output", default=DEFAULT_OUTPUT_DIR, help="session 输出根目录")
 @click.option("--video", is_flag=True, help="录制期录像（仅 headed 模式支持）")
-def record(url: str | None, cdp: str | None, auth: bool, output: str, video: bool) -> None:
+def record(url: str | None, cdp: str | None, auth: bool, headless: bool, output: str, video: bool) -> None:
     """录制浏览器操作，产出 doc.md / record.jsonl / requests.jsonl。"""
     if not url and not cdp:
         raise click.UsageError("需要 --url 或 --cdp 之一")
@@ -30,7 +31,7 @@ def record(url: str | None, cdp: str | None, auth: bool, output: str, video: boo
 
     from .recorder import Recorder
 
-    recorder = Recorder(url=url, cdp=cdp, use_auth=auth, output_root=output, video=video)
+    recorder = Recorder(url=url, cdp=cdp, use_auth=auth, output_root=output, video=video, headless=headless)
     session_dir = recorder.run()
     click.echo(f"\n录制完成，产物目录: {session_dir}")
 

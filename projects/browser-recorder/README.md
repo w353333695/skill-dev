@@ -46,6 +46,13 @@ browser-recorder replay <session_dir> --param password=xxx
 browser-recorder replay <session_dir> --on-fail skip --video
 ```
 
+### 无 UI 环境调试
+
+```bash
+# 无头模式录制（调试用；正常录制应 headed 或 --cdp）
+browser-recorder record --url http://localhost:8000 --headless
+```
+
 ## 产物
 
 ```
@@ -63,6 +70,7 @@ browser-recorder replay <session_dir> --on-fail skip --video
 ## 环境说明
 
 - **CDP 模式**：attach 后必须有一次导航/reload 录制脚本才生效（Playwright init script 只对 attach 后的导航生效），工具已自动处理。
-- **CDP 模式不支持录制期录像**（Playwright 限制）；回放录像不受影响。
-- iframe：同源 iframe 内操作可录制（经 parent 桥）；跨域 iframe 事件会丢弃并 warn。
-- SPA 路由变化目前不单独记 navigate 步骤（各步骤的 url 字段仍准确），后续版本补充。
+- **CDP 模式不支持录制期录像**（Playwright 限制）；回放录像（`replay --video`）不受影响。
+- **iframe**：同源 iframe 内操作可录制（事件经 parent 桥上报）；跨域 iframe 事件会丢弃并在 console warn。回放第一阶段只定位 main frame。
+- **SPA 路由**：`pushState/replaceState/popstate/hashchange` 会记录为 navigate 步骤。
+- **请求记录**：经 `context.route` 拦截所有 fetch/XHR（静态资源/媒体/websocket 除外），请求体 + 响应体（≤64KB）都记；doc.md 末尾附"关键请求"表（写操作 + 非 2xx）。

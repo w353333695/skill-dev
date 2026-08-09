@@ -211,6 +211,26 @@ RECORDER_JS = r"""
     }
   }, true);
 
+  // SPA 路由变化：hook history API，记 navigate 步骤（无整页导航时）
+  let lastUrl = location.href;
+  function onRouteChange() {
+    if (location.href === lastUrl) return;
+    lastUrl = location.href;
+    const p = basePayload("navigate", null);
+    p.value = location.href;
+    enqueue(p);
+  }
+  for (const m of ["pushState", "replaceState"]) {
+    const orig = history[m];
+    history[m] = function (...args) {
+      const r = orig.apply(this, args);
+      onRouteChange();
+      return r;
+    };
+  }
+  window.addEventListener("popstate", onRouteChange);
+  window.addEventListener("hashchange", onRouteChange);
+
   // 初次注入（含每次导航后）补发暂存事件
   if (document.readyState === "loading") {
     document.addEventListener("DOMContentLoaded", flushPending);

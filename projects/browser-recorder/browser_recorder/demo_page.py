@@ -51,11 +51,35 @@ WELCOME_HTML = """<!DOCTYPE html>
 </html>
 """
 
+SPA_HTML = """<!DOCTYPE html>
+<html lang="zh">
+<head><meta charset="utf-8"><title>spa</title></head>
+<body>
+  <h1>SPA 页</h1>
+  <button id="tab-a" data-testid="tab-a">标签A</button>
+  <button id="tab-b" data-testid="tab-b">标签B</button>
+  <div id="content">当前: A</div>
+  <script>
+    document.getElementById("tab-a").addEventListener("click", () => {
+      history.pushState({}, "", "/spa#a");
+      document.getElementById("content").textContent = "当前: A";
+    });
+    document.getElementById("tab-b").addEventListener("click", () => {
+      history.pushState({}, "", "/spa#b");
+      document.getElementById("content").textContent = "当前: B";
+    });
+  </script>
+</body>
+</html>
+"""
+
 
 class _Handler(BaseHTTPRequestHandler):
     def do_GET(self) -> None:
         if self.path == "/welcome":
             self._send(WELCOME_HTML)
+        elif self.path.startswith("/spa"):
+            self._send(SPA_HTML)
         else:
             self._send(LOGIN_HTML)
 
