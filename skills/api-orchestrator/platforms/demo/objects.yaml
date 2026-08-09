@@ -178,5 +178,15 @@ api_behavior:
       query（过滤根实例）vs fields_relation_filter（过滤返回的对端列表，key=关系 out_id 支持多层/边属性 .@）：职责正交。
       limitations[].field 支持多级（如 owner.app，search_limit.pb.go:22）；cmdb_service 自动生成仅第 1 层，多级需调用方自给。
       ⚠️ 注意：filter_relation 不在 search（在 GroupInstanceV3 聚合接口）。
+  relation_path_discovery:
+    rule: |
+      多模型关系链路【发现】用 object_relation.related_key（GET /object_relation_related_key，源码 object_path/）：
+      给定 src/dst 模型，返回所有可达路径（实测最多 100 条），每条 {label, reverseQueryKey, path}。
+      - reverseQueryKey（接口直给，点分 Out.Id 链）= dst→src 反向键，直接喂【dst 模型】search 的 fields/query。
+      - 正向键（src→dst）= 从 path[].relation_side_id 序列按序拼接，喂【src 模型】search。
+      e2e 实测（org 18832008）：related_key(HOST, APP_SYSTEM@ONEMODEL) →
+        reverseQueryKey=serviceSets.hosts（APP_SYSTEM→HOST：APP_SYSTEM search fields=["serviceSets.hosts.ip"] 取到 HOST ip 172.30.0.232）；
+        正向键=serviceSets.system（HOST→APP_SYSTEM：HOST search fields=["serviceSets.system.name"] 取到系统名 "Easyops"）。
+      工作流：related_key 发现链路键 → object_instance.search 用该键多层 jsonPath 穿越取终端字段/按终端属性过滤根实例。
   wrapper:
     rule: "标准响应 {code, message, error, data}；code=0 成功。业务错误码形如 133xxx。"
