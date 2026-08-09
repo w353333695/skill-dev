@@ -60,20 +60,24 @@ class Recorder:
 
         page.on("close", lambda _: self._stop.set())
         stop_at: float | None = None
-        while True:
-            try:
-                page.evaluate("1", timeout=2000)
-            except Exception:
-                pass
-            self.drain()
-            if owned and not self._context.pages:
-                break
-            if self._stop.is_set():
-                if stop_at is None:
-                    stop_at = time.monotonic() + 2.0  # stop 后再泵 2 秒收在途事件
-                elif time.monotonic() >= stop_at:
+        try:
+            while True:
+                try:
+                    page.evaluate("1", timeout=2000)
+                except Exception:
+                    pass
+                self.drain()
+                if owned and not self._context.pages:
                     break
-            time.sleep(0.3)
+                if self._stop.is_set():
+                    if stop_at is None:
+                        stop_at = time.monotonic() + 2.0  # stop 后再泵 2 秒收在途事件
+                    elif time.monotonic() >= stop_at:
+                        break
+                time.sleep(0.3)
+        except KeyboardInterrupt:
+            # Ctrl+C：不直接退出，照常走 finish 保证 record.jsonl flush + doc.md 生成
+            pass
         return self.finish()
 
     def start(self) -> None:

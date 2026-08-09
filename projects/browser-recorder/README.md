@@ -28,6 +28,11 @@ browser-recorder record --url https://172.30.0.232 --ignore-https-errors
 # 登录态过期会检测并提示原地重登（给了账密则自动重登），不中断录制
 ```
 
+**停止录制**（三种都行，都会正常收尾：flush 记录 + 生成 doc.md）：
+- 关闭浏览器窗口 / 最后一个标签页
+- 在终端按 `Ctrl+C`
+- 脚本场景调 `recorder.stop()`
+
 > 自签证书的内网站点需 `--ignore-https-errors`。
 
 ### 录制（CDP attach，无 UI 环境 / 登录态兜底）
