@@ -14,7 +14,7 @@ steps:
     args: ["<OBJECT_ID>", --body-file, "<check.json>", --insecure]
     desc: 预检——查 keys（如 ip/name）是否已存在，避免误判增改
     body_hint: '{ fields: ["instanceId","ip"], page:1, page_size:200, query: {ip: {$like: "%192.168.1.%"}} }'
-    on_fail: "fields 留空报 100000 → 必带 fields；ip 字段名以模型实际属性 id 为准"
+    on_fail: "fields 留空报 100000 → 必带 fields；fields 含 name 报 133116「Can not find name relation」→ 去 name 用 instanceId/ip；ip 字段名以模型实际属性 id 为准"
   - n: 2
     op: object_instance.import
     args: ["<OBJECT_ID>", --body-file, "<import.json>", --insecure, --yes]
