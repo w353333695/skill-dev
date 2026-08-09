@@ -57,16 +57,16 @@ RECORDER_JS = r"""
     }
 
     function push(type, event, value) {
-        const target = event.target;
-        if (!target) return;
+        const target = event ? event.target : null;
+        if (!target && type !== 'NAV') return;
         const record = {
             type: type,
             timestamp: Date.now(),
-            selector: getSelector(target, event),
+            selector: target ? getSelector(target, event) : '',
             value: value || null,
-            tagName: target.tagName ? target.tagName.toLowerCase() : '',
-            text: getText(target),
-            coords: getCoords(event),
+            tagName: target ? (target.tagName ? target.tagName.toLowerCase() : '') : '',
+            text: target ? getText(target) : '',
+            coords: event ? getCoords(event) : null,
             url: location.href,
             pageId: window.__recorder_page_id__ || 'main',
             frameId: null
@@ -134,6 +134,24 @@ RECORDER_JS = r"""
         doFlush();
         push('NAV', e, location.href);
     });
+
+    // Monkey-patch history.pushState / replaceState 以捕获 SPA 导航
+    (function() {
+        var _pushState = history.pushState;
+        var _replaceState = history.replaceState;
+        history.pushState = function() {
+            var result = _pushState.apply(this, arguments);
+            doFlush();
+            push('NAV', null, location.href);
+            return result;
+        };
+        history.replaceState = function() {
+            var result = _replaceState.apply(this, arguments);
+            doFlush();
+            push('NAV', null, location.href);
+            return result;
+        };
+    })();
 
     // 页面卸载前 flush
     window.addEventListener('beforeunload', function() {
