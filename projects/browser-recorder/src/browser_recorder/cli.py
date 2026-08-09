@@ -18,7 +18,7 @@ console = Console()
 def start(
     url: str = typer.Option(..., "--url", help="起始 URL"),
     output: Optional[Path] = typer.Option(
-        None, "--output", help="输出目录（默认 /workspace/tmp/.browser-recorder/<timestamp>）"
+        None, "--output", help="输出目录（默认按域名自动分配，如 .../example.com/）"
     ),
     interval: int = typer.Option(30, "--interval", help="兜底截图间隔（秒）"),
     req_all: bool = typer.Option(False, "--req-all", help="记录所有请求"),
@@ -123,6 +123,35 @@ def doctor() -> None:
             console.print(f"  ❌ {name} 未安装")
 
     console.print("\n[bold green]环境检查完成[/bold green]")
+
+
+@app.command("list")
+def list_sessions() -> None:
+    """列出所有录制的域名 session."""
+    from .recorder import load_index, load_meta, ARTIFACT_ROOT, session_path
+
+    index = load_index()
+    domains = index.get("domains", {})
+
+    if not domains:
+        console.print("[dim]暂无录制 session[/dim]")
+        return
+
+    console.print(f"\n[bold]录制 Session 列表[/bold] ({ARTIFACT_ROOT})\n")
+
+    for domain, info in sorted(domains.items()):
+        sp = session_path(f"https://{domain}")
+        meta = load_meta(sp)
+        last = info.get("last_recorded", "?")[:19]
+        count = info.get("total_recordings", 0)
+        urls = meta.get("urls", [])
+
+        console.print(f"  [bold cyan]{domain}[/bold cyan]")
+        console.print(f"    录制次数: {count}  |  最近: {last}")
+        if urls:
+            console.print(f"    URL: {', '.join(urls[:3])}{' ...' if len(urls) > 3 else ''}")
+        console.print(f"    目录: {sp}")
+        console.print()
 
 
 @app.command()
