@@ -6,9 +6,9 @@ build-backend = "setuptools.build_meta"
 name = "browser-recorder"
 version = "0.1.0"
 description = "浏览器操作录制 CLI 工具，基于 Playwright + Chromium"
-requires-python = ">=3.9"
+requires-python = ">=3.10"
 dependencies = [
-    "playwright>=1.40",
+    "playwright>=1.61",
     "typer>=0.9",
     "Pillow>=10.0",
     "rich>=13.0",
