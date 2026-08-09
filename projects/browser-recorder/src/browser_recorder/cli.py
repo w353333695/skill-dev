@@ -17,8 +17,9 @@ console = Console()
 @app.command()
 def start(
     url: str = typer.Option(..., "--url", help="起始 URL"),
+    name: str = typer.Option("default", "--name", "-n", help="场景名（同域名下区分不同录制场景）"),
     output: Optional[Path] = typer.Option(
-        None, "--output", help="输出目录（默认按域名自动分配，如 .../example.com/）"
+        None, "--output", help="输出目录（默认 <domain>/<name>/）"
     ),
     interval: int = typer.Option(30, "--interval", help="兜底截图间隔（秒）"),
     req_all: bool = typer.Option(False, "--req-all", help="记录所有请求"),
@@ -31,11 +32,13 @@ def start(
     from .recorder import Recorder
 
     console.print(f"[bold green]▶[/bold green] 启动录制: {url}")
+    console.print(f"   场景: {name}")
     console.print(f"  按 Ctrl+C 停止录制")
 
     recorder = Recorder(
         url=url,
         output_dir=output,
+        scenario_name=name,
         fallback_interval=interval,
         req_all=req_all,
         req_filter=req_filter,
@@ -127,8 +130,8 @@ def doctor() -> None:
 
 @app.command("list")
 def list_sessions() -> None:
-    """列出所有录制的域名 session."""
-    from .recorder import load_index, load_meta, ARTIFACT_ROOT, session_path
+    """列出所有录制的域名和场景."""
+    from .recorder import load_index, load_domain_meta, ARTIFACT_ROOT, domain_path
 
     index = load_index()
     domains = index.get("domains", {})
@@ -140,17 +143,25 @@ def list_sessions() -> None:
     console.print(f"\n[bold]录制 Session 列表[/bold] ({ARTIFACT_ROOT})\n")
 
     for domain, info in sorted(domains.items()):
-        sp = session_path(f"https://{domain}")
-        meta = load_meta(sp)
         last = info.get("last_recorded", "?")[:19]
-        count = info.get("total_recordings", 0)
-        urls = meta.get("urls", [])
+        scenarios = info.get("scenarios", [])
 
-        console.print(f"  [bold cyan]{domain}[/bold cyan]")
-        console.print(f"    录制次数: {count}  |  最近: {last}")
-        if urls:
-            console.print(f"    URL: {', '.join(urls[:3])}{' ...' if len(urls) > 3 else ''}")
-        console.print(f"    目录: {sp}")
+        console.print(f"  [bold cyan]{domain}[/bold cyan]  ({last})")
+
+        dp = domain_path(f"https://{domain}")
+        auth_file = dp / "auth.json"
+        auth_mark = "🔐" if auth_file.exists() else "  "
+        console.print(f"    {auth_mark} 鉴权: {'已保存' if auth_file.exists() else '无'}")
+
+        domain_meta = load_domain_meta(dp)
+        sc_meta = domain_meta.get("scenarios", {})
+
+        for sc_name in sorted(scenarios):
+            sc_info = sc_meta.get(sc_name, {})
+            sc_last = sc_info.get("last_recorded", "?")[:19]
+            sc_count = sc_info.get("total_recordings", 0)
+            console.print(f"    ├─ [bold]{sc_name}[/bold]  ({sc_count}次, {sc_last})")
+
         console.print()
 
 

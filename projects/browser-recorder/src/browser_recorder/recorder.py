@@ -8,7 +8,6 @@ from pathlib import Path
 from datetime import datetime, timezone
 from dataclasses import asdict
 from typing import Optional, Dict
-from urllib.parse import urlparse
 
 from playwright.async_api import async_playwright, Browser, BrowserContext, Page
 from rich.console import Console
@@ -34,6 +33,7 @@ def _domain_key(url: str) -> str:
     https://example.com/path   → example.com
     http://192.168.1.1:8080/a  → 192.168.1.1_8080
     """
+    from urllib.parse import urlparse
     p = urlparse(url)
     host = p.hostname or "unknown"
     if p.port and p.port not in (80, 443):
@@ -41,56 +41,86 @@ def _domain_key(url: str) -> str:
     return host
 
 
-def session_path(url: str) -> Path:
-    """返回 URL 对应的 session 目录."""
+def domain_path(url: str) -> Path:
+    """返回域名根目录."""
     return ARTIFACT_ROOT / _domain_key(url)
 
 
+def scenario_path(url: str, name: str = "default") -> Path:
+    """返回场景目录."""
+    return domain_path(url) / name
+
+
+# ---- index.json (全局) ----
+
+
 def load_index() -> dict:
-    """加载全局 index.json."""
-    idx_path = ARTIFACT_ROOT / "index.json"
-    if idx_path.exists():
-        return _json.loads(idx_path.read_text())
+    idx = ARTIFACT_ROOT / "index.json"
+    if idx.exists():
+        return _json.loads(idx.read_text())
     return {"domains": {}}
 
 
 def save_index(index: dict) -> None:
-    """保存全局 index.json."""
     ARTIFACT_ROOT.mkdir(parents=True, exist_ok=True)
     (ARTIFACT_ROOT / "index.json").write_text(
         _json.dumps(index, ensure_ascii=False, indent=2)
     )
 
 
-def load_meta(output_dir: Path) -> dict:
-    """加载域名 meta.json."""
-    meta_path = output_dir / "meta.json"
-    if meta_path.exists():
-        return _json.loads(meta_path.read_text())
+# ---- meta.json (域名级) ----
+
+
+def load_domain_meta(domain_dir: Path) -> dict:
+    mp = domain_dir / "meta.json"
+    if mp.exists():
+        return _json.loads(mp.read_text())
     return {
-        "domain": output_dir.name,
+        "domain": domain_dir.name,
         "first_seen": None,
         "last_recorded": None,
         "total_recordings": 0,
         "urls": [],
+        "scenarios": {},
+    }
+
+
+def save_domain_meta(domain_dir: Path, meta: dict) -> None:
+    (domain_dir / "meta.json").write_text(
+        _json.dumps(meta, ensure_ascii=False, indent=2)
+    )
+
+
+# ---- meta.json (场景级) ----
+
+
+def load_scenario_meta(scenario_dir: Path) -> dict:
+    sp = scenario_dir / "meta.json"
+    if sp.exists():
+        return _json.loads(sp.read_text())
+    return {
+        "name": scenario_dir.name,
+        "first_seen": None,
+        "last_recorded": None,
+        "total_recordings": 0,
         "sessions": [],
     }
 
 
-def save_meta(output_dir: Path, meta: dict) -> None:
-    """保存域名 meta.json."""
-    (output_dir / "meta.json").write_text(
+def save_scenario_meta(scenario_dir: Path, meta: dict) -> None:
+    (scenario_dir / "meta.json").write_text(
         _json.dumps(meta, ensure_ascii=False, indent=2)
     )
 
 
 class Recorder:
-    """录制编排器 — 按域名自动管理 session."""
+    """录制编排器 — 按域名共享鉴权 + 按场景独立录制."""
 
     def __init__(
         self,
         url: str,
         output_dir: Optional[Path] = None,
+        scenario_name: str = "default",
         fallback_interval: int = 30,
         req_all: bool = False,
         req_filter: Optional[str] = None,
@@ -98,15 +128,17 @@ class Recorder:
         max_duration: int = 0,
     ) -> None:
         self.url = url
+        self.scenario_name = scenario_name
         self.keep_all = keep_all
         self.max_duration = max_duration
         self.fallback_interval = fallback_interval
 
-        # 按域名自动分配目录，同名域名复用
-        self.output_dir = output_dir or session_path(url)
-        self.output_dir.mkdir(parents=True, exist_ok=True)
+        # 目录结构: <domain>/<scenario>/
+        self.domain_dir = domain_path(url)
+        self.scenario_dir = output_dir or scenario_path(url, scenario_name)
+        self.scenario_dir.mkdir(parents=True, exist_ok=True)
 
-        # 清理上次录制的临时截图
+        # 清除上次录制的临时截图
         self._clear_stale_screenshots()
 
         # 请求过滤
@@ -114,16 +146,19 @@ class Recorder:
         if req_all:
             self._req_filter = "*"
 
-        # 管道组件
+        # 管道组件（输出到场景目录）
         self.pipeline = FilterPipeline()
         self.pipeline.add(InputMergeFilter())
         self.pipeline.add(DedupFilter())
 
-        self.jsonl_writer = JsonlWriter(self.output_dir)
-        self.screenshoter = Screenshoter(self.output_dir)
+        self.jsonl_writer = JsonlWriter(self.scenario_dir)
+        self.screenshoter = Screenshoter(self.scenario_dir)
         self.network_interceptor = NetworkInterceptor(self._req_filter)
 
-        # 状态
+        # 鉴权状态
+        self._auth_file = self.domain_dir / "auth.json"
+
+        # 运行时状态
         self.actions: list[Action] = []
         self.step_counter = 0
         self.start_time_ms = 0.0
@@ -133,11 +168,32 @@ class Recorder:
         self._fallback_task: Optional[asyncio.Task] = None
 
     def _clear_stale_screenshots(self) -> None:
-        """删除上次录制遗留的截图."""
-        ss_dir = self.output_dir / "screenshots"
+        ss_dir = self.scenario_dir / "screenshots"
         if ss_dir.exists():
             shutil.rmtree(ss_dir)
         ss_dir.mkdir(parents=True, exist_ok=True)
+
+    def _load_auth(self, context: BrowserContext) -> None:
+        """从 auth.json 恢复鉴权状态."""
+        if self._auth_file.exists():
+            try:
+                state = _json.loads(self._auth_file.read_text())
+                context.add_cookies(state.get("cookies", []))
+                # localStorage/origins 通过 storage_state 完整恢复
+                # add_cookies 是简化版；完整恢复用 context.add_init_script
+                # 或直接用 browser.new_context(storage_state=...)
+                console.print(f"[dim]🔐 已加载鉴权: {self._auth_file}[/dim]")
+            except Exception:
+                pass
+
+    async def _save_auth(self, context: BrowserContext) -> None:
+        """保存鉴权状态到 auth.json."""
+        try:
+            state = await context.storage_state()
+            self._auth_file.write_text(_json.dumps(state, ensure_ascii=False, indent=2))
+            console.print(f"[dim]🔐 鉴权已保存: {self._auth_file}[/dim]")
+        except Exception:
+            pass
 
     async def run(self) -> Path:
         """启动录制."""
@@ -146,7 +202,20 @@ class Recorder:
 
         async with async_playwright() as pw:
             browser = await pw.chromium.launch(headless=False)
-            context = await browser.new_context(no_viewport=True)
+
+            # 尝试加载已有鉴权状态
+            storage_state = None
+            if self._auth_file.exists():
+                try:
+                    storage_state = _json.loads(self._auth_file.read_text())
+                    console.print("[dim]🔐 已加载鉴权状态[/dim]")
+                except Exception:
+                    pass
+
+            context = await browser.new_context(
+                no_viewport=True,
+                storage_state=storage_state,
+            )
 
             context.on("page", lambda p: asyncio.ensure_future(self._on_new_page(p)))
 
@@ -175,6 +244,9 @@ class Recorder:
 
             if self._fallback_task:
                 self._fallback_task.cancel()
+
+            # 保存鉴权
+            await self._save_auth(context)
 
             for p in self._page_map.values():
                 await injector_flush(p)
@@ -222,10 +294,8 @@ class Recorder:
             batch = _json.loads(json_str)
         except _json.JSONDecodeError:
             return
-
         for raw in batch:
-            processed = self.pipeline.process(raw)
-            for ev in processed:
+            for ev in self.pipeline.process(raw):
                 await self._handle_event(ev)
 
     async def _handle_event(self, ev: dict) -> None:
@@ -235,7 +305,6 @@ class Recorder:
         except ValueError:
             return
 
-        selector = ev.get("selector", "")
         page_id = ev.get("pageId", "main")
         page = self._page_map.get(page_id)
         if page is None:
@@ -246,7 +315,7 @@ class Recorder:
             step=self.step_counter,
             timestamp_ms=ev.get("timestamp", time.time() * 1000),
             tag=tag,
-            selector=selector,
+            selector=ev.get("selector", ""),
             tag_name=ev.get("tagName", ""),
             text=ev.get("text"),
             url=ev.get("url", page.url),
@@ -261,7 +330,6 @@ class Recorder:
                 page, action.step, action.coords
             )
             action.screenshot_before = str(before_path) if before_path else None
-
             after_path = await self.screenshoter.take_after(page, action.step)
             action.screenshot_after = str(after_path) if after_path else None
 
@@ -271,7 +339,6 @@ class Recorder:
     async def _record_nav(self, page: Page, url: str) -> None:
         await page.goto(url, wait_until="domcontentloaded")
         self.step_counter += 1
-
         after_path = await self.screenshoter.take_nav_result(page, self.step_counter)
 
         action = Action(
@@ -356,56 +423,59 @@ class Recorder:
         return action
 
     def _finalize(self) -> Path:
-        """生成报告 + 保存请求 + 更新 meta/index + 清理."""
         now = datetime.now(timezone.utc).isoformat()
         duration_s = 0.0
         if self.actions:
             duration_s = (self.actions[-1].timestamp_ms - self.actions[0].timestamp_ms) / 1000
 
-        # 保存 requests.json
+        # 产物写入场景目录
         requests = self.network_interceptor.requests
-        req_list = [asdict(r) for r in requests]
-        (self.output_dir / "requests.json").write_text(
-            _json.dumps(req_list, ensure_ascii=False, indent=2)
+        (self.scenario_dir / "requests.json").write_text(
+            _json.dumps([asdict(r) for r in requests], ensure_ascii=False, indent=2)
         )
+        MarkdownReporter().generate(self.actions, requests, self.scenario_dir)
+        cleanup(self.scenario_dir, keep_all=self.keep_all)
 
-        # 生成 record.md
-        reporter = MarkdownReporter()
-        reporter.generate(self.actions, requests, self.output_dir)
-
-        # 清理
-        cleanup(self.output_dir, keep_all=self.keep_all)
-
-        # 更新域名 meta.json
-        meta = load_meta(self.output_dir)
-        if meta["first_seen"] is None:
-            meta["first_seen"] = now
-        meta["last_recorded"] = now
-        meta["total_recordings"] += 1
-        if self.url not in meta["urls"]:
-            meta["urls"].append(self.url)
-        meta["sessions"].append({
+        # 更新场景 meta.json
+        sc_meta = load_scenario_meta(self.scenario_dir)
+        if sc_meta["first_seen"] is None:
+            sc_meta["first_seen"] = now
+        sc_meta["last_recorded"] = now
+        sc_meta["total_recordings"] += 1
+        sc_meta["sessions"].append({
             "ts": now,
             "url": self.url,
             "steps": len(self.actions),
             "duration_s": round(duration_s, 1),
         })
-        # 只保留最近 20 条 session 历史
-        if len(meta["sessions"]) > 20:
-            meta["sessions"] = meta["sessions"][-20:]
-        save_meta(self.output_dir, meta)
+        if len(sc_meta["sessions"]) > 20:
+            sc_meta["sessions"] = sc_meta["sessions"][-20:]
+        save_scenario_meta(self.scenario_dir, sc_meta)
+
+        # 更新域名 meta.json
+        domain_meta = load_domain_meta(self.domain_dir)
+        if domain_meta["first_seen"] is None:
+            domain_meta["first_seen"] = now
+        domain_meta["last_recorded"] = now
+        domain_meta["total_recordings"] += 1
+        if self.url not in domain_meta["urls"]:
+            domain_meta["urls"].append(self.url)
+        domain_meta["scenarios"][self.scenario_name] = {
+            "last_recorded": now,
+            "total_recordings": sc_meta["total_recordings"],
+        }
+        save_domain_meta(self.domain_dir, domain_meta)
 
         # 更新全局 index.json
         index = load_index()
-        index["domains"][self.output_dir.name] = {
+        index["domains"][self.domain_dir.name] = {
             "last_recorded": now,
-            "total_recordings": meta["total_recordings"],
+            "scenarios": list(domain_meta["scenarios"].keys()),
         }
         save_index(index)
 
-        console.print(f"\n[bold green]✅[/bold green] 录制完成: {self.output_dir}")
-        console.print(f"   报告: {self.output_dir / 'record.md'}")
-        console.print(f"   请求: {self.output_dir / 'requests.json'}")
-        console.print(f"   域名: {self.output_dir.name} (第 {meta['total_recordings']} 次录制)")
+        console.print(f"\n[bold green]✅[/bold green] 录制完成: {self.scenario_dir}")
+        console.print(f"   域名: {self.domain_dir.name}  |  场景: {self.scenario_name}")
+        console.print(f"   报告: {self.scenario_dir / 'record.md'}")
 
-        return self.output_dir
+        return self.scenario_dir
