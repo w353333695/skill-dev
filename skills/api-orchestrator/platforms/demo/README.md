@@ -9,7 +9,7 @@
 | **systems.yaml** | 系统接入：鉴权三件套 / 端口 / org 体系 / user 权限 / 环境变量 / capabilities | 「怎么连」「用哪个 org/user」|
 | **objects.yaml** | 对象模型 + 副作用规则：CmdbObject 结构、属性 value、关系约束、import upsert、删除 133129、NDJSON、fields 必填；实例 cmdb_instance（CRUD 批量语义/关系字段/instanceId 格式）| 「建模规则」「实例规则」「接口行为」|
 | **entities.yaml** | 字段锚 + 转换：objectId/instance_id/org/user 格式、跨实体 step 接力（含实例 search→import/delete）| 「字段格式」「编排接线」|
-| **flows/*.yaml** | e2e 流程模板：模型层 build-model/add-attributes/delete-model；实例层 create-instances/update-instances-batch/delete-instances-by-range | 「规划挡 build/change」|
+| **flows/*.yaml** | e2e 流程模板：模型层 build-model/add-attributes/delete-model；实例层 create-instances/update-instances-batch/delete-instances-by-range；跨模型链路 search-by-relation-chain | 「规划挡 build/change」「直通挡 链路查询」|
 | **easyops-cmdb.yaml** | api-cli 清单：18 verb 命令树 + body schema（三层：模型/关系/实例）| 「实际调用」|
 | formats/ | （本系统不适用——无 BPMN/插件格式包）| — |
 
