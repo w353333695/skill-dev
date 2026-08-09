@@ -97,6 +97,9 @@ systems:
                 - frequency: 120
                   method: POST
                   uri: /v2/object/{objectId}/instance/_search
+        URL 格式：openapi 网关按 /<app_name>/<uri> 路由——cmdb 的 app_name=cmdbservice，故 search 实际 URL=/cmdbservice/v3/object/{objectId}/instance/_search（SDK 便捷方法的 app 参数自动加前缀；internal 模式不加，直连后端原 path）。
+        入口地址：用【内网网关 IP】连 + Host 头 openapi.easyops-only.com（网关按 Host 路由）——实测 http://172.30.0.232 + Host=openapi.easyops-only.com 通；⚠️不要直连公网 openapi.easyops-only.com（解析到 121.12.124.232），那个入口 nginx 没放行该 API 会 405。
+        AK/SK 权限：openapi AK/SK 对应的主体须对目标模型实例有读权限，否则 130600 permission denied（与 internal 模式的 easyops 用户权限独立——internal 能读的 openapi AK/SK 未必能读，要在 easyops 后台给 AK/SK 主体授权）。
         配置文件：api_gateway/conf/openapi.yaml；改完按网关重启/生效流程。SDK openapi 调用见 sdk/easyops_client.py（HMAC-SHA1 签名移植自 api-cli easyops_openapi.go）。
 
     # e2e 验收 URL（前端）—— 模型类操作后在此可视化校验
