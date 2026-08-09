@@ -205,6 +205,16 @@ class Recorder:
 
         async with async_playwright() as pw:
             browser = await pw.chromium.launch(headless=False)
+
+            # 加载已有鉴权
+            storage_state = None
+            if self._auth_file.exists():
+                try:
+                    storage_state = _json.loads(self._auth_file.read_text())
+                    console.print("[dim]🔐 已加载鉴权状态[/dim]")
+                except Exception:
+                    pass
+
             context = await browser.new_context(
                 no_viewport=True,
                 storage_state=storage_state,
