@@ -168,10 +168,10 @@ systems:
       export_trap: "导出是 GET /tools/:toolId/export?versionId=<32hex>（⚠️GET 非 POST；参数名 versionId 非 vId，正则 ^[a-fA-F0-9]{32}$）。返回 tar.gz 二进制流——api-cli 无法存文件，走 Python SDK export_tool 流式下载"
       import_upsert: "导入是 upsert（toolId 存在→更新即加新版本；不存在→新建）。multipart——api-cli 不支持 formData，走 Python SDK import_tool 或 curl -F"
       builtin_vars_source: "工具脚本运行时用 EASYOPS_* 环境变量（EASYOPS_LOCAL_IP/EASYOPS_ORG/EASYOPS_USER/EASYOPS_AUTHORIZATION_TOKEN/EASYOPS_CMDB_HOST...）；⚠️不存在 __instance__/${cmdb.xxx}。完整清单见 objects.yaml#autoops_tool.api_behavior.builtin_vars"
-      python_runtime: "agent 自带 /usr/local/easyops/python/bin/python（py2/py3 由 agent 那个 python 决定，服务端不切）。工具脚本调 easyops/cmdb 用本目录 easyops_client.py（py2/3 兼容通用 SDK）"
-      wrapper: "标准响应 {code, codeExplain, error, data}；code=0 成功（与 cmdb 的 {code,message,error,data} 略不同——autoops 多 codeExplain）。⚠️tool.list 返回 NDJSON 流式（每行一个 Tool，同 cmdb list，非 {data:{list}} wrapper）；tool_version.list 是 {data:{list}} wrapper"
+      python_runtime: "agent 自带 /usr/local/easyops/python/bin/python（py2/py3 由 agent 那个 python 决定，服务端不切）。工具脚本调 easyops/cmdb 用本目录 sdk/easyops_client.py（py2/3 兼容通用 SDK）"
+      wrapper: "标准响应 {code, codeExplain, error, data}；code=0 成功（与 cmdb 的 {code,message,error,data} 略不同——autoops 多 codeExplain）。tool.list 后端响应 {code,data:{list,total}} wrapper（取 data.list；api-cli 流式输出 NDJSON 每行一个 Tool，是 api-cli 分页输出特性非后端格式）；tool_version.list 同 wrapper"
       cookie_optional_direct: "实测：直连后端 8181 时 cookie 非必需——org+user header 够（SDK 无 cookie 导出仍 200 成功）。cookie 主要在网关层校验；建议仍带（~/.api-cli/auth.d/easyops-cookie.yaml）以兼容网关面"
-      e2e_findings: "e2e 实测坑汇总（2026-08-10，org 18832008，6 场景全通）：① tool.list NDJSON 流式（非 wrapper）；② tool.update body flat（非 {tool:{}}，否则 updateFields=[tool] 假成功）；③ tool_execution.run inputs 是 map（非 [{name,value}] 数组）；④ run vId 默认 $latest_production 对 development 工具报 100005（用具体 vId 或 $latest_development）；⑤ update 响应只返 {toolId}（派生须 tool_version.list 复查）；⑥ 直连后端 cookie 非必需（org+user 够）。各坑详见 objects.yaml api_behavior + 对应 flow 的 key_rule"
+      e2e_findings: "e2e 实测坑汇总（2026-08-10，org 18832008，6 场景全通）：① tool.list 后端响应是 {data:{list}} wrapper（api-cli 流式 NDJSON 是其分页输出特性非后端格式；SDK 取 data.list）；② tool.update body flat（非 {tool:{}}，否则 updateFields=[tool] 假成功）；③ tool_execution.run inputs 是 map（非 [{name,value}] 数组）；④ run vId 默认 $latest_production 对 development 工具报 100005（用具体 vId 或 $latest_development）；⑤ update 响应只返 {toolId}（派生须 tool_version.list 复查）；⑥ 直连后端 cookie 非必需（org+user 够）。各坑详见 objects.yaml api_behavior + 对应 flow 的 key_rule"
 
     # e2e 验收 URL（前端）—— 工具类操作后在此可视化校验
     acceptance_urls:

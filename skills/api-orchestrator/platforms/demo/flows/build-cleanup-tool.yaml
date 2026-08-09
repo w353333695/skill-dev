@@ -3,7 +3,7 @@ name: build-cleanup-tool
 intent: 新建一个 CMDB 模型清理脚本工具（执行逻辑：删实例→删关系→删模型，入参模型 ID）
 trigger: ["建个CMDB清理工具", "新增清理脚本工具", "建个删除模型的工具"]
 guard: 规划挡（写、跨系统）
-key_rule: "工具脚本调 cmdb 删实例/关系/模型，用 EASYOPS_CMDB_HOST + easyops_client.py（py2/3）封装；脚本通过 PutStr 回吐进度。⚠️脚本入参 force（是否强删有实例的模型）≠ 工具层 force（绕 ReadOnly），见 add-tool-version。"
+key_rule: "工具脚本调 cmdb 删实例/关系/模型，用 EASYOPS_CMDB_HOST + sdk/easyops_client.py（py2/3）封装；脚本通过 PutStr 回吐进度。⚠️脚本入参 force（是否强删有实例的模型）≠ 工具层 force（绕 ReadOnly），见 add-tool-version。"
 prerequisites:
   env: [EASYOPS_AUTOOPS_BACKEND_URL, EASYOPS_ORG, EASYOPS_USER]
   payload: "工具定义 body（name/category=ITSM/type=shell/content=<清理脚本>/inputs=[model_id 必填, force 选填]/vName=v1）"
@@ -19,7 +19,7 @@ steps:
     args: ["<toolId>", --insecure]
     desc: 校验工具已建（含 inputs/content）
     expect: "data.toolId=<toolId>，inputs 含 model_id"
-note: "脚本示例见 tools-sdk-demo.py（用 easyops_client.EasyOpsClient 调 cmdb）。执行验证可走 execute-run-cmd 流程。"
+note: "脚本示例见 sdk/tools-sdk-demo.py（用 easyops_client.EasyOpsClient 调 cmdb）。执行验证可走 execute-run-cmd 流程。"
 side_effects: "见 objects.yaml#autoops_tool.side_effects（tool.create）"
 rollback: "tool.delete <toolId>（建错了删掉）"
 acceptance: "前端 tool_detail URL 可见新工具；tool.list --category ITSM --name cmdb 命中"

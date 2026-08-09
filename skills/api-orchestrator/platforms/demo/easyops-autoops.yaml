@@ -34,7 +34,7 @@
 #
 # ⚠️ api-cli 能力边界（影响 tool_package）：
 #   • params.in 仅 path/query/header/body，**无 formData** → multipart 上传（import）api-cli
-#     做不了真调，用 --print-curl 生成 curl 或走 Python SDK（easyops_client.py）。
+#     做不了真调，用 --print-curl 生成 curl 或走 Python SDK（sdk/easyops_client.py）。
 #   • response 仅 io.ReadAll + 宽松 JSON 解码，**无 --output 存文件** → tar.gz 二进制流
 #     （export）api-cli 直接调会乱码，走 Python SDK 流式下载或 --print-curl + curl。
 #   故 tool_package.export/import 的 description 标注「api-cli 仅预览，真调走 SDK」。
@@ -79,7 +79,7 @@ resources:
     operations:
       # ---------- 列表（GET /tools）—— 场景1/4 找工具 ----------
       list:
-        description: "工具列表（分页，支持分类/名称/类型过滤）。前端列表页 ?category=&q= 映射到本接口——注意前端 q 是后端 name 的别名（后端实际参数是 name，做 $like %name% 同时匹配 name 和 memo）。category 含子类展开（传 ITSM 会 $in 其所有子类）。⚠️返回是 NDJSON 流式（每行一个完整 Tool 对象，同 cmdb list），非 {data:{list}} wrapper——解析须逐行 json.loads；分页用 page/pageSize query。"
+        description: "工具列表（分页，支持分类/名称/类型过滤）。前端列表页 ?category=&q= 映射到本接口——注意前端 q 是后端 name 的别名（后端实际参数是 name，做 $like %name% 同时匹配 name 和 memo）。category 含子类展开（传 ITSM 会 $in 其所有子类）。⚠️后端响应是 {code,codeExplain,error,data:{list,total,page,pageSize}} wrapper（取 data.list）；api-cli 调本端点会流式输出 NDJSON（每行一个 Tool——那是 api-cli 的分页输出特性，非后端响应格式）。分页用 page/pageSize query。"
         method: GET
         path: /tools
         params:
@@ -260,7 +260,7 @@ resources:
         path: /tools/lib
         body:
           type: object
-          description: "工具库请求（ToolLibRequest）。file 为库包内容，name/description 为元信息。⚠️multipart——api-cli 仅 --print-curl 预览，真调走 Python SDK（easyops_client.py）。"
+          description: "工具库请求（ToolLibRequest）。file 为库包内容，name/description 为元信息。⚠️multipart——api-cli 仅 --print-curl 预览，真调走 Python SDK（sdk/easyops_client.py）。"
           additional_properties: true
           properties:
             name:        { type: string, description: "库名" }
@@ -379,10 +379,10 @@ resources:
   # 工具包 = 单个 .tar.gz（<toolName>/{._easyPackageConfig.dat, config, script, libs/}）。
   # ⚠️ export 返回 tar.gz 二进制流、import 是 multipart——api-cli 都做不了真调，
   #    仅 export_check（JSON 交互）能用 api-cli；export/import 真调走 Python SDK
-  #    （easyops_client.py 的 export_tool/import_tool）或 --print-curl + curl。
+  #    （sdk/easyops_client.py 的 export_tool/import_tool）或 --print-curl + curl。
   # ---------------------------------------------------------------------------
   tool_package:
-    description: 工具包导入导出。工具包是单个 .tar.gz 归档（含 ._easyPackageConfig.dat 元信息 + config 配置JSON + script 脚本 + 可选 libs/）。export_check 预检（JSON，api-cli 可调）；export/import 涉及二进制/多部分——api-cli 仅 --print-curl 预览，真调走 Python SDK（easyops_client.py）。文件结构与字段详见 objects.yaml#autoops_tool.api_behavior.package_format。
+    description: 工具包导入导出。工具包是单个 .tar.gz 归档（含 ._easyPackageConfig.dat 元信息 + config 配置JSON + script 脚本 + 可选 libs/）。export_check 预检（JSON，api-cli 可调）；export/import 涉及二进制/多部分——api-cli 仅 --print-curl 预览，真调走 Python SDK（sdk/easyops_client.py）。文件结构与字段详见 objects.yaml#autoops_tool.api_behavior.package_format。
     path: ""
 
     operations:
