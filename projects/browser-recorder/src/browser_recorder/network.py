@@ -3,11 +3,10 @@ from __future__ import annotations
 import time
 import fnmatch
 from typing import Optional
-from playwright.async_api import Page, Route, Request
+from playwright.async_api import Page, Route
 from .models import RequestRecord
 
 DEFAULT_RECORD_TYPES = {"xhr", "fetch", "document"}
-IGNORED_TYPES = {"image", "script", "stylesheet", "font", "media", "websocket", "other"}
 BODY_MAX_LENGTH = 10240  # 10KB 截断
 
 
@@ -42,7 +41,6 @@ class NetworkInterceptor:
     def __init__(self, filter_glob: Optional[str] = None) -> None:
         self._filter_glob = filter_glob
         self.requests: list[RequestRecord] = []
-        self._start_times: dict[str, float] = {}
 
     async def setup(self, page: Page) -> None:
         """在 page 上挂载 route 拦截."""
@@ -59,7 +57,6 @@ class NetworkInterceptor:
         """处理单个请求."""
         request = route.request
         start_time = time.time() * 1000
-        self._start_times[request.url] = start_time
 
         try:
             response = await route.fetch()
@@ -91,10 +88,7 @@ class NetworkInterceptor:
     def _truncate_body(body: Optional[bytes]) -> Optional[str]:
         if body is None:
             return None
-        try:
-            text = body.decode("utf-8", errors="replace")
-        except Exception:
-            return "[binary]"
+        text = body.decode("utf-8", errors="replace")
         if len(text) > BODY_MAX_LENGTH:
             return text[:BODY_MAX_LENGTH] + "…[truncated]"
         return text
