@@ -39,10 +39,14 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("deployment", nargs="?", default="demo")
     ap.add_argument("--api-cli", help="api-cli 二进制路径，提供则额外校验 spec 可被 api-cli 解析")
+    ap.add_argument("--base", help="platforms 根目录覆盖（自测用；默认 <skill>/platforms）")
     args = ap.parse_args()
 
-    skill_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))  # skills/api-orchestrator/
-    base = os.path.join(skill_dir, "platforms", args.deployment)
+    if args.base:
+        base = os.path.join(args.base, args.deployment)
+    else:
+        skill_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))  # skills/api-orchestrator/
+        base = os.path.join(skill_dir, "platforms", args.deployment)
     errs, warns, oks = [], [], []
     def ok(msg): oks.append(msg)
     def warn(msg): warns.append(msg)
@@ -172,15 +176,18 @@ def main():
     if not flow_files and os.path.isdir(os.path.join(base, "flows")):
         warn("flows/ 目录空（无流程模板）")
 
-    # ---- 7. README 引用的 .yaml 文件存在 ----
+    # ---- 7. README 引用的 .yaml 文件存在（引用闭合）----
     rm = os.path.join(base, "README.md")
     if os.path.isfile(rm):
         txt = open(rm, encoding="utf-8").read()
+        seen = set()
         for m in re.findall(r'`([A-Za-z0-9_./-]+\.yaml)`', txt):
-            refp = os.path.join(base, m)
-            if not os.path.isfile(refp) and "/" not in m:
-                # 可能是相对引用（如 systems.yaml），已查
-                pass
+            if m in seen or m.startswith("http") or ".." in m:
+                continue
+            seen.add(m)
+            if not os.path.isfile(os.path.join(base, m)):
+                warn(f"README 引用 {m} 但文件不存在（若引用外部/其他 deployment 可忽略）")
+        ok("README .yaml 引用闭合校验完成")
 
     # ---- 报告 ----
     print(f"lint platforms/{args.deployment}/")
