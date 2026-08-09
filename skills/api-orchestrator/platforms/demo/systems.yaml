@@ -34,7 +34,7 @@ systems:
 
     env:                                 # 部署所需环境变量（供 api-cli / shell 注入）
       EASYOPS_CMDB_BACKEND_URL: "http://172.30.0.232:8079"  # cmdb_service 后端（实测）
-      EASYOPS_CMDB_FRONTEND_URL: "https://172.30.0.90"      # 前端页面/网关
+      EASYOPS_CMDB_FRONTEND_URL: "https://172.30.0.232"      # 前端页面/网关
       EASYOPS_USER_SERVICE_URL: "http://172.30.0.232:8111"      # user_service（org 查询等）
 
     # 能力清单（resource.verb）—— 编排挡据此判断意图可达性
