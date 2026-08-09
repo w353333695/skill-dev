@@ -1,0 +1,58 @@
+# =============================================================================
+# platforms/demo/entities.yaml
+# 字段锚 + 实体间映射/转换。对应 SKILL.md：entities.yaml — 跨系统实体映射。
+# 单系统内即「实体间靠什么字段关联 + 字段格式约定」，编排挡接线用。
+# =============================================================================
+entities:
+  object_id:
+    description: 模型（object）主键锚。实例、关系、属性都通过它挂到模型。
+    format: "NAME@NAMESPACE（如 OCEANBASE@EASYOPS）"
+    namespaces: [EASYOPS, ONEMODEL]   # 实测见到的命名空间；ONEMODEL 多为系统/权限模型
+    rules:
+      - "无正则强制，仅非空；@NAMESPACE 在运行时解析"
+      - "同命名空间内 objectId / name 不可重复"
+    used_by:
+      - object_model（path/查询主键）
+      - object_instance.search（path 参数 /v3/object/{object_id}/instance/_search）
+      - cmdb_relation.left_object_id / right_object_id（锚到模型）
+      - object_attr / object_relation（path 含 object_id）
+
+  instance_id:
+    description: 实例主键锚。
+    format: "13 位小写 hex（如 5cf1da055c315）"
+    used_by: [object_instance（实例主键）, relation 实例层]
+
+  relation_id:
+    description: 关系主键锚。object_relation 细粒度 CRUD 用它做 path 参数。
+    format: "导入时不填则自动生成；约定可形如 <LEFT_OBJECT>_<RIGHT_ROLE>"
+
+  attr_id:
+    description: 属性主键锚（模型内唯一）。
+    convention: "给已存在模型新增属性时，id 加 _ 前缀（如 _regulatory_level）标识新增。详见 objects.yaml cmdb_object.side_effects。"
+
+  org:
+    description: 租户锚（请求头 org）。每个 org 一个独立数据库/命名空间。
+    type: integer
+    rules: ["gte:1（org=0 无库）", "系统自带 0/1/2 禁动；测试 18832008"]
+    # 接入侧（怎么取 org）见 systems.yaml runtime
+
+  user:
+    description: 用户锚（请求头 user）。模型系统管理员=easyops。
+    # 权限差异见 systems.yaml runtime
+
+# =============================================================================
+# 跨实体转换（编排挡 step 间接力时怎么传字段）
+# =============================================================================
+transitions:
+  - from: object_model.list
+    pick: objectId
+    to: [object_model.detail, object_model.delete, object_model.export, object_instance.search]
+    how: "list 返回的 objectId（NDJSON 每行一个）→ 作为 path 参数 {object_id} 喂下游"
+  - from: object_model.export
+    pick: data[].attrList[].id
+    to: object_model.import
+    how: "导出完整模型 → 改 attrList（新属性加 _ 前缀）→ import 回写（upsert）"
+  - from: user_service /api/v1/org/list
+    pick: data[].id
+    to: "export EASYOPS_ORG=<id>"
+    how: "查出非系统 org → 设为环境变量 → api-cli endpoint.headers 注入"

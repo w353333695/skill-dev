@@ -21,9 +21,9 @@
 #   持 PHPSESSID 会话 cookie）。backend/frontend 均用同一 cookie。
 #
 # ⚠️ cookie 不够！直连后端还要 org+user 两个 header（见 endpoint.headers）。
-# 完整接入真相（端口表 / org 体系 / user 权限差异）+ 调用踩坑录（NDJSON 分页 / fields 必填 /
-# import upsert / 关系对端 / 删除 133129）见同目录 README.md；机器可读摘要见 systems.yaml 的
-# runtime: 段。本目录是外接 EasyOps 的唯一真相来源——换环境/换 LLM 从这里读，勿依赖记忆。
+# 知识按 SKILL.md 设计分文件存放（本目录是外接 EasyOps 唯一真相来源，勿依赖记忆）：
+#   接入/端口/org/user → systems.yaml runtime；模型结构/副作用规则 → objects.yaml；
+#   字段锚/转换 → entities.yaml；建/改/删流程 → flows/；索引导航 → README.md。
 # =============================================================================
 spec: api-cli/v1
 service:

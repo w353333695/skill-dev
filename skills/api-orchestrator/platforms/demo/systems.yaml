@@ -2,6 +2,11 @@
 # platforms/demo/systems.yaml
 # deployment=demo 下接入的系统清单 + 各自 api-cli spec 路径 + 接入面 + 鉴权。
 # 编排挡（orchestration.md）查本文件获知「有哪些系统可用」与「spec 在哪」。
+#
+# 资料分工（唯一真相来源，换环境/换 LLM 从此读，勿依赖记忆）：
+#   systems.yaml(本文件) = 接入(鉴权/端口/org/user)；objects.yaml = 模型结构+副作用规则；
+#   entities.yaml = 字段锚+转换；flows/ = e2e 流程模板；easyops-cmdb.yaml = api-cli 清单。
+#   README.md 仅作索引导航。
 # =============================================================================
 deployment: demo
 

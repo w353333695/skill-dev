@@ -1,0 +1,20 @@
+# 流程模板：删除模型（场景④）。change 挡，含 forceDelete 坑。
+name: delete-model
+intent: 删除一个 CMDB 模型
+trigger: ["删除 X 模型", "删掉模型", "清理测试模型"]
+guard: 确认挡（写、破坏性）—— 须明确确认；批量删/protected 必确认
+key_rule: "模型含 relation_list 时直接 delete 报 133129「请先删除已有关系」。解法二选一：forceDelete=true（推荐，连关系删），或先 object_relation delete 逐条删。protected=true 不可删。见 objects.yaml#cmdb_object.side_effects。"
+steps:
+  - n: 1
+    op: object_model.delete
+    args: ["<objectId>", --forceDelete, "true", --insecure, --yes]
+    desc: 强删模型（连关系）
+    on_fail:
+      - "133129 有关系定义 → 确认已加 --forceDelete true；或回退用 object_relation delete 逐条删关系再删模型"
+      - "protected 模型 → 不可删（核心模型），放弃或先改 protected=false（需权限）"
+  - n: 2
+    op: object_model.list
+    args: [--q, "<objectId>", --insecure]
+    desc: 核实已删（返回 0 条；detail 报 133114 对象不存在）
+side_effects: objects.yaml#cmdb_object.side_effects
+relation_cleanup: "object_relation delete <relation_id> --force_delete true（逐条，若不用 forceDelete）"
