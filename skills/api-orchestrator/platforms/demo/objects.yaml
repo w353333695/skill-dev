@@ -399,6 +399,7 @@ objects:
       - "无独立『关联实例』控件——用 CmdbInstanceSelect / ModalSelect / CmdbCascader"
       - "无独立『子表』控件——多行靠 table 容器（容器实现，非控件本身）"
       - "table 容器内的控件运行期 IsPlural=true（多值）"
+      - "⚠️ key 应 == modelField（设计器约定，真实表单两者同值）。displayCondition 的 #{容器ID.控件ID} 据此解析控件值——key≠modelField 会导致表达式取不到值（条件显示不生效）"
 
   itsm_form_options:
     description: 控件配置（Options，component.go:51-73）—— 所有控件共享字段 + extraProps（控件特有）。
@@ -434,8 +435,13 @@ objects:
       CMDBINSTANCESELECT → frontKey 决定展示字段（默认 name）
       CMDBCASCADER → objectIdPath:[{objectId,showKey:[]}]（每级一个 CMDB 模型 + 展示字段列表）
       INPUT → isPasswordInput（密码框触发脱敏）/ trim / patternId / autoSize
+      ⚠️【每控件必填字段 + 校验逻辑是前端 designer 规则，后端透传不校验、components/ 目录不存】——已知必填（实测/designer）：
+      - CMDBINSTANCESELECT：cmdbProps.foreignObjectId（模型ID，必填）+ options.extraProps.frontKey（显示字段，必填）
+      - CMDBCASCADER：options.extraProps.objectIdPath（每级 objectId + showKey，必填）
+      - business_table 容器：extraProps.objectId（CMDB 模型，必填）
+      其余控件必填项待补（缺前端 designer 源码；建议 designer 配置后 get formDefinition 捕获回流）。
     fields:
-      "<按 type 取>": { type: any, desc: "见 description 各控件 extraProps 字段；items/options/format/step/min/max/objectIdPath/isPasswordInput 等" }
+      "<按 type 取>": { type: any, desc: "见 description 各控件 extraProps 字段；items/options/format/step/min/max/objectIdPath/frontKey/isPasswordInput 等" }
 
   itsm_form_cmdb_props:
     description: CMDB 控件强类型约束（xcmdb.Props，components/xcmdb/props.go:8-15）—— CmdbInstanceSelect/CmdbCascader 用。
@@ -591,9 +597,13 @@ api_behavior:
       └──────────────────────────┴───────────────────────────────────────────────┴──────────────────┘
       可配三处：组件 options.displayCondition / 容器 displayCondition / tabPane.displayCondition（+ displayUserTaskId 限流程节点）。
       容器ID/控件ID = formDefinition 里的 key（container.key / component.key），不是 modelField。
-      示例：场景『选虚拟机显虚拟机 table』——触发是 SELECT(单选) 申请主机类型(key=f_htype，容器 key=c_base)，
-      虚拟机 table 的 displayCondition = `#{c_base.f_htype}.value = "vm"`；物理机 table = `#{c_base.f_htype}.value = "pm"`。
-      另：businessRules（form 级 JSON 字符串）是独立业务规则载体，后端透传不解析。displayUserTaskId（tabPane/容器）限流程节点显示。
+      示例：场景『选虚拟机显虚拟机 table』——触发是 SELECT(单选) 申请主机类型(key=hostType，容器 key=c_base)，
+      虚拟机 table 的 displayCondition = `#{c_base.hostType}.value = "vm"`；物理机 table = `#{c_base.hostType}.value = "pm"`。
+      ⚠️控件 id 用 component.key，且 key 须 == modelField（见 itsm_form_component constraints），否则表达式取不到值。
+      另：displayUserTaskId（tabPane/容器，string）—— 【监听节点】限制仅在指定流程活动节点（BPMN activity id，如 Activity_0fvwq8a）显示。
+      ⚠️displayUserTaskId 须配合流程用——节点 id 来自流程定义（flowable_service 的 process API），二者联动。
+      TODO：未来补 flowable_service 流程相关接口知识（流程定义/节点/表单绑定）后，回流 displayUserTaskId 与流程节点的完整联动机制。
+      businessRules（form 级 JSON 字符串）是独立业务规则载体，后端透传不解析。
   itsm_data_inheritance:
     rule: |
       数据继承三层（无『继承整张父表单』的声明式配置）：

@@ -239,6 +239,7 @@ systems:
       set_main: "POST .../version/:versionId 设主版本=发布；目标须 state==done（unfinished 报错）；旧主自动降级；旧主被流程绑定时触发 ITSC_PROCESS_FORM_RELATION 换绑（业务连续）；已主版本幂等"
       form_definition_string: "formDefinition/businessRules 在 wire 层是 JSON 字符串（CMDB 存 string）。save/update 传 JSON.stringify([]Container)；get 返回需二次 parse。深层结构（5 容器/23 控件/5 脚本/条件显示/继承）见 objects.yaml#itsm_form_definition，后端透传前端解释"
       version_state: "状态机两态：unfinished(草稿)/done(完成)；无 draft/published 叫法。done=可被引用/可设主版本。list 的 lastestMainVersion/lastestVersion 字段拼写少 t（API 如此）"
+      process_integration_todo: "displayUserTaskId（容器/tabPane 监听节点）+ 表单被流程绑定（ITSC_PROCESS_FORM_RELATION）+ set_main 换绑都依赖流程侧。TODO 未来补 flowable_service 流程接口（流程定义/活动节点 activity id/表单-节点绑定）后回流完整联动；当前 displayUserTaskId 暂填固定值（如 Activity_0fvwq8a）占位"
 
     # e2e 验收 URL（前端）—— 表单类操作后在此可视化校验
     acceptance_urls:
