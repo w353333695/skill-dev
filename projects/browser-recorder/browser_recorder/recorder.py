@@ -70,10 +70,10 @@ class Recorder:
         try:
             while True:
                 try:
-                    page.evaluate("1", timeout=2000)
+                    self._pump(page)
                     eval_failures = 0
                 except Exception:
-                    # 浏览器/页面已关：evaluate 立即抛 TargetClosedError。
+                    # 浏览器/页面已关：泵调用立即抛 TargetClosedError。
                     # 连续失败即认定连接已断，退出（不依赖 context.pages——
                     # context 关闭后访问它可能悬挂或抛错）。
                     eval_failures += 1
@@ -92,6 +92,18 @@ class Recorder:
             # 再发 CDP 调用会报 pipe closed / Connection closed 噪音）。
             self._interrupted = True
         return self.finish()
+
+    @staticmethod
+    def _pump(page) -> None:
+        """录制主循环的泵：给 dispatcher fiber 调度机会，让 binding/事件回调执行。
+
+        playwright 1.60（py3.9）的 page.evaluate 不支持 timeout 参数（1.6x 新版才加），
+        按版本降级调用。
+        """
+        try:
+            page.evaluate("1", timeout=2000)
+        except TypeError:
+            page.evaluate("1")  # 旧版无 timeout 参数
 
     def start(self) -> None:
         """装配录制环境（launch/attach + goto + 注入），返回后 self.page 可用。"""
