@@ -11,6 +11,8 @@ uv run playwright install chromium   # 如本机无浏览器缓存
 uv run browser-recorder doctor       # 自检
 ```
 
+> **Python 版本**：兼容 3.9 ~ 3.12。3.9 下 playwright 自动解析为 1.60（1.61+ 要求 py≥3.10，故依赖钉 `playwright>=1.56,<1.61`），对应 chromium-1223，与 1.62 的 chromium-1234 互不冲突、可共存。
+
 ## 使用
 
 ### 录制（headed，生产环境有 UI）
