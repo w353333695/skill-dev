@@ -1,8 +1,0 @@
-pyproject.toml
-src/browser_recorder/__init__.py
-src/browser_recorder.egg-info/PKG-INFO
-src/browser_recorder.egg-info/SOURCES.txt
-src/browser_recorder.egg-info/dependency_links.txt
-src/browser_recorder.egg-info/entry_points.txt
-src/browser_recorder.egg-info/requires.txt
-src/browser_recorder.egg-info/top_level.txt
