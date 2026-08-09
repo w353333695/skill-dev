@@ -422,6 +422,10 @@ class Recorder:
         action = Action(
             step=self.step_counter,
             timestamp_ms=time.time() * 1000,
+            tag_name=kwargs.pop("tag_name", ""),
+            selector=kwargs.pop("selector", ""),
+            url=kwargs.pop("url", ""),
+            page_id=kwargs.pop("page_id", "main"),
             **kwargs,
         )
         self.actions.append(action)
