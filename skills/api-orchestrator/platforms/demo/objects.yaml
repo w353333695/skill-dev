@@ -602,9 +602,8 @@ api_behavior:
       示例：场景『选虚拟机显虚拟机 table』——触发是 SELECT(单选) 申请主机类型(key=hostType，容器 key=c_base)，
       虚拟机 table 的 displayCondition = `#{c_base.hostType}.value = "vm"`；物理机 table = `#{c_base.hostType}.value = "pm"`。
       ⚠️控件 id 用 component.key，且 key 须 == modelField（见 itsm_form_component constraints），否则表达式取不到值。
-      另：displayUserTaskId（tabPane/容器，string）—— 【监听节点】限制仅在指定流程活动节点（BPMN activity id，如 Activity_0fvwq8a）显示。
-      ⚠️displayUserTaskId 须配合流程用——节点 id 来自流程定义（flowable_service 的 process API），二者联动。
-      TODO：未来补 flowable_service 流程相关接口知识（流程定义/节点/表单绑定）后，回流 displayUserTaskId 与流程节点的完整联动机制。
+      ⚠️displayUserTaskId（监听节点，容器/tabPane，string）—— 只在【跨节点条件显示】时填：displayCondition 引用的是【别的流程节点】表单里的控件时，用 displayUserTaskId 指明从哪个节点（BPMN activity id，如 Activity_0fvwq8a）取该控件值。引用【本节点】（同表单内）控件的条件显示【不填】（留空）——误填会让前端按跨节点取值、本节点条件反而不生效。
+      节点 id 来自流程定义（flowable_service 的 process API）。TODO：未来补流程接口后回流跨节点联动的完整机制。
       businessRules（form 级 JSON 字符串）是独立业务规则载体，后端透传不解析。
   itsm_data_inheritance:
     rule: |
