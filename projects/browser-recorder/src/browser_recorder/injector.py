@@ -1,5 +1,7 @@
 """JS 注入器 — 浏览器端事件捕获脚本."""
 from __future__ import annotations
+
+import json
 from typing import Callable, Awaitable
 from playwright.async_api import Page
 
@@ -14,9 +16,9 @@ RECORDER_JS = r"""
     let buffer = [];
     let flushTimer = null;
 
-    function getSelector(target) {
+    function getSelector(target, evt) {
         try {
-            const path = event.composedPath ? event.composedPath() : [];
+            const path = evt && evt.composedPath ? evt.composedPath() : [];
             for (const el of path) {
                 if (el.nodeType !== 1) continue;
                 if (el.id) return '#' + CSS.escape(el.id);
@@ -60,7 +62,7 @@ RECORDER_JS = r"""
         const record = {
             type: type,
             timestamp: Date.now(),
-            selector: getSelector(target),
+            selector: getSelector(target, event),
             value: value || null,
             tagName: target.tagName ? target.tagName.toLowerCase() : '',
             text: getText(target),
@@ -163,7 +165,7 @@ RECORDER_JS = r"""
 
 async def inject(page: Page, page_id: str = "main") -> None:
     """注入录制脚本到页面."""
-    await page.evaluate(f"window.__recorder_page_id__ = '{page_id}';")
+    await page.evaluate(f"window.__recorder_page_id__ = {json.dumps(page_id)};")
     await page.evaluate(RECORDER_JS)
 
 
