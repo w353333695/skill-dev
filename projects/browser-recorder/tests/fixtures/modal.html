@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head><meta charset="UTF-8"><title>modal 测试页</title>
+<style>
+  .modal-overlay {
+    display:none; position:fixed; top:0;left:0;width:100%;height:100%;
+    background:rgba(0,0,0,0.5); z-index:1000;
+  }
+  .modal-overlay.open { display:flex; align-items:center; justify-content:center; }
+  .modal-box { background:white; padding:30px; border-radius:8px; }
+</style>
+</head>
+<body>
+  <h1>Modal 测试页面</h1>
+  <button id="open-modal" onclick="document.getElementById('modal').classList.add('open')">打开模态框</button>
+  <div id="modal" class="modal-overlay">
+    <div class="modal-box">
+      <p>这是一个自定义模态框</p>
+      <button id="modal-ok" onclick="document.getElementById('modal').classList.remove('open')">确定</button>
+      <button id="modal-cancel" onclick="document.getElementById('modal').classList.remove('open')">取消</button>
+    </div>
+  </div>
+</body>
+</html>

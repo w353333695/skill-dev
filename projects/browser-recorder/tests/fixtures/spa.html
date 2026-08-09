@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head><meta charset="UTF-8"><title>SPA 测试页</title></head>
+<body>
+  <h1>SPA 测试页面</h1>
+  <nav>
+    <button id="nav-home" onclick="navigate('/home')">Home</button>
+    <button id="nav-about" onclick="navigate('/about')">About</button>
+    <button id="nav-hash" onclick="location.hash='#section3'">Hash</button>
+  </nav>
+  <div id="content"><p>当前: Home</p></div>
+  <div id="section3" style="display:none;"><p>Section 3</p></div>
+  <script>
+    function navigate(path) {
+      history.pushState({}, '', path);
+      document.getElementById('content').innerHTML = '<p>当前: ' + path + '</p>';
+    }
+    window.addEventListener('popstate', function() {
+      document.getElementById('content').innerHTML = '<p>当前: ' + location.pathname + '</p>';
+    });
+    window.addEventListener('hashchange', function() {
+      document.getElementById('section3').style.display =
+        location.hash === '#section3' ? 'block' : 'none';
+    });
+  </script>
+</body>
+</html>

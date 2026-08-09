@@ -1,0 +1,13 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head><meta charset="UTF-8"><title>shadow DOM 测试页</title></head>
+<body>
+  <h1>Shadow DOM 测试页面</h1>
+  <div id="host"></div>
+  <script>
+    const host = document.getElementById('host');
+    const shadow = host.attachShadow({mode: 'open'});
+    shadow.innerHTML = '<style>.btn{color:blue;}</style><button class="btn" id="shadow-btn">Shadow 按钮</button><input id="shadow-input" placeholder="Shadow 输入框">';
+  </script>
+</body>
+</html>
