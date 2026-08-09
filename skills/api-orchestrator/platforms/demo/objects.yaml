@@ -166,5 +166,7 @@ api_behavior:
     rule: "object_instance.search 的实例总数在 data.total（契约 response 明列 total，不是 count）。场景『有几个实例』读 total，或对 data.list 计数。"
   instance_batch_delete_path:
     rule: "批量删真实路径 DELETE /object/{object_id}/instance_batch（契约误写 /instance/_batch，差一个斜杠，照契约写必 404）。源码 instance_extend/route.go:11 为准。"
+  instance_search_name_field:
+    rule: "search 的 fields 含 `name` 时依赖模型的『name relation』配置；模型若缺该配置（创建缺陷）报 133116「Can not find name relation of <OBJECT>」。规避：fields 不带 name，用 instanceId/ip 等字段（实例 name 仍存在，只是不能经此字段取）。e2e 实测 TESTWWH 即此坑。"
   wrapper:
     rule: "标准响应 {code, message, error, data}；code=0 成功。业务错误码形如 133xxx。"
