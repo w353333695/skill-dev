@@ -11,27 +11,38 @@ import io
 from PIL import Image, ImageDraw
 
 
-def annotate(png_bytes: bytes, point: dict | None, seq: int, dpr: float = 1.0) -> bytes:
-    """在截图上标注：点击位置红圈 + 箭头，左上角步骤序号徽标。"""
+def annotate(png_bytes: bytes, point: dict | None, seq: int, dpr: float = 1.0,
+             viewport: tuple | None = None) -> bytes:
+    """在截图上标注：点击位置红圈 + 箭头，左上角步骤序号徽标。
+
+    坐标缩放：point 是 CSS 像素（clientX/Y）。截图实际尺寸 / viewport（CSS 尺寸）
+    得到真实缩放比，比依赖 devicePixelRatio 更可靠（headed/retina 下 screenshot
+    返回物理像素，headless 下返回 CSS 尺寸，二者缩放不同）。viewport 为 None 时
+    退化为 dpr。
+    """
     img = Image.open(io.BytesIO(png_bytes))
+    if viewport and viewport[0] and viewport[1]:
+        scale = img.size[0] / viewport[0]
+    else:
+        scale = dpr
     draw = ImageDraw.Draw(img)
 
     if point:
-        x, y = point["x"] * dpr, point["y"] * dpr
-        r = 24 * dpr
-        w = max(3, int(4 * dpr))
+        x, y = point["x"] * scale, point["y"] * scale
+        r = 24 * scale
+        w = max(3, int(4 * scale))
         draw.ellipse([x - r, y - r, x + r, y + r], outline=(220, 38, 38), width=w)
         # 从右上方指过来的箭头
         ax, ay = x + r * 2.2, y - r * 2.2
         draw.line([ax, ay, x + r * 0.5, y - r * 0.5], fill=(220, 38, 38), width=w)
         for dx, dy in [(-14, -2), (-2, -14)]:  # 简单箭头头部
             draw.line(
-                [x + r * 0.5, y - r * 0.5, x + r * 0.5 - dx * dpr * 0.3, y - r * 0.5 - dy * dpr * 0.3],
+                [x + r * 0.5, y - r * 0.5, x + r * 0.5 - dx * scale * 0.3, y - r * 0.5 - dy * scale * 0.3],
                 fill=(220, 38, 38), width=w,
             )
 
     # 左上角序号徽标
-    badge = 20 * dpr
+    badge = 20 * scale
     draw.rectangle([8, 8, 8 + badge * 2.4, 8 + badge * 1.6], fill=(220, 38, 38))
     draw.text((8 + badge * 0.4, 8 + badge * 0.5), f"#{seq}", fill=(255, 255, 255))
 

@@ -73,6 +73,22 @@ SPA_HTML = """<!DOCTYPE html>
 </html>
 """
 
+# 点击立即弹层（验证点击前截图：截到的应无黄色弹层）
+POPUP_HTML = """<!DOCTYPE html>
+<html lang="zh">
+<head><meta charset="utf-8"><title>popup</title></head>
+<body>
+  <button id="pop" data-testid="pop">打开弹层</button>
+  <div id="layer" style="display:none;position:absolute;top:50px;left:50px;width:300px;height:300px;background:rgb(255,255,0)">弹出的层</div>
+  <script>
+    document.getElementById("pop").addEventListener("click", () => {
+      document.getElementById("layer").style.display = "block";
+    });
+  </script>
+</body>
+</html>
+"""
+
 
 class _Handler(BaseHTTPRequestHandler):
     def do_GET(self) -> None:
@@ -80,6 +96,8 @@ class _Handler(BaseHTTPRequestHandler):
             self._send(WELCOME_HTML)
         elif self.path.startswith("/spa"):
             self._send(SPA_HTML)
+        elif self.path.startswith("/popup"):
+            self._send(POPUP_HTML)
         else:
             self._send(LOGIN_HTML)
 

@@ -69,6 +69,18 @@ class Recorder:
         eval_failures = 0
         try:
             while True:
+                # 新标签跟随：切到最新打开的 page
+                if getattr(self, "_pending_new_page", None) is not None:
+                    new_page = self._pending_new_page
+                    self._pending_new_page = None
+                    self._page = new_page
+                    page = new_page
+                    try:
+                        new_page.wait_for_load_state("domcontentloaded", timeout=5000)
+                        self._write_step(StepEvent(seq=self._next_seq(), type="navigate",
+                                                   value=new_page.url, url=new_page.url))
+                    except Exception:
+                        pass
                 try:
                     self._pump(page)
                     eval_failures = 0
@@ -172,8 +184,12 @@ class Recorder:
         self._install_targetclosed_filter(page)
         try:
             self._dpr = page.evaluate("window.devicePixelRatio || 1")
+            # viewport CSS 尺寸：标注时与截图实际尺寸换算真实缩放比（比 dpr 可靠）
+            self._viewport = (page.viewport_size or {})
+            self._viewport = (self._viewport.get("width"), self._viewport.get("height"))
         except Exception:
             self._dpr = 1.0
+            self._viewport = None
 
     # 关闭阶段（Ctrl+C/关浏览器/连接断开）残留的 CDP future 噪音关键词
     _CLOSED_NOISE = ("TargetClosedError", "has been closed", "Connection closed",
@@ -259,13 +275,54 @@ class Recorder:
         return path
 
     def _wire_context(self, context) -> None:
-        inject.install(context, self._on_event)
+        inject.install(context, self._on_event, on_mousedown=self._on_mousedown)
         from .requests_log import RequestLogger
 
         self._request_logger = RequestLogger(self.session_dir, lambda: self._seq)
         self._request_logger.attach_context(context)
 
         self._event_buffer: list[StepEvent] = []
+        self._pre_shot: dict | None = None  # mousedown 预截图 {"png": bytes, "point":..., "url":...}
+        self._pending_new_page = None  # 新标签跟随：待切换的 page
+
+        # 新标签跟踪：点击打开新 page 时，切换活动 page 并记一步
+        context.on("page", self._on_new_page)
+
+    def _on_new_page(self, page) -> None:
+        """新标签/窗口打开：跟随切换（事件、截图都转到新 page）。
+
+        只记内存标记，具体 navigate 步骤由新 page 加载后的注入脚本/泵补记，
+        这里只做活动 page 切换（CDP 线程，禁止同步 CDP 调用）。
+        """
+        self._pending_new_page = page
+
+    def _on_mousedown(self, payload: dict) -> None:
+        """mousedown 桥回调（CDP 线程）：fire-and-forget 预截图。
+
+        赶在页面响应前截图（mousedown 早于 click 的默认行为，异步截图任务比
+        drain 的 0.3s 周期早得多）。回调里只能发起异步任务立即返回——同步等待
+        CDP 结果会悬挂（实测）。因此点击立即弹层/跳转的极端场景仍可能截到点击后
+        画面（CDP 截图往返 > 页面响应），这是技术上限；大多数场景（网络请求、
+        延迟渲染）能截到点击前。drain 时 url 不匹配或预截图未就绪则退化现场截。
+        """
+        page = self._page
+        if page is None:
+            return
+        loop = page._impl_obj._loop
+        point = {"x": payload.get("x"), "y": payload.get("y")}
+        url = payload.get("url")
+
+        async def do_shot():
+            try:
+                png = await page._impl_obj.screenshot()
+                self._pre_shot = {"png": png, "point": point, "url": url}
+            except Exception:
+                pass
+
+        try:
+            loop.call_soon_threadsafe(lambda: loop.create_task(do_shot()))
+        except Exception:
+            pass
 
     def _next_seq(self) -> int:
         self._seq += 1
@@ -302,19 +359,39 @@ class Recorder:
     def _drain_events(self, skip_screenshot: bool = False) -> int:
         """连接线程：从 buffer 取出事件，截图 + 写 record.jsonl。返回处理条数。
 
-        skip_screenshot=True 用于 Ctrl+C 中断收尾（driver 可能在关闭，不再发 CDP）。
+        click 截图优先用 mousedown 预截图（点击前画面），url 不匹配或无预截图时
+        退化为现场截。skip_screenshot=True 用于 Ctrl+C 中断收尾。
         """
         n = 0
         while self._event_buffer:
             step = self._event_buffer.pop(0)
             if step.type == "click" and not skip_screenshot:
                 shot_rel = f"screenshots/step-{step.seq:03d}.png"
-                page = self._current_page()
-                if page and self._safe_capture(page, shot_rel, step):
+                if self._use_pre_shot(step, shot_rel):
                     step.screenshot = shot_rel
+                else:
+                    page = self._current_page()
+                    if page and self._safe_capture(page, shot_rel, step):
+                        step.screenshot = shot_rel
             self._write_step(step)
             n += 1
         return n
+
+    def _use_pre_shot(self, step: StepEvent, shot_rel: str) -> bool:
+        """用 mousedown 预截图（点击前画面）。要求 url 匹配（同页点击）。"""
+        pre = self._pre_shot
+        self._pre_shot = None  # 预截图一次性消费
+        if not pre or not pre.get("png"):
+            return False
+        if step.url and pre.get("url") and step.url != pre["url"]:
+            return False  # 点击已跨页，预截图不是当前上下文
+        try:
+            path = self.session_dir / shot_rel
+            path.parent.mkdir(parents=True, exist_ok=True)
+            path.write_bytes(screenshots.annotate(pre["png"], step.point, step.seq, self._dpr, self._viewport))
+            return True
+        except Exception:
+            return False
 
     def _safe_capture(self, page, shot_rel: str, step) -> bool:
         """截图，screenshot 带超时；导航/页面繁忙导致悬挂时 playwright 抛错，放弃该图。
@@ -323,7 +400,7 @@ class Recorder:
             png = page.screenshot(timeout=3000)
             path = self.session_dir / shot_rel
             path.parent.mkdir(parents=True, exist_ok=True)
-            path.write_bytes(screenshots.annotate(png, step.point, step.seq, self._dpr))
+            path.write_bytes(screenshots.annotate(png, step.point, step.seq, self._dpr, self._viewport))
             return True
         except Exception:
             return False

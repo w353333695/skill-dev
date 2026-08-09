@@ -1,6 +1,6 @@
 [project]
 name = "browser-recorder"
-version = "0.1.4"
+version = "0.1.5"
 description = "录制浏览器操作, 生成图文手册 + 结构化记录 + 请求日志, 支持回放"
 requires-python = ">=3.9,<3.13"
 dependencies = [

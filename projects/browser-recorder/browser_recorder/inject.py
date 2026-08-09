@@ -42,7 +42,6 @@ RECORDER_JS = r"""
   }
 
   function deliver(payload) {
-    console.log("[br] deliver " + payload.type + " bridge=" + (bridge() ? "ok" : "null"));
     const fn = bridge();
     if (fn) {
       try { fn(JSON.stringify(payload)); } catch (e) { /* 页面销毁中 */ }
@@ -159,6 +158,18 @@ RECORDER_JS = r"""
     enqueue(p);
   }, true);
 
+  // mousedown 提前通知：click 的默认行为/页面响应在 mousedown 之后才发生，
+  // 此时截图是"点击前"的干净画面。通过独立的 __recordMouseDown 桥立即通知
+  // Python 截图（同步阶段触发，赶在页面响应前）。
+  document.addEventListener("mousedown", (e) => {
+    const fn = window.__recordMouseDown ||
+      (() => { try { return window.parent && window.parent.__recordMouseDown; } catch (err) { return null; } })();
+    if (typeof fn !== "function") return;
+    try {
+      fn(JSON.stringify({ x: Math.round(e.clientX), y: Math.round(e.clientY), url: location.href }));
+    } catch (err) { /* 忽略 */ }
+  }, true);
+
   // input 防抖：静默 500ms 或 change/blur 定稿
   let pendingInput = null;
   let inputTimer = null;
@@ -174,7 +185,6 @@ RECORDER_JS = r"""
   document.addEventListener("input", (e) => {
     const el = e.target;
     if (!el.matches("input, textarea")) return;
-    console.log("[br] input event on " + el.id);
     const type = (el.getAttribute("type") || "text").toLowerCase();
     if (["checkbox", "radio", "button", "submit", "file"].includes(type)) return;
     const p = basePayload("input", el);
@@ -241,7 +251,7 @@ RECORDER_JS = r"""
 """
 
 
-def install(context, on_event: Callable[[dict], None]) -> None:
+def install(context, on_event: Callable[[dict], None], on_mousedown: Callable[[dict], None] | None = None) -> None:
     """在 context 安装事件捕获：注入脚本 + 暴露 __recordEvent 桥。
 
     重要：binding 用 **page 级** expose_function，不用 context 级。
@@ -263,11 +273,24 @@ def install(context, on_event: Callable[[dict], None]) -> None:
                 pass  # 单个事件解析失败不中断录制
         return _bridge
 
+    def _make_mousedown_bridge():
+        def _bridge(payload: str) -> None:
+            try:
+                if on_mousedown:
+                    on_mousedown(json.loads(payload))
+            except Exception:
+                pass
+        return _bridge
+
     def _expose(page) -> None:
         try:
             page.expose_function("__recordEvent", _make_bridge())
         except Exception:
             pass  # 页面关闭中等场景忽略
+        try:
+            page.expose_function("__recordMouseDown", _make_mousedown_bridge())
+        except Exception:
+            pass
 
     for page in context.pages:
         _expose(page)
