@@ -61,7 +61,7 @@ recorder version                        版本号
 ## 目录结构
 
 ```
-/tmp/.browser-recorder/
+./browser-recorder/
 ├── index.json                     # 全局域名索引
 ├── example.com/
 │   ├── auth.json                  # 🔐 鉴权（跨场景共享，自动保存/恢复）

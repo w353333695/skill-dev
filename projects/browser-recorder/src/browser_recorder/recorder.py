@@ -24,7 +24,7 @@ from .cleaner import cleanup
 console = Console()
 
 # 产物根路径
-ARTIFACT_ROOT = Path("/workspace/tmp/.browser-recorder")
+ARTIFACT_ROOT = Path("./browser-recorder")
 
 
 def _domain_key(url: str) -> str:

@@ -18,7 +18,7 @@ from .cleaner import cleanup
 
 console = Console()
 
-ARTIFACT_ROOT = Path("/workspace/tmp/.browser-recorder")
+ARTIFACT_ROOT = Path("./browser-recorder")
 
 
 class ReplayEngine:
