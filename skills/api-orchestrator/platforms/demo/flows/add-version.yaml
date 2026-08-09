@@ -20,16 +20,24 @@ steps:
   - n: 2
     transform: 改造 formDefinition（本地）
     desc: |
-      在 formDefinition 的 []Container 里加内容。⚠️条件显示不要凭空写 displayCondition 字符串（语法前端求值，workspace 无源码无法确定，写了不生效）：
-      - 简单"仅在某流程节点显示"：用 displayUserTaskId（tabPane/容器级，填节点 id）。
-      - "按某字段值显隐容器/控件"（如选虚拟机→显虚拟机 table）：用 onValueChange 脚本——container.options.listenEvents 监听触发字段 + remoteFunc.toolId 指向 Python 工具，脚本返 formConfig 切显隐（见 objects.yaml#itsm_lifecycle_script + itsm_conditional_display）。
-      - 最稳：前端 designer 配好条件显示 → save → get formDefinition 捕获 designer 生成的真实结构再仿写。
-      本场景：加『申请主机类型』MULTIPLESELECT（options.extraProps.items: [{虚拟机,物理机}]）。
+      在 formDefinition 的 []Container 里加内容 + 配条件显示。
+      【条件显示】用 displayCondition 字符串表达式（前端求值）。语法：`#{容器key.控件key}` 引用值 + JS 风格操作符，按触发控件类型选模板（完整表见 objects.yaml#itsm_conditional_display）：
+        · SELECT单选/RADIO：#{c.field}.value = "vm"
+        · MULTIPLESELECT/CHECKBOX：#{c.field}.some(item => item.value = "vm")
+        · INPUT/TEXTAREA/NUMBERINPUT/SLIDER：#{c.field} = "1"
+        · SWITCH：#{c.field}.toString() = "true"
+      容器key/控件key 用 formDefinition 里的 key（非 modelField）。配在容器 displayCondition / 组件 options.displayCondition / tabPane.displayCondition。
+      复杂联动（多字段计算/动态取值）超出表达式时才用 onValueChange 脚本（container.options.listenEvents + toolId，返 formConfig）。
+      本场景：加『申请主机类型』SELECT(单选 key=f_htype)；虚拟机/物理机 table 配 displayCondition。
     body_hint: |
-      # 加多选控件（归一化补全 options 全字段，见 build-form.yaml）
-      {"key":"f_htype_multi","type":"MULTIPLESELECT","label":"申请主机类型","modelField":"hostType",
-       "belongToSection":"<容器key>","options":{"extraProps":{"items":[{"key":"vm","label":"虚拟机","value":"vm"},{"key":"pm","label":"物理机","value":"pm"}]},"layout":[0,2,12,1],"labelCol":3,"defaultValue":"","required":false,"dataType":"object","displayCondition":"","remoteFunc":{"toolId":"","scriptInputs":[]},"rules":[],...}}
-      # 按值显隐：配 container.options.listenEvents + toolId（onValueChange 脚本返 formConfig），不要写 displayCondition 字符串
+      # 加触发控件（归一化补全 options 全字段，见 build-form.yaml）
+      {"key":"f_htype","type":"SELECT","label":"申请主机类型","modelField":"hostType","belongToSection":"c_base",
+       "options":{"extraProps":{"items":[{"key":"vm","label":"虚拟机","value":"vm"},{"key":"pm","label":"物理机","value":"pm"}]},
+                 "layout":[0,1,12,1],"labelCol":3,"dataType":"object","displayCondition":"","remoteFunc":{"toolId":"","scriptInputs":[]},"rules":[],...}}
+      # 虚拟机 table 的 displayCondition（容器级）
+      {"key":"c_vm","name":"虚拟机申请","type":"table","displayCondition":"#{c_base.f_htype}.value = \"vm\"","propertys":[...]}
+      # 物理机 table
+      {"key":"c_pm","name":"物理机申请","type":"table","displayCondition":"#{c_base.f_htype}.value = \"pm\"","propertys":[...]}
 
   - n: 3
     op: form_version.update
