@@ -52,7 +52,3 @@ transitions:
     pick: data[].attrList[].id
     to: object_model.import
     how: "导出完整模型 → 改 attrList（新属性加 _ 前缀）→ import 回写（upsert）"
-  - from: user_service /api/v1/org/list
-    pick: data[].id
-    to: "export EASYOPS_ORG=<id>"
-    how: "查出非系统 org → 设为环境变量 → api-cli endpoint.headers 注入"

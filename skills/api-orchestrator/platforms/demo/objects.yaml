@@ -10,7 +10,7 @@ objects:
   cmdb_object:
     description: CMDB 模型（object）—— 一个资源类的完整定义。
     source: data/sources/backend/CMDB/cmdb_service/object/message/response.pb.go
-    api: object_model（list/detail/import/import_check/export/delete）
+    api: object_model
     fields:
       objectId:        { type: string, required: true, anchor: true, desc: "模型 ID，约定 NAME@NAMESPACE。无正则，仅非空（@NAMESPACE 运行时处理）" }
       name:            { type: string, required: true, desc: "模型名（同命名空间不可重复）" }
@@ -51,7 +51,7 @@ objects:
   # ---------- 属性 ----------
   cmdb_attr:
     description: 模型属性（字段）。
-    api: object_model.import（attrList 项）/ object_attr（细粒度 CRUD）
+    api: object_attr
     fields:
       id:          { type: string, required: true, desc: "属性 ID；新增时加 _ 前缀" }
       name:        { type: string, required: true, desc: "属性中文名" }
@@ -88,7 +88,7 @@ objects:
   # ---------- 关系 ----------
   cmdb_relation:
     description: 模型间关系。一条关系连两端模型，各持对端 id 与基数。
-    api: object_model.import（relation_list 项）/ object_relation（细粒度 CRUD）
+    api: object_relation
     fields:
       relation_id: { type: string, desc: "关系 ID，不填自动生成" }
       name: { type: string }
