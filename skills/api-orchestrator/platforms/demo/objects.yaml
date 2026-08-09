@@ -572,10 +572,17 @@ api_behavior:
     rule: "formDefinition / businessRules 在 wire 层都是【JSON 字符串】（CMDB 存 string，converter.go:115-133）。save/update body 传 JSON.stringify([]Container)；get 返回字符串需二次 JSON.parse。深层结构（容器/控件/脚本）见 objects.yaml#itsm_form_definition——后端透传不解析，结构由前端解释。"
   itsm_conditional_display:
     rule: |
-      条件显示=字符串表达式前端解释（后端不解析不存结构化），三处可配：
-      ① 控件级 options.displayCondition；② 容器级 container.displayCondition（后端 Container 无显式字段，靠 JSON 透传）；③ tabPane 级 displayCondition + displayUserTaskId（后者限制该 tab 仅在某流程节点显示）。
-      复杂联动（A 变→B 显隐/取值）用 onValueChange 脚本替代简单 displayCondition。
-      另：businessRules（form 级 JSON 字符串）是独立业务规则载体，后端透传。
+      条件显示机制（后端透传，前端求值；workspace 无前端渲染源码——只有 storyboard bundle，无表单渲染器逻辑。以下据后端结构体 + 测试数据 + 实测）：
+      ① displayCondition（字符串，组件 options / 容器 / tabPane 三处可配）—— 前端运行时求值的表达式。
+         ⚠️ 后端所有测试数据里 displayCondition【全是空串】，无任何非空样例；前端渲染器源码不在 workspace。
+         故其表达式 DSL 语法【无法从 workspace 确定】——不要凭空写字符串（如 "A 含 B" 属臆造，前端不认）。
+         正确做法：用前端 designer 配置条件显示 → save → get formDefinition 捕获 designer 生成的真实写法（届时回流本文件）。
+      ② displayUserTaskId（字符串，tabPane/options）—— 限制仅在指定流程节点 id 显示（简单、确定可用，非"按值"联动）。
+      ③ listenEvents + remoteFunc.toolId（container.options，onValueChange 钩子）——【字段联动的可靠机制】：
+         当 componentList 列出的组件值变化时，触发 toolId 脚本（Python 工具），脚本返回 formConfig（动态改容器/控件显隐）+ formData。
+         结构：options.listenEvents:[{componentList:[{key,label,value}], remoteFunc:{toolId}}]。
+         场景『选虚拟机→显虚拟机 table，选物理机→显物理机 table』即用此：listenEvents 监听 hostType 字段，脚本据当前值返 formConfig 切两 table 显隐。
+      复杂联动统一走 onValueChange 脚本（见 itsm_lifecycle_script）。businessRules（form 级 JSON 字符串）是独立业务规则载体，后端透传不解析。
   itsm_data_inheritance:
     rule: |
       数据继承三层（无『继承整张父表单』的声明式配置）：
