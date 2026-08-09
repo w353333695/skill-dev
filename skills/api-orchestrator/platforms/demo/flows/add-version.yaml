@@ -20,18 +20,16 @@ steps:
   - n: 2
     transform: 改造 formDefinition（本地）
     desc: |
-      在 formDefinition 的 []Container 里：
-      ① 加『申请主机类型』多选 CHECKBOX/MULTIPLESELECT（options.extraProps.items: [虚拟机,物理机]）
-      ② 给虚拟机/物理机 table 容器配【条件显示】：displayCondition 表达式——当选了虚拟机才显示虚拟机 table，选了物理机才显示物理机 table。
-      displayCondition 是【字符串表达式】（前端解释，后端透传；见 objects.yaml#itsm_conditional_display）。
-      复杂联动（多字段联动/取值计算）超出 displayCondition 时，改用 onValueChange 生命周期脚本（见 objects.yaml#itsm_lifecycle_script）。
+      在 formDefinition 的 []Container 里加内容。⚠️条件显示不要凭空写 displayCondition 字符串（语法前端求值，workspace 无源码无法确定，写了不生效）：
+      - 简单"仅在某流程节点显示"：用 displayUserTaskId（tabPane/容器级，填节点 id）。
+      - "按某字段值显隐容器/控件"（如选虚拟机→显虚拟机 table）：用 onValueChange 脚本——container.options.listenEvents 监听触发字段 + remoteFunc.toolId 指向 Python 工具，脚本返 formConfig 切显隐（见 objects.yaml#itsm_lifecycle_script + itsm_conditional_display）。
+      - 最稳：前端 designer 配好条件显示 → save → get formDefinition 捕获 designer 生成的真实结构再仿写。
+      本场景：加『申请主机类型』MULTIPLESELECT（options.extraProps.items: [{虚拟机,物理机}]）。
     body_hint: |
-      # 给容器加条件显示（示意）
-      {"key":"c_vm","name":"虚拟机申请","type":"table","displayCondition":"hostType 包含 虚拟机",
-       "propertys":[...]}
-      # 加多选控件
-      {"key":"hostType","label":"申请主机类型","type":"MULTIPLESELECT","modelField":"hostType",
-       "options":{"extraProps":{"options":[{"key":"vm","label":"虚拟机","value":"vm"},{"key":"pm","label":"物理机","value":"pm"}]}}}
+      # 加多选控件（归一化补全 options 全字段，见 build-form.yaml）
+      {"key":"f_htype_multi","type":"MULTIPLESELECT","label":"申请主机类型","modelField":"hostType",
+       "belongToSection":"<容器key>","options":{"extraProps":{"items":[{"key":"vm","label":"虚拟机","value":"vm"},{"key":"pm","label":"物理机","value":"pm"}]},"layout":[0,2,12,1],"labelCol":3,"defaultValue":"","required":false,"dataType":"object","displayCondition":"","remoteFunc":{"toolId":"","scriptInputs":[]},"rules":[],...}}
+      # 按值显隐：配 container.options.listenEvents + toolId（onValueChange 脚本返 formConfig），不要写 displayCondition 字符串
 
   - n: 3
     op: form_version.update
