@@ -1,0 +1,2 @@
+[console_scripts]
+recorder = browser_recorder.cli:app

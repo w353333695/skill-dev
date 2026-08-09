@@ -1,0 +1,4 @@
+playwright>=1.40
+typer>=0.9
+Pillow>=10.0
+rich>=13.0
