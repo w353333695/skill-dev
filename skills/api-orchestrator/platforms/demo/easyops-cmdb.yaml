@@ -487,15 +487,28 @@ resources:
           required: [fields]
           description: "实例搜索请求（V3）。fields 必填；page/page_size 选填有默认（1/30，page_size 上限 3000）。"
           properties:
-            fields:    { type: array, items: { type: string }, description: "返回字段（属性 id），必填；支持关系二级 jsonPath 如 clusters.name" }
+            fields:    { type: array, items: { type: string }, description: "返回字段（属性 id），必填。支持多层关系 jsonPath：A.B.C.field 沿关系链取对端字段（实测 3 层通，如 HOST.serviceSets.name 经 TESTWWH→HOST→服务集 取服务集名）；也可用命名跨级关系 rel_xxx（对象上预定义的 TransHierRelation，持 QueryPath，V3 专属）。" }
             page:      { type: integer, description: "页码（从 1 起，默认 1，≥1）" }
             page_size: { type: integer, description: "每页条数（默认 30，上限 3000）" }
             sort:      { type: array, description: "排序；留空默认按 instanceId 降序。order: 1=升 / -1=降 / 2,-2=自然序", items: { type: object, properties: { key: { type: string, description: "属性 id" }, order: { type: integer, enum: [-1, 1, -2, 2] } } } }
             query:
               type: object
               additional_properties: true
-              description: "MongoDB 风格查询：$and/$or 组合，字段名做 key，操作符 $like/$eq/$regex 等。如 {ip:{$like:'%172.30.%'}}（场景2 网段过滤）或 {'$and':[{'$or':[...]}]}"
-              example: { "$and": [{ "$or": [{ "name": { "$like": "%oceanbase%" } }] }] }
+              description: "MongoDB 风格查询：$and/$or 组合，字段名做 key，操作符 $eq/$like/$nlike/$regex/$in/$gte/$lte/$gt/$lt/$exists 等（全集见 cmdb_service/internal/cmdb/constant/other.go）。支持沿关系链过滤——key 用多层关系路径 A.B.C.field 按对端实例属性过滤根实例（实测 HOST.serviceSets.name={$eq:dev} 命中 7 条），或用 rel_xxx.field（后端重写成完整 QueryPath）。"
+              example: { "HOST.serviceSets.name": { "$eq": "dev" } }
+            fields_relation_filter:
+              type: object
+              additional_properties: true
+              description: "过滤【返回的关系对端实例】（透传 easycore fields_relation_filter）——缩小每条实例带出的对端集合，不收缩根实例。key=关系 out_id（支持多层如 cluster.host，或 cluster.@ 表关系边属性）；value=对端 filter（语法同 query：$eq/$in/$or...）。例 {cluster:{$or:[{name:'aaa'},{ip:'1'}]}}。若要按对端属性收缩【根实例】，用 query 的关系路径（见上），不用本字段。"
+            limitations:
+              type: array
+              description: "单独为某条关系指定 limit/sort（优先级高于 relation_limit）。field 支持多级关系（如 owner, owner.app）。"
+              items:
+                type: object
+                properties:
+                  field: { type: string, description: "关系字段（关系 id / Out.Id），支持多级如 owner.app" }
+                  limit: { type: integer, description: "该关系返回数量上限，0=不限" }
+                  sort:  { type: array, items: { type: object, properties: { key: { type: string }, order: { type: integer, enum: [-1, 1, -2, 2] } } } }
             only_my_instance:            { type: boolean, description: "true 只取与我相关实例，默认 false" }
             relation_limit:              { type: integer, description: "fields 带出关系的数量上限，0=不限" }
             ignore_missing_field_error:  { type: boolean, description: "fields 含不存在字段时不报错" }

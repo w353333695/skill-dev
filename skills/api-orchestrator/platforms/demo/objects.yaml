@@ -168,5 +168,15 @@ api_behavior:
     rule: "批量删真实路径 DELETE /object/{object_id}/instance_batch（契约误写 /instance/_batch，差一个斜杠，照契约写必 404）。源码 instance_extend/route.go:11 为准。"
   instance_search_name_field:
     rule: "search 的 fields 含 `name` 时依赖模型的『name relation』配置；模型若缺该配置（创建缺陷）报 133116「Can not find name relation of <OBJECT>」。规避：fields 不带 name，用 instanceId/ip 等字段（实例 name 仍存在，只是不能经此字段取）。e2e 实测 TESTWWH 即此坑。"
+  instance_relation_chain:
+    rule: |
+      多层关系链路（A→B→C→…）沿链取字段/过滤——两套机制（V3 专属 ProcessTransHierRelation；源码 instance_search_service.go:286-309）：
+      ① 直接点分路径（递归展开，实测 3 层通，契约对 fields 仅承诺 2 级但代码支持 N 层）：
+         - 取终端字段：fields:["HOST.serviceSets.name"]（TESTWWH→HOST→服务集 取服务集名）
+         - 按终端属性过滤【根实例】：query:{"HOST.serviceSets.name":{"$eq":"dev"}}（命中其 HOST 关联了 dev 服务集的实例；实测 7 条）
+      ② 命名跨级关系 rel_xxx：对象视图预定义的 TransHierRelation（持 QueryPath 如 HOST.SERVICE_SET.SYSTEM），用 rel_xxx 或 rel_xxx.attr 引用，后端重写成完整路径（rel_/_rel_ 前缀识别，constant/other.go:48-58）。
+      query（过滤根实例）vs fields_relation_filter（过滤返回的对端列表，key=关系 out_id 支持多层/边属性 .@）：职责正交。
+      limitations[].field 支持多级（如 owner.app，search_limit.pb.go:22）；cmdb_service 自动生成仅第 1 层，多级需调用方自给。
+      ⚠️ 注意：filter_relation 不在 search（在 GroupInstanceV3 聚合接口）。
   wrapper:
     rule: "标准响应 {code, message, error, data}；code=0 成功。业务错误码形如 133xxx。"
