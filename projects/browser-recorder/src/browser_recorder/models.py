@@ -1,7 +1,7 @@
 """browser-recorder 数据模型."""
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Optional, Dict
+from typing import Optional, Dict, TypedDict
 
 
 class ActionTag(str, Enum):
@@ -16,6 +16,20 @@ class ActionTag(str, Enum):
     TAB_CLOSE = "TAB_CLOSE"
     SHOT = "SHOT"
     SCROLL = "SCROLL"
+
+
+class RawEvent(TypedDict, total=False):
+    """JS 注入脚本推送的原始事件."""
+    type: str
+    timestamp: float
+    selector: str
+    value: Optional[str]
+    tagName: str
+    text: Optional[str]
+    coords: Optional[dict]
+    url: str
+    pageId: str
+    frameId: Optional[str]
 
 
 @dataclass

@@ -1,7 +1,7 @@
 """测试数据模型."""
 import json
 from dataclasses import asdict
-from browser_recorder.models import ActionTag, Action, RequestRecord
+from browser_recorder.models import ActionTag, Action, RequestRecord, RawEvent
 
 
 def test_action_tag_values():
@@ -108,3 +108,17 @@ def test_request_record_optional_fields():
     )
     assert req.req_body is None
     assert req.res_body is None
+
+
+def test_raw_event_creation():
+    """RawEvent 支持部分字段创建 (total=False)."""
+    event: RawEvent = {
+        "type": "CLICK",
+        "timestamp": 1000.0,
+        "selector": "#btn",
+        "tagName": "button",
+        "url": "https://example.com",
+        "pageId": "main",
+    }
+    assert event["type"] == "CLICK"
+    assert event.get("value") is None  # optional field
