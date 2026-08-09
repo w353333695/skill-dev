@@ -203,61 +203,58 @@ class Recorder:
         browser = None
         context = None
 
-        async with async_playwright() as pw:
-            browser = await pw.chromium.launch(headless=False)
+        try:
+            async with async_playwright() as pw:
+                browser = await pw.chromium.launch(headless=False)
+                storage_state = None
+                if self._auth_file.exists():
+                    try:
+                        storage_state = _json.loads(self._auth_file.read_text())
+                        console.print("[dim]🔐 已加载鉴权状态[/dim]")
+                    except Exception:
+                        pass
 
-            # 加载已有鉴权
-            storage_state = None
-            if self._auth_file.exists():
-                try:
-                    storage_state = _json.loads(self._auth_file.read_text())
-                    console.print("[dim]🔐 已加载鉴权状态[/dim]")
-                except Exception:
-                    pass
-
-            context = await browser.new_context(
-                no_viewport=True,
-                storage_state=storage_state,
-                ignore_https_errors=True,
-            )
-
-            page = await context.new_page()
-            self._register_page(page, "main")
-
-            await self.network_interceptor.setup(page)
-            await self._setup_page(page, "main")
-
-            context.on("page", lambda p: asyncio.ensure_future(self._on_new_page(p)))
-            await self._record_nav(page, self.url)
-
-            if self.fallback_interval > 0:
-                self._fallback_task = asyncio.ensure_future(
-                    self._fallback_loop(page)
+                context = await browser.new_context(
+                    no_viewport=True,
+                    storage_state=storage_state,
+                    ignore_https_errors=True,
                 )
+                page = await context.new_page()
+                self._register_page(page, "main")
+                await self.network_interceptor.setup(page)
+                await self._setup_page(page, "main")
+                context.on("page", lambda p: asyncio.ensure_future(self._on_new_page(p)))
+                await self._record_nav(page, self.url)
 
-            try:
-                while self._running:
-                    await asyncio.sleep(0.5)
-                    if self.max_duration > 0:
-                        elapsed = (time.time() * 1000 - self.start_time_ms) / 1000
-                        if elapsed >= self.max_duration:
-                            console.print("[yellow]⏰ 达到最大录制时长[/yellow]")
-                            break
-            except asyncio.CancelledError:
-                self._running = False
-            finally:
-                # 清理：取消定时器 → flush → 保存鉴权 → 关浏览器
-                if self._fallback_task:
-                    self._fallback_task.cancel()
-                for p in self._page_map.values():
-                    await injector_flush(p)
-                self.jsonl_writer.flush()
+                if self.fallback_interval > 0:
+                    self._fallback_task = asyncio.ensure_future(
+                        self._fallback_loop(page)
+                    )
+
                 try:
-                    await self._save_auth(context)
-                    await context.close()
-                    await browser.close()
-                except (RuntimeError, Exception):
-                    pass  # 事件循环关闭中，忽略清理错误
+                    while self._running:
+                        await asyncio.sleep(0.5)
+                        if self.max_duration > 0:
+                            elapsed = (time.time() * 1000 - self.start_time_ms) / 1000
+                            if elapsed >= self.max_duration:
+                                console.print("[yellow]⏰ 达到最大录制时长[/yellow]")
+                                break
+                except asyncio.CancelledError:
+                    self._running = False
+                finally:
+                    if self._fallback_task:
+                        self._fallback_task.cancel()
+                    for p in self._page_map.values():
+                        await injector_flush(p)
+                    self.jsonl_writer.flush()
+                    try:
+                        await self._save_auth(context)
+                        await context.close()
+                        await browser.close()
+                    except Exception:
+                        pass
+        except RuntimeError:
+            pass  # 事件循环关闭中，Playwright 清理触发，忽略
 
         return self._finalize()
 

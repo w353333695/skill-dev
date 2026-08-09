@@ -51,6 +51,8 @@ def start(
         asyncio.run(recorder.run())
     except KeyboardInterrupt:
         console.print("\n[bold yellow]⏹[/bold yellow] 录制已停止")
+    except RuntimeError:
+        pass  # 事件循环关闭时 Playwright 清理触发
 
 
 @app.command()
