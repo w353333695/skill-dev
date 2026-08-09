@@ -577,17 +577,23 @@ api_behavior:
     rule: "formDefinition / businessRules 在 wire 层都是【JSON 字符串】（CMDB 存 string，converter.go:115-133）。save/update body 传 JSON.stringify([]Container)；get 返回字符串需二次 JSON.parse。深层结构（容器/控件/脚本）见 objects.yaml#itsm_form_definition——后端透传不解析，结构由前端解释。"
   itsm_conditional_display:
     rule: |
-      条件显示机制（后端透传，前端求值；workspace 无前端渲染源码——只有 storyboard bundle，无表单渲染器逻辑。以下据后端结构体 + 测试数据 + 实测）：
-      ① displayCondition（字符串，组件 options / 容器 / tabPane 三处可配）—— 前端运行时求值的表达式。
-         ⚠️ 后端所有测试数据里 displayCondition【全是空串】，无任何非空样例；前端渲染器源码不在 workspace。
-         故其表达式 DSL 语法【无法从 workspace 确定】——不要凭空写字符串（如 "A 含 B" 属臆造，前端不认）。
-         正确做法：用前端 designer 配置条件显示 → save → get formDefinition 捕获 designer 生成的真实写法（届时回流本文件）。
-      ② displayUserTaskId（字符串，tabPane/options）—— 限制仅在指定流程节点 id 显示（简单、确定可用，非"按值"联动）。
-      ③ listenEvents + remoteFunc.toolId（container.options，onValueChange 钩子）——【字段联动的可靠机制】：
-         当 componentList 列出的组件值变化时，触发 toolId 脚本（Python 工具），脚本返回 formConfig（动态改容器/控件显隐）+ formData。
-         结构：options.listenEvents:[{componentList:[{key,label,value}], remoteFunc:{toolId}}]。
-         场景『选虚拟机→显虚拟机 table，选物理机→显物理机 table』即用此：listenEvents 监听 hostType 字段，脚本据当前值返 formConfig 切两 table 显隐。
-      复杂联动统一走 onValueChange 脚本（见 itsm_lifecycle_script）。businessRules（form 级 JSON 字符串）是独立业务规则载体，后端透传不解析。
+      条件显示 = displayCondition 字符串表达式（前端求值，后端透传不校验）。表达式 DSL：
+      用 `#{容器ID.控件ID}` 引用某控件的值，配 JS 风格操作符。按【触发控件类型】选模板：
+      ┌──────────────────────────┬───────────────────────────────────────────────┬──────────────────┐
+      │ 触发控件类型              │ 表达式（容器ID.控件ID 换成实际值）              │ 含义             │
+      ├──────────────────────────┼───────────────────────────────────────────────┼──────────────────┤
+      │ INPUT/TEXTAREA/NUMBERINPUT/SLIDER │ #{c.field} = "1"                      │ 值等于"1"时显示  │
+      │ ARRATINPUT（数组输入）    │ #{c.field}.includes("1")                      │ 值包含"1"时显示  │
+      │ SELECT(单选)/RADIO(单选组)│ #{c.field}.value = "1"                        │ 选中"1"时显示    │
+      │ MULTIPLESELECT/CHECKBOX   │ #{c.field}.some(item => item.value = "1")     │ 值含"1"时显示    │
+      │ CASCADER（级联）          │ #{c.field}.some(item => ["1-1"].includes(item.value)) │ 选中"1/1-1"时显示 │
+      │ SWITCH（开关）            │ #{c.field}.toString() = "true"                │ 开关开启时显示   │
+      └──────────────────────────┴───────────────────────────────────────────────┴──────────────────┘
+      可配三处：组件 options.displayCondition / 容器 displayCondition / tabPane.displayCondition（+ displayUserTaskId 限流程节点）。
+      容器ID/控件ID = formDefinition 里的 key（container.key / component.key），不是 modelField。
+      示例：场景『选虚拟机显虚拟机 table』——触发是 SELECT(单选) 申请主机类型(key=f_htype，容器 key=c_base)，
+      虚拟机 table 的 displayCondition = `#{c_base.f_htype}.value = "vm"`；物理机 table = `#{c_base.f_htype}.value = "pm"`。
+      另：businessRules（form 级 JSON 字符串）是独立业务规则载体，后端透传不解析。displayUserTaskId（tabPane/容器）限流程节点显示。
   itsm_data_inheritance:
     rule: |
       数据继承三层（无『继承整张父表单』的声明式配置）：
