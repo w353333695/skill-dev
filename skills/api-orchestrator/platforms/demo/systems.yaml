@@ -58,7 +58,9 @@ systems:
         update: "更新关系"
         delete: "删除关系"
       object_instance:
-        search: "按 MongoDB 风格 query 搜索实例（分页）"
+        search: "按 MongoDB 风格 query 搜索实例（fields 必填，分页；总数读 data.total）"
+        import: "批量建/改实例（upsert，keys+datas）—— 新建 + 改的统一入口（C+U）"
+        delete: "批量删除实例（instanceIds 分号分隔；路径 instance_batch）"
 
     # 运维知识（实测，真相来源）—— 完整叙述见 README「接入真相」「调用踩坑录」
     runtime:
@@ -76,6 +78,10 @@ systems:
       test_org: 18832008               # 非系统测试 org（2026-07-31 建），写验证用
       list_pagination: "流式 NDJSON——每行一个完整对象，非 {data:{list:[...]}} 包装；逐行 json.loads"
       instance_search_fields_required: true   # object_instance.search body 必带 fields（属性 id 列表），否则 100000
+      instance_search_total: "object_instance.search 响应 data.total=实例总数（场景『有几个』读 total，非 count；契约 response 明列 total）"
+      instance_import_semantics: "实例 _import=批量 upsert：keys(仅普通属性 id)组 query 判增改，命中→update 否则→insert；datas 字段名=模型属性 id；关系字段名=该关系 view 的 Out.Id，值可传对端 instanceId 字符串/对象/数组，传完整对象触发嵌套创建对端实例(disableNestedCreateInstance=true 禁止)；datas 可带 instanceId 指定主键，否则后端按微秒时间戳 hex 自动生成"
+      instance_id_format: "13 位 [0-9a-z]（微秒时间戳 hex）；新建可不带，后端自动生成；指定须匹配 ^[0-9a-z]{13}$"
+      instance_batch_delete: "DELETE /object/{object_id}/instance_batch?instanceIds=a;b;c —— ⚠️契约笔误写成 /instance/_batch，后端实际无斜杠 instance_batch（instance_extend/route.go:11）；照契约写必 404。无单删/按条件删的独立 verb：单删传一个 id，按条件删先 search 取 instanceIds 再 delete"
       import_semantics: "声明式 upsert（is_create 区分建/改）；新增属性 id 加 _ 前缀；关系对端须存在或同批导入（ignore_dst_relation:true 跳过校验）"
       delete_constraint: "模型有关系定义时 delete 报 133129；forceDelete=true 强删（连关系），或先 object_relation delete；protected 模型不可删"
 
@@ -83,3 +89,6 @@ systems:
     acceptance_urls:
       model_list:   "${EASYOPS_CMDB_FRONTEND_URL}/next/cmdb-model-management?hidden=true&page=1&q=测试&pageSize=20&category=应用资源"
       model_detail: "${EASYOPS_CMDB_FRONTEND_URL}/next/cmdb-model-management/object/{objectId}/detail"   # objectId 形如 OCEANBASE@EASYOPS
+      # 实例类验收（cmdb-instance 场景）。OBJECT_ID=模型 id（如 TESTWWH@EASYOPS）；list 的 aq 是 urlencoded 查询 JSON。
+      instance_list:   "${EASYOPS_CMDB_FRONTEND_URL}/next/next-cmdb-instance-management/next/{OBJECT_ID}/list?aq={urlencoded-query-json}"
+      instance_detail: "${EASYOPS_CMDB_FRONTEND_URL}/next/next-cmdb-instance-management/next/{OBJECT_ID}/instance/{instanceId}"

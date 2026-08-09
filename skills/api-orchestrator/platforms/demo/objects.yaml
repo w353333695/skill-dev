@@ -128,6 +128,32 @@ objects:
       show_key:            { type: array, items: string, desc: "实例列表显示键" }
       visible:             { type: bool, desc: "菜单可见" }
 
+  # ---------- 实例（instance）—— 模型下的具体数据记录 ----------
+  cmdb_instance:
+    description: CMDB 实例——某模型下的一条具体数据记录。字段名=模型属性 id；关系字段名=该关系 view 的 Out.Id（在 object_relation 定义里配）。
+    source: data/sources/backend/CMDB/cmdb_service/instance/message + instance_extend/message
+    api: object_instance
+    fields:
+      instanceId:            { type: string, anchor: true, desc: "实例主键，13 位 [0-9a-z]（微秒时间戳 hex）；新建可不带后端自动生成，指定须匹配 ^[0-9a-z]{13}$" }
+      name:                  { type: string, desc: "实例名；常用作 import 的 keys 联合唯一键" }
+      _object_id:            { type: string, ref: cmdb_object, desc: "隶属的模型 id（path 参数 {object_id}）" }
+      "<模型属性 id>":         { type: any, desc: "模型定义的各属性（ip/memo/整型示例 等），按属性 value.type 取值" }
+      "<关系 view 的 Out.Id>": { type: any, ref: cmdb_instance, desc: "关系字段：值可传对端 instanceId 字符串/对象{instanceId}/数组；传完整对象（无 instanceId）触发嵌套创建对端实例" }
+    relations:
+      - { to: cmdb_object,   type: association, cardinality: "N:1", via: _object_id, desc: "实例隶属一个模型" }
+      - { to: cmdb_instance, type: association, cardinality: "N:M", via: "<关系 view 的 Out.Id>", desc: "实例间关系（关系字段引用对端实例）" }
+    side_effects:   # 实例操作行为规则（源码实测，真相来源）
+      - op: object_instance.search
+        rule: "fields 必填（属性 id 列表），留空报 100000「fields is required but not set」。page/page_size 选填（默认 1/30，page_size 上限 3000）。实例总数在 data.total（契约 response 明列 total，非 count）。query 是 MongoDB 风格（$and/$or/$like/$regex）。"
+      - op: object_instance.import
+        rule: "批量 upsert：keys（仅普通属性 id，不支持 struct/关系字段）组 query——匹配到 update、没匹配 insert；datas 每条字段名=属性 id。建 N 实例用 keys=[name|ip]；定向改已有用 keys=[instanceId]（主键必命中→纯 update，用于场景3补属性）。"
+      - op: object_instance.import（关系字段）
+        rule: "关系字段名=该关系 view 的 Out.Id；值可传对端 instanceId 字符串/对象{instanceId}/数组；传完整对象（无 instanceId）会嵌套创建对端实例并自动关联，除非 disableNestedCreateInstance=true。append/remove 由后端 diff 当前已有 vs 请求列表决定。场景1『关联 easyops 系统』即用此字段。"
+      - op: object_instance.import（主键）
+        rule: "datas 可带 instanceId 指定主键（须 ^[0-9a-z]{13}$），不填则后端按微秒时间戳 hex 自动生成。"
+      - op: object_instance.delete
+        rule: "批量删：instanceIds 分号分隔；单个 id 即删单个。⚠️路径 /object/{id}/instance_batch（无斜杠；契约笔误 /instance/_batch，照写 404）。返回 data.deleteFailedInstances（空=全删成功）。无独立单删/按条件删 verb——单删传一个 id，按条件删先 search 取 instanceIds 再 delete。"
+
 # =============================================================================
 # 接口级行为（跨对象，编排时必须知道）
 # =============================================================================
@@ -136,5 +162,9 @@ api_behavior:
     rule: "list/search 分页时 api-cli 以流式 NDJSON 输出——每行一个完整对象，非 {data:{list:[...]}} 包装。解析须逐行 json.loads。单对象接口（detail）才是 {code,data:{...}}。"
   instance_search_fields_required:
     rule: "object_instance.search 的 body 必带 fields（返回属性 id 列表），否则 100000 参数错误 / fields is required but not set。"
+  instance_count_field:
+    rule: "object_instance.search 的实例总数在 data.total（契约 response 明列 total，不是 count）。场景『有几个实例』读 total，或对 data.list 计数。"
+  instance_batch_delete_path:
+    rule: "批量删真实路径 DELETE /object/{object_id}/instance_batch（契约误写 /instance/_batch，差一个斜杠，照契约写必 404）。源码 instance_extend/route.go:11 为准。"
   wrapper:
     rule: "标准响应 {code, message, error, data}；code=0 成功。业务错误码形如 133xxx。"

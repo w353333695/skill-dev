@@ -19,8 +19,13 @@ entities:
 
   instance_id:
     description: 实例主键锚。
-    format: "13 位小写 hex（如 5cf1da055c315）"
-    used_by: [object_instance（实例主键）, relation 实例层]
+    format: "13 位 [0-9a-z]（微秒时间戳 hex，如 5cf1da055c315）；新建可不带，后端自动生成"
+    pattern: '^[0-9a-z]{13}$'
+    used_by:
+      - object_instance.search（fields 返回 / query 过滤）
+      - object_instance.import（datas 带上则定向改；keys=[instanceId] 则纯 update）
+      - object_instance.delete（instanceIds 分号串）
+      - 关系字段值（关联对端实例 instanceId）
 
   relation_id:
     description: 关系主键锚。object_relation 细粒度 CRUD 用它做 path 参数。
@@ -52,3 +57,11 @@ transitions:
     pick: data[].attrList[].id
     to: object_model.import
     how: "导出完整模型 → 改 attrList（新属性加 _ 前缀）→ import 回写（upsert）"
+  - from: object_instance.search
+    pick: data.list[].instanceId
+    to: [object_instance.delete]
+    how: "search 的 data.list[].instanceId → jq 拼成分号串喂 delete 的 instanceIds query（场景4 按 ip 范围删）"
+  - from: object_instance.search
+    pick: data.list[].instanceId（+ 既有属性值）
+    to: [object_instance.import]
+    how: "search 取目标 instanceId → 作为 import 的 keys=[instanceId] + datas（每条带 instanceId + 新属性值）做定向 update（场景3 批量补属性）"

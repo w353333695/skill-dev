@@ -2,12 +2,16 @@
 # EasyOps CMDB —— api-cli 集中清单（三层体系：模型 object / 关系 relation / 实例 instance）
 # -----------------------------------------------------------------------------
 # 数据来源：
-#   • 契约  data/api-doc/cmdb-object.json （ListObjectBasic / ImportV2 /
+#   • 模型层 契约  data/api-doc/cmdb-object.json （ListObjectBasic / ImportV2 /
 #     ImportCheckV2 / ExportObjectV2 四个 EAML 契约）
-#   • 后端  data/sources/backend/CMDB/cmdb_service/object/route.go （补全契约
+#   • 模型层 后端  data/sources/backend/CMDB/cmdb_service/object/route.go （补全契约
 #     缺失的删除/详情/属性/关系等 CRUD 路由）
 #   • 模型  message.Response = easyops.model.cmdb.CmdbObject（attrList/relation_list/
 #     relation_groups/indexList/view 五大设计要素）
+#   • 实例层 契约  data/api-doc/cmdb-instance.json （PostSearchV3 / ImportInstance /
+#     DeleteInstanceBatch 三个有效契约；剔除 csv/json/excel 文件上传噪声）
+#   • 实例层 后端  data/sources/backend/CMDB/cmdb_service/instance(_extend)/route.go
+#     （SearchV3 / InstanceDatas 结构体 + 校验权威；并修正契约批量删路径笔误 instance_batch）
 #
 # 接入面：
 #   • backend —— 直连 cmdb_service :8079（HTTP）。契约示例与后端路由都以此为准，
@@ -456,36 +460,48 @@ resources:
           force_delete: { in: query, type: boolean, description: "强制删除，默认 false" }
 
   # ---------------------------------------------------------------------------
-  # 资源 4：object_instance —— CMDB 实例层（集中调用：与模型层同处一个 yaml）
-  # 复用前端网关走 search；后端直连亦可（/v3/object/{object_id}/instance/_search @ :8079）。
+  # 资源 4：object_instance —— CMDB 实例层（与模型层同处一个 yaml 集中调用）
+  # 三端点 disparate 路由（前缀不同：search 带 /v3，import/delete 不带），故 resource.path
+  # 留空，每个 operation 持完整路径：
+  #   search  POST   /v3/object/{object_id}/instance/_search   契约 PostSearchV3WithAdmin
+  #   import  POST      /object/{object_id}/instance/_import    契约 ImportInstance（批量 upsert）
+  #   delete  DELETE    /object/{object_id}/instance_batch      契约 DeleteInstanceBatch
+  #     ⚠️ 批量删路径契约笔误写成 /instance/_batch，后端实际是 /instance_batch（instance_extend/route.go:11）
+  # 数据来源：契约 data/api-doc/cmdb-instance.json（3 个有效契约；剔除 csv/json/excel 文件上传噪声）
+  #          + 后端 cmdb_service/instance(_extend)（SearchV3/InstanceDatas 结构体 + 校验权威）
+  # CRUD 映射：R=search / C+U=import(upsert，keys 判增改) / D=delete(_batch)
   # ---------------------------------------------------------------------------
   object_instance:
-    description: CMDB 对象实例（某模型下的具体数据记录）。按 MongoDB 风格 query 搜索实例。object_id 路径参数指向所属模型。
-    path: /v3/object/{object_id}/instance
+    description: CMDB 对象实例（某模型下的具体数据记录）。CRUD 全走批量语义——search 查、import 批量建/改（upsert）、delete 批量删。object_id 路径参数指向所属模型。
+    path: ""
     operations:
+      # ---------- 搜索（POST /v3/object/{object_id}/instance/_search）—— 场景2 ----------
       search:
-        description: 按条件搜索实例（MongoDB 风格 query），支持翻页。
+        description: 按条件搜索实例（MongoDB 风格 query），支持翻页。fields 必填（返回属性 id 列表，留空报 100000「fields is required but not set」）。实例总数看 data.total（场景「有几个」读这个，不是 count）。
         method: POST
-        path: /_search
+        path: /v3/object/{object_id}/instance/_search
         params:
-          object_id: { in: path, type: string, required: true, description: "所属模型 ID（如 OCEANBASE@EASYOPS）" }
+          object_id: { in: path, type: string, required: true, description: "所属模型 ID（如 TESTWWH@EASYOPS）" }
         body:
           type: object
-          required: [page, page_size]
-          description: "实例搜索请求"
+          required: [fields]
+          description: "实例搜索请求（V3）。fields 必填；page/page_size 选填有默认（1/30，page_size 上限 3000）。"
           properties:
-            fields:    { type: array, items: { type: string }, description: "返回字段" }
-            page:      { type: integer, description: "页码（从 1 起）" }
-            page_size: { type: integer, description: "每页条数" }
-            sort:      { type: array, description: "排序，order=-1 降序", items: { type: object, properties: { key: { type: string }, order: { type: integer } } } }
+            fields:    { type: array, items: { type: string }, description: "返回字段（属性 id），必填；支持关系二级 jsonPath 如 clusters.name" }
+            page:      { type: integer, description: "页码（从 1 起，默认 1，≥1）" }
+            page_size: { type: integer, description: "每页条数（默认 30，上限 3000）" }
+            sort:      { type: array, description: "排序；留空默认按 instanceId 降序。order: 1=升 / -1=降 / 2,-2=自然序", items: { type: object, properties: { key: { type: string, description: "属性 id" }, order: { type: integer, enum: [-1, 1, -2, 2] } } } }
             query:
               type: object
               additional_properties: true
-              description: "查询条件，MongoDB 风格（$and/$or 组合，字段名做 key，操作符 $like/$eq 等）"
+              description: "MongoDB 风格查询：$and/$or 组合，字段名做 key，操作符 $like/$eq/$regex 等。如 {ip:{$like:'%172.30.%'}}（场景2 网段过滤）或 {'$and':[{'$or':[...]}]}"
               example: { "$and": [{ "$or": [{ "name": { "$like": "%oceanbase%" } }] }] }
-            relation_limit: { type: integer }
+            only_my_instance:            { type: boolean, description: "true 只取与我相关实例，默认 false" }
+            relation_limit:              { type: integer, description: "fields 带出关系的数量上限，0=不限" }
+            ignore_missing_field_error:  { type: boolean, description: "fields 含不存在字段时不报错" }
         response:
           type: object
+          description: "标准 wrapper：{ code, message, data: { list, total, page, page_size } }"
           properties:
             code: { type: integer }
             data:
@@ -493,13 +509,14 @@ resources:
               properties:
                 list:
                   type: array
+                  description: "实例列表（每条是属性 id→值 的 map，含 instanceId/name 等）"
                   items:
                     type: object
+                    additional_properties: true
                     properties:
-                      instanceId:  { type: string, description: "实例 ID" }
-                      name:        { type: string }
-                      namespaceId: { type: string }
-                count: { type: integer }
+                      instanceId: { type: string, description: "实例 ID（13 位 [0-9a-z]）" }
+                      name:       { type: string }
+                total: { type: integer, description: "实例总数（场景『有几个』读 total，非 count）" }
         pagination:
           type: offset
           page_in: body
@@ -507,3 +524,67 @@ resources:
           page_param: page
           size_param: page_size
           size: 20
+
+      # ---------- 批量建/改（POST /object/{object_id}/instance/_import）—— 场景1建 + 场景3改 ----------
+      import:
+        description: 批量建/改实例（upsert）。keys=联合唯一键的属性 id 列表（仅普通属性，不支持 struct/关系字段）；后端按 keys+datas 组 query——匹配到则 update、没匹配则 insert。datas 每条是一条实例（字段名=模型属性 id；关系字段名=该关系 view 的 Out.Id，值可传对端 instanceId 字符串/对象/数组，传完整对象会嵌套创建对端实例，除非 disableNestedCreateInstance=true）。新建 N 实例、批量补属性都用它。
+        method: POST
+        path: /object/{object_id}/instance/_import
+        params:
+          object_id: { in: path, type: string, required: true, description: "所属模型 ID（如 TESTWWH@EASYOPS）" }
+        body:
+          type: object
+          required: [keys, datas]
+          description: "批量导入请求（InstanceDatas）"
+          properties:
+            keys:
+              type: array
+              items: { type: string }
+              description: "联合唯一键的属性 id 列表（仅普通属性）。后端用它组 query 判 insert/update：命中模型唯一键则 $in 单字段查，否则多字段 $or 联合查。场景1用 [name] 或 [ip]；场景3改用 [instanceId]。"
+            datas:
+              type: array
+              description: "实例数据列表。每条字段名=模型属性 id；可带 instanceId（13 位 [0-9a-z]）指定主键，不填后端按微秒时间戳自动生成。关系字段值见本 operation description。"
+              items:
+                type: object
+                additional_properties: true
+                example: { "name": "testwwh-01", "ip": "192.168.1.1", "owner": "5a377b5dc86a5" }
+            importMetadata:              { type: boolean, description: "是否允许写 metadata(ctime/creator/...)；true 时自动填 mtime/modifier，默认 false" }
+            ignoreReadonlyFields:        { type: boolean, description: "更新时是否忽略只读字段约束，默认 false" }
+            disableNestedCreateInstance: { type: boolean, description: "禁止通过关系字段嵌套创建对端实例（true 时关系字段只能引用已存在实例），默认 false" }
+            addToSetFields:              { type: array, items: { type: string }, description: "以 $addToSet 去重追加方式更新的数组字段名列表" }
+        response:
+          type: object
+          description: "标准 wrapper：{ code, data: { insert_count, update_count, failed_count, data:[失败明细] } }。code=0 仅表请求受理，逐条成败看 data 各 count。"
+          properties:
+            code: { type: integer }
+            data:
+              type: object
+              properties:
+                insert_count: { type: integer, description: "新建数" }
+                update_count: { type: integer, description: "更新数" }
+                failed_count: { type: integer, description: "失败数" }
+                data:
+                  type: array
+                  description: "失败明细（每项 {code, error, data}）"
+                  items: { type: object, additional_properties: true }
+
+      # ---------- 批量删（DELETE /object/{object_id}/instance_batch）—— 场景4 ----------
+      delete:
+        description: 批量删除实例。instanceIds 用分号分隔（如 a;b;c）；传单个 id 即删单个。⚠️真实路径是 /object/{object_id}/instance_batch（无斜杠），契约笔误写成 /instance/_batch。返回 data.deleteFailedInstances 为删除失败的实例。按条件删（如 ip 范围）：先 search 拿 instanceIds，再本接口。
+        method: DELETE
+        path: /object/{object_id}/instance_batch
+        params:
+          object_id:   { in: path, type: string, required: true, description: "所属模型 ID（如 TESTWWH@EASYOPS）" }
+          instanceIds: { in: query, type: string, required: true, description: "实例 ID 列表，分号分隔（如 5ab9f10a6ef88;5abb0dca9971d）；单个 id 即删单个" }
+        response:
+          type: object
+          description: "标准 wrapper：{ code, data: { deleteFailedInstances: [...] } }。deleteFailedInstances 为空=全删成功。"
+          properties:
+            code: { type: integer }
+            data:
+              type: object
+              properties:
+                deleteFailedInstances:
+                  type: array
+                  description: "删除失败的实例（每项 {instanceId, _object_id, name}）"
+                  items: { type: object, additional_properties: true }
