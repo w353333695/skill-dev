@@ -54,13 +54,24 @@ systems:
       object_instance:
         search: "按 MongoDB 风格 query 搜索实例（分页）"
 
-    # 运维知识（实测）—— 调用前必读，决定 user/org 怎么填
+    # 运维知识（实测，真相来源）—— 完整叙述见 README「接入真相」「调用踩坑录」
     runtime:
-      admin_user: easyops              # 模型系统管理员，有 ObjectImport/删除权限；export EASYOPS_USER=easyops（读模型元数据任意非空 user 即可，写必须 easyops）
-      org_query: "user_service GET http://172.30.0.232:8111/api/v1/org/list（Header: Cookie PHPSESSID + Host admin.easyops.local；返回非系统 org 列表）"
-      protected_orgs: [0, 1, 2]        # 系统自带 org，禁止写操作（业务库，动了会污染）。0 无库、1=主业务(22模型)、2=名字服务(9模型)
-      test_org: 18832008               # 非系统测试 org（org/list 查出，2026-07-31 建），写验证用；export EASYOPS_ORG=18832008
-      delete_constraint: "模型有关系定义时直接 delete 报 133129「请先删除已有关系」；解法：forceDelete=true 强删（连关系），或先 object_relation delete 逐条删关系再删模型"
+      admin_user: easyops              # 模型系统管理员（ObjectImport/删除权限）；读模型元数据任意非空 user 可，写必须 easyops
+      env_required:                    # 调用前 export
+        - "EASYOPS_CMDB_BACKEND_URL=http://172.30.0.232:8079"
+        - "EASYOPS_ORG=18832008"       # 测试 org（0/1/2 禁动）
+        - "EASYOPS_USER=easyops"
+      ports: { cmdb_backend: 8079, user_service: 8111, frontend: 232 }
+      host_header: admin.easyops.local # IP 直连须带 Host 头
+      auth: "三件套：cookie(PHPSESSID @ ~/.api-cli/auth.d/easyops-cookie.yaml) + org header + user header；缺任一报 empty org/user (100003)。源码 cmdb_service/main.go:549,691"
+      org_query: "user_service GET http://172.30.0.232:8111/api/v1/org/list（Cookie + Host）"
+      default_org_chain: "user_service: agollo common.org > $COMMON_ORG > yaml default_org；validator gte:1（org=0 报 Can not find 0 database）"
+      protected_orgs: [0, 1, 2]        # 系统自带禁动（0 无库、1 主业务 22 模型、2 名字服务 9 模型）
+      test_org: 18832008               # 非系统测试 org（2026-07-31 建），写验证用
+      list_pagination: "流式 NDJSON——每行一个完整对象，非 {data:{list:[...]}} 包装；逐行 json.loads"
+      instance_search_fields_required: true   # object_instance.search body 必带 fields（属性 id 列表），否则 100000
+      import_semantics: "声明式 upsert（is_create 区分建/改）；新增属性 id 加 _ 前缀；关系对端须存在或同批导入（ignore_dst_relation:true 跳过校验）"
+      delete_constraint: "模型有关系定义时 delete 报 133129；forceDelete=true 强删（连关系），或先 object_relation delete；protected 模型不可删"
 
     # e2e 验收 URL（前端）—— 模型类操作后在此可视化校验
     acceptance_urls:
