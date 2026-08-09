@@ -76,7 +76,8 @@ class Recorder:
                         break
                 time.sleep(0.3)
         except KeyboardInterrupt:
-            # Ctrl+C：不直接退出，照常走 finish 保证 record.jsonl flush + doc.md 生成
+            # Ctrl+C：不直接退出，照常走 finish 保证 record.jsonl flush + doc.md 生成。
+            # 打断在途泵调用残留的 future 噪音由 start 里的 TargetClosedError 钩子吞掉。
             pass
         return self.finish()
 
@@ -141,10 +142,41 @@ class Recorder:
 
         self._save_meta(context, page)
         self._page = page
+        self._install_targetclosed_filter(page)
         try:
             self._dpr = page.evaluate("window.devicePixelRatio || 1")
         except Exception:
             self._dpr = 1.0
+
+    @staticmethod
+    def _install_targetclosed_filter(page) -> None:
+        """给 playwright 的 asyncio loop 装异常钩子，吞掉关闭阶段的 TargetClosedError。
+
+        Ctrl+C / 关浏览器后，事件循环里残留的 Channel.send / response.body 等 future
+        撞上已关闭的 target；asyncio 在 future 被 GC 时经 call_exception_handler 打
+        "Future/Task exception was never retrieved: TargetClosedError"。这些发生在
+        target 已正常关闭之后，纯属噪音。钩子在 start 即挂上，覆盖整个录制+关闭期。
+        """
+        try:
+            from playwright._impl._errors import TargetClosedError
+
+            loop = page._impl_obj._loop
+            old_handler = loop.get_exception_handler()
+
+            def handler(loop, context):
+                exc = context.get("exception")
+                msg = str(context.get("message", ""))
+                if isinstance(exc, TargetClosedError) or "TargetClosedError" in msg \
+                        or "has been closed" in msg:
+                    return  # 静默
+                if old_handler:
+                    old_handler(loop, context)
+                else:
+                    loop.default_exception_handler(context)
+
+            loop.set_exception_handler(handler)
+        except Exception:
+            pass
 
     @property
     def page(self):
