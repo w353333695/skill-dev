@@ -179,25 +179,32 @@ class EasyOpsClient(object):
     # ------------------------------------------------------------------
     # 通用调用（核心）
     # ------------------------------------------------------------------
-    def call(self, method, path, params=None, body=None, headers=None):
-        """通用 HTTP 调用。method/path 相对 base_url。
+    def call(self, method, path, params=None, body=None, headers=None, app=None):
+        """通用 HTTP 调用。path 是后端语义（不含 app 前缀）。
 
+        :param app: openapi 模式的 app_name 前缀（如 cmdb='cmdbservice'）——openapi 网关按
+                    /<app>/<uri> 路由到 service；internal 模式忽略（直连后端用原 path）
         - body 是 dict/list 时 JSON 序列化（utf-8），签名与请求体一致
         - JSON 响应自动解析；非 JSON 返回 bytes；业务 code != 0 抛 EasyOpsError
         """
         method = method.upper()
+        # openapi 模式：URL 加 app 前缀（/<app_name>/<uri>，网关按 app 路由到 service）
+        if self.mode == 'openapi' and app:
+            url_path = '/' + app + path
+        else:
+            url_path = path
         content_type = 'application/json'
         body_bytes = None
         if body is not None:
             body_bytes = json.dumps(body, ensure_ascii=False).encode('utf-8')
         if self.mode == 'openapi':
-            q, h = self._sign(method, path, params or {}, content_type, body_bytes)
+            q, h = self._sign(method, url_path, params or {}, content_type, body_bytes)
         else:
             q = dict(params or {})
             h = self._internal_headers(content_type)
         if headers:
             h.update(headers)
-        url = self.base_url + path
+        url = self.base_url + url_path
         self.logger.debug("-> %s %s params=%s body=%dB", method, url, q, len(body_bytes or b''))
         resp = requests.request(method, url, params=q, data=body_bytes, headers=h,
                                 verify=self.verify, timeout=self.timeout)
@@ -370,26 +377,29 @@ class EasyOpsClient(object):
     # cmdb 便捷方法（工具脚本常调 cmdb 查实例/模型；与 autoops 方法共用同一 client，
     # 仅 base_url 指向 cmdb_service:8079）
     # ------------------------------------------------------------------
-    def search_instances(self, object_id, fields, query=None, page=1, page_size=30, **kw):
+    def search_instances(self, object_id, fields, query=None, page=1, page_size=30, app='cmdbservice', **kw):
         """cmdb 实例搜索（POST /v3/object/{objectId}/instance/_search）。
 
         :param object_id: 模型 id（如 HOST / APP_SYSTEM@ONEMODEL）
         :param fields: 返回字段（属性 id 列表）——【必填】，留空后端报 100000
         :param query: MongoDB 风格过滤（$and/$or/$like/$regex/$in/$eq...），如 {'name': {'$like': 'dev'}}
         :param page/page_size: 分页（page_size 上限 3000）
+        :param app: openapi 模式 app_name 前缀（cmdb 默认 'cmdbservice'；internal 模式忽略）
         :return: 后端响应 {code,data:{list,total,...}}；实例总数读 data.total
-        ⚠️ openapi 模式需后端在 api_gateway/conf/openapi.yaml 的 app_route 放行
-           cmdb service + 本 uri（POST /v3/object/{objectId}/instance/_search），否则 403/404。
+        ⚠️ openapi 模式需：①后端 api_gateway/conf/openapi.yaml app_route 放行 cmdb service +
+          本 uri；②base_url 指内网网关 IP（如 http://172.30.0.232）+ openapi_host=openapi.easyops-only.com
+          （Host 头，网关按 Host 路由）；③URL 自动加 /cmdbservice 前缀；④AK/SK 须对该模型实例有读权限
+          （否则 130600 permission denied）。
         """
         body = {'fields': fields, 'page': page, 'page_size': page_size}
         if query:
             body['query'] = query
         body.update(kw)
-        return self.call('POST', '/v3/object/%s/instance/_search' % object_id, body=body)
+        return self.call('POST', '/v3/object/%s/instance/_search' % object_id, body=body, app=app)
 
-    def get_object(self, object_id):
+    def get_object(self, object_id, app='cmdbservice'):
         """cmdb 模型详情（GET /object/{objectId}，含 attrList/relation_list/indexList/view）。"""
-        return self.call('GET', '/object/%s' % object_id)
+        return self.call('GET', '/object/%s' % object_id, app=app)
 
 
 # ---------------------------------------------------------------------------
