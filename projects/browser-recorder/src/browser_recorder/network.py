@@ -54,8 +54,14 @@ class NetworkInterceptor:
             pass
 
     async def _handle_route(self, route: Route) -> None:
-        """处理单个请求."""
+        """处理单个请求. 文档请求直接放行，不拦截导航重定向."""
         request = route.request
+
+        # 文档导航（主页面/iframe）不拦截，让浏览器原生处理重定向
+        if request.resource_type == "document":
+            await route.continue_()
+            return
+
         start_time = time.time() * 1000
 
         try:
