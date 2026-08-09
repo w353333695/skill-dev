@@ -3,7 +3,7 @@ name: execute-run-cmd
 intent: 执行 run_cmd（或任意）工具查所有主机内存使用率
 trigger: ["用run_cmd查主机内存", "执行X工具查主机", "查所有主机内存使用率"]
 guard: 规划挡（执行 + 轮询）
-key_rule: "run_cmd 是预置工具（非端点）。执行异步：run 返 execId → 轮询 get_status → get_table。⚠️依赖：run_cmd 存在 + 目标主机 agent 在线 + easy_command 可用 + 执行权限。"
+key_rule: "run_cmd 是预置工具（非端点）。执行异步：run 返 execId → 轮询 get_status → get_table。⚠️(1) run body.inputs 是 **map**（{\"cmd\":...}，不是 [{name,value}] 数组，否则报 100000）；(2) vId 默认 $latest_production，run_cmd 只有 development 版本会报『工具版本不存在 100005』——用 tool.get 拿具体 vId 或 $latest_development；(3) 依赖：run_cmd 存在 + 目标主机 agent 在线 + easy_command。"
 prerequisites:
   env: [EASYOPS_AUTOOPS_BACKEND_URL, EASYOPS_ORG, EASYOPS_USER]
   runtime: "run_cmd 工具已存在；目标主机 agent 在线"
@@ -16,8 +16,8 @@ steps:
     expect: "命中 run_cmd 工具"
   - n: 2
     op: tool_execution.run
-    args: [--body-file, "<exec-req.json: toolId + inputs.@agents=目标主机>", --insecure, --yes]
-    desc: 异步执行（默认 vId=$latest_production）
+    args: [--body-file, "<exec-req.json: toolId + vId(具体/$latest_development) + inputs(map:{cmd:...}) + agents=[目标主机IP]>", --insecure, --yes]
+    desc: "异步执行（⚠️inputs 是 map 非；vId 用具体——run_cmd 只有 development 版本）"
     dataflow: "data.execId → step3 轮询"
     expect: "code=0；返回 execId"
   - n: 3

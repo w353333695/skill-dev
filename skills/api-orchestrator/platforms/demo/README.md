@@ -54,6 +54,24 @@ api-cli --spec platforms/demo/easyops-cmdb.yaml <resource> <verb> [args] --insec
 | ③ 给所有实例补属性 | 规划 | search 取列表 → import 定向改（keys=[instanceId]）→ flows/update-instances-batch.yaml |
 | ④ 按 ip 范围删实例 | 规划 | search 取 instanceIds → `object_instance.delete`（分号串）→ flows/delete-instances-by-range.yaml |
 
+## EasyOps AutoOps 工具管理（tool_service）
+
+三层体系 + 两配套层（16 verb）：`tool`（工具 CRUD：list/get/create/update/delete）· `tool_version`（list；新建版本走 tool.update）· `tool_lib`（库 create/update/delete）· `tool_execution`（run + get_result/get_table/get_status 轮询）· `tool_package`（export_check + export/import，后两者走 Python SDK）。
+工具包格式（`.tar.gz` = dat/config/script/libs）+ 内置变量（`EASYOPS_*`，⚠️不存在 `__instance__`/`${cmdb.xxx}`）详见 `objects.yaml#autoops_tool.api_behavior`。Python SDK `easyops_client.py`（双模式 / py2/3 / 从 yaml 反射具名方法）补 api-cli 的 multipart/binary 缺口；`tools-sdk-demo.py` 是工具脚本调 cmdb 的示例。
+
+### autoops e2e 场景 → resource.verb 映射（6 场景全通，org 18832008，2026-08-10）
+
+| 场景 | 挡位 | 流程 |
+|---|---|---|
+| ① ITSM 分类查 cmdb 工具 | 直通 | `tool.list`（category=ITSM, name=cmdb；前端 q=name 别名）→ flows/search-tool.yaml |
+| ② 建 CMDB 清理脚本工具 | 规划（跨系统）| `tool.create`（脚本调 cmdb 用 easyops_client.py）→ flows/build-cleanup-tool.yaml |
+| ③ 加版本+强制删除入参 | 确认 | `tool.get` → **flat** body 改 inputs/content → `tool.update`（派生 development）→ version.list 复查 → flows/add-tool-version.yaml |
+| ④ run_cmd 查主机内存 | 规划 | `tool.list` 找 run_cmd → `tool_execution.run`（inputs **map**，具体 vId）→ 轮询 get_table → flows/execute-run-cmd.yaml |
+| ⑤ 导出工具 | 确认 | `tool_package.export_check` → `tool_package.export`（GET+versionId，走 SDK）→ flows/export-tool.yaml |
+| ⑥ 删工具 | 确认 | `tool.delete`（软删；force/versionId 可选）→ flows/delete-tool.yaml |
+
+⚠️ e2e 实测坑（详见 `systems.yaml#easyops-autoops.runtime.e2e_findings`）：① list NDJSON 流式（非 wrapper）；② update body flat（非 `{tool:{}}`，否则假成功）；③ run inputs 是 map（非数组）；④ run vId 对 development 工具用具体/$latest_development；⑤ update 响应只返 toolId（派生须 version.list 复查）；⑥ 直连后端 cookie 非必需（org+user 够）。
+
 ## 数据来源
 
 **cmdb**：契约 `data/api-doc/cmdb-object.json`（4 EAML，模型层）+ `cmdb-instance.json`（3 有效契约，实例层；剔除 csv/json/excel 文件上传噪声）+ 后端 `CMDB/cmdb_service`（object + instance(_extend)，补全端点并修正批量删路径笔误 `instance_batch`）。

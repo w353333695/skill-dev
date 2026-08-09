@@ -79,7 +79,7 @@ resources:
     operations:
       # ---------- 列表（GET /tools）—— 场景1/4 找工具 ----------
       list:
-        description: 工具列表（分页，支持分类/名称/类型过滤）。前端列表页 ?category=&q= 映射到本接口——注意前端 q 是后端 name 的别名（后端实际参数是 name，做 $like %name% 同时匹配 name 和 memo）。category 含子类展开（传 ITSM 会 $in 其所有子类）。返回 {code,data:{list,total,...}}（标准 JSON wrapper，非 cmdb 那种流式 NDJSON）。
+        description: "工具列表（分页，支持分类/名称/类型过滤）。前端列表页 ?category=&q= 映射到本接口——注意前端 q 是后端 name 的别名（后端实际参数是 name，做 $like %name% 同时匹配 name 和 memo）。category 含子类展开（传 ITSM 会 $in 其所有子类）。⚠️返回是 NDJSON 流式（每行一个完整 Tool 对象，同 cmdb list），非 {data:{list}} wrapper——解析须逐行 json.loads；分页用 page/pageSize query。"
         method: GET
         path: /tools
         params:
@@ -186,14 +186,18 @@ resources:
           toolId: { in: path, type: string, required: true, description: "工具 ID" }
         body:
           type: object
-          description: "更新请求。tool 是要改的字段 map（改 version 字段触发新版本）；可选 relationToolLibs 调整工具库关联。结构同 create body（按需传要改的字段）。"
+          description: "⚠️body 是 **flat**（顶层直接是工具字段，不要套 tool 包裹）——ValidateUpdateTool 把整段 body 直接 unmarshal 进 request.Tool（api_validator.go:671）；若套 {tool:{...}} 则 updateFields=[tool] 命中『仅改 config』短路分支，假成功不生效（实测坑）。改 ToolVersion 字段（inputs/content/outputDefs/tableDefs/vDesc/vName/type 等）触发派生新版本（envType=development，vName 不传则=vId）；改 ToolConfig 字段（name/category/tags 等）仅改配置不派生。toolId 走 path；vId/versionMark 不带。"
           additional_properties: true
           properties:
-            tool:               { type: object, additional_properties: true, description: "要更新的字段（ToolConfig + ToolVersion 子集）。改 version 字段即派生新版本。" }
-            relationToolLibs:   { type: array, description: "调整工具库关联（增/减绑定的 lib）", items: { type: object, additional_properties: true } }
+            inputs:           { type: array, description: "改入参（派生新版本）。含 @agents（cmdbInstances 执行目标）+ 业务入参", items: { type: object, additional_properties: true } }
+            content:          { type: string, description: "改脚本正文（派生新版本）" }
+            vDesc:            { type: string, description: "版本说明" }
+            vName:            { type: string, description: "可选版本名（不传则默认=vId；传了会查重）" }
+            name:             { type: string, description: "改工具名（仅改 ToolConfig，不派生版本）" }
+            relationToolLibs: { type: array, description: "调整工具库关联（lib instanceId 字符串列表）", items: { type: string } }
         response:
           type: object
-          description: "标准 wrapper。若派生了新版本，data 含新 vId/vName。"
+          description: "标准 wrapper。⚠️data 只含 {toolId}（无 vId/vName，源码 basic_service.go:322）——派生是否成功须 tool_version.list 复查。"
           properties:
             code: { type: integer }
             data:
@@ -308,11 +312,11 @@ resources:
         body:
           type: object
           required: [toolId]
-          description: "执行请求（ExecuteToolRequest）。toolId 必填；inputs 每项 {name,value} 对应工具 ToolInput 的 name；agents 目标主机（cmdbInstance 类型入参解析成实例）。"
+          description: "执行请求（ExecuteToolRequest）。toolId 必填；⚠️inputs 是 **map**（proto map<string,Value>，key=参数名 value=值，如 {\"cmd\":\"free -m\"}），不是 [{name,value}] 数组（实测数组报 json 解析失败 100000）；agents 目标主机（IP 数组，被重写成 inputs.@agents）。"
           properties:
             toolId:    { type: string, description: "要执行的工具 ID" }
-            vId:       { type: string, description: "版本 ID 或别名 $latest_version/$latest_development/$latest_production，默认 $latest_production" }
-            inputs:    { type: array, description: "入参值列表，每项 {name,value}（name 对应工具 ToolInput.name）", items: { type: object, properties: { name: { type: string }, value: {} }, additional_properties: true } }
+            vId:       { type: string, description: "版本 ID 或别名 $latest_version/$latest_development/$latest_production，默认 $latest_production。⚠️若工具只有 development 版本（如 run_cmd），$latest_production 报『工具版本不存在 100005』——用具体 vId 或 $latest_development" }
+            inputs:    { type: object, additional_properties: true, description: "⚠️入参值 **map**（不是数组！）——key=参数名（对应工具 ToolInput.name），value=参数值；如 {\"cmd\":\"free -m\"}" }
             agents:    { type: array, description: "目标主机（旧版兼容字段，会被重写成 inputs.@agents）；优先用 inputs 里 type=cmdbInstances 的入参", items: { type: string } }
             execUser:  { type: string, description: "执行用户（覆盖工具 defaultExecUser）" }
             needNotify: { type: string, enum: ["true", "false"], description: "是否通知，默认 true（字符串）" }
