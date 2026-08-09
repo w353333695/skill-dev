@@ -215,15 +215,18 @@ class Recorder:
             context = await browser.new_context(
                 no_viewport=True,
                 storage_state=storage_state,
+                ignore_https_errors=True,
             )
-
-            context.on("page", lambda p: asyncio.ensure_future(self._on_new_page(p)))
 
             page = await context.new_page()
             self._register_page(page, "main")
 
+            # 先挂主页面，再监听后续弹窗/新标签
             await self.network_interceptor.setup(page)
             await self._setup_page(page, "main")
+
+            # 监听后续新页面（window.open / target=_blank），不包括已创建的 main
+            context.on("page", lambda p: asyncio.ensure_future(self._on_new_page(p)))
             await self._record_nav(page, self.url)
 
             if self.fallback_interval > 0:
