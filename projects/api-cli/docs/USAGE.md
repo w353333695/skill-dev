@@ -263,7 +263,20 @@ resources:
   ```
   启动时若 `parent_key` 声明了但子 path 里没有对应占位，会**告警**（URL 可能缺父 ID）。
 - **body 嵌套结构**：`body` 用 JSON Schema 风格递归声明，LLM/人都能看懂；动态结构（任意 key）用 `additional_properties: true` + `description` 说规则。
-- **`${ENV}` 占位**：`base_url` / auth config 里的 `${VAR}` 会被环境变量替换。
+- **`${ENV}` 占位**：`base_url` / auth config / `endpoint.headers` 值里的 `${VAR}` 会被环境变量替换。
+- **`endpoint.headers`（固定头，每个请求都带）**：租户号、API 版本、追踪 id 等"所有请求都要带"的头，写在 endpoint 上一次声明、所有 operation 自动注入。多租户系统（如 EasyOps 要 `org`+`user` header）尤其有用，避免逐 operation 重复。
+  ```yaml
+  endpoints:
+    backend:
+      base_url: ${API_BASE}
+      auth: my-auth
+      headers:
+        org: ${ORG}        # 值支持 ${ENV}
+        user: ${USER}
+  ```
+  优先级：`endpoint.headers`（基底）→ operation 的 `header` 参数（可覆盖同名）→ auth provider 回传 header（最终权威）。
+- **无 `$ref`，schema 必须内联**：`body`/`response` 的 JSON Schema 全部内联展开；不解析 `$ref`，顶层 `schemas` 也不注入 operation。多个 operation 共用同一结构只能重复内联。
+- **`required` 双义（别混）**：`params` 里 `required: true` 是 **bool**（path/query 参数）；`body`/`response`（schema 对象）里 `required` 是 **[]string**（父对象列出哪些子字段必填，如 `required: [id, name]`）。在 schema **属性**上写 `required: true` 会解析报错 `cannot unmarshal !!bool into []string`。
 
 > 嵌套 resource 的 `children` 仅用于 **URL 真嵌套**（子真实 URL = 父 URL + 子段）。非嵌套结构用平级 resource。
 

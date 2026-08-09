@@ -19,6 +19,11 @@
 #
 # 鉴权：auth: easyops-cookie（~/.api-cli/auth.d/easyops-cookie.yaml，provider=cookie，
 #   持 PHPSESSID 会话 cookie）。backend/frontend 均用同一 cookie。
+#
+# ⚠️ cookie 不够！直连后端还要 org+user 两个 header（见 endpoint.headers）。
+# 完整接入真相（端口表 / org 体系 / user 权限差异）+ 调用踩坑录（NDJSON 分页 / fields 必填 /
+# import upsert / 关系对端 / 删除 133129）见同目录 README.md；机器可读摘要见 systems.yaml 的
+# runtime: 段。本目录是外接 EasyOps 的唯一真相来源——换环境/换 LLM 从这里读，勿依赖记忆。
 # =============================================================================
 spec: api-cli/v1
 service:
