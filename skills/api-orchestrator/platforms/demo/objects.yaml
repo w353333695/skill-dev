@@ -308,6 +308,8 @@ objects:
         rule: "路径参数 versionIds（复数分号，契约误写单数 versionId）；代码 strings.Split 后只用第一个——批量是壳实际删一个。被流程节点引用拒绝『表单已绑定节点，不可删除!』。⚠️隐式级联：删完若 form 已无任何版本，连带删 form。删主版本代码不拦（不建议）。"
       - op: form_version.set_main
         rule: "设主版本（=发布/对外生效）。目标须 state==done（unfinished 报『未完成状态不能设置为主版本』）。旧主版本自动降级 isMain=false。若旧主版本被流程绑定，触发换绑：ITSC_PROCESS_FORM_RELATION 从旧主迁到新主（业务连续）。已是主版本则幂等。"
+      - op: form.save / form_version.update（配置生效）
+        rule: "⚠️配置完版本（save 新建/update 改）后，须 form_version.set_main 标记为主版本才【生效】——前端默认展示主版本（isMain=true），非主版本的配置改动在前端看不到效果。新草稿(unfinished)→先 update 转 done→再 set_main。即：save/update 出来的非主版本，前端验收前必须 set_main。"
       - op: form_version.list
         rule: "name 参数实际是 versionName 精确匹配（非 form 名）。total=版本数（场景『有几个版本』读这个）。list 元素含 versionInfo（完整字段）+ processVersions（绑定流程）。"
       - op: form_version.get
