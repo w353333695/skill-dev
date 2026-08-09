@@ -68,3 +68,5 @@ scripts/run.sh --spec <spec-path> <resource> <verb> [args] [--print-curl|--dry-r
 - **写操作/复杂操作必确认**：展示 plan 或影响面，用户确认后执行。
 - **状态持久化**：复杂编排的中间产物写 `tmp/<task>/`，跨 bash 步传递。
 - **失败回滚**：记录已执行步骤，失败时反向调 remove/delete。
+- **onboarding 输入门禁**：契约 / API 文档 / 后端源码至少一个才开工；缺则停下问用户（详见 `references/onboarding.md` 步 1）。
+- **产物用 lint 自检**：onboarding 或更新 platforms 后跑 `scripts/lint-platforms.py <deployment>`，**0 ERR 才合格**（校验 schema + 引用闭合；详见 onboarding.md 步 7）。
