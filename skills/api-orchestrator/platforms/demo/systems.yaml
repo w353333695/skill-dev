@@ -93,3 +93,152 @@ systems:
       # 实例类验收（cmdb-instance 场景）。OBJECT_ID=模型 id（如 TESTWWH@EASYOPS）；list 的 aq 是 urlencoded 查询 JSON。
       instance_list:   "${EASYOPS_CMDB_FRONTEND_URL}/next/next-cmdb-instance-management/next/{OBJECT_ID}/list?aq={urlencoded-query-json}"
       instance_detail: "${EASYOPS_CMDB_FRONTEND_URL}/next/next-cmdb-instance-management/next/{OBJECT_ID}/instance/{instanceId}"
+
+  # ============================================================================
+  # EasyOps AutoOps 工具管理（tool_service）—— 第二个接入的系统。
+  # 与 cmdb 同属 EasyOps 平台：同 cookie 鉴权、同 org+user header、同测试 org。
+  # 命令树/字段 schema 见 easyops-autoops.yaml；对象结构/内置变量/工具包格式见 objects.yaml。
+  # ============================================================================
+  easyops-autoops:
+    description: |
+      EasyOps AutoOps 工具管理（tool_service）—— 三层体系（+ 执行/导入导出两配套层）：
+      ① tool 工具（tool）：定义「自动化脚本」，含配置(ToolConfig: name/category/权限/通知)
+         + 版本(ToolVersion: 脚本类型/内容、输入参数 inputs、输出 outputDefs+tableDefs、绑定库 toolLibs)；
+      ② tool_version 版本（tool_version）：工具版本，无独立写端点
+         （新建版本 = tool.update 改 version 字段触发派生，返回新 vId）；
+      ③ tool_lib 工具库（tool_lib）：可被多工具引用的 python 动态库（仅 python 脚本类型）。
+      配套层：tool_execution 执行（run_cmd 类工具异步执行+轮询）；tool_package 导入导出（.tar.gz 工具包）。
+      核心范式：工具=配置+版本聚合；新建版本走 update；删除软删；执行异步。
+
+    spec: easyops-autoops.yaml              # api-cli 清单，相对本目录
+    default_endpoint: backend               # 默认直连 tool_service :8181（无网关前缀，rewrite 复数 path 直连命中）
+
+    endpoints:
+      backend:                              # 直连后端（HTTP，无网关前缀；tool 域全 verb 通用）
+        base_url: ${EASYOPS_AUTOOPS_BACKEND_URL}
+        host: admin.easyops.local           # IP 直连，网关按 Host 路由
+      frontend:                             # 前端网关（HTTPS）——网关 per-API 路由，多 verb 不通用，仅备选
+        base_url: ${EASYOPS_AUTOOPS_FRONTEND_URL}
+        host: admin.easyops.local
+
+    auth: easyops-cookie                    # 与 cmdb 同一 cookie（~/.api-cli/auth.d/easyops-cookie.yaml：PHPSESSID）
+
+    env:                                    # 部署所需环境变量（ORG/USER 复用 cmdb 那套）
+      EASYOPS_AUTOOPS_BACKEND_URL: "http://172.30.0.232:8181"   # tool_service 后端（实测）
+      EASYOPS_AUTOOPS_FRONTEND_URL: "https://172.30.0.232"      # 前端页面/网关
+
+    # 能力清单（resource.verb）—— 编排挡据此判意图可达性
+    capabilities:
+      tool:
+        list:   "工具列表（name 模糊匹配 name+memo，前端 q 是其别名；category 含子类展开；type 过滤；分页）"
+        get:    "工具详情（vId 支持 $latest_version/$latest_development/$latest_production，不填=最新生产版）"
+        create: "新建工具（同时建首个版本；必填 name/type/category/content）"
+        update: "改工具；改 version 字段（inputs/content/outputDefs/tableDefs/toolLibs）派生新版本（场景3 加版本）"
+        delete: "删工具（软删；force 绕 ReadOnly；versionId 不填删整个/填删单版本）"
+      tool_version:
+        list: "列工具的所有版本（校验/审计）"
+      tool_lib:
+        create: "新建工具库（python 动态库）"
+        update: "改工具库"
+        delete: "删工具库"
+      tool_execution:
+        run:        "异步执行工具（返 execId；目标主机 agents 或 inputs.@agents；默认 vId=$latest_production）"
+        get_result: "取执行完整结果（每主机 outputs/status/exitStatus）"
+        get_table:  "取执行表格结果（工具声明 tableDefs 时；查主机内存等多行数据走这）"
+        get_status: "取执行状态（轮询用，轻量）"
+      tool_package:
+        export_check: "导出前检查（绑定的 lib 制品是否在；JSON，api-cli 可调）"
+        export:       "导出工具为 tar.gz（GET + versionId；⚠️二进制流，真调走 Python SDK export_tool）"
+        import:       "导入工具包（multipart，upsert；⚠️真调走 Python SDK import_tool）"
+
+    # 运维知识（实测，真相来源）—— 完整工具包格式/内置变量见 objects.yaml
+    runtime:
+      admin_user: easyops              # 写操作用户（与 cmdb 同）
+      env_required:                    # 调用前 export
+        - "EASYOPS_AUTOOPS_BACKEND_URL=http://172.30.0.232:8181"
+        - "EASYOPS_ORG=18832008"       # 测试 org（0/1/2 禁动，与 cmdb 共用）
+        - "EASYOPS_USER=easyops"
+      ports: { autoops_backend: 8181, frontend: 232 }
+      host_header: admin.easyops.local
+      auth: "三件套（与 cmdb 一致）：cookie(PHPSESSID @ ~/.api-cli/auth.d/easyops-cookie.yaml) + org header + user header；缺任一报 empty org/user。orguser 中间件 cmd/tool_service/main.go:624"
+      rewrite_paths: "后端原始注册单数 /tool/:toolId，rewrite 中间件改写复数 /tools/:toolId——直连后端用复数即可命中（两边都挂 rewrite）。list/execution/lib 等本就是复数"
+      create_version: "新建版本无独立端点：PUT /tools/:toolId 改 version 字段即派生新版本，返回新 vId（manager tool_manager.go:485-520）。场景3 流程：get 当前 → 改 inputs/content → update"
+      delete_semantics: "删除软删（置 delete_me=true，非物理删）。force=true（query 字符串 \"true\"）仅绕 ReadOnly。versionId 不填=删整个工具，填=只删该版本。'有实例不删模型'那层在被清理的 CMDB 侧，不在 tool_service"
+      run_cmd_is_tool: "run_cmd 是预置工具非端点。场景4 = tool.list 找 run_cmd 的 toolId → tool_execution.run → 轮询 get_table/get_status。依赖：run_cmd 存在 + 目标主机 agent 在线 + easy_command 可用 + 执行权限（+ runner 注册，若走 python 快通道）"
+      export_trap: "导出是 GET /tools/:toolId/export?versionId=<32hex>（⚠️GET 非 POST；参数名 versionId 非 vId，正则 ^[a-fA-F0-9]{32}$）。返回 tar.gz 二进制流——api-cli 无法存文件，走 Python SDK export_tool 流式下载"
+      import_upsert: "导入是 upsert（toolId 存在→更新即加新版本；不存在→新建）。multipart——api-cli 不支持 formData，走 Python SDK import_tool 或 curl -F"
+      builtin_vars_source: "工具脚本运行时用 EASYOPS_* 环境变量（EASYOPS_LOCAL_IP/EASYOPS_ORG/EASYOPS_USER/EASYOPS_AUTHORIZATION_TOKEN/EASYOPS_CMDB_HOST...）；⚠️不存在 __instance__/${cmdb.xxx}。完整清单见 objects.yaml#autoops_tool.api_behavior.builtin_vars"
+      python_runtime: "agent 自带 /usr/local/easyops/python/bin/python（py2/py3 由 agent 那个 python 决定，服务端不切）。工具脚本调 easyops/cmdb 用本目录 easyops_client.py（py2/3 兼容通用 SDK）"
+      wrapper: "标准响应 {code, codeExplain, error, data}；code=0 成功（与 cmdb 的 {code,message,error,data} 略不同——autoops 多 codeExplain）。list 返回 {data:{list,total,...}} 标准 JSON（非 cmdb 流式 NDJSON）"
+
+    # e2e 验收 URL（前端）—— 工具类操作后在此可视化校验
+    acceptance_urls:
+      tool_list:   "${EASYOPS_AUTOOPS_FRONTEND_URL}/next/tool/management?page=1&category=ITSM&display=card&pageSize=50&type=&q=cmdb"   # q 是后端 name 的别名（模糊匹配 name+memo）；category 含子类
+      tool_detail: "${EASYOPS_AUTOOPS_FRONTEND_URL}/next/tool/management/{toolId}/detail?vId={vId}"   # toolId=32hex（≠CMDB instanceId）；vId 不填=最新版本
+
+  # ============================================================================
+  # EasyOps ITSM 表单管理（flowable_service）—— 第三个接入的系统。
+  # 与 cmdb/autoops 同属 EasyOps 平台：同 cookie 鉴权、同 org+user header、同测试 org。
+  # 命令树/字段 schema 见 easyops-itsm-form.yaml；表单内容模型（容器/控件/脚本/继承）见 objects.yaml。
+  # ============================================================================
+  easyops-itsm-form:
+    description: |
+      EasyOps ITSM 表单管理（flowable_service）—— 三层体系：
+      ① form 表单层（form）：表单元信息（FormSchema: name/category/creator/memo）+ 多版本；
+         list 看有哪些表单，save 新建（永远建 form+首版本），delete 删表单（须先清版本）。
+      ② form_version 表单版本层（form_version）：一个表单的多个版本（FormSchemaVersion），
+         同时仅一版 isMain=true（主版本=对外生效/流程默认引用）。状态机两态：unfinished(草稿)/done(完成)。
+         list/get/update/delete/set_main；update 非对称（done 版→派生新草稿，unfinished→就地改）。
+      ③ formDefinition 内容层：版本的 formDefinition（JSON 字符串 = []Container 容器平铺列表），
+         容器（row/tabs/table/business_table）内放控件（23 种）。含条件显示/数据继承/5 生命周期脚本。
+         非独立端点，作为 save/update 的 body 字段。
+      核心范式：表单=元信息+版本；版本内容=formDefinition JSON 字符串（后端透传，前端解释）。
+
+    spec: easyops-itsm-form.yaml             # api-cli 清单，相对本目录
+    default_endpoint: backend                # 直连 flowable_service :8134（无网关，路径带 /api/flowable_service/...）
+
+    endpoints:
+      backend:                               # 直连后端（HTTP，无 path 前缀；全 verb 通用）
+        base_url: ${EASYOPS_ITSM_BACKEND_URL}
+        host: admin.easyops.local            # IP 直连，网关按 Host 路由
+
+    auth: easyops-cookie                     # 与 cmdb/autoops 同一 cookie（~/.api-cli/auth.d/easyops-cookie.yaml：PHPSESSID）
+
+    env:                                     # 部署所需环境变量（ORG/USER 复用 cmdb 那套）
+      EASYOPS_ITSM_BACKEND_URL: "http://172.30.0.232:8134"   # flowable_service 后端（实测）
+      EASYOPS_CMDB_FRONTEND_URL: "https://172.30.0.232"      # 前端页面（表单列表/详情）
+
+    # 能力清单（resource.verb）—— 编排挡据此判意图可达性
+    capabilities:
+      form:
+        list:   "表单列表（name/category/creator/state/Q 过滤；state 过滤版本状态；isMain 只取主版本）"
+        save:   "新建表单（永远建 form+首版本 isMain=true；非 upsert）—— 含 formDefinition 内容"
+        delete: "删表单（有版本拒绝；须先清版本；幂等）"
+      form_version:
+        list:     "列某表单所有版本（name 实为 versionName 精确匹配；total=版本数）"
+        get:      "版本详情 V2（含 formDefinition/businessRules/domainModel[]/formDataSources[]）"
+        update:   "改版本（upsert 非对称：done→派生新草稿/unfinished→就地改；同时改 form 元信息）—— 加版本走这"
+        delete:   "删版本（路径 versionIds 复数；只删第一个；被流程引用拒绝；末版本级联删 form）"
+        set_main: "设主版本（=发布；须 done；旧主降级；触发流程换绑）"
+
+    # 运维知识（实测，真相来源）—— 表单内容模型/坑见 objects.yaml#itsm_form_definition
+    runtime:
+      admin_user: easyops              # 写操作用户（与 cmdb/autoops 同；具备 itsc:form_management_* 4 权限）
+      env_required:                    # 调用前 export
+        - "EASYOPS_ITSM_BACKEND_URL=http://172.30.0.232:8134"
+        - "EASYOPS_ORG=18832008"       # 测试 org（0/1/2 禁动，与 cmdb 共用）
+        - "EASYOPS_USER=easyops"
+      ports: { itsm_backend: 8134, frontend: 232 }
+      host_header: admin.easyops.local # IP 直连须带 Host 头
+      auth: "三件套（与 cmdb/autoops 一致）：cookie(PHPSESSID) + org header + user header（orguser 中间件 cmd/flowable_service/.../main_start.go:336-344；缺一报『org、user获取失败』）+ 额外 itsc:form_management_{access,create,update,delete} 4 权限（service.go:31-34，缺报 403）"
+      save_not_upsert: "POST /v2/form 永远新建 form + 首个 isMain=true 版本；formId/versionId 不可指定（CMDB 生成返回）。要『改』走 form_version.update。无单 form 详情端点（GET /form/:formId 不存在）"
+      update_asymmetric: "PUT /v2/.../version/:versionId 是 upsert 但非对称：当前版 state==done → 新建 isMain=false 草稿（场景④加版本）；unfinished → 就地改。同时改 form.name/category/memo。versionName 唯一（重复报『重复的表单版本号』）"
+      delete_constraints: "删 form 须先清所有版本（有版本报『表单存在版本,无法删除』）。删版本路径参数是 versionIds（复数分号，契约误写单数 versionId）；代码只用第一个（批量是壳）。删版本被流程引用拒绝『表单已绑定节点』。⚠️删最后一个版本隐式级联删 form"
+      set_main: "POST .../version/:versionId 设主版本=发布；目标须 state==done（unfinished 报错）；旧主自动降级；旧主被流程绑定时触发 ITSC_PROCESS_FORM_RELATION 换绑（业务连续）；已主版本幂等"
+      form_definition_string: "formDefinition/businessRules 在 wire 层是 JSON 字符串（CMDB 存 string）。save/update 传 JSON.stringify([]Container)；get 返回需二次 parse。深层结构（5 容器/23 控件/5 脚本/条件显示/继承）见 objects.yaml#itsm_form_definition，后端透传前端解释"
+      version_state: "状态机两态：unfinished(草稿)/done(完成)；无 draft/published 叫法。done=可被引用/可设主版本。list 的 lastestMainVersion/lastestVersion 字段拼写少 t（API 如此）"
+
+    # e2e 验收 URL（前端）—— 表单类操作后在此可视化校验
+    acceptance_urls:
+      form_list:   "${EASYOPS_CMDB_FRONTEND_URL}/next/itsc-form-management/form-list?visible=true&page=1&pageSize=20&name=&creator=&category=&state="   # query 可选过滤 name/creator/category/state
+      form_detail: "${EASYOPS_CMDB_FRONTEND_URL}/next/itsc-form-management/form-list/{formId}/{versionId}"   # formId=表单实例id（13hex）；versionId=版本实例id（13hex）

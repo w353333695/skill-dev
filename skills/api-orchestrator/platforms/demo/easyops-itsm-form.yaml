@@ -1,0 +1,272 @@
+# =============================================================================
+# EasyOps ITSM 表单管理（flowable_service）—— api-cli 集中清单
+# -----------------------------------------------------------------------------
+# 三层体系：
+#   ① form        表单层（FormSchema）—— 表单本身的 list/save(新建+首版本)/delete
+#   ② form_version 表单版本层（FormSchemaVersion）—— 版本的 list/get/update/delete/set_main
+#   ③ formDefinition  版本内容层 —— JSON 字符串 []Container（容器/控件/脚本/条件显示/继承）
+#                  非独立端点，作为 form.save / form_version.update 的 body 字段透传。
+#                  完整内容模型（5 容器 / 23 控件 / 5 生命周期脚本 / 条件显示 / 数据继承）
+#                  见 objects.yaml#itsm_form_definition（本清单只定 wire 层）。
+#
+# 数据来源：
+#   • 契约  data/api-doc/itsm-form.json（8 EAML：form + form_version CRUD）
+#   • 后端  data/sources/backend/ITSM/flowable_service/form_schema_version/
+#        - route.go:6-19                           （12 条路由，契约漏 4：ListVersion/V2get/V2upd/Category）
+#        - form_schema_version_service.go           （CRUD 真相 + 副作用 + upsert 非对称行为）
+#        - validators/{api_validator,request_validate_trees}.go （必填/正则校验）
+#   • 内容模型 internal/form/definition/ + internal/enums/{field_kind,process_script}/
+#     （容器/控件/脚本枚举与结构体，objects.yaml 详述）
+#
+# 接入面：
+#   • backend —— 直连 flowable_service :8134（HTTP，无 path 前缀）。所有 verb 路径
+#     带 /api/flowable_service/v1|v2 前缀，故 resource.path 留空，每 operation 持完整路径。
+#   • 无 frontend 网关接入（ITSM 表单网关 per-API 路由，CLI 直连 backend 即可）。
+#
+# 鉴权：auth: easyops-cookie（与 cmdb/autoops 同一 cookie）。
+#   ⚠️ cookie 不够！直连后端还要 org+user header（orguser 中间件，
+#      cmd/flowable_service/flowable_service_start/main_start.go:336-344；缺一报
+#      "org、user获取失败"）。见 endpoint.headers。
+#   ⚠️ 比 cmdb 多一道权限校验：每端点校验 itsc:form_management_{access,create,update,delete}
+#      4 个 action（form_schema_version_service.go:31-34），缺权限报 403「鉴权失败」。
+#      实测 easyops 用户具备这 4 个权限。
+#
+# 关键坑（详见 systems.yaml runtime + objects.yaml side_effects）：
+#   • save(POST v2/form) 非 upsert——永远新建 form + 首版本，formId/versionId 不可指定
+#   • update(PUT v2/.../version/:versionId) 才是 upsert 且非对称：done 版→新建版本，unfinished→就地改
+#   • 删 form 要求 version 先清空（"表单存在版本,无法删除"）；删最后一个 version 隐式级联删 form
+#   • DELETE version 路径参数是 versionIds（复数，分号分隔），但代码只删第一个（批量是壳）
+#   • set_main 须 state==done，触发流程表单关系换绑（ITSC_PROCESS_FORM_RELATION）
+# =============================================================================
+spec: api-cli/v1
+service:
+  name: easyops-itsm-form
+  version: "1.0"
+  default_endpoint: backend
+  endpoints:
+    backend:
+      base_url: ${EASYOPS_ITSM_BACKEND_URL}          # http://172.30.0.232:8134
+      host: admin.easyops.local                       # IP 直连，Host 由 endpoint.Host 注入
+      path_prefix: ""                                 # 路由挂在 /api/flowable_service/...（每 op 持完整路径）
+      auth: easyops-cookie
+      headers:                                        # endpoint 级固定 header（每个请求都带）
+        org: ${EASYOPS_ORG}                           # EasyOps 租户 org（测试 18832008；0/1/2 禁动）。export EASYOPS_ORG=<值>
+        user: ${EASYOPS_USER}                         # EasyOps 用户（easyops 具备 itsc:form_management_* 4 权限）。export EASYOPS_USER=easyops
+
+# -----------------------------------------------------------------------------
+# 资源 1：form —— 表单（FormSchema）层。
+# 路径 disparate（/api/flowable_service/v1|v2/form[/:formId]），resource.path 留空。
+# -----------------------------------------------------------------------------
+resources:
+  form:
+    description: ITSM 表单（FormSchema）—— 表单本身的查询/新建/删除。一个表单含多个版本（form_version）；表单的"内容"在版本的 formDefinition 里（不在本层）。注意：无单 form 详情端点（GET /form/:formId 不存在），取 form 元信息走 list 过滤或 form_version.get 的 formSchema 子对象。
+    path: ""
+
+    operations:
+      # ---------- 列表（GET /api/flowable_service/v1/form）—— 场景① ----------
+      list:
+        description: 表单列表（分页，支持 name/category/creator/state/Q 模糊过滤）。注意：state 过滤的是【版本状态】(ITSC_FORM_VERSION.state) 非 form 本身；isMain=true 只取主版本，缺省取每 form 最新 ctime 版本。list 元素含 lastestMainVersion/lastestVersion（字段名 lastest 拼写如此，少一个 t，API 就这么返）。
+        method: GET
+        path: /api/flowable_service/v1/form
+        params:
+          name:     { in: query, type: string,  description: "form 名模糊匹配（$like %x%）" }
+          category: { in: query, type: string,  description: "分类模糊匹配" }
+          creator:  { in: query, type: string,  description: "创建者模糊匹配" }
+          state:    { in: query, type: string, enum: [unfinished, done], description: "【版本状态】精确匹配（过滤的是 version.state）" }
+          Q:        { in: query, type: string,  description: "通用关键词，$or 同时模糊匹配 name/state/creator" }
+          isMain:   { in: query, type: boolean, description: "true=只取主版本；缺省/false=取每 form 最新 ctime 版本" }
+          page:     { in: query, type: integer, description: "页码，默认 1，≥1" }
+          pageSize: { in: query, type: integer, description: "每页条数，默认 10，≥1" }
+        response:
+          type: object
+          description: "标准 wrapper：{ code, data: { page, pageSize, total, list[] } }"
+          properties:
+            code: { type: integer }
+            data:
+              type: object
+              properties:
+                page:     { type: integer }
+                pageSize: { type: integer }
+                total:    { type: integer, description: "表单总数" }
+                list:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      instanceId:          { type: string, description: "表单 id（13 hex）" }
+                      name:                { type: string }
+                      category:            { type: string }
+                      memo:                { type: string }
+                      creator:             { type: string }
+                      ctime:               { type: string }
+                      lastestMainVersion:  { type: object, description: "最新主版本（字段名拼写如此，少 t）" }
+                      lastestVersion:      { type: object, description: "最新版本" }
+        pagination:
+          type: offset
+          page_in: query
+          items_path: data.list
+          page_param: page
+          size_param: pageSize
+          size: 10
+
+      # ---------- 新建（POST /api/flowable_service/v2/form）—— 场景③ ----------
+      save:
+        description: 新建表单（永远新建 form + 第一个 isMain=true 的版本；非 upsert，formId 不可指定，由 CMDB 生成并返回）。body 含表单元信息(name/category/memo) + 首版本内容(formDefinition/versionName/state/versionMemo) + 关联(domainModelId[]/dataSourceIdList[]) + businessRules。formDefinition 是 JSON 字符串（[]Container，结构见 objects.yaml#itsm_form_definition）。场景③建主机申请表单用它。
+        method: POST
+        path: /api/flowable_service/v2/form
+        body:
+          type: object
+          required: [name, category, formDefinition, state]
+          description: "新建表单请求。name/category/formDefinition/state 必填。"
+          properties:
+            name:             { type: string, description: "表单名" }
+            category:         { type: string, description: "分类（自由文本，无枚举）" }
+            formDefinition:   { type: string, description: "表单定义 JSON 字符串 = []Container（容器/控件树）。完整结构见 objects.yaml#itsm_form_definition。前端二次 JSON.parse。例：JSON.stringify([{type:'row',name:'基础信息',propertys:[...]}])" }
+            state:            { type: string, enum: [unfinished, done], description: "首版本状态：unfinished=草稿 / done=完成。新建通常传 unfinished" }
+            versionName:      { type: string, pattern: '^\d+\.\d+\.\d+$', description: "版本号（语义化三段式，如 1.0.0）；不传则空" }
+            memo:             { type: string, description: "表单级备注" }
+            versionMemo:      { type: string, description: "版本级备注（落 version.memo；v1 的 vMemo 已弃用）" }
+            businessRules:    { type: string, description: "业务规则 JSON 字符串（前端解释，后端透传）" }
+            domainModelId:    { type: array, items: { type: string }, description: "关联的领域模型 id 列表" }
+            dataSourceIdList: { type: array, items: { type: string }, description: "关联的数据源 id 列表" }
+        response:
+          type: object
+          description: "{ code, data: { instanceId(表单), lastestVersion: {instanceId(版本), versionName, isMain, state, ...} } }"
+          properties:
+            code: { type: integer }
+            data:
+              type: object
+              additional_properties: true
+
+      # ---------- 删除（DELETE /api/flowable_service/v1/form/:formId）—— 场景⑤ ----------
+      delete:
+        description: 删除表单。⚠️有版本时拒绝（"表单存在版本,无法删除"）——必须先把所有版本删干净。form 不存在则静默成功（幂等）。删最后一个版本会隐式级联删 form（见 form_version.delete）。
+        method: DELETE
+        path: /api/flowable_service/v1/form/{formId}
+        params:
+          formId: { in: path, type: string, required: true, description: "表单 id（13 hex）" }
+
+  # -----------------------------------------------------------------------------
+  # 资源 2：form_version —— 表单版本（FormSchemaVersion）层。
+  # 路径 disparate（/api/flowable_service/v1|v2/form/:formId/version[/:versionId|:versionIds]）。
+  # V2（get/update）比 V1 多返回 businessRules/domainModel[]/formDataSources[]。
+  # -----------------------------------------------------------------------------
+  form_version:
+    description: ITSM 表单版本（FormSchemaVersion）—— 版本的查询/改/删/设主版本。一个 form 有多版本 1:N，同时只有一个 isMain=true（由 set_main 保证，旧主版本自动降级）。版本状态机两态：unfinished(草稿)/done(完成)。版本的 formDefinition 才是表单内容（容器/控件树）。set_main=设主版本(=对外生效)，须 done 状态。
+    path: ""
+
+    operations:
+      # ---------- 版本列表（GET /v1/form/:formId/version）—— 场景② ----------
+      list:
+        description: 列某表单的所有版本。name 参数实际是 versionName 精确匹配（非 form 名）。list 元素含 versionInfo（版本完整字段）+ processVersions（流程绑定）。
+        method: GET
+        path: /api/flowable_service/v1/form/{formId}/version
+        params:
+          formId:   { in: path, type: string, required: true, description: "表单 id（13 hex）" }
+          name:     { in: query, type: string, description: "versionName 精确匹配（注意：是版本号非 form 名）" }
+          state:    { in: query, type: string, enum: [unfinished, done], description: "版本状态精确匹配" }
+          page:     { in: query, type: integer, description: "页码，默认 1" }
+          pageSize: { in: query, type: integer, description: "每页条数，默认 10" }
+        response:
+          type: object
+          description: "{ code, data: { page, pageSize, total, list[] } }。total=版本数（场景『有几个版本』读这个）。"
+          properties:
+            code: { type: integer }
+            data:
+              type: object
+              properties:
+                total: { type: integer }
+                list:
+                  type: array
+                  items:
+                    type: object
+                    additional_properties: true
+                    properties:
+                      versionInfo: { type: object, description: "版本完整字段 {instanceId,versionName,isMain,state,memo,creator,ctime}" }
+                      processVersions: { type: array, description: "绑定该版本的流程" }
+        pagination:
+          type: offset
+          page_in: query
+          items_path: data.list
+          page_param: page
+          size_param: pageSize
+          size: 10
+
+      # ---------- 版本详情（GET /v2/form/:formId/version/:versionId）—— 取完整 schema ----------
+      get:
+        description: 读取单个版本完整详情（V2 超集）。返回 formDefinition(JSON 字符串)+businessRules+form 元信息+domainModel[]+standardFields[]+formDataSources[]+userDisplayMap。formDefinition 前端需二次 JSON.parse 得到 []Container。取表单内容（容器/控件/脚本）走它。
+        method: GET
+        path: /api/flowable_service/v2/form/{formId}/version/{versionId}
+        params:
+          formId:    { in: path, type: string, required: true, description: "表单 id（13 hex）" }
+          versionId: { in: path, type: string, required: true, description: "版本 id（13 hex）" }
+        response:
+          type: object
+          description: "{ code, data: {版本字段 + formSchema + domainModel[] + ...} }"
+          properties:
+            code: { type: integer }
+            data:
+              type: object
+              properties:
+                instanceId:      { type: string, description: "版本 id" }
+                versionName:     { type: string }
+                isMain:          { type: boolean, description: "是否主版本" }
+                state:           { type: string, enum: [unfinished, done] }
+                memo:            { type: string }
+                creator:         { type: string }
+                formDefinition:  { type: string, description: "表单定义 JSON 字符串 = []Container（见 objects.yaml#itsm_form_definition）" }
+                businessRules:   { type: string, description: "业务规则 JSON 字符串" }
+                ctime:           { type: string }
+                formSchema:      { type: object, description: "form 元信息 {instanceId,name,category,creator,memo,ctime}" }
+                domainModel:     { type: array, description: "领域模型列表（V2 返整个列表；V1 只返 [0]）" }
+                standardFields:  { type: array, description: "标准字段列表" }
+                formDataSources: { type: array, description: "数据源列表" }
+                userDisplayMap:  { type: object, description: "creator 展示名映射 {user:showName}" }
+
+      # ---------- 改版本（PUT /v2/form/:formId/version/:versionId）—— 场景④ ----------
+      update:
+        description: 改表单版本（upsert，非对称）。行为按【当前 version 的 state】分：done 版→【新建一个 isMain=false 的草稿版本】（基于已发布版派生新草稿，场景④"加版本"走这条）；unfinished 版→【就地更新】。同时改 form 的 name/category/memo。versionName 唯一性：done 新建时不能与已有重，unfinished 改 versionName 也不能重（否则"重复的表单版本号"）。body 字段同 form.save。
+        method: PUT
+        path: /api/flowable_service/v2/form/{formId}/version/{versionId}
+        params:
+          formId:    { in: path, type: string, required: true, description: "表单 id" }
+          versionId: { in: path, type: string, required: true, description: "【当前】版本 id（done 版→基于它派生新版本；unfinished 版→就地改它）" }
+        body:
+          type: object
+          required: [name, category, formDefinition, state]
+          description: "改版本请求（字段同 form.save）。done 版时本 body 成为新派生草稿的内容；unfinished 版时就地覆盖。"
+          properties:
+            name:             { type: string, description: "表单名（同时改 form.name）" }
+            category:         { type: string, description: "分类（同时改 form.category）" }
+            formDefinition:   { type: string, description: "表单定义 JSON 字符串 = []Container（见 objects.yaml#itsm_form_definition）" }
+            state:            { type: string, enum: [unfinished, done], description: "目标版本状态" }
+            versionName:      { type: string, pattern: '^\d+\.\d+\.\d+$', description: "版本号（done 派生新版本时的新版本号，不能与已有重）" }
+            memo:             { type: string, description: "表单级备注" }
+            versionMemo:      { type: string, description: "版本级备注" }
+            businessRules:    { type: string, description: "业务规则 JSON 字符串" }
+            domainModelId:    { type: array, items: { type: string } }
+            dataSourceIdList: { type: array, items: { type: string } }
+        response:
+          type: object
+          description: "{ code, data: {版本字段} }（done 版时 data 是新派生的草稿版本）"
+          properties:
+            code: { type: integer }
+            data: { type: object, additional_properties: true }
+
+      # ---------- 删版本（DELETE /v1/form/:formId/version/:versionIds）—— 场景⑤ ----------
+      delete:
+        description: 删除版本。⚠️路径参数是 versionIds（复数，分号分隔，契约误写单数）；但代码只用第一个——批量是壳，实际只删一个。被流程节点引用时拒绝（"表单已绑定节点，不可删除!"）。副作用：删完若该 form 已无任何版本，【隐式级联删 form】。删主版本代码不拦（但会导致 form 无主版本，不建议）。
+        method: DELETE
+        path: /api/flowable_service/v1/form/{formId}/version/{versionIds}
+        params:
+          formId:     { in: path, type: string, required: true, description: "表单 id" }
+          versionIds: { in: path, type: string, required: true, description: "版本 id（参数名复数 versionIds；分号分隔，但只删第一个；单删传一个 id）" }
+
+      # ---------- 设主版本（POST /v1/form/:formId/version/:versionId）—— 发布 ----------
+      set_main:
+        description: 设主版本（=对外生效/发布）。把指定 version 设 isMain=true，原主版本自动降级 isMain=false。⚠️目标 version 必须 state==done（unfinished 报"未完成状态不能设置为主版本"）。隐式副作用：若旧主版本被流程绑定，触发换绑——把 ITSC_PROCESS_FORM_RELATION 从旧主版本迁到新主版本（保证业务连续）。已是主版本则幂等返回。
+        method: POST
+        path: /api/flowable_service/v1/form/{formId}/version/{versionId}
+        params:
+          formId:    { in: path, type: string, required: true, description: "表单 id" }
+          versionId: { in: path, type: string, required: true, description: "要设为主版本的版本 id（须 state==done）" }

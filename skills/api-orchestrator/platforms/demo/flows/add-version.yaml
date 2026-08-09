@@ -1,0 +1,61 @@
+# 流程模板：给表单加版本（含条件显示）—— 场景④。规划挡（写、change）。
+# 场景：给主机申请表单加个版本，加个『申请主机类型』多选框，决定表单显示哪些 table 容器（让页面整洁）。
+name: add-version
+intent: 对已发布(done)表单版本派生新草稿版本，加入条件显示控件（某字段值决定容器显隐）
+trigger: ["给表单加版本", "表单加字段", "条件显示", "按类型显示不同表单内容", "派生新版本"]
+guard: 规划挡（写、change）—— 须展示新 formDefinition 确认
+
+prerequisites:
+  env: [EASYOPS_ORG, EASYOPS_USER=easyops, EASYOPS_ITSM_BACKEND_URL]
+  base: "已有表单 + 至少一个 done 或 unfinished 版本（formId/versionId 已知）"
+
+steps:
+  - n: 1
+    op: form_version.get
+    args: ["<formId>", "<versionId>", --insecure]
+    desc: 取当前版本完整内容（拿 formDefinition 字符串 + 现有 businessRules）
+    dataflow: "data.formDefinition(JSON 字符串) → step2 二次 parse 改造"
+    note: "formDefinition 是字符串，python json.loads 后改 []Container，再 json.dumps 回字符串"
+
+  - n: 2
+    transform: 改造 formDefinition（本地）
+    desc: |
+      在 formDefinition 的 []Container 里：
+      ① 加『申请主机类型』多选 CHECKBOX/MULTIPLESELECT（options.extraProps.items: [虚拟机,物理机]）
+      ② 给虚拟机/物理机 table 容器配【条件显示】：displayCondition 表达式——当选了虚拟机才显示虚拟机 table，选了物理机才显示物理机 table。
+      displayCondition 是【字符串表达式】（前端解释，后端透传；见 objects.yaml#itsm_conditional_display）。
+      复杂联动（多字段联动/取值计算）超出 displayCondition 时，改用 onValueChange 生命周期脚本（见 objects.yaml#itsm_lifecycle_script）。
+    body_hint: |
+      # 给容器加条件显示（示意）
+      {"key":"c_vm","name":"虚拟机申请","type":"table","displayCondition":"hostType 包含 虚拟机",
+       "propertys":[...]}
+      # 加多选控件
+      {"key":"hostType","label":"申请主机类型","type":"MULTIPLESELECT","modelField":"hostType",
+       "options":{"extraProps":{"options":[{"key":"vm","label":"虚拟机","value":"vm"},{"key":"pm","label":"物理机","value":"pm"}]}}}
+
+  - n: 3
+    op: form_version.update
+    args: ["<formId>", "<versionId>", --body-file, "<new.json>", --insecure, --yes]
+    desc: |
+      改版本（PUT，非对称 upsert）。行为按【当前版本 state】：
+      当前 done → 派生一个 isMain=false 新草稿（场景④『加版本』走这条，versionName 不能与已有重）；
+      当前 unfinished → 就地改。同时改 form.name/category/memo。
+    body_hint: |
+      { "name":"主机申请表单", "category":"ITSM",
+        "formDefinition": <改造后的 JSON 字符串>,
+        "state":"unfinished", "versionName":"1.1.0", "versionMemo":"加主机类型多选+条件显示" }
+    expect: "code=0；done 版时 data 是新派生草稿版本的 instanceId/versionName"
+    on_fail: "『重复的表单版本号』→ versionName 与已有重，改号；403 → 缺 itsc:form_management_update 权限"
+
+  - n: 4
+    op: form_version.get
+    args: ["<formId>", "<新版本id>", --insecure]
+    desc: 校验新版本内容（formDefinition 含新控件 + 条件显示）
+    dataflow: "step3 返回的新 versionId → step4"
+
+key_rule: |
+  update 是 upsert 但【非对称】：done 版→新建草稿版本（isMain=false）；unfinished→就地改。
+  想让新版本对外生效须再 form_version.set_main（且须先把新版本 state 改 done）。
+  displayCondition 字符串表达式前端解释——后端不校验语义，写错只在前端表现为不生效。
+side_effects: objects.yaml#itsm_form_version.side_effects
+acceptance: "${EASYOPS_CMDB_FRONTEND_URL}/next/itsc-form-management/form-list/<formId>/<新版本id>"

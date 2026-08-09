@@ -1,0 +1,36 @@
+# 流程模板：执行 run_cmd 查主机内存（场景④）。规划挡（执行 + 轮询，多步）。
+name: execute-run-cmd
+intent: 执行 run_cmd（或任意）工具查所有主机内存使用率
+trigger: ["用run_cmd查主机内存", "执行X工具查主机", "查所有主机内存使用率"]
+guard: 规划挡（执行 + 轮询）
+key_rule: "run_cmd 是预置工具（非端点）。执行异步：run 返 execId → 轮询 get_status → get_table。⚠️依赖：run_cmd 存在 + 目标主机 agent 在线 + easy_command 可用 + 执行权限。"
+prerequisites:
+  env: [EASYOPS_AUTOOPS_BACKEND_URL, EASYOPS_ORG, EASYOPS_USER]
+  runtime: "run_cmd 工具已存在；目标主机 agent 在线"
+steps:
+  - n: 1
+    op: tool.list
+    args: [--name, "run_cmd", --insecure]
+    desc: 找 run_cmd 工具的 toolId
+    dataflow: "data.list[].toolId（name=run_cmd）→ step2"
+    expect: "命中 run_cmd 工具"
+  - n: 2
+    op: tool_execution.run
+    args: [--body-file, "<exec-req.json: toolId + inputs.@agents=目标主机>", --insecure, --yes]
+    desc: 异步执行（默认 vId=$latest_production）
+    dataflow: "data.execId → step3 轮询"
+    expect: "code=0；返回 execId"
+  - n: 3
+    op: tool_execution.get_status
+    args: ["<execId>", --insecure]
+    desc: 轮询状态直到完成（running→success/failed）
+    expect: "状态=success"
+    on_fail: "failed 则 get_result 看每主机错误"
+  - n: 4
+    op: tool_execution.get_table
+    args: ["<execId>", --insecure]
+    desc: 取表格结果（主机 + 内存使用率）
+    expect: "data.tableData[] 每行一台主机的内存"
+note: "目标主机走 inputs 里 type=cmdbInstances 的 @agents 入参（平台按目标解析成实例）；旧版 agents 数组兼容（重写成 inputs.@agents）"
+rollback: "本清单未收 terminate；超时由工具 timeout 控制"
+acceptance: "data.tableData 含每主机内存使用率"
