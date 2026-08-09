@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # run.sh —— 开发态调 api-cli 的壳。
 # 用法: scripts/run.sh <api-cli-args...>
-# 例:   scripts/run.sh --spec platforms/demo/cmdb.yaml inst read i-1 --print-curl
+# 例:   scripts/run.sh --spec platforms/<deployment>/<system>.yaml <resource> <verb> --print-curl
 #
 # 分发态（skill 打包后）直接裸调 api-cli，不用本壳。
 set -euo pipefail

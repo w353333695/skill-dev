@@ -7,6 +7,13 @@ description: 通用 API 编排 skill——自然语言需求 → 跨系统调用
 
 把自然语言需求翻译成跨系统调用编排。**通用**——不知道任何具体系统/格式，全靠 `platforms/` 资料驱动。
 
+## 定位：与任意系统解耦（勿过拟合到单一系统）
+
+- **api-orchestrator = 基于 api-cli 的「系统知识整理 + 自动化调度」层**：执行能力来自 api-cli（声明式清单→命令树），调度能力来自 LLM 读本 SKILL 决策树，领域知识来自 `platforms/`。
+- **和 api-cli 一样，与任意系统解耦**：本 skill 自身（`SKILL.md` / `references/` / `scripts/`）**零系统知识**——不含任何具体系统的字段、鉴权、端口、副作用。所有系统特定内容只活在 `platforms/<deployment>/` 实例里（可替换）。
+- **接入新系统 = 加 platforms 资料，不改 skill**：onboarding 产出的资料归位到 systems/objects/entities/flows（schema 见 `references/asset-schema.md`），skill 代码/文档不变。因此不会对任何单一系统过拟合。
+- **结论**：换系统、换部署，只换 `platforms/`；skill 本体复用。
+
 ## 核心范式
 
 - **调度器 = 你（LLM）**：读本 SKILL 的决策树，对每个需求推理分派。没有代码调度引擎。
@@ -42,7 +49,7 @@ description: 通用 API 编排 skill——自然语言需求 → 跨系统调用
 - `flows/` — 流程模板（build 用）
 - `formats/<fmt>/` — 格式包（BPMN/插件 等，跨部署复用）
 
-资料 schema 详见 `references/asset-schema.md`（编写中）。
+资料 schema 详见 `references/asset-schema.md`（通用约定，零系统知识——适用于任何外接系统）。
 
 ## 执行
 
@@ -50,7 +57,7 @@ description: 通用 API 编排 skill——自然语言需求 → 跨系统调用
 ```bash
 # 开发态（本 worktree）
 scripts/run.sh --spec <spec-path> <resource> <verb> [args] [--print-curl|--dry-run]
-# 例：scripts/run.sh --spec platforms/demo/cmdb.yaml inst read i-1 --print-curl
+# 例：scripts/run.sh --spec platforms/<deployment>/<system>.yaml <resource> <verb> --print-curl
 ```
 
 **先用 `--print-curl` 或 `--dry-run` 预览请求**，确认无误再真调（写操作尤其）。
