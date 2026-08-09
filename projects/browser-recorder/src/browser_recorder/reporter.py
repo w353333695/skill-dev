@@ -87,7 +87,7 @@ class MarkdownReporter:
 
             # 截图
             if action.screenshot_before:
-                lines.append(f"点击位置：")
+                lines.append(f"操作前：")
                 lines.append(f'<img src="{action.screenshot_before}" width="300"/>')
                 lines.append("")
             if action.screenshot_after:
@@ -105,7 +105,7 @@ class MarkdownReporter:
             lines.append("| # | 时间 | 方法 | URL | 状态 | 耗时 |")
             lines.append("|---|------|------|-----|------|------|")
             for i, req in enumerate(requests, 1):
-                rel_ms = req.timestamp_ms - base_ts
+                rel_ms = max(0, req.timestamp_ms - base_ts)
                 rel_str = self._fmt_timestamp(rel_ms)
                 lines.append(
                     f"| {i} | {rel_str} | {req.method} | {req.url} "
