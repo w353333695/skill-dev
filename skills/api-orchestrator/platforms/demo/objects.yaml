@@ -532,13 +532,18 @@ api_behavior:
   autoops_wrapper:
     rule: "标准响应 {code, codeExplain, error, data}（比 cmdb 多 codeExplain）；code=0 成功。业务错误码形如 1xxxxx。导出端点是 .tar.gz 二进制流（不走 JSON wrapper）。"
   autoops_list_format:
-    rule: "tool.list 返回 **NDJSON 流式**（每行一个完整 Tool 对象，同 cmdb list，非 {data:{list}} wrapper）——解析须逐行 json.loads。前端列表页 ?category=&q= 映射：category 直传（含子类展开），q 是后端 name 的别名（$like 匹配 name+memo）。"
+    rule: "tool.list **后端响应**是 {code,data:{list,total}} wrapper（取 data.list）；**api-cli** 调本端点流式输出 NDJSON（每行一个 Tool，是 api-cli 的分页输出特性，非后端响应格式）；SDK（sdk/easyops_client.py list_tools）取 data.list 返回 [...]. 前端列表页 ?category=&q= 映射：category 直传（含子类展开），q 是后端 name 的别名（$like 匹配 name+memo）。"
   run_inputs_map:
     rule: "tool_execution.run 的 body.inputs 是 **map**（proto map<string,Value>，key=参数名 value=值，如 {\"cmd\":\"free -m\"}），不是 [{name,value}] 数组——数组会报 json 解析失败 100000。目标主机走 agents（IP 数组，重写成 inputs.@agents）。"
   run_vid_default:
     rule: "tool_execution.run 的 vId 默认 $latest_production；若工具只有 development 版本（如 run_cmd），$latest_production 报『工具版本不存在 100005』——用具体 vId（从 tool.get 拿）或 $latest_development。"
   update_response_only_toolid:
     rule: "tool.update 响应 data 只含 {toolId}（无 vId/vName，源码 basic_service.go:322）——无法从响应判断是否派生新版本，必须 tool_version.list 复查。"
+  tool_script_no_future:
+    rule: |
+      ⚠️ 工具脚本（.tar.gz 里的 script）及其依赖库（sdk/sdk/easyops_client.py 等）【不要】用 `from __future__ import ...`。
+      EasyOps 平台下发执行时会在脚本开头注入内部方法/变量（SDK 库 header + EASYOPS_* 注入），使 __future__ 不在文件首行，触发 SyntaxError: from __future__ imports must occur at the beginning of the file（实测坑）。
+      py2/3 兼容改用：运行时判断 PY2 = sys.version_info[0]==2、text = unicode(py2)/str(py3)、用 logging（不直接 print）、不用 f-string、raise 不带 from。范本见 sdk/sdk/easyops_client.py。
   builtin_vars:
     rule: |
       工具脚本运行时的内置变量（agent 侧环境变量；源码 internal/execution/param/param.go:64-96 + cmd/tool_service/conf/internal.param.default.yaml）。
@@ -559,7 +564,7 @@ api_behavior:
             └── libs/<libName>.tar.gz     # 可选：依赖工具库（解压得 <libName>.json 元信息 + <libName>_repo.tar.gz）
       字段序列化靠 Go struct 的 export tag 分流（export:"dat"→dat 文件，export:"config"→config 文件）。导入是 upsert（toolId 锚定）。
       无编译步骤——工具定义 ↔ tar.gz 是纯序列化往返；运行时执行器把 SDK 库（按 type 选 main.sh/main.py/...）+ EASYOPS_* header + 用户 content 拼成脚本下发 agent。
-      开发新工具包（承接工具包开发需求）：产出 dat+config+script 三件套（+ 可选 libs）打成 tar.gz；脚本调 PutStr/PutRow 回吐输出。示例见 easyops_client.py 的打包函数 + tools-sdk-demo.py。
+      开发新工具包（承接工具包开发需求）：产出 dat+config+script 三件套（+ 可选 libs）打成 tar.gz；脚本调 PutStr/PutRow 回吐输出。示例见 sdk/easyops_client.py 的打包函数 + sdk/tools-sdk-demo.py。
 
   # ===========================================================================
   # ITSM 表单接口级行为（flowable_service）—— 编排时必须知道
