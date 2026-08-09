@@ -9,7 +9,7 @@ skill 的调度分三挡位，按需求的意图 + 复杂度选挡。
 流程：
 1. 查 `platforms/<dep>/systems.yaml` → 找到目标系统的 spec + resource/verb。
 2. 查 `entities.yaml`（如涉及跨字段）确认锚字段。
-3. bash 调 api-cli：`run.sh --spec <spec> <resource> <verb> [args] [--format json]`。
+3. bash 调 api-cli：`api-cli --spec <spec> <resource> <verb> [args] [--format json]`（开发态用 `scripts/run.sh` 等价）。
 4. 后处理（jq 数量/抽取字段/格式化）→ 答。
 
 无规划、无确认、一轮 bash。

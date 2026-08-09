@@ -17,7 +17,7 @@ description: 通用 API 编排 skill——自然语言需求 → 跨系统调用
 ## 核心范式
 
 - **调度器 = 你（LLM）**：读本 SKILL 的决策树，对每个需求推理分派。没有代码调度引擎。
-- **执行 = bash 调 api-cli**：`scripts/run.sh` 是 api-cli 的开发态壳；每个系统是一份 api-cli 清单（spec）。
+- **执行 = bash 调 api-cli**：统一命令名 `api-cli`（开发态由 `scripts/run.sh` 提供 editable 等价）；每个系统是一份 api-cli 清单（spec）。
 - **知识 = platforms/ 资料**：系统目录/实体映射/对象关系/流程模板/格式包，全部可替换。
 
 ## 调度决策树（拿到需求先走这个）
@@ -53,14 +53,31 @@ description: 通用 API 编排 skill——自然语言需求 → 跨系统调用
 
 ## 执行
 
-调 api-cli（bash）：
+统一命令名 `api-cli`（声明式清单 → 命令树）：
 ```bash
-# 开发态（本 worktree）
-scripts/run.sh --spec <spec-path> <resource> <verb> [args] [--print-curl|--dry-run]
-# 例：scripts/run.sh --spec platforms/<deployment>/<system>.yaml <resource> <verb> --print-curl
+api-cli --spec <spec-path> <resource> <verb> [args] [--print-curl|--dry-run]
+# 例：api-cli --spec platforms/<deployment>/<system>.yaml <resource> <verb> --print-curl
 ```
 
+**两种运行形态**（命令名一致，实现不同）：
+- **分发态（runtime，默认）**：api-cli 已打包为二进制、在 `PATH` 里，直接 `api-cli ...`。
+- **开发态（本 worktree）**：`scripts/run.sh` 是 api-cli 的 editable 等价（go build 增量，改 api-cli 即生效）——`scripts/run.sh --spec ...` ≡ `api-cli --spec ...`。文档示例统一写 `api-cli`；开发态把 `api-cli` 换成 `scripts/run.sh`。
+
 **先用 `--print-curl` 或 `--dry-run` 预览请求**，确认无误再真调（写操作尤其）。
+
+## 模式与写保护（防 platforms 污染）
+
+skill 两种模式，决定能否写 `platforms/`：
+
+| 模式 | 触发 | platforms/ | 用途 |
+|---|---|---|---|
+| **orchestration**（默认）| `/api-orchestrator`（不带 onboarding）| **只读** | 自然语言 → 编排执行；非专业人员 |
+| **onboarding** | `/api-orchestrator onboarding <input>` | **可写** | 接入/更新资料；开发者 |
+
+**写保护纪律**：
+- **orchestration 模式下 platforms/ 只读**：禁止 Write/Edit platforms 任何文件、禁止跑 onboarding 流程。只读 systems/objects/entities/flows 做编排，写只发生在远端系统 API（且写操作必确认）。
+- **onboarding 模式才写 platforms**：且必须 ① 过输入门禁（契约/文档/源码 ≥1）、② 改完跑 lint（0 ERR）。详见 `references/onboarding.md`。
+- **分发加固**：分发打包时 platforms/ 设文件只读（pack 脚本 `chmod -R a-w platforms/`），文件层兜底防误写。
 
 ## 关键纪律
 
@@ -68,5 +85,6 @@ scripts/run.sh --spec <spec-path> <resource> <verb> [args] [--print-curl|--dry-r
 - **写操作/复杂操作必确认**：展示 plan 或影响面，用户确认后执行。
 - **状态持久化**：复杂编排的中间产物写 `tmp/<task>/`，跨 bash 步传递。
 - **失败回滚**：记录已执行步骤，失败时反向调 remove/delete。
+- **platforms 只读（orchestration 模式）**：非 onboarding 不得 Write/Edit platforms 文件（防资料污染）；onboarding 改完必 lint。
 - **onboarding 输入门禁**：契约 / API 文档 / 后端源码至少一个才开工；缺则停下问用户（详见 `references/onboarding.md` 步 1）。
 - **产物用 lint 自检**：onboarding 或更新 platforms 后跑 `scripts/lint-platforms.py <deployment>`，**0 ERR 才合格**（校验 schema + 引用闭合；详见 onboarding.md 步 7）。
