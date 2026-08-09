@@ -326,6 +326,12 @@ objects:
       - "tabPane 内可放控件（tabPanes[].propertys[]），但 tabPane 内不能再套容器"
       - "控件 json tag 是 propertys（拼写如此，少 y），非 properties"
       - "e2e 实测：新建/派生版本时后端对组件结构有校验——控件须含 belongToSection（指向所属容器 key）；手写控件缺该字段会报『必填key name 不存在』(误导性，非真缺 name)。建议先 get 一个真实表单的 formDefinition 参考其完整字段集（belongToSection/layout/layoutConfig/condition 等）再改"
+      - |
+        ⚠️【前端必读字段集——缺了前端渲染崩溃】后端透传 formDefinition 不校验结构，但前端逐字段读，缺关键字段会抛 "Cannot read properties of undefined (reading '0')" 等白屏错。手写 formDefinition 须补全下列字段（实测对照正常表单「知识表单」）：
+        容器 Container 须含：condition(bool,true)、layout([x,y,w,h])、layoutConfig({layout:"vertical",columns:12})、displayCondition("")、modelField(=容器 key)、name、key、type、propertys[]
+        控件 Component 须含：belongToSection(=所属容器 key)、key、type、label、modelField、options{...}
+        options 须含全字段：layout([0,row,12,1])、layoutSpan(12)、labelCol(3)、defaultValue(""或[])、required(bool)、dataType(string/number/object/...)、pattern、placeholder、disabled(false)、enabled(true)、highLight(false)、isMore(true)、only(false)、note、question([])、displayCondition("")、remoteFunc({toolId:"",scriptInputs:[]})、rules([])、extraProps({})(SELECT/RADIO/CHECKBOX 的选项放 extraProps.items:[{key,label,value}])
+        崩点最常见：options.layout[0]（前端读栅格坐标）、options.remoteFunc.scriptInputs、belongToSection。→ 生成 formDefinition 必须用归一化器补默认值，不能只填语义字段。
 
   itsm_form_container:
     description: 容器（Container，definition.go:33-42）—— 表单内容的分组单元，type 决定形态。
