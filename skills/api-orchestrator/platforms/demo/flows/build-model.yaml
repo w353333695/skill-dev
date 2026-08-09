@@ -24,5 +24,5 @@ steps:
     args: ["<objectId>", --insecure]
     desc: 校验落库（attrList/relation_list 齐全）
 side_effects: objects.yaml#cmdb_object.side_effects
-acceptance: "http://172.30.0.90/next/cmdb-model-management/object/<objectId>/detail"
+acceptance: "${EASYOPS_CMDB_FRONTEND_URL}/next/cmdb-model-management/object/<objectId>/detail"
 rollback: object_model.delete --forceDelete true（见 delete-model.yaml）

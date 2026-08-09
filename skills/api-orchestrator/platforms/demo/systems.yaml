@@ -33,8 +33,9 @@ systems:
     auth: easyops-cookie                 # ~/.api-cli/auth.d/easyops-cookie.yaml：provider=cookie，持 PHPSESSID
 
     env:                                 # 部署所需环境变量（供 api-cli / shell 注入）
-      EASYOPS_CMDB_BACKEND_URL: "http://172.30.0.90:8079"
-      EASYOPS_CMDB_FRONTEND_URL: "https://172.30.0.90"
+      EASYOPS_CMDB_BACKEND_URL: "http://172.30.0.232:8079"  # cmdb_service 后端（实测）
+      EASYOPS_CMDB_FRONTEND_URL: "https://172.30.0.90"      # 前端页面/网关
+      EASYOPS_USER_SERVICE_URL: "http://172.30.0.232:8111"      # user_service（org 查询等）
 
     # 能力清单（resource.verb）—— 编排挡据此判断意图可达性
     capabilities:
@@ -69,7 +70,7 @@ systems:
       ports: { cmdb_backend: 8079, user_service: 8111, frontend: 232 }
       host_header: admin.easyops.local # IP 直连须带 Host 头
       auth: "三件套：cookie(PHPSESSID @ ~/.api-cli/auth.d/easyops-cookie.yaml) + org header + user header；缺任一报 empty org/user (100003)。源码 cmdb_service/main.go:549,691"
-      org_query: "user_service GET http://172.30.0.232:8111/api/v1/org/list（Cookie + Host）"
+      org_query: "user_service GET ${EASYOPS_USER_SERVICE_URL}/api/v1/org/list（Cookie + Host）"
       default_org_chain: "user_service: agollo common.org > $COMMON_ORG > yaml default_org；validator gte:1（org=0 报 Can not find 0 database）"
       protected_orgs: [0, 1, 2]        # 系统自带禁动（0 无库、1 主业务 22 模型、2 名字服务 9 模型）
       test_org: 18832008               # 非系统测试 org（2026-07-31 建），写验证用
@@ -80,5 +81,5 @@ systems:
 
     # e2e 验收 URL（前端）—— 模型类操作后在此可视化校验
     acceptance_urls:
-      model_list:   "http://172.30.0.90/next/cmdb-model-management?hidden=true&page=1&q=测试&pageSize=20&category=应用资源"
-      model_detail: "http://172.30.0.90/next/cmdb-model-management/object/{objectId}/detail"   # objectId 形如 OCEANBASE@EASYOPS
+      model_list:   "${EASYOPS_CMDB_FRONTEND_URL}/next/cmdb-model-management?hidden=true&page=1&q=测试&pageSize=20&category=应用资源"
+      model_detail: "${EASYOPS_CMDB_FRONTEND_URL}/next/cmdb-model-management/object/{objectId}/detail"   # objectId 形如 OCEANBASE@EASYOPS
