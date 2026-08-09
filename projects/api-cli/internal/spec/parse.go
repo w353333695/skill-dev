@@ -41,9 +41,14 @@ func Parse(raw []byte) (*tree.OperationTree, error) {
 		Resources: map[string]*tree.Resource{},
 	}
 	for name, ep := range y.Service.Endpoints {
+		headers := make(map[string]string, len(ep.Headers))
+		for k, v := range ep.Headers {
+			headers[k] = expandEnv(v) // endpoint 级 header 值也支持 ${ENV} 占位
+		}
 		tr.Service.Endpoints[name] = &tree.Endpoint{
 			Name: name, BaseURL: expandEnv(ep.BaseURL), Auth: ep.Auth,
 			PathPrefix: ep.PathPrefix, Host: ep.Host, AllowOperations: ep.AllowOperations,
+			Headers: headers,
 		}
 	}
 	for name, r := range y.Resources {

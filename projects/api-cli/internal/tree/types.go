@@ -24,6 +24,7 @@ type Endpoint struct {
 	PathPrefix      string
 	Host            string   // 自定义 Host header（如 openapi 走 IP 直连 + 改 host 的场景）
 	AllowOperations []string // 预留，MVP 不启用
+	Headers         map[string]string // endpoint 级固定 header（每个请求都带）；值支持 ${ENV}，operation 级 header 参数可覆盖
 }
 
 // Resource 资源定义（命令树节点）。

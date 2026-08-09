@@ -35,7 +35,13 @@ func resolve(tr *tree.OperationTree, ep *tree.Endpoint, r *tree.Resource, op *tr
 	if err != nil {
 		return nil, err
 	}
-	req := &resolvedReq{Method: op.Method, URL: url, Host: ep.Host, Query: map[string]string{}, Header: map[string]string{}}
+	// endpoint 级固定 header 作基底（如 easyops 的 org/user）；operation 级 header
+	// 参数（下方 switch）可覆盖同名 key；auth provider header 在 execute 阶段最终权威覆盖。
+	header := make(map[string]string, len(ep.Headers))
+	for k, v := range ep.Headers {
+		header[k] = v
+	}
+	req := &resolvedReq{Method: op.Method, URL: url, Host: ep.Host, Query: map[string]string{}, Header: header}
 
 	// body 参数：MVP 单层 JSON 对象（key=param.Name, value=flag 字符串）。
 	// 命中任意 body 参数才 marshal，避免无 body 时打印 "null"。
