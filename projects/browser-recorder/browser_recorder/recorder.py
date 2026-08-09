@@ -49,6 +49,7 @@ class Recorder:
         self._record_fp = None
         self.session_dir: Path | None = None
         self._context = None
+        self._interrupted = False
 
     # ---------- 对外接口 ----------
 
@@ -59,16 +60,26 @@ class Recorder:
         owned = self._owned
 
         page.on("close", lambda _: self._stop.set())
+        # 关整个浏览器/最后一个标签也要退出：page.close 之外再兜 context/browser 层
+        try:
+            self._context.on("close", lambda _: self._stop.set())
+        except Exception:
+            pass
         stop_at: float | None = None
+        eval_failures = 0
         try:
             while True:
                 try:
                     page.evaluate("1", timeout=2000)
+                    eval_failures = 0
                 except Exception:
-                    pass
+                    # 浏览器/页面已关：evaluate 立即抛 TargetClosedError。
+                    # 连续失败即认定连接已断，退出（不依赖 context.pages——
+                    # context 关闭后访问它可能悬挂或抛错）。
+                    eval_failures += 1
+                    if eval_failures >= 3:
+                        break
                 self.drain()
-                if owned and not self._context.pages:
-                    break
                 if self._stop.is_set():
                     if stop_at is None:
                         stop_at = time.monotonic() + 2.0  # stop 后再泵 2 秒收在途事件
@@ -77,8 +88,9 @@ class Recorder:
                 time.sleep(0.3)
         except KeyboardInterrupt:
             # Ctrl+C：不直接退出，照常走 finish 保证 record.jsonl flush + doc.md 生成。
-            # 打断在途泵调用残留的 future 噪音由 start 里的 TargetClosedError 钩子吞掉。
-            pass
+            # 标记中断，finish 里跳过一次 CDP 截图（此时 driver 可能已在关闭，
+            # 再发 CDP 调用会报 pipe closed / Connection closed 噪音）。
+            self._interrupted = True
         return self.finish()
 
     def start(self) -> None:
@@ -115,9 +127,12 @@ class Recorder:
 
         self._browser = browser
         self._owned = owned
+        # launch 模式：先建 page 再 wire，保证 __recordEvent 同步挂到已存在的 page。
+        # （若先 wire 再 new_page，binding 靠 context.on("page") 异步补挂，goto 时
+        #   init script 调用桥可能早于注册完成，导致事件丢失——实测 launch 模式录不到。）
+        page = context.pages[0] if context.pages else context.new_page()
         self._wire_context(context)
 
-        page = context.pages[0] if context.pages else context.new_page()
         start_url = self.url or page.url or "about:blank"
         if self.cdp and not self.url:
             try:
@@ -148,26 +163,28 @@ class Recorder:
         except Exception:
             self._dpr = 1.0
 
+    # 关闭阶段（Ctrl+C/关浏览器/连接断开）残留的 CDP future 噪音关键词
+    _CLOSED_NOISE = ("TargetClosedError", "has been closed", "Connection closed",
+                     "pipe closed by peer", "closed while reading from the driver")
+
     @staticmethod
     def _install_targetclosed_filter(page) -> None:
-        """给 playwright 的 asyncio loop 装异常钩子，吞掉关闭阶段的 TargetClosedError。
+        """给 playwright 的 asyncio loop 装异常钩子，吞掉关闭阶段的无害 future 警告。
 
-        Ctrl+C / 关浏览器后，事件循环里残留的 Channel.send / response.body 等 future
-        撞上已关闭的 target；asyncio 在 future 被 GC 时经 call_exception_handler 打
-        "Future/Task exception was never retrieved: TargetClosedError"。这些发生在
-        target 已正常关闭之后，纯属噪音。钩子在 start 即挂上，覆盖整个录制+关闭期。
+        Ctrl+C / 关浏览器后，事件循环里残留的 Channel.send / response.body / 泵 evaluate
+        等 future 撞上已关闭的 target/driver；asyncio 在 future 被 GC 时经
+        call_exception_handler 打 "Future/Task exception was never retrieved"（
+        TargetClosedError / Connection closed / pipe closed by peer 等）。这些发生在
+        连接已正常关闭之后，纯属噪音。钩子在 start 即挂上，覆盖整个录制+关闭期。
         """
         try:
-            from playwright._impl._errors import TargetClosedError
-
             loop = page._impl_obj._loop
             old_handler = loop.get_exception_handler()
 
             def handler(loop, context):
                 exc = context.get("exception")
-                msg = str(context.get("message", ""))
-                if isinstance(exc, TargetClosedError) or "TargetClosedError" in msg \
-                        or "has been closed" in msg:
+                text = f"{exc} {context.get('message', '')}"
+                if any(k in text for k in Recorder._CLOSED_NOISE):
                     return  # 静默
                 if old_handler:
                     old_handler(loop, context)
@@ -187,8 +204,15 @@ class Recorder:
         self._drain_events()
 
     def finish(self) -> Path:
-        """收尾：最后 drain、关闭资源、生成 doc.md。"""
-        self.drain()
+        """收尾：最后 drain、关闭资源、生成 doc.md。
+
+        Ctrl+C 中断时 driver 可能已在关闭，跳过 drain 里的 CDP 截图（避免
+        pipe closed / Connection closed 噪音），仅做文件级收尾。
+        """
+        if self._interrupted:
+            self._drain_events(skip_screenshot=True)
+        else:
+            self.drain()
         self._record_fp.close()
         self._request_logger.close()
         if self._owned:
@@ -263,12 +287,15 @@ class Recorder:
             point=payload.get("point"),
         ))
 
-    def _drain_events(self) -> int:
-        """连接线程：从 buffer 取出事件，截图 + 写 record.jsonl。返回处理条数。"""
+    def _drain_events(self, skip_screenshot: bool = False) -> int:
+        """连接线程：从 buffer 取出事件，截图 + 写 record.jsonl。返回处理条数。
+
+        skip_screenshot=True 用于 Ctrl+C 中断收尾（driver 可能在关闭，不再发 CDP）。
+        """
         n = 0
         while self._event_buffer:
             step = self._event_buffer.pop(0)
-            if step.type == "click":
+            if step.type == "click" and not skip_screenshot:
                 shot_rel = f"screenshots/step-{step.seq:03d}.png"
                 page = self._current_page()
                 if page and self._safe_capture(page, shot_rel, step):
@@ -290,12 +317,9 @@ class Recorder:
             return False
 
     def _current_page(self):
-        # 截图用最近活跃 page；多 tab 场景取最后一个
-        try:
-            pages = self._context.pages
-            return pages[-1] if pages else None
-        except Exception:
-            return None
+        # 截图用主页面。不用 context.pages（context 关闭后访问会悬挂），
+        # 直接用 start 时缓存的 page 引用。
+        return self._page
 
     def _save_meta(self, context, page) -> None:
         self._context = context
