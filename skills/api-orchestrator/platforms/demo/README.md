@@ -1,17 +1,25 @@
-# EasyOps CMDB（platforms/demo）
+# EasyOps demo 部署（platforms/demo）
 
-外接 EasyOps CMDB 的接入资料——**唯一真相来源**，换环境/换 LLM 从这里读。按 SKILL.md 设计的 5 类位置组织，知识分门别类，不堆 README。
+外接 EasyOps 的接入资料——**唯一真相来源**，换环境/换 LLM 从这里读。按 SKILL.md 设计的 5 类位置组织，知识分门别类，不堆 README。
+
+## 接入的系统（3 个，同 cookie/org/user，不同 service/端口）
+
+| 系统 | service:端口 | spec | 三层 + verb |
+|---|---|---|---|
+| **easyops-cmdb** | cmdb_service:8079 | easyops-cmdb.yaml | 模型/关系/实例（19 verb）|
+| **easyops-autoops** | tool_service:8181 | easyops-autoops.yaml | 工具/版本/库 + 执行/导入导出 |
+| **easyops-itsm-form** | flowable_service:8134 | easyops-itsm-form.yaml | 表单/版本/内容（8 verb）|
 
 ## 资料地图（知识在哪，按需查）
 
 | 文件 | 装什么 | 何时查 |
 |---|---|---|
-| **systems.yaml** | 系统接入：鉴权三件套 / 端口 / org 体系 / user 权限 / 环境变量 / capabilities | 「怎么连」「用哪个 org/user」|
-| **objects.yaml** | 对象模型 + 副作用规则：CmdbObject 结构、属性 value、关系约束、import upsert、删除 133129、NDJSON、fields 必填；实例 cmdb_instance（CRUD 批量语义/关系字段/instanceId 格式）| 「建模规则」「实例规则」「接口行为」|
-| **entities.yaml** | 字段锚 + 转换：objectId/instance_id/org/user 格式、跨实体 step 接力（含实例 search→import/delete）| 「字段格式」「编排接线」|
-| **flows/*.yaml** | e2e 流程模板：模型层 build-model/add-attributes/delete-model；实例层 create-instances/update-instances-batch/delete-instances-by-range；跨模型链路 search-by-relation-chain | 「规划挡 build/change」「直通挡 链路查询」|
-| **easyops-cmdb.yaml** | api-cli 清单：18 verb 命令树 + body schema（三层：模型/关系/实例）| 「实际调用」|
-| formats/ | （本系统不适用——无 BPMN/插件格式包）| — |
+| **systems.yaml** | 3 系统接入：鉴权三件套（+ itsc 权限 for itsm）/ 端口 / org / user / capabilities | 「怎么连」「用哪个 org/user」|
+| **objects.yaml** | 3 系统对象模型 + 副作用：cmdb(模型/实例) + autoops(工具/内置变量/工具包) + itsm(表单/版本/容器/控件/脚本/继承/条件显示) | 「对象规则」「接口行为」|
+| **entities.yaml** | 字段锚 + 转换：3 系统主键格式 + 跨实体 step 接力 | 「字段格式」「编排接线」|
+| **flows/*.yaml** | e2e 流程模板：cmdb(模型/实例/链路) + autoops(工具) + itsm(表单 build/add-version/delete/list) | 「规划挡 build/change」「直通挡 读/链路」|
+| **easyops-{cmdb,autoops,itsm-form}.yaml** | 各系统 api-cli 清单：命令树 + body schema | 「实际调用」|
+| formats/ | （本部署不适用——无 BPMN/插件格式包）| — |
 
 ## 快速调用
 
@@ -48,4 +56,23 @@ api-cli --spec platforms/demo/easyops-cmdb.yaml <resource> <verb> [args] --insec
 
 ## 数据来源
 
-契约 `data/api-doc/cmdb-object.json`（4 EAML，模型层）+ `data/api-doc/cmdb-instance.json`（3 有效契约：PostSearchV3/ImportInstance/DeleteInstanceBatch，实例层；剔除 csv/json/excel 文件上传噪声）+ 后端 `data/sources/backend/CMDB/cmdb_service`（object + instance(_extend) 的 route.go / message/*.pb.go，补全契约缺失端点并修正批量删路径笔误 `instance_batch`）。
+**cmdb**：契约 `data/api-doc/cmdb-object.json`（4 EAML，模型层）+ `cmdb-instance.json`（3 有效契约，实例层；剔除 csv/json/excel 文件上传噪声）+ 后端 `CMDB/cmdb_service`（object + instance(_extend)，补全端点并修正批量删路径笔误 `instance_batch`）。
+**autoops**：契约 `data/api-doc/autoops-tool.json`（10 端点，压扁）+ 后端 `AutoOps/tool_service`（源码补全 list/delete/版本/执行/lib）。
+**itsm-form**：契约 `data/api-doc/itsm-form.json`（8 EAML）+ 后端 `ITSM/flowable_service/form_schema_version`（12 路由，补 ListVersion/V2get/V2upd/Category）+ `internal/form/definition`（容器/控件/脚本权威结构体）。
+
+---
+
+## EasyOps ITSM 表单管理（flowable_service）
+
+三层体系（8 verb）：`form`（list/save/delete）· `form_version`（list/get[V2]/update[V2]/delete/set_main）· `formDefinition`（版本内容 JSON 字符串 = []Container，非端点）。
+内容模型（5 容器 / 23 控件 / 5 生命周期脚本 / 条件显示 / 数据继承）详见 `objects.yaml#itsm_form_definition`。
+
+### itsm-form e2e 场景 → resource.verb 映射
+
+| 场景 | 挡位 | 流程 |
+|---|---|---|
+| ① 看 easyops 建了哪些表单 | 直通 | `form.list` → flows/list-forms-and-versions.yaml |
+| ② 看 test 有几个版本 | 直通 | `form.list` 找 formId → `form_version.list` 读 `data.total` |
+| ③ 新建主机申请表单（多机/VM配置/物理机选实例）| 规划 | `form.save`（formDefinition 构造）→ flows/build-form.yaml |
+| ④ 加版本+主机类型多选+条件显示 | 规划 | `form_version.get` → 改 → `form_version.update`（done 版派生新草稿）→ flows/add-version.yaml |
+| ⑤ 删 test 表单 | 规划 | `form_version.delete` 清版本（末版本级联删 form）→ `form.delete` → flows/delete-form.yaml |

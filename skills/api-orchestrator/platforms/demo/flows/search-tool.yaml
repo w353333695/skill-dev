@@ -1,0 +1,12 @@
+# 流程模板：按分类 + 名称查工具（场景①）。直通挡（单步只读）。
+name: search-tool
+intent: 按分类 + 名称关键词查找工具（如 ITSM 分类下找 cmdb 相关工具）
+trigger: ["ITSM分类下有没有X工具", "找X工具", "查工具列表", "有哪些工具"]
+guard: 直通挡（单步只读）
+steps:
+  - n: 1
+    op: tool.list
+    args: [--category, "<分类如ITSM>", --name, "<关键词如cmdb>", --insecure]
+    desc: 按分类 + 名称模糊查工具（name 匹配 name+memo；category 含子类展开；前端 q 是 name 别名）
+    expect: "data.list[] 命中工具；无匹配则空列表"
+acceptance: "前端 tool_list URL（?category=<分类>&q=<关键词>）可见同一结果"
