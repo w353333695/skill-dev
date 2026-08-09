@@ -13,13 +13,16 @@ prerequisites:
 
 steps:
   - n: 1
-    transform: 构造 formDefinition（本地）
+    transform: 构造 formDefinition（本地）—— ⚠️必须归一化补全前端字段
     desc: |
-      按需求拼 []Container（容器平铺列表）。本场景结构：
-      ① row 容器『基础信息』: 申请理由 INPUT(必填) + 申请主机类型 SELECT[物理机|虚拟机]（决定后续 table 显隐，见 add-version.yaml 的条件显示）
-      ② table 容器『虚拟机申请』(动态多行，每行一组): 配置档位 SELECT + 是否挂载分区 SWITCH + 分区类型 SELECT + 分区大小 NUMBERINPUT + 挂载位置 INPUT
-      ③ table 容器『物理机申请』(动态多行): 选物理机 CMDBINSTANCESELECT(cmdbProps.class=relation, foreignObjectId=HOST 或 options.frontKey=name)
-      ⚠️控件 json tag 是 propertys（少 y）；table 容器的列就是 propertys[] 每项一个控件。
+      按需求拼 []Container（容器平铺列表）。⚠️不能只填语义字段——前端逐字段读，缺 options.layout/belongToSection/remoteFunc/rules 等会白屏崩（"Cannot read properties of undefined"）。
+      必须用归一化器补全：容器加 condition/layout/layoutConfig/modelField/displayCondition；控件加 belongToSection + 完整 options（layout/layoutSpan/labelCol/defaultValue/disabled/enabled/highLight/isMore/only/pattern/placeholder/note/question/displayCondition/remoteFunc{toolId,scriptInputs}/rules/extraProps/dataType/required）。完整字段集见 objects.yaml#itsm_form_definition constraints。
+      最稳：get 一个正常表单（如「知识表单」）的 formDefinition 作模板，改里面的 type/label/modelField/extraProps.items。
+      本场景结构：
+      ① row 容器『基础信息』: 申请理由 INPUT(必填) + 申请主机类型 SELECT[物理机|虚拟机] + 申请主机类型 MULTIPLESELECT（决定后续 table 显隐，条件显示见 add-version.yaml）
+      ② table 容器『虚拟机申请』(动态多行): 配置档位 SELECT + 是否挂载分区 SWITCH + 分区类型 SELECT + 分区大小 NUMBERINPUT + 挂载位置 INPUT
+      ③ table 容器『物理机申请』(动态多行): 选物理机 CMDBINSTANCESELECT(cmdbProps.class=relation, foreignObjectId=HOST, options.frontKey=name)
+      控件 json tag 是 propertys（少 y）；SELECT 选项放 options.extraProps.items:[{key,label,value}]。
     body_hint: |
       formDefinition = JSON.stringify([
         { "key":"c_base","name":"基础信息","type":"row","propertys":[
