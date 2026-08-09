@@ -16,13 +16,17 @@ uv run browser-recorder doctor       # 自检
 ### 录制（headed，生产环境有 UI）
 
 ```bash
-# 首次：手动登录一次，登录态存到 .browser-recorder/auth/<host>.json
-browser-recorder login --url http://172.30.0.232
+# 账密自动登录（无 UI 也能跑；easyops 等表单登录站点）
+browser-recorder record --url https://172.30.0.232 \
+  --username easyops --password xxx --ignore-https-errors
 
-# 之后录制自动带登录态；过期会提示原地重登（不中断录制）
-browser-recorder record --url http://172.30.0.232
-# 在浏览器里正常操作，Ctrl+C 或关闭浏览器结束录制
+# 或首次手动登录导出登录态，之后复用
+browser-recorder login --url https://172.30.0.232 --ignore-https-errors
+browser-recorder record --url https://172.30.0.232 --ignore-https-errors
+# 登录态过期会检测并提示原地重登（给了账密则自动重登），不中断录制
 ```
+
+> 自签证书的内网站点需 `--ignore-https-errors`。
 
 ### 录制（CDP attach，无 UI 环境 / 登录态兜底）
 
@@ -73,4 +77,5 @@ browser-recorder record --url http://localhost:8000 --headless
 - **CDP 模式不支持录制期录像**（Playwright 限制）；回放录像（`replay --video`）不受影响。
 - **iframe**：同源 iframe 内操作可录制（事件经 parent 桥上报）；跨域 iframe 事件会丢弃并在 console warn。回放第一阶段只定位 main frame。
 - **SPA 路由**：`pushState/replaceState/popstate/hashchange` 会记录为 navigate 步骤。
-- **请求记录**：经 `context.route` 拦截所有 fetch/XHR（静态资源/媒体/websocket 除外），请求体 + 响应体（≤64KB）都记；doc.md 末尾附"关键请求"表（写操作 + 非 2xx）。
+- **请求记录**：`page.on("request/response")` 事件监听所有 fetch/XHR（静态资源/媒体/websocket 除外），记录方法/URL/状态/请求体，按步骤关联；doc.md 末尾附"关键请求"表（写操作 + 非 2xx）。响应体在录制期周期 drain 时补读（响应新鲜时命中；页面导航后的旧响应 body 可能丢失，退化为仅元数据）。不用 route 拦截（fulfill 会重建响应丢 header 破坏 SPA，continue_ 会双发写操作）。
+- **已实测**：内网 easyops（DevOps 管理专家，表单登录 + PHPSESSID cookie）端到端通过——账密自动登录、录制登录+导航操作、88 条 API 请求记录、图文手册+请求附录生成、回放 5/6 通过（失败步骤为动态元素定位，报告可定位）。

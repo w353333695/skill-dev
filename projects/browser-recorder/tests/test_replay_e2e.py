@@ -46,8 +46,11 @@ def test_record_and_replay(tmp_path, demo_server):
     page.evaluate(_DISPATCH_INPUTS)
     recorder.drain()
     page.evaluate("() => document.getElementById('submit-btn').click()")
-    # click 触发 fetch + 导航；导航期间避免访问 page（CDP 调用会悬挂），直接等 + drain
-    time.sleep(1.5)
+    # click 触发 fetch + 导航；request/response 是异步事件，给足时间到达
+    # （finish 会 close 文件，之后到的事件被丢弃）
+    time.sleep(2.5)
+    recorder.drain()
+    time.sleep(0.5)
     recorder.drain()
 
     session_dir = recorder.finish()

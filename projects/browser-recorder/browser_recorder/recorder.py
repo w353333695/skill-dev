@@ -29,12 +29,18 @@ class Recorder:
         output_root: str = ".browser-recorder/sessions",
         video: bool = False,
         headless: bool = False,
+        username: str | None = None,
+        password: str | None = None,
+        ignore_https_errors: bool = False,
     ):
         self.url = url
         self.cdp = cdp
         self.use_auth = use_auth
         self.video = video
         self.headless = headless
+        self.username = username
+        self.password = password
+        self.ignore_https_errors = ignore_https_errors
         self.output_root = Path(output_root)
 
         self._stop = threading.Event()
@@ -85,7 +91,7 @@ class Recorder:
             context = browser.contexts[0] if browser.contexts else browser.new_context()
             owned = False
         else:
-            kwargs = {}
+            kwargs = {"ignore_https_errors": self.ignore_https_errors}
             if self.video:
                 kwargs["record_video_dir"] = str(self.session_dir / "video")
             storage_state = None
@@ -97,7 +103,8 @@ class Recorder:
                     storage_state = str(self._auth.state_path(self.url))
                 if storage_state:
                     kwargs["storage_state"] = storage_state
-            browser = p.chromium.launch(headless=self.headless)
+            launch_args = ["--ignore-certificate-errors"] if self.ignore_https_errors else []
+            browser = p.chromium.launch(headless=self.headless, args=launch_args)
             context = browser.new_context(**kwargs)
             owned = True
 
@@ -119,7 +126,14 @@ class Recorder:
             self._write_step(StepEvent(seq=self._next_seq(), type="navigate", value=page.url, url=page.url))
 
         if owned and self.use_auth and self.url and getattr(self, "_auth", None):
-            self._auth.ensure_valid(context, page, self.url)
+            # SPA 站点（如 easyops）goto 后需等 JS 加载才到登录页/落地页
+            page.wait_for_timeout(3000)
+            self._auth.ensure_valid(context, page, self.url,
+                                    username=self.username, password=self.password)
+            # 自动登录可能引发二次导航，重新记录落地页
+            if self.username and self.password and page.url != start_url:
+                self._drain_events()  # 先收下登录过程产生的事件
+                self._write_step(StepEvent(seq=self._next_seq(), type="navigate", value=page.url, url=page.url))
 
         self._save_meta(context, page)
         self._page = page

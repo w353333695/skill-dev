@@ -24,12 +24,14 @@ class Replayer:
         on_fail: str = "stop",
         video: bool = False,
         timeout_ms: int = 15000,
+        ignore_https_errors: bool = False,
     ):
         self.session_dir = Path(session_dir)
         self.params = params or {}
         self.on_fail = on_fail
         self.video = video
         self.timeout_ms = timeout_ms
+        self.ignore_https_errors = ignore_https_errors
 
         self.replay_dir = self.session_dir / "replay"
         self.replay_dir.mkdir(exist_ok=True)
@@ -43,8 +45,9 @@ class Replayer:
         start_url = self._start_url(steps)
 
         with sync_playwright() as p:
-            browser = p.chromium.launch(headless=True)
-            ctx_kwargs = {}
+            launch_args = ["--ignore-certificate-errors"] if self.ignore_https_errors else []
+            browser = p.chromium.launch(headless=True, args=launch_args)
+            ctx_kwargs = {"ignore_https_errors": self.ignore_https_errors}
             if self.video:
                 ctx_kwargs["record_video_dir"] = str(self.replay_dir / "video")
             context = browser.new_context(**ctx_kwargs)
