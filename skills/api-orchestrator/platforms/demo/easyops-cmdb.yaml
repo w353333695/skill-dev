@@ -27,10 +27,13 @@ service:
   default_endpoint: backend
   endpoints:
     backend:
-      base_url: ${EASYOPS_CMDB_BACKEND_URL}        # http://172.30.0.90:8079
+      base_url: ${EASYOPS_CMDB_BACKEND_URL}        # http://172.30.0.232:8079
       host: admin.easyops.local                     # IP 直连，Host 由 endpoint.Host 注入
       path_prefix: ""                               # 后端路由挂在 gin root（无前缀）
       auth: easyops-cookie
+      headers:                                      # endpoint 级固定 header（每个请求都带，api-cli 自动注入）
+        org: "1"                                    # EasyOps 租户 org：user_service 默认 org=1（validator gte:1，org=0 无库）。改部署时改这里。
+        user: ${EASYOPS_USER}                       # EasyOps 用户标识：直连后端无网关解 cookie，须手动带（否则 empty user）。需有 ObjectImport 权限才能写；读模型元数据任意非空值即可。export EASYOPS_USER=<登录账号>
     frontend:
       base_url: ${EASYOPS_CMDB_FRONTEND_URL}        # https://172.30.0.90
       host: admin.easyops.local

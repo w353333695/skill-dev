@@ -17,11 +17,12 @@ type yamlService struct {
 }
 
 type yamlEndpoint struct {
-	BaseURL         string   `yaml:"base_url"`
-	Auth            string   `yaml:"auth"`
-	PathPrefix      string   `yaml:"path_prefix"`
-	Host            string   `yaml:"host"`
-	AllowOperations []string `yaml:"allow_operations"`
+	BaseURL         string            `yaml:"base_url"`
+	Auth            string            `yaml:"auth"`
+	PathPrefix      string            `yaml:"path_prefix"`
+	Host            string            `yaml:"host"`
+	AllowOperations []string          `yaml:"allow_operations"`
+	Headers         map[string]string `yaml:"headers"` // endpoint 级固定 header（每个请求都带，如 easyops 的 org/user）
 }
 
 type yamlResource struct {
