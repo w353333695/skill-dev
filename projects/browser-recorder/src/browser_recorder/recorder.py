@@ -340,7 +340,9 @@ class Recorder:
         self.jsonl_writer.write(action)
 
     async def _record_nav(self, page: Page, url: str) -> None:
-        await page.goto(url, wait_until="domcontentloaded")
+        """记录导航事件. commit 后等 2s 让 JS 跳转/渲染完成."""
+        await page.goto(url, wait_until="commit", timeout=30000)
+        await asyncio.sleep(2)  # 等 JS 跳转 + 首屏渲染
         self.step_counter += 1
         after_path = await self.screenshoter.take_nav_result(page, self.step_counter)
 
