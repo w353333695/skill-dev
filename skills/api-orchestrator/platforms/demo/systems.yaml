@@ -54,6 +54,14 @@ systems:
       object_instance:
         search: "按 MongoDB 风格 query 搜索实例（分页）"
 
+    # 运维知识（实测）—— 调用前必读，决定 user/org 怎么填
+    runtime:
+      admin_user: easyops              # 模型系统管理员，有 ObjectImport/删除权限；export EASYOPS_USER=easyops（读模型元数据任意非空 user 即可，写必须 easyops）
+      org_query: "user_service GET http://172.30.0.232:8111/api/v1/org/list（Header: Cookie PHPSESSID + Host admin.easyops.local；返回非系统 org 列表）"
+      protected_orgs: [0, 1, 2]        # 系统自带 org，禁止写操作（业务库，动了会污染）。0 无库、1=主业务(22模型)、2=名字服务(9模型)
+      test_org: 18832008               # 非系统测试 org（org/list 查出，2026-07-31 建），写验证用；export EASYOPS_ORG=18832008
+      delete_constraint: "模型有关系定义时直接 delete 报 133129「请先删除已有关系」；解法：forceDelete=true 强删（连关系），或先 object_relation delete 逐条删关系再删模型"
+
     # e2e 验收 URL（前端）—— 模型类操作后在此可视化校验
     acceptance_urls:
       model_list:   "http://172.30.0.90/next/cmdb-model-management?hidden=true&page=1&q=测试&pageSize=20&category=应用资源"
