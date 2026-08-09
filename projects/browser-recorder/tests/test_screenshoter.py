@@ -8,10 +8,10 @@ from browser_recorder.screenshoter import Screenshoter
 
 def test_mark_click_creates_image():
     """mark_click 在图片上画圆标记并输出."""
-    s = Screenshoter()
-    # 创建一张 200x100 白色测试图
-    img = Image.new("RGB", (200, 100), color="white")
     with tempfile.TemporaryDirectory() as tmpdir:
+        s = Screenshoter(output_dir=Path(tmpdir))
+        # 创建一张 200x100 白色测试图
+        img = Image.new("RGB", (200, 100), color="white")
         src = Path(tmpdir) / "src.png"
         img.save(src)
         out = Path(tmpdir) / "out.png"
@@ -25,9 +25,9 @@ def test_mark_click_creates_image():
 
 def test_mark_click_circle_visible():
     """标记图片上应有红色像素（圆圈）."""
-    s = Screenshoter()
-    img = Image.new("RGB", (100, 100), color="white")
     with tempfile.TemporaryDirectory() as tmpdir:
+        s = Screenshoter(output_dir=Path(tmpdir))
+        img = Image.new("RGB", (100, 100), color="white")
         src = Path(tmpdir) / "src.png"
         img.save(src)
         out = Path(tmpdir) / "out.png"
@@ -44,9 +44,9 @@ def test_mark_click_circle_visible():
 
 def test_mark_click_none_coords_noop():
     """coords 为 None → 不标记，直接复制."""
-    s = Screenshoter()
-    img = Image.new("RGB", (50, 50), color="white")
     with tempfile.TemporaryDirectory() as tmpdir:
+        s = Screenshoter(output_dir=Path(tmpdir))
+        img = Image.new("RGB", (50, 50), color="white")
         src = Path(tmpdir) / "src.png"
         img.save(src)
         out = Path(tmpdir) / "out.png"

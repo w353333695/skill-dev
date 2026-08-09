@@ -1,6 +1,5 @@
 """智能截图器 — 双帧策略 + Pillow 点击标记."""
 from __future__ import annotations
-import asyncio
 from pathlib import Path
 from typing import Optional
 from PIL import Image, ImageDraw
@@ -15,13 +14,11 @@ class Screenshoter:
       - 结果帧 (after): DOM 稳定后的全页面截图
     """
 
-    def __init__(self, output_dir: Path = Path("."), fallback_interval: float = 30.0) -> None:
+    def __init__(self, output_dir: Path) -> None:
         self.output_dir = Path(output_dir)
         self.screenshots_dir = self.output_dir / "screenshots"
         self.screenshots_dir.mkdir(parents=True, exist_ok=True)
-        self.fallback_interval = fallback_interval
-        self._last_before_screenshot: Optional[Path] = None
-        self._last_screenshot_time: float = 0.0
+        self._last_screenshot: Optional[Path] = None
 
     async def take_before(self, page: Page, step: int, coords: Optional[tuple]) -> Optional[Path]:
         """截取前帧（操作前页面），在图上标记点击坐标."""
@@ -36,7 +33,7 @@ class Screenshoter:
             if raw_path.exists():
                 raw_path.unlink()
 
-            self._last_before_screenshot = out_path
+            self._last_screenshot = out_path
             return out_path
         except Exception:
             return None
@@ -53,7 +50,7 @@ class Screenshoter:
 
             out_path = self.screenshots_dir / f"step_{step:03d}_result.jpg"
             await page.screenshot(path=str(out_path), full_page=True)
-            self._last_before_screenshot = out_path
+            self._last_screenshot = out_path
             return out_path
         except Exception:
             return None
@@ -64,7 +61,7 @@ class Screenshoter:
             await page.wait_for_load_state("networkidle")
             out_path = self.screenshots_dir / f"step_{step:03d}_result.jpg"
             await page.screenshot(path=str(out_path), full_page=True)
-            self._last_before_screenshot = out_path
+            self._last_screenshot = out_path
             return out_path
         except Exception:
             return None
@@ -90,13 +87,14 @@ class Screenshoter:
 
     def get_last_before(self) -> Optional[Path]:
         """返回最近一次截图路径（作为下一步的前帧）."""
-        return self._last_before_screenshot
+        return self._last_screenshot
 
     async def fallback_shot(self, page: Page, step: int) -> Optional[Path]:
         """兜底定时截图（无操作时）."""
         out_path = self.screenshots_dir / f"step_{step:03d}_shot.jpg"
         try:
             await page.screenshot(path=str(out_path), full_page=True)
+            self._last_screenshot = out_path
             return out_path
         except Exception:
             return None
