@@ -39,6 +39,7 @@
 * **Python 版本基线（强制）**：每个 Python project 的开发 venv **钉到 `requires-python` 的下限版本**（当前基线 **3.9**），用 `.python-version` 固化并提交。
   - **原因**：`requires-python` 只是**安装时**校验的元数据，**不验证代码兼容性**；uv 按 `.python-version` 只在**一个**版本上开发/构建/跑测试，不会自动测下限。钉到下限 = 开发即验证下限：写了 `X | None`（无 future）/`match`/`zip(strict=True)` 等 3.10+ 语法，保存跑一下就当场炸，强制兑现 `>=3.9` 契约（doc-converter 曾因 `X | None` 在 3.9 炸，见 commit 4c61f0c）。
   - **落地**：`.python-version` 写下限版本（如 `3.9`）；切换时 `rm -rf .venv uv.lock && UV_INDEX_URL=https://pypi.tuna.tsinghua.edu.cn/simple uv sync` 重建（镜像见 §3.1）。类型注解用 `X | None` 时配合 `from __future__ import annotations`（注解惰性化为字符串，3.9 运行时不再求值）。
+  - **依赖侧也要卡下限**：不止自己的代码语法，**第三方依赖的新版本也可能抬高 python 要求**。典型：playwright **1.61+ 要求 py≥3.10**，支持 3.9 的最后版本是 1.60（对应 chromium-1223）；click **8.2+ 要求 py≥3.10**。凡要兼容 3.9 的 project，这类依赖必须钉上限（如 `playwright>=1.56,<1.61`、`click<8.2`），否则 uv 在 3.9 环境会解析失败或装上跑不动。browser-recorder 实测：3.9.25 + playwright 1.60 全测试通过，业务代码零改动（全靠 future annotations）。
   - **新建 Python project**：直接 `echo 3.9 > .python-version` + 建 3.9 venv 起步，别从 3.12 建再降级（降级时会撞语法雷）。
   - **不再需要老版本**时：**优先提高 `requires-python` 下限**（如 `>=3.11`）并同步 `.python-version`，而不是留在 3.9 靠 future import 硬撑。
   - whl 是 `py3-none-any`，build 用的版本**不影响**产物的兼容性标记；但仍建议偶尔在高版本（如 3.12）跑次测试防反向不兼容。
