@@ -26,9 +26,16 @@ api-cli --spec platforms/demo/easyops-cmdb.yaml <resource> <verb> [args] --insec
 - 字段格式/编排接线 → 查 `entities.yaml`
 - 端到端建/改/删模型 → 查 `flows/`
 
-## 三层体系（18 verb）
+## 三层体系（19 verb）
 
-`object_model`（模型：list/detail/import/import_check/export/delete）· `object_attr`/`object_relation`（属性/关系细粒度 CRUD）· `object_instance`（实例：search/import/delete——CRUD 全走批量，import 是建+改的 upsert 统一入口）。命令树与 body schema 详见 `easyops-cmdb.yaml`。
+`object_model`（模型：list/detail/import/import_check/export/delete）· `object_attr`/`object_relation`（属性/关系细粒度 CRUD + `object_relation.related_key` 跨模型链路发现）· `object_instance`（实例：search/import/delete——CRUD 全走批量，import 是建+改的 upsert 统一入口）。命令树与 body schema 详见 `easyops-cmdb.yaml`。
+
+## 多模型关系链路（related_key + search 协同）
+
+跨模型沿链取字段/过滤（如 TESTWWH→HOST→服务集→系统）：
+1. **发现链路**：`object_relation.related_key`（src, dst）→ 拿 `reverseQueryKey`（dst→src，喂 dst 模型 search）+ 从 `path[].relation_side_id` 拼正向键（src→dst，喂 src 模型 search）。
+2. **穿越**：`object_instance.search` 用该键多层 jsonPath——`fields:["<key>.name"]` 取终端名，`query:{<key>.name:{$eq}}` 按终端名过滤。
+   实测：HOST search `serviceSets.system.name` 取到系统名 `"Easyops"`。
 
 ## cmdb-instance e2e 场景 → resource.verb 映射
 

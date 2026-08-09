@@ -409,11 +409,11 @@ resources:
           force_delete: { in: query, type: boolean, description: "强制删除，默认 false" }
 
   # ---------------------------------------------------------------------------
-  # 资源 3：object_relation —— 模型关系(关联)的细粒度 CRUD
-  # 路径 /object_relation[/{relation_id}]。关系两端各指向一个模型。
+  # 资源 3：object_relation —— 模型关系(关联)的细粒度 CRUD + 跨模型关系链路发现
+  # 路径 /object_relation[/{relation_id}]；链路发现 /object_relation_related_key（disparate）。
   # ---------------------------------------------------------------------------
   object_relation:
-    description: 模型关系(关联)的细粒度 CRUD。建/改关系除走 object_model.import 外，也可走这里。一条关系连接两个模型(left/right)，各持对端 id 与基数(min/max)。relation_id 路径参数。
+    description: 模型关系(关联)的细粒度 CRUD + 跨模型关系链路发现。建/改关系除走 object_model.import 外也可走这里；related_key 发现两模型间的关系路径（返回 reverseQueryKey/正向键，配合 object_instance.search 的多层 jsonPath 穿越链路）。一条关系连接两个模型(left/right)，各持对端 id 与基数(min/max)。
     path: ""
     operations:
       list:
@@ -458,6 +458,39 @@ resources:
         params:
           relation_id:  { in: path, type: string, required: true, description: "关系 ID" }
           force_delete: { in: query, type: boolean, description: "强制删除，默认 false" }
+
+      # ---------- 跨模型关系链路发现（GET /object_relation_related_key）----------
+      # 配合 object_instance.search 多层 jsonPath：先本接口发现两模型间的链路键，再 search 穿越。
+      # 源码 object_path/（route.go:16 / object_path_service.go:173 / logic.go:436-469）。
+      related_key:
+        description: 发现两个模型间的关系路径（多模型链路发现）。给定 src/dst 模型，返回所有可达路径（实测最多 100 条），每条含 label（人读链路名）、reverseQueryKey（dst→src 反向键，直接可喂【dst 模型】的 search fields/query）、path（节点-边序列，边的 relation_side_id 序列拼成【src→dst 正向键】，喂【src 模型】的 search）。例 related_key(HOST, APP_SYSTEM@ONEMODEL) → reverseQueryKey=serviceSets.hosts（APP_SYSTEM→HOST，APP_SYSTEM search 用），正向键=serviceSets.system（HOST→APP_SYSTEM，HOST search 用 serviceSets.system.name 取系统名，实测返回 "Easyops"）。
+        method: GET
+        path: /object_relation_related_key
+        params:
+          src_object_id:     { in: query, type: string, required: true, description: "起点模型 id（如 HOST）" }
+          dst_object_id:     { in: query, type: string, required: true, description: "终点模型 id（如 APP_SYSTEM@ONEMODEL）" }
+          show_inherit_node: { in: query, type: boolean, description: "是否展示继承关系节点，默认 false" }
+          with_cycle:        { in: query, type: boolean, description: "是否允许环路路径，默认 false" }
+          white_list:        { in: query, type: string, description: "白名单（模型/关系，逗号分隔），只走这些" }
+          black_list:        { in: query, type: string, description: "黑名单（模型/关系，逗号分隔），跳过这些" }
+        response:
+          type: object
+          description: "标准 wrapper：{ code, data: ObjectRelationRelatedKey[] }。data 为 src→dst 的所有可达路径。"
+          properties:
+            code: { type: integer }
+            data:
+              type: array
+              description: "可达关系路径列表（实测最多 100 条；按需选最短/最贴切的，reverseQueryKey 段数≈跳数）"
+              items:
+                type: object
+                properties:
+                  id:               { type: string, description: "路径 hash id" }
+                  label:            { type: string, description: "人读链路名，如『主机-服务集(服务集)-应用系统(系统)』" }
+                  reverseQueryKey:  { type: string, description: "dst→src 反向路径键（点分 Out.Id 链）。直接可用于【dst 模型】search 的 fields/query。如 serviceSets.hosts" }
+                  path:
+                    type: array
+                    description: "节点-边交替序列。边的 relation_side_id 按序拼接 = src→dst 正向键，用于【src 模型】search。"
+                    items: { type: object, additional_properties: true }
 
   # ---------------------------------------------------------------------------
   # 资源 4：object_instance —— CMDB 实例层（与模型层同处一个 yaml 集中调用）

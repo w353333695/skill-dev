@@ -57,6 +57,7 @@ systems:
         read:   "读取单条关系"
         update: "更新关系"
         delete: "删除关系"
+        related_key: "发现两模型间的关系路径（reverseQueryKey/正向键，配合 search 多层 jsonPath 穿越链路）"
       object_instance:
         search: "按 MongoDB 风格 query 搜索实例（fields 必填，分页；总数读 data.total）"
         import: "批量建/改实例（upsert，keys+datas）—— 新建 + 改的统一入口（C+U）"
