@@ -200,18 +200,11 @@ class Recorder:
         self._running = True
         self.start_time_ms = time.time() * 1000
 
+        browser = None
+        context = None
+
         async with async_playwright() as pw:
             browser = await pw.chromium.launch(headless=False)
-
-            # 尝试加载已有鉴权状态
-            storage_state = None
-            if self._auth_file.exists():
-                try:
-                    storage_state = _json.loads(self._auth_file.read_text())
-                    console.print("[dim]🔐 已加载鉴权状态[/dim]")
-                except Exception:
-                    pass
-
             context = await browser.new_context(
                 no_viewport=True,
                 storage_state=storage_state,
@@ -221,11 +214,9 @@ class Recorder:
             page = await context.new_page()
             self._register_page(page, "main")
 
-            # 先挂主页面，再监听后续弹窗/新标签
             await self.network_interceptor.setup(page)
             await self._setup_page(page, "main")
 
-            # 监听后续新页面（window.open / target=_blank），不包括已创建的 main
             context.on("page", lambda p: asyncio.ensure_future(self._on_new_page(p)))
             await self._record_nav(page, self.url)
 
@@ -243,20 +234,20 @@ class Recorder:
                             console.print("[yellow]⏰ 达到最大录制时长[/yellow]")
                             break
             except asyncio.CancelledError:
-                pass
-
-            if self._fallback_task:
-                self._fallback_task.cancel()
-
-            # 保存鉴权
-            await self._save_auth(context)
-
-            for p in self._page_map.values():
-                await injector_flush(p)
-            self.jsonl_writer.flush()
-
-            await context.close()
-            await browser.close()
+                self._running = False
+            finally:
+                # 清理：取消定时器 → flush → 保存鉴权 → 关浏览器
+                if self._fallback_task:
+                    self._fallback_task.cancel()
+                for p in self._page_map.values():
+                    await injector_flush(p)
+                self.jsonl_writer.flush()
+                try:
+                    await self._save_auth(context)
+                    await context.close()
+                    await browser.close()
+                except (RuntimeError, Exception):
+                    pass  # 事件循环关闭中，忽略清理错误
 
         return self._finalize()
 
