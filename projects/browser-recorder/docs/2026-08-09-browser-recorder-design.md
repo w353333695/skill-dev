@@ -1,6 +1,6 @@
 # browser-recorder 设计规格书
 
-> 版本: 0.1.0 | 日期: 2026-08-09 | 状态: 设计中
+> 版本: 0.1.1 | 日期: 2026-08-09 | 状态: 设计中
 
 ## 1. 概述
 
@@ -15,10 +15,10 @@
 - 生成 Markdown 图文报告，步骤序号 + 分类标签
 - 支持弹窗、iframe、多标签页（新增/切换/关闭）
 - 默认清理临时截图，可选择保留全部过程记录
+- **基于录制事件的自动化回放**（支持倍速，条件等待与人为停顿区别对待）
 
 ### 1.2 非目标（v0.1）
 
-- 录制回放（未来插件扩展）
 - 服务端部署 / Web UI
 - 多浏览器并发录制
 - 视频录制
@@ -81,6 +81,7 @@ class Reporter(Protocol):
 | Handler | `ScreenshotHandler` | 智能截图（前帧标记 + 结果帧） |
 | Handler | `RequestHandler` | page.route() 网络请求拦截 |
 | Handler | `JsonlWriter` | 增量写 events.jsonl |
+| Handler | `ReplayHandler` | 读 events.jsonl 回放操作链 |
 | Reporter | `MarkdownReporter` | 生成 record.md |
 
 ### 3.2 项目结构
@@ -93,6 +94,7 @@ projects/browser-recorder/
 │   ├── __init__.py
 │   ├── cli.py                   # Typer CLI 入口
 │   ├── recorder.py              # 核心编排器
+│   ├── replay.py                # 事件链回放引擎
 │   ├── injector.py              # JS 注入 + 事件 push
 │   ├── network.py               # page.route() 拦截
 │   ├── screenshoter.py          # 智能截图 + Pillow 标记
@@ -286,6 +288,35 @@ context.on('page') → 新 tab 诞生
 
 注入脚本监听 `popstate` + `hashchange`，变化时 push NAV 事件。
 
+### 5.9 事件回放
+
+回放基于录制产出的 `events.jsonl`，读入 Action 序列后在新浏览器上下文中自动执行。
+
+**核心机制：区分两种等待**
+
+| 等待类型 | 来源 | 倍速影响 |
+|----------|------|----------|
+| **条件等待** | 等元素可见、等 networkidle、等 DOM 稳定 | **不加速**，等到条件满足为止（有超时） |
+| **人为停顿** | 操作间自然间隔（打字、阅读停顿） | **按倍速缩放** |
+
+```
+回放伪代码：
+  for each action:
+      case NAV:     page.goto(url) → wait networkidle
+      case CLICK:   wait selector visible → page.click(selector)
+      case INPUT:   page.fill(selector, value)
+      ...
+
+      人为停顿 = 录制时间间隔 - 上一步条件等待耗时
+      sleep(人为停顿 / speed)
+```
+
+**回放时的截图与报告：** 回放过程中同样运行 ScreenshotHandler + RequestHandler，每次回放产出独立的 markdown 报告。回放产物的 step 编号后缀 `(R)` 标记为回放步骤。
+
+**多标签页回放：** `events.jsonl` 中每条 Action 已携带 `page_id`，回放时按同样顺序在对应 page 上执行，支持跨标签操作链的完整还原。新标签页的出现（如 `window.open`）在回放时会自然触发 `context.on('page')`，回放引擎接管新页面继续执行该 `page_id` 的后续事件。
+
+注入脚本监听 `popstate` + `hashchange`，变化时 push NAV 事件。
+
 ---
 
 ## 6. CLI 接口
@@ -309,8 +340,23 @@ recorder start --url URL [OPTIONS]
 
 ```bash
 recorder doctor    # 检查环境（chromium 是否安装）
+recorder replay    # 回放录制的事件链
 recorder version   # 版本号
 ```
+
+### 6.1 replay 子命令
+
+```bash
+recorder replay <events.jsonl> [OPTIONS]
+```
+
+| 参数 | 类型 | 默认值 | 说明 |
+|------|------|--------|------|
+| `EVENTS` | Path | (必填) | 录制的 events.jsonl 文件路径 |
+| `--speed` | float | 1.0 | 人为停顿的倍速（条件等待不加速） |
+| `--repeat` | int | 1 | 重复回放次数 |
+| `--output` | Path | 自动 | 输出目录（默认 events.jsonl 旁 `-replay<N>`） |
+| `--keep-all` | flag | False | 保留回放的全部过程文件 |
 
 ---
 
@@ -436,7 +482,6 @@ record-20260809_143025/
 
 通过插件接口可扩展：
 
-- **ReplayHandler** — 录制回放
 - **WebSocketHandler** — 实时上报到服务端
 - **CodegenReporter** — 导出 Playwright 测试代码
 - **VideoHandler** — 视频录制
@@ -448,3 +493,4 @@ record-20260809_143025/
 | 日期 | 版本 | 变更 |
 |------|------|------|
 | 2026-08-09 | 0.1.0 | 初始设计规格 |
+| 2026-08-09 | 0.1.1 | 新增 `recorder replay` 回放能力：条件等待/人为停顿区分 + 倍速 + 重复回放 + 回放生成独立报告 |
