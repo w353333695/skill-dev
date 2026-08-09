@@ -7,10 +7,10 @@
 | 文件 | 装什么 | 何时查 |
 |---|---|---|
 | **systems.yaml** | 系统接入：鉴权三件套 / 端口 / org 体系 / user 权限 / 环境变量 / capabilities | 「怎么连」「用哪个 org/user」|
-| **objects.yaml** | 对象模型 + 副作用规则：CmdbObject 结构、属性 value、关系约束、import upsert、删除 133129、NDJSON、fields 必填 | 「建模规则」「接口行为」|
-| **entities.yaml** | 字段锚 + 转换：objectId/instance_id/org/user 格式、跨实体 step 接力 | 「字段格式」「编排接线」|
-| **flows/*.yaml** | e2e 流程模板：build-model / add-attributes / delete-model | 「规划挡 build/change」|
-| **easyops-cmdb.yaml** | api-cli 清单：16 verb 命令树 + body schema（三层：模型/关系/实例）| 「实际调用」|
+| **objects.yaml** | 对象模型 + 副作用规则：CmdbObject 结构、属性 value、关系约束、import upsert、删除 133129、NDJSON、fields 必填；实例 cmdb_instance（CRUD 批量语义/关系字段/instanceId 格式）| 「建模规则」「实例规则」「接口行为」|
+| **entities.yaml** | 字段锚 + 转换：objectId/instance_id/org/user 格式、跨实体 step 接力（含实例 search→import/delete）| 「字段格式」「编排接线」|
+| **flows/*.yaml** | e2e 流程模板：模型层 build-model/add-attributes/delete-model；实例层 create-instances/update-instances-batch/delete-instances-by-range | 「规划挡 build/change」|
+| **easyops-cmdb.yaml** | api-cli 清单：18 verb 命令树 + body schema（三层：模型/关系/实例）| 「实际调用」|
 | formats/ | （本系统不适用——无 BPMN/插件格式包）| — |
 
 ## 快速调用
@@ -26,10 +26,19 @@ api-cli --spec platforms/demo/easyops-cmdb.yaml <resource> <verb> [args] --insec
 - 字段格式/编排接线 → 查 `entities.yaml`
 - 端到端建/改/删模型 → 查 `flows/`
 
-## 三层体系（16 verb）
+## 三层体系（18 verb）
 
-`object_model`（模型：list/detail/import/import_check/export/delete）· `object_attr`/`object_relation`（属性/关系细粒度 CRUD）· `object_instance`（实例 search）。命令树与 body schema 详见 `easyops-cmdb.yaml`。
+`object_model`（模型：list/detail/import/import_check/export/delete）· `object_attr`/`object_relation`（属性/关系细粒度 CRUD）· `object_instance`（实例：search/import/delete——CRUD 全走批量，import 是建+改的 upsert 统一入口）。命令树与 body schema 详见 `easyops-cmdb.yaml`。
+
+## cmdb-instance e2e 场景 → resource.verb 映射
+
+| 场景 | 挡位 | 流程 |
+|---|---|---|
+| ① 新建 N 实例（含关联）| 规划 | `object_instance.import`（keys+datas，关系字段=Out.Id）→ flows/create-instances.yaml |
+| ② 查某网段有几个实例 | 直通 | `object_instance.search`（query ip $like），读 `data.total` |
+| ③ 给所有实例补属性 | 规划 | search 取列表 → import 定向改（keys=[instanceId]）→ flows/update-instances-batch.yaml |
+| ④ 按 ip 范围删实例 | 规划 | search 取 instanceIds → `object_instance.delete`（分号串）→ flows/delete-instances-by-range.yaml |
 
 ## 数据来源
 
-契约 `data/api-doc/cmdb-object.json`（4 EAML）+ 后端 `data/sources/backend/CMDB/cmdb_service`（route.go / message/*.pb.go，补全契约缺失的删除/详情/属性/关系 CRUD）。
+契约 `data/api-doc/cmdb-object.json`（4 EAML，模型层）+ `data/api-doc/cmdb-instance.json`（3 有效契约：PostSearchV3/ImportInstance/DeleteInstanceBatch，实例层；剔除 csv/json/excel 文件上传噪声）+ 后端 `data/sources/backend/CMDB/cmdb_service`（object + instance(_extend) 的 route.go / message/*.pb.go，补全契约缺失端点并修正批量删路径笔误 `instance_batch`）。

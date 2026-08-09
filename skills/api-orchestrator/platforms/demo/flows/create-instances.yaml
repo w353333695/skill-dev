@@ -1,0 +1,42 @@
+# 流程模板：批量新建实例（cmdb-instance 场景①）。对应 SKILL.md flows/（build 用）。
+# 场景：新建 TESTWWH 实例，ip 192.168.1.1-10 共 10 个，全部关联 easyops 系统。
+name: create-instances
+intent: 批量新建某模型的 N 个实例（可含关系关联），走 object_instance.import 一次性 upsert
+trigger: ["建 N 个实例", "批量新建实例", "录入一批主机/资源", "新建实例并关联到 X"]
+guard: 规划挡（写、批量）—— 须展示 datas 确认
+prerequisites:
+  env: [EASYOPS_ORG（非 0/1/2 测试 org）, EASYOPS_USER=easyops, EASYOPS_CMDB_BACKEND_URL]
+  model_exists: "目标模型（如 TESTWWH@EASYOPS）已存在；若要带关系，关系定义须已存在（见 object_model.import）"
+  relation_field: "若要关联对端实例：先 object_model.detail 拿 relation_list，找到指向对端模型的关系及其 Out.Id（实例上的关系字段名）；再查对端实例拿 instanceId"
+steps:
+  - n: 1
+    op: object_instance.search
+    args: ["<OBJECT_ID>", --body-file, "<check.json>", --insecure]
+    desc: 预检——查 keys（如 ip/name）是否已存在，避免误判增改
+    body_hint: '{ fields: ["instanceId","ip"], page:1, page_size:200, query: {ip: {$like: "%192.168.1.%"}} }'
+    on_fail: "fields 留空报 100000 → 必带 fields；ip 字段名以模型实际属性 id 为准"
+  - n: 2
+    op: object_instance.import
+    args: ["<OBJECT_ID>", --body-file, "<import.json>", --insecure, --yes]
+    desc: 批量建（upsert）。keys 选 ip（或 name）；datas 生成 10 条（ip 192.168.1.1~.10）；关系字段=<Out.Id>，值=easyops 系统实例的 instanceId
+    body_hint: |
+      { keys: ["ip"],
+        datas: [
+          { name: "testwwh-01", ip: "192.168.1.1", "<关系Out.Id>": "<easyops系统instanceId>" },
+          ...10 条...
+        ] }
+    expect: "code=0；data.insert_count=10，failed_count=0"
+    dataflow: "step1 确认 keys 无冲突 → step2 datas；关系 instanceId 来自 prerequisites.relation_field 的查询"
+  - n: 3
+    op: object_instance.search
+    args: ["<OBJECT_ID>", --body-file, "<verify.json>", --insecure]
+    desc: 校验——10 条都落库且关系已建立
+    body_hint: '{ fields: ["instanceId","name","ip","<关系Out.Id>"], query: {ip: {$like: "%192.168.1.%"}} }'
+    expect: "data.total=10，每条都带关系字段值"
+relation_note: |
+  「关联 easyops 系统」两种写法（择一）：
+  ① 已知对端 instanceId：datas 里 "<关系Out.Id>": "<instanceId>"（推荐，简单）。
+  ② 仅有匹配键（如系统名）："<关系Out.Id>": {"name":"<系统名>"}，后端匹配/嵌套创建；此时勿设 disableNestedCreateInstance=true。
+side_effects: objects.yaml#cmdb_instance.side_effects
+acceptance: "${EASYOPS_CMDB_FRONTEND_URL}/next/next-cmdb-instance-management/next/<OBJECT_ID>/list"
+rollback: "object_instance delete <OBJECT_ID> --instanceIds \"<新建的id分号串>\"（见 delete-instances-by-range.yaml）"
