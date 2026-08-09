@@ -190,7 +190,7 @@ objects:
       - op: tool.create
         rule: "新建工具同时建首个版本。必填 name/type/category/content（giraffe ValidatePostRequiredAndSetDefault 校验，非 gin binding tag）。默认 listVisible=true/sourceFrom=default/timeout=86400。返回 toolId+vId。"
       - op: tool.update（新建版本）
-        rule: "改 ToolVersion 字段（inputs/content/outputDefs/tableDefs/toolLibs）触发派生新版本（manager.UpdateToolWithExists→CreateByExists，tool_manager.go:485-520），返回新 vId。改 ToolConfig 字段（name/category）直接生效不派生版本。场景3『加版本』走这条：get 当前 → 改 inputs/content → update。"
+        rule: "⚠️body 是 **flat**（顶层直接字段，不要套 {tool:{}}；实测 {tool:{}} 会让 updateFields=[tool] 命中『仅改 config』短路分支，假成功不生效）。改 ToolVersion 字段（inputs/content/outputDefs/tableDefs/vDesc/vName/type）触发派生新版本（manager.UpdateToolWithExists→CreateByExists，tool_manager.go:485-520）——派生版 envType=development，vName 不传则=vId。改 ToolConfig 字段（name/category）仅改配置不派生。⚠️响应 data 只含 {toolId}（无新 vId），派生成功否须 tool_version.list 复查。场景3『加版本』：get 当前 → flat body 改 inputs/content → update → version.list 复查新 development 版本。"
       - op: tool.delete
         rule: "软删（置 delete_me=true，非物理删）。force=true（query 字符串 \"true\"）仅绕 ReadOnly。versionId 不填=删整个工具（所有版本+配置）；填=只删该版本，删完若无版本才连带删配置。ReadOnly=true 不让删（除非 force）。被流程引用的防护在更上层，本服务层只认 ReadOnly。"
 
@@ -532,7 +532,13 @@ api_behavior:
   autoops_wrapper:
     rule: "标准响应 {code, codeExplain, error, data}（比 cmdb 多 codeExplain）；code=0 成功。业务错误码形如 1xxxxx。导出端点是 .tar.gz 二进制流（不走 JSON wrapper）。"
   autoops_list_format:
-    rule: "tool.list 返回标准 JSON wrapper {data:{list,total,page,pageSize}}（非 cmdb 那种流式 NDJSON）。前端列表页 ?category=&q= 映射：category 直传（含子类展开），q 是后端 name 的别名（$like 匹配 name+memo）。"
+    rule: "tool.list 返回 **NDJSON 流式**（每行一个完整 Tool 对象，同 cmdb list，非 {data:{list}} wrapper）——解析须逐行 json.loads。前端列表页 ?category=&q= 映射：category 直传（含子类展开），q 是后端 name 的别名（$like 匹配 name+memo）。"
+  run_inputs_map:
+    rule: "tool_execution.run 的 body.inputs 是 **map**（proto map<string,Value>，key=参数名 value=值，如 {\"cmd\":\"free -m\"}），不是 [{name,value}] 数组——数组会报 json 解析失败 100000。目标主机走 agents（IP 数组，重写成 inputs.@agents）。"
+  run_vid_default:
+    rule: "tool_execution.run 的 vId 默认 $latest_production；若工具只有 development 版本（如 run_cmd），$latest_production 报『工具版本不存在 100005』——用具体 vId（从 tool.get 拿）或 $latest_development。"
+  update_response_only_toolid:
+    rule: "tool.update 响应 data 只含 {toolId}（无 vId/vName，源码 basic_service.go:322）——无法从响应判断是否派生新版本，必须 tool_version.list 复查。"
   builtin_vars:
     rule: |
       工具脚本运行时的内置变量（agent 侧环境变量；源码 internal/execution/param/param.go:64-96 + cmd/tool_service/conf/internal.param.default.yaml）。
