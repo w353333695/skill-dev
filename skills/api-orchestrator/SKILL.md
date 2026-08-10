@@ -78,7 +78,7 @@ skill 两种模式，决定能否写 `platforms/`：
 **写保护纪律**：
 - **orchestration 模式下 platforms/ 只读**：禁止 Write/Edit platforms 任何文件、禁止跑 onboarding 流程。只读 systems/objects/entities/flows 做编排，写只发生在远端系统 API（且写操作必确认）。
 - **onboarding 模式才写 platforms**：且必须 ① 过输入门禁（契约/文档/源码 ≥1）、② 改完跑 lint（0 ERR）。详见 `references/onboarding.md`。
-- **分发加固**：`pack-go.sh --skill <name> --target <os/arch> --dist` 读 manifest 编译到 bin/ + 打 tar.gz → 随 skill 分发。部署机可选跑 `scripts/setup.sh`（锁 platforms 只读 + lint 自检，非必须）。onboarding 改 platforms 前先 `chmod -R u+w`，改完锁回。
+- **分发加固**：`pack-go.sh --skill <name> --target <os/arch> --dist` 读 manifest 编译到 bin/ + 打 tar.gz → 随 skill 分发。零 setup——Go 预编译二进制随包走，不需要安装 runtime。onboarding 改 platforms 前先 `chmod -R u+w`，改完锁回。
 
 ## 关键纪律
 
