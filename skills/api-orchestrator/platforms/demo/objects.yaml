@@ -586,13 +586,16 @@ objects:
       - "分支条件正则（validator.go:15）：ConditionExpressionRegexp=\\$\\{(.*)\\}，须形如 ${pass==1}"
       - "表达式解析 GetProcessVariable（converter.go:17-40）：isFormDecision=0 只能 ==（拆 Name/Value）；isFormDecision=1 整表达式作 Value，支持复杂（pass>=1&&pass<=100 / (pass==-1||pass==1)&&key=='a'）"
       - |
-        ⚠️【从零构建可部署 BPMN 的必需结构】（实测：缺 targetNamespace/schemaLocation 则 flowable 部署失败 140200；补齐后手工 BPMN 从零构建并部署成功，version 1.0.5 实证）：
-        ① <bpmn2:definitions> 必须含：xmlns:bpmn2/xsi/bpmndi/dc/di/flowable 命名空间 + id="sample-diagram" + 【targetNamespace="http://bpmn.io/schema/bpmn"】+ 【xsi:schemaLocation="http://www.omg.org/spec/BPMN/20100524/MODEL BPMN20.xsd"】（后两个是 flowable schema 校验必需，缺则 140200 部署失败！）
-        ② <bpmn2:process id="ITSC-PROCESS-ID" name="ITSC-PROCESS-NAME">（占位符，部署时替换为 ITSC<definitionId>）
-        ③ <bpmn2:userTask> 须带完整 flowable:属性集：isFormDecision/strategy/handling/assignee/subsequentConf/setAssignee/formExpressionName/assigneeValue/assigneeType/assigneeList/assigneeGroup/opsAllowed（即使空值也要有）
-        ④ <bpmn2:sequenceFlow sourceRef targetRef> 连接，节点 incoming/outgoing 引用 flow id
-        ⑤ <bpmndi:BPMNDiagram><bpmndi:BPMNPlane bpmnElement="ITSC-PROCESS-ID"> + 每节点 <bpmndi:BPMNShape bpmnElement="<id>"><dc:Bounds/><bpmndi:BPMNLabel><dc:Bounds/></bpmndi:BPMNLabel></bpmndi:BPMNShape> + 每线 <bpmndi:BPMNEdge bpmnElement="<flowId>"><di:waypoint/></bpmndi:BPMNEdge>
-        审批人 flowable:assignee 用占位符体系（见 itsm_process_assignee），如 {{.lastExecLeader}}/{{.loginUser}}/指定用户名；processSetting.nodeSettings 可为空数组（审批人在 BPMN）。
+        ⚠️【从零构建可部署 BPMN 的完整方法】（实测版本 2.1.0 端到端验证：5节点+网关+表单决定流转+驳回，部署成功 flowableDefinitionId=ITSC<pdid>:5:<hex>）：
+        ① <bpmn2:definitions> 含：xmlns:bpmn2/xsi/bpmndi/dc/di/flowable 命名空间 + id="sample-diagram" + 【targetNamespace="http://bpmn.io/schema/bpmn"】+ 【xsi:schemaLocation="http://www.omg.org/spec/BPMN/20100524/MODEL BPMN20.xsd"】（后两个 flowable schema 校验必需，缺则 140200）
+        ② <bpmn2:process id="ITSC-PROCESS-ID" name="ITSC-PROCESS-NAME" isExecutable="true">（占位符+isExecutable 必须有！）
+        ③ <bpmn2:userTask> V2 只保留核心 flowable:属性：assignee(+assigneeValue/assigneeType/assigneeList/assigneeGroup)+strategy+handling+isFormDecision+formExpressionName。⚠️opsAllowed/setAssignee/subsequentConf/operationConf/suspendConf/memoLevel 等 V2 全放 processSetting.nodeSettings，XML 里不写（写了被忽略，且老属性全集可能导致复杂流程部署失败）
+        ④ <bpmn2:sequenceFlow> 连接节点；分支条件用 <bpmn2:conditionExpression xsi:type="bpmn2:tFormalExpression"> 表达式 </bpmn2:conditionExpression>
+        ⑤ 条件表达式格式：非表单决策 = `变量==值`（如 pass==1，数字）；表单决策(isFormDecision=1上游) = `${变量}=='值'`（如 ${resourceType}=='pm'，变量在${}内，==在外，字符串单引号）
+        ⑥ formExpressionName = `变量名:modelField`（如 resourceType:hostType），不是运行时复杂路径
+        ⑦ <bpmndi:BPMNDiagram> 必含 BPMNPlane+Shape(含BPMNLabel+dc:Bounds)+Edge(di:waypoint)
+        ⑧ processSetting.nodeSettings 配 rejectNodes/allowedOps/scriptSettings 等（驳回靠 rejectNodes 不画反向 sequenceFlow）
+        参考源：tmp/process_development/process-definition-v2-dev.md（字段全表+端到端示例）+ tmp/process_design/compliance-rules.md（27条bpmnlint）+ check_compliance.py（校验脚本）
 
   itsm_process_node_setting:
     description: |
