@@ -29,7 +29,7 @@ description: 通用 API 编排 skill——自然语言需求 → 跨系统调用
 │      是 → onboarding 模式（见 references/onboarding.md）—— 从输入生成 platforms 资料
 │      否 ↓
 │
-├─[2] 识别意图 + 复杂度（查 platforms/<deployment>/systems.yaml 知道有哪些系统可用）
+├─[2] 识别意图 + 复杂度——【读取纪律：先读 systems.yaml 的 capabilities 粗筛可达性 → 命中 verb 后按需读 spec/objects 段（grep+offset，禁 Read 全文）；详见 orchestration.md「读取纪律」】
 │      · 读查询（单系统、单步）           → 直通挡
 │      · 写操作（单系统、1-2 步）          → 确认挡
 │      · 跨系统/多步/build/change/插件     → 规划挡
