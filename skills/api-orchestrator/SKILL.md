@@ -17,7 +17,7 @@ description: 通用 API 编排 skill——自然语言需求 → 跨系统调用
 ## 核心范式
 
 - **调度器 = 你（LLM）**：读本 SKILL 的决策树，对每个需求推理分派。没有代码调度引擎。
-- **执行 = bash 调 scripts/run.sh**：统一执行入口（自动检测 PATH/build），每个系统是一份 api-cli 清单（spec）。
+- **执行 = bash 调 scripts/run.sh**：统一执行入口（读 manifest.sh 自动定位 binary，Go/Python 通用），每个系统是一份 api-cli 清单（spec）。
 - **知识 = platforms/ 资料**：系统目录/实体映射/对象关系/流程模板/格式包，全部可替换。
 
 ## 调度决策树（拿到需求先走这个）
@@ -53,16 +53,18 @@ description: 通用 API 编排 skill——自然语言需求 → 跨系统调用
 
 ## 执行
 
-统一执行入口 `scripts/run.sh`（自动探测 OS/ARCH + 查找二进制，skill 不感知环境）：
+统一执行入口 `scripts/run.sh`（读 manifest.sh 自动定位 binary，skill 不感知环境）：
 ```bash
 scripts/run.sh --spec <spec-path> <resource> <verb> [args] [--print-curl|--dry-run]
 # 例：scripts/run.sh --spec platforms/<deployment>/<system>.yaml <resource> <verb> --print-curl
 ```
-`scripts/run.sh` 按 uname 探测 OS/ARCH（linux/darwin × amd64/arm64，不含 windows），按序查找：① `bin/api-cli-<os>-<arch>`（skill 自带预编译，零环境依赖）→ ② `bin/api-cli`（兼容）→ ③ PATH → ④ go build（开发态）。
+`scripts/run.sh` 读 `manifest.sh` 获取 binary name，按序查找：① `bin/<name>`（预编译，零环境依赖）→ ② PATH → ③ go build（开发态）。通用模板，Go/Python skill 共用。
 
-分发打包：`scripts/pack-go.sh` 交叉编译四平台 → `bin/api-cli-{linux,darwin}-{amd64,arm64}` → 随 skill 分发。**无 setup**——Go 预编译二进制随 skill 打包，不需要安装 runtime、不配 PATH、不要 go。
+分发打包：`scripts/pack-go.sh --skill <name> --target <os/arch> [--dist]` 读 manifest 编译到 `bin/` + 可选打 tar.gz。**无 setup**——Go 预编译二进制随 skill 打包，不需要安装 runtime、不配 PATH、不要 go。
 
 **先用 `--print-curl` 或 `--dry-run` 预览请求**，确认无误再真调（写操作尤其）。
+
+**调用姿势（防污染）**：`scripts/run.sh` 用**绝对路径**调，cwd 保持用户工作目录——勿 `cd` 进 skill 再用相对路径，否则临时产物会写进 skill 目录（见「关键纪律」状态持久化）。body 优先用进程替换 `--body-file <(printf '%s' '<json>')` 零落盘，避免任何临时文件。
 
 ## 模式与写保护（防 platforms 污染）
 
@@ -76,13 +78,13 @@ skill 两种模式，决定能否写 `platforms/`：
 **写保护纪律**：
 - **orchestration 模式下 platforms/ 只读**：禁止 Write/Edit platforms 任何文件、禁止跑 onboarding 流程。只读 systems/objects/entities/flows 做编排，写只发生在远端系统 API（且写操作必确认）。
 - **onboarding 模式才写 platforms**：且必须 ① 过输入门禁（契约/文档/源码 ≥1）、② 改完跑 lint（0 ERR）。详见 `references/onboarding.md`。
-- **分发加固**：分发打包跑 `scripts/pack-go.sh` 预编译四平台二进制到 `bin/` → 随 skill 分发。部署机可选跑 `scripts/setup.sh`（锁 platforms 只读 + lint 自检，非必须——Go 二进制已随 skill 走，不装 runtime）。onboarding 改 platforms 前先 `chmod -R u+w`，改完锁回。
+- **分发加固**：`pack-go.sh --skill <name> --target <os/arch> --dist` 读 manifest 编译到 bin/ + 打 tar.gz → 随 skill 分发。部署机可选跑 `scripts/setup.sh`（锁 platforms 只读 + lint 自检，非必须）。onboarding 改 platforms 前先 `chmod -R u+w`，改完锁回。
 
 ## 关键纪律
 
 - **不硬编码任何系统/格式**：所有"调什么/字段怎么接/怎么校验"查 platforms 资料。
 - **写操作/复杂操作必确认**：展示 plan 或影响面，用户确认后执行。
-- **状态持久化**：复杂编排的中间产物写 `tmp/<task>/`，跨 bash 步传递。
+- **状态持久化（tmp 落点纪律）**：复杂编排的中间产物跨 bash 步传递时——① **优先不落盘**：body 用进程替换喂 `--body-file <(printf '%s' '<json>')`，能用内联/stdin 就不写文件；② **必须落盘时**用绝对路径锚定**调用方 cwd**（`$PWD/.api-orchestrator/tmp/<task>/` 或 `mktemp -d`），**严禁写 skill 目录**——勿 `cd` 进 skill 再用相对 `tmp/`，那会把运行时垃圾写进分发物，且顶层 `.gitignore` 的 `tmp/` 会让 git 静默、污染隐形。
 - **失败回滚**：记录已执行步骤，失败时反向调 remove/delete。
 - **platforms 只读（orchestration 模式）**：非 onboarding 不得 Write/Edit platforms 文件（防资料污染）；onboarding 改完必 lint。
 - **onboarding 输入门禁**：契约 / API 文档 / 后端源码至少一个才开工；缺则停下问用户（详见 `references/onboarding.md` 步 1）。
