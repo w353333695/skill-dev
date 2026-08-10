@@ -586,21 +586,21 @@ api_behavior:
   itsm_conditional_display:
     rule: |
       条件显示 = displayCondition 字符串表达式（前端求值，后端透传不校验）。表达式 DSL：
-      用 `#{容器ID.控件ID}` 引用某控件的值，配 JS 风格操作符。按【触发控件类型】选模板：
+      用 `#{容器ID.控件ID}` 引用某控件的值，配 JS 风格操作符（比较用 `==` 非 `=`）。按【触发控件类型】选模板：
       ┌──────────────────────────┬───────────────────────────────────────────────┬──────────────────┐
       │ 触发控件类型              │ 表达式（容器ID.控件ID 换成实际值）              │ 含义             │
       ├──────────────────────────┼───────────────────────────────────────────────┼──────────────────┤
-      │ INPUT/TEXTAREA/NUMBERINPUT/SLIDER │ #{c.field} = "1"                      │ 值等于"1"时显示  │
+      │ INPUT/TEXTAREA/NUMBERINPUT/SLIDER │ #{c.field} == "1"                     │ 值等于"1"时显示  │
       │ ARRATINPUT（数组输入）    │ #{c.field}.includes("1")                      │ 值包含"1"时显示  │
-      │ SELECT(单选)/RADIO(单选组)│ #{c.field}.value = "1"                        │ 选中"1"时显示    │
-      │ MULTIPLESELECT/CHECKBOX   │ #{c.field}.some(item => item.value = "1")     │ 值含"1"时显示    │
+      │ SELECT(单选)/RADIO(单选组)│ #{c.field}.value == "1"                       │ 选中"1"时显示    │
+      │ MULTIPLESELECT/CHECKBOX   │ #{c.field}.some(item => item.value == "1")    │ 值含"1"时显示    │
       │ CASCADER（级联）          │ #{c.field}.some(item => ["1-1"].includes(item.value)) │ 选中"1/1-1"时显示 │
-      │ SWITCH（开关）            │ #{c.field}.toString() = "true"                │ 开关开启时显示   │
+      │ SWITCH（开关）            │ #{c.field}.toString() == "true"               │ 开关开启时显示   │
       └──────────────────────────┴───────────────────────────────────────────────┴──────────────────┘
-      可配三处：组件 options.displayCondition / 容器 displayCondition / tabPane.displayCondition（+ displayUserTaskId 限流程节点）。
+      可配三处：组件 options.displayCondition / 容器 displayCondition / tabPane.displayCondition（+ displayUserTaskId 仅跨节点填）。
       容器ID/控件ID = formDefinition 里的 key（container.key / component.key），不是 modelField。
       示例：场景『选虚拟机显虚拟机 table』——触发是 SELECT(单选) 申请主机类型(key=hostType，容器 key=c_base)，
-      虚拟机 table 的 displayCondition = `#{c_base.hostType}.value = "vm"`；物理机 table = `#{c_base.hostType}.value = "pm"`。
+      虚拟机 table 的 displayCondition = `#{c_base.hostType}.value == "vm"`；物理机 table = `#{c_base.hostType}.value == "pm"`（实测 == 生效，单 = 不生效）。
       ⚠️控件 id 用 component.key，且 key 须 == modelField（见 itsm_form_component constraints），否则表达式取不到值。
       ⚠️displayUserTaskId（监听节点，容器/tabPane，string）—— 只在【跨节点条件显示】时填：displayCondition 引用的是【别的流程节点】表单里的控件时，用 displayUserTaskId 指明从哪个节点（BPMN activity id，如 Activity_0fvwq8a）取该控件值。引用【本节点】（同表单内）控件的条件显示【不填】（留空）——误填会让前端按跨节点取值、本节点条件反而不生效。
       节点 id 来自流程定义（flowable_service 的 process API）。TODO：未来补流程接口后回流跨节点联动的完整机制。
