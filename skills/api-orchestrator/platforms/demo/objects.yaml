@@ -427,23 +427,32 @@ objects:
 
   itsm_form_component_extra:
     description: |
-      控件特有配置（options.extraProps map，按 type 取；源码 components/x*/ + form_builder/components/）：
-      SELECT/RADIO/CHECKBOX → items:[{key,label,value}]（选项列表）
-      MULTIPLESELECT / SELECT(旧结构) → options:[{key,label,value}]（前端历史包袱另一种结构）
-      NUMBERINPUT / SLIDER → step（步长）；SLIDER 还有 min/max
-      COMMONDATE / DATE / TIME / DATERANGE / TIMERANGE → format（moment 串如 YYYY年MM月DD日）、disabledPast（禁选过去）
-      UPLOAD / LARGEFILE_UPLOAD → buttonText / max_number / max_size / isEnableFileTypeLimit / uploadDraggable(大附件)
-      MODALSELECT（实例选择）→ options:[] / listMode；展示字段用 dataIndex（; 分隔）
-      CMDBINSTANCESELECT → options.frontKey（⚠️在 options 顶层，非 extraProps）决定展示字段；须是模型真实属性（查 model 的 view.show_key，如 HOST 是 hostname/ip，HOST 无 name 属性）
-      CMDBCASCADER → objectIdPath:[{objectId,showKey:[]}]（每级一个 CMDB 模型 + 展示字段列表）
-      INPUT → isPasswordInput（密码框触发脱敏）/ trim / patternId / autoSize
-      ⚠️【每控件必填字段 + 校验逻辑是前端 designer 规则，后端透传不校验、components/ 目录不存】——已知必填（实测/designer）：
-      - CMDBINSTANCESELECT：cmdbProps.foreignObjectId（模型ID，必填，须 CMDB 真实 objectId）+ options.frontKey（显示字段，必填，在 options 顶层非 extraProps；值须模型真实属性，查 view.show_key）
-      - CMDBCASCADER：options.extraProps.objectIdPath（每级 objectId + showKey，必填）
-      - business_table 容器：extraProps.objectId（CMDB 模型，必填）
-      其余控件必填项待补（缺前端 designer 源码；建议 designer 配置后 get formDefinition 捕获回流）。
+      ⚠️控件配置分散在【三处】，混淆就配不对（源码 component.go:51-73 + testdata/definition.json 真实样例 + parser.go/classify_wrapper.go 消费逻辑）：
+      ① options.extraProps（map）—— 控件【特有】动态属性（按 type）
+      ② options.<顶层强类型> —— frontKey/dataIndex/primaryKey/remoteFunc/rules/defaultValue/desensitization（通用，不在 extraProps）
+      ③ cmdbProps（Component 顶层）—— 【仅 business_table/business_cmdb_instance_change_table 容器内控件用】定义 attr/relation 写入元信息；CMDBINSTANCESELECT/CMDBCASCADER 控件【不用 cmdbProps】！
+      【options.extraProps 各控件真实字段】（testdata/definition.json ground truth）：
+      INPUT → {isPasswordInput:true}（密码框，普通则 {}）
+      TEXTAREA/SWITCH/ARRATINPUT → {}
+      NUMBERINPUT → {step:10}
+      SELECT/MULTIPLESELECT/CHECKBOX → {items:[{key,label,value}]}（候选项 key 是 items）
+      ⚠️RADIO → {options:[{key,label,value}]}（候选项 key 是 options，不是 items！与 SELECT 系不一致，坑）
+      SLIDER → {max,min,step}（数值）
+      RICHTEXT → {showOperationButton:true}
+      COMMONDATE/DATE/TIME/DATERANGE/TIMERANGE → {format:"YYYY年MM月DD日"/"HH:mm:ss"(moment串), disabledPast:false}
+      UPLOAD → {buttonText,max_number,max_size,isEnableFileTypeLimit}
+      LARGEFILE_UPLOAD → {max_number,draggerUploadHint,isEnableFileTypeLimit}（⚠️与 UPLOAD 不同：无 buttonText/max_size，多 draggerUploadHint）
+      LINK → {label,href}
+      CMDBINSTANCESELECT → {objectId:<CMDB模型id>, url:"", user:"", listMode:false}（模型 id 在 extraProps.objectId！不是 cmdbProps）
+      CMDBCASCADER → {objectIdPath:[{objectId,showKey:[...]}]}（多级，每级模型+展示字段）
+      MODALSELECT → {options:[], listMode:false}（候选用顶层 remoteFunc 拉）
+      USER_SELECTOR/USER_GROUP_SELECTOR/DEPARTMENT_SELECTOR → 无 extraProps 样例；显示字段走【顶层 frontKey】（默认 [name]）
+      【顶层字段（不在 extraProps）】CMDBINSTANCESELECT 显示字段= options.frontKey（[]string，如 ["hostname"]，须模型真实属性，查 view.show_key）；primaryKey（["instanceId"]）；dataType（CMDB 类=objectarray，defaultValue=[]）。MODALSELECT 显示字段= options.dataIndex（; 分隔）。
+      【三实例选择控件对比】CMDBINSTANCESELECT：extraProps.objectId + 顶层 frontKey，不需 remoteFunc（CMDB 接口直接按 objectId 查）；CMDBCASCADER：extraProps.objectIdPath（每级 objectId+showKey）；MODALSELECT：顶层 dataIndex + remoteFunc.toolId（必，拉候选）。
+      【后端导出读取】（classify_wrapper.go）：CMDBINSTANCESELECT 读顶层 frontKey（不读 extraProps.objectId——那给前端拉候选用）；CMDBCASCADER 读 extraProps.objectIdPath；MODALSELECT 读顶层 dataIndex；日期类读 extraProps.format；USER 类读顶层 frontKey 默认 name；INPUT 脱敏读 extraProps.isPasswordInput。
+      ground truth 源：testdata/definition.json（每控件真实样例）+ form_builder/components/*/property.go（旧体系，字段名不同仅供参考）。
     fields:
-      "<按 type 取>": { type: any, desc: "见 description 各控件 extraProps 字段；items/options/format/step/min/max/objectIdPath/frontKey/isPasswordInput 等" }
+      "<按 type 取>": { type: any, desc: "见 description 各控件真实 extraProps 字段；items(注意 RADIO 用 options)/format/step/min/max/objectId/objectIdPath/listMode/isPasswordInput/href 等" }
 
   itsm_form_cmdb_props:
     description: CMDB 控件强类型约束（xcmdb.Props，components/xcmdb/props.go:8-15）—— CmdbInstanceSelect/CmdbCascader 用。
@@ -549,9 +558,10 @@ api_behavior:
     rule: "tool.update 响应 data 只含 {toolId}（无 vId/vName，源码 basic_service.go:322）——无法从响应判断是否派生新版本，必须 tool_version.list 复查。"
   tool_script_no_future:
     rule: |
-      ⚠️ 工具脚本（.tar.gz 里的 script）及其依赖库（sdk/sdk/easyops_client.py 等）【不要】用 `from __future__ import ...`。
-      EasyOps 平台下发执行时会在脚本开头注入内部方法/变量（SDK 库 header + EASYOPS_* 注入），使 __future__ 不在文件首行，触发 SyntaxError: from __future__ imports must occur at the beginning of the file（实测坑）。
-      py2/3 兼容改用：运行时判断 PY2 = sys.version_info[0]==2、text = unicode(py2)/str(py3)、用 logging（不直接 print）、不用 f-string、raise 不带 from。范本见 sdk/sdk/easyops_client.py。
+      ⚠️ 工具脚本（.tar.gz 里的 script）【不要】用 `from __future__ import ...`。
+      EasyOps 平台下发执行时会在脚本开头注入内部方法/变量（EASYOPS_* 注入），使 __future__ 不在文件首行，触发 SyntaxError: from __future__ imports must occur at the beginning of the file（实测坑）。
+      py2/3 兼容改用：运行时判断 PY2 = sys.version_info[0]==2、text = unicode(py2)/str(py3)、用 logging（不直接 print）、不用 f-string、raise 不带 from。
+      ⚠️工具脚本须【自包含】（不得 import 外部 .py；调 cmdb/easyops 用 py2 stdlib urllib2 + EASYOPS_*）——见 systems.yaml 顶层 platform_conventions.code。
   builtin_vars:
     rule: |
       工具脚本运行时的内置变量（agent 侧环境变量；源码 internal/execution/param/param.go:64-96 + cmd/tool_service/conf/internal.param.default.yaml）。
@@ -572,7 +582,7 @@ api_behavior:
             └── libs/<libName>.tar.gz     # 可选：依赖工具库（解压得 <libName>.json 元信息 + <libName>_repo.tar.gz）
       字段序列化靠 Go struct 的 export tag 分流（export:"dat"→dat 文件，export:"config"→config 文件）。导入是 upsert（toolId 锚定）。
       无编译步骤——工具定义 ↔ tar.gz 是纯序列化往返；运行时执行器把 SDK 库（按 type 选 main.sh/main.py/...）+ EASYOPS_* header + 用户 content 拼成脚本下发 agent。
-      开发新工具包（承接工具包开发需求）：产出 dat+config+script 三件套（+ 可选 libs）打成 tar.gz；脚本调 PutStr/PutRow 回吐输出。示例见 sdk/easyops_client.py 的打包函数 + sdk/tools-sdk-demo.py。
+      开发新工具包（承接工具包开发需求）：产出 dat+config+script 三件套（+ 可选 libs）打成 tar.gz；script 须【自包含】（py2，不 import 外部 .py，见 platform_conventions.code），用 PutStr/PutRow 回吐输出。
 
   # ===========================================================================
   # ITSM 表单接口级行为（flowable_service）—— 编排时必须知道
