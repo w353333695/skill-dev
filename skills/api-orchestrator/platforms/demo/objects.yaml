@@ -595,7 +595,7 @@ objects:
         ⑥ formExpressionName = `变量名:userTaskId.containId.index.componentId.valueField`（jsonPath 格式，如 resourceType:Task_leader.c_base.0.hostType.value）。⚠️不是 modelField 短名——后端 step/manager.go:1107-1137 按 . 拆路径解析：[0]=userTaskId [1]=containId [2]=index(跳过) [3]=componentId [4]=valueField
         ⑦ <bpmndi:BPMNDiagram> 必含 BPMNPlane+Shape(含BPMNLabel+dc:Bounds)+Edge(di:waypoint)
         ⑧ processSetting.nodeSettings 配 rejectNodes/allowedOps/scriptSettings 等（驳回靠 rejectNodes 不画反向 sequenceFlow）
-        参考源：tmp/process_development/process-definition-v2-dev.md（字段全表+端到端示例）+ tmp/process_design/compliance-rules.md（27条bpmnlint）+ check_compliance.py（校验脚本）
+        BPMN 合规要点（bpmnlint 27条精华）：节点名≤20字且不重名/必须1个startEvent+≥1endEvent+≥1userTask/节点全连通/网关不直连网关/排他包容网关后不接endEvent/userTaskId正则^[a-zA-Z][a-zA-Z0-9_]+$。V2 userTask XML 只保留 id/name/assignee(+Value/Type/List/Group)/strategy/handling/isFormDecision/formExpressionName——opsAllowed/setAssignee/subsequentConf/operationConf/suspendConf/memoLevel 全放 processSetting.nodeSettings（XML写了被忽略）。完整 nodeSettings 结构示例：{userTaskId,memoLevel(-1隐藏/0非必填/1必填),allowedOps[],rejectNodes["节点id:线名"],labelViews[],triggerIdList[],candidateSettings[{operation,candidates[],dataSource}],nextAssigneeSetting{enabled,nextAssignees[{userTaskId,label,candidates,dataSource}]},scriptSettings{preScript:{name,desc,scriptIdList[],operations[],isAsync},postScript:{...}},suspendSetting{isAutoActivate,activateTime(小时)}}。
 
   itsm_process_node_setting:
     description: |
@@ -651,15 +651,14 @@ objects:
       inputs:  { type: array, items: string, desc: "注入：节点脚本 [orderInfo,loginUser,action,scriptType]；表单脚本 [orderInfo,loginUser,eventSource,args,formData]。orderInfo 是 JSON 字符串注入（非 struct）" }
       output:  { type: any, desc: "按事件：afterDataLoad/onValueChange→formData+可选formConfig/ticketName；preSubmitCheck→checkState|submitCheck；componentLoad→result；失败含 raise→raise 值当 error 抛" }
     constraints:
-      - |
-        orderInfo 结构（order_info.pb.go + tmp/orderInfo.md 实测修正）：
-        顶层：instanceId(步骤id)/userTaskId/taskName/status/action/formData(字符串)/variables[]/processInstance{instanceId,orderNum,name,creator}/process/processVersion{bpmnXML}/stepList[](每步 formData)/nodeList[]/userInfoMap。
+        orderInfo 结构（order_info.pb.go 实测归纳，全量字段）：
+        顶层：instanceId(步骤id≠工单id)/userTaskId/taskName/status/action/formData(字符串)/variables[]/processInstance{instanceId,orderNum,name,creator,category,status}/process{instanceId,name,category}/processVersion{instanceId,versionName,bpmnXML,isJumpable}/stepList[](每步简报含 formData)/nodeList[](节点定义+配置)/finishedStepList[](已完成步骤id)/userInfoMap{用户名:显示名}/stepOperationRecord[]。
         ⚠️formData 是三重 JSON：orderInfo(字符串)→json.loads→dict→dict["formData"](字符串)→json.loads→list[{key:容器key, values:[行...]}]→行内{modelField:值}。
         ⚠️formData 解析后是【list 按 container key 分段】不是扁平 dict：[{key:"c_base",values:[{hostType:{key,label,value},reason:"xxx"}]}]。
         SELECT/RADIO/CHECKBOX 值是 {key,label,value} 对象取 .value；INPUT/NUMBERINPUT/SWITCH 是裸值。
         table 容器 values 多行；row 容器 values 通常 1 行。
         历史节点表单取数：order["stepList"] 遍历找 userTaskId+status=done→该步 formData（也是三重 JSON）。
-        详见 tmp/orderInfo.md（字段全表+python 示例）。
+        首节点无 orderInfo（工单未建）；判断工单终止须同时看 status+isSuspended/isCancelled/isDelete。
       - "场景：前置脚本(pre)=节点提交前校验/预处理（能拿本次 formData）；后置脚本(rear)=节点完成后联动（通知/自动化）"
       - "表单实例选择控件脚本不注入 orderInfo（process_script_service.go:152）"
       - |
