@@ -2,6 +2,19 @@
 
 skill 的调度分三挡位，按需求的意图 + 复杂度选挡。
 
+## 读取纪律（所有挡位前置，强制）
+
+调度靠 LLM 推理、**无代码引擎兜底**——platforms 读取须守此纪律，保证一致 + 省 token：
+
+1. **粗筛（必读，第一步）**：读 `systems.yaml` 的 `systems.<system>.capabilities`（resource.verb → 一句话用途），判需求可达性、命中哪个系统哪个 verb。systems.yaml 不大，全量读（含 `runtime` 坑一并看，避免踩雷如 update body flat / run inputs map）。
+2. **按需读详情（命中后，禁止全量）**：命中 resource.verb 后，按需读对应段，**禁止 `Read` spec/objects 全文**（大文件用 `grep` 定位行 → `Read --offset` 取该段）：
+   - spec `<system>.yaml`：读命中 `resource.verb` 的 `description` + `body` + `params`（grep `^\s*<verb>:` 定位 operation 段）
+   - `objects.yaml`：读命中对象的 `fields` + `side_effects`（grep 对象名定位）
+   - `flows/<flow>.yaml`：需求匹配某 flow 的 `trigger` 时才读该 flow（单文件不大可全读）
+3. **禁止**：跳过 capabilities 直接猜 verb；不读 `runtime` 坑就写操作；`Read` spec/objects 全文（数百行费 token）。
+
+例外：onboarding 模式录资料时全量读写（非调度读取）；systems.yaml 全量（入口 + 不大 + runtime 必看）。
+
 ## 直通挡（简单读查询）
 
 触发：读查询、单系统、单步（如"查下有多少主机""列出 X 的实例"）。
