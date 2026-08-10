@@ -620,7 +620,7 @@ objects:
     fields:
       userType:        { type: string, enum: [loginUser, lastExec, lastExecLeader, historyExec, historyExecLeader, dutyGroup, dutyGroupV2, formValue, userRule, userTree, department, specifyUser], desc: "审批人类型。占位符映射：{{.loginUser}}提单人/{{.lastExec}}上一步执行人/{{.lastExecLeader}}其直属领导/{{.historyExec}}历史节点处理人/{{.historyExecLeader}}其领导/{{.dutyGroup}}老值班组/{{.dutyGroupV2}}新值班组/{{.formValue}}来源表单/{{.userRule}}人员规则/{{.userTree}}人员树/{{.department}}部门；非占位符(如easyops)=specifyUser 指定用户" }
       assigneeValue:   { type: string, desc: "配置值：historyExec/dutyGroup=instanceId；userTree=;分隔用户名；department=部门id；userRule=规则JSON；specifyUser 不用" }
-      assignee:        { type: string, desc: "单签指定用户名（specifyUser）；会签写 \${assignee}" }
+      assignee:        { type: string, desc: "单签指定用户名（specifyUser）；会签写 ${assignee}（flowable 多实例 elementVariable）" }
       assigneeListUser: { type: array, items: string, desc: "会签用户名列表（;分隔于 BPMN assigneeList，配 multiInstanceLoopCharacteristics）" }
       assigneeGroups:  { type: array, items: string, desc: "用户组列表" }
     constraints:
