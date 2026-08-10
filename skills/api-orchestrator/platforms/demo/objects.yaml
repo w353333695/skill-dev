@@ -565,7 +565,7 @@ objects:
       - op: process_version.delete
         rule: "路径 versionIds(复数分号)但只删第一个——批量是壳（service.go:1230-1231）。约束任一即拒(HTTP 412/400 ERR_FAILED_PRECONDITION)：①绑表单『当前流程已有绑定表单，不可删除!』(view.go:80)→先 process_form.set 解绑 ②关联工单『有正在流转中的工单，不可删除!』(view.go:84)→工单侧处理 ③主版本+绑服务『当前流程已绑定了服务且当前是主版本，请先删除服务或设置其它主版本!』(view.go:75)→删服务或换主版本（服务=ITSC_SERVICE_INSTANCE 跨域，须服务管理 API，不在本清单）④被父/子流程引用『当前流程被引用，不可删除!』(view.go:78)。删完若 def 无版本→隐式级联删 def。【清理顺序实测】按 ①→②→③→④ 逐项解，都清后删版本→末版本级联删 def。test 流程实测：①表单已解(0绑表单节点)→③卡服务绑定(须先删服务)。服务绑定是跨 process 域的依赖（服务管理 API 未 onboard），主版本+绑服务的流程删不掉除非先处理服务。"
       - op: process_version.set_main
-        rule: "PUT /v1/.../version/:versionId 设主版本。⚠️须 state==done。旧主自动降级（MAIN_VERSION 关系覆盖）。触发 deployProcessAndModifyCMDB：上传 BPMN 到 Flowable 引擎（替换占位符 ITSC-PROCESS-ID/NAME）+ 回填 deploymentId/flowableDefinitionId。只有 set_main 才部署。运行中工单不受影响（走旧 deploymentId）。"
+        rule: "PUT /v1/.../version/:versionId 设主版本。⚠️须 state==done。旧主自动降级（MAIN_VERSION 关系覆盖）。触发 deployProcessAndModifyCMDB：上传 BPMN 到 Flowable 引擎（替换占位符 ITSC-PROCESS-ID/NAME）+ 回填 deploymentId/flowableDefinitionId。只有 set_main 才部署。运行中工单不受影响（走旧 deploymentId）。⚠️set_main 偶发 140500『获取流程定义版本详情失败』（瞬时，重试即好）。⚠️首次 done 自动设主不可靠——实测 isMain 未自动置 true，须显式 set_main。完整建流程链：create def → create version（不部署）→ process_form.set 绑表单 → set_main（部署生效）。"
 
   itsm_process_bpmn:
     description: |
@@ -591,7 +591,7 @@ objects:
         ② <bpmn2:process id="ITSC-PROCESS-ID" name="ITSC-PROCESS-NAME" isExecutable="true">（占位符+isExecutable 必须有！）
         ③ <bpmn2:userTask> V2 只保留核心 flowable:属性：assignee(+assigneeValue/assigneeType/assigneeList/assigneeGroup)+strategy+handling+isFormDecision+formExpressionName。⚠️opsAllowed/setAssignee/subsequentConf/operationConf/suspendConf/memoLevel 等 V2 全放 processSetting.nodeSettings，XML 里不写（写了被忽略，且老属性全集可能导致复杂流程部署失败）
         ④ <bpmn2:sequenceFlow> 连接节点；分支条件用 <bpmn2:conditionExpression xsi:type="bpmn2:tFormalExpression"> 表达式 </bpmn2:conditionExpression>
-        ⑤ 条件表达式格式：非表单决策 = `变量==值`（如 pass==1，数字）；表单决策(isFormDecision=1上游) = `${变量}=='值'`（如 ${resourceType}=='pm'，变量在${}内，==在外，字符串单引号）
+        ⑤ 条件表达式格式：整个表达式包在 ${} 内——非表单决策 `${变量==值}`（如 ${pass==1}）；表单决策(isFormDecision=1上游) `${变量=='值'}`（如 ${resourceType=='pm']}，全在${}内，字符串单引号）
         ⑥ formExpressionName = `变量名:userTaskId.containId.index.componentId.valueField`（jsonPath 格式，如 resourceType:Task_leader.c_base.0.hostType.value）。⚠️不是 modelField 短名——后端 step/manager.go:1107-1137 按 . 拆路径解析：[0]=userTaskId [1]=containId [2]=index(跳过) [3]=componentId [4]=valueField
         ⑦ <bpmndi:BPMNDiagram> 必含 BPMNPlane+Shape(含BPMNLabel+dc:Bounds)+Edge(di:waypoint)
         ⑧ processSetting.nodeSettings 配 rejectNodes/allowedOps/scriptSettings 等（驳回靠 rejectNodes 不画反向 sequenceFlow）
@@ -607,9 +607,9 @@ objects:
       assignType:        { type: string, desc: "指派类型 single(单签)/assigneeList(会签，legacy)" }
       handling:          { type: string, enum: [directly, send_directly, claim_directly, send_claim_directly], desc: "处理方式：directly直接/send_directly先派单/claim_directly先认领/send_claim_directly派单+认领" }
       presetAssigneeConf: { type: object, ref: itsm_process_assignee, desc: "审批人（后端按 userType 回查 name 的展示视图；真正来源在 BPMN flowable:assignee）" }
-      allowedOps:        { type: array, items: string, desc: "允许操作 done:完成/assignee:转派/cc:分阅/withdraw:撤回/SLAChange 等（;分隔于 BPMN opsAllowed）" }
+      allowedOps:        { type: array, items: string, desc: "节点允许的操作按钮。取值：assignee(审批处理)/distribute(派单)/claim(认领)/withdraw(撤回)/cc(抄送)/SLAChange(SLA变更,首节点默认)/close(关单)/add(加签)。⚠️done(通过)+convert(工单转换)默认开启不在列表配。V2 在 nodeSettings 配（非 BPMN XML）" }
       memoLevel:         { type: integer, enum: [-1, 0, 1], desc: "审批意见级别 -1隐藏/0非必填/1必填" }
-      rejectNodes:       { type: array, items: string, desc: "可驳回节点 ['Activity_xxx:1']" }
+      rejectNodes:       { type: array, items: string, desc: "可驳回/跳回的目标节点。格式 `节点id:线名`（如 Task_apply:驳回修改）。⚠️驳回是运行时动态跳转，靠此字段声明，bpmnXML 不画反向 sequenceFlow（画了反而不对）。目标节点id须图中存在否则被 cleanSetting 清洗" }
       scriptSettings:    { type: object, ref: itsm_process_script, desc: "前后置脚本 {PreScript,PostScript}" }
       autoSetting:       { type: object, ref: itsm_process_auto_node, desc: "自动化节点（绑 autoops 工具）" }
       nextAssigneeSetting: { type: object, desc: "允许本节点设下节点审批人；细粒度配在 BPMN subsequentConf" }
@@ -654,6 +654,10 @@ objects:
       - "orderInfo 结构（order_info.pb.go:14-69，工单全上下文）：ProcessInstance/Process/ProcessVersion{bpmnXML,isJumpable}/ServiceInstance/ServiceRelevanceOrder[]/UserTaskList[]/NodeList[]/StepList[]/FinishedStepList[]/Variables[]/当前步骤(instanceId/userTaskId/taskName/status/action/operator/creator/operatorLeader/memo/formData/isSubStep)/UserInfoMap/IsTimeout/SlaStatus。运行时由 manager.GetOrderInfo 组装"
       - "场景：前置脚本(pre)=节点提交前校验/预处理（能拿本次 formData）；后置脚本(rear)=节点完成后联动（通知/自动化）"
       - "表单实例选择控件脚本不注入 orderInfo（process_script_service.go:152）"
+      - |
+        ⚠️scriptSettings.operations 取【原始 itemID】（不是 allowedOps 重映射值）：pass(通过)/reject(退回)/withdraw(撤回)/claim(认领)/jump(直达)/assignee(转派)/distribute(派单)/cc(抄送)/add(加签)/add_reject(加签退回)。⚠️"通过时触发脚本"配 ["pass"] 不是 ["done"]（done 是 allowedOps 重映射值，不是合法 operations）。多选——脚本在勾选的任一操作时执行。
+      - "同步(isAsync=false)：线性执行，前置脚本失败阻断节点动作（关键数据写入/处理人决策用同步）；异步(isAsync=true)：忽略异常逐个触发，不阻断（通知/日志用异步）。⚠️避免前置+异步用于关键数据写入"
+      - "scriptIdList 为空=未配置（服务端 len==0 直接忽略）。多工具按顺序执行副作用（不消费返回值）"
 
   itsm_process_form_flow:
     description: |
