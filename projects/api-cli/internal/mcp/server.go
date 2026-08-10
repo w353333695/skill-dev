@@ -144,6 +144,11 @@ func buildToolDescription(r *tree.Resource, op *tree.Operation) string {
 	if op.Pagination != nil {
 		tags = append(tags, "[可分页]")
 	}
+	// binary verb 经 MCP 调用必然失败（见 toolsCall 拦截），[CLI-only] 标签在
+	// tools/list 时给 LLM 提前信号——声明层 + 执行层双保险。
+	if op.Response != nil && op.Response.Format == "binary" {
+		tags = append(tags, "[CLI-only]")
+	}
 	if len(tags) > 0 {
 		s += " " + strings.Join(tags, " ")
 	}
@@ -238,6 +243,12 @@ func (s *Server) toolsCall(ctx context.Context, params json.RawMessage) map[stri
 	r, op := s.findByToolName(p.Name)
 	if r == nil || op == nil {
 		return map[string]any{"error": map[string]any{"code": -32602, "message": "tool not found: " + p.Name}}
+	}
+	// binary 响应不经 MCP：二进制字节塞进 JSON-RPC text 会产生无效 UTF-8 损坏响应。
+	// 引导调用方走 CLI --output 落盘（声明式可预测，不静默损坏）。
+	// 拦截点在 SelectEndpoint 前——清单声明合法（lint 不拦），这是运行时通道限制。
+	if op.Response != nil && op.Response.Format == "binary" {
+		return map[string]any{"error": map[string]any{"code": -32602, "message": "该操作返回二进制流，MCP 不支持；请用 CLI 调用并加 --output 落盘"}}
 	}
 	ep, err := s.tr.SelectEndpoint("") // 空名走 service.DefaultEndpoint
 	if err != nil {
