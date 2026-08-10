@@ -114,6 +114,7 @@ verb（create/read/update/delete）有**默认 method**（POST/GET/PATCH/DELETE�
 | `--body-file <path>` | 请求 body（JSON 文件，支持嵌套/复杂结构） |
 | `--insecure` | 跳过 TLS 证书校验（自签证书） |
 | `--timeout 30s` | HTTP 超时 |
+| `--output, -o <path>` | 输出到文件（binary 响应落盘 / 文本写文件，默认 stdout） |
 
 ---
 
@@ -280,6 +281,49 @@ resources:
 
 > 嵌套 resource 的 `children` 仅用于 **URL 真嵌套**（子真实 URL = 父 URL + 子段）。非嵌套结构用平级 resource。
 
+### 文件上传 / 下载（iter4）
+
+二进制流（文件上传/下载）通过三个声明式字段完成，无需写代码：
+
+| 字段 | 位置 | 取值 | 含义 |
+|---|---|---|---|
+| `content_type` | operation | `multipart-form-data` | 上传用 multipart；自动拼 boundary，body 由 formData 参数组装 |
+| `param.format` | param | `binary` | 该 formData 参数是文件字节（CLI 用 `--file @路径` 传） |
+| `response.format` | response | `binary` | 响应是字节流；CLI 用 `--output/-o <path>` 落盘 |
+
+最小示例（完整版见 `examples/binary.yaml`）：
+```yaml
+resources:
+  pkg:
+    operations:
+      upload:                                  # 上传：multipart
+        method: POST
+        path: /upload
+        content_type: multipart-form-data
+        params:
+          file: { in: formData, format: binary, required: true, description: 要上传的文件 }
+          kind: { in: formData, description: 文件类别 }
+      download:                                # 下载：binary 响应
+        method: GET
+        path: /download/{id}
+        params:
+          id: { in: path, type: string, required: true }
+        response:
+          format: binary
+          description: 文件字节流
+```
+
+调用：
+```bash
+api-cli --spec binary.yaml pkg upload --file @/path/to/pkg.zip --kind archive   # POST multipart
+api-cli --spec binary.yaml pkg download abc123 -o ./pkg.zip                     # GET binary → 落盘
+```
+
+要点：
+- **上传**：`content_type: multipart-form-data` + `format: binary` 的 formData 参数；普通 formData 字段（如 `kind`）和文件字段混在同一 multipart body。
+- **下载**：`response.format: binary`；不加 `--output` 时字节流写 stdout（管道场景有用，但终端会乱码）；加 `--output/-o` 落盘。
+- **MCP 限制**：MCP 通道**不支持 binary**（上传/下载都走 CLI verb，不导出 MCP tool）——见 §9。
+
 ---
 
 ## 7. 作为 MCP server 接 LLM
@@ -322,6 +366,10 @@ Claude Desktop / Cursor 等配置示例（stdio）：
 ## 9. 已知限制
 
 - **cobra CLI 嵌套位置参数**：`api-cli inst <id> relation read <rid>` 形式尚未支持（位置 id 被当未知子命令）。嵌套 resource 当前走 MCP，或清单层拆平级。
+- **文件上传/下载**（iter4）：
+  - **已支持（CLI）**：文件上传（`content_type: multipart-form-data` + `param.format: binary`）+ 文件下载（`response.format: binary` + `--output/-o` 落盘）。
+  - **MCP 不支持 binary**：上传/下载类 verb 走 CLI 通道，不导出 MCP tool（MCP schema 无法表达字节流）。
+  - **大文件流式上传/下载延后**：当前上传全量读入内存（multipart 一次拼装），下载全量读到内存再写 `--output`；GB 级文件需流式改造，见 iter4 design §2.2。
 - **MVP 不做**：OpenAPI importer、批量 create、长任务轮询、并发分页、静态代码生成、非 Go adapter SDK。
 
 完整能力演进与设计见仓库根 `README.md` 与 `docs/` 下的 design/plan。

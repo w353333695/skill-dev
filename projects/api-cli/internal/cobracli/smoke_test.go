@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"io"
 	"os"
+	"path/filepath"
 	"strings"
 	"testing"
 
@@ -101,5 +102,65 @@ resources:
 	out := captureExecute(root, []string{"inst", "read", "--help-format=json"})
 	if !strings.Contains(out, `"resource": "inst"`) || !strings.Contains(out, `"verb": "read"`) {
 		t.Errorf("单独 --help-format=json 应输出 JSON help，got:\n%s", out)
+	}
+}
+
+// TestGlobalOutputFlag 验证 --output flag 注册 + globalOpts 重定向 Out 到文件 + 设 OutCloser。
+func TestGlobalOutputFlag(t *testing.T) {
+	raw := []byte(`
+spec: api-cli/v1
+service: { name: s, default_endpoint: backend, endpoints: { backend: { base_url: http://x, auth: none } } }
+resources:
+  r:
+    operations:
+      read: { method: GET, path: "/r/{id}", params: { id: { in: path, type: string, required: true } } }
+`)
+	tr, err := spec.Parse(raw)
+	if err != nil {
+		t.Fatal(err)
+	}
+	root, _ := Build(tr)
+
+	// 1) flag 注册
+	pf := root.PersistentFlags()
+	if pf.Lookup("output") == nil {
+		t.Error("--output flag 未注册")
+	}
+	if pf.ShorthandLookup("o") == nil {
+		t.Error("-o shorthand 未注册")
+	}
+
+	// 2) globalOpts：--output 时 Out 指向文件 + OutCloser 非 nil
+	cmd, _, _ := root.Find([]string{"r", "read"})
+	// 触发 persistent flag 合并进 cmd.Flags()（cobra 真实 Execute 路径会自动 merge；
+	// 直接调 globalOpts 前需手动触发，否则 Set/Get 找不到 --output）。
+	_ = cmd.ParseFlags(nil)
+	tmpOut := filepath.Join(t.TempDir(), "out.txt")
+	if err := cmd.Flags().Set("output", tmpOut); err != nil {
+		t.Fatal(err)
+	}
+	opts, err := globalOpts(cmd)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if opts.OutCloser == nil {
+		t.Error("设了 --output 但 OutCloser == nil（应指向文件句柄）")
+	}
+	f, ok := opts.Out.(*os.File)
+	if !ok || f.Name() != tmpOut {
+		t.Errorf("opts.Out 不是指向 %q 的 *os.File：got %#v", tmpOut, opts.Out)
+	}
+	opts.OutCloser.Close()
+
+	// 3) 无 --output：OutCloser == nil，Out == stdout
+	root2, _ := Build(tr)
+	cmd2, _, _ := root2.Find([]string{"r", "read"})
+	_ = cmd2.ParseFlags(nil) // 同上：触发 persistent flag 合并
+	opts2, err := globalOpts(cmd2)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if opts2.OutCloser != nil {
+		t.Error("未设 --output 但 OutCloser != nil")
 	}
 }
