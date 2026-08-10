@@ -25,6 +25,12 @@
    - gap 标注也是有效产出——它告诉下一个 LLM/用户这里缺证据，比错误信息危害小得多。
    - 实操：写 platforms 时自检「这条有 file:line / 真实样例 / 实测证据吗？」没有就降级为 gap 标注，并记到对应文件的 constraints / api_behavior 里。
 
+4. **platforms/ 知识必须自包含——不引用 platforms/ 以外的文件**。
+   - `platforms/<deployment>/` 是唯一真相来源，换环境/换 LLM 只读这些文件。引用外部文件（尤其 `tmp/` 临时文件、`knowledge/modules/` 等）= 知识依赖了随时会删的东西，分发即断。
+   - `source:` 字段（如 `data/sources/backend/.../*.go:line`）仅标**溯源**（这条知识从哪段源码归纳的），不是「详见此处获取知识」——知识必须**内联**在 platforms 文件里。
+   - 发现自己写「详见 tmp/xxx.md」「参考 knowledge/modules/xxx」时 → **停**，把那个文件里的关键知识提取内联到 platforms 对应文件，然后删掉引用。
+   - 实操：onboarding 完成时 grep `platforms/` 目录，确认零 `tmp/` 引用、零 `详见/参见/参考 + 外部路径`；`source:` 和 YAML 头注释里的 `data/` 路径是溯源 OK 的（不是知识依赖）。
+
 ---
 
 ## 1. 输入启动包（引导用户按最佳实践提供）
