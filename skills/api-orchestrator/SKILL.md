@@ -53,12 +53,12 @@ description: 通用 API 编排 skill——自然语言需求 → 跨系统调用
 
 ## 执行
 
-统一执行入口 `scripts/run.sh`（自动检测环境，skill 不感知开发态/分发态）：
+统一执行入口 `scripts/run.sh`（自动查找，skill 不感知环境）：
 ```bash
 scripts/run.sh --spec <spec-path> <resource> <verb> [args] [--print-curl|--dry-run]
 # 例：scripts/run.sh --spec platforms/<deployment>/<system>.yaml <resource> <verb> --print-curl
 ```
-`scripts/run.sh` 自动检测：api-cli 在 PATH 上（分发态）→ 直接 exec；不在（开发态）→ go build 增量编译后 exec。
+`scripts/run.sh` 按序查找：① skill 自带预编译二进制 `bin/api-cli`（分发态，随 skill 打包，零环境依赖）→ ② PATH 上的 api-cli → ③ go build 增量编译（开发态）。
 
 **先用 `--print-curl` 或 `--dry-run` 预览请求**，确认无误再真调（写操作尤其）。
 
@@ -74,7 +74,7 @@ skill 两种模式，决定能否写 `platforms/`：
 **写保护纪律**：
 - **orchestration 模式下 platforms/ 只读**：禁止 Write/Edit platforms 任何文件、禁止跑 onboarding 流程。只读 systems/objects/entities/flows 做编排，写只发生在远端系统 API（且写操作必确认）。
 - **onboarding 模式才写 platforms**：且必须 ① 过输入门禁（契约/文档/源码 ≥1）、② 改完跑 lint（0 ERR）。详见 `references/onboarding.md`。
-- **分发加固**：分发后跑 `scripts/setup.sh`——检查 api-cli 在 PATH + `chmod -R a-w platforms/` 锁只读 + lint 自检。onboarding 改 platforms 前先 `chmod -R u+w`，改完锁回。
+- **分发加固**：分发后跑 `scripts/setup.sh`——确认 bin/api-cli 就绪 + `chmod -R a-w platforms/` 锁只读 + lint 自检。onboarding 改 platforms 前先 `chmod -R u+w`，改完锁回。Go skill 零环境依赖：bin/api-cli 预编译二进制随 skill 打包，不需要 setup 装 runtime。
 
 ## 关键纪律
 
