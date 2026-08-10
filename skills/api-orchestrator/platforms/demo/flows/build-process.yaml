@@ -1,67 +1,99 @@
-# 流程模板：建流程定义+版本+绑表单+审批节点—— 场景②。规划挡（写、build）。
-# 场景：设计主机申请流程，绑「主机申请表单-WWH-v3」表单；审批节点：直属领导审批 → 系统组领导审批（物理机才需）→ 实施 → 验收。
+# 流程模板：建流程定义+版本+绑表单+审批节点+表单决定流转—— 场景②③④。规划挡（写、build）。
+# 场景：设计主机申请流程，绑「主机申请表单-WWH-v3」；技术复核→直属领导[表单决定流转]→[物理机→系统组领导]/[虚拟机]→实施→验收。
+# e2e 实测 v2.3.0 全通（def 658aa1ed3bbd2, flowableDefId=ITSC<pdid>:7:7585）。
 name: build-process
-intent: 新建 ITSM 流程定义 + 建流程版本（含 BPMN 流程图 + 节点配置）+ 绑表单 + 配审批人/审批方法
+intent: 新建 ITSM 流程定义 + 建流程版本（含 BPMN 流程图 + 节点配置）+ 绑表单 + 配审批人/审批方法/表单决定流转
 trigger: ["建个流程", "设计流程", "新建审批流程", "做个工单流程"]
 guard: 规划挡（写、build）—— 须展示 BPMN + processSetting 确认
 
 prerequisites:
   env: [EASYOPS_ORG（18832008）, EASYOPS_USER=easyops, EASYOPS_ITSM_BACKEND_URL]
   form_exists: "要绑的表单已存在且有主版本（如 主机申请表单-WWH-v3 的 formId/versionId）"
-  bpmn_truth: "⚠️bpmnXML 是标准 BPMN 2.0 XML（bpmn2:命名空间 + flowable:扩展属性 + ⚠️必含 bpmndi:BPMNDiagram 图形坐标）。结构/校验见 objects.yaml#itsm_process_bpmn。【实测铁律】flowable 部署要求完整真实 BPMN 结构——手工拼的最小 BPMN（哪怕加了 BPMNDI）flowable 部署失败（140200 flowable部署流程失败）。必须 get 一个现成已部署流程版本（如故障处理 60c33a2523e8d 主版本）的 bpmnXML 作模板，改节点名/assignee/条件，保留其完整结构（命名空间/BPMNDI/属性全集）。真实样例 internal/bpmn/xml/parser_test.go:26-258"
+  bpmn_truth: |
+    ⚠️从零构建可部署 BPMN 的 8 要素（实测 v2.3.0 验证，详见 objects.yaml#itsm_process_bpmn constraints）：
+    ① <bpmn2:definitions> 含 xmlns:bpmn2/xsi/bpmndi/dc/di/flowable + id + targetNamespace="http://bpmn.io/schema/bpmn" + xsi:schemaLocation="...BPMN20.xsd"（后两个缺则 140200）
+    ② <bpmn2:process id="ITSC-PROCESS-ID" name="ITSC-PROCESS-NAME" isExecutable="true">（占位符+isExecutable 必须有！）
+    ③ <bpmn2:userTask> V2 只保留核心 flowable:属性：assignee(+assigneeValue/assigneeType/assigneeList/assigneeGroup)+strategy+handling+isFormDecision+formExpressionName。opsAllowed/setAssignee等全放 processSetting.nodeSettings
+    ④ 条件表达式：整个在 ${} 内——非表单决策 ${pass==1}；表单决策 ${resourceType=='pm']}（全在${}内，字符串单引号）
+    ⑤ formExpressionName = 变量名:userTaskId.containId.index.componentId.valueField（jsonPath，如 resourceType:Task_leader.c_base.0.hostType.value）
+    ⑥ BPMNDI：BPMNPlane+Shape(含BPMNLabel+dc:Bounds)+Edge(di:waypoint)
+    ⑦ processSetting.nodeSettings 配 rejectNodes/allowedOps/scriptSettings 等（驳回靠 rejectNodes 不画反向 sequenceFlow）
+    ⑧ 参考源：tmp/process_development/process-definition-v2-dev.md（字段全表+端到端示例）+ tmp/process_design/compliance-rules.md（27条bpmnlint）+ check_compliance.py（校验脚本）
 
 steps:
   - n: 1
     op: process_definition.create
     args: [--body-file, "<def.json>", --insecure, --yes]
-    desc: 建流程定义（只建元信息 name/category）
+    desc: 建流程定义（只建元信息 name/category/memo）
     body_hint: '{ "name":"主机申请流程","category":"ITSM","memo":"主机申请审批" }'
     expect: "code=0；data.instanceId=definitionId"
-    on_fail: "403 → 缺 itsc:process_design_create 权限"
 
   - n: 2
-    transform: 构造 BPMN + processSetting（本地，⚠️参考真实样例，勿臆造）
+    transform: 构造 BPMN + processSetting（本地，⚠️守 8 要素）
     desc: |
-      按 nodes 拼 bpmnXML（startEvent→userTask 直属领导→userTask 系统组领导→userTask 实施→userTask 验收→endEvent，sequenceFlow 连接）。
-      ⚠️【物理机才需系统组领导】= 表单决定流转：系统组领导前的 sequenceFlow 配 conditionExpression（${resourceType==pm} 之类），直属领导 userTask 配 isFormDecision=1 + formExpressionName(变量映射 DSL 变量名:userTaskId.containId.index.componentId)。
-      审批人：BPMN userTask flowable:assignee 占位符体系——直属领导={{.lastExecLeader}}(上一步提单人领导)；指定用户=easyops（见 objects.yaml#itsm_process_assignee）。
-      审批方法：flowable:handling=directly；flowable:opsAllowed=done;reject。
-      processSetting.nodeSettings[] 按 userTaskId 关联 BPMN 节点。
+      按 nodes 拼 bpmnXML（严格遵循 8 要素构建方法）：
+      节点：startEvent → Task_review(技术复核) → Task_leader(直属领导,isFormDecision=1) → exclusiveGateway →
+        [物理机 ${resourceType=='pm']}] → Task_sysgroup(系统组领导) → Task_impl(实施)
+        [虚拟机 ${resourceType=='vm']}] → Task_impl
+        → Task_accept(验收) → endEvent
+      审批人：flowable:assignee 占位符——{{.loginUser}}(提单人)/{{.lastExecLeader}}(上一步领导)/指定用户名（见 objects.yaml#itsm_process_assignee）
+      审批方法：strategy="emptyAssign" handling="directly"（核心属性在 XML；allowedOps 等在 nodeSettings）
+      驳回：nodeSettings.rejectNodes=["Task_review:驳回技术复核"]（不画反向 sequenceFlow！）
+      processSetting.nodeSettings[] 每节点一条（含 allowedOps/rejectNodes/scriptSettings/suspendSetting）
     body_hint: |
-      bpmnXML = '<bpmn2:definitions ...><bpmn2:process id="ITSC-PROCESS-ID" name="主机申请流程">
-        <bpmn2:startEvent id="StartEvent_1"/>
-        <bpmn2:userTask id="Activity_leader" name="直属领导审批" flowable:assignee="{{.lastExecLeader}}" flowable:handling="directly" flowable:opsAllowed="done;reject" flowable:isFormDecision="1" flowable:formExpressionName="resourceType:Activity_leader.<containId>.0.<componentId>.value"/>
-        <bpmn2:userTask id="Activity_sysgroup" name="系统组领导审批" flowable:assignee="sysgroupuser" .../>
-        <bpmn2:sequenceFlow sourceRef="Activity_leader" targetRef="Activity_sysgroup"><bpmn2:conditionExpression>${resourceType==pm}</bpmn2:conditionExpression></bpmn2:sequenceFlow>
-        ...</bpmn2:process></bpmn2:definitions>'
-      processSetting = {"nodeSettings":[{"userTaskId":"Activity_leader","assignType":"single","handling":"directly",...}]}
+      # BPMN 关键结构（完整 8 要素见 prerequisites.bpmn_truth）
+      bpmnXML = '<bpmn2:definitions ...targetNamespace...xsi:schemaLocation...>
+        <bpmn2:process id="ITSC-PROCESS-ID" name="ITSC-PROCESS-NAME" isExecutable="true">
+        <bpmn2:userTask id="Task_leader" name="直属领导审批"
+          flowable:assignee="{{.lastExecLeader}}" flowable:strategy="emptyAssign" flowable:handling="directly"
+          flowable:isFormDecision="1" flowable:formExpressionName="resourceType:Task_leader.c_base.0.hostType.value">
+        <bpmn2:exclusiveGateway id="GW_split">...</bpmn2:exclusiveGateway>
+        <bpmn2:sequenceFlow sourceRef="GW_split" targetRef="Task_sysgroup">
+          <bpmn2:conditionExpression xsi:type="bpmn2:tFormalExpression">${resourceType=='pm']}</bpmn2:conditionExpression>
+        </bpmn2:sequenceFlow>
+        <bpmndi:BPMNDiagram>...Shape+BPMNLabel+Edge...</bpmndi:BPMNDiagram>
+      </bpmn2:definitions>'
+      # processSetting.nodeSettings（完整结构）
+      processSetting = {"lineSettings":[], "nodeSettings":[
+        {"userTaskId":"Task_leader","memoLevel":1,"allowedOps":["assignee","distribute","cc"],
+         "rejectNodes":["Task_review:驳回技术复核"],
+         "nextAssigneeSetting":{"enabled":false,"nextAssignees":[]},
+         "scriptSettings":{"preScript":{},"postScript":{}},
+         "suspendSetting":{"isAutoActivate":false,"activateTime":-1}}, ...]}
 
   - n: 3
     op: process_version.create
     args: ["<definitionId>", --body-file, "<version.json>", --insecure, --yes]
-    desc: 建流程版本（bpmnXML+processSetting+versionName+state）。⚠️建版本不部署 Flowable
-    body_hint: '{ "bpmnXML":<BPMN 2.0 XML>, "versionName":"1.0.0", "state":"done", "processSetting":{"nodeSettings":[...]}, "memo":"初版" }'
+    desc: 建流程版本（bpmnXML+processSetting+versionName+state=done）。⚠️建版本不部署 Flowable
+    body_hint: '{ "bpmnXML":<BPMN>, "versionName":"1.0.0", "state":"done", "processSetting":{...}, "memo":"初版" }'
     expect: "code=0；data.versionId"
-    on_fail: "BPMN 校验失败 → 对照 objects.yaml#itsm_process_bpmn 11 项 validator（孤立节点/表达式正则/userTaskId正则等）；'未完成状态不能...' 是 set_main 的错不是这"
+    on_fail: "140501 表达式错误 → 检查 ${} 包裹；140200 部署失败 → 检查 8 要素（targetNamespace/isExecutable/V2属性精简）"
 
   - n: 4
     op: process_form.set
     args: ["<versionId>", --body-file, "<form-bind.json>", --insecure, --yes]
-    desc: 给【节点】绑表单（userTaskId 指向 BPMN 节点；formId=主机申请表单 formId）。场景②绑表单
-    body_hint: '{ "userTaskId":"Activity_leader", "useFormBuilder":false, "formId":"<主机申请表单 formId>" }'
-    expect: "code=0（后端默认取表单主版本绑）"
-    on_fail: "节点不存在 → 核对 userTaskId 与 BPMN <userTask id> 一致"
+    desc: ⚠️显式绑表单（不靠 baseVersionId 克隆——克隆不可靠）。给 isFormDecision 节点绑表单，运行时才能解析 formExpressionName
+    body_hint: '{ "userTaskId":"Task_leader", "useFormBuilder":false, "formId":"<formId>" }'
+    expect: "code=0"
 
   - n: 5
     op: process_version.set_main
     args: ["<definitionId>", "<versionId>", --insecure, --yes]
-    desc: ⚠️设主版本=部署到 Flowable 引擎才生效（建版本不部署）。须 state==done
-    expect: "code=0；版本对外生效（流程可发起）"
+    desc: ⚠️设主版本=部署到 Flowable 引擎才生效（建版本不部署）。须 state==done。偶发 140500→重试
+    expect: "code=0；flowableDefinitionId 形如 ITSC<defId>:<n>:<hex>（真部署）"
 
 key_rule: |
-  完整建流程链：process_definition.create（建 def）→ process_version.create（建 BPMN 版本，不部署）→ process_form.set（节点绑表单）→ process_version.set_main（部署生效）。
-  bpmnXML 标准格式 + flowable:扩展属性；userTaskId=BPMN<userTask id>=nodeSettings[].userTaskId（join 锚）。
-  物理机才需某节点 = 表单决定流转：sequenceFlow conditionExpression ${...} + 触发节点 isFormDecision=1+formExpressionName。
+  完整建流程链（实测 v2.3.0 验证）：
+  process_definition.create（建 def）→ process_version.create（建 BPMN 版本，不部署）
+  → process_form.set（⚠️显式绑表单，不靠 baseVersionId）→ process_version.set_main（部署生效）
+
+  BPMN 构建 8 要素缺一不可（详见 prerequisites.bpmn_truth）：
+  targetNamespace+xsi:schemaLocation（缺→140200）/ isExecutable（缺→复杂流程部署失败）
+  / V2属性精简（老属性全集→复杂流程部署失败）/ ${表达式整体}（变量+==+值全在${}内）
+  / formExpressionName=jsonPath(变量名:userTaskId.containId.index.componentId.valueField)
+
+  表单决定流转：触发节点 isFormDecision=1 + formExpressionName(jsonPath) + 网关出边 conditionExpression(${变量=='值'})
+  驳回：nodeSettings.rejectNodes 配（格式 `节点id:线名`），不画反向 sequenceFlow
 side_effects: objects.yaml#itsm_process_version.side_effects
 acceptance: "${EASYOPS_CMDB_FRONTEND_URL}/next/itsc-process-manage/<definitionId>/versionCreate-v2/<versionId>?activeTab=0"
-rollback: "process_version.delete 清版本 → process_definition.delete（或末版本级联删）"
+rollback: "process_version.delete 清版本（注意约束）→ process_definition.delete（或末版本级联删）"
