@@ -53,12 +53,14 @@ description: 通用 API 编排 skill——自然语言需求 → 跨系统调用
 
 ## 执行
 
-统一执行入口 `scripts/run.sh`（自动查找，skill 不感知环境）：
+统一执行入口 `scripts/run.sh`（自动探测 OS/ARCH + 查找二进制，skill 不感知环境）：
 ```bash
 scripts/run.sh --spec <spec-path> <resource> <verb> [args] [--print-curl|--dry-run]
 # 例：scripts/run.sh --spec platforms/<deployment>/<system>.yaml <resource> <verb> --print-curl
 ```
-`scripts/run.sh` 按序查找：① skill 自带预编译二进制 `bin/api-cli`（分发态，随 skill 打包，零环境依赖）→ ② PATH 上的 api-cli → ③ go build 增量编译（开发态）。
+`scripts/run.sh` 按 uname 探测 OS/ARCH（linux/darwin × amd64/arm64，不含 windows），按序查找：① `bin/api-cli-<os>-<arch>`（skill 自带预编译，零环境依赖）→ ② `bin/api-cli`（兼容）→ ③ PATH → ④ go build（开发态）。
+
+分发打包：`scripts/pack-go.sh` 交叉编译四平台 → `bin/api-cli-{linux,darwin}-{amd64,arm64}` → 随 skill 分发。**无 setup**——Go 预编译二进制随 skill 打包，不需要安装 runtime、不配 PATH、不要 go。
 
 **先用 `--print-curl` 或 `--dry-run` 预览请求**，确认无误再真调（写操作尤其）。
 
@@ -74,7 +76,7 @@ skill 两种模式，决定能否写 `platforms/`：
 **写保护纪律**：
 - **orchestration 模式下 platforms/ 只读**：禁止 Write/Edit platforms 任何文件、禁止跑 onboarding 流程。只读 systems/objects/entities/flows 做编排，写只发生在远端系统 API（且写操作必确认）。
 - **onboarding 模式才写 platforms**：且必须 ① 过输入门禁（契约/文档/源码 ≥1）、② 改完跑 lint（0 ERR）。详见 `references/onboarding.md`。
-- **分发加固**：分发后跑 `scripts/setup.sh`——确认 bin/api-cli 就绪 + `chmod -R a-w platforms/` 锁只读 + lint 自检。onboarding 改 platforms 前先 `chmod -R u+w`，改完锁回。Go skill 零环境依赖：bin/api-cli 预编译二进制随 skill 打包，不需要 setup 装 runtime。
+- **分发加固**：分发打包跑 `scripts/pack-go.sh` 预编译四平台二进制到 `bin/` → 随 skill 分发。部署机可选跑 `scripts/setup.sh`（锁 platforms 只读 + lint 自检，非必须——Go 二进制已随 skill 走，不装 runtime）。onboarding 改 platforms 前先 `chmod -R u+w`，改完锁回。
 
 ## 关键纪律
 
