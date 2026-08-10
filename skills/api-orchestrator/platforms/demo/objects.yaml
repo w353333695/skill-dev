@@ -595,6 +595,15 @@ objects:
         ⑥ formExpressionName = `变量名:userTaskId.containId.index.componentId.valueField`（jsonPath 格式，如 resourceType:Task_leader.c_base.0.hostType.value）。⚠️不是 modelField 短名——后端 step/manager.go:1107-1137 按 . 拆路径解析：[0]=userTaskId [1]=containId [2]=index(跳过) [3]=componentId [4]=valueField
         ⑦ <bpmndi:BPMNDiagram> 必含 BPMNPlane+Shape(含BPMNLabel+dc:Bounds)+Edge(di:waypoint)
         ⑧ processSetting.nodeSettings 配 rejectNodes/allowedOps/scriptSettings 等（驳回靠 rejectNodes 不画反向 sequenceFlow）
+        ⑨ 【BPMNDI 图形布局原则（实测 v2.6.1 手调验证）】：
+           a. 连线全用横平竖直——只有水平段(x不变)和垂直段(y不变)，零斜线。
+           b. 分支节点放网关正上/正下方（同 x 中心对齐），不放右侧——分支连线只需 1 段垂直。
+           c. 默认分支（如虚拟机）走主轴水平直通到汇合节点，不绕路。
+           d. 附加分支（如物理机→系统组领导）走完回来用 L 型（水平→垂直），不用 U 型绕远。
+           e. 最少转角：每条连线尽量 1-2 段，不用 3-4 段。
+           f. 所有节点同一 y 轴对齐（主轴），分支节点上偏或下偏到独立 y 行。
+           反例（v2.6.0 自动生成）：网关→sysgroup 用 4 段绕路(水平→垂直→水平)，vm 分支 6 段 U 型绕——视觉混乱。
+           正例（v2.6.1 手调）：网关→sysgroup 1 段垂直(正上方)，vm 1 段水平直走，sysgroup→impl 2 段 L 型。
         BPMN 合规要点（bpmnlint 27条精华）：节点名≤20字且不重名/必须1个startEvent+≥1endEvent+≥1userTask/节点全连通/网关不直连网关/排他包容网关后不接endEvent/userTaskId正则^[a-zA-Z][a-zA-Z0-9_]+$。V2 userTask XML 只保留 id/name/assignee(+Value/Type/List/Group)/strategy/handling/isFormDecision/formExpressionName——opsAllowed/setAssignee/subsequentConf/operationConf/suspendConf/memoLevel 全放 processSetting.nodeSettings（XML写了被忽略）。完整 nodeSettings 结构示例：{userTaskId,memoLevel(-1隐藏/0非必填/1必填),allowedOps[],rejectNodes["节点id:线名"],labelViews[],triggerIdList[],candidateSettings[{operation,candidates[],dataSource}],nextAssigneeSetting{enabled,nextAssignees[{userTaskId,label,candidates,dataSource}]},scriptSettings{preScript:{name,desc,scriptIdList[],operations[],isAsync},postScript:{...}},suspendSetting{isAutoActivate,activateTime(小时)}}。
 
   itsm_process_node_setting:
