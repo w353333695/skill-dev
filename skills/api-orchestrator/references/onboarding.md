@@ -6,6 +6,27 @@
 
 ---
 
+## 证据纪律（防臆测，最高优先——适用全程）
+
+> 实战教训：itsm 表单 onboarding 时，把 `options.extraProps`（Go 端 `map[string]interface{}`）的字段内容、`displayCondition` 表达式语法**凭字段名/直觉臆测**写进 platforms，结果前端渲染崩、条件显示不生效，用户多次推回后才靠深挖 `testdata/definition.json` 纠正。根因不是检索深度，是没守下面三条——**onboarding 全程、所有步骤适用**。
+
+1. **动态/透传字段的权威源是「真实样例」，不是 Go struct、更不是字段名**。
+   - 凡字段在源码里是 `map[string]interface{}` / `interface{}` / `string`(JSON blob) 等弱类型（后端透传不解析），其【字段 schema】Go struct 看不到——权威源是：① 仓库 `testdata/` 的真实样例；② `get` 一个现成实例/记录捕获；③ 前端 designer 生成的产物。
+   - 不许从字段名推断结构（反例：见 `foreignObjectId` 就猜填模型 id、见 `name` 就猜是默认显示字段——itsm 实测两者都错）。
+   - 实操：派子代理时明确要求「扫 testdata 抽该字段每类型真实值」；没 testdata 就 get 现成实例；都没有→走规则 3。
+
+2. **「前端解释型内容」的 e2e ≠ save 返回 200**。
+   - 后端透传、前端解释的 blob（如 formDefinition / businessRules / 模板字符串 / 自定义 DSL），后端【不校验结构】——save/update 返回 code=0 只表「存下了」，**不代表前端能渲染/逻辑能跑**。把 API 200 当「配置正确」是假阳性。
+   - 这类内容的正确性必须：① 前端渲染/执行验证（用户看或截图）；或 ② 从 designer / 现成实例捕获的【已知能跑】结构仿写。
+   - 实操：e2e 报告对这类内容明确标「API 已落库，前端渲染待验证」，别默认成功。
+
+3. **无证据不臆测——查不到就标 gap，不许编**。
+   - 某字段/语法/枚举值查不到权威源时，写「未知—待捕获（建议 designer 配置后 get 回流）」，**不许**凭「看起来合理」编一个（反例：编 `field 含 value` 这种不存在的表达式语法）。
+   - gap 标注也是有效产出——它告诉下一个 LLM/用户这里缺证据，比错误信息危害小得多。
+   - 实操：写 platforms 时自检「这条有 file:line / 真实样例 / 实测证据吗？」没有就降级为 gap 标注，并记到对应文件的 constraints / api_behavior 里。
+
+---
+
 ## 1. 输入启动包（引导用户按最佳实践提供）
 
 onboarding 的速度和质量取决于输入完整度。**开工前按此清单核对，缺什么先问用户要什么**——不要在缺关键输入时硬猜。
