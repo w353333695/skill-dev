@@ -1,0 +1,48 @@
+# 流程模板：删流程定义—— 场景⑤。规划挡（写、破坏性）。
+# 场景：删除名称为 test 的流程。注意事项（已核实源码）：删所有版本即可；绑表单的版本删不掉；关联工单的版本删不掉。
+name: delete-process
+intent: 删除一个 ITSM 流程定义（含其所有版本）
+trigger: ["删除流程", "删掉 X 流程", "清理测试流程"]
+guard: 规划挡（写、破坏性）—— 必须确认删哪个（definitionId）
+
+prerequisites:
+  env: [EASYOPS_ORG, EASYOPS_USER=easyops, EASYOPS_ITSM_BACKEND_URL]
+  confirm: "已确认 definitionId；删错不可逆"
+
+steps:
+  - n: 1
+    op: process_definition.list
+    args: [--name, "test", --insecure]
+    desc: 找 test 流程，拿 definitionId
+    dataflow: "data.list[].instanceId（definitionId）→ step2/3"
+
+  - n: 2
+    op: process_version.list
+    args: ["<definitionId>", --insecure]
+    desc: 列该流程所有版本，拿 versionId 清单
+    dataflow: "data.list[].vInstanceId（versionId）→ step3"
+    expect: "total=版本数；向用户展示版本清单确认"
+
+  - n: 3
+    op: process_version.delete
+    args: ["<definitionId>", "<versionId>", --insecure, --yes]
+    desc: |
+      逐个删版本。⚠️路径参数 versionIds（复数）但只删第一个——循环单删。
+      约束（任一即拒 HTTP 412，须先解决再删）：
+      ①绑表单『当前流程已有绑定表单，不可删除!』→ 先 process_form.set 解绑（formRelationInstanceId 非空 + formId 空）
+      ②关联工单『当前流程有正在流转中的工单，不可删除!』→ 先在工单侧处理
+      ③主版本+绑服务 ④被父/子流程引用
+      删完最后一个版本→隐式级联删 def。
+    on_fail: "绑定表单 → 解绑再删；关联工单 → 处理工单；版本是壳批量（versionIds 分号）但只删第一个，循环调"
+
+  - n: 4
+    op: process_definition.delete
+    args: ["<definitionId>", --insecure, --yes]
+    desc: 删流程定义（若 step3 已清光版本，本步幂等成功——末版本级联已删 def；若有残留则报『存在流程定义版本，不允许删除』）
+    on_fail: "『存在流程定义版本』→ 回 step2 确认版本没清干净，继续 step3"
+
+key_rule: |
+  删流程 = 清所有版本（删末版本级联删 def）。版本删不掉的 4 个约束（绑表单/关联工单/主版本+服务/被引用）任一即拒。
+  versionIds(复数)路径但只删第一个——批量是壳，循环单删。
+side_effects: objects.yaml#itsm_process_version.side_effects
+acceptance: "process_definition.list 过滤该 name → 不含它（删干净）"

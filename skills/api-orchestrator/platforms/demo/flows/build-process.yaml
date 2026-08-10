@@ -1,0 +1,67 @@
+# 流程模板：建流程定义+版本+绑表单+审批节点—— 场景②。规划挡（写、build）。
+# 场景：设计主机申请流程，绑「主机申请表单-WWH-v3」表单；审批节点：直属领导审批 → 系统组领导审批（物理机才需）→ 实施 → 验收。
+name: build-process
+intent: 新建 ITSM 流程定义 + 建流程版本（含 BPMN 流程图 + 节点配置）+ 绑表单 + 配审批人/审批方法
+trigger: ["建个流程", "设计流程", "新建审批流程", "做个工单流程"]
+guard: 规划挡（写、build）—— 须展示 BPMN + processSetting 确认
+
+prerequisites:
+  env: [EASYOPS_ORG（18832008）, EASYOPS_USER=easyops, EASYOPS_ITSM_BACKEND_URL]
+  form_exists: "要绑的表单已存在且有主版本（如 主机申请表单-WWH-v3 的 formId/versionId）"
+  bpmn_truth: "⚠️bpmnXML 是标准 BPMN 2.0 XML（bpmn2:命名空间 + flowable:扩展属性）。结构/校验见 objects.yaml#itsm_process_bpmn。真实样例 internal/bpmn/xml/parser_test.go:26-258——建议 get 一个现成流程版本捕获其 bpmnXML 作模板改"
+
+steps:
+  - n: 1
+    op: process_definition.create
+    args: [--body-file, "<def.json>", --insecure, --yes]
+    desc: 建流程定义（只建元信息 name/category）
+    body_hint: '{ "name":"主机申请流程","category":"ITSM","memo":"主机申请审批" }'
+    expect: "code=0；data.instanceId=definitionId"
+    on_fail: "403 → 缺 itsc:process_design_create 权限"
+
+  - n: 2
+    transform: 构造 BPMN + processSetting（本地，⚠️参考真实样例，勿臆造）
+    desc: |
+      按 nodes 拼 bpmnXML（startEvent→userTask 直属领导→userTask 系统组领导→userTask 实施→userTask 验收→endEvent，sequenceFlow 连接）。
+      ⚠️【物理机才需系统组领导】= 表单决定流转：系统组领导前的 sequenceFlow 配 conditionExpression（${resourceType==pm} 之类），直属领导 userTask 配 isFormDecision=1 + formExpressionName(变量映射 DSL 变量名:userTaskId.containId.index.componentId)。
+      审批人：BPMN userTask flowable:assignee 占位符体系——直属领导={{.lastExecLeader}}(上一步提单人领导)；指定用户=easyops（见 objects.yaml#itsm_process_assignee）。
+      审批方法：flowable:handling=directly；flowable:opsAllowed=done;reject。
+      processSetting.nodeSettings[] 按 userTaskId 关联 BPMN 节点。
+    body_hint: |
+      bpmnXML = '<bpmn2:definitions ...><bpmn2:process id="ITSC-PROCESS-ID" name="主机申请流程">
+        <bpmn2:startEvent id="StartEvent_1"/>
+        <bpmn2:userTask id="Activity_leader" name="直属领导审批" flowable:assignee="{{.lastExecLeader}}" flowable:handling="directly" flowable:opsAllowed="done;reject" flowable:isFormDecision="1" flowable:formExpressionName="resourceType:Activity_leader.<containId>.0.<componentId>.value"/>
+        <bpmn2:userTask id="Activity_sysgroup" name="系统组领导审批" flowable:assignee="sysgroupuser" .../>
+        <bpmn2:sequenceFlow sourceRef="Activity_leader" targetRef="Activity_sysgroup"><bpmn2:conditionExpression>${resourceType==pm}</bpmn2:conditionExpression></bpmn2:sequenceFlow>
+        ...</bpmn2:process></bpmn2:definitions>'
+      processSetting = {"nodeSettings":[{"userTaskId":"Activity_leader","assignType":"single","handling":"directly",...}]}
+
+  - n: 3
+    op: process_version.create
+    args: ["<definitionId>", --body-file, "<version.json>", --insecure, --yes]
+    desc: 建流程版本（bpmnXML+processSetting+versionName+state）。⚠️建版本不部署 Flowable
+    body_hint: '{ "bpmnXML":<BPMN 2.0 XML>, "versionName":"1.0.0", "state":"done", "processSetting":{"nodeSettings":[...]}, "memo":"初版" }'
+    expect: "code=0；data.versionId"
+    on_fail: "BPMN 校验失败 → 对照 objects.yaml#itsm_process_bpmn 11 项 validator（孤立节点/表达式正则/userTaskId正则等）；'未完成状态不能...' 是 set_main 的错不是这"
+
+  - n: 4
+    op: process_form.set
+    args: ["<versionId>", --body-file, "<form-bind.json>", --insecure, --yes]
+    desc: 给【节点】绑表单（userTaskId 指向 BPMN 节点；formId=主机申请表单 formId）。场景②绑表单
+    body_hint: '{ "userTaskId":"Activity_leader", "useFormBuilder":false, "formId":"<主机申请表单 formId>" }'
+    expect: "code=0（后端默认取表单主版本绑）"
+    on_fail: "节点不存在 → 核对 userTaskId 与 BPMN <userTask id> 一致"
+
+  - n: 5
+    op: process_version.set_main
+    args: ["<definitionId>", "<versionId>", --insecure, --yes]
+    desc: ⚠️设主版本=部署到 Flowable 引擎才生效（建版本不部署）。须 state==done
+    expect: "code=0；版本对外生效（流程可发起）"
+
+key_rule: |
+  完整建流程链：process_definition.create（建 def）→ process_version.create（建 BPMN 版本，不部署）→ process_form.set（节点绑表单）→ process_version.set_main（部署生效）。
+  bpmnXML 标准格式 + flowable:扩展属性；userTaskId=BPMN<userTask id>=nodeSettings[].userTaskId（join 锚）。
+  物理机才需某节点 = 表单决定流转：sequenceFlow conditionExpression ${...} + 触发节点 isFormDecision=1+formExpressionName。
+side_effects: objects.yaml#itsm_process_version.side_effects
+acceptance: "${EASYOPS_CMDB_FRONTEND_URL}/next/itsc-process-manage/<definitionId>/versionCreate-v2/<versionId>?activeTab=0"
+rollback: "process_version.delete 清版本 → process_definition.delete（或末版本级联删）"

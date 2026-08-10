@@ -506,6 +506,183 @@ objects:
       - "instSelect（实例选择）：候选项过滤/计算"
       - "工具执行失败且输出含 raise 字段 → raise 值作为 error 抛前端（自定义报错文案）"
 
+  # ===========================================================================
+  # EasyOps ITSM 流程定义（flowable_service，第二域）—— 三层：流程定义/版本/内容。
+  # 权威源：契约 itsm-process_definition.json + 后端 process_definition_version/ +
+  #   internal/bpmn/(解析校验) + internal/process/(流转求值) + internal/process_script/(orderInfo)。
+  # 版本内容 = bpmnXML(标准 BPMN 2.0 XML) + processSetting(节点配置 JSON) + stageSetting(阶段 relation)。
+  # ⚠️ 证据纪律：以下结构均有 testdata/源码真实样例（file:line），flowConfig/ProcessStage 运行样例标"待捕获"。
+  # ===========================================================================
+  itsm_process_definition:
+    description: ITSM 流程定义（ITSC_PROCESS）—— 流程元信息 + 多版本。流程内容在版本的 bpmnXML/processSetting。
+    source: data/sources/backend/ITSM/flowable_service/process_definition_version/process_definition_version_service.go
+    api: process_definition
+    fields:
+      instanceId:  { type: string, anchor: true, desc: "流程定义 id（13 hex，CMDB 生成不可指定）" }
+      name:        { type: string, required: true, desc: "流程名（def 内唯一）" }
+      category:    { type: string, required: true, desc: "分类（自由文本）" }
+      creator:     { type: string }
+      memo:        { type: string }
+      triggerIdList: { type: array, items: string, desc: "触发器 id 列表" }
+      useFormBuilder: { type: bool, default: false, desc: "是否引入 form_builder" }
+    relations:
+      - { to: itsm_process_version, type: composition, cardinality: "1:N", desc: "一个流程定义多版本，同时仅一版 isMain（部署到 Flowable）" }
+    side_effects:
+      - op: process_definition.create
+        rule: "POST /v2/process_definition 只建 def 元信息（不含版本），防重名 CheckNameDuplicate。versionId CMDB 生成。建完须 process_version.create 建 BPMN 版本。"
+      - op: process_definition.edit
+        rule: "PUT /v2/process_definition/:definitionId 改元信息，非 upsert，须传已存在 definitionId，改 name 防重（排除自己）。"
+      - op: process_definition.delete
+        rule: "⚠️有版本拒绝『存在流程定义版本，不允许删除』——必须先删干净所有版本。def 不存在静默成功（幂等）。删最后一个版本隐式级联删 def（见 itsm_process_version）。"
+
+  itsm_process_version:
+    description: |
+      ITSM 流程版本（ITSC_PROCESS_VERSION）—— 持流程内容。状态机两态 unfinished(草稿)/done(完成)。
+      版本内容三块：bpmnXML(BPMN 2.0 XML string) + processSetting(节点配置 JSON string) + stageSetting(阶段，独立 relation)。
+      DataVersion 字段 ≥SettingSplit 走"XML+分离setting"新路径，旧版走 deprecated userTaskInfo。
+      ⚠️只有 set_main 才把 BPMN 部署到 Flowable 引擎（版本真正生效）；建/改版本只存不部署。
+    source: data/sources/backend/ITSM/flowable_service/internal/models/def_version.go:15-41
+    api: process_version
+    fields:
+      instanceId:          { type: string, anchor: true, desc: "版本 id（13 hex，CMDB 生成；list 支持 'lastest' 别名取最新）" }
+      versionName:         { type: string, required: true, desc: "版本名（def 内唯一）" }
+      state:               { type: string, required: true, enum: [unfinished, done], desc: "done 才能 set_main；done 版本不可编辑" }
+      bpmnXML:             { type: string, required: true, ref: itsm_process_bpmn, desc: "BPMN 2.0 XML（流程图）。结构+校验见 itsm_process_bpmn" }
+      processSetting:      { type: object, required: true, ref: itsm_process_node_setting, desc: "节点配置 {nodeSettings:[],lineSettings:[]}。存 JSON 字符串。见 itsm_process_node_setting" }
+      isMain:              { type: bool, desc: "是否主版本（由 MAIN_VERSION 关系标记，deprecated 字段）。set_main 触发 Flowable 部署" }
+      deploymentId:        { type: string, desc: "Flowable 部署 id（set_main 后回填；之前是 fakeId 占位）" }
+      flowableDefinitionId: { type: string, desc: "Flowable 流程定义 id（set_main 后回填）" }
+      processId:           { type: string, desc: "本地拼 'ITSC'+definitionId，BPMN 内部 process id" }
+      stageSetting:        { type: array, desc: "阶段配置（relation 存储，每项 {name,userTaskIds[]}）" }
+    relations:
+      - { to: itsm_process_definition, type: association, cardinality: "N:1", desc: "版本隶属一个流程定义" }
+      - { to: itsm_process_form, type: association, cardinality: "1:N", desc: "每节点一条表单关系 ITSC_PROCESS_FORM_RELATION" }
+    side_effects:
+      - op: process_version.create
+        rule: "POST /v2/process_definition/:definitionId 建版本（bpmnXML/versionName/state/processSetting 必填）。versionId CMDB 生成。baseVersionId 传则克隆【表单关系+阶段设置】（不克隆 bpmnXML/processSetting，仍须 request 给）。cleanSetting 清掉引用不存在节点的配置。⚠️建版本不部署 Flowable，须再 set_main 才生效。"
+      - op: process_version.edit
+        rule: "PUT /v2/.../version/:versionId 改版本。⚠️done 版本拒绝编辑『当前版本已完成，不可修改！』——只能改 unfinished。要改 done 须 create+baseVersionId 派生新版本。"
+      - op: process_version.delete
+        rule: "路径 versionIds(复数分号)但只删第一个——批量是壳（service.go:1230-1231）。约束任一即拒(HTTP 412)：①绑表单『已有绑定表单，不可删除!』(view.go:80) ②关联工单『有正在流转中的工单，不可删除!』(view.go:84) ③主版本+绑服务 ④被父/子流程引用。删完若 def 无版本→隐式级联删 def。"
+      - op: process_version.set_main
+        rule: "PUT /v1/.../version/:versionId 设主版本。⚠️须 state==done。旧主自动降级（MAIN_VERSION 关系覆盖）。触发 deployProcessAndModifyCMDB：上传 BPMN 到 Flowable 引擎（替换占位符 ITSC-PROCESS-ID/NAME）+ 回填 deploymentId/flowableDefinitionId。只有 set_main 才部署。运行中工单不受影响（走旧 deploymentId）。"
+
+  itsm_process_bpmn:
+    description: |
+      BPMN 2.0 XML（流程图）—— 标准 BPMN（bpmn2: 命名空间）+ EasyOps 扩展（flowable: 命名空间属性挂 userTask 上）。
+      节点拓扑靠 incoming/outgoing 引用 sequenceFlow id；分支条件挂 sequenceFlow 上；会签/串签靠 multiInstanceLoopCharacteristics。
+      真实样例：internal/bpmn/xml/parser_test.go:26-258（含表单流转的完整图）/ converter_test.go:36-90（最全 userTask 属性）。
+    source: data/sources/backend/ITSM/flowable_service/internal/bpmn/{xml/parser.go,converter.go,validator.go,constants.go}
+    fields:
+      definitions: { type: string, desc: "<bpmn2:definitions xmlns:bpmn2=... xmlns:flowable=...> 根" }
+      process:     { type: string, desc: "<bpmn2:process id=...> 聚合 startEvent/endEvent/userTask/callActivity(子流程)/sequenceFlow/exclusiveGateway(排他)/inclusiveGateway(包容)/parallelGateway(并行)" }
+      userTask:    { type: string, desc: "<bpmn2:userTask id='Activity_xxx' name='审批' flowable:assignee='...' flowable:handling='directly' ...>——节点配置全在 flowable:扩展属性。见下方属性全集" }
+      sequenceFlow: { type: string, desc: "<bpmn2:sequenceFlow sourceRef targetRef><bpmn2:conditionExpression>${pass==1}</bpmn2:conditionExpression>——分支条件" }
+      multiInstance: { type: string, desc: "<multiInstanceLoopCharacteristics isSequential='false' flowable:collection='assigneeList'><completionCondition>${nrOfCompletedInstances/nrOfInstances>=0.6}</completionCondition>——会签(false)/串签(true) + 通过比例" }
+    constraints:
+      - "userTask 全部 flowable:扩展属性（converter_test.go:64 真实样例）：isFormDecision(0/1) | strategy(emptyAssign等) | script=[JSON前后置脚本] | handling(directly/send_directly/claim_directly/send_claim_directly) | assignee(占位符或指定用户) | assigneeValue | assigneeType | assigneeList(;分隔会签) | assigneeGroup | subsequentConf=[JSON下节点审批人] | operationConf=[JSON操作候选人] | suspendConf | memoLevel(-1隐藏/0非必填/1必填) | suspendTimeLimit | triggerIdList | setAssignee(true/false) | opsAllowed(;分隔done;assignee;cc) | formExpressionName(表单决定流转变量映射) | jumpableNodes | labelViews"
+      - "userTaskId = BPMN <userTask id> = processSetting.nodeSettings[].userTaskId（join 锚，def_version.go:249-268 getNodeList）"
+      - "校验 11 项（validator.go:302-314 ValidateProcessV2）：孤立节点/表达式正则/必须1个startEvent+≥1endEvent+≥1userTask/包容网关前节点须isFormDecision=1/userTaskId正则^[a-zA-Z][a-zA-Z0-9_]+$且唯一/子流程不接start网关/空跳过不接多分支网关/排他包容网关后不接endEvent/并行包容后子流程不引用同流程"
+      - "分支条件正则（validator.go:15）：ConditionExpressionRegexp=\\$\\{(.*)\\}，须形如 ${pass==1}"
+      - "表达式解析 GetProcessVariable（converter.go:17-40）：isFormDecision=0 只能 ==（拆 Name/Value）；isFormDecision=1 整表达式作 Value，支持复杂（pass>=1&&pass<=100 / (pass==-1||pass==1)&&key=='a'）"
+
+  itsm_process_node_setting:
+    description: |
+      节点配置 NodeSetting（processSetting.nodeSettings[]，按 userTaskId 关联 BPMN 节点）。每节点一套：审批人/审批方法/脚本/驳回/自动化/操作权限/文案。
+      真实样例：抓现成流程 taskInfo[] + internal/bpmn/converter_test.go。
+    source: data/sources/backend/ITSM/flowable_service/internal/models/def_version.go:350-364
+    fields:
+      userTaskId:        { type: string, desc: "对应 BPMN <userTask id>" }
+      assignType:        { type: string, desc: "指派类型 single(单签)/assigneeList(会签，legacy)" }
+      handling:          { type: string, enum: [directly, send_directly, claim_directly, send_claim_directly], desc: "处理方式：directly直接/send_directly先派单/claim_directly先认领/send_claim_directly派单+认领" }
+      presetAssigneeConf: { type: object, ref: itsm_process_assignee, desc: "审批人（后端按 userType 回查 name 的展示视图；真正来源在 BPMN flowable:assignee）" }
+      allowedOps:        { type: array, items: string, desc: "允许操作 done:完成/assignee:转派/cc:分阅/withdraw:撤回/SLAChange 等（;分隔于 BPMN opsAllowed）" }
+      memoLevel:         { type: integer, enum: [-1, 0, 1], desc: "审批意见级别 -1隐藏/0非必填/1必填" }
+      rejectNodes:       { type: array, items: string, desc: "可驳回节点 ['Activity_xxx:1']" }
+      scriptSettings:    { type: object, ref: itsm_process_script, desc: "前后置脚本 {PreScript,PostScript}" }
+      autoSetting:       { type: object, ref: itsm_process_auto_node, desc: "自动化节点（绑 autoops 工具）" }
+      nextAssigneeSetting: { type: object, desc: "允许本节点设下节点审批人；细粒度配在 BPMN subsequentConf" }
+      autoCCSetting:     { type: object, desc: "自动分阅设置" }
+      holidayHandleConf: { type: object, desc: "节假日处理" }
+      isFormDecision:    { type: string, enum: ["0", "1"], desc: "0否/1由表单决定多分支流转（配 formExpressionName）" }
+      formExpressionName: { type: string, ref: itsm_process_form_flow, desc: "表单决定流转的变量映射 DSL" }
+      buttonSetting:     { type: array, desc: "按钮配置" }
+      labelViews:        { type: array, items: string, desc: "操作文案 ['done:通过']" }
+      revokeRoles:       { type: array, items: string, desc: "允许撤销角色 admin/svcOwner/creator" }
+      cancelRoles:       { type: array, items: string, desc: "允许作废角色" }
+
+  itsm_process_assignee:
+    description: |
+      审批人体系。BPMN flowable:assignee 写【占位符】→ 解析映射 userType（converter.go:266-323 parseAssignee，constants.go:5-29）。
+      presetAssigneeConf 是后端按 userType 实时回查 name 拼的【展示视图】（manager.go:579-696），非输入配置——真正人员来源在 BPMN flowable:assignee*。
+      真实样例：converter_test.go:25,43,69（指定用户/会签）。
+    source: data/sources/backend/ITSM/flowable_service/internal/bpmn/converter.go:266-323
+    fields:
+      userType:        { type: string, enum: [loginUser, lastExec, lastExecLeader, historyExec, historyExecLeader, dutyGroup, dutyGroupV2, formValue, userRule, userTree, department, specifyUser], desc: "审批人类型。占位符映射：{{.loginUser}}提单人/{{.lastExec}}上一步执行人/{{.lastExecLeader}}其直属领导/{{.historyExec}}历史节点处理人/{{.historyExecLeader}}其领导/{{.dutyGroup}}老值班组/{{.dutyGroupV2}}新值班组/{{.formValue}}来源表单/{{.userRule}}人员规则/{{.userTree}}人员树/{{.department}}部门；非占位符(如easyops)=specifyUser 指定用户" }
+      assigneeValue:   { type: string, desc: "配置值：historyExec/dutyGroup=instanceId；userTree=;分隔用户名；department=部门id；userRule=规则JSON；specifyUser 不用" }
+      assignee:        { type: string, desc: "单签指定用户名（specifyUser）；会签写 \${assignee}" }
+      assigneeListUser: { type: array, items: string, desc: "会签用户名列表（;分隔于 BPMN assigneeList，配 multiInstanceLoopCharacteristics）" }
+      assigneeGroups:  { type: array, items: string, desc: "用户组列表" }
+    constraints:
+      - "presetAssigneeConf 展示视图：specifyUser→{userList[{username,nickname}],userGroupList[{groupname,groupId}]}；userTree→userList；historyExec→{historyExec{userTaskId,userTaskName}}；dutyGroup/dutyGroupV2→{dutyGroup{...}}"
+
+  itsm_process_script:
+    description: |
+      节点前后置脚本（BPMN flowable:script=[JSON]，转 NodeSetting.scriptSettings）+ 表单生命周期脚本。
+      脚本=引用预注册 EasyOps 工具(toolId, python)，schema 只存 toolId+映射。ScriptType: pre=前置/rear=后置。
+      ⚠️ 注入 orderInfo（工单全上下文，JSON 字符串）+ loginUser/formData。
+      真实样例：converter_test.go:25 flowable:script=[{scriptType:'pre',...}]；orderInfo JSON 样例 process_script_service_test.go:1485。
+    source: data/sources/backend/ITSM/flowable_service/internal/process_script/process_script_service.go:360-380
+    fields:
+      hook:    { type: string, enum: [pre, rear, afterDataLoad, preSubmitCheck, onValueChange, componentLoad, instSelect], desc: "pre=节点前置(提交前)/rear=后置(完成后)；afterDataLoad/preSubmitCheck/onValueChange/componentLoad/instSelect=表单生命周期" }
+      toolIds: { type: array, items: string, desc: "EasyOps 工具 id 列表（autoops_tool.toolId）" }
+      opMode:  { type: string, enum: [sync, async], desc: "同步/异步" }
+      inputs:  { type: array, items: string, desc: "注入：节点脚本 [orderInfo,loginUser,action,scriptType]；表单脚本 [orderInfo,loginUser,eventSource,args,formData]。orderInfo 是 JSON 字符串注入（非 struct）" }
+      output:  { type: any, desc: "按事件：afterDataLoad/onValueChange→formData+可选formConfig/ticketName；preSubmitCheck→checkState|submitCheck；componentLoad→result；失败含 raise→raise 值当 error 抛" }
+    constraints:
+      - "orderInfo 结构（order_info.pb.go:14-69，工单全上下文）：ProcessInstance/Process/ProcessVersion{bpmnXML,isJumpable}/ServiceInstance/ServiceRelevanceOrder[]/UserTaskList[]/NodeList[]/StepList[]/FinishedStepList[]/Variables[]/当前步骤(instanceId/userTaskId/taskName/status/action/operator/creator/operatorLeader/memo/formData/isSubStep)/UserInfoMap/IsTimeout/SlaStatus。运行时由 manager.GetOrderInfo 组装"
+      - "场景：前置脚本(pre)=节点提交前校验/预处理（能拿本次 formData）；后置脚本(rear)=节点完成后联动（通知/自动化）"
+      - "表单实例选择控件脚本不注入 orderInfo（process_script_service.go:152）"
+
+  itsm_process_form_flow:
+    description: |
+      【表单决定流转】三层机制——决定 sequenceFlow 走哪条线。⚠️和表单 displayCondition #{容器.控件}【不是同一套】（语法/求值方/对象都不同）。
+      真实样例：parser_test.go:69,76,85 conditionExpression ${pass==1}；step/manager.go:1107-1137 formExpressionName 解析。
+    source: data/sources/backend/ITSM/flowable_service/internal/process/{step/manager.go,expression/validate.go} + internal/bpmn/converter.go:17-40
+    fields:
+      conditionExpression: { type: string, desc: "BPMN <sequenceFlow><conditionExpression>${表达式}</conditionExpression>。isFormDecision=0 只能 ==（如 ${pass==1}）；isFormDecision=1 支持复杂（${pass>=1&&pass<=100}）" }
+      isFormDecision:      { type: string, enum: ["0", "1"], desc: "BPMN userTask flowable:isFormDecision。1=由表单决定多分支" }
+      formExpressionName:  { type: string, desc: "BPMN userTask flowable:formExpressionName。变量映射 DSL：'变量名:userTaskId.containId.index.componentId[.valueField]'，多变量;分隔。运行时按此从表单取控件值赋给变量名（如 pass）" }
+    constraints:
+      - "求值用 govaluate 库（expression/validate.go:87），支持自定义函数 containsAny；formatExp 去 variables: 前缀+数字去引号；variables 自动转 int/float"
+      - "分支匹配 GetMatchedNextOps（step/manager.go:567-592）：非表单决定比 name==value；表单决定对每出边 ValidateValue(expr,variables) 求值"
+      - "formExpressionName DSL 铁证（step/manager.go:1107-1137）：'pass:Activity_178mit1.h8w9ylt2i1.0.h8w9ylt2i2.value;passKey:Activity_178mit1.h8w9ylt2i1.0.h8w9ylt2i2'——按.拆 [0]userTaskId [1]containId [2]index(跳过) [3]componentId [4]valueField?；调 composer.GetFormValueByComponentId 取表单控件值"
+      - "⚠️ vs 表单 displayCondition：流转 ${...} 后端 govaluate 求值决定走哪线；displayCondition #{...} 前端求值决定控件显隐。两者独立"
+      - "LineSetting.flowConfig：后端零构造零解析纯透传（service.go:1439），真实取值【待捕获】"
+
+  itsm_process_auto_node:
+    description: 自动化节点（NodeSetting.autoSetting）—— 节点自动执行 AutoOps 工具（非人工审批）。
+    source: data/sources/backend/ITSM/flowable_service/internal/auto_node/{interfaces.go,manager.go,components.go}
+    fields:
+      enabled:        { type: bool, desc: "是否启用" }
+      actionExecutionSetting: { type: object, desc: "{actionType}：TimeTypeImmediately 立即 / 延时类 CalculateExecutionTime" }
+      toolSetting:    { type: object, desc: "{toolId(绑 autoops 工具), toolArgs[]:{key, fixedValue|formValueConfig{userTaskId,containId,componentId,field}}}" }
+      exceptionNotice: { type: object, desc: "{method[email等], subject, content, receivers{userNames[],userGroupIds[]}}——执行失败通知" }
+
+  itsm_process_form:
+    description: 流程版本↔表单绑定（ITSC_PROCESS_FORM_RELATION）—— 表单绑到【节点】(userTaskId)非版本；每节点一条关系。
+    source: data/sources/backend/ITSM/flowable_service/process_definition_version/process_definition_version_service.go:511-636
+    api: process_form
+    fields:
+      versionId:             { type: string, anchor: true, desc: "流程版本 id" }
+      userTaskId:            { type: string, required: true, desc: "BPMN 节点 id（表单绑到节点）" }
+      formId:                { type: string, ref: itsm_form, desc: "老表单 form schema id（useFormBuilder=false）" }
+      useFormBuilder:        { type: bool, desc: "true=fbFormId 体系；false=formId+formSchemaVersion" }
+      formRelationInstanceId: { type: string, desc: "关系实例 id（空=没绑/非空=已绑）" }
+    side_effects:
+      - op: process_form.set
+        rule: "按 formRelationInstanceId+formId 组合 4 动作：①都空=无操作 ②relId空+formId非空=绑定 ③relId非空+formId空=解绑 ④都非空=换绑。useFormBuilder=false 时后端默认取表单【主版本】绑（service.go:593,604）。"
+
 # =============================================================================
 # 接口级行为（跨对象，编排时必须知道）
 # =============================================================================

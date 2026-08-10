@@ -262,6 +262,20 @@ systems:
         update:   "改版本（upsert 非对称：done→派生新草稿/unfinished→就地改；同时改 form 元信息）—— 加版本走这"
         delete:   "删版本（路径 versionIds 复数；只删第一个；被流程引用拒绝；末版本级联删 form）"
         set_main: "设主版本（=发布；须 done；旧主降级；触发流程换绑）"
+      process_definition:
+        list:   "流程定义列表（name/category/creator/Q 模糊；isMain 只列有主版本；不返 bpmnXML/processSetting）"
+        create: "新建流程定义（只建元信息；versionId CMDB 生成；建完用 process_version.create 建版本）"
+        edit:   "编辑定义元信息（非 upsert；须传已存在 definitionId；name 防重）"
+        delete: "删流程定义（有版本拒绝；须先清版本；末版本级联删 def）"
+      process_version:
+        list:     "列流程版本（versionId 支持 'lastest' 别名取最新；不返 bpmnXML/processSetting）"
+        get:      "版本详情 V2（bpmnXML + taskInfo 节点设置 + lineSettings + stageSetting）"
+        create:   "建流程版本（bpmnXML+processSetting+versionName+state 必填；baseVersionId 克隆表单关系+阶段；不部署 Flowable）"
+        edit:     "改版本（仅 unfinished 可改；done 拒绝编辑）"
+        delete:   "删版本（versionIds 复数但只删第一个；约束：绑表单/关联工单/主版本+服务/被引用 任一拒）"
+        set_main: "设主版本（=部署到 Flowable 引擎生效；须 done；旧主降级；运行中工单不受影响）"
+      process_form:
+        set: "节点绑/解/换表单（userTaskId 绑到节点；formRelationInstanceId+formId 组合决定 绑/解/换；默认取表单主版本）"
 
     # 运维知识（实测，真相来源）—— 表单内容模型/坑见 objects.yaml#itsm_form_definition
     runtime:
@@ -279,9 +293,17 @@ systems:
       set_main: "POST .../version/:versionId 设主版本=发布；目标须 state==done（unfinished 报错）；旧主自动降级；旧主被流程绑定时触发 ITSC_PROCESS_FORM_RELATION 换绑（业务连续）；已主版本幂等"
       form_definition_string: "formDefinition/businessRules 在 wire 层是 JSON 字符串（CMDB 存 string）。save/update 传 JSON.stringify([]Container)；get 返回需二次 parse。深层结构（5 容器/23 控件/5 脚本/条件显示/继承）见 objects.yaml#itsm_form_definition，后端透传前端解释"
       version_state: "状态机两态：unfinished(草稿)/done(完成)；无 draft/published 叫法。done=可被引用/可设主版本。list 的 lastestMainVersion/lastestVersion 字段拼写少 t（API 如此）"
-      process_integration_todo: "displayUserTaskId（监听节点）只在【跨节点条件显示】填（displayCondition 引用别的流程节点表单的控件时，指明从哪个 activity id 取值）；引用本节点控件【不填】（留空，误填反不生效）。displayUserTaskId + 表单被流程绑定（ITSC_PROCESS_FORM_RELATION）+ set_main 换绑都依赖流程侧。TODO 未来补 flowable_service 流程接口（流程定义/活动节点 activity id/表单-节点绑定）后回流跨节点联动的完整机制"
+      process_integration_todo: "displayUserTaskId（监听节点）只在【跨节点条件显示】填（displayCondition 引用别的流程节点表单的控件时，指明从哪个 activity id 取值）；引用本节点控件【不填】（留空，误填反不生效）。流程接口已接入（见下 process_*），displayUserTaskId↔节点联动机制见 objects.yaml#itsm_process_form_flow"
+      # ---- 流程定义（process）运维知识 ----
+      process_bpmn: "bpmnXML 是标准 BPMN 2.0 XML（bpmn2:命名空间 + flowable:扩展属性挂 userTask）。节点拓扑靠 incoming/outgoing；分支条件在 <sequenceFlow><conditionExpression>${pass==1}</conditionExpression>；会签 multiInstanceLoopCharacteristics。userTaskId=BPMN<userTask id>=nodeSettings[].userTaskId（join 锚）。校验 11 项（validator.go）。完整见 objects.yaml#itsm_process_bpmn"
+      process_save_version: "process_version.create 必填 bpmnXML/versionName/state/processSetting。baseVersionId 克隆【表单关系+阶段】不克隆 bpmnXML/processSetting。⚠️建版本不部署 Flowable——须再 set_main 才生效（部署到 Flowable 引擎，回填 deploymentId）。done 版本不可编辑（要改须 create+baseVersionId 派生）"
+      process_delete_constraints: "删流程定义须先清所有版本（『存在流程定义版本，不允许删除』）。删版本路径 versionIds(复数分号)但只删第一个——批量是壳。约束任一即拒(HTTP412)：绑表单/关联工单/主版本+绑服务/被引用。删末版本隐式级联删 def"
+      process_form_flow: "表单决定流转三层：①sequenceFlow conditionExpression ${pass==1} ②userTask isFormDecision=1+formExpressionName(变量映射DSL '变量名:userTaskId.containId.index.componentId') ③后端 govaluate 求值。⚠️和表单 displayCondition #{容器.控件}【不同套】（流转后端求值决定走线/displayCondition前端求值决定显隐）。完整见 objects.yaml#itsm_process_form_flow"
+      process_form_binding: "表单绑到【节点】(userTaskId)非版本（ITSC_PROCESS_FORM_RELATION 每节点一条）。process_form.set 按 formRelationInstanceId+formId 组合 绑/解/换（4动作）。useFormBuilder=false 时后端默认取表单主版本绑"
 
     # e2e 验收 URL（前端）—— 表单类操作后在此可视化校验
     acceptance_urls:
       form_list:   "${EASYOPS_CMDB_FRONTEND_URL}/next/itsc-form-management/form-list?visible=true&page=1&pageSize=20&name=&creator=&category=&state="   # query 可选过滤 name/creator/category/state
       form_detail: "${EASYOPS_CMDB_FRONTEND_URL}/next/itsc-form-management/form-list/{formId}/{versionId}"   # formId=表单实例id（13hex）；versionId=版本实例id（13hex）
+      process_list:   "${EASYOPS_CMDB_FRONTEND_URL}/next/itsc-process-manage/process-list?visible=true&page=1&pageSize=20&name=&creator=&category="   # 流程列表，query 可选过滤 name/creator/category
+      process_detail: "${EASYOPS_CMDB_FRONTEND_URL}/next/itsc-process-manage/{definitionId}/versionCreate-v2/{versionId}?activeTab=0"   # definitionId=流程定义id；versionId=版本id
