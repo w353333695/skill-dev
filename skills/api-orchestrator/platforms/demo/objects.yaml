@@ -651,7 +651,15 @@ objects:
       inputs:  { type: array, items: string, desc: "注入：节点脚本 [orderInfo,loginUser,action,scriptType]；表单脚本 [orderInfo,loginUser,eventSource,args,formData]。orderInfo 是 JSON 字符串注入（非 struct）" }
       output:  { type: any, desc: "按事件：afterDataLoad/onValueChange→formData+可选formConfig/ticketName；preSubmitCheck→checkState|submitCheck；componentLoad→result；失败含 raise→raise 值当 error 抛" }
     constraints:
-      - "orderInfo 结构（order_info.pb.go:14-69，工单全上下文）：ProcessInstance/Process/ProcessVersion{bpmnXML,isJumpable}/ServiceInstance/ServiceRelevanceOrder[]/UserTaskList[]/NodeList[]/StepList[]/FinishedStepList[]/Variables[]/当前步骤(instanceId/userTaskId/taskName/status/action/operator/creator/operatorLeader/memo/formData/isSubStep)/UserInfoMap/IsTimeout/SlaStatus。运行时由 manager.GetOrderInfo 组装"
+      - |
+        orderInfo 结构（order_info.pb.go + tmp/orderInfo.md 实测修正）：
+        顶层：instanceId(步骤id)/userTaskId/taskName/status/action/formData(字符串)/variables[]/processInstance{instanceId,orderNum,name,creator}/process/processVersion{bpmnXML}/stepList[](每步 formData)/nodeList[]/userInfoMap。
+        ⚠️formData 是三重 JSON：orderInfo(字符串)→json.loads→dict→dict["formData"](字符串)→json.loads→list[{key:容器key, values:[行...]}]→行内{modelField:值}。
+        ⚠️formData 解析后是【list 按 container key 分段】不是扁平 dict：[{key:"c_base",values:[{hostType:{key,label,value},reason:"xxx"}]}]。
+        SELECT/RADIO/CHECKBOX 值是 {key,label,value} 对象取 .value；INPUT/NUMBERINPUT/SWITCH 是裸值。
+        table 容器 values 多行；row 容器 values 通常 1 行。
+        历史节点表单取数：order["stepList"] 遍历找 userTaskId+status=done→该步 formData（也是三重 JSON）。
+        详见 tmp/orderInfo.md（字段全表+python 示例）。
       - "场景：前置脚本(pre)=节点提交前校验/预处理（能拿本次 formData）；后置脚本(rear)=节点完成后联动（通知/自动化）"
       - "表单实例选择控件脚本不注入 orderInfo（process_script_service.go:152）"
       - |
