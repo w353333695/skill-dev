@@ -322,7 +322,7 @@ api-cli --spec binary.yaml pkg download abc123 -o ./pkg.zip                     
 要点：
 - **上传**：`content_type: multipart-form-data` + `format: binary` 的 formData 参数；普通 formData 字段（如 `kind`）和文件字段混在同一 multipart body。
 - **下载**：`response.format: binary`；不加 `--output` 时字节流写 stdout（管道场景有用，但终端会乱码）；加 `--output/-o` 落盘。
-- **MCP 限制**：MCP 通道**不支持 binary**（上传/下载都走 CLI verb，不导出 MCP tool）——见 §9。
+- **MCP 限制**：MCP 通道**不支持文件上传（multipart）与下载（binary）**——binary/multipart verb 走 CLI（上传用文件路径参数，下载加 `--output` 落盘），见 §9。
 
 ---
 
@@ -368,7 +368,7 @@ Claude Desktop / Cursor 等配置示例（stdio）：
 - **cobra CLI 嵌套位置参数**：`api-cli inst <id> relation read <rid>` 形式尚未支持（位置 id 被当未知子命令）。嵌套 resource 当前走 MCP，或清单层拆平级。
 - **文件上传/下载**（iter4）：
   - **已支持（CLI）**：文件上传（`content_type: multipart-form-data` + `param.format: binary`）+ 文件下载（`response.format: binary` + `--output/-o` 落盘）。
-  - **MCP 不支持 binary**：上传/下载类 verb 走 CLI 通道，不导出 MCP tool（MCP schema 无法表达字节流）。
+  - **MCP 不支持文件上传/下载**：MCP 不支持文件上传（multipart）与下载（binary 响应）——两者都需要 LLM 无法提供的本地文件系统。binary/multipart verb 走 CLI（上传用文件路径参数，下载加 `--output` 落盘），tools/list 标 `[CLI-only]`、tools/call 返回 `-32602` 引导。
   - **大文件流式上传/下载延后**：当前上传全量读入内存（multipart 一次拼装），下载全量读到内存再写 `--output`；GB 级文件需流式改造，见 iter4 design §2.2。
 - **MVP 不做**：OpenAPI importer、批量 create、长任务轮询、并发分页、静态代码生成、非 Go adapter SDK。
 

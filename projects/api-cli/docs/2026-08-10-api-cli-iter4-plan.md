@@ -40,8 +40,8 @@
 | `internal/cobracli/flags.go` | `bindGlobalFlags` 加 `--output/-o`；`globalOpts` `os.Create`→`Out`+`OutCloser`（补 import `"os"`） | 4 |
 | `internal/cobracli/build.go` | `operationCmd` RunE 加 `defer opts.OutCloser.Close()` | 4 |
 | `internal/cobracli/smoke_test.go` | `--output` flag + OutCloser 行为 | 4 |
-| `internal/mcp/server.go` | `toolsCall` binary 报错；`buildToolDescription` 加 `[CLI-only]` 标签 | 6 |
-| `internal/mcp/server_test.go` | toolsCall binary 拒绝 + `[CLI-only]` 标签 | 6 |
+| `internal/mcp/server.go` | `toolsCall` 对 binary 响应/multipart 上传报错；`buildToolDescription` 加 `[CLI-only]` 标签；`isCLIOnlyVerb` 谓词 | 6 |
+| `internal/mcp/server_test.go` | toolsCall binary/multipart 拒绝 + `[CLI-only]` 标签（两类 verb 各子用例） | 6 |
 | `examples/binary.yaml` | upload + download verb 示例清单 | 4, 5 |
 | `docs/USAGE.md` | §6 语法 + flag 表 + §9 状态更新 | 4 |
 | `tests/integration/binary_test.go` | httptest 端到端 | 5 |
@@ -1204,15 +1204,15 @@ git commit -m "test(api-cli): iter4 T5 端到端（httptest multipart 上传 + b
 
 ---
 
-## Task 6: MCP 通道排除 binary（toolsCall 报错 + [CLI-only] 标签）
+## Task 6: MCP 通道排除 binary 响应 + multipart 上传（toolsCall 报错 + [CLI-only] 标签）
 
 **Files:**
-- Modify: `projects/api-cli/internal/mcp/server.go`（`toolsCall` binary 报错；`buildToolDescription` 加 `[CLI-only]` 标签）
+- Modify: `projects/api-cli/internal/mcp/server.go`（`toolsCall` 对 binary 响应 / multipart 上传报错；`buildToolDescription` 对这两类 verb 加 `[CLI-only]` 标签；谓词抽到 `isCLIOnlyVerb` 复用）
 - Test: `projects/api-cli/internal/mcp/server_test.go`
 
 **Interfaces:**
-- Consumes: `tree.Operation.Response.Format`（Task 1）
-- Produces: `toolsCall` 命中 binary verb 返回 `-32602` 错误 + 引导文案；`buildToolDescription` 对 binary verb 输出含 `[CLI-only]`。
+- Consumes: `tree.Operation.Response.Format`（Task 1）+ `tree.Operation.ContentType`（Task 1）
+- Produces: `toolsCall` 命中 binary 响应 verb 或 multipart 上传 verb 均返回 `-32602` 错误 + 引导文案；`buildToolDescription` 对这两类 verb 输出含 `[CLI-only]`。谓词 `isCLIOnlyVerb(op) = (op.Response.Format=="binary") || (op.ContentType=="multipart-form-data")`。
 
 - [ ] **Step 1: 写失败测试**（`server_test.go` 追加）
 
@@ -1335,9 +1335,11 @@ git commit -m "feat(api-cli): iter4 T6 MCP 排除 binary（toolsCall 报错 + [C
 - **`Options.OutputFile` 已删**（engine 不需要文件路径），改用 `OutCloser` ✓
 
 **3. MCP 范围决策落地**（修订 2）：
-- toolsCall binary 报错（-32602 + 引导文案）→ Task 6 ✓
-- buildToolDescription `[CLI-only]` 标签 → Task 6 ✓
-- lint 不拦 binary（清单合法）✓ —— 与 design §3 约定 6 一致
+- toolsCall 对 binary 响应 / multipart 上传报错（-32602 + 引导文案）→ Task 6 ✓
+- buildToolDescription 对这两类 verb 加 `[CLI-only]` 标签 → Task 6 ✓
+- 谓词 `isCLIOnlyVerb` 集中判定，toolsCall 与 buildToolDescription 共用 → Task 6 ✓
+- lint 不拦（清单合法）✓ —— 与 design §3 约定 6 一致
+- **范围在 final-review 时扩展**：原只拦 binary 响应（损坏 JSON-RPC），扩展到也拦 multipart 上传——文件上传与下载对 LLM 同样是 CLI-only（都需要 LLM 无法提供的本地文件系统：上传需本地文件路径、下载需落盘）。扩展前 multipart verb 经 MCP 调用会到 `os.Open(flags["file"])` 在 api-cli 宿主上必失败，报「打开上传文件 失败」令人困惑且无 `[CLI-only]` 声明信号。
 
 **4. Placeholder 扫描**：plan 内代码块均为完整可编译 Go（Task 5 的 helper `opByName`/`newBinaryTestServer`/`binaryExampleManifest` 已给完整实现，非占位）。无 TBD/TODO（Task 2 Step 6 renderPreview 精确 `-F` 是设计性延后，已注明影响面；Task 1 注明 Param.Example 死字段不顺手修）。
 
