@@ -585,6 +585,14 @@ objects:
       - "校验 11 项（validator.go:302-314 ValidateProcessV2）：孤立节点/表达式正则/必须1个startEvent+≥1endEvent+≥1userTask/包容网关前节点须isFormDecision=1/userTaskId正则^[a-zA-Z][a-zA-Z0-9_]+$且唯一/子流程不接start网关/空跳过不接多分支网关/排他包容网关后不接endEvent/并行包容后子流程不引用同流程"
       - "分支条件正则（validator.go:15）：ConditionExpressionRegexp=\\$\\{(.*)\\}，须形如 ${pass==1}"
       - "表达式解析 GetProcessVariable（converter.go:17-40）：isFormDecision=0 只能 ==（拆 Name/Value）；isFormDecision=1 整表达式作 Value，支持复杂（pass>=1&&pass<=100 / (pass==-1||pass==1)&&key=='a'）"
+      - |
+        ⚠️【从零构建可部署 BPMN 的必需结构】（实测：缺 targetNamespace/schemaLocation 则 flowable 部署失败 140200；补齐后手工 BPMN 从零构建并部署成功，version 1.0.5 实证）：
+        ① <bpmn2:definitions> 必须含：xmlns:bpmn2/xsi/bpmndi/dc/di/flowable 命名空间 + id="sample-diagram" + 【targetNamespace="http://bpmn.io/schema/bpmn"】+ 【xsi:schemaLocation="http://www.omg.org/spec/BPMN/20100524/MODEL BPMN20.xsd"】（后两个是 flowable schema 校验必需，缺则 140200 部署失败！）
+        ② <bpmn2:process id="ITSC-PROCESS-ID" name="ITSC-PROCESS-NAME">（占位符，部署时替换为 ITSC<definitionId>）
+        ③ <bpmn2:userTask> 须带完整 flowable:属性集：isFormDecision/strategy/handling/assignee/subsequentConf/setAssignee/formExpressionName/assigneeValue/assigneeType/assigneeList/assigneeGroup/opsAllowed（即使空值也要有）
+        ④ <bpmn2:sequenceFlow sourceRef targetRef> 连接，节点 incoming/outgoing 引用 flow id
+        ⑤ <bpmndi:BPMNDiagram><bpmndi:BPMNPlane bpmnElement="ITSC-PROCESS-ID"> + 每节点 <bpmndi:BPMNShape bpmnElement="<id>"><dc:Bounds/><bpmndi:BPMNLabel><dc:Bounds/></bpmndi:BPMNLabel></bpmndi:BPMNShape> + 每线 <bpmndi:BPMNEdge bpmnElement="<flowId>"><di:waypoint/></bpmndi:BPMNEdge>
+        审批人 flowable:assignee 用占位符体系（见 itsm_process_assignee），如 {{.lastExecLeader}}/{{.loginUser}}/指定用户名；processSetting.nodeSettings 可为空数组（审批人在 BPMN）。
 
   itsm_process_node_setting:
     description: |
