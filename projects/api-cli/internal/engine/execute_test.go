@@ -479,3 +479,42 @@ resources:
 		t.Fatalf("Execute: %v", err)
 	}
 }
+
+// TestSingleBinaryResponseWritesOut 验证 binary 响应：single 直接把原始字节写到 opts.Out，
+// 不经 decodeLoose/Format（避免被 JSON 字符串化损坏二进制内容）。
+//
+// 触发条件：op.Response.Format == "binary" → single 在 status>=400 检查后、
+// decodeLoose 之前走 binary 分支，调 writeOutput(opts, body) 直写 Out。
+// engine 层只验 Out 收到原始字节（落盘与否由 opts.Out 指向决定，本测试用 bytes.Buffer）。
+func TestSingleBinaryResponseWritesOut(t *testing.T) {
+	payload := []byte{0x1f, 0x8b, 0x08, 0x00, 0xAA, 0xBB, 0xCC}
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/gzip")
+		w.Write(payload)
+	}))
+	defer srv.Close()
+	raw := []byte(`
+spec: api-cli/v1
+service: { name: s, default_endpoint: backend, endpoints: { backend: { base_url: ` + srv.URL + `, auth: none } } }
+resources:
+  pkg:
+    operations:
+      download: { method: GET, path: "/download/{id}", params: { id: { in: path, type: string, required: true } }, response: { format: binary } }
+`)
+	tr, err := spec.Parse(raw)
+	if err != nil {
+		t.Fatal(err)
+	}
+	ep, _ := tr.SelectEndpoint("")
+	e := New(tr)
+	// engine 层只验 Out 收到原始字节（不经 decode）；落盘断言在 Task 4/5。
+	var buf bytes.Buffer
+	err = e.Execute(context.Background(), ep, tr.Resources["pkg"], tr.Resources["pkg"].Operations["download"],
+		map[string]string{"id": "abc"}, nil, Options{Format: "json", Out: &buf})
+	if err != nil {
+		t.Fatalf("Execute: %v", err)
+	}
+	if !bytes.Equal(buf.Bytes(), payload) {
+		t.Errorf("Out 内容不一致：got %d bytes, want %d bytes", buf.Len(), len(payload))
+	}
+}

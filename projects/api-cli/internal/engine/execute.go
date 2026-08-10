@@ -160,6 +160,11 @@ func (e *Engine) single(ctx context.Context, req *resolvedReq, op *tree.Operatio
 	if status >= 400 {
 		return output.NormalizeAPIError(status, body)
 	}
+	// binary 响应：字节直写 opts.Out，不经 decodeLoose/Format。
+	// 落盘与否由 opts.Out 指向决定（--output 时 cobracli globalOpts 已把 Out 指向文件）。
+	if op.Response != nil && op.Response.Format == "binary" {
+		return writeOutput(opts, body)
+	}
 	data := decodeLoose(body)
 	if opts.Format == "table" {
 		return output.FormatTable(opts.Out, data, responseHeaders(op))
@@ -348,4 +353,11 @@ func decodeLoose(b []byte) any {
 		return string(b)
 	}
 	return v
+}
+
+// writeOutput 把字节写到 opts.Out（仅此一处出口）。
+// 落盘由 cobracli globalOpts 把 opts.Out 指向文件实现；engine 不持有文件句柄。
+func writeOutput(opts Options, body []byte) error {
+	_, err := opts.Out.Write(body)
+	return err
 }
