@@ -1,0 +1,14 @@
+# 录制产物与登录态（含敏感凭证，绝不进版本库）
+.browser-recorder/
+auth/
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+.pytest_cache/
+*.egg-info/
+dist/
+
+# core dump（调试挂死时产生）
+core.*

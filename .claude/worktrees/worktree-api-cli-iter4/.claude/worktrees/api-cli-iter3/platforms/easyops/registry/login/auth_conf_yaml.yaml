@@ -1,0 +1,39 @@
+name: auth_conf_yaml
+module: login
+method: GET
+path: /auth/conf.yaml
+gateway_path: /next/auth/conf.yaml
+service: ''
+side_effect: read
+path_source: gateway_strip
+path_confidence: medium
+tags:
+- 登录
+- 静态配置
+- conf.yaml
+- 渲染配置
+- 查询
+summary: 登录页静态配置(YAML)
+description: 登录页渲染所需的静态配置文件，通常 204 无内容（使用默认）。
+request:
+  required: []
+  properties: {}
+outputs: {}
+requires: []
+rollback: null
+examples: []
+confidence:
+  module: medium
+  outputs: low
+  requires: high
+  rollback: high
+  summary: medium
+  tags: medium
+endpoint:
+  contract_ref: ''
+  mode: easyops_gateway
+source:
+  openapi_file: ITSM-登录与功能入口-openapi.yaml
+  openapi_hash: ec5d99f1d3772798ed04de980321a11cbf0d5a286894ac6da4acaea855a5904a
+  recorded_at: '2026-07-09T14:05:09'
+registered_at: '2026-07-22T10:34:10.040270'

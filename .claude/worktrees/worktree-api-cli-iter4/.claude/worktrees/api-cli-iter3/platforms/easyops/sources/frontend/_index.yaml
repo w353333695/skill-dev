@@ -1,0 +1,384 @@
+flows:
+- flow: CMDB-实例管理
+  file: sources/frontend/guides/CMDB-实例管理/CMDB-实例管理-操作指引.md
+  host: http://172.30.0.90
+  intent:
+  - 搜索实例
+  - 查询主机
+  - 关键词搜索
+  - 高级搜索
+  - 导出实例
+  - 导入实例
+  - 批量编辑
+  - 批量删除
+  - 查看实例详情
+  - 实例关系
+  - 添加所属应用
+  - 移除所属应用
+  - 编辑实例
+  - 删除实例
+  api_tags:
+  - 实例查询
+  - 实例导出
+  - 实例导入
+  - 实例批量删除
+  - 实例关系
+  - 实例编辑
+  - 实例删除
+  - 模型与视图配置
+  - 实例审批
+- flow: ITSM-系统管理-流程管理
+  file: sources/frontend/guides/ITSM-系统管理-流程管理/ITSM-系统管理-流程管理-操作指引.md
+  host: ''
+  intent: ''
+  api_tags:
+  - 流程列表与详情
+  - 流程创建与编辑
+  - 流程版本保存与发布
+  - 流程版本删除
+  - 流程节点编排
+  - 触发器与表单
+  - 用户与CMDB查询
+- flow: ITSM-系统管理-用户管理
+  file: sources/frontend/guides/ITSM-系统管理-用户管理/ITSM-系统管理-用户管理-操作指引.md
+  host: ''
+  intent: ''
+  api_tags:
+  - 用户查询
+  - 用户详情
+  - 用户更新
+  - 用户密码
+  - 用户角色
+- flow: ITSM-系统管理-表单管理
+  file: sources/frontend/guides/ITSM-系统管理-表单管理/ITSM-系统管理-表单管理-操作指引.md
+  host: http://172.30.5.20
+  intent: ''
+  api_tags:
+  - 表单列表查询
+  - 表单分类
+  - 表单创建
+  - 表单版本详情
+  - 表单删除
+  - 表单更新
+  - 表单版本管理
+- flow: ITSM-系统管理-代理人管理
+  file: sources/frontend/guides/ITSM-系统管理-代理人管理/ITSM-系统管理-代理人管理-操作指引.md
+  host: http://172.30.5.20
+  intent: ''
+  api_tags:
+  - 代理人列表查询
+  - 代理人详情
+  - 代理人创建
+  - 代理人更新
+  - 代理人删除
+  - 服务目录与用户选择
+- flow: ITSM-系统管理-用户组管理
+  file: sources/frontend/guides/ITSM-系统管理-用户组管理/ITSM-系统管理-用户组管理-操作指引.md
+  host: http://172.30.5.20/next
+  intent: ''
+  api_tags:
+  - 用户组列表与详情
+  - 用户组创建与删除
+  - 用户组成员管理
+- flow: ITSM-系统管理-知识目录管理
+  file: sources/frontend/guides/ITSM-系统管理-知识目录管理/ITSM-系统管理-知识目录管理-操作指引.md
+  host: ''
+  intent: ''
+  api_tags:
+  - 知识目录树与列表
+  - 知识目录增删改
+  - 知识目录权限
+  - 知识条目状态管理
+  - 用户与用户组搜索
+- flow: ITSM-系统管理-组织架构管理
+  file: sources/frontend/guides/ITSM-系统管理-组织架构管理/ITSM-系统管理-组织架构管理-操作指引.md
+  host: ''
+  intent: ''
+  api_tags:
+  - 科室树与详情
+  - 科室成员管理
+  - 科室职务设置
+  - 科室增删改
+  - 用户搜索
+- flow: ITSM-工单发起
+  file: sources/frontend/guides/ITSM-工单发起/ITSM-工单发起-操作指引.md
+  host: http://172.30.5.20
+  intent: ''
+  api_tags:
+  - 服务目录与服务实例
+  - 表单模板
+  - 工单发起
+  - 工单任务详情
+- flow: ITSM-标准字段管理
+  file: sources/frontend/guides/ITSM-标准字段管理/ITSM-标准字段管理-操作指引.md
+  host: http://172.30.5.20
+  intent: ''
+  api_tags:
+  - 标准字段列表查询
+  - 标准字段详情
+  - 标准字段更新
+  - 标准字段删除
+  - 标准字段创建
+- flow: ITSM-领域模型管理
+  file: sources/frontend/guides/ITSM-领域模型管理/ITSM-领域模型管理-操作指引.md
+  host: http://172.30.5.20
+  intent: ''
+  api_tags:
+  - 领域模型列表查询
+  - 领域模型创建
+  - 领域模型详情
+  - 领域模型更新
+  - 领域模型删除
+  - 标准字段查询
+- flow: ITSM-工单搜索与处理
+  file: sources/frontend/guides/ITSM-工单搜索与处理/ITSM-工单搜索与处理-操作指引.md
+  host: http://172.30.0.90
+  intent: ''
+  api_tags:
+  - 工单列表查询
+  - 工单详情
+  - 工单处理
+  - 工单配置
+- flow: ITSM-登录与功能入口
+  file: sources/frontend/guides/ITSM-登录与功能入口/ITSM-登录与功能入口-操作指引.md
+  host: http://172.30.0.90
+  intent: ''
+  api_tags:
+  - 认证
+  - 门户启动台
+  - ITSM 工作台初始化
+- flow: ITSM-系统管理-服务目录管理
+  file: sources/frontend/guides/ITSM-系统管理-服务目录管理/ITSM-系统管理-服务目录管理-操作指引.md
+  host: ''
+  intent: ''
+  api_tags:
+  - 服务目录管理
+  - 服务实例管理
+  - 服务导入导出
+  - 目录权限
+  - 用户与用户组搜索
+  - 流程与知识关联
+- flow: CMDB-登录与功能入口
+  file: sources/frontend/guides/CMDB-登录与功能入口/CMDB-登录与功能入口-操作指引.md
+  host: http://172.30.0.90
+  intent: ''
+  api_tags:
+  - 认证
+  - 门户启动台
+  - CMDB 资源管理初始化
+  - 应用系统架构树
+- flow: CMDB-模型管理
+  file: sources/frontend/guides/CMDB-模型管理/CMDB-模型管理-操作指引.md
+  host: http://172.30.0.90
+  intent: ''
+  api_tags:
+  - 模型列表与详情
+  - 模型导入导出
+  - 模型创建与更新
+  - 字段管理
+  - 关系管理
+  - 模型视图
+  - 高级设置
+  - 模型与字段删除
+- flow: AutoOps-入口与功能预览
+  file: sources/frontend/guides/AutoOps-入口与功能预览/AutoOps-入口与功能预览-操作指引.md
+  host: http://172.30.0.90
+  intent: ''
+  api_tags:
+  - AutoOps 菜单与作业
+  - 任务历史
+  - 运维度量
+- flow: AutoOps-工具库管理
+  file: sources/frontend/guides/AutoOps-工具库管理/AutoOps-工具库管理-操作指引.md
+  host: http://172.30.0.90
+  intent: ''
+  api_tags:
+  - 工具列表与详情
+  - 工具全局配置
+  - 高危命令管理
+  - 执行时间窗口
+  - 工具创建与编辑
+  - 工具调试与执行
+  - 工具版本与审批
+  - 工具导入导出
+  - 工具删除
+  - 任务历史
+- flow: ITSM-定时工单管理
+  file: sources/frontend/guides/ITSM-定时工单管理/ITSM-定时工单管理-操作指引.md
+  host: http://172.30.0.90
+  intent:
+  - 定时工单
+  - 定时任务
+  - 定时触发
+  - 定时发起工单
+  - 计划任务
+  - cron
+  - crontab
+  - 周期工单
+  - 启用定时
+  - 禁用定时
+  - 删除定时
+  - 编辑定时工单
+  - 定时工单管理
+  api_tags:
+  - 定时工单管理
+  - 服务目录与流程
+  - 通知策略
+- flow: ITSM-运行管理-SLA协议管理
+  file: sources/frontend/guides/ITSM-运行管理-SLA协议管理/ITSM-运行管理-SLA协议管理-操作指引.md
+  host: http://172.30.0.90
+  intent:
+  - SLA
+  - SLA协议
+  - 服务级别协议
+  - 服务协议
+  - 响应时效
+  - 处理时效
+  - 完成时效
+  - 响应预警
+  - 响应超时
+  - 完成预警
+  - 完成超时
+  - 服务时段
+  - 工作日历
+  - 优先级算法
+  - 新建SLA
+  - 编辑SLA
+  - 删除SLA
+  - 服务质量设置
+  - 运行管理
+  api_tags:
+  - SLA协议管理
+  - 服务质量设置
+  - 优先级与服务时段
+  - 通知策略
+- flow: ITSM-运行管理-营业时间管理
+  file: sources/frontend/guides/ITSM-运行管理-营业时间管理/ITSM-运行管理-营业时间管理-操作指引.md
+  host: http://172.30.0.90
+  intent:
+  - 营业时间
+  - 营业时间管理
+  - 工作日历
+  - 工作时段
+  - 工作时间
+  - 服务时段
+  - 日历管理
+  - 假期
+  - 节假日
+  - 加班日
+  - 特殊日期
+  - 新建日历
+  - 编辑日历
+  - 删除日历
+  - 运行管理
+  api_tags:
+  - 营业时间(工作日历)管理
+- flow: ITSM-系统管理-通知触发器管理与配置
+  file: sources/frontend/guides/ITSM-系统管理-通知触发器管理与配置/ITSM-系统管理-通知触发器管理与配置-操作指引.md
+  host: http://172.30.0.90
+  intent:
+  - 通知
+  - 通知管理
+  - 通知配置
+  - 通知策略
+  - 触发器
+  - 触发器管理
+  - 触发条件
+  - 触发动作
+  - 发送通知
+  - 任务状态变化
+  - 通知范围
+  - 通知模式
+  - 工单信号
+  - 触发信号
+  - 条件配置
+  - 引用触发器
+  - 节点触发器
+  - 新建通知
+  - 新建触发器
+  - 删除触发器
+  api_tags:
+  - 通知配置管理
+  - 触发器管理
+  - 触发器引用
+- flow: AutoOps-文件分发管理
+  file: sources/frontend/guides/AutoOps-文件分发管理/AutoOps-文件分发管理-操作指引.md
+  host: http://172.30.0.90
+  intent:
+  - 文件分发
+  - 文件包管理
+  - 新建文件包
+  - 上传文件
+  - 新建版本
+  - 提交版本
+  - 下载版本
+  - 删除版本
+  - 编辑文件包
+  - 删除文件包
+  - 批量设置权限
+  - 文件包搜索
+  api_tags:
+  - 文件包列表与分类
+  - 文件包创建与编辑
+  - 文件包删除
+  - 版本管理
+  - 文件上传与提交
+  - 权限管理
+- flow: HyperInsight-入口与功能预览
+  file: sources/frontend/guides/HyperInsight-入口与功能预览/HyperInsight-入口与功能预览-操作指引.md
+  host: http://172.30.0.90
+  intent:
+  - HyperInsight
+  - 监控系统
+  - 超融合监控
+  - 监控入口
+  - 事件中心
+  - 系统态势
+  - 服务观测
+  - 资源监控
+  - 指标分析
+  - 运营治理
+  - 监控设置
+  - 告警事件
+  - 进入监控
+  api_tags:
+  - 入口与运行时
+  - 事件中心
+  - 资源监控与采集
+  - 服务观测
+- flow: HyperInsight-监控资源管理
+  file: sources/frontend/guides/HyperInsight-监控资源管理/HyperInsight-监控资源管理-操作指引.md
+  host: http://172.30.0.90
+  intent:
+  - 监控资源管理
+  - 配置监控采集
+  - 搜索监控资源
+  - 新建资源配置
+  - 编辑资源配置
+  - 重命名资源
+  - 修改采集间隔
+  - 启用禁用监控
+  - 删除资源配置
+  api_tags:
+  - 资源配置增删改
+  - 资源查询与搜索
+  - 采集套件与Agent
+- flow: HyperInsight-自定义监控套件
+  file: sources/frontend/guides/HyperInsight-自定义监控套件/HyperInsight-自定义监控套件-操作指引.md
+  host: https://172.30.0.232
+  intent:
+  - 自定义监控套件
+  - 创建监控套件
+  - 新建套件
+  - 监控套件
+  - 防火墙套件
+  - 套件信息
+  - 采集参数
+  - 套件描述
+  - 套件帮助文档
+  - EasyOps套件
+  api_tags:
+  - 套件搜索与资源关联
+  - 套件信息填写
+  - 采集参数配置
+  - 套件激活与指标导入

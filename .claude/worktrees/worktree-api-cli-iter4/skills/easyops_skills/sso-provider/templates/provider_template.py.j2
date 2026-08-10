@@ -1,0 +1,327 @@
+# -*- coding: utf-8 -*-
+"""
+{{ provider_name }} SSO Provider
+{% if description %}
+{{ description }}
+{% endif %}
+
+协议类型: {{ protocol_type }}
+{% if base_class == 'oauth2' %}
+继承自 oauth2 类，重写非标准部分的实现
+{% elif base_class == 'Provider' %}
+直接继承 Provider 基类，实现完整的认证流程
+{% endif %}
+
+运行环境: Python 2.7.18
+"""
+
+# stdlib
+import json
+import logging
+{% if needs_urlencode %}
+from urllib import urlencode
+{% endif %}
+{% if needs_urlparse %}
+from urlparse import urlparse
+{% endif %}
+{% if needs_time %}
+import time
+{% endif %}
+{% if needs_hashlib %}
+import hashlib
+{% endif %}
+{% if needs_base64 %}
+import base64
+{% endif %}
+{% if needs_hmac %}
+import hmac
+{% endif %}
+
+# 3rd party
+import requests
+from jsonschema import validate
+
+# project
+from settings.setting import PLUGIN_CONFIG
+from handlers.providers.base_provider import Provider
+{% if needs_presignin_request %}
+from handlers.providers.http_request_info import PreSignInRequest, SignOutRequest
+{% endif %}
+{% if base_class == 'oauth2' %}
+from handlers.providers.oauth2.oauth2 import oauth2
+{% endif %}
+{% if extra_imports %}
+{% for imp in extra_imports %}
+{{ imp }}
+{% endfor %}
+{% endif %}
+from utils.tools import b2s
+
+
+class {{ provider_name }}({% if base_class == 'oauth2' %}oauth2{% else %}Provider{% endif %}):
+    """
+    {{ provider_name }} SSO 认证提供者
+
+    实现 {{ protocol_type }} 协议的 SSO 认证流程。
+    配置项位于 settings/setting_custom.py 的 PLUGIN_CONFIG.{{ provider_name }} 中。
+    """
+
+    def __init__(self):
+        """初始化 {{ provider_name }} provider，加载并校验配置"""
+        {% if base_class == 'oauth2' %}
+        oauth2.__init__(self)
+        {% else %}
+        Provider.__init__(self)
+        {% endif %}
+        self._config = PLUGIN_CONFIG.get("{{ provider_name }}")
+        if self._config is None:
+            raise Exception(
+                u"导入{{ provider_name }}模块异常, "
+                u"setting.py中PLUGIN_CONFIG.{{ provider_name }}配置不存在"
+            )
+
+        # 配置校验 schema
+        config_schema = {
+            "type": "object",
+            "properties": {
+                {% for prop in config_properties %}
+                "{{ prop.name }}": {"type": "{{ prop.type }}"},
+                {% endfor %}
+            },
+            "required": [{% for req in config_required %}"{{ req }}"{% if not loop.last %}, {% endif %}{% endfor %}]
+        }
+        try:
+            validate(instance=self._config, schema=config_schema)
+        except Exception, e:
+            raise Exception(
+                u"导入{{ provider_name }}模块异常, "
+                u"setting.py中PLUGIN_CONFIG.{{ provider_name }}格式非法: %s" % b2s(e.message)
+            )
+
+        {% if needs_redirect_uri_parse %}
+        # 解析重定向 URI，构建回调地址
+        parsed_url = urlparse(self._config["redirect_uri"])
+        port = parsed_url.port
+        if not port:
+            port = 80
+        self._redirect_uri = "{scheme}://{hostname}:{port}/next/sso-auth/authorize".format(
+            scheme=parsed_url.scheme,
+            hostname=parsed_url.hostname,
+            port=port
+        )
+        {% endif %}
+
+    {% if base_class != 'oauth2' %}
+    def pre_signin(self, params):
+        """
+        登录前置处理
+
+        构造 SSO 服务端的登录跳转 URL。当用户访问 EasyOps 需要认证时，
+        框架会调用此方法获取跳转地址，将用户重定向到 SSO 服务端进行认证。
+
+        Args:
+            params (dict): 请求参数，包含框架传入的 query 参数
+
+        Returns:
+            str 或 PreSignInRequest: 返回登录跳转 URL 字符串，
+                或 PreSignInRequest 对象（支持 POST 方式跳转）
+        """
+        logging.info(u"[{{ provider_name }}] pre_signin 开始, params: %s", json.dumps(params))
+
+        {% if pre_signin_logic %}
+{{ pre_signin_logic }}
+        {% else %}
+        # TODO: 根据对接文档实现登录跳转逻辑
+        # 典型实现：拼接 SSO 服务端的登录 URL + 必要参数
+        login_url = self._config["login_url"]
+        return login_url
+        {% endif %}
+
+    def signin(self, params):
+        """
+        登录处理
+
+        用户在 SSO 服务端完成认证后，会被重定向回 EasyOps，
+        框架将回调参数传入此方法。此方法负责用回调参数（如 code/ticket）
+        向 SSO 服务端换取访问凭证。
+
+        Args:
+            params (dict): SSO 服务端回调时携带的参数（如 code, state, ticket 等）
+
+        Returns:
+            dict: authorization_info 字典，包含访问凭证信息。
+                  后续 user_info() 方法会使用此返回值获取用户信息。
+        """
+        logging.info(u"[{{ provider_name }}] signin 开始, params: %s", json.dumps(params))
+
+        {% if signin_logic %}
+{{ signin_logic }}
+        {% else %}
+        # TODO: 根据对接文档实现登录凭证交换逻辑
+        # 典型实现：
+        # 1. 从 params 中获取授权码
+        # 2. 用授权码向 SSO 服务端请求 access_token
+        # 3. 返回 authorization_info
+        code = params.get("code") or params.get("ticket")
+        authorization_info = {
+            "code": code,
+        }
+        return authorization_info
+        {% endif %}
+
+    def user_info(self, authorization_info):
+        """
+        获取用户信息
+
+        使用 signin() 返回的 authorization_info 中的凭证，
+        向 SSO 服务端请求用户信息，并返回 CMDB 用户唯一标识。
+
+        扩展点：可在返回前执行自动注册、信息同步等操作。
+
+        Args:
+            authorization_info (dict): signin() 方法返回的凭证信息
+
+        Returns:
+            tuple: (login_key, login_value)
+                - login_key: CMDB USER 模型的唯一字段 ID（如 "name", "email"）
+                - login_value: 对应的用户唯一标识值
+        """
+        logging.info(
+            u"[{{ provider_name }}] user_info 开始, authorization_info: %s",
+            json.dumps(authorization_info)
+        )
+
+        {% if user_info_logic %}
+{{ user_info_logic }}
+        {% else %}
+        # TODO: 根据对接文档实现用户信息获取逻辑
+        # 典型实现：
+        # 1. 从 authorization_info 中取出 access_token
+        # 2. 请求 SSO 服务端的用户信息接口
+        # 3. 解析响应，提取用户唯一标识
+        login_key = "{{ login_key }}"
+        login_value = authorization_info.get("username", "")
+        {% endif %}
+        {% if user_info_post_logic %}
+
+        # ---- 业务扩展：user_info 后置处理 ----
+{{ user_info_post_logic }}
+        {% endif %}
+        return login_key, login_value
+    {% endif %}
+
+    {% if base_class == 'oauth2' %}
+    {% for method_override in oauth2_overrides %}
+    def {{ method_override.name }}(self, {{ method_override.params }}):
+        """
+        {{ method_override.description }}
+        """
+{{ method_override.body }}
+
+    {% endfor %}
+    {% endif %}
+
+    def authorize_post_deal(self, params):
+        """
+        授权后处理
+
+        在用户 SSO 认证成功后，框架调用此方法执行额外业务逻辑。
+        注意：此方法需要前端/调用方主动调用，不会在 signin 流程中自动触发。
+        如需在登录流程中自动执行扩展逻辑，请使用 user_info 的后置扩展。
+
+        Args:
+            params (dict): 授权后框架传入的参数，包含 username、access_token 等
+
+        Returns:
+            None
+        """
+        logging.info(
+            u"[{{ provider_name }}] authorize_post_deal, params: %s",
+            json.dumps(params)
+        )
+        {% if authorize_post_deal_logic %}
+
+        # ---- 业务扩展：authorize_post_deal ----
+{{ authorize_post_deal_logic }}
+        {% endif %}
+        return
+
+    def sign_out(self, authorization_info):
+        """
+        用户注销处理
+
+        用户在 EasyOps 注销时，框架调用此方法获取 SSO 服务端的注销 URL，
+        以实现全局注销（Single Logout）。
+
+        Args:
+            authorization_info (dict): 用户的认证凭证信息
+
+        Returns:
+            str 或 SignOutRequest: SSO 服务端的注销 URL，
+                或 SignOutRequest 对象（支持 POST 方式注销）
+        """
+        logging.info(
+            u"[{{ provider_name }}] sign_out, authorization_info: %s",
+            json.dumps(authorization_info)
+        )
+        {% if sign_out_pre_logic %}
+
+        # ---- 业务扩展：sign_out 前置处理 ----
+{{ sign_out_pre_logic }}
+        {% endif %}
+
+        {% if sign_out_logic %}
+{{ sign_out_logic }}
+        {% else %}
+        # TODO: 根据对接文档实现注销跳转逻辑
+        logout_url = self._config.get("logout_url", "")
+        return logout_url
+        {% endif %}
+
+    def custom_auth(self, params):
+        """
+        自定义密码校验（可选实现）
+
+        用于非 SSO 场景下的用户名密码验证。
+        如果不需要此功能，返回 False 即可。
+
+        Args:
+            params (dict): 包含 username 和 password 的字典
+
+        Returns:
+            bool: 验证通过返回 True，否则返回 False
+        """
+        # 注意：请求参数包含密码，请勿打印完整参数
+        safe_params = dict(params)
+        if "password" in safe_params:
+            safe_params["password"] = "******"
+        logging.info(u"[{{ provider_name }}] custom_auth, params: %s", json.dumps(safe_params))
+        return False
+
+    def sso_global_sign_out(self, params):
+        """
+        SSO 全局登出处理
+
+        SSO 服务端发起全局登出通知时，框架调用此方法解析登出请求，
+        提取需要注销的会话 ticket。
+
+        Args:
+            params (dict): SSO 服务端发送的登出请求参数
+
+        Returns:
+            str: 需要注销的 authorization ticket
+        """
+        logging.info(
+            u"[{{ provider_name }}] sso_global_sign_out, params: %s",
+            json.dumps(params)
+        )
+
+        {% if sso_global_sign_out_logic %}
+{{ sso_global_sign_out_logic }}
+        {% else %}
+        # TODO: 根据对接文档实现全局登出逻辑（如 SAML 的 LogoutRequest 解析）
+        ticket = params.get("session_index", "")
+        if not ticket:
+            raise Exception(u"全局登出失败: 未找到 session ticket")
+        return ticket
+        {% endif %}

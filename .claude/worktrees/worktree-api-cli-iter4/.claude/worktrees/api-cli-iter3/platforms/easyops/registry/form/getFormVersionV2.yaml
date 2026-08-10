@@ -1,0 +1,70 @@
+name: getFormVersionV2
+module: form
+method: GET
+path: /api/flowable_service/v2/form/{formId}/version/{versionId}
+gateway_path: /next/api/gateway/logic.flowable_service/api/flowable_service/v2/form/{formId}/version/{versionId}
+service: logic.flowable_service
+side_effect: read
+path_source: backend_contract
+path_confidence: high
+tags:
+- 表单
+- form
+- 版本
+- version
+- 详情
+summary: 查询表单版本详情（v2 编辑）
+description: 进入版本编辑/新建版本页时拉取，含 standardFields（标准字段）、userDisplayMap 等，供设计器使用。
+request:
+  required:
+  - formId
+  - versionId
+  properties:
+    formId:
+      type: instance_id
+      desc: 表单实例Id
+    versionId:
+      type: instance_id
+      desc: 表单版本Id
+outputs:
+  detail:
+    jsonpath: $.data
+    desc: 版本详情整体对象（编辑用）
+  domainModel:
+    jsonpath: $.data.domainModel
+    desc: 引用的领域模型列表
+  formDataSources:
+    jsonpath: $.data.formDataSources
+    desc: 已选用的数据源列表
+  formSchema:
+    jsonpath: $.data.formSchema
+    desc: 表单信息
+  standardFields:
+    jsonpath: $.data.standardFields
+    desc: 已选用的标准字段列表
+  userDisplayMap:
+    jsonpath: $.data.userDisplayMap
+    desc: 用户 showKey 字典
+requires:
+- formId 须为已存在的表单 id
+- versionId 须为该表单下已存在的版本 id
+- 解析返回的表单结构（容器/控件/布局/联动）对照 knowledge/modules/form_design/form-design-spec.md；可用同目录
+  check_form_design.py 离线校验 formDefinition 合规性
+rollback: null
+examples: []
+confidence:
+  module: high
+  outputs: high
+  requires: high
+  rollback: high
+  summary: high
+  tags: high
+  request: high
+endpoint:
+  contract_ref: logic.flowable_service|GET|/api/flowable_service/v2/form/{formId}/version/{versionId}
+  mode: easyops_gateway
+source:
+  openapi_file: ITSM-系统管理-表单管理-openapi.yaml
+  openapi_hash: 1d53625c34e380689cd9e269d0a4a76ecac595276dee9da6107bd25218886cd8
+  recorded_at: '2026-07-13T14:35:29'
+registered_at: '2026-07-22T10:34:11.800992'

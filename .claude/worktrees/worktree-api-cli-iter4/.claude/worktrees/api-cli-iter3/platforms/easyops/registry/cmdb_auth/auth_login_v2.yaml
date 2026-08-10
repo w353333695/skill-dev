@@ -1,0 +1,58 @@
+name: auth_login_v2
+module: cmdb_auth
+method: POST
+path: /api/auth/login/v2
+gateway_path: /next/api/auth/login/v2
+service: logic.api.gateway.auth
+side_effect: create
+path_source: gateway_strip
+path_confidence: medium
+tags:
+- 认证
+- 登录
+summary: 用户名密码登录(v2)
+description: 提交账号密码完成登录。成功后服务端下发会话凭证，前端跳转门户 `/next/portal`。
+request:
+  required: []
+  properties:
+    username:
+      type: string
+      desc: 用户名
+    password:
+      type: string
+      desc: 登录密码（脱敏，勿明文存储）
+    org:
+      type: number
+      desc: 组织 ID，可缺省
+    phrase:
+      type: string
+      desc: 验证码
+      _source: contract
+    loginBy:
+      type: string
+      desc: '校验密码的方式 easyops: 校验 easyops 的账号密码 custom:  通过客户自定义方式校验, 这种方式需要在 sso-adapter
+        实现和客户对接的逻辑 ldap:    通过 ldap 校验密码'
+      _source: contract
+outputs:
+  detail:
+    jsonpath: $.data
+    desc: 登录结果
+requires: []
+rollback: null
+examples: []
+confidence:
+  request: medium
+  module: high
+  outputs: high
+  tags: high
+  summary: high
+  requires: medium
+  rollback: medium
+endpoint:
+  contract_ref: logic.api.gateway.auth|POST|/api/auth/login/v2
+  mode: easyops_gateway
+source:
+  openapi_file: CMDB-登录与功能入口-openapi.yaml
+  openapi_hash: 03368b8fed81615f7835509bbeb28ad4bc3b44520f5e837fe3383ab4c85a3bbf
+  recorded_at: '2026-07-23T09:55:56.715723'
+registered_at: '2026-07-23T14:28:59.247623'

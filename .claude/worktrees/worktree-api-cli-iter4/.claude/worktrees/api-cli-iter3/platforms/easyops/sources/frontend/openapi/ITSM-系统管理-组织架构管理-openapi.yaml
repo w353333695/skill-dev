@@ -1,0 +1,439 @@
+openapi: 3.0.3
+info:
+  title: ITSM 系统管理 · 组织架构管理 API
+  version: "1.0"
+  description: |
+    ITSM「系统管理 -> 组织架构管理」涉及的后端接口。涵盖科室树加载、
+    科室成员查询/添加/移除、科室职务设置（主管）、科室新增/编辑/删除，
+    以及添加成员时的用户检索。
+    路径前缀均为 `/next/api/gateway/...`，网关按「服务.方法」路由到后端微服务。
+  x-system: itsm
+
+# ============ 标签 ============
+tags:
+  - name: 科室树与详情
+    description: 科室树加载与科室详情查询
+  - name: 科室成员管理
+    description: 科室成员列表查询、添加、移除
+  - name: 科室职务设置
+    description: 设置科室职务（如主管 leader）
+  - name: 科室增删改
+    description: 科室的新增、编辑、删除
+  - name: 用户搜索
+    description: 添加成员/选主管时的用户检索
+
+# ============ 路径 ============
+paths:
+
+  # ---------- 科室树与详情 ----------
+  /next/api/gateway/logic.sys_setting/api/sys_setting/v1/organization/department_tree:
+    get:
+      tags: [科室树与详情]
+      operationId: getDepartmentTree
+      summary: 获取完整科室树
+      description: |
+        返回整棵组织科室树，含父子层级（childDepartment 递归）、
+        departmentId / name / namePath / parentDepartmentId / hasChild 等。
+        进入组织架构管理页、选中科室后刷新时均调用。
+        query: isAll=true（返回全部）、showAncestor=true（含祖先链）。
+      x-relevant: true
+      parameters:
+        - in: query
+          name: isAll
+          schema: { type: string, example: "true" }
+          description: 是否返回全部科室
+        - in: query
+          name: showAncestor
+          schema: { type: string, example: "true" }
+          description: 是否包含祖先节点
+      responses:
+        '200':
+          description: 科室树
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code: { type: number, example: 0 }
+                  codeExplain: { type: string, example: "" }
+                  error: { type: string, example: "" }
+                  data:
+                    type: object
+                    properties:
+                      tree:
+                        type: array
+                        description: 顶层科室节点（递归包含 childDepartment）
+                        items:
+                          type: object
+                          properties:
+                            departmentId: { type: string, example: "65628a0990cf9" }
+                            departmentIdPath: { type: string, example: "65628a0990cf9" }
+                            name: { type: string, example: "公司" }
+                            namePath: { type: string, example: "公司" }
+                            parentDepartmentId: { type: string, example: "" }
+                            hasChild: { type: boolean, example: true }
+                            childDepartment:
+                              type: array
+                              description: 子科室（结构与父节点相同，递归）
+
+  # ---------- 科室成员管理 ----------
+  /next/api/gateway/logic.sys_setting/api/sys_setting/v1/organization/department/{departmentId}/staff:
+    get:
+      tags: [科室成员管理]
+      operationId: listDepartmentStaff
+      summary: 查询科室成员列表
+      description: |
+        分页查询指定科室下的成员列表。
+        选中科室、职务设置前刷新成员时调用。
+      x-relevant: true
+      parameters:
+        - in: path
+          name: departmentId
+          required: true
+          schema: { type: string }
+          description: 科室 ID
+        - in: query
+          name: page
+          schema: { type: string, example: "1" }
+        - in: query
+          name: pageSize
+          schema: { type: string, example: "10" }
+        - in: query
+          name: q
+          schema: { type: string, example: "" }
+          description: 成员关键词过滤
+      responses:
+        '200':
+          description: 成员列表
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code: { type: number, example: 0 }
+                  codeExplain: { type: string, example: "" }
+                  error: { type: string, example: "" }
+                  data:
+                    type: object
+                    properties:
+                      page: { type: number, example: 1 }
+                      page_size: { type: number, example: 10 }
+                      total: { type: number, example: 0 }
+                      list:
+                        type: array
+                        description: 成员条目（为空时为 []）
+                        items:
+                          type: object
+    post:
+      tags: [科室成员管理]
+      operationId: updateDepartmentStaff
+      summary: 添加/移除科室成员
+      description: |
+        通过 action 字段区分操作：
+        - action=add：将 userIds 加入指定科室
+        - action=remove：将 userIds 从指定科室移除
+        操作完成后通常刷新成员列表与科室树。
+      x-relevant: true
+      parameters:
+        - in: path
+          name: departmentId
+          required: true
+          schema: { type: string }
+          description: 科室 ID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [action, userIds]
+              properties:
+                action:
+                  type: string
+                  enum: [add, remove]
+                  example: add
+                  description: 操作类型
+                userIds:
+                  type: array
+                  items: { type: string }
+                  example: ["653547e2782c3", "653baedadb9dd"]
+                  description: 用户 instanceId 列表
+      responses:
+        '200':
+          description: 操作结果
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code: { type: number, example: 0 }
+                  codeExplain: { type: string, example: "" }
+                  error: { type: string, example: "" }
+                  data: { type: object, nullable: true, example: null }
+
+  # ---------- 科室职务设置 ----------
+  /next/api/gateway/logic.sys_setting/api/sys_setting/v1/organization/bulk/{departmentId}/staff_position:
+    post:
+      tags: [科室职务设置]
+      operationId: setDepartmentStaffPosition
+      summary: 设置科室职务（主管）
+      description: |
+        批量为指定科室设置成员的职务。position=leader 表示设为主管。
+        一次可指定多个 userIds。
+      x-relevant: true
+      parameters:
+        - in: path
+          name: departmentId
+          required: true
+          schema: { type: string }
+          description: 科室 ID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [position, userIds]
+              properties:
+                position:
+                  type: string
+                  enum: [leader]
+                  example: leader
+                  description: 职务标识（leader=主管）
+                userIds:
+                  type: array
+                  items: { type: string }
+                  example: ["654091f62d541"]
+                  description: 担任该职务的用户 instanceId 列表
+      responses:
+        '200':
+          description: 设置结果
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code: { type: number, example: 0 }
+                  codeExplain: { type: string, example: "" }
+                  error: { type: string, example: "" }
+                  data: { type: object, nullable: true, example: null }
+
+  # ---------- 科室增删改 ----------
+  /next/api/gateway/logic.sys_setting/api/sys_setting/v1/organization/department:
+    post:
+      tags: [科室增删改]
+      operationId: createDepartment
+      summary: 新增科室（子科室）
+      description: |
+        在指定父科室下新建子科室，返回新科室 departmentId。
+        parentDepartmentId 为空表示顶层科室。
+      x-relevant: true
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name, parentDepartmentId]
+              properties:
+                name:
+                  type: string
+                  example: "科室3"
+                  description: 科室名称
+                parentDepartmentId:
+                  type: string
+                  example: "6567637e6fce6"
+                  description: 父科室 ID（顶层为空字符串）
+                description:
+                  type: string
+                  example: ""
+                  description: 科室描述
+      responses:
+        '200':
+          description: 新建结果
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code: { type: number, example: 0 }
+                  codeExplain: { type: string, example: "" }
+                  error: { type: string, example: "" }
+                  data:
+                    type: object
+                    properties:
+                      departmentId: { type: string, example: "656771c54e3dd" }
+
+  /next/api/gateway/logic.sys_setting/api/sys_setting/v1/organization/department/{departmentId}:
+    put:
+      tags: [科室增删改]
+      operationId: updateDepartment
+      summary: 编辑科室
+      description: |
+        修改指定科室的名称、描述等信息。
+      x-relevant: true
+      parameters:
+        - in: path
+          name: departmentId
+          required: true
+          schema: { type: string }
+          description: 待编辑科室 ID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  example: "部门01"
+                  description: 新科室名称
+                description:
+                  type: string
+                  example: ""
+                  description: 科室描述
+      responses:
+        '200':
+          description: 编辑结果
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code: { type: number, example: 0 }
+                  codeExplain: { type: string, example: "" }
+                  error: { type: string, example: "" }
+                  data: { type: object, nullable: true, example: null }
+    delete:
+      tags: [科室增删改]
+      operationId: deleteDepartment
+      summary: 删除科室
+      description: |
+        删除指定科室。前端通常要求输入科室名二次确认后调用。
+      x-relevant: true
+      parameters:
+        - in: path
+          name: departmentId
+          required: true
+          schema: { type: string }
+          description: 待删除科室 ID
+      responses:
+        '200':
+          description: 删除结果
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code: { type: number, example: 0 }
+                  codeExplain: { type: string, example: "" }
+                  error: { type: string, example: "" }
+                  data: { type: object, nullable: true, example: null }
+
+  # ---------- 用户搜索 ----------
+  /next/api/gateway/cmdb.instance.PostSearchV3/v3/object/USER/instance/_search:
+    post:
+      tags: [用户搜索]
+      operationId: searchUserCmdb
+      summary: 搜索用户（CMDB USER 实例检索）
+      description: |
+        按关键词/字段分页搜索用户。USER 以 CMDB 实例模型存储，
+        支持字段过滤与关系展开。添加科室成员打开选人框时调用。
+      x-relevant: true
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                fields:
+                  type: array
+                  items: { type: string }
+                  example: ["name", "nickname", "user_icon", "user_email", "user_tel", "state", "instanceId"]
+                  description: 返回字段
+                page:
+                  type: number
+                  example: 1
+                page_size:
+                  type: number
+                  example: 10
+                ignore_missing_field_error:
+                  type: boolean
+                  example: true
+                relation_limit:
+                  type: number
+                  example: 6
+      responses:
+        '200':
+          description: 用户列表
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      list:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            instanceId: { type: string, example: "653547e2782c3" }
+                            name: { type: string, example: "easyops" }
+                            nickname: { type: string, example: "鲲鹏3046" }
+                            state: { type: string, example: "valid" }
+                            user_email: { type: string, example: "easyops@easyops.cn" }
+                            user_tel: { type: string, example: "13612345678" }
+
+  /next/api/gateway/user_service.user_admin.SearchAllUsersInfo/api/v1/users/all:
+    post:
+      tags: [用户搜索]
+      operationId: searchAllUsersInfo
+      summary: 检索全部用户信息
+      description: |
+        用户服务侧的用户检索，支持按 nickname/name 模糊匹配（$like）。
+        进入组织架构管理页初始化、选主管候选时调用。
+      x-relevant: true
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                fields:
+                  type: object
+                  description: 需返回的字段开关
+                  example: { name: true, nickname: true, state: true, user_email: true, user_tel: true, user_iconL: true, STAFF_TAG: true }
+                query:
+                  type: object
+                  description: 查询条件（支持 $or / $like 模糊匹配）
+                  example: { "$or": [ { "nickname": { "$like": "" } }, { "name": { "$like": "" } } ] }
+      responses:
+        '200':
+          description: 用户列表
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code: { type: number, example: 0 }
+                  codeExplain: { type: string, example: "" }
+                  error: { type: string, example: "" }
+                  data:
+                    type: object
+                    properties:
+                      list:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            instanceId: { type: string, example: "653547e2782c3" }
+                            name: { type: string, example: "easyops" }
+                            nickname: { type: string, example: "鲲鹏3046" }
+                            state: { type: string, example: "valid" }
+                            user_email: { type: string, example: "easyops@easyops.cn" }
+                            user_tel: { type: string, example: "13612345678" }

@@ -1,0 +1,54 @@
+name: inspection_list_suites
+module: autoops_inspection
+method: GET
+path: /api/v1/inspection
+gateway_path: ''
+service: logic.inspection
+side_effect: read
+path_source: backend_contract
+path_confidence: high
+tags:
+- AutoOps
+- 巡检
+- 套件
+- 列表
+summary: 巡检套件列表
+description: 分页查询巡检套件列表，按 page/pageSize 翻页，keyword 走显示名模糊匹配。返回 data.list + data.total。
+request:
+  required: []
+  properties:
+    page:
+      type: int
+      desc: 页码，从 1 开始
+    pageSize:
+      type: int
+      desc: 每页条数
+    keyword:
+      type: string
+      desc: 套件显示名模糊匹配关键字（按套件 id 精确查找可能不命中，需拉全量按 id 匹配兜底）
+outputs:
+  list:
+    jsonpath: $.data.list
+    desc: 套件列表（含 id/name/status/method/objectId/relationIdWithHost/ctime）
+  total:
+    jsonpath: $.data.total
+    desc: 套件总数
+requires: []
+rollback: null
+examples: []
+confidence:
+  request: medium
+  module: high
+  outputs: high
+  tags: high
+  summary: high
+  requires: medium
+  rollback: medium
+endpoint:
+  contract_ref: logic.inspection|LIST|/api/v1/inspection
+  mode: easyops_internal
+source:
+  openapi_file: ''
+  openapi_hash: ''
+  recorded_at: '2026-07-29T00:00:00'
+registered_at: '2026-07-29T14:42:35.155348'

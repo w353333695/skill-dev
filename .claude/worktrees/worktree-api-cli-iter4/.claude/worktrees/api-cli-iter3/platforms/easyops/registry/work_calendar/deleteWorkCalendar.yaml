@@ -1,0 +1,43 @@
+name: deleteWorkCalendar
+module: work_calendar
+method: DELETE
+path: /api/sys_setting/v1/work/calendar/{ids}
+gateway_path: /next/api/gateway/logic.sys_setting/api/sys_setting/v1/work/calendar/{calendarId}
+service: logic.sys_setting
+side_effect: delete
+path_source: backend_contract
+path_confidence: high
+tags:
+- 工作日历
+- 删除
+- 营业时间
+- 写
+summary: 删除工作日历
+description: 删除指定工作日历。
+request:
+  required: []
+  properties:
+    ids:
+      type: string
+      desc: 要删除的工作日历列表，以;分割
+      _source: contract
+outputs: {}
+requires:
+- ids 用;分隔批量
+rollback: null
+examples: []
+confidence:
+  request: high
+  module: high
+  outputs: medium
+  tags: high
+  summary: high
+  requires: high
+endpoint:
+  contract_ref: logic.sys_setting|DELETE|/api/sys_setting/v1/work/calendar/{ids}
+  mode: easyops_gateway
+source:
+  openapi_file: ITSM-运行管理-营业时间管理-openapi.yaml
+  openapi_hash: 02467de10e4cd52adcbf8975ca51b51a5a06742b85a95342ca4ffec2ea26481f
+  recorded_at: '2026-07-28T14:13:31.896000'
+registered_at: '2026-07-28T16:48:34.882046'

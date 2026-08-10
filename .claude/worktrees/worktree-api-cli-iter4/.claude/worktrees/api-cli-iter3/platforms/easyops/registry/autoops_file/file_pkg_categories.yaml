@@ -1,0 +1,46 @@
+name: file_pkg_categories
+module: autoops_file
+method: GET
+path: /package/categories_and_count
+gateway_path: /next/api/gateway/logic.artifact/package/categories_and_count
+service: logic.artifact
+side_effect: read
+path_source: backend_contract
+path_confidence: high
+tags:
+- 文件分发
+- 文件包
+- 分类
+- 统计
+summary: 查询文件包分类及数量
+description: 返回文件包的分类列表及每个分类下的包数量（如「默认」6 个），type=4 固定为文件分发包。
+request:
+  required: []
+  properties:
+    type:
+      type: package_type
+      desc: 包类型（4=文件分发）
+outputs:
+  total:
+    jsonpath: $.data.total
+    desc: 制品包总数
+  list_full:
+    jsonpath: $.data.list
+    desc: 分类列表全量（name/count）
+requires: []
+rollback: null
+examples: []
+confidence:
+  request: high
+  module: high
+  outputs: high
+  tags: high
+  summary: high
+endpoint:
+  contract_ref: logic.artifact|GET|/package/categories_and_count
+  mode: easyops_internal
+source:
+  openapi_file: AutoOps-文件分发管理-openapi.yaml
+  openapi_hash: edf3872fae57ab16180ccec0257fe32c2d0de09a4a639719250779d5ae96e426
+  recorded_at: '2026-07-29T16:20:10'
+registered_at: '2026-07-29T16:49:25.523907'

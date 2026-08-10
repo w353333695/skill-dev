@@ -1,0 +1,41 @@
+name: tool_time_window_read
+module: autoops_tool
+method: GET
+path: /api/tool_service/v1/globalConfigs/timeWindow/read
+gateway_path: /next/api/gateway/logic.tool_service/api/tool_service/v1/globalConfigs/timeWindow/read
+service: logic.tool_service
+side_effect: read
+path_source: gateway_strip
+path_confidence: medium
+tags:
+- 工具库
+- 执行时间窗口
+- 查询
+summary: 查询执行时间窗口
+description: ''
+request:
+  required: []
+  properties: {}
+outputs:
+  detail:
+    jsonpath: $.data
+    desc: 时间窗口配置
+requires: []
+rollback: null
+examples: []
+confidence:
+  request: high
+  module: high
+  outputs: high
+  tags: high
+  summary: high
+  requires: medium
+  rollback: medium
+endpoint:
+  contract_ref: ''
+  mode: easyops_gateway
+source:
+  openapi_file: AutoOps-工具库管理-openapi.yaml
+  openapi_hash: 7ed1d5a46514c3b8bc40573042495f3c411417688c19c42fbf739581cf1bb2c6
+  recorded_at: '2026-07-23T14:19:29.887012'
+registered_at: '2026-07-23T14:28:58.209763'

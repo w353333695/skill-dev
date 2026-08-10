@@ -1,0 +1,47 @@
+name: listTrigger
+module: process
+method: GET
+path: /api/flowable_service/v1/trigger
+gateway_path: /next/api/gateway/flowable_service.trigger.ListTrigger/api/flowable_service/v1/trigger
+service: flowable_service.trigger.ListTrigger
+side_effect: read
+path_source: gateway_strip
+path_confidence: medium
+tags:
+- 触发器
+- 列表
+- 流程
+- trigger
+summary: 查询可选触发器列表
+description: 新建/编辑流程选择触发器时调用，返回可选触发器。
+request:
+  required: []
+  properties: {}
+outputs:
+  list_full:
+    jsonpath: $.data.list
+    desc: 触发器列表全量
+  list_ids:
+    jsonpath: $.data.list
+    desc: 触发器 id 列表（配合 ${s.list_full.instanceId} 投影）
+  total:
+    jsonpath: $.data.total
+    desc: 触发器总数
+requires: []
+rollback: null
+examples: []
+confidence:
+  module: high
+  outputs: medium
+  requires: high
+  rollback: high
+  summary: high
+  tags: high
+endpoint:
+  contract_ref: ''
+  mode: easyops_gateway
+source:
+  openapi_file: ITSM-系统管理-流程管理-openapi.yaml
+  openapi_hash: be88bdf060789ec422b671fffae672e0754857b66418b48c317c4c55f8e9a77d
+  recorded_at: '2026-07-13T14:31:52'
+registered_at: '2026-07-22T10:34:10.699651'

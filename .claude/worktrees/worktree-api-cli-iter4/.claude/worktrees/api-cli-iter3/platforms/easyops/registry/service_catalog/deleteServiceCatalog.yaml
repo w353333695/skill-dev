@@ -1,0 +1,42 @@
+name: deleteServiceCatalog
+module: service_catalog
+method: DELETE
+path: /api/flowable_service/v1/service_catalog/{catalogId}
+gateway_path: /next/api/gateway/logic.flowable_service/api/flowable_service/v1/service_catalog/{catalogId}
+service: logic.flowable_service
+side_effect: delete
+path_source: gateway_strip
+path_confidence: medium
+tags:
+- 服务目录
+- 删除
+- catalog
+summary: 删除服务目录
+description: 删除指定服务目录。删除前需确认其下服务已清空或按页面提示二次确认。
+request:
+  required:
+  - catalogId
+  properties:
+    catalogId:
+      type: string
+      desc: 待删除目录 ID
+outputs: {}
+requires:
+- 删除前须确认目录下服务已清空
+rollback: null
+examples: []
+confidence:
+  module: high
+  outputs: high
+  requires: medium
+  rollback: high
+  summary: high
+  tags: high
+endpoint:
+  contract_ref: ''
+  mode: easyops_gateway
+source:
+  openapi_file: ITSM-系统管理-服务目录管理-openapi.yaml
+  openapi_hash: a27e0a4e7c6dd1cab5f0e3af9182e873d3ef6a3e84b03f255c424ea97fa2df6e
+  recorded_at: '2026-07-13T16:11:24'
+registered_at: '2026-07-22T10:34:10.494082'

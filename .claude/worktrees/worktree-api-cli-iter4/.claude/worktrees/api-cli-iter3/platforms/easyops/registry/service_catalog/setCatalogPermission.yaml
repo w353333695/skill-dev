@@ -1,0 +1,52 @@
+name: setCatalogPermission
+module: service_catalog
+method: POST
+path: /api/flowable_service/v1/set_catalog_permission
+gateway_path: /next/api/gateway/flowable_service.service_catalog.SetCatalogPermission/api/flowable_service/v1/set_catalog_permission
+service: logic.flowable_service
+side_effect: create
+path_source: gateway_strip
+path_confidence: medium
+tags:
+- 服务目录
+- 权限
+- 设置
+- catalog
+- permission
+summary: 设置目录查看/操作权限
+description: 配置可查看（readUserList）与可操作（modifyUserList）该目录的用户/用户组列表。
+request:
+  required:
+  - instanceId
+  properties:
+    instanceId:
+      type: instance_id
+      desc: 目录 ID
+    readUserList:
+      type: string[]
+      desc: 可查看的用户/用户组
+    modifyUserList:
+      type: string[]
+      desc: 可操作的用户/用户组
+outputs: {}
+requires:
+- instanceId 须是已存在目录 ID
+- readUserList/modifyUserList 须为有效用户/用户组 ID
+rollback: null
+examples: []
+confidence:
+  module: high
+  outputs: high
+  requires: medium
+  rollback: high
+  summary: high
+  tags: high
+  request: high
+endpoint:
+  contract_ref: logic.flowable_service|POST|/api/flowable_service/v1/set_catalog_permission
+  mode: easyops_gateway
+source:
+  openapi_file: ITSM-系统管理-服务目录管理-openapi.yaml
+  openapi_hash: a27e0a4e7c6dd1cab5f0e3af9182e873d3ef6a3e84b03f255c424ea97fa2df6e
+  recorded_at: '2026-07-13T16:11:24'
+registered_at: '2026-07-22T10:34:10.494082'

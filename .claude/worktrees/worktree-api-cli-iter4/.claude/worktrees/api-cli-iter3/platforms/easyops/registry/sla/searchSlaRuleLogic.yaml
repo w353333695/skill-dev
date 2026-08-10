@@ -1,0 +1,71 @@
+name: searchSlaRuleLogic
+module: sla
+method: POST
+path: /api/flowable_service/v1/sla/rule/_search
+gateway_path: /next/api/gateway/logic.flowable_service/api/flowable_service/v1/sla/rule/_search
+service: logic.flowable_service
+side_effect: read
+path_source: backend_contract
+path_confidence: high
+tags:
+- SLA
+- 查询
+- 列表
+- sla_rule
+summary: 查询 SLA 协议列表（列表页）
+description: SLA 协议列表页查询，支持按名称、协议负责人、服务名称、关键词搜索。
+request:
+  required: []
+  properties:
+    Q:
+      type: string
+      desc: 关键词
+    name:
+      type: string
+      desc: 协议名称
+    ownerName:
+      type: string
+      desc: 协议负责人账号
+    serviceName:
+      type: string
+      desc: 服务名称
+    page:
+      type: integer
+      desc: 页码
+    pageSize:
+      type: integer
+      desc: 每页数据量
+    priorityId:
+      type: string
+      desc: 引用的优先级过滤
+      _source: contract
+    instanceIds:
+      type: string[]
+      desc: sla实例id过滤(in查询)
+      _source: contract
+outputs:
+  list_full:
+    jsonpath: $.data.list
+    desc: SLA规则列表
+  total:
+    jsonpath: $.data.total
+    desc: 总数
+requires:
+- 'status: 0=全部/enabled=启用/disabled=禁用'
+rollback: null
+examples: []
+confidence:
+  request: high
+  module: high
+  outputs: high
+  tags: high
+  summary: high
+  requires: medium
+endpoint:
+  contract_ref: logic.flowable_service|POST|/api/flowable_service/v1/sla/rule/_search
+  mode: easyops_gateway
+source:
+  openapi_file: ITSM-运行管理-SLA协议管理-openapi.yaml
+  openapi_hash: 932ebe240075b0787316921f641a05f77ac16e8c2d23cb007ae7917133d3aa47
+  recorded_at: '2026-07-28T14:04:57.668523'
+registered_at: '2026-07-28T16:48:34.376143'

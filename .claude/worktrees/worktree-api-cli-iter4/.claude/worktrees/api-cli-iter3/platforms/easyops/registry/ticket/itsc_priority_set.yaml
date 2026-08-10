@@ -1,0 +1,46 @@
+name: itsc_priority_set
+module: ticket
+method: GET
+path: /api/flowable_service/v1/priority_set_all
+gateway_path: /next/api/gateway/logic.flowable_service/api/flowable_service/v1/priority_set_all
+service: logic.flowable_service
+side_effect: read
+path_source: backend_contract
+path_confidence: high
+tags:
+- 工单
+- 优先级
+- priority
+- 配置
+- 查询
+summary: 工单优先级维度集合
+description: ''
+request:
+  required: []
+  properties: {}
+outputs:
+  list_full:
+    jsonpath: $.data.priorities
+    desc: 所有优先级维度列表
+  list_ids:
+    jsonpath: $.data.priorities
+    desc: 列表项id集合(配合 ${s.list_full.instanceId} 投影)
+requires: []
+rollback: null
+examples: []
+confidence:
+  module: high
+  outputs: high
+  requires: high
+  rollback: high
+  summary: high
+  tags: high
+  request: high
+endpoint:
+  contract_ref: logic.flowable_service|GET|/api/flowable_service/v1/priority_set_all
+  mode: easyops_gateway
+source:
+  openapi_file: ITSM-登录与功能入口-openapi.yaml
+  openapi_hash: ec5d99f1d3772798ed04de980321a11cbf0d5a286894ac6da4acaea855a5904a
+  recorded_at: '2026-07-09T14:05:09'
+registered_at: '2026-07-22T10:34:10.040270'

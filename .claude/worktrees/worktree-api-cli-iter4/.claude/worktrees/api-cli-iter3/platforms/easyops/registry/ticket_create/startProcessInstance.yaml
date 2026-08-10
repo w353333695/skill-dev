@@ -1,0 +1,82 @@
+name: startProcessInstance
+module: ticket_create
+method: POST
+path: /api/flowable_service/v2/process_instance
+gateway_path: /next/api/gateway/flowable_service.process_instance.StartProcessInstanceV2/api/flowable_service/v2/process_instance
+service: logic.flowable_service
+side_effect: create
+path_source: gateway_strip
+path_confidence: medium
+tags:
+- 工单
+- 发起
+- 创建
+- 流程实例
+- process_instance
+summary: 发起工单创建流程实例（核心）
+description: '**工单发起的核心接口**。提交表单数据创建流程实例，返回工单 instanceId 与工单号 orderNum。'
+request:
+  required:
+  - name
+  - formData
+  - serviceId
+  properties:
+    name:
+      type: string
+      desc: 工单标题（默认取服务名）
+    serviceId:
+      type: string
+      desc: 服务 ID
+    formData:
+      type: string
+      desc: 表单字段值 JSON 字符串（key/values 结构）
+    variableName:
+      type: string
+      desc: 流程变量名（控制流向）
+    variableValue:
+      type: string
+      desc: 流程变量值
+    variables:
+      type: array
+      desc: 流程变量数组
+    visibleRange:
+      type: string
+      desc: 可见范围
+    originTicketInfo:
+      type: object
+      desc: 来源工单信息（无则为空对象）
+outputs:
+  instance_id:
+    jsonpath: $.data.instanceId
+    desc: 工单实例 ID（核心输出，用于后续查询/关联/评论操作）
+  list_full:
+    jsonpath: $.data.userTaskList
+    desc: 发起后产生的用户任务列表（用于流转到下一步处理）
+  list_ids:
+    jsonpath: $.data.userTaskList
+    desc: 用户任务 id 集合（配合 ${s.list_full.instanceId} 投影）
+  order_num:
+    jsonpath: $.data.orderNum
+    desc: 工单号（业务编号，展示用）
+requires:
+- name/serviceId/formData 为必填
+- serviceId 须为已存在服务（来自服务目录/常用服务/服务实例查询）
+- formData 须为符合表单模板（searchFormTemplate）定义的 JSON 字符串
+rollback: null
+examples: []
+confidence:
+  module: high
+  outputs: medium
+  requires: medium
+  rollback: high
+  summary: high
+  tags: high
+  request: high
+endpoint:
+  contract_ref: logic.flowable_service|POST|/api/flowable_service/v2/process_instance
+  mode: easyops_gateway
+source:
+  openapi_file: ITSM-工单发起-openapi.yaml
+  openapi_hash: 1ca484b7e487f62a1c488f8e8b29d32e77b51750fc68f94a51a775d93f09be61
+  recorded_at: '2026-07-13T14:47:07'
+registered_at: '2026-07-22T10:34:09.642601'

@@ -1,0 +1,49 @@
+name: model_delete
+module: cmdb_model
+method: DELETE
+path: /object/{objectId}
+gateway_path: /next/api/gateway/cmdb.cmdb_object.DeleteObject/object/{objectId}
+service: logic.cmdb.service
+side_effect: delete
+path_source: gateway_strip
+path_confidence: medium
+tags:
+- CMDB
+- 模型
+- 删除
+summary: 删除模型
+description: 删除整个模型（含所有字段、关系、实例），不可恢复。
+request:
+  required:
+  - objectId
+  properties:
+    objectId:
+      type: object_id
+      desc: 模型对象ID
+    forceDelete:
+      type: bool
+      desc: 是否强制删除
+      _source: contract
+outputs:
+  detail:
+    jsonpath: $.data
+    desc: 删除结果
+requires:
+- objectId 为已存在模型
+rollback: null
+examples: []
+confidence:
+  request: medium
+  module: high
+  outputs: high
+  tags: high
+  summary: high
+  requires: medium
+  rollback: medium
+endpoint:
+  contract_ref: logic.cmdb.service|DELETE|/object/{objectId}
+source:
+  openapi_file: CMDB-模型管理-openapi.yaml
+  openapi_hash: e422eadfbcf745f98992379d09d3334717c7e3992c54b62f366b7f342e7e08f0
+  recorded_at: '2026-07-23T10:29:50.694479'
+registered_at: '2026-07-23T14:28:58.926734'

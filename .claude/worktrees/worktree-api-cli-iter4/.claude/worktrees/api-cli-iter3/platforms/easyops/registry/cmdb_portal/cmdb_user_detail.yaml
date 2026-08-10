@@ -1,0 +1,49 @@
+name: cmdb_user_detail
+module: cmdb_portal
+method: GET
+path: /api/v1/users/detail/{username}
+gateway_path: /next/api/gateway/logic.user_service/api/v1/users/detail/{username}
+service: logic.user_service
+side_effect: read
+path_source: backend_contract
+path_confidence: high
+tags:
+- 门户
+- 用户
+- 详情
+summary: 用户详情
+description: 获取指定用户详情（含组织、角色等）。
+request:
+  required:
+  - username
+  properties:
+    username:
+      type: string
+      desc: 用户名
+    org:
+      type: number
+      desc: 组织 ID
+outputs:
+  detail:
+    jsonpath: $.data
+    desc: 用户详情
+requires:
+- username 为已存在用户
+rollback: null
+examples: []
+confidence:
+  request: high
+  module: high
+  outputs: high
+  tags: high
+  summary: high
+  requires: medium
+  rollback: medium
+endpoint:
+  contract_ref: logic.user_service|GET|/api/v1/users/detail/{username}
+  mode: easyops_gateway
+source:
+  openapi_file: CMDB-登录与功能入口-openapi.yaml
+  openapi_hash: 03368b8fed81615f7835509bbeb28ad4bc3b44520f5e837fe3383ab4c85a3bbf
+  recorded_at: '2026-07-23T09:55:56.715723'
+registered_at: '2026-07-23T14:28:59.247623'

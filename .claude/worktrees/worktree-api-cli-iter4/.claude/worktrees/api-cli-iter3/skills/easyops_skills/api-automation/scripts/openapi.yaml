@@ -1,0 +1,256 @@
+# EasyOps API 路由配置
+# 记录 uwin.py 中使用的 API 信息，便于运维和监控
+# 新增方法时同步更新此文件
+
+app_route:
+  - app_name: cmdbservice
+    service_name: logic.cmdb.service
+    port: 8079
+    api_list:
+      # search_instance - 搜索实例
+      - frequency: 120
+        method: POST
+        uri: /v3/object/:objectId/instance/_search
+      # get_api_desc - 获取API描述 (内部查询)
+      - frequency: 120
+        method: POST
+        uri: /v3/object/EASYOPS_API_DEFINE@EASYOPS/instance/_search
+      # get_service_port - 获取服务端口 (内部查询)
+      - frequency: 120
+        method: POST
+        uri: /v3/object/MICRO_APP_CONTAINER@EASYOPS/instance/_search
+      # get_model_desc - 获取模型详情
+      - frequency: 120
+        method: GET
+        uri: /object/:objectId
+      # import_instance - 导入实例
+      - frequency: 120
+        method: POST
+        uri: /object/:objectId/instance/_import
+      # import_instance_json - JSON文件导入实例
+      - frequency: 120
+        method: POST
+        uri: /import/object/:objectId/instance/json
+      # list_object_basic - 获取模型列表
+      - frequency: 120
+        method: GET
+        uri: /object_basic
+      # delete_relation - 删除关系
+      - frequency: 120
+        method: DELETE
+        uri: /object_relation/:relationId
+      # batch_archive_instance - 批量归档实例
+      - frequency: 120
+        method: POST
+        uri: /object/:objectId/instance/_batch_archive
+      # delete_instance_batch - 批量删除实例
+      - frequency: 120
+        method: DELETE
+        uri: /object/:objectId/instance/_batch
+      # delete_object - 删除模型
+      - frequency: 120
+        method: DELETE
+        uri: /object/:objectId
+      # import_model - 导入模型
+      - frequency: 120
+        method: POST
+        uri: /v2/object_import
+      # create_instance_relation - 创建实例关系
+      - frequency: 120
+        method: POST
+        uri: /object/:objectId/relation/:relationSideId/instance/:instanceId/_bindMulti
+      # create_property - 创建模型属性
+      - frequency: 120
+        method: POST
+        uri: /object/:objectId/attr
+        
+  - app_name: resource_manage
+    service_name: logic.resource_manage
+    port: 8073
+    api_list:
+      # get_import_instance_excel - 获取数据录入模板
+      - frequency: 120
+        method: GET
+        uri: /api/v1/resource_manage/data_entry/templates/export
+
+  - app_name: tool_service
+    service_name: logic.tool_service
+    port: 8181
+    api_list:
+      # list_tools - 批量获取工具信息
+      - frequency: 120
+        method: GET
+        uri: /tools
+      # get_tool_versions - 查询工具版本列表
+      - frequency: 120
+        method: GET
+        uri: /tools/:toolId/versions
+      # execute_tool - 执行工具
+      - frequency: 120
+        method: POST
+        uri: /tools/execution
+      # get_execute_result - 获取工具执行结果
+      - frequency: 120
+        method: GET
+        uri: /tools/execution/:execId
+      # export_tools - 批量导出工具
+      - frequency: 120
+        method: POST
+        uri: /api/tool_service/v1/batch/export
+      # import_tool_check - 工具导入检查
+      - frequency: 120
+        method: POST
+        uri: /api/tool_service/v1/batch/import/check
+      # import_tool - 导入工具
+      - frequency: 120
+        method: POST
+        uri: /tools/import
+
+  - app_name: agent_admin
+    service_name: logic.agent_admin
+    port: 8179
+    api_list:
+      # create_agent_management_task - 批量新增agent管理任务
+      - frequency: 120
+        method: POST
+        uri: /api/v1/agent_management/tasks
+      # get_agent_management_task - 批量查询agent管理任务
+      - frequency: 120
+        method: GET
+        uri: /api/v1/agent_management/tasks/:id
+
+  - app_name: collector_plugin_service
+    service_name: logic.collector_plugin_service
+    port: 8151
+    api_list:
+      # import_plugin - 导入监控采集插件
+      - frequency: 120
+        method: POST
+        uri: /api/v1/plugin/import
+      # update_plugin - 更新监控采集插件
+      - frequency: 120
+        method: PUT
+        uri: /api/v1/plugin/import_update/:plugin_id
+
+  - app_name: collector_service
+    service_name: easyops.api.collector_service.job.ActivateCollectorKit
+    port: 12000
+    api_list:
+      # activate_collector_kit - 启用采集套件
+      # 需要 header: giraffe-contract-name: easyops.api.collector_service.job.ActivateCollectorKit
+      - frequency: 120
+        method: POST
+        uri: /api/v1/collector/kit/activate
+
+  - app_name: flowable_service
+    service_name: logic.flowable_service
+    port: 8134
+    api_list:
+      # list_service_catalog - 获取服务目录列表
+      - frequency: 120
+        method: GET
+        uri: /api/flowable_service/v1/service_catalog
+      # create_service_catalog - 创建服务目录
+      - frequency: 120
+        method: POST
+        uri: /api/flowable_service/v1/service_catalog
+      # delete_service_catalog - 删除服务目录
+      - frequency: 120
+        method: DELETE
+        uri: /api/flowable_service/v1/service_catalog/:catalogId
+
+  - app_name: notify_service
+    service_name: logic.notify
+    port: 8069
+    api_list:
+      # list_operation_log - 查询操作日志
+      - frequency: 120
+        method: GET
+        uri: /operation/log
+
+  - app_name: artifact
+    service_name: logic.artifact
+    port: 8175
+    api_list:
+      # search_package - 搜索制品包
+      - frequency: 120
+        method: GET
+        uri: /package/search
+      # list_version - 获取版本列表
+      - frequency: 120
+        method: GET
+        uri: /version/list
+      # download_archive - 下载归档版本
+      - frequency: 120
+        method: GET
+        uri: /archive/:packageId/:versionId
+      # batch_delete_versions - 批量删除版本
+      - frequency: 120
+        method: DELETE
+        uri: /versions/:packageId
+      # delete_version - 删除版本
+      - frequency: 120
+        method: DELETE
+        uri: /version/:packageId/:versionId
+      # delete_package - 删除包
+      - frequency: 120
+        method: DELETE
+        uri: /package/package/:packageId
+      # create_package - 创建包
+      - frequency: 120
+        method: POST
+        uri: /package
+      # init_workspace - 初始化工作区
+      - frequency: 120
+        method: PUT
+        uri: /workspace/:packageId
+      # clear_workspace - 清空工作区
+      - frequency: 120
+        method: DELETE
+        uri: /workspace/:packageId
+      # commit_workspace - 提交工作区创建新版本
+      - frequency: 120
+        method: POST
+        uri: /v2/workspace/:packageId
+      # upload_file - 上传文件到工作区
+      - frequency: 120
+        method: POST
+        uri: /workspace/:packageId/upload
+
+  - app_name: data_exchange
+    service_name: logic.data_exchange
+    port: 8152
+    api_list:
+      # olap_query - OLAP数据查询与聚合统计
+      - frequency: 120
+        method: POST
+        uri: /api/v3/data_exchange/olap
+      # tsdb_column_query - TsdbColumn数据查询
+      - frequency: 120
+        method: POST
+        uri: /api/v1/data_exchange/tsdb_column/query
+      # tsdb_column_object_get_base_list - TsdbColumnObject批量获取定义
+      - frequency: 120
+        method: POST
+        uri: /api/v1/data_exchange/tsdb_column_object/get_base_list
+      # tsdb_column_update_by_filter - TsdbColumn数据批量更新
+      - frequency: 120
+        method: PUT
+        uri: /api/v1/data_exchange/tsdb_column/update_by_filter
+
+  - app_name: inspection
+    service_name: logic.inspection
+    port: 8103
+    api_list:
+      # list_inspection_suite - 获取巡检套件列表
+      - frequency: 120
+        method: GET
+        uri: /api/v1/inspection
+      # import_inspection_suite - 导入巡检套件
+      - frequency: 120
+        method: POST
+        uri: /api/v1/inspection-import
+      # delete_inspection_suite - 卸载巡检套件
+      - frequency: 120
+        method: DELETE
+        uri: /api/v1/inspection/:pluginId

@@ -1,0 +1,102 @@
+name: createForm
+module: form
+method: POST
+path: /api/flowable_service/v2/form
+gateway_path: /next/api/gateway/logic.flowable_service/api/flowable_service/v2/form
+service: logic.flowable_service
+side_effect: create
+path_source: backend_contract
+path_confidence: high
+tags:
+- 表单
+- form
+- 新建
+- create
+- 版本
+summary: 新建表单
+description: 在新建表单页填写名称、分类、说明、版本号、版本说明后点击「保存」提交创建。
+request:
+  required:
+  - name
+  - category
+  - versionName
+  - formDefinition
+  properties:
+    name:
+      type: string
+      desc: 表单名称
+    category:
+      type: string
+      desc: 分类
+    memo:
+      type: string
+      desc: 表单说明
+    state:
+      type: string
+      desc: 状态（done=已完成）
+    versionName:
+      type: string
+      desc: 版本号（X.Y.Z 三位）
+    versionMemo:
+      type: string
+      desc: 版本说明
+    formDefinition:
+      type: string
+      desc: 字段定义 JSON 字符串（控件数组）
+    vMemo:
+      type: string
+      desc: 版本说明(deprecated)
+      _source: contract
+    domainModelId:
+      type: string[]
+      desc: 选用的领域模型 id
+      _source: contract
+    dataSourceIdList:
+      type: string[]
+      desc: 数据源id列表
+      _source: contract
+outputs:
+  detail:
+    jsonpath: $.data.lastestVersion
+    desc: 新建后的最新版本信息（含 formId/versionId）
+  instanceId:
+    jsonpath: $.data.lastestVersion.formId
+    desc: 新建表单版本 id（取自最新版本，向后兼容锚点）
+  formId:
+    jsonpath: $.data.lastestVersion.formId
+    desc: 新建后的表单 id（回滚 deleteFormVersion 用）
+  versionId:
+    jsonpath: $.data.lastestVersion.versionId
+    desc: 新建后的版本 id（回滚 deleteFormVersion 用）
+requires:
+- category 须是 getFormSchemaCategory 返回的已存在分类
+- formDefinition 须为合法的表单 JSON 字符串（顶层为容器数组，结构见 knowledge/modules/form_design/form-design-spec.md）
+- formDefinition 提交前可用 knowledge/modules/form_design/check_form_design.py 做设计期 schema
+  预检（零依赖）
+- versionName 须为 X.Y.Z 三位版本号
+rollback:
+  api: deleteFormVersion
+  params:
+  - param_key: formId
+    from_output: detail
+    from_field: formId
+  - param_key: versionId
+    from_output: detail
+    from_field: versionId
+examples: []
+confidence:
+  module: high
+  outputs: medium
+  requires: high
+  rollback: high
+  summary: high
+  tags: high
+  request: medium
+endpoint:
+  contract_ref: logic.flowable_service|POST|/api/flowable_service/v2/form
+  mode: easyops_gateway
+source:
+  openapi_file: ITSM-系统管理-表单管理-openapi.yaml
+  openapi_hash: 1d53625c34e380689cd9e269d0a4a76ecac595276dee9da6107bd25218886cd8
+  recorded_at: '2026-07-13T14:35:29'
+registered_at: '2026-07-22T10:34:11.800992'

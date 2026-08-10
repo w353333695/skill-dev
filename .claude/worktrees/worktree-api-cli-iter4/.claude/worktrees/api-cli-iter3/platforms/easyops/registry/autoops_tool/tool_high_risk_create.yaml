@@ -1,0 +1,56 @@
+name: tool_high_risk_create
+module: autoops_tool
+method: POST
+path: /v2/object/_TOOL_HIGH_RISK_COMMAND@EASYOPS
+gateway_path: /next/api/gateway/cmdb.instance.CreateInstance/v2/object/_TOOL_HIGH_RISK_COMMAND@EASYOPS
+service: cmdb.instance.CreateInstance
+side_effect: create
+path_source: gateway_strip
+path_confidence: medium
+tags:
+- 工具库
+- 高危命令
+- 创建
+summary: 新建高危命令识别规则
+description: 新建高危命令识别规则。关键字段：
+request:
+  required: []
+  properties:
+    name:
+      type: string
+      desc: ''
+    recognizeMethod:
+      type: string
+      desc: ''
+    riskDescription:
+      type: string
+      desc: ''
+    riskLevel:
+      type: string
+      desc: ''
+outputs:
+  instanceId:
+    jsonpath: $.data.instanceId
+    desc: 高危命令实例 id
+  detail:
+    jsonpath: $.data
+    desc: 创建结果
+requires: []
+rollback: null
+examples: []
+confidence:
+  request: high
+  module: high
+  outputs: high
+  tags: high
+  summary: high
+  requires: medium
+  rollback: medium
+endpoint:
+  contract_ref: ''
+  mode: easyops_gateway
+source:
+  openapi_file: AutoOps-工具库管理-openapi.yaml
+  openapi_hash: 7ed1d5a46514c3b8bc40573042495f3c411417688c19c42fbf739581cf1bb2c6
+  recorded_at: '2026-07-23T14:19:29.887012'
+registered_at: '2026-07-23T14:28:58.209763'

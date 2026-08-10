@@ -1,0 +1,69 @@
+name: createServiceCatalog
+module: service_catalog
+method: POST
+path: /api/flowable_service/v1/service_catalog
+gateway_path: /next/api/gateway/logic.flowable_service/api/flowable_service/v1/service_catalog
+service: logic.flowable_service
+side_effect: create
+path_source: backend_contract
+path_confidence: high
+tags:
+- 服务目录
+- 新建
+- 创建
+- catalog
+summary: 新建服务目录
+description: |
+  在指定父目录下新建服务目录，返回新目录 instanceId。
+  ⚠️ 2026-07-28 实测补充：
+  - `parentID` 必填（卡片已列 required，顶层目录传空字符串；挂父目录传父 instanceId）。
+  - 内置根目录（服务请求/事件管理等）不能直接建服务（createServiceInstance 报"内置服务,禁止新建"），需先在本接口建**用户子目录**（如"资源申请"挂"服务请求"下），再把服务建到子目录。
+  - `builtIn` 必须 false（用户建的目录非内置）。
+  实测可建 body：{name, parentID, parentName, description, builtIn:false}。返回 data.instanceId 作 createServiceInstance 的 catalogId。
+request:
+  required:
+  - name
+  - parentID
+  properties:
+    name:
+      type: string
+      desc: 目录名称
+    parentID:
+      type: instance_id
+      desc: 父目录 ID（顶层为空）
+    parentName:
+      type: string
+      desc: 父目录名称
+    description:
+      type: string
+      desc: 目录描述
+    builtIn:
+      type: bool
+      desc: 是否为内置(默认为false)
+      _source: contract
+outputs:
+  instanceId:
+    jsonpath: $.data.instanceId
+    desc: 新建服务目录实例 ID
+requires:
+- parentID 须是已存在的父目录 instanceId，顶层传空
+rollback:
+  api: deleteServiceCatalog
+  param_from_output: instanceId
+examples: []
+confidence:
+  module: high
+  outputs: medium
+  requires: medium
+  rollback: medium
+  summary: high
+  tags: high
+  request: medium
+endpoint:
+  contract_ref: logic.flowable_service|POST|/api/flowable_service/v1/service_catalog
+  mode: easyops_gateway
+source:
+  openapi_file: ITSM-系统管理-服务目录管理-openapi.yaml
+  openapi_hash: a27e0a4e7c6dd1cab5f0e3af9182e873d3ef6a3e84b03f255c424ea97fa2df6e
+  recorded_at: '2026-07-13T16:11:24'
+registered_at: '2026-07-22T10:34:10.494082'

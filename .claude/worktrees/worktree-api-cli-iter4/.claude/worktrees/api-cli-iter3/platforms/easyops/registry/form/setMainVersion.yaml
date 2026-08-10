@@ -1,0 +1,51 @@
+name: setMainVersion
+module: form
+method: POST
+path: /api/flowable_service/v1/form/{formId}/version/{versionId}/setMain
+internal_path: /api/flowable_service/v1/form/{formId}/version/{versionId}
+gateway_path: /next/api/gateway/logic.flowable_service/api/flowable_service/v1/form/{formId}/version/{versionId}/setMain
+service: logic.flowable_service
+side_effect: create
+path_source: gateway_strip
+path_confidence: medium
+tags:
+- 表单
+- form
+- 主版本
+- setMain
+- 状态变更
+summary: 设置表单主版本
+description: |
+  新版本保存后将指定版本设为主版本（isMain=true）。
+  ⚠️ 路由分环境：
+    - 网关（80 + cookie）：POST gateway_path（带 /setMain 后缀）
+    - 内网直连（8134，user/org 头）：POST internal_path（**直接 POST 到版本 URL，不带 /setMain 后缀**）
+  卡片原 `path`（带 /setMain）在 8134 内网直连返回 404（gateway_strip 录制路径，非后端真实路由）；
+  内网真实路由经 2026-07-27 实测为 internal_path。2026-07-28 真调验证：POST internal_path 返回 code=0，版本 isMain 置 true。
+request:
+  required: []
+  properties: {}
+outputs:
+  detail:
+    jsonpath: $.data
+    desc: 设置结果兜底（无明确返回）
+requires:
+- formId 须存在
+- versionId 须为该表单下已存在的版本
+rollback: null
+examples: []
+confidence:
+  module: high
+  outputs: low
+  requires: medium
+  rollback: medium
+  summary: high
+  tags: high
+endpoint:
+  contract_ref: ''
+  mode: easyops_gateway
+source:
+  openapi_file: ITSM-系统管理-表单管理-openapi.yaml
+  openapi_hash: 1d53625c34e380689cd9e269d0a4a76ecac595276dee9da6107bd25218886cd8
+  recorded_at: '2026-07-13T14:35:29'
+registered_at: '2026-07-22T10:34:11.800992'

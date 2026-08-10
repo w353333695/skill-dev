@@ -1,0 +1,45 @@
+name: getSlaRule
+module: sla
+method: GET
+path: /api/flowable_service/v1/sla/rule/{ruleId}
+gateway_path: /next/api/gateway/flowable_service.sla.GetSLARule/api/flowable_service/v1/sla/rule/{ruleId}
+service: logic.flowable_service
+side_effect: read
+path_source: backend_contract
+path_confidence: high
+tags:
+- SLA
+- 详情
+- sla_rule
+summary: 查询 SLA 协议详情
+description: 获取单条 SLA 协议详情（编辑表单回填用）。
+request:
+  required: []
+  properties:
+    ruleId:
+      type: string
+      desc: 协议id
+      _source: contract
+outputs:
+  detail:
+    jsonpath: $.data
+    desc: SLA规则详情
+requires:
+- ruleId 须存在
+rollback: null
+examples: []
+confidence:
+  request: high
+  module: high
+  outputs: high
+  tags: high
+  summary: high
+  requires: high
+endpoint:
+  contract_ref: logic.flowable_service|GET|/api/flowable_service/v1/sla/rule/{ruleId}
+  mode: easyops_gateway
+source:
+  openapi_file: ITSM-运行管理-SLA协议管理-openapi.yaml
+  openapi_hash: 932ebe240075b0787316921f641a05f77ac16e8c2d23cb007ae7917133d3aa47
+  recorded_at: '2026-07-28T14:04:57.668523'
+registered_at: '2026-07-28T16:48:34.376143'

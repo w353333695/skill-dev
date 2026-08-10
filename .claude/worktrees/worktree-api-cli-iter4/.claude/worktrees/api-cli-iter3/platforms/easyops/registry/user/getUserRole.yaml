@@ -1,0 +1,46 @@
+name: getUserRole
+module: user
+method: GET
+path: /api/v1/permission_role/user_role/{username}
+gateway_path: /next/api/gateway/permission.role.GetUserRole/api/v1/permission_role/user_role/{username}
+service: permission.role.GetUserRole
+side_effect: read
+path_source: gateway_strip
+path_confidence: medium
+tags:
+- 用户
+- 角色
+- 查询
+- 已分配
+summary: 查询用户已分配角色
+description: 获取指定用户已分配的角色名列表。
+request:
+  required:
+  - username
+  properties:
+    username:
+      type: string
+      desc: 用户名（name）
+outputs:
+  list_full:
+    jsonpath: $.data
+    desc: 用户已分配的角色名列表
+requires:
+- username 须为已存在的用户名
+rollback: null
+examples: []
+confidence:
+  module: high
+  outputs: medium
+  requires: low
+  rollback: high
+  summary: high
+  tags: high
+endpoint:
+  contract_ref: ''
+  mode: easyops_gateway
+source:
+  openapi_file: ITSM-系统管理-用户管理-openapi.yaml
+  openapi_hash: 62e3d6c7b4841e3254ee4f78bd899a37d383bbfcfca7613cccddfdbbbe90392e
+  recorded_at: '2026-07-13T11:40:59'
+registered_at: '2026-07-22T10:34:10.925487'

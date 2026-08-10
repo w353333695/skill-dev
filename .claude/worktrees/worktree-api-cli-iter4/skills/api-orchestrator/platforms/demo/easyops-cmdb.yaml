@@ -1,0 +1,640 @@
+# =============================================================================
+# EasyOps CMDB —— api-cli 集中清单（三层体系：模型 object / 关系 relation / 实例 instance）
+# -----------------------------------------------------------------------------
+# 数据来源：
+#   • 模型层 契约  data/api-doc/cmdb-object.json （ListObjectBasic / ImportV2 /
+#     ImportCheckV2 / ExportObjectV2 四个 EAML 契约）
+#   • 模型层 后端  data/sources/backend/CMDB/cmdb_service/object/route.go （补全契约
+#     缺失的删除/详情/属性/关系等 CRUD 路由）
+#   • 模型  message.Response = easyops.model.cmdb.CmdbObject（attrList/relation_list/
+#     relation_groups/indexList/view 五大设计要素）
+#   • 实例层 契约  data/api-doc/cmdb-instance.json （PostSearchV3 / ImportInstance /
+#     DeleteInstanceBatch 三个有效契约；剔除 csv/json/excel 文件上传噪声）
+#   • 实例层 后端  data/sources/backend/CMDB/cmdb_service/instance(_extend)/route.go
+#     （SearchV3 / InstanceDatas 结构体 + 校验权威；并修正契约批量删路径笔误 instance_batch）
+#
+# 接入面：
+#   • backend —— 直连 cmdb_service :8079（HTTP）。契约示例与后端路由都以此为准，
+#     object 域所有 verb 都能干净命中（无 per-API 网关前缀问题）。**默认走 backend**。
+#   • frontend —— 走前端网关 https://172.30.0.90 + Host 头。注意：网关按 *每个 API*
+#     路由（path_prefix 形如 /next/api/gateway/cmdb.cmdb_object.<Verb>），一个 endpoint
+#     只能持一个 path_prefix，故 frontend 对 object 域多 verb 不通用；仅 instance.search
+#     可走 frontend（其网关前缀固定 cmdb.instance.PostSearchV3）。object 管理请用 backend。
+#
+# 鉴权：auth: easyops-cookie（~/.api-cli/auth.d/easyops-cookie.yaml，provider=cookie，
+#   持 PHPSESSID 会话 cookie）。backend/frontend 均用同一 cookie。
+#
+# ⚠️ cookie 不够！直连后端还要 org+user 两个 header（见 endpoint.headers）。
+# 知识按 SKILL.md 设计分文件存放（本目录是外接 EasyOps 唯一真相来源，勿依赖记忆）：
+#   接入/端口/org/user → systems.yaml runtime；模型结构/副作用规则 → objects.yaml；
+#   字段锚/转换 → entities.yaml；建/改/删流程 → flows/；索引导航 → README.md。
+# =============================================================================
+spec: api-cli/v1
+service:
+  name: easyops-cmdb
+  version: "1.0"
+  default_endpoint: backend
+  endpoints:
+    backend:
+      base_url: ${EASYOPS_CMDB_BACKEND_URL}        # http://172.30.0.232:8079
+      host: admin.easyops.local                     # IP 直连，Host 由 endpoint.Host 注入
+      path_prefix: ""                               # 后端路由挂在 gin root（无前缀）
+      auth: easyops-cookie
+      headers:                                      # endpoint 级固定 header（每个请求都带，api-cli 自动注入）
+        org: ${EASYOPS_ORG}                         # EasyOps 租户 org。系统自带 0/1/2 禁动（业务库）；测试用 18832008。export EASYOPS_ORG=<值>
+        user: ${EASYOPS_USER}                       # EasyOps 用户标识。模型系统管理员=easyops（有 ObjectImport 权限）。export EASYOPS_USER=easyops
+    frontend:
+      base_url: ${EASYOPS_CMDB_FRONTEND_URL}        # https://172.30.0.90
+      host: admin.easyops.local
+      path_prefix: /next/api/gateway/cmdb.instance.PostSearchV3   # 仅对 instance.search 通用
+      auth: easyops-cookie
+    openapi:                                        # openapi 网关（外网/非内网；AK/SK 签名）。需后端 api_gateway/conf/openapi.yaml 放行
+      base_url: http://172.30.0.232                  # 内网网关 IP（连接地址；勿直连公网 openapi.easyops-only.com）
+      path_prefix: /cmdbservice                      # cmdb app_name 前缀（网关按 /<app>/<uri> 路由）
+      auth: easyops-openapi                          # ~/.api-cli/auth.d/easyops-openapi.yaml（host=openapi.easyops-only.com 作签名 Host 头，网关按 Host 路由）
+
+# -----------------------------------------------------------------------------
+# 资源 1：object_model —— CMDB 模型（object）层。e2e 场景全落在这里。
+# 建模说明：object 域各 verb 的 URL 无公共前缀（/object_basic、/v2/object_import、
+# /object/{id} …），故 resource.path 留空，每个 operation 持完整路径。
+# -----------------------------------------------------------------------------
+resources:
+  object_model:
+    description: CMDB 模型（object）—— 模型的查询/详情/删除/导入(声明式 upsert)/导出。EasyOps 通过「声明式导入」一次性定义整个模型（含属性 attrList、关系 relation_list、关系分组 relation_groups、索引 indexList、视图 view），而非逐属性 CRUD；导入即 upsert（存在则更新）。
+    path: ""
+
+    operations:
+      # ---------- 查询（GET /object_basic）—— 场景1：查"IT资源监控"相关模型 ----------
+      list:
+        description: 模型基本信息列表（分页，支持关键词/分类/ID 过滤）。返回 ObjectBasicInfo（轻量，不含 attrList/relation）。对应契约 ListObjectBasic / 后端 GetObjectAllRequest 全量过滤参数。
+        method: GET
+        path: /object_basic
+        params:
+          q:           { in: query, type: string,  description: "关键词，对模型 id/name 模糊匹配（如『IT资源监控』）" }
+          category:    { in: query, type: string,  description: "分类过滤。xx=精确；xx%=匹配 xx 或 xx.*；xx.%=匹配 xx\\..*（点分多级，如『应用资源.测试管理』）" }
+          objectIds:   { in: query, type: string,  description: "按模型 ID 过滤，逗号分隔（如 A@EASYOPS,B@EASYOPS）" }
+          system:      { in: query, type: string,  description: "按所属子产品(system)过滤" }
+          visible:     { in: query, type: string, enum: [visible, invisible, all], description: "可见性过滤，默认 all" }
+          isAbstract:  { in: query, type: string, enum: ["true", "false"], description: "是否抽象(父)模型" }
+          parentObjectId: { in: query, type: string, description: "按父模型 ID 过滤" }
+          page:        { in: query, type: integer, description: "页码，从 1 起，默认 1" }
+          page_size:   { in: query, type: integer, description: "每页条数，默认 200，上限 3000" }
+          fields:      { in: query, type: string,  description: "限制返回的属性字段，逗号分隔" }
+        response:
+          type: object
+          description: "标准 wrapper：{ code, message, data: { list, count } }"
+          properties:
+            code:    { type: integer, description: "0=成功" }
+            message: { type: string }
+            data:
+              type: object
+              properties:
+                list:
+                  type: array
+                  description: "模型基本信息列表（ObjectBasicInfo）"
+                  items:
+                    type: object
+                    description: "模型基本信息（同 CmdbObject 但去掉 attrList/relation_list/relation_groups/indexList）"
+                    properties:
+                      objectId:   { type: string, description: "模型 ID，形如 NAME@NAMESPACE" }
+                      name:       { type: string, description: "模型名称" }
+                      category:   { type: string, description: "分类（点分多级）" }
+                      icon:       { type: string }
+                      system:     { type: string, description: "所属子产品" }
+                      protected:  { type: boolean, description: "受保护(核心)模型，不可删" }
+                      isAbstract: { type: boolean }
+                count:      { type: integer, description: "总条数" }
+        pagination:
+          type: offset
+          page_in: query                  # GET 翻页号在 query
+          items_path: data.list
+          page_param: page
+          size_param: page_size
+          size: 20
+
+      # ---------- 详情（GET /object/{object_id}）—— 拿单个模型完整定义 ----------
+      detail:
+        description: 读取单个模型完整详情（含 attrList/relation_list/relation_groups/indexList/view）。契约未给（ExportObjectV2 是 POST 批量），后端 GET /object/:object_id 才是单模型详情。
+        method: GET
+        path: /object/{object_id}
+        params:
+          object_id:            { in: path, type: string, required: true, description: "模型 ID（如 OCEANBASE@EASYOPS）" }
+          ignoreAttrPermission: { in: query, type: boolean, description: "跳过字段级权限校验" }
+          withRelationProperty: { in: query, type: boolean, description: "关系附带其属性" }
+          moreMetadataAttr:     { in: query, type: string, description: "额外要返回的元数据属性 ID，逗号分隔" }
+        response:
+          type: object
+          description: "标准 wrapper，data 为完整 CmdbObject（见 import 的 body 描述）"
+          properties:
+            code: { type: integer }
+            data:
+              type: object
+              description: "完整模型定义（CmdbObject）"
+              additional_properties: true
+
+      # ---------- 删除（DELETE /object/{object_id}）—— 场景4 ----------
+      delete:
+        description: 删除模型。受保护(protected=true)模型不可删。query forceDelete=true 强删（慎用）。
+        method: DELETE
+        path: /object/{object_id}
+        params:
+          object_id:   { in: path, type: string, required: true, description: "模型 ID（如 OCEANBASE@EASYOPS）" }
+          forceDelete: { in: query, type: boolean, description: "是否强制删除，默认 false" }
+
+      # ---------- 导出（POST /v2/object_export）—— 批量取完整模型定义 ----------
+      export:
+        description: 按 ID 批量导出完整模型定义（CmdbObject[]，含 attrList/relation_list 等）。可作 import 的反操作：导出→改→导回。
+        method: POST
+        path: /v2/object_export
+        body:
+          type: object
+          required: [objectIds]
+          description: "导出请求"
+          properties:
+            objectIds:
+              type: array
+              items: { type: string }
+              description: "模型 ID 列表（如 [OCEANBASE@EASYOPS]）"
+        response:
+          type: object
+          properties:
+            code: { type: integer }
+            data:
+              type: array
+              description: "完整模型定义列表（CmdbObject[]）"
+              items: { type: object, additional_properties: true }
+
+      # ---------- 导入预检（POST /v2/object_import_check）—— 建模前 dry-run ----------
+      import_check:
+        description: 导入预检（dry-run）。校验模型定义但不落库；返回逐模型/逐属性/逐关系的校验结果（code=0 成功）。建模型前先跑它看约束是否满足。ignore_dst_relation 默认 true（不校验对端模型存在性）。
+        method: POST
+        path: /v2/object_import_check
+        body:
+          type: object
+          required: [object_list]
+          description: "导入预检请求（结构同 import，详见 import 的 object_list 描述）"
+          properties:
+            object_list:
+              type: array
+              description: "模型列表（CmdbObject[]，结构见 import.object_list）"
+              items: { type: object, additional_properties: true }
+            ignore_dst_relation: { type: boolean, description: "忽略对端关系不存在错误，默认 true" }
+        response: { type: object, description: "{ code, data: { import_result: ImportResult[] } }，每项含逐属性/关系校验 code/message", additional_properties: true }
+
+      # ---------- 导入（POST /v2/object_import）—— 场景2/3：建模型 + 加属性（声明式 upsert） ----------
+      import:
+        description: 声明式导入模型（upsert：存在则更新，不存在则建）。一次定义整个模型——属性(attrList)、关系(relation_list)、关系分组(relation_groups)、索引(indexList)、视图(view)。新建模型、加属性、改关系都用它（场景2建 oceanbase、场景3加分类属性）。导入是幂等 upsert。ignore_dst_relation 默认 false（关系对端模型须已存在或在同批）。
+        method: POST
+        path: /v2/object_import
+        body:
+          type: object
+          required: [object_list]
+          description: "导入请求"
+          properties:
+            object_list:
+              type: array
+              description: "模型列表（CmdbObject[]）。每个元素是一个完整模型定义，结构如下。"
+              items:
+                type: object
+                required: [objectId, name, attrList]
+                description: "CmdbObject —— 一个 CMDB 模型的完整定义"
+                properties:
+                  # —— 基础信息 ——
+                  objectId:   { type: string, description: "模型 ID，约定形如 NAME@NAMESPACE（如 OCEANBASE@EASYOPS）。无正则，仅要求非空；命名空间在运行时处理。" }
+                  name:       { type: string, description: "模型名称（同命名空间内不可重复）" }
+                  icon:       { type: string, description: "图标 class（如 fa fa-database）" }
+                  category:   { type: string, description: "分类，点分多级（如『应用资源.数据库』）" }
+                  memo:       { type: string, description: "备注" }
+                  protected:  { type: boolean, description: "受保护(核心)模型，true 则不可删，默认 false" }
+                  system:     { type: string, description: "所属子产品(小产品 owner)" }
+                  notifyDenied: { type: boolean, description: "抑制变更通知，默认 false" }
+                  isAbstract: { type: boolean, description: "是否抽象(父)模型，默认 false" }
+                  parentObjectId:  { type: string, description: "（已弃用）单个父模型 ID" }
+                  parentObjectIds: { type: array, items: { type: string }, description: "父模型 ID 列表（nil 表示不更新继承）" }
+                  _version:   { type: integer, description: "模型 schema 版本号" }
+                  permissionDenied: { type: boolean, description: "跳过实例权限校验" }
+                  wordIndexDenied:  { type: boolean, description: "排除出全文检索" }
+                  # —— 权限白名单 ——
+                  updateAuthorizers: { type: array, items: { type: string }, description: "编辑权限白名单(用户/角色)" }
+                  deleteAuthorizers: { type: array, items: { type: string }, description: "删除权限白名单" }
+                  readAuthorizers:   { type: array, items: { type: string }, description: "只读权限白名单" }
+                  # —— 视图 view（google.protobuf.Struct，自由 JSON）——
+                  view:
+                    type: object
+                    additional_properties: true
+                    description: "模型视图/布局配置（自由结构）。常见字段：attr_category_order(属性分组顺序)、attr_order(属性顺序)、show_key(列表显示键)、visible(是否可见)"
+                    properties:
+                      attr_category_order: { type: array, items: { type: string }, description: "属性分组(分类)的展示顺序" }
+                      attr_order:           { type: array, items: { type: string }, description: "属性展示顺序（属性 id 列表）" }
+                      show_key:             { type: array, items: { type: string }, description: "实例列表显示的键属性 id" }
+                      visible:              { type: boolean, description: "模型是否在菜单可见" }
+                  # —— 索引 indexList ——
+                  indexList:
+                    type: array
+                    description: "索引定义列表"
+                    items:
+                      type: object
+                      properties:
+                        name:        { type: string, description: "索引名（自动生成的唯一 id）" }
+                        propertyIds: { type: array, items: { type: string }, description: "索引覆盖的属性 id 列表" }
+                        unique:      { type: boolean, description: "是否唯一索引" }
+                  # —— 关系分组 relation_groups ——
+                  relation_groups:
+                    type: array
+                    description: "关系分组定义"
+                    items:
+                      type: object
+                      required: [id, name]
+                      properties:
+                        id:        { type: string, pattern: '^[0-9a-zA-Z_]{1,32}$', description: "分组 ID（仅字母数字下划线，≤32）" }
+                        name:      { type: string, description: "分组名" }
+                        protected: { type: boolean }
+                  # —— 关系 relation_list ——
+                  relation_list:
+                    type: array
+                    description: "关系定义列表。一条关系有 left/right 两端，各指向一个模型。两端对端 id 不可相同；同批关系 id/名称不可重复。"
+                    items:
+                      type: object
+                      required: [left_object_id, left_id, left_description, right_object_id, right_id, right_description]
+                      properties:
+                        relation_id: { type: string, description: "关系 ID（不填则自动生成）" }
+                        name:        { type: string, description: "关系名" }
+                        protected:   { type: boolean }
+                        # —— 左端 ——
+                        left_object_id:        { type: string, description: "左端模型 ID" }
+                        left_id:               { type: string, pattern: '^[0-9a-zA-Z_]{1,32}$', description: "左端对端 ID（仅字母数字下划线，≤32）；与 right_id 不可相同" }
+                        left_description:      { type: string, description: "左端描述（如『运维负责人』）" }
+                        left_name:             { type: string, description: "左端名称" }
+                        left_min:              { type: integer, description: "左端最小基数，默认 0（≥0）" }
+                        left_max:              { type: integer, description: "左端最大基数，默认 -1（无限）" }
+                        left_groups:           { type: array, items: { type: string }, description: "左端所属关系分组 id" }
+                        left_tags:             { type: array, items: { type: string } }
+                        # —— 右端 ——
+                        right_object_id:       { type: string, description: "右端模型 ID" }
+                        right_id:              { type: string, pattern: '^[0-9a-zA-Z_]{1,32}$', description: "右端对端 ID；与 left_id 不可相同" }
+                        right_description:     { type: string, description: "右端描述" }
+                        right_name:            { type: string, description: "右端名称" }
+                        right_min:             { type: integer, description: "右端最小基数，默认 0" }
+                        right_max:             { type: integer, description: "右端最大基数，默认 -1（无限；如 1=一对一，-1=一对多）" }
+                        right_groups:          { type: array, items: { type: string } }
+                        right_tags:            { type: array, items: { type: string } }
+                        _version:              { type: integer }
+                  # —— 属性 attrList（模型设计核心）——
+                  attrList:
+                    type: array
+                    min_items: 1
+                    description: "属性列表（≥1）。每个属性是一个字段定义。注意：给已存在模型『新增』属性时，新属性 id 需加 `_` 前缀（如 `_regulatory_level`）以标识为新增。"
+                    items:
+                      type: object
+                      required: [id, name, value]
+                      description: "Property —— 一个模型属性(字段)"
+                      properties:
+                        id:          { type: string, description: "属性 ID（小驼峰或下划线；新增属性建议加 `_` 前缀）" }
+                        name:        { type: string, description: "属性中文名" }
+                        protected:   { type: boolean, description: "受保护(核心)属性，不可删/不可改约束" }
+                        unique:      { type: string, enum: ["true", "false"], description: "是否唯一，默认 false（字符串）" }
+                        readonly:    { type: string, enum: ["true", "false"], description: "是否只读，默认 false" }
+                        required:    { type: string, enum: ["true", "false"], description: "是否必填，默认 false" }
+                        tag:         { type: array, items: { type: string }, description: "属性分组(分类)标签，如 [『基本信息』]" }
+                        description: { type: string, description: "属性说明" }
+                        tips:        { type: string, description: "输入提示" }
+                        value:
+                          type: object
+                          required: [type]
+                          description: "属性值定义（类型/约束/默认值）"
+                          properties:
+                            type:
+                              type: string
+                              enum: [int, enum, str, arr, date, datetime, struct, structs, ip, bool, float, json, enums, attachment]
+                              description: "值类型。枚举类用 enum(单选)/enums(多选)；文本 str；整数 int；浮点 float；布尔 bool；日期 date/datetime；IP ip；JSON schema json；复合 struct/structs；数组 arr；附件 attachment。（FK/FKs 已弃用）"
+                            regex:
+                              type: object
+                              additional_properties: true
+                              description: "约束。type=enum/enums 时=枚举值数组(如 [get,post,put,delete])；type=json 时=JSON schema；其余=正则字符串。struct/structs 不设。"
+                            default_type:
+                              type: string
+                              enum: [value, function, auto-increment-id, series-number]
+                              description: "默认值来源。value=静态值；function=函数；auto-increment-id=自增 id；series-number=流水号"
+                            default:
+                              type: object
+                              additional_properties: true
+                              description: "默认值（与 default_type 配合）"
+                            mode:
+                              type: string
+                              description: "字符串模式（如 multiple-lines 多行、default）"
+                            prefix:
+                              type: string
+                              description: "流水号/自增 id 前缀（default_type=series-number/auto-increment-id 时必填）"
+                            start_value:
+                              type: integer
+                              description: "自增/流水号起始值"
+                            series_number_length:
+                              type: integer
+                              description: "流水号固定长度"
+                            struct_define:
+                              type: array
+                              description: "复合类型字段定义（type=struct/structs 时必填）"
+                              items:
+                                type: object
+                                properties:
+                                  id:    { type: string }
+                                  name:  { type: string }
+                                  type:  { type: string, enum: [int, enum, str, arr, date, datetime, ip, bool, float, json, enums], description: "子字段类型（无 struct/structs/FK）" }
+                                  regex: { type: object, additional_properties: true, description: "子字段约束（enum 时为枚举值数组）" }
+            ignore_dst_relation: { type: boolean, description: "忽略对端关系不存在错误，默认 false（即关系对端模型须已存在或在本批内）。建带新关系的模型时建议同批导入对端模型，或临时置 true。" }
+        response:
+          type: object
+          description: "标准 wrapper。data.import_result 为逐模型导入结果。code=0 成功；非 0 的逐项给出失败约束。"
+          properties:
+            code: { type: integer }
+            data:
+              type: object
+              properties:
+                import_result:
+                  type: array
+                  description: "逐模型导入结果（ImportResult）"
+                  items:
+                    type: object
+                    properties:
+                      objectId:  { type: string }
+                      name:      { type: string }
+                      is_create: { type: boolean, description: "true=本次新建，false=更新已有" }
+                      code:      { type: integer, description: "0=该模型整体成功" }
+                      message:   { type: string }
+                      info_result:          { type: array, description: "基础信息导入结果", items: { type: object, additional_properties: true } }
+                      attr_list_result:     { type: array, description: "逐属性结果 {id,name,code,message}", items: { type: object, additional_properties: true } }
+                      relation_list_result: { type: array, description: "逐关系结果", items: { type: object, additional_properties: true } }
+                      index_list_result:    { type: array, description: "逐索引结果", items: { type: object, additional_properties: true } }
+
+  # ---------------------------------------------------------------------------
+  # 资源 2：object_attr —— 模型属性(字段)的细粒度 CRUD（import 的补充）
+  # 路径 /object/{object_id}/attr[/{attr_id}]，两个 path 参数。
+  # ---------------------------------------------------------------------------
+  object_attr:
+    description: 模型属性(字段)的细粒度 CRUD。新建/改单个属性除走 object_model.import(声明式 upsert) 外，也可走这里（POST/PUT/DELETE /object/:id/attr）。属性 value 结构同 object_model.import.object_list[].attrList[].value。
+    path: ""
+    operations:
+      create:
+        description: 给模型新增一个属性。body 为单个 Property（id/name/value 必填），结构同 import 里的 attrList 项。
+        method: POST
+        path: /object/{object_id}/attr
+        params:
+          object_id: { in: path, type: string, required: true, description: "目标模型 ID" }
+        body:
+          type: object
+          required: [id, name, value]
+          description: "新属性定义（Property）。id/name/value 必填；value.type 决定类型（见 object_model.import 的 value 描述）。"
+          additional_properties: true
+      read:
+        description: 读取模型的单个属性。
+        method: GET
+        path: /object/{object_id}/attr/{attr_id}
+        params:
+          object_id: { in: path, type: string, required: true, description: "模型 ID" }
+          attr_id:   { in: path, type: string, required: true, description: "属性 ID" }
+      update:
+        description: 更新模型的单个属性。
+        method: PUT
+        path: /object/{object_id}/attr/{attr_id}
+        params:
+          object_id: { in: path, type: string, required: true, description: "模型 ID" }
+          attr_id:   { in: path, type: string, required: true, description: "属性 ID" }
+        body:
+          type: object
+          description: "属性更新内容（Property，结构同 create body）"
+          additional_properties: true
+      delete:
+        description: 删除模型的单个属性。force_delete=true 强删。
+        method: DELETE
+        path: /object/{object_id}/attr/{attr_id}
+        params:
+          object_id:    { in: path, type: string, required: true, description: "模型 ID" }
+          attr_id:      { in: path, type: string, required: true, description: "属性 ID" }
+          force_delete: { in: query, type: boolean, description: "强制删除，默认 false" }
+
+  # ---------------------------------------------------------------------------
+  # 资源 3：object_relation —— 模型关系(关联)的细粒度 CRUD + 跨模型关系链路发现
+  # 路径 /object_relation[/{relation_id}]；链路发现 /object_relation_related_key（disparate）。
+  # ---------------------------------------------------------------------------
+  object_relation:
+    description: 模型关系(关联)的细粒度 CRUD + 跨模型关系链路发现。建/改关系除走 object_model.import 外也可走这里；related_key 发现两模型间的关系路径（返回 reverseQueryKey/正向键，配合 object_instance.search 的多层 jsonPath 穿越链路）。一条关系连接两个模型(left/right)，各持对端 id 与基数(min/max)。
+    path: ""
+    operations:
+      list:
+        description: 列出所有关系（Relation[]）。
+        method: GET
+        path: /object_relation
+        response:
+          type: object
+          description: "{ code, data: Relation[] }"
+          properties:
+            code: { type: integer }
+            data: { type: array, items: { type: object, additional_properties: true } }
+      create:
+        description: 新建一条关系。body 为 Relation，需含两端 object_id/id/description（结构同 import 里的 relation_list 项）。
+        method: POST
+        path: /object_relation
+        body:
+          type: object
+          required: [left_object_id, left_id, left_description, right_object_id, right_id, right_description]
+          description: "关系定义（Relation）。结构同 object_model.import.object_list[].relation_list[]。"
+          additional_properties: true
+      read:
+        description: 读取单条关系。
+        method: GET
+        path: /object_relation/{relation_id}
+        params:
+          relation_id: { in: path, type: string, required: true, description: "关系 ID" }
+      update:
+        description: 更新一条关系。
+        method: PUT
+        path: /object_relation/{relation_id}
+        params:
+          relation_id: { in: path, type: string, required: true, description: "关系 ID" }
+        body:
+          type: object
+          description: "关系更新内容（Relation）"
+          additional_properties: true
+      delete:
+        description: 删除一条关系。force_delete=true 强删。
+        method: DELETE
+        path: /object_relation/{relation_id}
+        params:
+          relation_id:  { in: path, type: string, required: true, description: "关系 ID" }
+          force_delete: { in: query, type: boolean, description: "强制删除，默认 false" }
+
+      # ---------- 跨模型关系链路发现（GET /object_relation_related_key）----------
+      # 配合 object_instance.search 多层 jsonPath：先本接口发现两模型间的链路键，再 search 穿越。
+      # 源码 object_path/（route.go:16 / object_path_service.go:173 / logic.go:436-469）。
+      related_key:
+        description: 发现两个模型间的关系路径（多模型链路发现）。给定 src/dst 模型，返回所有可达路径（实测最多 100 条），每条含 label（人读链路名）、reverseQueryKey（dst→src 反向键，直接可喂【dst 模型】的 search fields/query）、path（节点-边序列，边的 relation_side_id 序列拼成【src→dst 正向键】，喂【src 模型】的 search）。例 related_key(HOST, APP_SYSTEM@ONEMODEL) → reverseQueryKey=serviceSets.hosts（APP_SYSTEM→HOST，APP_SYSTEM search 用），正向键=serviceSets.system（HOST→APP_SYSTEM，HOST search 用 serviceSets.system.name 取系统名，实测返回 "Easyops"）。
+        method: GET
+        path: /object_relation_related_key
+        params:
+          src_object_id:     { in: query, type: string, required: true, description: "起点模型 id（如 HOST）" }
+          dst_object_id:     { in: query, type: string, required: true, description: "终点模型 id（如 APP_SYSTEM@ONEMODEL）" }
+          show_inherit_node: { in: query, type: boolean, description: "是否展示继承关系节点，默认 false" }
+          with_cycle:        { in: query, type: boolean, description: "是否允许环路路径，默认 false" }
+          white_list:        { in: query, type: string, description: "白名单（模型/关系，逗号分隔），只走这些" }
+          black_list:        { in: query, type: string, description: "黑名单（模型/关系，逗号分隔），跳过这些" }
+        response:
+          type: object
+          description: "标准 wrapper：{ code, data: ObjectRelationRelatedKey[] }。data 为 src→dst 的所有可达路径。"
+          properties:
+            code: { type: integer }
+            data:
+              type: array
+              description: "可达关系路径列表（实测最多 100 条；按需选最短/最贴切的，reverseQueryKey 段数≈跳数）"
+              items:
+                type: object
+                properties:
+                  id:               { type: string, description: "路径 hash id" }
+                  label:            { type: string, description: "人读链路名，如『主机-服务集(服务集)-应用系统(系统)』" }
+                  reverseQueryKey:  { type: string, description: "dst→src 反向路径键（点分 Out.Id 链）。直接可用于【dst 模型】search 的 fields/query。如 serviceSets.hosts" }
+                  path:
+                    type: array
+                    description: "节点-边交替序列。边的 relation_side_id 按序拼接 = src→dst 正向键，用于【src 模型】search。"
+                    items: { type: object, additional_properties: true }
+
+  # ---------------------------------------------------------------------------
+  # 资源 4：object_instance —— CMDB 实例层（与模型层同处一个 yaml 集中调用）
+  # 三端点 disparate 路由（前缀不同：search 带 /v3，import/delete 不带），故 resource.path
+  # 留空，每个 operation 持完整路径：
+  #   search  POST   /v3/object/{object_id}/instance/_search   契约 PostSearchV3WithAdmin
+  #   import  POST      /object/{object_id}/instance/_import    契约 ImportInstance（批量 upsert）
+  #   delete  DELETE    /object/{object_id}/instance_batch      契约 DeleteInstanceBatch
+  #     ⚠️ 批量删路径契约笔误写成 /instance/_batch，后端实际是 /instance_batch（instance_extend/route.go:11）
+  # 数据来源：契约 data/api-doc/cmdb-instance.json（3 个有效契约；剔除 csv/json/excel 文件上传噪声）
+  #          + 后端 cmdb_service/instance(_extend)（SearchV3/InstanceDatas 结构体 + 校验权威）
+  # CRUD 映射：R=search / C+U=import(upsert，keys 判增改) / D=delete(_batch)
+  # ---------------------------------------------------------------------------
+  object_instance:
+    description: CMDB 对象实例（某模型下的具体数据记录）。CRUD 全走批量语义——search 查、import 批量建/改（upsert）、delete 批量删。object_id 路径参数指向所属模型。
+    path: ""
+    operations:
+      # ---------- 搜索（POST /v3/object/{object_id}/instance/_search）—— 场景2 ----------
+      search:
+        description: 按条件搜索实例（MongoDB 风格 query），支持翻页。fields 必填（返回属性 id 列表，留空报 100000「fields is required but not set」）。实例总数看 data.total（场景「有几个」读这个，不是 count）。
+        method: POST
+        path: /v3/object/{object_id}/instance/_search
+        params:
+          object_id: { in: path, type: string, required: true, description: "所属模型 ID（如 TESTWWH@EASYOPS）" }
+        body:
+          type: object
+          required: [fields]
+          description: "实例搜索请求（V3）。fields 必填；page/page_size 选填有默认（1/30，page_size 上限 3000）。"
+          properties:
+            fields:    { type: array, items: { type: string }, description: "返回字段（属性 id），必填。支持多层关系 jsonPath：A.B.C.field 沿关系链取对端字段（实测 3 层通，如 HOST.serviceSets.name 经 TESTWWH→HOST→服务集 取服务集名）；也可用命名跨级关系 rel_xxx（对象上预定义的 TransHierRelation，持 QueryPath，V3 专属）。" }
+            page:      { type: integer, description: "页码（从 1 起，默认 1，≥1）" }
+            page_size: { type: integer, description: "每页条数（默认 30，上限 3000）" }
+            sort:      { type: array, description: "排序；留空默认按 instanceId 降序。order: 1=升 / -1=降 / 2,-2=自然序", items: { type: object, properties: { key: { type: string, description: "属性 id" }, order: { type: integer, enum: [-1, 1, -2, 2] } } } }
+            query:
+              type: object
+              additional_properties: true
+              description: "MongoDB 风格查询：$and/$or 组合，字段名做 key，操作符 $eq/$like/$nlike/$regex/$in/$gte/$lte/$gt/$lt/$exists 等（全集见 cmdb_service/internal/cmdb/constant/other.go）。支持沿关系链过滤——key 用多层关系路径 A.B.C.field 按对端实例属性过滤根实例（实测 HOST.serviceSets.name={$eq:dev} 命中 7 条），或用 rel_xxx.field（后端重写成完整 QueryPath）。"
+              example: { "HOST.serviceSets.name": { "$eq": "dev" } }
+            fields_relation_filter:
+              type: object
+              additional_properties: true
+              description: "过滤【返回的关系对端实例】（透传 easycore fields_relation_filter）——缩小每条实例带出的对端集合，不收缩根实例。key=关系 out_id（支持多层如 cluster.host，或 cluster.@ 表关系边属性）；value=对端 filter（语法同 query：$eq/$in/$or...）。例 {cluster:{$or:[{name:'aaa'},{ip:'1'}]}}。若要按对端属性收缩【根实例】，用 query 的关系路径（见上），不用本字段。"
+            limitations:
+              type: array
+              description: "单独为某条关系指定 limit/sort（优先级高于 relation_limit）。field 支持多级关系（如 owner, owner.app）。"
+              items:
+                type: object
+                properties:
+                  field: { type: string, description: "关系字段（关系 id / Out.Id），支持多级如 owner.app" }
+                  limit: { type: integer, description: "该关系返回数量上限，0=不限" }
+                  sort:  { type: array, items: { type: object, properties: { key: { type: string }, order: { type: integer, enum: [-1, 1, -2, 2] } } } }
+            only_my_instance:            { type: boolean, description: "true 只取与我相关实例，默认 false" }
+            relation_limit:              { type: integer, description: "fields 带出关系的数量上限，0=不限" }
+            ignore_missing_field_error:  { type: boolean, description: "fields 含不存在字段时不报错" }
+        response:
+          type: object
+          description: "标准 wrapper：{ code, message, data: { list, total, page, page_size } }"
+          properties:
+            code: { type: integer }
+            data:
+              type: object
+              properties:
+                list:
+                  type: array
+                  description: "实例列表（每条是属性 id→值 的 map，含 instanceId/name 等）"
+                  items:
+                    type: object
+                    additional_properties: true
+                    properties:
+                      instanceId: { type: string, description: "实例 ID（13 位 [0-9a-z]）" }
+                      name:       { type: string }
+                total: { type: integer, description: "实例总数（场景『有几个』读 total，非 count）" }
+        pagination:
+          type: offset
+          page_in: body
+          items_path: data.list
+          page_param: page
+          size_param: page_size
+          size: 20
+
+      # ---------- 批量建/改（POST /object/{object_id}/instance/_import）—— 场景1建 + 场景3改 ----------
+      import:
+        description: 批量建/改实例（upsert）。keys=联合唯一键的属性 id 列表（仅普通属性，不支持 struct/关系字段）；后端按 keys+datas 组 query——匹配到则 update、没匹配则 insert。datas 每条是一条实例（字段名=模型属性 id；关系字段名=该关系 view 的 Out.Id，值可传对端 instanceId 字符串/对象/数组，传完整对象会嵌套创建对端实例，除非 disableNestedCreateInstance=true）。新建 N 实例、批量补属性都用它。
+        method: POST
+        path: /object/{object_id}/instance/_import
+        params:
+          object_id: { in: path, type: string, required: true, description: "所属模型 ID（如 TESTWWH@EASYOPS）" }
+        body:
+          type: object
+          required: [keys, datas]
+          description: "批量导入请求（InstanceDatas）"
+          properties:
+            keys:
+              type: array
+              items: { type: string }
+              description: "联合唯一键的属性 id 列表（仅普通属性）。后端用它组 query 判 insert/update：命中模型唯一键则 $in 单字段查，否则多字段 $or 联合查。场景1用 [name] 或 [ip]；场景3改用 [instanceId]。"
+            datas:
+              type: array
+              description: "实例数据列表。每条字段名=模型属性 id；可带 instanceId（13 位 [0-9a-z]）指定主键，不填后端按微秒时间戳自动生成。关系字段值见本 operation description。"
+              items:
+                type: object
+                additional_properties: true
+                example: { "name": "testwwh-01", "ip": "192.168.1.1", "owner": "5a377b5dc86a5" }
+            importMetadata:              { type: boolean, description: "是否允许写 metadata(ctime/creator/...)；true 时自动填 mtime/modifier，默认 false" }
+            ignoreReadonlyFields:        { type: boolean, description: "更新时是否忽略只读字段约束，默认 false" }
+            disableNestedCreateInstance: { type: boolean, description: "禁止通过关系字段嵌套创建对端实例（true 时关系字段只能引用已存在实例），默认 false" }
+            addToSetFields:              { type: array, items: { type: string }, description: "以 $addToSet 去重追加方式更新的数组字段名列表" }
+        response:
+          type: object
+          description: "标准 wrapper：{ code, data: { insert_count, update_count, failed_count, data:[失败明细] } }。code=0 仅表请求受理，逐条成败看 data 各 count。"
+          properties:
+            code: { type: integer }
+            data:
+              type: object
+              properties:
+                insert_count: { type: integer, description: "新建数" }
+                update_count: { type: integer, description: "更新数" }
+                failed_count: { type: integer, description: "失败数" }
+                data:
+                  type: array
+                  description: "失败明细（每项 {code, error, data}）"
+                  items: { type: object, additional_properties: true }
+
+      # ---------- 批量删（DELETE /object/{object_id}/instance_batch）—— 场景4 ----------
+      delete:
+        description: 批量删除实例。instanceIds 用分号分隔（如 a;b;c）；传单个 id 即删单个。⚠️真实路径是 /object/{object_id}/instance_batch（无斜杠），契约笔误写成 /instance/_batch。返回 data.deleteFailedInstances 为删除失败的实例。按条件删（如 ip 范围）：先 search 拿 instanceIds，再本接口。
+        method: DELETE
+        path: /object/{object_id}/instance_batch
+        params:
+          object_id:   { in: path, type: string, required: true, description: "所属模型 ID（如 TESTWWH@EASYOPS）" }
+          instanceIds: { in: query, type: string, required: true, description: "实例 ID 列表，分号分隔（如 5ab9f10a6ef88;5abb0dca9971d）；单个 id 即删单个" }
+        response:
+          type: object
+          description: "标准 wrapper：{ code, data: { deleteFailedInstances: [...] } }。deleteFailedInstances 为空=全删成功。"
+          properties:
+            code: { type: integer }
+            data:
+              type: object
+              properties:
+                deleteFailedInstances:
+                  type: array
+                  description: "删除失败的实例（每项 {instanceId, _object_id, name}）"
+                  items: { type: object, additional_properties: true }

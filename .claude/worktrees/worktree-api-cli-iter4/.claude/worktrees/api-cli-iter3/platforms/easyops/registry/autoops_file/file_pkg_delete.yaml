@@ -1,0 +1,45 @@
+name: file_pkg_delete
+module: autoops_file
+method: DELETE
+path: /package/package/{packageId}
+gateway_path: /next/api/gateway/artifact.pkgservice.DeletePackage/package/package/{packageId}
+service: logic.artifact
+side_effect: delete
+path_source: backend_contract
+path_confidence: high
+tags:
+- 文件分发
+- 文件包
+- 删除
+summary: 删除文件包
+description: 删除指定文件包（连带其下所有版本，不可恢复）。包内已有版本时可能需 force=true 强制清理版本后删除。
+request:
+  required:
+  - packageId
+  properties:
+    packageId:
+      type: string
+      desc: 文件包 ID（path 参数）
+    force:
+      type: bool
+      desc: 是否强制清理版本并删除
+      _source: contract
+outputs: {}
+requires:
+- 删除文件包会连带删除其下所有版本，操作不可恢复
+rollback: null
+examples: []
+confidence:
+  request: medium
+  module: high
+  outputs: low
+  tags: high
+  summary: high
+endpoint:
+  contract_ref: logic.artifact|DELETE|/package/package/{packageId}
+  mode: easyops_internal
+source:
+  openapi_file: AutoOps-文件分发管理-openapi.yaml
+  openapi_hash: edf3872fae57ab16180ccec0257fe32c2d0de09a4a639719250779d5ae96e426
+  recorded_at: '2026-07-29T16:20:10'
+registered_at: '2026-07-29T16:49:25.523907'

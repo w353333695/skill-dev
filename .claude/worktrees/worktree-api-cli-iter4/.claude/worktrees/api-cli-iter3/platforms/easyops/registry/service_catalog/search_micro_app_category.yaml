@@ -1,0 +1,54 @@
+name: search_micro_app_category
+module: service_catalog
+method: POST
+path: /v3/object/MICRO_APP_CATEGORY@EASYOPS/instance/_search
+gateway_path: /next/api/gateway/cmdb.instance.PostSearchV3/v3/object/MICRO_APP_CATEGORY@EASYOPS/instance/_search
+service: cmdb.instance.PostSearchV3
+side_effect: read
+path_source: gateway_strip
+path_confidence: medium
+tags:
+- 微应用
+- 分类
+- category
+- CMDB
+- 查询
+summary: 查询微应用分类(门户卡片分组)
+description: 检索微应用分类实例（id/name/icon/order/locales 等），用于门户首页卡片分组展示。
+request:
+  required: []
+  properties:
+    page:
+      type: number
+      desc: ''
+    pageSize:
+      type: number
+      desc: ''
+    fields:
+      type: array
+      desc: ''
+outputs:
+  list_full:
+    jsonpath: $.data.list
+    desc: 微应用分类实例列表
+  list_ids:
+    jsonpath: $.data.list
+    desc: 列表项id集合(配合 ${s.list_full.instanceId} 投影)
+requires: []
+rollback: null
+examples: []
+confidence:
+  module: medium
+  outputs: low
+  requires: high
+  rollback: high
+  summary: medium
+  tags: medium
+endpoint:
+  contract_ref: ''
+  mode: easyops_gateway
+source:
+  openapi_file: ITSM-登录与功能入口-openapi.yaml
+  openapi_hash: ec5d99f1d3772798ed04de980321a11cbf0d5a286894ac6da4acaea855a5904a
+  recorded_at: '2026-07-09T14:05:09'
+registered_at: '2026-07-22T10:34:10.040270'

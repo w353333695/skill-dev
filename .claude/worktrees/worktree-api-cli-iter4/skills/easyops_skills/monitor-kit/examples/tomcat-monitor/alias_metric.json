@@ -1,0 +1,194 @@
+[
+    {
+        "dataType": "double",
+        "description": "Tomcat服务状态，1=正常，0=异常",
+        "dims": [
+            {"dimDisplayName": "IP地址", "dimName": "ip", "isArray": false, "originDimName": "ip"},
+            {"dimDisplayName": "安装路径", "dimName": "installPath", "isArray": false, "originDimName": "installPath"}
+        ],
+        "displayName": "服务状态",
+        "expression": "",
+        "metricSet": ["默认指标集", "JVM指标"],
+        "name": "status",
+        "objectId": "TOMCAT@ONEMODEL",
+        "originalMetrics": ["status"],
+        "type": "normal",
+        "unit": ""
+    },
+    {
+        "dataType": "double",
+        "description": "JVM空闲内存",
+        "dims": [
+            {"dimDisplayName": "IP地址", "dimName": "ip", "isArray": false, "originDimName": "ip"},
+            {"dimDisplayName": "安装路径", "dimName": "installPath", "isArray": false, "originDimName": "installPath"}
+        ],
+        "displayName": "JVM空闲内存",
+        "expression": "",
+        "metricSet": ["JVM指标"],
+        "name": "jvm_free_memory_mb",
+        "objectId": "TOMCAT@ONEMODEL",
+        "originalMetrics": ["jvm_free_memory_mb"],
+        "type": "normal",
+        "unit": "MB"
+    },
+    {
+        "dataType": "double",
+        "description": "JVM已用内存",
+        "dims": [
+            {"dimDisplayName": "IP地址", "dimName": "ip", "isArray": false, "originDimName": "ip"},
+            {"dimDisplayName": "安装路径", "dimName": "installPath", "isArray": false, "originDimName": "installPath"}
+        ],
+        "displayName": "JVM已用内存",
+        "expression": "",
+        "metricSet": ["JVM指标"],
+        "name": "jvm_used_memory_mb",
+        "objectId": "TOMCAT@ONEMODEL",
+        "originalMetrics": ["jvm_used_memory_mb"],
+        "type": "normal",
+        "unit": "MB"
+    },
+    {
+        "dataType": "double",
+        "description": "JVM最大内存",
+        "dims": [
+            {"dimDisplayName": "IP地址", "dimName": "ip", "isArray": false, "originDimName": "ip"},
+            {"dimDisplayName": "安装路径", "dimName": "installPath", "isArray": false, "originDimName": "installPath"}
+        ],
+        "displayName": "JVM最大内存",
+        "expression": "",
+        "metricSet": ["JVM指标"],
+        "name": "jvm_max_memory_mb",
+        "objectId": "TOMCAT@ONEMODEL",
+        "originalMetrics": ["jvm_max_memory_mb"],
+        "type": "normal",
+        "unit": "MB"
+    },
+    {
+        "dataType": "double",
+        "description": "JVM内存使用率",
+        "dims": [
+            {"dimDisplayName": "IP地址", "dimName": "ip", "isArray": false, "originDimName": "ip"},
+            {"dimDisplayName": "安装路径", "dimName": "installPath", "isArray": false, "originDimName": "installPath"}
+        ],
+        "displayName": "JVM内存使用率",
+        "expression": "",
+        "metricSet": ["默认指标集", "JVM指标"],
+        "name": "jvm_memory_usage_pct",
+        "objectId": "TOMCAT@ONEMODEL",
+        "originalMetrics": ["jvm_memory_usage_pct"],
+        "type": "normal",
+        "unit": "%"
+    },
+    {
+        "dataType": "double",
+        "description": "最大线程数",
+        "dims": [
+            {"dimDisplayName": "IP地址", "dimName": "ip", "isArray": false, "originDimName": "ip"},
+            {"dimDisplayName": "安装路径", "dimName": "installPath", "isArray": false, "originDimName": "installPath"}
+        ],
+        "displayName": "最大线程数",
+        "expression": "",
+        "metricSet": ["线程指标"],
+        "name": "max_threads",
+        "objectId": "TOMCAT@ONEMODEL",
+        "originalMetrics": ["max_threads"],
+        "type": "normal",
+        "unit": ""
+    },
+    {
+        "dataType": "double",
+        "description": "当前线程数",
+        "dims": [
+            {"dimDisplayName": "IP地址", "dimName": "ip", "isArray": false, "originDimName": "ip"},
+            {"dimDisplayName": "安装路径", "dimName": "installPath", "isArray": false, "originDimName": "installPath"}
+        ],
+        "displayName": "当前线程数",
+        "expression": "",
+        "metricSet": ["线程指标"],
+        "name": "current_threads",
+        "objectId": "TOMCAT@ONEMODEL",
+        "originalMetrics": ["current_threads"],
+        "type": "normal",
+        "unit": ""
+    },
+    {
+        "dataType": "double",
+        "description": "繁忙线程数",
+        "dims": [
+            {"dimDisplayName": "IP地址", "dimName": "ip", "isArray": false, "originDimName": "ip"},
+            {"dimDisplayName": "安装路径", "dimName": "installPath", "isArray": false, "originDimName": "installPath"}
+        ],
+        "displayName": "繁忙线程数",
+        "expression": "",
+        "metricSet": ["默认指标集", "线程指标"],
+        "name": "busy_threads",
+        "objectId": "TOMCAT@ONEMODEL",
+        "originalMetrics": ["busy_threads"],
+        "type": "normal",
+        "unit": ""
+    },
+    {
+        "dataType": "double",
+        "description": "线程使用率",
+        "dims": [
+            {"dimDisplayName": "IP地址", "dimName": "ip", "isArray": false, "originDimName": "ip"},
+            {"dimDisplayName": "安装路径", "dimName": "installPath", "isArray": false, "originDimName": "installPath"}
+        ],
+        "displayName": "线程使用率",
+        "expression": "",
+        "metricSet": ["默认指标集", "线程指标"],
+        "name": "thread_usage_pct",
+        "objectId": "TOMCAT@ONEMODEL",
+        "originalMetrics": ["thread_usage_pct"],
+        "type": "normal",
+        "unit": "%"
+    },
+    {
+        "dataType": "double",
+        "description": "请求总数",
+        "dims": [
+            {"dimDisplayName": "IP地址", "dimName": "ip", "isArray": false, "originDimName": "ip"},
+            {"dimDisplayName": "安装路径", "dimName": "installPath", "isArray": false, "originDimName": "installPath"}
+        ],
+        "displayName": "请求总数",
+        "expression": "",
+        "metricSet": ["请求指标"],
+        "name": "request_count",
+        "objectId": "TOMCAT@ONEMODEL",
+        "originalMetrics": ["request_count"],
+        "type": "normal",
+        "unit": ""
+    },
+    {
+        "dataType": "double",
+        "description": "错误总数",
+        "dims": [
+            {"dimDisplayName": "IP地址", "dimName": "ip", "isArray": false, "originDimName": "ip"},
+            {"dimDisplayName": "安装路径", "dimName": "installPath", "isArray": false, "originDimName": "installPath"}
+        ],
+        "displayName": "错误总数",
+        "expression": "",
+        "metricSet": ["默认指标集", "请求指标"],
+        "name": "error_count",
+        "objectId": "TOMCAT@ONEMODEL",
+        "originalMetrics": ["error_count"],
+        "type": "normal",
+        "unit": ""
+    },
+    {
+        "dataType": "double",
+        "description": "最大处理时间",
+        "dims": [
+            {"dimDisplayName": "IP地址", "dimName": "ip", "isArray": false, "originDimName": "ip"},
+            {"dimDisplayName": "安装路径", "dimName": "installPath", "isArray": false, "originDimName": "installPath"}
+        ],
+        "displayName": "最大处理时间",
+        "expression": "",
+        "metricSet": ["请求指标"],
+        "name": "max_processing_time_ms",
+        "objectId": "TOMCAT@ONEMODEL",
+        "originalMetrics": ["max_processing_time_ms"],
+        "type": "normal",
+        "unit": "ms"
+    }
+]

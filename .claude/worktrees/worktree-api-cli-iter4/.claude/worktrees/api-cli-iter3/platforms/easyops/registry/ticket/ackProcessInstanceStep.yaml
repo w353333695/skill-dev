@@ -1,0 +1,45 @@
+name: ackProcessInstanceStep
+module: ticket
+method: PUT
+path: /api/flowable_service/v1/process_instance_step_ack/{stepId}
+gateway_path: /next/api/gateway/flowable_service.process_instance.AckProcessInstanceStep/api/flowable_service/v1/process_instance_step_ack/{stepId}
+service: logic.flowable_service
+side_effect: update
+path_source: gateway_strip
+path_confidence: medium
+tags:
+- 工单
+- 步骤
+- 确认
+- ack
+- 已读
+summary: 确认工单步骤标记已读
+description: 进入工单任务详情时自动确认（ack）该步骤，标记已读。
+request:
+  required: []
+  properties:
+    stepId:
+      type: instance_id
+      desc: 任务ID
+      _source: contract
+outputs: {}
+requires:
+- stepId 须为已存在的工单步骤 ID（可来自 getTaskDetail 的任务节点）
+rollback: null
+examples: []
+confidence:
+  module: high
+  outputs: low
+  requires: medium
+  rollback: high
+  summary: high
+  tags: high
+  request: medium
+endpoint:
+  contract_ref: logic.flowable_service|PUT|/api/flowable_service/v1/process_instance_step_ack/{stepId}
+  mode: easyops_gateway
+source:
+  openapi_file: ITSM-工单发起-openapi.yaml
+  openapi_hash: 1ca484b7e487f62a1c488f8e8b29d32e77b51750fc68f94a51a775d93f09be61
+  recorded_at: '2026-07-13T14:47:07'
+registered_at: '2026-07-22T10:34:09.642601'

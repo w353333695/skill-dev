@@ -1,0 +1,50 @@
+name: cmdb_search_service
+module: cmdb_portal
+method: POST
+path: /v3/object/SERVICE@ONEMODEL/instance/_search
+gateway_path: /next/api/gateway/logic.cmdb.service/v3/object/SERVICE@ONEMODEL/instance/_search
+service: logic.cmdb.service
+side_effect: read
+path_source: gateway_strip
+path_confidence: medium
+tags:
+- CMDB
+- 服务
+- 搜索
+summary: 搜索服务实例(SERVICE@ONEMODEL)
+description: 检索 `SERVICE@ONEMODEL`（服务）模型实例。
+request:
+  required: []
+  properties:
+    fields:
+      type: array
+      desc: ''
+    page:
+      type: number
+      desc: ''
+    pageSize:
+      type: number
+      desc: ''
+outputs:
+  list_full:
+    jsonpath: $.data.list
+    desc: 服务实例列表
+requires: []
+rollback: null
+examples: []
+confidence:
+  request: high
+  module: high
+  outputs: high
+  tags: high
+  summary: high
+  requires: medium
+  rollback: medium
+endpoint:
+  contract_ref: ''
+  mode: easyops_gateway
+source:
+  openapi_file: CMDB-登录与功能入口-openapi.yaml
+  openapi_hash: 03368b8fed81615f7835509bbeb28ad4bc3b44520f5e837fe3383ab4c85a3bbf
+  recorded_at: '2026-07-23T09:55:56.715723'
+registered_at: '2026-07-23T14:28:59.247623'

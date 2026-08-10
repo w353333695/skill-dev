@@ -1,0 +1,623 @@
+openapi: 3.0.3
+info:
+  title: EasyOps AutoOps — 工具库管理 API
+  description: |
+    录制自 EasyOps 平台（http://172.30.0.90/）「AutoOps 工具库管理」流程（`/next/tool/management`）。
+    覆盖工具（运维脚本）全生命周期：列表查询、全局配置（基础设置/高危命令/执行时间窗口）、
+    新建/编辑/调试/执行、导入导出、版本与审批、删除，以及任务历史。
+
+    - 流程指引见同目录 `AutoOps-工具库管理-操作指引.md`
+    - 通用响应包装：`{ code, codeExplain, error, data }`（cmdb.instance 系列为 `{ code, error, message, data }`），`code === 0` 表示成功
+    - 工具库底层用 CMDB 模型存储：`_TOOL_LIB@EASYOPS`（lib 包/公共依赖，可被工具引用）、`_TOOLS_CONFIG_GLOBAL`（全局配置）、`_TOOL_HIGH_RISK_COMMAND@EASYOPS`（高危命令）、`_TOOLS_VARIABLES@EASYOPS`（变量）
+    - 工具业务接口命名式：`tool.basic.CreateTool`、`tool.execute.ExecuteTool`、`logic.tool_service/...`
+  version: "1.0.0"
+  contact:
+    name: 录制生成（browser-recorder）
+
+servers:
+  - url: http://172.30.0.90
+    description: EasyOps 测试环境
+
+tags:
+  - name: 工具列表与详情
+    description: 工具库列表查询、工具详情
+  - name: 工具全局配置
+    description: 各脚本类型的默认执行用户、超时时间等基础设置
+  - name: 高危命令管理
+    description: 高危命令识别规则（字符串/正则）的增删
+  - name: 执行时间窗口
+    description: 工具允许执行的时间段配置
+  - name: 工具创建与编辑
+    description: 新建工具、编辑工具
+  - name: 工具调试与执行
+    description: 工具调试（试运行）、正式执行
+  - name: 工具版本与审批
+    description: 工具版本管理、标记生产版本（审批）
+  - name: 工具导入导出
+    description: 工具版本导出、工具包导入
+  - name: 工具删除
+    description: 删除工具
+  - name: 任务历史
+    description: 工具执行任务记录查询
+
+paths:
+  # ============ 工具列表与详情 ============
+  /next/api/gateway/tool.basic.ListTool/tools:
+    get:
+      tags: [工具列表与详情]
+      summary: 查询工具列表
+      description: |
+        查询工具（运维脚本）列表，返回 `list`（工具数组）与 `total`（总数）。
+        支持按名称/分类/脚本类型/权限过滤与分页。这是「工具」业务实体的列表接口
+        （区别于 `_TOOL_LIB` 的 lib 包搜索，后者查的是工具可引用的公共依赖）。
+      operationId: tool_list
+      parameters:
+        - name: page
+          in: query
+          schema: { type: integer, example: 1 }
+          description: 页码
+        - name: pageSize
+          in: query
+          schema: { type: integer, example: 30 }
+          description: 页大小
+        - name: detail
+          in: query
+          schema: { type: boolean, example: false }
+          description: 是否返回详细信息
+        - name: plugin
+          in: query
+          schema: { type: boolean, example: false }
+          description: 是否返回插件
+        - name: toolId
+          in: query
+          schema: { type: string }
+          description: 工具 id，多个用逗号分隔
+        - name: category
+          in: query
+          schema: { type: string }
+          description: 工具分类
+        - name: name
+          in: query
+          schema: { type: string }
+          description: 工具名称（模糊匹配）
+      responses:
+        "200":
+          description: 工具列表（data 含 list/total/page/pageSize）
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AutoOpsResult"
+      x-relevant: true
+
+  /next/api/gateway/tool.basic.GetToolVersions/tools/{toolId}/versions:
+    get:
+      tags: [工具列表与详情]
+      summary: 查询工具版本列表
+      description: |
+        查询指定工具的版本列表，返回 `list`（版本数组）与 `total`（版本总数）。
+        支持按版本类型（开发/生产）、时间范围过滤与排序。用于工具版本管理、
+        回溯历史版本（配合 `tool_approval` 标记生产版本）。
+      operationId: tool_version_list
+      parameters:
+        - name: toolId
+          in: path
+          required: true
+          schema: { type: string }
+          description: 工具 id
+        - name: envType
+          in: query
+          schema: { type: string }
+          description: 版本类型（development=开发 / production=生产）
+        - name: limit
+          in: query
+          schema: { type: integer }
+          description: 限制返回数量（0 表示不限制）
+        - name: startTime
+          in: query
+          schema: { type: string }
+          description: 开始时间
+        - name: endingTime
+          in: query
+          schema: { type: string }
+          description: 结束时间
+        - name: pagingTime
+          in: query
+          schema: { type: string }
+          description: 分页开始时间（默认最新时间）
+        - name: fields
+          in: query
+          schema: { type: string }
+          description: 返回的属性 keys（逗号分割）
+        - name: orderBy
+          in: query
+          schema: { type: string }
+          description: 排序字段
+        - name: orderType
+          in: query
+          schema: { type: string, enum: [ASC, DESC] }
+          description: 排序类型（DESC 降序 / ASC 升序）
+      responses:
+        "200":
+          description: 工具版本列表（data 含 list/total/limit/pagingTime）
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AutoOpsResult"
+      x-relevant: true
+
+  /next/api/gateway/cmdb.instance.PostSearch/object/_TOOL_LIB@EASYOPS/instance/_search:
+    post:
+      tags: [工具列表与详情]
+      summary: 搜索工具库的 lib 包（公共依赖）
+      description: |
+        检索 `_TOOL_LIB@EASYOPS`——工具库中的 lib 库，即所有工具都可引用的
+        公共包/依赖（每条含 packageId、scriptType、name 等）。区别于「工具列表」
+        （后者用 `tool.basic.ListTool`，是具体的运维脚本工具本身）。
+      operationId: tool_lib_search
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                page: { type: number, example: 1 }
+                page_size: { type: number, example: 3000 }
+                query: { type: object, description: 过滤条件（分类/类型/关键字） }
+                fields: { type: object, description: 返回字段控制 }
+      responses:
+        "200":
+          description: 工具库实例列表
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CmdbResult"
+      x-relevant: true
+
+  # ============ 工具全局配置 ============
+  /next/api/gateway/cmdb.instance.UpdateInstance/object/_TOOLS_CONFIG_GLOBAL/instance/{id}:
+    put:
+      tags: [工具全局配置]
+      summary: 保存基础设置
+      description: |
+        保存某脚本类型（Shell/Python/PowerShell/Bat）的全局基础配置：
+        默认执行用户、执行超时时间等。每种脚本类型对应一个实例。
+      operationId: tool_global_config_update
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string }
+          description: 全局配置实例 ID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                defaultExecUser: { type: string, description: 默认执行用户 }
+                execTimeout: { type: number, description: 执行超时时间（秒） }
+      responses:
+        "200":
+          description: 保存结果
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CmdbResult"
+      x-relevant: true
+
+  # ============ 高危命令管理 ============
+  /next/api/gateway/cmdb.instance.CreateInstance/v2/object/_TOOL_HIGH_RISK_COMMAND@EASYOPS:
+    post:
+      tags: [高危命令管理]
+      summary: 新建高危命令
+      description: |
+        新建高危命令识别规则。关键字段：
+        - `name`：识别内容（字符串或正则，如 `rm\s+-rf`）
+        - `recognizeMethod`：识别方式（`string` / `regexp`）
+        - `riskDescription`：风险说明
+        - `riskLevel`：风险等级
+      operationId: tool_high_risk_create
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name: { type: string, example: "rm\\s+-rf" }
+                recognizeMethod: { type: string, example: regexp }
+                riskDescription: { type: string, example: 彻底删除 }
+                riskLevel: { type: string }
+      responses:
+        "200":
+          description: 创建结果
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CmdbResult"
+      x-relevant: true
+
+  # ============ 执行时间窗口 ============
+  /next/api/gateway/logic.tool_service/api/tool_service/v1/globalConfigs/timeWindow:
+    put:
+      tags: [执行时间窗口]
+      summary: 保存执行时间窗口
+      description: 配置工具允许执行的时间段（可多个窗口）。
+      operationId: tool_time_window_update
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                execTimeWindowConfig:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      startTime: { type: string, example: "08:00" }
+                      endTime: { type: string, example: "23:00" }
+      responses:
+        "200":
+          description: 保存结果
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AutoOpsResult"
+      x-relevant: true
+
+  /next/api/gateway/logic.tool_service/api/tool_service/v1/globalConfigs/timeWindow/read:
+    get:
+      tags: [执行时间窗口]
+      summary: 查询执行时间窗口
+      operationId: tool_time_window_read
+      responses:
+        "200":
+          description: 时间窗口配置
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AutoOpsResult"
+      x-relevant: true
+
+  # ============ 工具创建与编辑 ============
+  /next/api/gateway/tool.basic.CreateTool/tools:
+    post:
+      tags: [工具创建与编辑]
+      summary: 新建工具
+      description: |
+        创建工具。关键字段：
+        - `name`：工具名称
+        - `toolType`：脚本类型（python/shell/powershell/bat）
+        - `content`：脚本内容
+        - `inputs`：输入参数定义（含 `@agents` 执行目标等）
+        - `outputs`：输出参数定义
+        - `category`：分类
+      operationId: tool_create
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name: { type: string }
+                toolType: { type: string, example: python }
+                content: { type: string, description: 脚本内容 }
+                category: { type: string, example: 默认 }
+                inputs:
+                  type: array
+                  items: { type: object }
+                outputs:
+                  type: array
+                  items: { type: object }
+      responses:
+        "200":
+          description: 创建结果（返回 toolId）
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AutoOpsResult"
+      x-relevant: true
+
+  /next/api/gateway/tool.basic.UpdateTool/tools/{toolId}:
+    put:
+      tags: [工具创建与编辑]
+      summary: 编辑工具
+      description: 修改工具内容，生成新版本。`vId` 指定基于哪个版本编辑。
+      operationId: tool_update
+      parameters:
+        - name: toolId
+          in: path
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name: { type: string }
+                content: { type: string }
+                inputs:
+                  type: array
+                  items: { type: object }
+                outputs:
+                  type: array
+                  items: { type: object }
+      responses:
+        "200":
+          description: 更新结果
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AutoOpsResult"
+      x-relevant: true
+
+  # ============ 工具调试与执行 ============
+  /next/api/gateway/tool.execute.ExecuteDebugTool/tools/debug:
+    post:
+      tags: [工具调试与执行]
+      summary: 调试工具
+      description: 在目标主机上试运行工具（不生成正式任务），用于验证脚本。
+      operationId: tool_debug
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                toolId: { type: string }
+                vId: { type: string }
+                inputs: { type: object, description: 输入参数实参 }
+                agentIps:
+                  type: array
+                  items: { type: string }
+                  description: 调试目标主机 IP
+      responses:
+        "200":
+          description: 调试结果
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AutoOpsResult"
+      x-relevant: true
+
+  /next/api/gateway/tool.execute.ExecuteTool/tools/execution:
+    post:
+      tags: [工具调试与执行]
+      summary: 执行工具
+      description: |
+        正式执行工具，生成执行任务。关键字段：
+        - `toolId` / `vId`：工具与版本
+        - `execUser`：执行用户（如 root）
+        - `agentIps` / 目标主机
+      operationId: tool_execute
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                toolId: { type: string, example: facf85f47f73a74562ae7fd3e38466fb }
+                vId: { type: string }
+                execUser: { type: string, example: root }
+                inputs: { type: object }
+                agentIps:
+                  type: array
+                  items: { type: string }
+      responses:
+        "200":
+          description: 执行结果（返回 taskId）
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AutoOpsResult"
+      x-relevant: true
+
+  # ============ 工具版本与审批 ============
+  /next/api/gateway/tool.basic.ToolApproval/tools/{toolId}:
+    post:
+      tags: [工具版本与审批]
+      summary: 工具审批（标记生产版本）
+      description: |
+        将某版本标记为生产版本（提审/审批）。关键字段：
+        - `vId`：目标版本
+        - `checkType`：审批类型（如 `approving`）
+      operationId: tool_approval
+      parameters:
+        - name: toolId
+          in: path
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                vId: { type: string }
+                checkType: { type: string, example: approving }
+      responses:
+        "200":
+          description: 审批结果
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AutoOpsResult"
+      x-relevant: true
+
+  # ============ 工具导入导出 ============
+  /next/api/gateway/logic.tool_service/tools/{toolId}/export:
+    post:
+      tags: [工具导入导出]
+      summary: 导出工具版本
+      description: 将指定工具版本导出为工具包文件。
+      operationId: tool_export
+      parameters:
+        - name: toolId
+          in: path
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                vId: { type: string, description: 要导出的版本 }
+      responses:
+        "200":
+          description: 导出结果
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AutoOpsResult"
+      x-relevant: true
+
+  /next/api/gateway/logic.tool_service/api/tool_service/v1/batch/import/pkg/check:
+    post:
+      tags: [工具导入导出]
+      summary: 导入工具包校验
+      description: 上传工具包后校验内容（版本、依赖等），返回校验预览。
+      operationId: tool_import_check
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                pkgId: { type: string, description: 上传后的工具包 ID }
+      responses:
+        "200":
+          description: 校验结果
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AutoOpsResult"
+      x-relevant: true
+
+  /next/api/gateway/logic.tool_service/tools/import:
+    post:
+      tags: [工具导入导出]
+      summary: 导入工具
+      description: 校验通过后正式导入工具包。
+      operationId: tool_import
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                pkgId: { type: string }
+      responses:
+        "200":
+          description: 导入结果
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AutoOpsResult"
+      x-relevant: true
+
+  # ============ 工具删除 ============
+  /next/api/gateway/tool.basic.DeleteTool/tools/{toolId}:
+    delete:
+      tags: [工具删除]
+      summary: 删除工具
+      description: 删除指定工具（含其所有版本）。
+      operationId: tool_delete
+      parameters:
+        - name: toolId
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        "200":
+          description: 删除结果
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AutoOpsResult"
+      x-relevant: true
+
+  # ============ 任务历史 ============
+  /next/api/gateway/logic.tool_service/api/tool_service/v1/tool_task:
+    get:
+      tags: [任务历史]
+      summary: 任务历史列表
+      description: 查询工具执行任务记录，支持按状态/操作人/触发方式/时间范围筛选。
+      operationId: tool_task_list
+      parameters:
+        - name: page
+          in: query
+          schema: { type: number }
+        - name: page_size
+          in: query
+          schema: { type: number }
+        - name: status
+          in: query
+          schema: { type: string }
+          description: 任务状态，如 failed/success
+        - name: operator
+          in: query
+          schema: { type: string }
+          description: 操作人
+        - name: trigger
+          in: query
+          schema: { type: string }
+          description: 触发方式，如 schedule（定时）
+      responses:
+        "200":
+          description: 任务列表
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AutoOpsResult"
+      x-relevant: true
+
+components:
+  schemas:
+    AutoOpsResult:
+      type: object
+      description: AutoOps 工具服务通用响应包装
+      properties:
+        code:
+          type: number
+          description: 业务码，0 表示成功
+          example: 0
+        codeExplain:
+          type: string
+          example: ""
+        error:
+          type: string
+          example: ""
+        data:
+          description: 业务数据（具体结构见各接口）
+      required: [code]
+    CmdbResult:
+      type: object
+      description: CMDB 实例操作响应包装（工具库底层存储）
+      properties:
+        code:
+          type: number
+          description: 业务码，0 表示成功
+          example: 0
+        error:
+          type: string
+          example: ""
+        message:
+          type: string
+          example: ""
+        data:
+          description: 业务数据
+      required: [code]

@@ -1,0 +1,67 @@
+name: createProcessDefinition
+module: process
+method: POST
+path: /api/flowable_service/v1/process_definition
+gateway_path: /next/api/gateway/logic.flowable_service/api/flowable_service/v1/process_definition
+service: logic.flowable_service
+side_effect: create
+path_source: backend_contract
+path_confidence: high
+tags:
+- 流程定义
+- 新建
+- 创建
+- process
+summary: 创建流程定义
+description: 创建流程定义，填写名称、分类、说明、触发器等，返回流程 ID，
+request:
+  required: []
+  properties:
+    name:
+      type: string
+      desc: 流程名称
+    category:
+      type: string
+      desc: 流程分类
+    memo:
+      type: string
+      desc: 流程说明
+    triggerIdList:
+      type: string[]
+      desc: 关联触发器 ID 列表
+    dVersionName:
+      type: string
+      desc: 版本号
+      _source: contract
+    dVersionMemo:
+      type: string
+      desc: 版本描述
+      _source: contract
+    useFormBuilder:
+      type: bool
+      desc: 是否引入form_builder, 默认值为false
+      _source: contract
+outputs:
+  instanceId:
+    jsonpath: $.data.instanceId
+    desc: 新建流程返回的流程定义 ID
+requires:
+- triggerIdList 须是 listTrigger 返回的已存在触发器 ID
+rollback: null
+examples: []
+confidence:
+  module: high
+  outputs: medium
+  requires: high
+  rollback: medium
+  summary: high
+  tags: high
+  request: medium
+endpoint:
+  contract_ref: logic.flowable_service|POST|/api/flowable_service/v1/process_definition
+  mode: easyops_gateway
+source:
+  openapi_file: ITSM-系统管理-流程管理-openapi.yaml
+  openapi_hash: be88bdf060789ec422b671fffae672e0754857b66418b48c317c4c55f8e9a77d
+  recorded_at: '2026-07-13T14:31:52'
+registered_at: '2026-07-22T10:34:10.699651'

@@ -1,0 +1,64 @@
+name: post_api_flowable_service_v2_process_instance_{ticketId}_task_{taskId}
+module: ticket
+method: POST
+path: /api/flowable_service/v2/process_instance/{ticketId}/task/{taskId}
+gateway_path: /next/api/gateway/logic.flowable_service/api/flowable_service/v2/process_instance/{ticketId}/task/{taskId}
+service: logic.flowable_service
+side_effect: create
+path_source: gateway_strip
+path_confidence: medium
+tags:
+- 审批提交
+- task submit
+- 流转
+- 工单处理
+- create
+summary: 提交任务节点(审批/退回/挂起)
+description: 工单审批「提交」的核心接口。携带表单数据与流转变量，完成当前节点处理并流转到下一节点。
+request:
+  required: []
+  properties:
+    formData:
+      type: object
+      desc: 表单数据
+    variables:
+      type: object
+      desc: 流转变量
+    variableName:
+      type: string
+      desc: ''
+    variableValue:
+      type: string
+      desc: ''
+    memo:
+      type: string
+      desc: 审批意见
+    assigneeUsers:
+      type: array
+      desc: 下一节点处理人
+outputs:
+  detail:
+    jsonpath: $.data
+    desc: 提交结果(兜底)
+requires:
+- ticketId
+- taskId
+- formData(表单数据)
+- variables(流转变量)
+rollback: null
+examples: []
+confidence:
+  module: high
+  outputs: medium
+  requires: low
+  rollback: high
+  summary: high
+  tags: high
+endpoint:
+  contract_ref: ''
+  mode: easyops_gateway
+source:
+  openapi_file: ITSM-工单搜索与处理-openapi.yaml
+  openapi_hash: df32200dd3f5e69e90c5f01356dcbb67bef6292eac32ef0f06011eacb3d50100
+  recorded_at: '2026-07-09T17:54:19'
+registered_at: '2026-07-22T10:44:45.827137'

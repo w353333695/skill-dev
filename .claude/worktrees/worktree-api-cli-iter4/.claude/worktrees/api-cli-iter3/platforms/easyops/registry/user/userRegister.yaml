@@ -1,0 +1,83 @@
+name: userRegister
+module: user
+method: POST
+path: /api/v1/users/register
+gateway_path: /next/api/gateway/user_service.user_admin.UserRegister/api/v1/users/register
+service: logic.user_service
+side_effect: create
+path_source: gateway_strip
+path_confidence: medium
+tags:
+- 用户
+- 注册
+- 创建
+- 管理员
+summary: 注册新用户
+description: '注册新用户[内部], 返回用户名/邮箱/org/instanceId。对应 giraffe contract: easyops.api.user_service.user_admin@UserRegister。'
+request:
+  required:
+  - name
+  - password
+  properties:
+    name:
+      type: string
+      desc: 用户名
+    password:
+      type: string
+      desc: 密码
+    email:
+      type: string
+      desc: 邮箱
+    org:
+      type: int
+      desc: 机构 ID
+    isAdmin:
+      type: bool
+      desc: 是否管理员
+    nickname:
+      type: string
+      desc: 昵称
+outputs:
+  name:
+    jsonpath: $.data.name
+    desc: 用户名
+  instanceId:
+    jsonpath: $.data.instanceId
+    desc: 用户实例ID
+requires:
+- name 须不重复(用户名唯一)
+rollback:
+  api: userDelete
+  params:
+  - param_key: username
+    param_from_output: name
+examples: []
+confidence:
+  module: high
+  outputs: medium
+  requires: medium
+  rollback: medium
+  summary: high
+  tags: high
+  request: high
+endpoint:
+  contract_ref: logic.user_service|POST|/api/v1/users/register
+  mode: easyops_internal
+  method: POST
+contract_name: easyops.api.user_service.user_admin@UserRegister
+source:
+  contract_name: easyops.api.user_service.user_admin@UserRegister
+  note: 手工注册(giraffe contract; 后端契约已存在; 无前端 openapi)
+  registered_at: '2026-07-31'
+  verified:
+    status: failed
+    http_status: 500
+    biz_code: 500
+    mode: easyops_internal
+    port: 8111
+    result: CMDB 建实例报 'relation of USER object is required'(code 300316); 卡片路由/鉴权/参数全对,
+      失败在服务端业务层
+    root_cause: '[内部]接口依赖调用上下文; register 的 6 字段不足以满足 USER 模型约束(15 必填属性: name/uassId/FS_userId/dingding_userid/nickname/orgName/user_email
+      等); USER 无正向必填关系, ''relation required'' 来自 user_admin 服务侧隐式关系建立逻辑; 非卡片可修复'
+    verified_at: '2026-07-31'
+registered_at: '2026-07-31T00:00:00'
