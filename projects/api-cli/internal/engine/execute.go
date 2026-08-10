@@ -33,6 +33,7 @@ type Options struct {
 	Insecure  bool          // 跳过 TLS 证书校验（自签证书场景）
 	Timeout   time.Duration // HTTP 超时（0 = 不限）；用 context.WithTimeout 包装 ctx，http.Do 尊重 deadline
 	Out       io.Writer     // 输出目标（默认 os.Stdout；测试注入 bytes.Buffer）
+	OutCloser io.Closer     // 非空时调用方（cobracli RunE）在 Execute 后 Close（--output 指向文件场景）
 }
 
 // Engine 执行器。可被 cobracli/mcp 共用。

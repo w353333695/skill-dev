@@ -2,6 +2,7 @@ package cobracli
 
 import (
 	"fmt"
+	"os"
 	"time"
 
 	"api-cli/internal/engine"
@@ -105,10 +106,12 @@ func bindGlobalFlags(root *cobra.Command) {
 	root.PersistentFlags().String("body-file", "", "请求 body JSON 文件路径（覆盖 body 参数，支持复杂/嵌套 body）")
 	root.PersistentFlags().Bool("insecure", false, "跳过 TLS 证书校验（自签证书）")
 	root.PersistentFlags().Duration("timeout", 0, "HTTP 超时（如 30s、500ms；0=不限）")
+	root.PersistentFlags().StringP("output", "o", "", "输出到文件（binary 响应落盘 / 文本写文件，默认 stdout）")
 }
 
 // globalOpts 从 cobra command 取全局 flag → engine.Options。
-// Out 固定指向 os.Stdout（spec §11.3）。
+// Out 默认指向 os.Stdout（spec §11.3）；--output 非空时改指向 os.Create 打开的文件，
+// 并把句柄同时填进 OutCloser——RunE 在 Execute 后 defer Close（统一落盘生命周期）。
 // endpoint 名不进 Options（Task 9 的 Options 无该字段），
 // 由 operationCmd.RunE 单独取 --endpoint flag 后调 tr.SelectEndpoint。
 func globalOpts(cmd *cobra.Command) (engine.Options, error) {
@@ -124,6 +127,16 @@ func globalOpts(cmd *cobra.Command) (engine.Options, error) {
 		Insecure:  boolFlag(f, "insecure"),
 		Timeout:   durationFlag(f, "timeout"),
 		Out:       stdout(),
+	}
+	// --output/-o：非空 → 落盘。os.Create 失败（权限/路径不存在）转 APIError 退 param 错。
+	// engine 不持有文件句柄，只写 opts.Out；句柄由 cobracli RunE defer Close。
+	if out := strFlag(f, "output"); out != "" {
+		fout, err := os.Create(out)
+		if err != nil {
+			return opts, &output.APIError{Code: "output_file", Message: err.Error(), ExitCode: output.ExitParamError}
+		}
+		opts.Out = fout
+		opts.OutCloser = fout
 	}
 	if err := validateFormat(opts.Format); err != nil {
 		return opts, err
