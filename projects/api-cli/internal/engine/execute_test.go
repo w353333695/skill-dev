@@ -351,6 +351,86 @@ resources: { r: { path: /r, operations: { read: { method: GET, path: "/{id}", pa
 	}
 }
 
+// TestExecuteBodyBytesOverridesMultipartContentType 验证：multipart verb 配 BodyBytes（MCP `_body`）覆盖时，
+// Execute 必须同时清掉 req.ContentType —— 否则 do() 会给一份非 multipart 的 JSON body 贴上
+// `multipart/form-data; boundary=...` Content-Type，造成 silent mismatch（服务端按 boundary 切字节流必炸）。
+//
+// 触发条件：op.ContentType == "multipart-form-data" → resolve 设 req.ContentType；
+// 随后 opts.BodyBytes 非空 → Execute 覆盖 req.Body（但旧实现未清 ContentType）。
+// 修复后：Execute 在覆盖 req.Body 的同时清 req.ContentType，do() 不再写入 Content-Type。
+func TestExecuteBodyBytesOverridesMultipartContentType(t *testing.T) {
+	var sawCT string
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		sawCT = r.Header.Get("Content-Type")
+		w.Write([]byte(`{}`))
+	}))
+	defer srv.Close()
+	raw := []byte(`
+spec: api-cli/v1
+service: { name: s, default_endpoint: backend, endpoints: { backend: { base_url: ` + srv.URL + `, auth: none } } }
+resources:
+  pkg:
+    operations:
+      upload: { method: POST, path: /upload, content_type: multipart-form-data, params: { file: { in: formData, format: binary, required: true }, kind: { in: formData } } }
+`)
+	tr, err := spec.Parse(raw)
+	if err != nil {
+		t.Fatal(err)
+	}
+	ep, _ := tr.SelectEndpoint("")
+	e := New(tr)
+	// BodyBytes 模拟 MCP `_body` 注入：嵌套 JSON 字节覆盖 multipart body。
+	// 不传 file/kind flags → buildMultipart 产空 body，但 resolve 仍设了 ContentType
+	// （w.Close 后 FormDataContentType() 与 body 是否空无关）→ 覆盖路径必须清。
+	err = e.Execute(context.Background(), ep, tr.Resources["pkg"], tr.Resources["pkg"].Operations["upload"],
+		nil, map[string]string{}, Options{
+			Format: "json", Out: io.Discard, Yes: true,
+			BodyBytes: []byte(`{"x":1}`),
+		})
+	if err != nil {
+		t.Fatalf("Execute: %v", err)
+	}
+	if strings.Contains(sawCT, "multipart/form-data") {
+		t.Fatalf("BodyBytes 覆盖后 Content-Type 不应是 multipart，got %q（silent mismatch）", sawCT)
+	}
+}
+
+// TestRenderPreviewMultipartCurlOmitted 验证 curl 预览路径：multipart 请求的 raw body 不刷屏，
+// 改输出注释（等价 -F 提示）。回归保护：避免后续重构把 raw-bytes 漏回 curl 输出。
+func TestRenderPreviewMultipartCurlOmitted(t *testing.T) {
+	req := &resolvedReq{
+		Method:      "POST",
+		URL:         "http://example.com/upload",
+		ContentType: "multipart/form-data; boundary=x",
+		Body:        []byte("raw-bytes"),
+	}
+	out := renderPreview(req, Options{PrintCurl: true})
+	if strings.Contains(out, "raw-bytes") {
+		t.Errorf("curl 预览不应含 raw body 字节，got: %s", out)
+	}
+	if !strings.Contains(out, "multipart") {
+		t.Errorf("curl 预览应含 multipart 注释，got: %s", out)
+	}
+}
+
+// TestRenderPreviewMultipartDryRunOmitted 验证 dry-run 预览路径：multipart body 渲染为
+// `<multipart body omitted>` 而非原始字节。回归保护。
+func TestRenderPreviewMultipartDryRunOmitted(t *testing.T) {
+	req := &resolvedReq{
+		Method:      "POST",
+		URL:         "http://example.com/upload",
+		ContentType: "multipart/form-data; boundary=x",
+		Body:        []byte("raw-bytes"),
+	}
+	out := renderPreview(req, Options{})
+	if strings.Contains(out, "raw-bytes") {
+		t.Errorf("dry-run 预览不应含 raw body 字节，got: %s", out)
+	}
+	if !strings.Contains(out, "<multipart body omitted>") {
+		t.Errorf("dry-run 预览应含 <multipart body omitted>，got: %s", out)
+	}
+}
+
 // TestResolveMultipart 验证端到端 multipart 上传：resolve 接入 buildMultipart →
 // do() 设 Content-Type（含 boundary）→ 服务端 ParseMultipartForm 成功拿到 file part + 表单字段。
 //

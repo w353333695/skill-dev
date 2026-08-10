@@ -89,6 +89,10 @@ func (e *Engine) Execute(ctx context.Context, ep *tree.Endpoint, r *tree.Resourc
 			return &output.APIError{Code: "body_file", Message: err.Error(), ExitCode: output.ExitParamError}
 		}
 		req.Body = b
+		// 覆盖 body 时清 multipart Content-Type：避免 resolve 阶段（multipart verb）设置的
+		// multipart/form-data Content-Type 配上一份非 multipart body，造成 silent mismatch。
+		// do() 仅在 req.ContentType != "" 时才写 Header，故置空即生效。
+		req.ContentType = ""
 	}
 
 	// BodyBytes（MCP _body）：最高优先级，覆盖 --body-file 和 body 参数。
@@ -96,6 +100,8 @@ func (e *Engine) Execute(ctx context.Context, ep *tree.Endpoint, r *tree.Resourc
 	// 由 mcp/server.go 提前 marshal 成字节，经此通道直传，绕过 resolve 的 flat 限制。
 	if len(opts.BodyBytes) > 0 {
 		req.Body = opts.BodyBytes
+		// 同上：覆盖 body 时清 multipart Content-Type，避免 silent mismatch。
+		req.ContentType = ""
 	}
 
 	// dry-run / print-curl：渲染预览，不发请求。
