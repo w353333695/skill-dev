@@ -42,7 +42,13 @@ steps:
     on_fail: "『存在流程定义版本』→ 回 step2 确认版本没清干净，继续 step3"
 
 key_rule: |
-  删流程 = 清所有版本（删末版本级联删 def）。版本删不掉的 4 个约束（绑表单/关联工单/主版本+服务/被引用）任一即拒。
+  删流程 = 清所有版本（删末版本级联删 def）。版本删不掉的 4 约束【按序解】（实测 test 流程）：
+  ①表单绑定『已有绑定表单』→ process_form.set 解绑（formRelationInstanceId 非空 + formId 空）
+  ②关联工单『有正在流转中的工单』→ 工单侧处理
+  ③主版本+绑服务『已绑定了服务且当前是主版本』→ 删服务或换主版本（⚠️服务=ITSC_SERVICE_INSTANCE 跨域，须服务管理 API，不在本清单）
+  ④被父/子流程引用『当前流程被引用』→ 解引用
+  test 流程实测：①表单已解 → ③卡服务绑定（绑了服务 test 658a53111322b，是主版本）→ 须先删服务才能继续。
   versionIds(复数)路径但只删第一个——批量是壳，循环单删。
+  ⚠️服务绑定是跨 process 域依赖：主版本+绑服务的流程删不掉，除非先在服务管理删/解服务（或换主版本）。
 side_effects: objects.yaml#itsm_process_version.side_effects
 acceptance: "process_definition.list 过滤该 name → 不含它（删干净）"
