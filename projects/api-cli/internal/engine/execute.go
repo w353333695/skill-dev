@@ -276,6 +276,11 @@ func (e *Engine) do(ctx context.Context, req *resolvedReq, hc *http.Client) ([]b
 		}
 		httpReq.Header.Set(k, v)
 	}
+	// Content-Type（multipart 含 boundary）：在 header 循环之后设置，确保 multipart 的 boundary
+	// 不被 operation 级 header 参数意外覆盖；同时普通 JSON 请求若显式声明也走这里。
+	if req.ContentType != "" {
+		httpReq.Header.Set("Content-Type", req.ContentType)
+	}
 	q := httpReq.URL.Query()
 	for k, v := range req.Query {
 		q.Set(k, v)
@@ -292,13 +297,20 @@ func (e *Engine) do(ctx context.Context, req *resolvedReq, hc *http.Client) ([]b
 }
 
 // renderPreview 渲染 dry-run / curl 预览。
+// multipart body 含文件字节，直接 string(req.Body) 会刷屏；检测到 multipart 时省略 body。
+//
+// 精确重建 `-F file=@<path>` 需把 flags 透传进 renderPreview（当前签名 `(req, opts)` 无 flags），
+// 影响面大，本迭代取「省略 + 注释」，留 TODO。
 func renderPreview(req *resolvedReq, opts Options) string {
+	isMultipart := strings.HasPrefix(req.ContentType, "multipart/form-data")
 	if opts.PrintCurl {
 		curl := "curl -X " + req.Method + " '" + req.URL + "'"
 		for k, v := range req.Header {
 			curl += " -H '" + k + ": " + v + "'"
 		}
-		if req.Body != nil {
+		if isMultipart {
+			curl += "  # multipart body（含文件字节，省略；等价 -F file=@<path> -F <field>=<v>）"
+		} else if req.Body != nil {
 			curl += " -d '" + string(req.Body) + "'"
 		}
 		if opts.Insecure {
@@ -306,8 +318,12 @@ func renderPreview(req *resolvedReq, opts Options) string {
 		}
 		return curl
 	}
+	bodyRepr := fmt.Sprintf("%v", req.Body)
+	if isMultipart {
+		bodyRepr = "<multipart body omitted>"
+	}
 	return fmt.Sprintf("DRY-RUN %s %s insecure=%v query=%v header=%v body=%s",
-		req.Method, req.URL, opts.Insecure, req.Query, req.Header, req.Body)
+		req.Method, req.URL, opts.Insecure, req.Query, req.Header, bodyRepr)
 }
 
 // copySS 浅拷贝 map[string]string。

@@ -6,6 +6,9 @@ import (
 	"io"
 	"net/http"
 	"net/http/httptest"
+	"os"
+	"path/filepath"
+	"strings"
 	"testing"
 	"time"
 
@@ -345,5 +348,54 @@ resources: { r: { path: /r, operations: { read: { method: GET, path: "/{id}", pa
 	ae, ok := err.(*output.APIError)
 	if !ok || ae.ExitCode != output.ExitNetTimeout {
 		t.Fatalf("应是 net timeout，got %#v", err)
+	}
+}
+
+// TestResolveMultipart 验证端到端 multipart 上传：resolve 接入 buildMultipart →
+// do() 设 Content-Type（含 boundary）→ 服务端 ParseMultipartForm 成功拿到 file part + 表单字段。
+//
+// 触发条件：op.ContentType == "multipart-form-data" → resolve 末尾分支调 buildMultipart，
+// 覆盖 bodyParams；resolvedReq.ContentType 经 do() 写入 httpReq Header。
+func TestResolveMultipart(t *testing.T) {
+	// server 收 multipart，校验 Content-Type 含 boundary + 文件 part
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if !strings.HasPrefix(r.Header.Get("Content-Type"), "multipart/form-data; boundary=") {
+			t.Errorf("server 收到 Content-Type=%q", r.Header.Get("Content-Type"))
+		}
+		if err := r.ParseMultipartForm(10 << 20); err != nil {
+			t.Errorf("ParseMultipartForm: %v", err)
+		}
+		if r.MultipartForm == nil || r.MultipartForm.Value["kind"][0] != "tool" {
+			t.Errorf("kind field 缺失/错误: %+v", r.MultipartForm)
+		}
+		if fh := r.MultipartForm.File["file"]; len(fh) != 1 || fh[0].Filename != "pkg.tar.gz" {
+			t.Errorf("file part 缺失/错误: %+v", r.MultipartForm.File)
+		}
+	}))
+	defer srv.Close()
+	raw := []byte(`
+spec: api-cli/v1
+service: { name: s, default_endpoint: backend, endpoints: { backend: { base_url: ` + srv.URL + `, auth: none } } }
+resources:
+  pkg:
+    operations:
+      upload: { method: POST, path: /upload, content_type: multipart-form-data, params: { file: { in: formData, format: binary, required: true }, kind: { in: formData } } }
+`)
+	tr, err := spec.Parse(raw)
+	if err != nil {
+		t.Fatal(err)
+	}
+	// 写临时上传文件
+	tmp := t.TempDir()
+	tmpFile := filepath.Join(tmp, "pkg.tar.gz")
+	if err := os.WriteFile(tmpFile, []byte{0x1f, 0x8b, 0x08, 0x00}, 0o644); err != nil {
+		t.Fatal(err)
+	}
+	ep, _ := tr.SelectEndpoint("")
+	e := New(tr)
+	err = e.Execute(context.Background(), ep, tr.Resources["pkg"], tr.Resources["pkg"].Operations["upload"],
+		nil, map[string]string{"file": tmpFile, "kind": "tool"}, Options{Format: "json", Out: io.Discard})
+	if err != nil {
+		t.Fatalf("Execute: %v", err)
 	}
 }
