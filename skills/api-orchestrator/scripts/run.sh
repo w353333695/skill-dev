@@ -59,7 +59,7 @@ if [ "${#PROJECTS[@]}" -gt 0 ]; then
     PROJ_NAME="${ENTRY%%=*}"
     CLI_NAME="${ENTRY#*=}"
 
-    # ① PATH（setup.sh 装后 / 分发态）
+    # ① PATH（分发态——用户手动装过）
     if command -v "$CLI_NAME" >/dev/null 2>&1; then
         exec "$CLI_NAME" "$@"
     fi
