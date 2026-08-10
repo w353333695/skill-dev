@@ -48,6 +48,10 @@ service:
       host: admin.easyops.local
       path_prefix: /next/api/gateway/cmdb.instance.PostSearchV3   # 仅对 instance.search 通用
       auth: easyops-cookie
+    openapi:                                        # openapi 网关（外网/非内网；AK/SK 签名）。需后端 api_gateway/conf/openapi.yaml 放行
+      base_url: http://172.30.0.232                  # 内网网关 IP（连接地址；勿直连公网 openapi.easyops-only.com）
+      path_prefix: /cmdbservice                      # cmdb app_name 前缀（网关按 /<app>/<uri> 路由）
+      auth: easyops-openapi                          # ~/.api-cli/auth.d/easyops-openapi.yaml（host=openapi.easyops-only.com 作签名 Host 头，网关按 Host 路由）
 
 # -----------------------------------------------------------------------------
 # 资源 1：object_model —— CMDB 模型（object）层。e2e 场景全落在这里。
