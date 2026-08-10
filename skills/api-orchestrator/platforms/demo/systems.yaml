@@ -29,6 +29,10 @@ systems:
       frontend:                          # 前端网关（HTTPS）—— 注意：网关 per-API 路由，仅 instance.search 通用
         base_url: ${EASYOPS_CMDB_FRONTEND_URL}
         host: admin.easyops.local
+      openapi:                           # openapi 网关（外网/非内网；AK/SK 签名）—— base_url=内网IP + path_prefix=/cmdbservice + auth=easyops-openapi。详见 easyops-cmdb.yaml endpoints.openapi + runtime.openapi_gateway_config
+        base_url: http://172.30.0.232
+        path_prefix: /cmdbservice
+        auth: easyops-openapi
 
     auth: easyops-cookie                 # ~/.api-cli/auth.d/easyops-cookie.yaml：provider=cookie，持 PHPSESSID
 
