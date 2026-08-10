@@ -12,6 +12,7 @@ import (
 	"testing"
 
 	"api-cli/internal/spec"
+	"api-cli/internal/tree"
 )
 
 // cmdbYAML 测试用的最小 cmdb 清单：单资源 inst + 单 operation read。
@@ -438,4 +439,112 @@ resources:
 	if !strings.Contains(resp.Result.Content[0].Text, `"$and"`) {
 		t.Fatalf("嵌套 body 未到达服务端: %s", resp.Result.Content[0].Text)
 	}
+}
+
+// TestToolsCallBinaryRejected 验证「CLI-only」verb 在 toolsCall 入口被拒（-32602 + 引导文案）。
+//
+// CLI-only 谓词（iter4 final-review 扩展）= 二进制响应（下载） OR multipart 上传——
+// 两者都需要 LLM 无法提供的本地文件系统（下载需落盘、上传需本地文件路径），
+// 经 MCP 调用必然失败：binary 损坏 JSON-RPC；multipart 在 api-cli 宿主上 os.Open(flags["file"]) 报错。
+// design §4.6：toolsCall 反查 r/op 命中后、SelectEndpoint 前拦截（声明合法，运行时通道限制）。
+//
+// 注：toolsCall 返回 map[string]any 时 code 是 int（pre-marshal），
+// 而经 Serve marshal→unmarshal 后会变 float64（其它用例的 pattern）——这里直调 toolsCall 验 int。
+func TestToolsCallBinaryRejected(t *testing.T) {
+	// 二进制响应（下载场景）：二进制字节塞进 JSON-RPC text 会产生无效 UTF-8 损坏响应。
+	t.Run("binary_response", func(t *testing.T) {
+		raw := []byte(`
+spec: api-cli/v1
+service: { name: binary-demo, default_endpoint: backend, endpoints: { backend: { base_url: http://x, auth: none } } }
+resources:
+  pkg:
+    operations:
+      download: { method: GET, path: "/download/{id}", params: { id: { in: path, type: string, required: true } }, response: { format: binary } }
+`)
+		tr, err := spec.Parse(raw)
+		if err != nil {
+			t.Fatal(err)
+		}
+		srv := New(tr)
+		resp := srv.toolsCall(context.Background(), json.RawMessage(`{"name":"binary-demo_pkg_download","arguments":{"id":"abc"}}`))
+		errMap, ok := resp["error"].(map[string]any)
+		if !ok {
+			t.Fatalf("期望 error 响应，got: %v", resp)
+		}
+		code, _ := errMap["code"].(int)
+		if code != -32602 {
+			t.Errorf("error code = %v, want -32602", code)
+		}
+		msg, _ := errMap["message"].(string)
+		if !strings.Contains(msg, "二进制") || !strings.Contains(msg, "--output") {
+			t.Errorf("error message 未含引导文案（二进制/--output）: %q", msg)
+		}
+	})
+
+	// multipart 上传（上传场景）：splitArgs 把 file 参数塞进 flags，resolve → buildMultipart →
+	// os.Open(flags["file"]) 在 api-cli 宿主上几乎必失败（LLM 无法把文件放到 api-cli 宿主上）。
+	// 虽不损坏 JSON-RPC，但运行不可用且报「打开上传文件 失败」令人困惑，故同样在入口拦截。
+	t.Run("multipart_upload", func(t *testing.T) {
+		raw := []byte(`
+spec: api-cli/v1
+service: { name: upload-demo, default_endpoint: backend, endpoints: { backend: { base_url: http://x, auth: none } } }
+resources:
+  pkg:
+    operations:
+      upload: { method: POST, path: /upload, content_type: multipart-form-data, params: { file: { in: formData, format: binary, required: true } } }
+`)
+		tr, err := spec.Parse(raw)
+		if err != nil {
+			t.Fatal(err)
+		}
+		srv := New(tr)
+		resp := srv.toolsCall(context.Background(), json.RawMessage(`{"name":"upload-demo_pkg_upload","arguments":{"file":"/nonexistent/path.zip"}}`))
+		errMap, ok := resp["error"].(map[string]any)
+		if !ok {
+			t.Fatalf("期望 error 响应，got: %v", resp)
+		}
+		code, _ := errMap["code"].(int)
+		if code != -32602 {
+			t.Errorf("error code = %v, want -32602", code)
+		}
+		msg, _ := errMap["message"].(string)
+		if !strings.Contains(msg, "MCP 不支持") {
+			t.Errorf("error message 未含引导文案（MCP 不支持）: %q", msg)
+		}
+	})
+}
+
+// TestBuildToolDescriptionCLIonlyTag 验证 CLI-only verb 的 tool description 含 [CLI-only] 标签。
+//
+// CLI-only 谓词（iter4 final-review 扩展）= 二进制响应 OR multipart 上传——两者都需要本地文件系统。
+// LLM 在 tools/list 时看到 [CLI-only] 即知该 tool 不应经 MCP 调用（提前规避通道限制），
+// 与 toolsCall 的运行时拦截形成「声明 + 执行」双层保险。
+func TestBuildToolDescriptionCLIonlyTag(t *testing.T) {
+	// 二进制响应（下载）
+	t.Run("binary_response", func(t *testing.T) {
+		r := &tree.Resource{Name: "pkg", Description: "文件包"}
+		op := &tree.Operation{
+			Verb:     "download",
+			Method:   "GET",
+			Response: &tree.Schema{Format: "binary"},
+		}
+		desc := buildToolDescription(r, op)
+		if !strings.Contains(desc, "[CLI-only]") {
+			t.Errorf("binary verb description 缺 [CLI-only] 标签: %q", desc)
+		}
+	})
+
+	// multipart 上传
+	t.Run("multipart_upload", func(t *testing.T) {
+		r := &tree.Resource{Name: "pkg", Description: "文件包"}
+		op := &tree.Operation{
+			Verb:        "upload",
+			Method:      "POST",
+			ContentType: "multipart-form-data",
+		}
+		desc := buildToolDescription(r, op)
+		if !strings.Contains(desc, "[CLI-only]") {
+			t.Errorf("multipart verb description 缺 [CLI-only] 标签: %q", desc)
+		}
+	})
 }

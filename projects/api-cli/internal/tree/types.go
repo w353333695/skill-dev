@@ -45,6 +45,7 @@ type Operation struct {
 	Method      string // 内部模型永远必填（parse 阶段对标准 verb 填默认值）
 	Path        string // 相对 resource.Path，含 {param} 模板
 	Description string // 操作用途（LLM 抉择 + cobra Short）；空 = 回退 verb+singular
+	ContentType string // 请求体类型：空/"json" = JSON（默认）；"multipart-form-data" = 文件上传
 	Params      []Param
 	Body        *Schema     // nil = 无 body
 	Response    *Schema     // nil = 无 response schema（outputSchema）
@@ -54,11 +55,12 @@ type Operation struct {
 // Param 一个入参。
 type Param struct {
 	Name        string
-	In          string // path|query|header|body
+	In          string // path|query|header|body|formData
 	Type        string // 空 = any（透传）
 	Required    bool
 	Enum        []string
 	Pattern     string
+	Format      string // 空 = 普通；"binary" = 文件（仅 in=formData）
 	Description string
 	Example     any
 }
@@ -82,6 +84,7 @@ type Schema struct {
 	Properties           map[string]*Schema
 	Items                *Schema // type=array 时
 	Description          string
+	Format               string // 空 = 普通；"binary" = 二进制流响应（仅 response 用）
 	Example              any   // 动态结构示例（LLM 理解核心）
 	AdditionalProperties *bool // 允许任意 key（MongoDB query 等）；nil = 不出现该字段
 }

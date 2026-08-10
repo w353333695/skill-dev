@@ -33,6 +33,7 @@ type Options struct {
 	Insecure  bool          // 跳过 TLS 证书校验（自签证书场景）
 	Timeout   time.Duration // HTTP 超时（0 = 不限）；用 context.WithTimeout 包装 ctx，http.Do 尊重 deadline
 	Out       io.Writer     // 输出目标（默认 os.Stdout；测试注入 bytes.Buffer）
+	OutCloser io.Closer     // 非空时调用方（cobracli RunE）在 Execute 后 Close（--output 指向文件场景）
 }
 
 // Engine 执行器。可被 cobracli/mcp 共用。
@@ -89,6 +90,10 @@ func (e *Engine) Execute(ctx context.Context, ep *tree.Endpoint, r *tree.Resourc
 			return &output.APIError{Code: "body_file", Message: err.Error(), ExitCode: output.ExitParamError}
 		}
 		req.Body = b
+		// 覆盖 body 时清 multipart Content-Type：避免 resolve 阶段（multipart verb）设置的
+		// multipart/form-data Content-Type 配上一份非 multipart body，造成 silent mismatch。
+		// do() 仅在 req.ContentType != "" 时才写 Header，故置空即生效。
+		req.ContentType = ""
 	}
 
 	// BodyBytes（MCP _body）：最高优先级，覆盖 --body-file 和 body 参数。
@@ -96,6 +101,8 @@ func (e *Engine) Execute(ctx context.Context, ep *tree.Endpoint, r *tree.Resourc
 	// 由 mcp/server.go 提前 marshal 成字节，经此通道直传，绕过 resolve 的 flat 限制。
 	if len(opts.BodyBytes) > 0 {
 		req.Body = opts.BodyBytes
+		// 同上：覆盖 body 时清 multipart Content-Type，避免 silent mismatch。
+		req.ContentType = ""
 	}
 
 	// dry-run / print-curl：渲染预览，不发请求。
@@ -153,6 +160,11 @@ func (e *Engine) single(ctx context.Context, req *resolvedReq, op *tree.Operatio
 	}
 	if status >= 400 {
 		return output.NormalizeAPIError(status, body)
+	}
+	// binary 响应：字节直写 opts.Out，不经 decodeLoose/Format。
+	// 落盘与否由 opts.Out 指向决定（--output 时 cobracli globalOpts 已把 Out 指向文件）。
+	if op.Response != nil && op.Response.Format == "binary" {
+		return writeOutput(opts, body)
 	}
 	data := decodeLoose(body)
 	if opts.Format == "table" {
@@ -276,6 +288,11 @@ func (e *Engine) do(ctx context.Context, req *resolvedReq, hc *http.Client) ([]b
 		}
 		httpReq.Header.Set(k, v)
 	}
+	// Content-Type（multipart 含 boundary）：在 header 循环之后设置，确保 multipart 的 boundary
+	// 不被 operation 级 header 参数意外覆盖；同时普通 JSON 请求若显式声明也走这里。
+	if req.ContentType != "" {
+		httpReq.Header.Set("Content-Type", req.ContentType)
+	}
 	q := httpReq.URL.Query()
 	for k, v := range req.Query {
 		q.Set(k, v)
@@ -292,13 +309,20 @@ func (e *Engine) do(ctx context.Context, req *resolvedReq, hc *http.Client) ([]b
 }
 
 // renderPreview 渲染 dry-run / curl 预览。
+// multipart body 含文件字节，直接 string(req.Body) 会刷屏；检测到 multipart 时省略 body。
+//
+// 精确重建 `-F file=@<path>` 需把 flags 透传进 renderPreview（当前签名 `(req, opts)` 无 flags），
+// 影响面大，本迭代取「省略 + 注释」，留 TODO。
 func renderPreview(req *resolvedReq, opts Options) string {
+	isMultipart := strings.HasPrefix(req.ContentType, "multipart/form-data")
 	if opts.PrintCurl {
 		curl := "curl -X " + req.Method + " '" + req.URL + "'"
 		for k, v := range req.Header {
 			curl += " -H '" + k + ": " + v + "'"
 		}
-		if req.Body != nil {
+		if isMultipart {
+			curl += "  # multipart body（含文件字节，省略；等价 -F file=@<path> -F <field>=<v>）"
+		} else if req.Body != nil {
 			curl += " -d '" + string(req.Body) + "'"
 		}
 		if opts.Insecure {
@@ -306,8 +330,12 @@ func renderPreview(req *resolvedReq, opts Options) string {
 		}
 		return curl
 	}
+	bodyRepr := fmt.Sprintf("%v", req.Body)
+	if isMultipart {
+		bodyRepr = "<multipart body omitted>"
+	}
 	return fmt.Sprintf("DRY-RUN %s %s insecure=%v query=%v header=%v body=%s",
-		req.Method, req.URL, opts.Insecure, req.Query, req.Header, req.Body)
+		req.Method, req.URL, opts.Insecure, req.Query, req.Header, bodyRepr)
 }
 
 // copySS 浅拷贝 map[string]string。
@@ -326,4 +354,11 @@ func decodeLoose(b []byte) any {
 		return string(b)
 	}
 	return v
+}
+
+// writeOutput 把字节写到 opts.Out（仅此一处出口）。
+// 落盘由 cobracli globalOpts 把 opts.Out 指向文件实现；engine 不持有文件句柄。
+func writeOutput(opts Options, body []byte) error {
+	_, err := opts.Out.Write(body)
+	return err
 }

@@ -54,11 +54,60 @@ func Parse(raw []byte) (*tree.OperationTree, error) {
 	for name, r := range y.Resources {
 		tr.Resources[name] = convertResource(name, r)
 	}
+	// lint：二进制相关声明校验（err 级，阻断 Parse）
+	if err := lintBinary(tr); err != nil {
+		return nil, err
+	}
 	// lint：child resource 缺 parent_key 占位 → 警告（URL 可能缺父 ID）
 	for _, r := range tr.Resources {
 		lintParentKey(r, os.Stderr)
 	}
 	return tr, nil
+}
+
+// lintBinary 校验二进制相关声明（content_type 取值 / format=binary 的 in 约束 /
+// response.format=binary 不含结构 / binary × pagination 互斥）。err 级，阻断 Parse。
+func lintBinary(tr *tree.OperationTree) error {
+	var firstErr error
+	check := func(op *tree.Operation) {
+		if firstErr != nil {
+			return
+		}
+		ct := op.ContentType
+		if ct != "" && ct != "json" && ct != "multipart-form-data" {
+			firstErr = fmt.Errorf("operation %q: content_type %q 非法（允许 json/multipart-form-data）", op.Verb, ct)
+			return
+		}
+		for _, p := range op.Params {
+			if p.Format == "binary" && p.In != "formData" {
+				firstErr = fmt.Errorf("operation %q: param %q format=binary 必须 in=formData（当前 in=%q）", op.Verb, p.Name, p.In)
+				return
+			}
+		}
+		if op.Response != nil && op.Response.Format == "binary" {
+			if len(op.Response.Properties) > 0 || op.Response.Items != nil {
+				firstErr = fmt.Errorf("operation %q: response.format=binary 不能再声明 properties/items", op.Verb)
+				return
+			}
+			if op.Pagination != nil {
+				firstErr = fmt.Errorf("operation %q: response.format=binary 不支持 pagination（二进制响应不分页）", op.Verb)
+				return
+			}
+		}
+	}
+	var walk func(*tree.Resource)
+	walk = func(r *tree.Resource) {
+		for _, op := range r.Operations {
+			check(op)
+		}
+		for _, c := range r.Children {
+			walk(c)
+		}
+	}
+	for _, r := range tr.Resources {
+		walk(r)
+	}
+	return firstErr
 }
 
 // lintParentKey 递归检查：对每个有 ParentKey 的 resource，其每个 child 的 Path
@@ -90,14 +139,14 @@ func convertResource(name string, y *yamlResource) *tree.Resource {
 }
 
 func convertOperation(verb string, y *yamlOperation) *tree.Operation {
-	op := &tree.Operation{Verb: verb, Method: y.Method, Path: y.Path, Description: y.Description}
+	op := &tree.Operation{Verb: verb, Method: y.Method, Path: y.Path, Description: y.Description, ContentType: y.ContentType}
 	if op.Method == "" {
 		op.Method = defaultMethod[verb] // 标准 verb 默认填充；自定义 verb 空 method 在 Validate 阶段报错
 	}
 	for pname, p := range y.Params {
 		op.Params = append(op.Params, tree.Param{
 			Name: pname, In: p.In, Type: p.Type, Required: p.Required,
-			Enum: p.Enum, Pattern: p.Pattern, Description: p.Description,
+			Enum: p.Enum, Pattern: p.Pattern, Format: p.Format, Description: p.Description,
 		})
 	}
 	if y.Body != nil {
@@ -118,7 +167,7 @@ func convertOperation(verb string, y *yamlOperation) *tree.Operation {
 }
 
 func convertSchema(y *yamlSchema) *tree.Schema {
-	s := &tree.Schema{Type: y.Type, Required: y.Required, Description: y.Description}
+	s := &tree.Schema{Type: y.Type, Required: y.Required, Description: y.Description, Format: y.Format}
 	for k, v := range y.Properties {
 		if s.Properties == nil {
 			s.Properties = map[string]*tree.Schema{}

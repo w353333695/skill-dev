@@ -88,6 +88,11 @@ func operationCmd(tr *tree.OperationTree, e *engine.Engine, r *tree.Resource, op
 			if err != nil {
 				return err
 			}
+			// --output 时 OutCloser 指向文件句柄，Execute 返回后统一 Close（落盘）；
+			// stdout/Buffer 无 OutCloser（nil），defer 是 no-op。
+			if opts.OutCloser != nil {
+				defer opts.OutCloser.Close()
+			}
 			pathVals := buildPathVals(pathParams, args, parentKeys)
 			flags := bag.values(otherParams)
 			// endpoint 名取自 --endpoint flag（空 → SelectEndpoint 走 service.default_endpoint）。

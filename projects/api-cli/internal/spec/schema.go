@@ -38,6 +38,7 @@ type yamlOperation struct {
 	Description string               `yaml:"description"`
 	Method      string               `yaml:"method"`
 	Path        string               `yaml:"path"`
+	ContentType string               `yaml:"content_type"`
 	Params      map[string]yamlParam `yaml:"params"`
 	Body        *yamlSchema          `yaml:"body"`
 	Response    *yamlSchema          `yaml:"response"`
@@ -50,6 +51,7 @@ type yamlParam struct {
 	Required    bool     `yaml:"required"`
 	Enum        []string `yaml:"enum"`
 	Pattern     string   `yaml:"pattern"`
+	Format      string   `yaml:"format"`
 	Description string   `yaml:"description"`
 }
 
@@ -70,6 +72,7 @@ type yamlSchema struct {
 	Properties           map[string]*yamlSchema `yaml:"properties"`
 	Items                *yamlSchema            `yaml:"items"`
 	Description          string                 `yaml:"description"`
+	Format               string                 `yaml:"format"`
 	Example              any                    `yaml:"example"`
 	AdditionalProperties *bool                  `yaml:"additional_properties"`
 }
