@@ -92,7 +92,7 @@ onboarding 的速度和质量取决于输入完整度。**开工前按此清单�
   - **`required` 双义**——`params.required` 是 bool；schema 的 `required` 是 `[]string`（父列必填子字段名）。在 schema 属性上写 `required: true` 会解析报错。
   - **disparate 路由**用 `resource.path: ""` + 每 operation 持完整路径。
   - **每个 resource/operation 写 `description`**——它进 MCP tool description，决定 LLM 抉择准不准。
-- 验证：`api-cli --spec X --help`（resource/verb 渲染）+ `explain R V`（schema 透传）+ `R V --dry-run`（URL/body 构造）。
+- 验证：`scripts/run.sh --spec X --help`（resource/verb 渲染）+ `scripts/run.sh --spec X explain R V`（schema 透传）+ `scripts/run.sh --spec X R V --dry-run`（URL/body 构造）。
 
 ### 步 5：录入 platforms（按 asset-schema 归位）
 知识分文件，**别堆 README**：
