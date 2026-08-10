@@ -8,7 +8,7 @@ guard: 规划挡（写、build）—— 须展示 BPMN + processSetting 确认
 prerequisites:
   env: [EASYOPS_ORG（18832008）, EASYOPS_USER=easyops, EASYOPS_ITSM_BACKEND_URL]
   form_exists: "要绑的表单已存在且有主版本（如 主机申请表单-WWH-v3 的 formId/versionId）"
-  bpmn_truth: "⚠️bpmnXML 是标准 BPMN 2.0 XML（bpmn2:命名空间 + flowable:扩展属性）。结构/校验见 objects.yaml#itsm_process_bpmn。真实样例 internal/bpmn/xml/parser_test.go:26-258——建议 get 一个现成流程版本捕获其 bpmnXML 作模板改"
+  bpmn_truth: "⚠️bpmnXML 是标准 BPMN 2.0 XML（bpmn2:命名空间 + flowable:扩展属性 + ⚠️必含 bpmndi:BPMNDiagram 图形坐标）。结构/校验见 objects.yaml#itsm_process_bpmn。【实测铁律】flowable 部署要求完整真实 BPMN 结构——手工拼的最小 BPMN（哪怕加了 BPMNDI）flowable 部署失败（140200 flowable部署流程失败）。必须 get 一个现成已部署流程版本（如故障处理 60c33a2523e8d 主版本）的 bpmnXML 作模板，改节点名/assignee/条件，保留其完整结构（命名空间/BPMNDI/属性全集）。真实样例 internal/bpmn/xml/parser_test.go:26-258"
 
 steps:
   - n: 1
