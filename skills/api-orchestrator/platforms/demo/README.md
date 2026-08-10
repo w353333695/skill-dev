@@ -27,7 +27,7 @@
 ```bash
 export EASYOPS_CMDB_BACKEND_URL=http://172.30.0.232:8079
 export EASYOPS_ORG=18832008 EASYOPS_USER=easyops   # 测试 org + 模型系统管理员（0/1/2 禁动）
-api-cli --spec platforms/demo/easyops-cmdb.yaml <resource> <verb> [args] --insecure   # 开发态用 scripts/run.sh 等价
+scripts/run.sh --spec platforms/demo/easyops-cmdb.yaml <resource> <verb> [args] --insecure   # 统一入口（自动检测环境）
 ```
 
 - 鉴权/端口/org/user → 查 `systems.yaml` 的 `runtime:` 段

@@ -17,7 +17,7 @@ description: 通用 API 编排 skill——自然语言需求 → 跨系统调用
 ## 核心范式
 
 - **调度器 = 你（LLM）**：读本 SKILL 的决策树，对每个需求推理分派。没有代码调度引擎。
-- **执行 = bash 调 api-cli**：统一命令名 `api-cli`（开发态由 `scripts/run.sh` 提供 editable 等价）；每个系统是一份 api-cli 清单（spec）。
+- **执行 = bash 调 scripts/run.sh**：统一执行入口（自动检测 PATH/build），每个系统是一份 api-cli 清单（spec）。
 - **知识 = platforms/ 资料**：系统目录/实体映射/对象关系/流程模板/格式包，全部可替换。
 
 ## 调度决策树（拿到需求先走这个）
@@ -53,15 +53,12 @@ description: 通用 API 编排 skill——自然语言需求 → 跨系统调用
 
 ## 执行
 
-统一命令名 `api-cli`（声明式清单 → 命令树）：
+统一执行入口 `scripts/run.sh`（自动检测环境，skill 不感知开发态/分发态）：
 ```bash
-api-cli --spec <spec-path> <resource> <verb> [args] [--print-curl|--dry-run]
-# 例：api-cli --spec platforms/<deployment>/<system>.yaml <resource> <verb> --print-curl
+scripts/run.sh --spec <spec-path> <resource> <verb> [args] [--print-curl|--dry-run]
+# 例：scripts/run.sh --spec platforms/<deployment>/<system>.yaml <resource> <verb> --print-curl
 ```
-
-**两种运行形态**（命令名一致，实现不同）：
-- **分发态（runtime，默认）**：api-cli 已打包为二进制、在 `PATH` 里，直接 `api-cli ...`。
-- **开发态（本 worktree）**：`scripts/run.sh` 是 api-cli 的 editable 等价（go build 增量，改 api-cli 即生效）——`scripts/run.sh --spec ...` ≡ `api-cli --spec ...`。文档示例统一写 `api-cli`；开发态把 `api-cli` 换成 `scripts/run.sh`。
+`scripts/run.sh` 自动检测：api-cli 在 PATH 上（分发态）→ 直接 exec；不在（开发态）→ go build 增量编译后 exec。
 
 **先用 `--print-curl` 或 `--dry-run` 预览请求**，确认无误再真调（写操作尤其）。
 
