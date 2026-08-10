@@ -1,16 +1,16 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-# ⚠️ 本文件【不要】用 `from __future__ import ...`——EasyOps 工具库下发执行时，平台会在
-# 脚本开头注入内部方法/变量，使 __future__ 不在文件首行，触发 SyntaxError:
-# from __future__ imports must occur at the beginning of the file。
-# py2/3 兼容改用运行时判断（见下方 PY2 / text）+ logging（不直接 print）。
-# 坑详见 platforms/demo/objects.yaml#api_behavior.tool_script_no_future。
+# ⚠️ 本文件【不要】用 `from __future__ import ...`——py2/3 兼容改用运行时判断
+# （见下方 PY2 / text）+ logging（不直接 print）。
 """
 easyops_client.py —— EasyOps 通用 HTTP 客户端（py2/3，自包含，双模式）。
 
-定位：给 EasyOps 工具脚本运行时（agent /usr/local/easyops/python/bin/python）调 easyops
-      API 用；也可用于任何 easyops 自动化。【自包含】——不依赖任何 yaml/外部代码文件，
-      单文件即可运行（仅依赖 requests）。
+定位：编排侧 api-cli 缺口补丁——api-cli 不支持 multipart/binary（tool_package 导入导出真调）
+      与 openapi AK/SK HMAC-SHA1 签名，本文件补这两个缺口。仅在【编排侧/开发机】运行，
+      【不进 agent、不作为 EasyOps 工具脚本的依赖】——属 systems.yaml 顶层
+      platform_conventions.code.exceptions 声明的领域例外。EasyOps 工具脚本须自包含调
+      cmdb/easyops（py2 stdlib urllib2 + EASYOPS_* 环境变量），不得 import 本文件。
+      【自包含】——单文件即可运行（仅依赖 requests）。
 
 双模式（互斥）：
   - openapi（外网 / 非内网首选）：AK/SK HMAC-SHA1 签名，走 openapi 网关

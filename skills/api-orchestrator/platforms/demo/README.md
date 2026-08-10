@@ -19,7 +19,7 @@
 | **entities.yaml** | 字段锚 + 转换：3 系统主键格式 + 跨实体 step 接力 | 「字段格式」「编排接线」|
 | **flows/*.yaml** | e2e 流程模板：cmdb(模型/实例/链路) + autoops(工具) + itsm(表单 build/add-version/delete/list) | 「规划挡 build/change」「直通挡 读/链路」|
 | **easyops-{cmdb,autoops,itsm-form}.yaml** | 各系统 api-cli 清单：命令树 + body schema | 「实际调用」|
-| **sdk/** | easyops Python SDK：`easyops_client.py`（自包含 py2/3，双模式 openapi AK/SK 签名 + 内网直连，内置 autoops 便捷方法）+ `tools-sdk-demo.py`（工具脚本调 cmdb 示例）| 「工具脚本运行时调 easyops」「外网 AK/SK 调用」|
+| **sdk/** | 编排侧 Python SDK（api-cli 缺口补丁）：`easyops_client.py`（自包含 py2/3，双模式 openapi AK/SK 签名 + 内网直连，补 multipart/binary 缺口）。【编排侧 tool_package 导入导出/openapi 用；非 agent 工具脚本依赖，属 platform_conventions 例外】| 「编排侧 tool_package 导入导出」「外网 AK/SK 调用」|
 | formats/ | （本部署不适用——无 BPMN/插件格式包）| — |
 
 ## 快速调用
@@ -58,14 +58,14 @@ api-cli --spec platforms/demo/easyops-cmdb.yaml <resource> <verb> [args] --insec
 ## EasyOps AutoOps 工具管理（tool_service）
 
 三层体系 + 两配套层（16 verb）：`tool`（工具 CRUD：list/get/create/update/delete）· `tool_version`（list；新建版本走 tool.update）· `tool_lib`（库 create/update/delete）· `tool_execution`（run + get_result/get_table/get_status 轮询）· `tool_package`（export_check + export/import，后两者走 Python SDK）。
-工具包格式（`.tar.gz` = dat/config/script/libs）+ 内置变量（`EASYOPS_*`，⚠️不存在 `__instance__`/`${cmdb.xxx}`）详见 `objects.yaml#autoops_tool.api_behavior`。Python SDK `sdk/easyops_client.py`（**自包含** py2/3，双模式 openapi AK/SK 签名 + 内网直连，内置 autoops 便捷方法，补 api-cli multipart/binary 缺口）；`sdk/tools-sdk-demo.py` 是工具脚本调 cmdb 的示例。⚠️SDK 与工具脚本勿用 `from __future__`（平台注入破坏，见 `objects.yaml#tool_script_no_future`）。
+工具包格式（`.tar.gz` = dat/config/script/libs）+ 内置变量（`EASYOPS_*`，⚠️不存在 `__instance__`/`${cmdb.xxx}`）详见 `objects.yaml#autoops_tool.api_behavior`。Python SDK `sdk/easyops_client.py`（**自包含** py2/3，双模式 openapi AK/SK 签名 + 内网直连，补 api-cli multipart/binary 缺口）——【编排侧库，非 agent 工具脚本依赖，属 platform_conventions.code 例外】；agent 工具脚本须自包含调 cmdb（py2 stdlib）。
 
 ### autoops e2e 场景 → resource.verb 映射（6 场景全通，org 18832008，2026-08-10）
 
 | 场景 | 挡位 | 流程 |
 |---|---|---|
 | ① ITSM 分类查 cmdb 工具 | 直通 | `tool.list`（category=ITSM, name=cmdb；前端 q=name 别名）→ flows/search-tool.yaml |
-| ② 建 CMDB 清理脚本工具 | 规划（跨系统）| `tool.create`（脚本调 cmdb 用 sdk/easyops_client.py）→ flows/build-cleanup-tool.yaml |
+| ② 建 CMDB 清理脚本工具 | 规划（跨系统）| `tool.create`（脚本须【自包含】调 cmdb，py2 stdlib，不引用 sdk——见 platform_conventions）→ flows/build-cleanup-tool.yaml |
 | ③ 加版本+强制删除入参 | 确认 | `tool.get` → **flat** body 改 inputs/content → `tool.update`（派生 development）→ version.list 复查 → flows/add-tool-version.yaml |
 | ④ run_cmd 查主机内存 | 规划 | `tool.list` 找 run_cmd → `tool_execution.run`（inputs **map**，具体 vId）→ 轮询 get_table → flows/execute-run-cmd.yaml |
 | ⑤ 导出工具 | 确认 | `tool_package.export_check` → `tool_package.export`（GET+versionId，走 SDK）→ flows/export-tool.yaml |
