@@ -434,11 +434,11 @@ objects:
       COMMONDATE / DATE / TIME / DATERANGE / TIMERANGE → format（moment 串如 YYYY年MM月DD日）、disabledPast（禁选过去）
       UPLOAD / LARGEFILE_UPLOAD → buttonText / max_number / max_size / isEnableFileTypeLimit / uploadDraggable(大附件)
       MODALSELECT（实例选择）→ options:[] / listMode；展示字段用 dataIndex（; 分隔）
-      CMDBINSTANCESELECT → frontKey 决定展示字段（默认 name）
+      CMDBINSTANCESELECT → options.frontKey（⚠️在 options 顶层，非 extraProps）决定展示字段；须是模型真实属性（查 model 的 view.show_key，如 HOST 是 hostname/ip，HOST 无 name 属性）
       CMDBCASCADER → objectIdPath:[{objectId,showKey:[]}]（每级一个 CMDB 模型 + 展示字段列表）
       INPUT → isPasswordInput（密码框触发脱敏）/ trim / patternId / autoSize
       ⚠️【每控件必填字段 + 校验逻辑是前端 designer 规则，后端透传不校验、components/ 目录不存】——已知必填（实测/designer）：
-      - CMDBINSTANCESELECT：cmdbProps.foreignObjectId（模型ID，必填）+ options.extraProps.frontKey（显示字段，必填）
+      - CMDBINSTANCESELECT：cmdbProps.foreignObjectId（模型ID，必填，须 CMDB 真实 objectId）+ options.frontKey（显示字段，必填，在 options 顶层非 extraProps；值须模型真实属性，查 view.show_key）
       - CMDBCASCADER：options.extraProps.objectIdPath（每级 objectId + showKey，必填）
       - business_table 容器：extraProps.objectId（CMDB 模型，必填）
       其余控件必填项待补（缺前端 designer 源码；建议 designer 配置后 get formDefinition 捕获回流）。
