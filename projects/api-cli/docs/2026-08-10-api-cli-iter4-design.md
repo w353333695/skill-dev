@@ -45,7 +45,7 @@ api-cli 当前请求、响应两侧**完全 JSON-only**（实测核实，引证�
 | 3 | binary 响应落盘（统一 Out 方案：`--output/-o` 由 globalOpts 重定向 Out，engine `writeOutput` 只写 Out，不经 decodeLoose/Format） | T3 |
 | 4 | CLI flag `--output/-o` + `Options.OutCloser` + cobracli RunE Close + USAGE 文档 + `examples/binary.yaml` | T4 |
 | 5 | 端到端（`httptest.Server` 跑通上传 + 下载） | T5 |
-| 6 | MCP 通道排除 binary：`toolsCall` 报错 + `buildToolDescription` 加 `[CLI-only]` 标签 | T6 |
+| 6 | MCP 通道排除 binary 响应 + multipart 上传：`toolsCall` 报错 + `buildToolDescription` 加 `[CLI-only]` 标签 | T6 |
 
 ### 2.2 不做（延后）
 
@@ -65,7 +65,7 @@ api-cli 当前请求、响应两侧**完全 JSON-only**（实测核实，引证�
 3. **multipart Content-Type 由 engine 设**：构造 multipart body 时 engine 设 `Content-Type: multipart/form-data; boundary=<...>`（含 boundary），清单不声明 boundary。
 4. **`--output` 语义 = 输出目标改文件（统一 Out 方案）**：`--output <path>` 由 cobracli `globalOpts` 把 `opts.Out` 从 stdout 重定向到 `os.Create(path)` 打开的文件，并记 `opts.OutCloser` 供 RunE 关闭。binary 响应 + `--output` = 二进制字节写文件；文本响应 + `--output` = 格式化文本写文件（`output.Format`/`FormatTable` 自然写 `opts.Out`）；binary 响应无 `--output` 时进 stdout（适合 `> file.bin` 管道，但推荐显式 `--output`）。**engine 的 `writeOutput` 只写 `opts.Out`，不直接 `os.WriteFile`、不读文件路径**——落盘与否、文件句柄生命周期都归 cobracli 层；engine 零文件句柄、零泄漏。
 5. **backward compatible**：所有新字段零值 = 旧行为（`content_type` 空 = json；`format` 空 = 普通字段/响应）。现有清单/verb 零改动。
-6. **MCP 不支持 binary（CLI-only）**：`response.format: binary` 的 verb 是「人的下载」场景，不经 MCP。`mcp/server.go` `toolsCall` 命中 binary verb 时返回 error（`-32602`，提示走 CLI `--output`）；`buildToolDescription` 给 binary verb 加 `[CLI-only]` 标签，让 LLM 在 `tools/list` 即知不宜调用。lint 不拦（清单声明合法，MCP 不支持是运行时通道限制）。
+6. **MCP 不支持文件上传（multipart）与下载（binary 响应）（CLI-only）**：`response.format: binary` 与 `content_type: multipart-form-data` 的 verb 都需要 LLM 无法提供的本地文件系统（下载需落盘、上传需本地文件路径），不经 MCP。`mcp/server.go` `toolsCall` 命中这两种 verb 时返回 error（`-32602`，提示走 CLI：上传用文件路径参数，下载加 `--output`）；`buildToolDescription` 给这两类 verb 加 `[CLI-only]` 标签，让 LLM 在 `tools/list` 即知不宜调用。lint 不拦（清单声明合法，MCP 不支持是运行时通道限制）。
 
 ---
 
@@ -321,7 +321,7 @@ RunE: func(cmd *cobra.Command, args []string) error {
 
 - §6 清单语法补 `content_type` / `format: binary` 说明 + 上传/下载示例。
 - 全局 flag 表补 `--output/-o`。
-- §9 已知限制：补「现支持文件上下传（CLI：multipart 上传 / binary 下载 `--output` 落盘；**MCP 不支持 binary，binary verb 走 CLI**）」，移除隐含的"不支持"假设。
+- §9 已知限制：补「现支持文件上下传（CLI：multipart 上传 / binary 下载 `--output` 落盘；**MCP 不支持文件上传（multipart）与下载（binary），binary/multipart verb 走 CLI**）」，移除隐含的"不支持"假设。
 
 **examples**：新增 `examples/binary.yaml`（upload + download verb，T5 端到端用例）。
 
@@ -337,7 +337,9 @@ RunE: func(cmd *cobra.Command, args []string) error {
 - 上传：`api-cli --spec binary.yaml pkg upload --file test.tar.gz --kind tool` → 校验 server 回 JSON 含正确 file/size。
 - 下载：`api-cli --spec binary.yaml pkg download abc --output out.bin` → 校验 `out.bin` 字节 == server 固定二进制（验证 §4.4 globalOpts 重定向 Out + RunE Close 全链路）。
 
-### 4.6 T6 — MCP 通道排除 binary
+### 4.6 T6 — MCP 通道排除 binary 响应 + multipart 上传（CLI-only）
+
+> **谓词（final-review 扩展）**：CLI-only = `(response.format=binary) OR (content_type=multipart-form-data)`——两者都需要 LLM 无法提供的本地文件系统。binary 损坏 JSON-RPC；multipart 在 api-cli 宿主 `os.Open(file)` 必失败。toolsCall 与 buildToolDescription 共用此谓词（`isCLIOnlyVerb`），声明层 + 执行层双保险。
 
 **toolsCall 报错**（`mcp/server.go` `toolsCall`，反查 r/op 命中 nil 检查之后、`SelectEndpoint` 之前）：
 
@@ -346,10 +348,12 @@ RunE: func(cmd *cobra.Command, args []string) error {
     if r == nil || op == nil {
         return map[string]any{"error": map[string]any{"code": -32602, "message": "tool not found: " + p.Name}}
     }
-    // binary 响应不经 MCP：二进制字节塞进 JSON-RPC text 会产生无效 UTF-8 损坏响应。
-    // 引导调用方走 CLI --output 落盘。
-    if op.Response != nil && op.Response.Format == "binary" {
-        return map[string]any{"error": map[string]any{"code": -32602, "message": "该操作返回二进制流，MCP 不支持；请用 CLI 调用并加 --output 落盘"}}
+    // CLI-only verb 不经 MCP（两者都需要 LLM 无法提供的本地文件系统）：
+    //   - binary 响应（下载）：二进制字节塞进 JSON-RPC text 产生无效 UTF-8 损坏响应。
+    //   - multipart 上传：splitArgs 把 file 参数塞进 flags → buildMultipart → osOpen 在 api-cli 宿主上必失败。
+    // 引导调用方走 CLI（上传用文件路径参数，下载加 --output 落盘）。
+    if (op.Response != nil && op.Response.Format == "binary") || op.ContentType == "multipart-form-data" {
+        return map[string]any{"error": map[string]any{"code": -32602, "message": "该操作涉及文件传输（上传或下载二进制），MCP 不支持；请用 CLI 调用（上传用文件路径参数，下载加 --output 落盘）"}}
     }
 ```
 
@@ -363,7 +367,7 @@ RunE: func(cmd *cobra.Command, args []string) error {
     if op.Pagination != nil {
         tags = append(tags, "[可分页]")
     }
-    if op.Response != nil && op.Response.Format == "binary" {
+    if (op.Response != nil && op.Response.Format == "binary") || op.ContentType == "multipart-form-data" {
         tags = append(tags, "[CLI-only]")
     }
 ```
@@ -405,14 +409,14 @@ LLM 在 `tools/list` 即看到 `[CLI-only]`，不会贸然调用；即便调用�
 | **T3 单测** | `single` + `response.format=binary`：body 原样写 `opts.Out`（buffer，不经 decode）——**engine 层只验 Out 字节正确，不验落盘**（落盘归 T4/T5） |
 | **T4 单测** | `bindGlobalFlags` 含 `--output/-o`；`globalOpts` 设 `--output` 时 `opts.Out` 是 `*os.File` 指向该路径、`opts.OutCloser != nil`；未设时 `OutCloser == nil`、`Out == stdout`（RunE `defer Close` 是配套一行，落盘全链路在 T5 集成覆盖） |
 | **T5 集成** | httptest server：upload multipart 正确解析（file/size/kind）、download `--output` 落盘字节逐一致 |
-| **T6 单测** | `toolsCall` 命中 binary verb 返回 `-32602` + 提示文案；`buildToolDescription` 对 binary verb 输出含 `[CLI-only]` |
+| **T6 单测** | `toolsCall` 命中 binary 响应 verb 或 multipart 上传 verb 均返回 `-32602` + 引导文案；`buildToolDescription` 对这两类 verb 输出含 `[CLI-only]` |
 
 ---
 
 ## 7. 清单 + 文档更新
 
 - `examples/binary.yaml`（新）：upload + download verb（T5 端到端用例）。
-- `docs/USAGE.md`：§6 补 `content_type`/`format: binary` 语法 + 示例；全局 flag 表补 `--output/-o`；§9 更新二进制支持状态（CLI 支持 / MCP 不支持 binary）。
+- `docs/USAGE.md`：§6 补 `content_type`/`format: binary` 语法 + 示例；全局 flag 表补 `--output/-o`；§9 更新二进制支持状态（CLI 支持 / MCP 不支持文件上传 multipart + 下载 binary）。
 - 本 design + 对应 plan。
 - **不破坏现有清单**：新字段全可选、零值即旧行为；`examples/*.yaml` 现有清单零改动。
 

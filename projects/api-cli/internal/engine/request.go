@@ -15,12 +15,13 @@ import (
 //   - Query/Header/Body 来自 flag（按 param.In 分发）
 //   - Host 来自 endpoint.Host（自定义 Host header，IP 直连场景）
 type resolvedReq struct {
-	Method string
-	URL    string
-	Host   string
-	Query  map[string]string
-	Header map[string]string
-	Body   []byte
+	Method      string
+	URL         string
+	Host        string
+	Query       map[string]string
+	Header      map[string]string
+	Body        []byte
+	ContentType string // 非空时 do() 设 httpReq Content-Type（multipart 含 boundary）
 }
 
 // resolve 把 operation + flag 值物化成 resolvedReq。
@@ -66,6 +67,16 @@ func resolve(tr *tree.OperationTree, ep *tree.Endpoint, r *tree.Resource, op *tr
 			return nil, fmt.Errorf("body 序列化失败: %w", err)
 		}
 		req.Body = b
+	}
+	// multipart 请求：op.ContentType == "multipart-form-data" 时用 buildMultipart 构造，
+	// 覆盖 bodyParams（multipart verb 的字段都进 formData，不走 JSON bodyParams）。
+	if op.ContentType == "multipart-form-data" {
+		body, ct, err := buildMultipart(op, flags)
+		if err != nil {
+			return nil, err
+		}
+		req.Body = body
+		req.ContentType = ct
 	}
 	return req, nil
 }
