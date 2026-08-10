@@ -221,11 +221,11 @@ systems:
   # ============================================================================
   # EasyOps ITSM 表单管理（flowable_service）—— 第三个接入的系统。
   # 与 cmdb/autoops 同属 EasyOps 平台：同 cookie 鉴权、同 org+user header、同测试 org。
-  # 命令树/字段 schema 见 easyops-itsm-form.yaml；表单内容模型（容器/控件/脚本/继承）见 objects.yaml。
+  # 命令树/字段 schema 见 easyops-itsm.yaml；表单内容模型（容器/控件/脚本/继承）见 objects.yaml。
   # ============================================================================
-  easyops-itsm-form:
+  easyops-itsm:
     description: |
-      EasyOps ITSM 表单管理（flowable_service）—— 三层体系：
+      EasyOps ITSM（flowable_service）—— 当前覆盖【表单管理】（form/form_version）；未来 ITSM 其它域（流程 process 等）统一并入本系统。表单三层体系：
       ① form 表单层（form）：表单元信息（FormSchema: name/category/creator/memo）+ 多版本；
          list 看有哪些表单，save 新建（永远建 form+首版本），delete 删表单（须先清版本）。
       ② form_version 表单版本层（form_version）：一个表单的多个版本（FormSchemaVersion），
@@ -236,7 +236,7 @@ systems:
          非独立端点，作为 save/update 的 body 字段。
       核心范式：表单=元信息+版本；版本内容=formDefinition JSON 字符串（后端透传，前端解释）。
 
-    spec: easyops-itsm-form.yaml             # api-cli 清单，相对本目录
+    spec: easyops-itsm.yaml             # api-cli 清单，相对本目录
     default_endpoint: backend                # 直连 flowable_service :8134（无网关，路径带 /api/flowable_service/...）
 
     endpoints:

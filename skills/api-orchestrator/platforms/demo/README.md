@@ -8,7 +8,7 @@
 |---|---|---|---|
 | **easyops-cmdb** | cmdb_service:8079 | easyops-cmdb.yaml | 模型/关系/实例（19 verb）|
 | **easyops-autoops** | tool_service:8181 | easyops-autoops.yaml | 工具/版本/库 + 执行/导入导出 |
-| **easyops-itsm-form** | flowable_service:8134 | easyops-itsm-form.yaml | 表单/版本/内容（8 verb）|
+| **easyops-itsm** | flowable_service:8134 | easyops-itsm.yaml | 表单/版本/内容（8 verb）|
 
 ## 资料地图（知识在哪，按需查）
 
@@ -18,7 +18,7 @@
 | **objects.yaml** | 3 系统对象模型 + 副作用：cmdb(模型/实例) + autoops(工具/内置变量/工具包) + itsm(表单/版本/容器/控件/脚本/继承/条件显示) | 「对象规则」「接口行为」|
 | **entities.yaml** | 字段锚 + 转换：3 系统主键格式 + 跨实体 step 接力 | 「字段格式」「编排接线」|
 | **flows/*.yaml** | e2e 流程模板：cmdb(模型/实例/链路) + autoops(工具) + itsm(表单 build/add-version/delete/list) | 「规划挡 build/change」「直通挡 读/链路」|
-| **easyops-{cmdb,autoops,itsm-form}.yaml** | 各系统 api-cli 清单：命令树 + body schema | 「实际调用」|
+| **easyops-{cmdb,autoops,itsm}.yaml** | 各系统 api-cli 清单：命令树 + body schema | 「实际调用」|
 | **sdk/** | 编排侧 Python SDK（api-cli 缺口补丁）：`easyops_client.py`（自包含 py2/3，双模式 openapi AK/SK 签名 + 内网直连，补 multipart/binary 缺口）。【编排侧 tool_package 导入导出/openapi 用；非 agent 工具脚本依赖，属 platform_conventions 例外】| 「编排侧 tool_package 导入导出」「外网 AK/SK 调用」|
 | formats/ | （本部署不适用——无 BPMN/插件格式包）| — |
 
@@ -77,7 +77,7 @@ api-cli --spec platforms/demo/easyops-cmdb.yaml <resource> <verb> [args] --insec
 
 **cmdb**：契约 `data/api-doc/cmdb-object.json`（4 EAML，模型层）+ `cmdb-instance.json`（3 有效契约，实例层；剔除 csv/json/excel 文件上传噪声）+ 后端 `CMDB/cmdb_service`（object + instance(_extend)，补全端点并修正批量删路径笔误 `instance_batch`）。
 **autoops**：契约 `data/api-doc/autoops-tool.json`（10 端点，压扁）+ 后端 `AutoOps/tool_service`（源码补全 list/delete/版本/执行/lib）。
-**itsm-form**：契约 `data/api-doc/itsm-form.json`（8 EAML）+ 后端 `ITSM/flowable_service/form_schema_version`（12 路由，补 ListVersion/V2get/V2upd/Category）+ `internal/form/definition`（容器/控件/脚本权威结构体）。
+**itsm**：契约 `data/api-doc/itsm-form.json`（8 EAML）+ 后端 `ITSM/flowable_service/form_schema_version`（12 路由，补 ListVersion/V2get/V2upd/Category）+ `internal/form/definition`（容器/控件/脚本权威结构体）。
 
 ---
 
@@ -86,7 +86,7 @@ api-cli --spec platforms/demo/easyops-cmdb.yaml <resource> <verb> [args] --insec
 三层体系（8 verb）：`form`（list/save/delete）· `form_version`（list/get[V2]/update[V2]/delete/set_main）· `formDefinition`（版本内容 JSON 字符串 = []Container，非端点）。
 内容模型（5 容器 / 23 控件 / 5 生命周期脚本 / 条件显示 / 数据继承）详见 `objects.yaml#itsm_form_definition`。
 
-### itsm-form e2e 场景 → resource.verb 映射
+### itsm e2e 场景 → resource.verb 映射
 
 | 场景 | 挡位 | 流程 |
 |---|---|---|

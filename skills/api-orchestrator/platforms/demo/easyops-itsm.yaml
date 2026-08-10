@@ -1,7 +1,8 @@
 # =============================================================================
-# EasyOps ITSM 表单管理（flowable_service）—— api-cli 集中清单
+# EasyOps ITSM（flowable_service）—— api-cli 集中清单
 # -----------------------------------------------------------------------------
-# 三层体系：
+# 当前覆盖：表单管理（form/form_version）。未来 ITSM 其它域（流程 process 等）统一并入本清单。
+# 表单三层体系：
 #   ① form        表单层（FormSchema）—— 表单本身的 list/save(新建+首版本)/delete
 #   ② form_version 表单版本层（FormSchemaVersion）—— 版本的 list/get/update/delete/set_main
 #   ③ formDefinition  版本内容层 —— JSON 字符串 []Container（容器/控件/脚本/条件显示/继承）
@@ -40,7 +41,7 @@
 # =============================================================================
 spec: api-cli/v1
 service:
-  name: easyops-itsm-form
+  name: easyops-itsm
   version: "1.0"
   default_endpoint: backend
   endpoints:
