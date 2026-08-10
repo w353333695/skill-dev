@@ -144,9 +144,10 @@ func buildToolDescription(r *tree.Resource, op *tree.Operation) string {
 	if op.Pagination != nil {
 		tags = append(tags, "[可分页]")
 	}
-	// binary verb 经 MCP 调用必然失败（见 toolsCall 拦截），[CLI-only] 标签在
-	// tools/list 时给 LLM 提前信号——声明层 + 执行层双保险。
-	if op.Response != nil && op.Response.Format == "binary" {
+	// CLI-only verb（binary 响应或 multipart 上传）经 MCP 调用必然失败（见 toolsCall 拦截），
+	// [CLI-only] 标签在 tools/list 时给 LLM 提前信号——声明层 + 执行层双保险。
+	// 两者都需要本地文件系统：下载需落盘、上传需本地文件路径。
+	if isCLIOnlyVerb(op) {
 		tags = append(tags, "[CLI-only]")
 	}
 	if len(tags) > 0 {
@@ -162,6 +163,14 @@ func isWriteMethod(m string) bool {
 		return true
 	}
 	return false
+}
+
+// isCLIOnlyVerb 判断 operation 是否「MCP 不可用、只能走 CLI」。
+// CLI-only 谓词（iter4 final-review 扩展）= binary 响应（下载） OR multipart 上传——
+// 两者都需要 LLM 无法提供的本地文件系统，经 MCP 调用必然失败。
+// 集中判定供 toolsCall（运行时拦截）与 buildToolDescription（声明层标签）共用，避免两处分叉。
+func isCLIOnlyVerb(op *tree.Operation) bool {
+	return (op.Response != nil && op.Response.Format == "binary") || op.ContentType == "multipart-form-data"
 }
 
 // Serve 启动 stdio JSON-RPC 循环（initialize / tools/list / tools/call）。
@@ -244,11 +253,15 @@ func (s *Server) toolsCall(ctx context.Context, params json.RawMessage) map[stri
 	if r == nil || op == nil {
 		return map[string]any{"error": map[string]any{"code": -32602, "message": "tool not found: " + p.Name}}
 	}
-	// binary 响应不经 MCP：二进制字节塞进 JSON-RPC text 会产生无效 UTF-8 损坏响应。
-	// 引导调用方走 CLI --output 落盘（声明式可预测，不静默损坏）。
-	// 拦截点在 SelectEndpoint 前——清单声明合法（lint 不拦），这是运行时通道限制。
-	if op.Response != nil && op.Response.Format == "binary" {
-		return map[string]any{"error": map[string]any{"code": -32602, "message": "该操作返回二进制流，MCP 不支持；请用 CLI 调用并加 --output 落盘"}}
+	// CLI-only verb 不经 MCP——两者都需要 LLM 无法提供的本地文件系统：
+	//   - binary 响应（下载）：二进制字节塞进 JSON-RPC text 产生无效 UTF-8，损坏响应。
+	//   - multipart 上传（op.ContentType == "multipart-form-data"）：splitArgs 把 file 参数塞进 flags，
+	//     resolve → buildMultipart → os.Open(flags["file"]) 在 api-cli 宿主上几乎必失败
+	//     （LLM 无法把文件放到 api-cli 宿主上），报「打开上传文件 失败」令人困惑且不可用。
+	// 统一拦截在 SelectEndpoint 前——清单声明合法（lint 不拦），这是运行时通道限制。
+	// 引导调用方走 CLI（上传用文件路径参数，下载加 --output 落盘）。
+	if isCLIOnlyVerb(op) {
+		return map[string]any{"error": map[string]any{"code": -32602, "message": "该操作涉及文件传输（上传或下载二进制），MCP 不支持；请用 CLI 调用（上传用文件路径参数，下载加 --output 落盘）"}}
 	}
 	ep, err := s.tr.SelectEndpoint("") // 空名走 service.DefaultEndpoint
 	if err != nil {
