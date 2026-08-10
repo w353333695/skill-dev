@@ -100,6 +100,28 @@ entities:
     trap: "delete 路径参数是 versionIds（复数，分号分隔）；其余是 versionId（单数）。值同 13hex，参数名不同。"
     state_machine: "版本状态两态：unfinished(草稿)/done(完成)。set_main 须 done。无 draft/published 叫法。"
 
+  # ===========================================================================
+  # ITSM 流程定义锚（flowable_service）
+  # ===========================================================================
+  process_definition_id:
+    description: 流程定义主键锚（flowable_service）。process_definition path 参数 {definitionId}；process_version path 参数 {definitionId}。
+    format: "13 位 hex（CMDB 生成，不可在 body 指定；create 返回 data.instanceId）"
+    pattern: '^[0-9a-z]{13}$'
+    used_by:
+      - process_definition.edit / delete（path {definitionId}）
+      - process_version.list / get / create / edit / delete / set_main（path {definitionId}）
+
+  process_version_id:
+    description: 流程版本主键锚。process_version path 参数。list 支持 'lastest' 别名。
+    format: "13 位 hex（CMDB 生成；create 返回 versionId）"
+    pattern: '^[0-9a-z]{13}$'
+    used_by:
+      - process_version.get / edit / set_main（path {versionId}）
+      - process_version.delete（path {versionIds} 复数分号，⚠️参数名 versionIds）
+      - process_form.set（path {versionId}）
+    trap: "delete 参数名是 versionIds（复数）；其余 versionId。批量是壳只删第一个。"
+    state_machine: "两态 unfinished/done。done 才能设主版本+部署 Flowable；done 不可编辑。"
+
 # =============================================================================
 # 跨实体转换（编排挡 step 间接力时怎么传字段）
 # =============================================================================
@@ -155,3 +177,20 @@ transitions:
     pick: data.list[].versionInfo.instanceId（versionId）
     to: [form_version.get, form_version.update, form_version.delete]
     how: "list 返回版本 instanceId → 作为 {versionId} 喂 get/update/delete。注意 delete 的参数名是 versionIds（复数）"
+  # ---------- ITSM 流程定义 ----------
+  - from: process_definition.list
+    pick: data.list[].instanceId（definitionId）
+    to: [process_definition.edit, process_definition.delete, process_version.list, process_version.create]
+    how: "list 返回流程定义 instanceId → 作为 {definitionId} 喂下游。场景①看有哪些流程 / 场景②建版本须先有 definitionId"
+  - from: process_definition.create
+    pick: data.instanceId（definitionId）
+    to: [process_version.create, process_definition.edit, process_definition.delete]
+    how: "create 返回 definitionId → process_version.create 建版本（场景②建流程后建 BPMN 版本）"
+  - from: process_version.create
+    pick: data.versionId
+    to: [process_version.get, process_version.edit, process_version.set_main, process_form.set]
+    how: "create 返回 versionId → get 校验 / edit 改 / set_main 部署生效 / process_form.set 绑表单。⚠️建版本不部署，set_main 才生效"
+  - from: process_version.list
+    pick: data.list[].vInstanceId（versionId）
+    to: [process_version.get, process_version.edit, process_version.delete, process_version.set_main, process_form.set]
+    how: "list 返回版本 id → 喂下游。delete 参数名 versionIds（复数）"

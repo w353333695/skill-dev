@@ -81,12 +81,14 @@ api-cli --spec platforms/demo/easyops-cmdb.yaml <resource> <verb> [args] --insec
 
 ---
 
-## EasyOps ITSM 表单管理（flowable_service）
+## EasyOps ITSM（flowable_service）—— 表单 + 流程定义
 
-三层体系（8 verb）：`form`（list/save/delete）· `form_version`（list/get[V2]/update[V2]/delete/set_main）· `formDefinition`（版本内容 JSON 字符串 = []Container，非端点）。
-内容模型（5 容器 / 23 控件 / 5 生命周期脚本 / 条件显示 / 数据继承）详见 `objects.yaml#itsm_form_definition`。
+**表单域**（8 verb）：`form`（list/save/delete）· `form_version`（list/get[V2]/update[V2]/delete/set_main）· `formDefinition`（版本内容 JSON 字符串 = []Container，非端点）。内容模型（5 容器 / 23 控件 / 5 生命周期脚本 / 条件显示 / 数据继承）详见 `objects.yaml#itsm_form_definition`。
 
-### itsm e2e 场景 → resource.verb 映射
+**流程定义域**（11 verb）：`process_definition`（list/create/edit/delete）· `process_version`（list/get[V2]/create/edit/delete/set_main）· `process_form`（set 节点绑表单）。版本内容 = bpmnXML（标准 BPMN 2.0 XML + flowable:扩展）+ processSetting（节点配置 JSON）。内容模型（BPMN/节点配置/审批人体系/前后置脚本+orderInfo/表单决定流转/自动化节点）详见 `objects.yaml#itsm_process_bpmn` / `itsm_process_node_setting` / `itsm_process_form_flow`。
+⚠️流程关键：建版本不部署 Flowable，须 set_main 才生效；表单决定流转用 `${pass==1}`+govaluate（后端求值），与表单 displayCondition `#{...}`（前端求值）不同套。
+
+### itsm 表单 e2e 场景 → resource.verb 映射
 
 | 场景 | 挡位 | 流程 |
 |---|---|---|

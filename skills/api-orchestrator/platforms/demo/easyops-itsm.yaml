@@ -1,7 +1,7 @@
 # =============================================================================
 # EasyOps ITSM（flowable_service）—— api-cli 集中清单
 # -----------------------------------------------------------------------------
-# 当前覆盖：表单管理（form/form_version）。未来 ITSM 其它域（流程 process 等）统一并入本清单。
+# 当前覆盖：表单管理（form/form_version）+ 流程定义（process_definition/process_version/process_form）。未来 ITSM 其它域统一并入本清单。
 # 表单三层体系：
 #   ① form        表单层（FormSchema）—— 表单本身的 list/save(新建+首版本)/delete
 #   ② form_version 表单版本层（FormSchemaVersion）—— 版本的 list/get/update/delete/set_main
@@ -271,3 +271,159 @@ resources:
         params:
           formId:    { in: path, type: string, required: true, description: "表单 id" }
           versionId: { in: path, type: string, required: true, description: "要设为主版本的版本 id（须 state==done）" }
+
+  # ===========================================================================
+  # ITSM 流程定义（process）—— 复用同 service（flowable_service:8134），三层体系：
+  #   ① process_definition  流程定义层（ITSC_PROCESS）—— list/create/edit/delete
+  #   ② process_version      流程版本层（ITSC_PROCESS_VERSION）—— list/get[V2]/create/edit/delete/set_main
+  #   ③ process_form         表单绑定层（ITSC_PROCESS_FORM_RELATION）—— set（绑/解/换节点表单）
+  # 版本内容 = bpmnXML（标准 BPMN 2.0 XML + flowable:扩展）+ processSetting（节点配置 JSON）+ stageSetting（阶段，relation）。
+  # 完整内容模型（BPMN/节点/脚本/orderInfo/表单流转）见 objects.yaml#itsm_process_*（本清单只定 wire）。
+  # ⚠️ 路径 disparate：list/get/delete/set_main 走 /definition/:definitionId/version...；
+  #    create/edit 走 /process_definition/:definitionId[/version/:versionId]——resource.path 留空，每 op 持完整路径。
+  # 数据来源：契约 data/api-doc/itsm-process_definition.json（10 EAML）+ 后端 process_definition_version/ +
+  #   internal/bpmn/（BPMN 解析/校验）+ internal/process/（流转求值）+ internal/process_script/（orderInfo）。
+  # ===========================================================================
+  process_definition:
+    description: ITSM 流程定义（ITSC_PROCESS）—— 流程本身的查询/新建/编辑/删除。一个流程定义含多版本（process_version），主版本(isMain)部署到 Flowable 引擎才生效。无单 def 详情 verb——取 def 元信息走 list 过滤。
+    path: ""
+    operations:
+      list:
+        description: 流程定义列表（分页，name/category/creator/Q 模糊过滤）。isMain=true 只列有主版本的 def。list 元素含 instanceId/name/category/creator/dVersionName/vInstanceId/versionName/state/isMain。⚠️不返回 bpmnXML/processSetting（list 不取重字段）。
+        method: GET
+        path: /api/flowable_service/v1/process_definition
+        params:
+          name:     { in: query, type: string, description: "流程名模糊匹配" }
+          category: { in: query, type: string, description: "分类模糊匹配" }
+          creator:  { in: query, type: string, description: "创建者模糊匹配" }
+          Q:        { in: query, type: string, description: "通用关键词，$or 模糊匹配 name+creator" }
+          isMain:   { in: query, type: boolean, description: "true=只列有主版本的 def；响应只填 MainVersion" }
+          page:     { in: query, type: integer, description: "页码默认 1 ≥1" }
+          pageSize: { in: query, type: integer, description: "每页默认 10 ≥1" }
+        pagination: { type: offset, page_in: query, items_path: data.list, page_param: page, size_param: pageSize, size: 10 }
+      create:
+        description: 新建流程定义（只建 def 元信息 name/category/memo/triggerIdList；不含版本。versionId 不可指定，CMDB 生成）。建完用 process_version.create 建 BPMN 版本。useFormBuilder=false（老表单）默认。
+        method: POST
+        path: /api/flowable_service/v2/process_definition
+        body:
+          type: object
+          required: [name, category]
+          properties:
+            name:           { type: string, description: "流程名（def 内唯一）" }
+            category:       { type: string, description: "分类（自由文本）" }
+            memo:           { type: string, description: "备注" }
+            triggerIdList:  { type: array, items: { type: string }, description: "触发器 id 列表" }
+            useFormBuilder: { type: boolean, description: "是否引入 form_builder，默认 false" }
+      edit:
+        description: 编辑流程定义元信息（name/category/memo/triggerIdList）。不是 upsert——必须传已存在 definitionId。改 name 防重（排除自己）。
+        method: PUT
+        path: /api/flowable_service/v2/process_definition/{definitionId}
+        params:
+          definitionId: { in: path, type: string, required: true, description: "流程定义 id（13 hex）" }
+        body:
+          type: object
+          required: [name, category]
+          properties:
+            name:           { type: string }
+            category:       { type: string }
+            memo:           { type: string }
+            triggerIdList:  { type: array, items: { type: string } }
+            useFormBuilder: { type: boolean }
+      delete:
+        description: 删除流程定义。⚠️有版本时拒绝（『存在流程定义版本，不允许删除』）——必须先删干净所有版本。def 不存在静默成功（幂等）。删最后一个版本会隐式级联删 def（见 process_version.delete）。
+        method: DELETE
+        path: /api/flowable_service/v1/process_definition/{definitionId}
+        params:
+          definitionId: { in: path, type: string, required: true, description: "流程定义 id" }
+
+  process_version:
+    description: ITSM 流程版本（ITSC_PROCESS_VERSION）—— 版本的查询/建/改/删/设主版本。一个 def 多版本 1:N，同时仅一版 isMain（由 set_main 保证，旧主自动降级）。状态机两态 unfinished(草稿)/done(完成)。版本内容=bpmnXML（BPMN 2.0 XML）+ processSetting（{nodeSettings,lineSettings} 节点配置 JSON）+ stageSetting（阶段）。⚠️只有 set_main 才把 BPMN 部署到 Flowable 引擎（版本真正生效）；done 版本不可编辑。完整内容模型见 objects.yaml#itsm_process_bpmn / itsm_process_node_setting。
+    path: ""
+    operations:
+      list:
+        description: 列某流程定义的所有版本。versionId 支持 "lastest" 别名（取最新版本，仅 list 类可靠）。list 元素含 vInstanceId/versionName/state/isMain。⚠️不返回 bpmnXML/processSetting。
+        method: GET
+        path: /api/flowable_service/v1/definition/{definitionId}/version
+        params:
+          definitionId: { in: path, type: string, required: true, description: "流程定义 id（13 hex）" }
+          versionId:    { in: query, type: string, description: "版本 id；'lastest' 取最新版本" }
+        pagination: { type: offset, page_in: query, items_path: data.list, page_param: page, size_param: pageSize, size: 10 }
+      get:
+        description: 读取版本完整详情（V2 超集）。返回 bpmnXML + taskInfo（每节点设置含表单绑定/审批人/审批方法/流转条件，即 processSetting.nodeSettings 的展示视图）+ lineSettings + stageSetting。bpmnXML 是标准 BPMN 2.0 XML。取流程内容走它。
+        method: GET
+        path: /api/flowable_service/v2/definition/{definitionId}/version/{versionId}
+        params:
+          definitionId: { in: path, type: string, required: true, description: "流程定义 id" }
+          versionId:    { in: path, type: string, required: true, description: "版本 id（13 hex）" }
+      create:
+        description: 新建流程版本（保存 BPMN + 节点配置）。body 必填 bpmnXML(BPMN 2.0 XML)/versionName/state/processSetting。baseVersionId 传则克隆【表单关系+阶段设置】（不克隆 bpmnXML/processSetting，仍须 request 给）。versionId CMDB 生成返回。⚠️建版本不部署 Flowable——须再 set_main 才生效。场景②建主机申请流程用它。
+        method: POST
+        path: /api/flowable_service/v2/process_definition/{definitionId}
+        params:
+          definitionId: { in: path, type: string, required: true, description: "流程定义 id" }
+        body:
+          type: object
+          required: [bpmnXML, versionName, state, processSetting]
+          description: "新建版本请求。bpmnXML/versionName/state/processSetting 必填。"
+          properties:
+            bpmnXML:        { type: string, description: "BPMN 2.0 XML 字符串（流程图）。bpmn2:命名空间 + flowable:扩展属性。结构+校验见 objects.yaml#itsm_process_bpmn。例：'<bpmn2:definitions ...><bpmn2:process id=...><bpmn2:startEvent/><bpmn2:userTask id=\"Activity_xxx\" flowable:assignee=\"...\"/><bpmn2:sequenceFlow><bpmn2:conditionExpression>${pass==1}</bpmn2:conditionExpression></bpmn2:sequenceFlow></bpmn2:process></bpmn2:definitions>'" }
+            versionName:    { type: string, description: "版本名（def 内唯一）" }
+            state:          { type: string, enum: [unfinished, done], description: "unfinished=草稿 / done=完成（done 才能 set_main）" }
+            processSetting: { type: object, description: "节点配置 {nodeSettings:[NodeSetting], lineSettings:[LineSetting]}。NodeSetting 按 userTaskId 关联 BPMN 节点（审批人/审批方法/脚本/驳回/自动化）。完整结构见 objects.yaml#itsm_process_node_setting。存为 JSON 字符串" }
+            memo:           { type: string, description: "版本说明" }
+            baseVersionId:  { type: string, description: "克隆源版本 id——克隆【表单关系+阶段设置】到新版本（不克隆 bpmnXML/processSetting）。场景『基于现有版本派生』用" }
+      edit:
+        description: 编辑流程版本（bpmnXML/processSetting/versionName等）。⚠️done 版本拒绝编辑（『当前版本已完成，不可修改！』）——只能改 unfinished 版本。要改 done 版本须先创派生新版本（create + baseVersionId）。
+        method: PUT
+        path: /api/flowable_service/v2/process_definition/{definitionId}/version/{versionId}
+        params:
+          definitionId: { in: path, type: string, required: true, description: "流程定义 id" }
+          versionId:    { in: path, type: string, required: true, description: "版本 id（须 unfinished）" }
+        body:
+          type: object
+          required: [bpmnXML, versionName, state, processSetting]
+          description: "编辑版本请求（字段同 create）。仅 unfinished 版本可编辑。"
+          properties:
+            bpmnXML:        { type: string, description: "BPMN 2.0 XML（见 objects.yaml#itsm_process_bpmn）" }
+            versionName:    { type: string }
+            state:          { type: string, enum: [unfinished, done] }
+            processSetting: { type: object, description: "节点配置（见 objects.yaml#itsm_process_node_setting）" }
+            memo:           { type: string }
+      delete:
+        description: 删除流程版本。⚠️路径参数 versionIds（复数分号）但代码只删第一个——批量是壳。约束（任一即拒，HTTP 412）：①绑定了表单『当前流程已有绑定表单，不可删除!』②关联工单『当前流程有正在流转中的工单，不可删除!』③主版本+绑定服务 ④被父/子流程引用。副作用：删完若该 def 已无版本，【隐式级联删 def】。
+        method: DELETE
+        path: /api/flowable_service/v1/definition/{definitionId}/version/{versionIds}
+        params:
+          definitionId: { in: path, type: string, required: true, description: "流程定义 id" }
+          versionIds:   { in: path, type: string, required: true, description: "版本 id（参数名复数 versionIds；分号分隔但只删第一个；单删传一个 id）" }
+      set_main:
+        description: 设主版本（=部署到 Flowable 引擎对外生效）。⚠️目标须 state==done（unfinished 报『未完成状态不能设置为主版本』）。旧主版本自动降级（MAIN_VERSION 关系覆盖）。只有 set_main 才把 BPMN 真正部署到 Flowable（建/改版本都不部署）。运行中工单不受影响（仍走旧 deploymentId）。已是主版本则幂等。
+        method: PUT
+        path: /api/flowable_service/v1/definition/{definitionId}/version/{versionId}
+        params:
+          definitionId: { in: path, type: string, required: true, description: "流程定义 id" }
+          versionId:    { in: path, type: string, required: true, description: "要设主版本的版本 id（须 done）" }
+
+  process_form:
+    description: 流程版本↔表单绑定（ITSC_PROCESS_FORM_RELATION）。表单绑到【节点】(userTaskId)非整个版本；一个版本每个节点一条表单关系。绑/解/换同一接口靠 formRelationInstanceId + formId 组合区分。
+    path: ""
+    operations:
+      set:
+        description: 给流程版本的某节点【绑/解/换】表单。按 formRelationInstanceId + formId 组合决定动作：①都空=无操作 ②formRelationInstanceId空+formId非空=绑定 ③formRelationInstanceId非空+formId空=解绑 ④都非空=换绑。useFormBuilder=false（老表单，formId+formSchemaVersion）时后端默认取表单【主版本】绑定。场景②绑主机申请表单走它。
+        method: POST
+        path: /api/flowable_service/v1/process/version/{versionId}
+        params:
+          versionId: { in: path, type: string, required: true, description: "流程版本 id（13 hex）" }
+        body:
+          type: object
+          required: [userTaskId]
+          description: "节点表单绑定请求。userTaskId 必填（绑到节点）。"
+          properties:
+            userTaskId:             { type: string, description: "BPMN 用户任务节点 id（表单绑到节点，非版本）" }
+            useFormBuilder:         { type: boolean, description: "true=接入 formBuilder(fbFormId)；false=老表单(formId)。默认 false" }
+            formRelationInstanceId: { type: string, description: "已存在的表单关系实例 id（空=没绑过；非空=已绑，配 formId 决定解绑/换绑）" }
+            formId:                 { type: string, description: "老表单 form schema id（useFormBuilder=false）；空+formRelationInstanceId非空=解绑" }
+            fbFormId:               { type: string, description: "formBuilder 表单 id（useFormBuilder=true）" }
+            fbFormInstanceId:       { type: string, description: "formBuilder 表单版本实例 id" }
+            formDisplayMode:        { type: string, description: "表单展示模式" }
+            isDesensitization:      { type: boolean, description: "是否脱敏（仅 useFormBuilder=true 生效）" }
