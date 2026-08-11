@@ -83,7 +83,10 @@ onboarding 的速度和质量取决于输入完整度。**开工前按此清单�
 - **补端点**：找路由注册（gin/echo/http router `.GET/.POST/...` 或路由表），补全契约缺的端点。
 - **权威结构体**：找契约里引用的模型（如 `<ModelType>[]`）的 Go/源码定义——拿到**全部字段 + json tag + 校验 tag**（required/regex/enum），比契约的字段描述准。
 - **校验/约束**：找 validator + service 层的运行时检查（重复、依赖、副作用）。
+- **枚举/变量语法优先找集中源**：先找 `fixtures/`（如 notify_policy 的 `rawSetting` 全量枚举）、testdata、枚举接口（route.go 里的 `ListEnums`/`GetXxxEnums`）——这些是值空间的权威全量源，比 grep 字面量散点全。找不到再 grep validator 正则 + service switch case。
 - 派 `Explore` 子代理大面积扫，要结论 + `file:line` 引证，别 dump 全文。
+- ⚠️**这一步不可跳**：步 7 的 lint 门禁会校验每个 object 块有 `source:`（file:line / 枚举接口 / 契约）。跳了步 3 → 没 source → lint ERR → 产物不合格。不止步于契约描述 + 1~2 个样例值——那是「没查」不是「gap」，gap 是查过源码后仍无约束才标。
+- ⚠️**load-bearing 真相别托付给 background agent**：本步的结论会被后续步骤依赖（写 spec/objects），用 inline bounded grep 查、查完立即内联进 platforms + commit——session 退出会 kill background agent，已提交到 platforms 的事实不丢。
 
 ### 步 4：写 api-cli 清单（`<system>.yaml`）
 - 按 api-cli spec 格式（见 api-cli USAGE）：`service/endpoints` + `resources/<resource>/operations`。
@@ -116,11 +119,11 @@ onboarding 的速度和质量取决于输入完整度。**开工前按此清单�
 - ⚠️ **e2e 必须全走 scripts/run.sh（api-cli），禁用 curl**。curl 绕过清单验证，等于没验证 manifest 能用——onboarding 的核心产出（api-cli 清单）未经 api-cli 自身验证，交付即断。正确做法：`scripts/run.sh --spec <spec> <resource> <verb> [args]`，每个 e2e 场景逐条走 api-cli 命令树。
 
 ### 步 7：交付 + 自检
-- **跑 lint**：`scripts/lint-platforms.py <deployment>`——校验 platforms 符合 asset-schema + 引用闭合（spec 文件存在 / api 指向 resource / ref 指向 object / flows 的 op 在 spec verbs 里）。**0 ERR 才算产物合格**；WARN 逐条确认是否可接受。可加 `--api-cli <bin>` 额外校验 spec 能被 api-cli 解析。
+- **跑 lint**：`scripts/lint-platforms.py <deployment>`——校验 platforms 符合 asset-schema + 引用闭合（spec 文件存在 / api 指向 resource / ref 指向 object / flows 的 op 在 spec verbs 里）+ **source 证据门禁**（每个有 `api:` 的 object 必须有非空 `source:`，防步 3 被跳）。**0 ERR 才算产物合格**；WARN 逐条确认是否可接受。可加 `--api-cli <bin>` 额外校验 spec 能被 api-cli 解析。
 - README 作资料地图索引（指向各文件）。
 - e2e 场景逐条标注用哪个 resource.verb（覆盖标尺）。
 - 验收 URL / 校验命令记录在 systems.yaml。
-- 提交；坑已回流 platforms（**不进记忆**——platforms 是唯一真相来源）。
+- 提交；坑已回流 platforms（**不进记忆**——platforms 是唯一真相来源；本 skill 的所有知识落在 skill 本体，遵守 AGENTS.md §8 skill 自包含纪律）。
 
 ---
 

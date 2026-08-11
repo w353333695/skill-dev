@@ -108,3 +108,12 @@
 * **`platforms/` 不在通用打包范围**：它是 skill 的外部可拔插部件（如 api-orchestrator 的平台资产），由 skill 方自行手动分发，通用脚本不处理。
 * 用户使用：解压 zip 到 workspace 根 → `bash skills/<skill>/scripts/setup.sh` → n 个 CLI 就位 → skill 直接调。
 * **golang project 不走本套**：用独立的 `scripts/pack-go.sh`（多平台二进制大礼包），不读 `manifest.sh`、不进 `vendor/` whl。若一个 skill 同时依赖 Python 和 golang project，Python 走上述流程，golang 另跑 `pack-go.sh`，两套产物独立分发。
+
+## 8. skill 开发纪律：模拟分发效果，skill 必须自包含
+
+开发或优化 skill 时，**禁止把 skill 的内部知识记进 agent memory**（`~/.claude/projects/*/memory/`）——包括但不限于：skill 的运行时配置、字段 schema、踩过的坑、脚本结构、开发状态、skill 调用行为等。
+
+* **原因：模拟分发后的真实使用效果**。用户拿到的是打包分发的 skill，**没有开发态的 memory 辅助**——memory 只存在于本开发环境，不随 skill 分发。开发时若把关键知识记进 memory 当拐杖，skill 本体（`SKILL.md` / `references/` / `platforms/` / `scripts/` 注释）的自包含缺陷会被掩盖，分发后用户用不顺，也拖慢迭代优化。
+* **所有 skill 知识必须落在 skill 本体**：遇到坑/配置/字段，直接修进 `SKILL.md`、onboarding 到 `platforms/<deployment>/`、或写进 `references/`，**不要"先记 memory 回头再说"**。
+* **memory 只记与具体 skill 无关的内容**：平台/harness 行为（工作区自动提交、background agent 生命周期等）、通用工作环境、用户偏好、跨项目的通用 feedback。
+* **目的**：逼出 skill 的自包含性——分发即可用、换环境换部署只换 `platforms/`；缺陷在开发期就暴露，不靠外部记忆兜底，从而能快速开发与优化 skill。
