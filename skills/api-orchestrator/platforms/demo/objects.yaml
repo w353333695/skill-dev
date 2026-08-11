@@ -769,7 +769,7 @@ objects:
       - op: ticket.delete
         rule: "DELETE /v1/process_instance/:instanceIds。⚠️只有作废(isCancelled)的工单才能删除——running/done/closed 须先 cancel 再 delete。instanceIds 分号分隔。"
       - op: ticket.export_excel
-        rule: "POST /v1/file/batch/ticket/excel_export。ticketIds JSON 数组；fields 空用服务默认导出配置。返回二进制 Excel 流。⚠️e2e 实测报 permission denied（环境权限配置，非 API 格式问题）——可能需要 itsc 导出权限。"
+        rule: "POST /v1/file/batch/ticket/excel_export。ticketIds JSON 数组；fields 空用服务默认导出配置。返回二进制 Excel 流。e2e 实测：running 工单导出成功(8KB Excel)，done 工单报 permission denied——导出权限与工单状态/可见范围相关（非 API 格式问题）。"
 
 # =============================================================================
 # 接口级行为（跨对象，编排时必须知道）
