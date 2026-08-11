@@ -77,7 +77,7 @@ func operationCmd(tr *tree.OperationTree, e *engine.Engine, r *tree.Resource, op
 	bag := newFlagBag()
 
 	c := &cobra.Command{
-		Use:   verb,
+		Use:   verb + " [args]",
 		Short: opShort(op, r),
 		Annotations: map[string]string{
 			"resource": r.Name,
