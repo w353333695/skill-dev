@@ -42,17 +42,17 @@ resources:
 	// inst 子命令存在
 	var foundInst, foundRead, foundRelation, foundRelationRead bool
 	for _, c := range root.Commands() {
-		if c.Use == "inst" {
+		if c.Name() == "inst" {
 			foundInst = true
 			for _, cc := range c.Commands() {
-				if cc.Use == "read" {
+				if cc.Name() == "read" {
 					foundRead = true
 				}
-				if cc.Use == "relation" {
+				if cc.Name() == "relation" {
 					foundRelation = true
 					// relation 下应有自己的 read
 					for _, gc := range cc.Commands() {
-						if gc.Use == "read" {
+						if gc.Name() == "read" {
 							foundRelationRead = true
 						}
 					}
