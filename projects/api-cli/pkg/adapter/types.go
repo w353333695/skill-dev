@@ -24,6 +24,7 @@ type AuthRequest struct {
 	Body    []byte
 	Headers map[string]string
 	Query   map[string]string
+	DryRun  bool // dry-run/print-curl 时 true：有状态 provider（oauth2）跳过刷新；无状态 provider 忽略
 }
 
 // AuthResponse 是 adapter 算出的注入项。
