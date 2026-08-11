@@ -122,6 +122,13 @@ entities:
     trap: "delete 参数名是 versionIds（复数）；其余 versionId。批量是壳只删第一个。"
     state_machine: "两态 unfinished/done。done 才能设主版本+部署 Flowable；done 不可编辑。"
 
+  service_instance_id:
+    description: 服务实例主键锚（flowable_service）。service_instance resource path 参数 {instanceId}。
+    format: "13 位 hex（CMDB 生成，不可在 body 指定；create 返回 data.instanceId）"
+    pattern: '^[0-9a-z]{13}$'
+    used_by:
+      - service_instance.get / edit / delete（path {instanceId}）
+
 # =============================================================================
 # 跨实体转换（编排挡 step 间接力时怎么传字段）
 # =============================================================================

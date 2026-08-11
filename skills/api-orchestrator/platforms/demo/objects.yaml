@@ -714,6 +714,34 @@ objects:
       - op: process_form.set
         rule: "按 formRelationInstanceId+formId 组合 4 动作：①都空=无操作 ②relId空+formId非空=绑定 ③relId非空+formId空=解绑 ④都非空=换绑。useFormBuilder=false 时后端默认取表单【主版本】绑（service.go:593,604）。"
 
+  # ---------- ITSM 服务实例（service_instance）----------
+  itsm_service_instance:
+    description: ITSM 服务实例（服务目录条目）—— 用户在 ITSM 前端选服务发起工单；每个服务关联一个流程定义（associatedProcess）。CRUD 全在 /v1/service_instance。
+    source: data/sources/backend/ITSM/flowable_service/service_catalog/service_catalog_service.go
+    api: service_instance
+    fields:
+      instanceId:          { type: string, anchor: true, desc: "服务实例 id（13 hex，CMDB 生成）" }
+      name:                { type: string, required: true, desc: "服务名称" }
+      category:            { type: string, required: true, desc: "分类（点分多级，如 服务请求.请求目录 / 事件管理）" }
+      associatedProcess:   { type: string, required: true, ref: itsm_process_definition, desc: "关联流程定义 instanceId（服务绑定的流程）" }
+      catalogId:           { type: string, desc: "所在目录实例 id（服务目录树的位置）" }
+      owner:               { type: string, desc: "负责人用户名" }
+      description:         { type: string, desc: "服务说明" }
+      guide:               { type: string, desc: "服务指引" }
+      status:              { type: string, enum: [enabled, disabled], desc: "是否启用" }
+      builtIn:             { type: bool, desc: "是否内置服务（不可删）" }
+      url:                 { type: string, desc: "自定义 URL" }
+      iconColor:           { type: string, desc: "图标颜色" }
+      triggerIdList:       { type: array, items: string, desc: "触发器 id 列表" }
+      slaRuleId:           { type: string, desc: "SLA 规则 id" }
+    relations:
+      - { to: itsm_process_definition, type: association, cardinality: "N:1", via: associatedProcess, desc: "服务关联一个流程定义" }
+    side_effects:
+      - op: service_instance.create
+        rule: "POST /v1/service_instance。必填 name/category/associatedProcess。catalogId 指定目录位置；owner 指定负责人。instanceId CMDB 生成返回。"
+      - op: service_instance.delete
+        rule: "有工单在流转时拒绝（『服务尚有工单正在流转中,不允许删除』）——须先删完该服务所有工单。内置服务（builtIn=true）不可删。源码 service_catalog_service.go:1450-1460 CheckServiceRemovable。"
+
 # =============================================================================
 # 接口级行为（跨对象，编排时必须知道）
 # =============================================================================

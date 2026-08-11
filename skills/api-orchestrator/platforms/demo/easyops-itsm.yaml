@@ -1,7 +1,7 @@
 # =============================================================================
 # EasyOps ITSM（flowable_service）—— api-cli 集中清单
 # -----------------------------------------------------------------------------
-# 当前覆盖：表单管理（form/form_version）+ 流程定义（process_definition/process_version/process_form）。未来 ITSM 其它域统一并入本清单。
+# 当前覆盖：表单管理（form/form_version）+ 流程定义（process_definition/process_version/process_form）+ 服务实例（service_instance）。未来 ITSM 其它域统一并入本清单。
 # 表单三层体系：
 #   ① form        表单层（FormSchema）—— 表单本身的 list/save(新建+首版本)/delete
 #   ② form_version 表单版本层（FormSchemaVersion）—— 版本的 list/get/update/delete/set_main
@@ -427,3 +427,85 @@ resources:
             fbFormInstanceId:       { type: string, description: "formBuilder 表单版本实例 id" }
             formDisplayMode:        { type: string, description: "表单展示模式" }
             isDesensitization:      { type: boolean, description: "是否脱敏（仅 useFormBuilder=true 生效）" }
+
+  # ===========================================================================
+  # ITSM 服务实例（service）—— 同 flowable_service，CRUD。
+  # 路径统一 /api/flowable_service/v1/service_instance[/:instanceId]。
+  # 数据来源：契约 data/api-doc/itsm-service_instance.json（7 EAML，取 CRUD 5 个）
+  #          + 后端 service_catalog/（service_catalog_service.go）。
+  # ===========================================================================
+  service_instance:
+    description: ITSM 服务实例（服务目录里的一个服务条目）。用户在 ITSM 前端选服务发起工单；服务关联一个流程定义（associatedProcess）。CRUD 全在 /v1/service_instance。
+    path: ""
+
+    operations:
+      list:
+        description: 服务实例列表（按目录 catalogID 过滤）。catalogID 逗号分隔多个目录 id（空=查无目录的服务）。Q 模糊搜索名称。hideDisabled=true 隐藏禁用服务。⚠️ list 需要必填参数（catalogID/page/pageSize），前端默认不渲染否则——见 acceptance_urls。
+        method: GET
+        path: /api/flowable_service/v1/service_instance
+        params:
+          catalogID:     { in: query, type: string, description: "目录实例 id 列表，逗号分隔。空=无目录的服务" }
+          Q:             { in: query, type: string, description: "模糊搜索服务名称" }
+          fuzzyNickname: { in: query, type: string, description: "模糊搜索昵称" }
+          hideDisabled:  { in: query, type: boolean, description: "true=隐藏禁用服务，默认 false" }
+          page:          { in: query, type: integer, description: "页码默认 1" }
+          pageSize:      { in: query, type: integer, description: "每页默认 10" }
+        pagination: { type: offset, page_in: query, items_path: data.list, page_param: page, size_param: pageSize, size: 10 }
+
+      create:
+        description: 创建服务实例。必填 name/category/associatedProcess。catalogId 指定所在目录（如服务请求.请求目录 的 catalog id）；owner 指定负责人（用户名）。associatedProcess=流程定义 instanceId（如主机申请流程的 definitionId）。场景②建 test-host 服务用它。
+        method: POST
+        path: /api/flowable_service/v1/service_instance
+        body:
+          type: object
+          required: [name, category, associatedProcess]
+          description: "创建服务请求。name/category/associatedProcess 必填。"
+          properties:
+            name:               { type: string, description: "服务名称" }
+            category:           { type: string, description: "分类（如 服务请求.请求目录）" }
+            associatedProcess:  { type: string, description: "关联流程定义 instanceId（如 658aa1ed3bbd2）" }
+            catalogId:          { type: string, description: "所在目录实例 id" }
+            owner:              { type: string, description: "负责人用户名（如 easyops）" }
+            description:        { type: string, description: "服务说明" }
+            guide:              { type: string, description: "服务指引" }
+            status:             { type: string, enum: [enabled, disabled], description: "是否启用，默认 enabled" }
+            icon:               { type: object, description: "图标 {name,lib}" }
+            iconColor:          { type: string, description: "图标颜色" }
+            url:                { type: string, description: "自定义服务 URL" }
+            triggerIdList:      { type: array, items: { type: string }, description: "触发器 id 列表" }
+            slaRuleId:          { type: string, description: "SLA 规则 id" }
+
+      get:
+        description: 获取服务实例详情（含关联流程/负责人/SLA/权限等）。
+        method: GET
+        path: /api/flowable_service/v1/service_instance/{instanceId}
+        params:
+          instanceId: { in: path, type: string, required: true, description: "服务实例 id（13 hex）" }
+
+      edit:
+        description: 编辑服务实例（全量覆盖元信息：name/category/owner/description/guide等）。场景③改说明用它。
+        method: PUT
+        path: /api/flowable_service/v1/service_instance/{instanceId}
+        params:
+          instanceId: { in: path, type: string, required: true, description: "服务实例 id" }
+        body:
+          type: object
+          description: "编辑服务（字段同 create，全量覆盖）。"
+          properties:
+            name:               { type: string }
+            category:           { type: string }
+            associatedProcess:  { type: string }
+            catalogId:          { type: string }
+            owner:              { type: string }
+            description:        { type: string }
+            guide:              { type: string }
+            status:             { type: string, enum: [enabled, disabled] }
+            url:                { type: string }
+            iconColor:          { type: string }
+
+      delete:
+        description: 删除服务实例。⚠️有工单在流转时拒绝（『服务尚有工单正在流转中,不允许删除』）——须先删完该服务所有工单。内置服务（builtIn=true）不可删。
+        method: DELETE
+        path: /api/flowable_service/v1/service_instance/{instanceId}
+        params:
+          instanceId: { in: path, type: string, required: true, description: "服务实例 id" }
