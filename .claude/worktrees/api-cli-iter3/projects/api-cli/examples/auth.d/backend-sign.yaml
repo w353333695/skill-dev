@@ -1,4 +1,0 @@
-provider: hmac
-config:
-  appkey: ${CMDB_APPKEY}
-  secret: ${CMDB_SECRET}

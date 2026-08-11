@@ -1,3 +1,0 @@
-provider: bearer
-config:
-  token: ${CMDB_FRONTEND_TOKEN}

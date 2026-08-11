@@ -1,5 +1,0 @@
-
-monitor-kit 
-resource-collector-kit 
-inspection-kit 
-custom-notification
