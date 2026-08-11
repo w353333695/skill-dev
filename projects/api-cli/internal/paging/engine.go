@@ -17,9 +17,10 @@ import (
 // 消费方（engine.iterate）应据此归一化错误返回，而非把截断数据当成完整结果。
 // 出错的 Item 发出后 channel 立即 close。
 type Item struct {
-	ID  string
-	Raw []byte // 原始 JSON 字节
-	Err error  // 翻页中途错误（DoFunc 失败）；非 nil 时 Raw 为空
+	ID    string
+	Raw   []byte // 原始 JSON 字节
+	Err   error  // 翻页中途错误（DoFunc 失败）；非 nil 时 Raw 为空
+	Total *int   // 首条 item 携带信封里的 total（若有）；仅第一条非 nil
 }
 
 // Options 翻页选项。
@@ -64,6 +65,16 @@ func Iter(ctx context.Context, pg *tree.Pagination, do DoFunc, firstBody []byte,
 				return
 			}
 			items := gjson.GetBytes(respBody, pg.ItemsPath).Array()
+			// 首次响应抽 total（默认 totalPath = itemsPath 父级 + ".total"）
+			totalPath := pg.TotalPath
+			if totalPath == "" {
+				totalPath = parentPath(pg.ItemsPath) + ".total"
+			}
+			var firstTotal *int
+			if t := gjson.GetBytes(respBody, totalPath); t.Exists() {
+				n := int(t.Int())
+				firstTotal = &n
+			}
 			for _, it := range items {
 				id := gjson.Get(it.Raw, "id").String()
 				if !opts.NoDedupe && id != "" {
@@ -73,10 +84,11 @@ func Iter(ctx context.Context, pg *tree.Pagination, do DoFunc, firstBody []byte,
 					seen[id] = true
 				}
 				select {
-				case out <- Item{ID: id, Raw: []byte(it.Raw)}:
+				case out <- Item{ID: id, Raw: []byte(it.Raw), Total: firstTotal}:
 				case <-ctx.Done():
 					return
 				}
+				firstTotal = nil // 只在首条 item 带
 				count++
 				if opts.Limit > 0 && count >= opts.Limit {
 					return
@@ -169,4 +181,14 @@ func copyMap(m map[string]string) map[string]string {
 		out[k] = v
 	}
 	return out
+}
+
+// parentPath 返回点分路径的父级："data.list" -> "data"；无点返回 ""。
+func parentPath(p string) string {
+	for i := len(p) - 1; i >= 0; i-- {
+		if p[i] == '.' {
+			return p[:i]
+		}
+	}
+	return ""
 }

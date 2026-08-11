@@ -34,6 +34,7 @@ type Options struct {
 	Timeout   time.Duration // HTTP 超时（0 = 不限）；用 context.WithTimeout 包装 ctx，http.Do 尊重 deadline
 	Out       io.Writer     // 输出目标（默认 os.Stdout；测试注入 bytes.Buffer）
 	OutCloser io.Closer     // 非空时调用方（cobracli RunE）在 Execute 后 Close（--output 指向文件场景）
+	Err       io.Writer     // stderr（total / warning 输出；空则 engine 内部用 os.Stderr）
 }
 
 // Engine 执行器。可被 cobracli/mcp 共用。
@@ -228,6 +229,13 @@ func (e *Engine) iterate(ctx context.Context, req *resolvedReq, op *tree.Operati
 		limit = 0 // 0 = 不限，受 paging.Options.MaxItems 硬上限约束
 	}
 	items := paging.Iter(ctx, op.Pagination, do, req.Body, first, paging.Options{Limit: limit})
+	// stderr：默认 os.Stderr；opts.Err 注入（测试用 bytes.Buffer 断言）。
+	// total 经首条 item 携带，发出一次后置 totalEmitted=true（多页/重试不再重复）。
+	errw := opts.Err
+	if errw == nil {
+		errw = os.Stderr
+	}
+	totalEmitted := false
 	// format=table|yaml：缓冲全部 items（json.Unmarshal 成 map 收集），末尾整体 FormatTable/Format。
 	// 取舍：缓冲换确定性表头/列对齐；json 默认仍走流式 NDJSON（大列表不爆内存）。
 	if opts.Format == "table" || opts.Format == "yaml" {
@@ -239,6 +247,10 @@ func (e *Engine) iterate(ctx context.Context, req *resolvedReq, op *tree.Operati
 					return it.Err
 				}
 				return &output.APIError{Code: "paging", Message: it.Err.Error(), ExitCode: output.ExitNetTimeout}
+			}
+			if !totalEmitted && it.Total != nil {
+				fmt.Fprintf(errw, `{"_meta":{"total":%d}}`+"\n", *it.Total)
+				totalEmitted = true
 			}
 			var m map[string]any
 			if err := json.Unmarshal(it.Raw, &m); err == nil {
@@ -257,6 +269,10 @@ func (e *Engine) iterate(ctx context.Context, req *resolvedReq, op *tree.Operati
 				return it.Err
 			}
 			return &output.APIError{Code: "paging", Message: it.Err.Error(), ExitCode: output.ExitNetTimeout}
+		}
+		if !totalEmitted && it.Total != nil {
+			fmt.Fprintf(errw, `{"_meta":{"total":%d}}`+"\n", *it.Total)
+			totalEmitted = true
 		}
 		fmt.Fprintln(opts.Out, string(it.Raw))
 	}
