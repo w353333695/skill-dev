@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"net/url"
 	"os"
 	"strings"
 	"sync"
@@ -37,6 +38,7 @@ type Options struct {
 	OutCloser io.Closer     // 非空时调用方（cobracli RunE）在 Execute 后 Close（--output 指向文件场景）
 	Err       io.Writer     // stderr（total / warning 输出；空则 engine 内部用 os.Stderr）
 	Body      string        // inline JSON body（--body flag；优先级：Body > BodyFile > body 参数）
+	RevealAuth bool         // print-curl 显示真实 auth 值（默认遮蔽 <redacted>）
 }
 
 // Engine 执行器。可被 cobracli/mcp 共用。
@@ -126,20 +128,10 @@ func (e *Engine) Execute(ctx context.Context, ep *tree.Endpoint, r *tree.Resourc
 		req.ContentType = ""
 	}
 
-	// dry-run / print-curl：渲染预览，不发请求。
-	// 必须先于写闸门：dry-run 是安全预览（不发请求），update/delete --dry-run 非 TTY 不该被 gateWrite 拦。
-	if opts.DryRun || opts.PrintCurl {
-		fmt.Fprintln(opts.Out, renderPreview(req, opts))
-		return nil
-	}
-
-	// 写操作闸门（create/update/delete 需 --yes 或 TTY 交互确认）。
-	if err := gateWrite(op.Verb, opts); err != nil {
-		return err
-	}
-
 	// auth.Apply：endpoint.Auth 空 / "none" 时跳过；其余按名加载 provider。
-	// 直接 import pkg/adapter 构造 AuthRequest，删去 authReqAdapter/mergeAuth 迂回（controller 修正 #2）。
+	// 提前到 preview 之前（T6）：让 dry-run/print-curl 看到完整鉴权头。
+	// DryRun guard：dry-run/print-curl 时传 DryRun=true，防 oauth2 等有状态 provider 刷新
+	// （easyops cookie/openapi 无副作用，DryRun 对它们 no-op；oauth2 provider 留 TODO）。
 	if ep.Auth != "" && ep.Auth != "none" {
 		provider, err := auth.Load(ep.Auth)
 		if err != nil {
@@ -147,6 +139,7 @@ func (e *Engine) Execute(ctx context.Context, ep *tree.Endpoint, r *tree.Resourc
 		}
 		ar, err := provider.Apply(ctx, &adapter.AuthRequest{
 			Method: req.Method, URL: req.URL, Body: req.Body, Headers: req.Header, Query: req.Query,
+			DryRun: opts.DryRun || opts.PrintCurl,
 		})
 		if err != nil {
 			return &output.APIError{Code: "auth_apply", Message: err.Error(), ExitCode: output.ExitAuthError}
@@ -157,6 +150,17 @@ func (e *Engine) Execute(ctx context.Context, ep *tree.Endpoint, r *tree.Resourc
 		for k, v := range ar.Query {
 			req.Query[k] = v
 		}
+	}
+
+	// dry-run / print-curl：渲染预览，不发请求（auth 已在上完成，curl 可见鉴权头）。
+	if opts.DryRun || opts.PrintCurl {
+		fmt.Fprintln(opts.Out, renderPreview(req, opts))
+		return nil
+	}
+
+	// 写操作闸门（create/update/delete 需 --yes 或 TTY 交互确认）。
+	if err := gateWrite(op.Verb, opts); err != nil {
+		return err
 	}
 
 	// 选 client：--insecure 用跳过 TLS 校验的（自签证书）。
@@ -362,8 +366,17 @@ func (e *Engine) do(ctx context.Context, req *resolvedReq, hc *http.Client) ([]b
 func renderPreview(req *resolvedReq, opts Options) string {
 	isMultipart := strings.HasPrefix(req.ContentType, "multipart/form-data")
 	if opts.PrintCurl {
-		curl := "curl -X " + req.Method + " '" + req.URL + "'"
+		curl := "curl -X " + req.Method + " '" + buildCurlURL(req) + "'"
+		if req.Host != "" {
+			curl += " -H 'Host: " + req.Host + "'"
+		}
+		if req.ContentType != "" && !isMultipart {
+			curl += " -H 'Content-Type: " + req.ContentType + "'"
+		}
 		for k, v := range req.Header {
+			if isAuthHeader(k) && !opts.RevealAuth {
+				v = "<redacted>"
+			}
 			curl += " -H '" + k + ": " + v + "'"
 		}
 		if isMultipart {
@@ -382,6 +395,33 @@ func renderPreview(req *resolvedReq, opts Options) string {
 	}
 	return fmt.Sprintf("DRY-RUN %s %s insecure=%v query=%v header=%v body=%s",
 		req.Method, req.URL, opts.Insecure, req.Query, req.Header, bodyRepr)
+}
+
+// buildCurlURL 把 req.Query 拼进 URL（print-curl 显示用；真请求在 do() 拼）。
+// 修 T6/③：原来 print-curl 的 URL 是裸 req.URL（无 query），让人误以为 query 没传。
+func buildCurlURL(req *resolvedReq) string {
+	u := req.URL
+	if len(req.Query) > 0 {
+		v := url.Values{}
+		for k, val := range req.Query {
+			v.Set(k, val)
+		}
+		sep := "?"
+		if strings.Contains(u, "?") {
+			sep = "&"
+		}
+		u += sep + v.Encode()
+	}
+	return u
+}
+
+// isAuthHeader 判断是否鉴权头（print-curl 遮蔽目标）：Cookie / Authorization。
+func isAuthHeader(k string) bool {
+	switch strings.ToLower(k) {
+	case "cookie", "authorization":
+		return true
+	}
+	return false
 }
 
 // copySS 浅拷贝 map[string]string。
