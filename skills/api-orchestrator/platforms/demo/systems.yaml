@@ -282,6 +282,11 @@ systems:
         get:    "服务详情（含关联流程/负责人/SLA）"
         edit:   "改服务（全量覆盖元信息）"
         delete: "删服务（有工单流转拒；builtIn 不可删）"
+      ticket:
+        list:         "工单搜索（V4 POST 高级过滤；Q/status/creator/serviceId/ctime；token 翻页）"
+        delete:       "删工单（仅作废的；instanceIds 分号）"
+        set_state:    "改工单状态（suspend仅running/activate仅suspended/cancel仅running；分号批量）"
+        export_excel: "导出工单 Excel（ticketIds 数组；fields 空用服务默认配置）"
 
     # 运维知识（实测，真相来源）—— 表单内容模型/坑见 objects.yaml#itsm_form_definition
     runtime:

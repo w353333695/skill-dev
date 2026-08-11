@@ -742,6 +742,35 @@ objects:
       - op: service_instance.delete
         rule: "有工单在流转时拒绝（『服务尚有工单正在流转中,不允许删除』）——须先删完该服务所有工单。内置服务（builtIn=true）不可删。源码 service_catalog_service.go:1450-1460 CheckServiceRemovable。"
 
+  # ---------- ITSM 工单实例（ticket/process_instance）----------
+  itsm_ticket:
+    description: ITSM 工单实例（运行中的流程实例）。发起工单走前端（表单渲染+生命周期脚本），API 只管 list/delete/state/export。状态三态 running/done/closed + 布尔标记 isSuspended/isCancelled。
+    source: data/sources/backend/ITSM/flowable_service/process_instance/
+    api: ticket
+    fields:
+      instanceId:    { type: string, anchor: true, desc: "工单 id（13 hex）" }
+      orderNum:      { type: string, desc: "工单号（如 ITSC-20260811-001）" }
+      name:          { type: string, desc: "工单名称" }
+      status:        { type: string, enum: [running, done, closed], desc: "工单状态" }
+      isSuspended:   { type: bool, desc: "是否挂起（仅 running 可挂起）" }
+      isCancelled:   { type: bool, desc: "是否作废（仅作废的工单可删）" }
+      creator:       { type: string, desc: "发起人" }
+      ctime:         { type: string, desc: "创建时间" }
+      serviceId:     { type: string, ref: itsm_service_instance, desc: "关联服务实例 id" }
+      serviceCategory: { type: string, desc: "服务分类 change/event/req/question/release" }
+    relations:
+      - { to: itsm_service_instance, type: association, cardinality: "N:1", via: serviceId, desc: "工单从服务发起" }
+      - { to: itsm_process_definition, type: association, cardinality: "N:1", desc: "工单走某流程定义" }
+    side_effects:
+      - op: ticket.list
+        rule: "POST /v4/process_instance_filter 高级搜索。body 含 filter(standard_fields/process_fields)+Q模糊+status/creator/serviceCategory 精确。token 翻页（nextToken）。返回 ProcessInstanceBasic[]+total。"
+      - op: ticket.set_state
+        rule: "PUT /v1/process_instance_state 批量状态变更。action=suspend(仅running)/activate(仅suspended)/cancel(仅running)。⚠️只有 running 的工单能挂起；只有作废(isCancelled)的能删除。"
+      - op: ticket.delete
+        rule: "DELETE /v1/process_instance/:instanceIds。⚠️只有作废(isCancelled)的工单才能删除——running/done/closed 须先 cancel 再 delete。instanceIds 分号分隔。"
+      - op: ticket.export_excel
+        rule: "POST /v1/file/batch/ticket/excel_export。ticketIds JSON 数组；fields 空用服务默认导出配置。返回二进制 Excel 流。⚠️e2e 实测报 permission denied（环境权限配置，非 API 格式问题）——可能需要 itsc 导出权限。"
+
 # =============================================================================
 # 接口级行为（跨对象，编排时必须知道）
 # =============================================================================
