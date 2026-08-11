@@ -1031,6 +1031,13 @@ resources:
                       type:                { type: string, description: "inst=工单级 / step=节点级" }
                       ownerName:           { type: string }
                       serviceInstanceName: { type: string }
+        pagination:
+          type: offset
+          page_in: body                                # ⚠️page/pageSize 在 body（POST _search），非 query
+          items_path: data.list
+          page_param: page
+          size_param: pageSize
+          size: 10
 
       get:
         description: SLA 规则详情（含完整 slaConfig[].levelConfig[]，每级 workingCalendarId→work_calendar）。
