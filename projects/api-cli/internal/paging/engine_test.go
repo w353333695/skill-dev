@@ -145,6 +145,35 @@ func TestIterErrorClosesChannel(t *testing.T) {
 // TestPageInBodyPaging 验证 page 在 body 时翻页改 body 不改 query。
 // page_in=body：do 收 body，按 body.page 翻页；3 页（page=1→2→3），
 // 第 3 页返回 < size 终止。下一页的 page 号由 bumpBodyPage 改 body 副本。
+// TestIterEmitsTotal 验证 Iter 把响应信封里的 total 经 Item.Total 传出（仅首条 item 携带）。
+// totalPath 默认 = itemsPath 父 + ".total"；data.list -> data.total。
+func TestIterEmitsTotal(t *testing.T) {
+	pg := &tree.Pagination{Type: "implicit", ItemsPath: "data.list", Size: 10}
+	// 响应信封含 data.total=3 + data.list 一条
+	resp := []byte(`{"data":{"total":3,"list":[{"id":"a"}]}}`)
+	do := func(ctx context.Context, body []byte, q map[string]string) ([]byte, error) {
+		return resp, nil
+	}
+	items := Iter(context.Background(), pg, do, nil, nil, Options{Limit: 10})
+	var gotTotal *int
+	count := 0
+	for it := range items {
+		if it.Total != nil {
+			gotTotal = it.Total
+		}
+		if it.Err != nil {
+			t.Fatalf("unexpected err: %v", it.Err)
+		}
+		count++
+	}
+	if gotTotal == nil || *gotTotal != 3 {
+		t.Fatalf("want total=3, got %v", gotTotal)
+	}
+	if count != 1 {
+		t.Fatalf("want 1 item, got %d", count)
+	}
+}
+
 func TestPageInBodyPaging(t *testing.T) {
 	// page 在 body：do 收 body，按 body.page 翻页；3 页（page=1→2→3），第 3 页返回 < size 终止
 	pages := map[string][]string{

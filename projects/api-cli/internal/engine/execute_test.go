@@ -480,6 +480,44 @@ resources:
 	}
 }
 
+// TestIterateEmitsTotalToStderr 验证分页查询时，响应信封里的 data.total 经首条 Item.Total
+// 传到 engine.iterate，输出一行 {"_meta":{"total":N}} 到 opts.Err（stderr）。
+//
+// 触发条件：op 有 pagination + 响应含 total → paging.Iter 抽 total 挂首条 item；
+// engine.iterate 收到后写 opts.Err（测试用 bytes.Buffer 断言）。
+// stdout 仍是流式 NDJSON（每行一个 item.Raw），total 不污染 stdout。
+func TestIterateEmitsTotalToStderr(t *testing.T) {
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Write([]byte(`{"data":{"total":2,"list":[{"id":"1","name":"a"},{"id":"2","name":"b"}]}}`))
+	}))
+	defer srv.Close()
+	raw := []byte(`spec: api-cli/v1
+service: { name: x, default_endpoint: e, endpoints: { e: { base_url: BASE, auth: none, path_prefix: "" } } }
+resources: { r: { path: /r, operations: { list: { method: GET, path: "", pagination: { type: offset, items_path: data.list, page_param: page, size_param: size, size: 10 } } } } }`)
+	raw = bytes.ReplaceAll(raw, []byte("BASE"), []byte(srv.URL))
+	tr, _ := spec.Parse(raw)
+	e := New(tr)
+	op := tr.Resources["r"].Operations["list"]
+	ep, _ := tr.SelectEndpoint("")
+	var out, errBuf bytes.Buffer
+	err := e.Execute(context.Background(), ep, tr.Resources["r"], op, nil, map[string]string{},
+		Options{Format: "json", Out: &out, Err: &errBuf, Limit: 10})
+	if err != nil {
+		t.Fatal(err)
+	}
+	// stderr 应含一行 {"_meta":{"total":2}}
+	if !bytes.Contains(errBuf.Bytes(), []byte(`"total":2`)) {
+		t.Fatalf("stderr 应含 total:2，got %q", errBuf.String())
+	}
+	// stdout 仍为 NDJSON：每行一个 item.Raw，不含 _meta
+	if bytes.Contains(out.Bytes(), []byte(`_meta`)) {
+		t.Fatalf("stdout 不应含 _meta（total 只进 stderr），got %s", out.String())
+	}
+	if !bytes.Contains(out.Bytes(), []byte(`"id": "1"`)) && !bytes.Contains(out.Bytes(), []byte(`"id":"1"`)) {
+		t.Fatalf("stdout 应含 item id=1，got %s", out.String())
+	}
+}
+
 // TestSingleBinaryResponseWritesOut 验证 binary 响应：single 直接把原始字节写到 opts.Out，
 // 不经 decodeLoose/Format（避免被 JSON 字符串化损坏二进制内容）。
 //
