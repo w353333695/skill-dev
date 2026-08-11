@@ -166,6 +166,13 @@ entities:
       场景："查主机的实例" → common_models 匹配 "主机" → objectId=HOST
       → scripts/run.sh --spec easyops-cmdb.yaml object_instance search HOST ...
       省去：object_model.list --q 主机 → 解析 → 拿 objectId → 再 search。
+    count_recipe: |
+      计数（"有几个/多少"）→ object_instance.search + 读 stderr 的 _meta.total（新版 binary）：
+        scripts/run.sh --spec easyops-cmdb.yaml object_instance search <objectId> \
+          --body '{"fields":["instanceId"],"page":1,"page_size":1,"ignore_missing_field_error":true}'
+        → stderr {"_meta":{"total":N}} 即实例总数（fields 最小化只取数，不拉数据）。
+      边界：空结果（total=0）时 stderr 无 total、stdout 也空——exit 0 即代表 0 条
+        （新版错误可读到 stderr 且 exit≠0，故 exit0+空输出可放心判 0，无需 raw 兜底）。
 
 # =============================================================================
 # 跨实体转换（编排挡 step 间接力时怎么传字段）
