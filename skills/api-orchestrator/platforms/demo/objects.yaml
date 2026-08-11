@@ -795,6 +795,20 @@ objects:
       - op: service_catalog.set_permission
         rule: "POST /v1/set_catalog_permission。modifyUserList 自动获得 read 权限（去重合并到 readUserList）。权限沿树传播：授 read 须授所有祖先；取消 read 须取消所有子孙。"
 
+  # ---------- ITSM 默认常用服务（common_service）----------
+  itsm_common_service:
+    description: ITSM 默认常用服务——前端门户的"常用服务"快捷入口配置。每条含名称/排序/关联服务/可见用户组。
+    source: data/api-doc/itsm-service_instance.xlsx（DefaultCommonService 5 接口）
+    api: common_service
+    fields:
+      instanceId:     { type: string, anchor: true, desc: "常用服务条目 id" }
+      name:           { type: string, required: true, desc: "名称" }
+      priority:       { type: integer, desc: "排序权重，默认 0" }
+      userGroups:     { type: array, items: string, desc: "可见用户组列表" }
+      commonServices: { type: array, items: string, ref: itsm_service_instance, desc: "关联的服务实例 id 列表" }
+    relations:
+      - { to: itsm_service_instance, type: association, cardinality: "N:N", via: commonServices, desc: "常用服务关联多个服务实例" }
+
 # =============================================================================
 # 接口级行为（跨对象，编排时必须知道）
 # =============================================================================

@@ -694,3 +694,68 @@ resources:
         body:
           type: object
           description: "multipart/form-data：file=服务文件；onlyCheck=仅校验"
+
+  # ===========================================================================
+  # ITSM 默认常用服务（common_service）—— ITSM 前端门户的"常用服务"快捷入口配置。
+  # 路径 /api/flowable_service/v1/process_common/default_common_service。
+  # 数据来源：契约 data/api-doc/itsm-service_instance.xlsx（5 个 DefaultCommonService 接口）。
+  # ===========================================================================
+  common_service:
+    description: ITSM 默认常用服务——前端门户的"常用服务"快捷入口配置。每个常用服务条目含名称/排序/关联服务实例/可见用户组。
+    path: ""
+
+    operations:
+      list:
+        description: 列默认常用服务（分页）。
+        method: GET
+        path: /api/flowable_service/v1/process_common/default_common_service
+        params:
+          page:     { in: query, type: integer, description: "页码默认 1" }
+          pageSize: { in: query, type: integer, description: "每页默认 10" }
+        pagination: { type: offset, page_in: query, items_path: data.list, page_param: page, size_param: pageSize, size: 10 }
+
+      create:
+        description: 创建默认常用服务条目。name 必填；priority 排序（默认0）；userGroups 控制可见范围。
+        method: POST
+        path: /api/flowable_service/v1/process_common/default_common_service
+        body:
+          type: object
+          required: [name]
+          description: "创建常用服务请求"
+          properties:
+            name:       { type: string, description: "常用服务名称" }
+            priority:   { type: integer, description: "排序权重，默认 0" }
+            userGroups: { type: array, items: { type: string }, description: "可见用户组列表" }
+
+      update:
+        description: 编辑默认常用服务（name/priority/userGroups）。
+        method: PUT
+        path: /api/flowable_service/v1/process_common/default_common_service/{instanceId}
+        params:
+          instanceId: { in: path, type: string, required: true, description: "常用服务条目 id" }
+        body:
+          type: object
+          properties:
+            name:       { type: string }
+            priority:   { type: integer }
+            userGroups: { type: array, items: { type: string } }
+
+      delete:
+        description: 删除默认常用服务条目。
+        method: DELETE
+        path: /api/flowable_service/v1/process_common/default_common_service/{instanceId}
+        params:
+          instanceId: { in: path, type: string, required: true, description: "常用服务条目 id" }
+
+      set_services:
+        description: 关联服务实例到常用服务条目（commonServices 字段）。
+        method: POST
+        path: /api/flowable_service/v1/process_common/default_common_service/{instanceId}/services
+        params:
+          instanceId: { in: path, type: string, required: true, description: "常用服务条目 id" }
+        body:
+          type: object
+          required: [commonServices]
+          description: "关联服务请求"
+          properties:
+            commonServices: { type: array, items: { type: string }, description: "服务实例 id 列表" }

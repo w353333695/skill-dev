@@ -297,6 +297,12 @@ systems:
         edit:            "改目录"
         delete:          "删目录（builtIn 不可删；有服务实例不可删）"
         set_permission:  "设目录权限（read/modify 用户列表）"
+      common_service:
+        list:         "列默认常用服务（分页）"
+        create:       "建常用服务（name/priority/userGroups）"
+        update:       "改常用服务"
+        delete:       "删常用服务"
+        set_services: "关联服务实例到常用服务（commonServices id 列表）"
 
     # 运维知识（实测，真相来源）—— 表单内容模型/坑见 objects.yaml#itsm_form_definition
     runtime:
