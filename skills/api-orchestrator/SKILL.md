@@ -64,7 +64,14 @@ scripts/run.sh --spec <spec-path> <resource> <verb> [args] [--print-curl|--dry-r
 
 **先用 `--print-curl` 或 `--dry-run` 预览请求**，确认无误再真调（写操作尤其）。
 
-**调用姿势（防污染）**：`scripts/run.sh` 用**绝对路径**调，cwd 保持用户工作目录——勿 `cd` 进 skill 再用相对路径，否则临时产物会写进 skill 目录（见「关键纪律」状态持久化）。body 优先用进程替换 `--body-file <(printf '%s' '<json>')` 零落盘，避免任何临时文件。
+**调用姿势（防污染）**：`scripts/run.sh` 用**绝对路径**调，cwd 保持用户工作目录——勿 `cd` 进 skill 再用相对路径，否则临时产物会写进 skill 目录（见「关键纪律」状态持久化）。body 优先用 `--body '<json>'`（inline，api-cli UX 改造后支持，零落盘），其次进程替换 `--body-file <(printf '%s' '<json>')`，避免任何临时文件。
+
+**api-cli UX 改造后行为要点**（2026-08-11，`worktree-api-cli-ux` 落地）：
+- **错误默认人类可读到 stderr**（`error: <code>: <msg>`）——`--q` 等未知 flag 不再静默，会清晰报错。`--format=json` 时错误输出 JSON。
+- **分页 total 在 stderr**（`{"_meta":{"total":N}}`），stdout 仍是纯 NDJSON（读 stdout 的脚本不受影响；要 total 读 stderr）。
+- **`--all` 触顶 exit 4**（硬上限 10000 条/1000 页，结果可能不完整，stderr 有 warning）。
+- **`--print-curl` 默认遮蔽 auth**（Cookie/Authorization 显示 `<redacted>`，加 `--reveal-auth` 显真值）；curl 现含 Host/Content-Type/query（完整可复现）。
+- **`--help` 列 path/query/body 参数分类**（不再只列 global flag）。
 
 ## 模式与写保护（防 platforms 污染）
 
