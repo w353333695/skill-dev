@@ -113,6 +113,7 @@ onboarding 的速度和质量取决于输入完整度。**开工前按此清单�
 2. **读路径**：list/detail/search 真调，确认返回结构（wrapper? 流式 NDJSON? 字段?）。
 3. **写路径**（用户授权 + 测试空间）：预检 → 建 → 改 → 删（清理）。每个失败都回溯源码/问用户，**坑即时写进 objects.yaml/systems.yaml**。
 - 读通了再写；写要在可丢弃的测试空间，全程可回滚。
+- ⚠️ **e2e 必须全走 scripts/run.sh（api-cli），禁用 curl**。curl 绕过清单验证，等于没验证 manifest 能用——onboarding 的核心产出（api-cli 清单）未经 api-cli 自身验证，交付即断。正确做法：`scripts/run.sh --spec <spec> <resource> <verb> [args]`，每个 e2e 场景逐条走 api-cli 命令树。
 
 ### 步 7：交付 + 自检
 - **跑 lint**：`scripts/lint-platforms.py <deployment>`——校验 platforms 符合 asset-schema + 引用闭合（spec 文件存在 / api 指向 resource / ref 指向 object / flows 的 op 在 spec verbs 里）。**0 ERR 才算产物合格**；WARN 逐条确认是否可接受。可加 `--api-cli <bin>` 额外校验 spec 能被 api-cli 解析。
