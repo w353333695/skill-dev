@@ -276,6 +276,12 @@ systems:
         set_main: "设主版本（=部署到 Flowable 引擎生效；须 done；旧主降级；运行中工单不受影响）"
       process_form:
         set: "节点绑/解/换表单（userTaskId 绑到节点；formRelationInstanceId+formId 组合决定 绑/解/换；默认取表单主版本）"
+      service_instance:
+        list:   "服务列表（catalogID 过滤目录；Q 模糊搜索名；hideDisabled 隐藏禁用）"
+        create: "建服务（name/category/associatedProcess 必填；catalogId 目录；owner 负责人）"
+        get:    "服务详情（含关联流程/负责人/SLA）"
+        edit:   "改服务（全量覆盖元信息）"
+        delete: "删服务（有工单流转拒；builtIn 不可删）"
 
     # 运维知识（实测，真相来源）—— 表单内容模型/坑见 objects.yaml#itsm_form_definition
     runtime:
@@ -307,3 +313,5 @@ systems:
       form_detail: "${EASYOPS_CMDB_FRONTEND_URL}/next/itsc-form-management/form-list/{formId}/{versionId}"   # formId=表单实例id（13hex）；versionId=版本实例id（13hex）
       process_list:   "${EASYOPS_CMDB_FRONTEND_URL}/next/itsc-process-manage/process-list?visible=true&page=1&pageSize=20&name=&creator=&category="   # 流程列表，query 可选过滤 name/creator/category
       process_detail: "${EASYOPS_CMDB_FRONTEND_URL}/next/itsc-process-manage/{definitionId}/versionCreate-v2/{versionId}?activeTab=0"   # definitionId=流程定义id；versionId=版本id
+      service_list:   "${EASYOPS_CMDB_FRONTEND_URL}/next/itsc-service-management/setting-list?page=1&pageSize=10&catalog={catalogName}&catalogId={catalogId}&builtIn=true"   # catalog/catalogId/builtIn 必填（前端默认不渲染否则）
+      service_detail: "${EASYOPS_CMDB_FRONTEND_URL}/next/itsc-service-management/setting-list/{instanceId}"   # 服务实例 id（13hex）
