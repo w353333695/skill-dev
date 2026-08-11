@@ -127,6 +127,13 @@ def main():
                 api = o.get("api")
                 if api and spec_verbs and not any(v.startswith(api + ".") for v in spec_verbs):
                     warn(f"objects.{oname}.api → {api} 不在任何 spec 的 resource 里")
+                # 【证据门禁】有 api 的 object 必须有非空 source（防 onboarding 跳过源码确认）
+                # 规则来源：onboarding.md 步 3「探源码补全」+ 证据纪律「字段值域必须有源码/样例证据」。
+                # 没有 source = 字段值域（枚举/正则/副作用）未被查证，编排时 LLM 不知道能填什么 → ERR。
+                if api:
+                    src = o.get("source")
+                    if not src or (isinstance(src, str) and not src.strip()):
+                        err(f"objects.{oname}: 有 api={api} 但缺 source —— onboarding 步 3 未做（字段值域无源码/样例证据），补 source: <源码 file:line 或枚举接口或契约>")
                 # fields.ref → objects 内有该 object
                 for fname, f in (o.get("fields") or {}).items():
                     if isinstance(f, dict):
@@ -136,7 +143,7 @@ def main():
                             ref = ref or iv  # items 仅当指向 object 名才算 ref；基础类型(string/int)不算
                         if ref and ref not in objs:
                             err(f"objects.{oname}.fields.{fname}.ref → {ref} 不在 objects 里")
-            ok("objects.yaml 引用闭合校验完成")
+            ok("objects.yaml 引用闭合 + source 证据门禁校验完成")
     else:
         warn("无 objects.yaml（对象结构/副作用知识缺失，onboarding 不完整）")
 

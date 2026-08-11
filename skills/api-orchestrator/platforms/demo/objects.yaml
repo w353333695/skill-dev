@@ -51,6 +51,7 @@ objects:
   # ---------- 属性 ----------
   cmdb_attr:
     description: 模型属性（字段）。
+    source: data/sources/backend/CMDB/cmdb_service/object/（object_service.go 属性 CRUD + 校验；导入/删除约束见 systems.yaml#easyops-cmdb.runtime.import_semantics / delete_constraint）
     api: object_attr
     fields:
       id:          { type: string, required: true, desc: "属性 ID；新增时加 _ 前缀" }
@@ -88,6 +89,7 @@ objects:
   # ---------- 关系 ----------
   cmdb_relation:
     description: 模型间关系。一条关系连两端模型，各持对端 id 与基数。
+    source: data/sources/backend/CMDB/cmdb_service/object/object_relation_service.go（关系 CRUD + 校验；删除约束见 systems.yaml#easyops-cmdb.runtime.delete_constraint）
     api: object_relation
     fields:
       relation_id: { type: string, desc: "关系 ID，不填自动生成" }
