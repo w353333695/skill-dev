@@ -3,6 +3,7 @@ package engine
 import (
 	"bytes"
 	"context"
+	"fmt"
 	"io"
 	"net/http"
 	"net/http/httptest"
@@ -13,6 +14,7 @@ import (
 	"time"
 
 	"api-cli/internal/output"
+	"api-cli/internal/paging"
 	"api-cli/internal/spec"
 	"api-cli/internal/tree"
 )
@@ -515,6 +517,63 @@ resources: { r: { path: /r, operations: { list: { method: GET, path: "", paginat
 	}
 	if !bytes.Contains(out.Bytes(), []byte(`"id": "1"`)) && !bytes.Contains(out.Bytes(), []byte(`"id":"1"`)) {
 		t.Fatalf("stdout 应含 item id=1，got %s", out.String())
+	}
+}
+
+// TestHandleItemErrCappedReturnsExit4 直接测 handleItemErr 对 ErrCapped 的归一化：
+// 返回 *output.APIError{ExitCode: ExitPagingOver(4)}，且 warning 写入 errw。
+// 这是 engine 层 exit-4 路径的最小覆盖。
+//
+// 不走 Execute 全链路：paging.MaxItems 默认 10000，单测无法在合理时间内触发；
+// paging 层 TestIterCappedEmitsErrCapped 已验 ErrCapped 发出，handleItemErr 是 engine 层
+// 唯一 capped 归一化点，直接测它即可。wiring（iterate range 收到 Item{Err} → 调 handleItemErr）
+// 与 *output.APIError 路径同构，由 TestExecutePagingMidwayError 覆盖。
+func TestHandleItemErrCappedReturnsExit4(t *testing.T) {
+	var errBuf bytes.Buffer
+	err := handleItemErr(paging.Item{Err: paging.ErrCapped}, &errBuf)
+	if err == nil {
+		t.Fatal("want non-nil err for ErrCapped")
+	}
+	ae, ok := err.(*output.APIError)
+	if !ok {
+		t.Fatalf("want *output.APIError, got %T", err)
+	}
+	if ae.ExitCode != output.ExitPagingOver {
+		t.Fatalf("exit code = %d, want ExitPagingOver(%d)", ae.ExitCode, output.ExitPagingOver)
+	}
+	if ae.Code != "paging_capped" {
+		t.Fatalf("Code = %q, want paging_capped", ae.Code)
+	}
+	if !bytes.Contains(errBuf.Bytes(), []byte("hit paging cap")) {
+		t.Fatalf("stderr 应含 'hit paging cap' warning, got %q", errBuf.String())
+	}
+}
+
+// TestHandleItemErrPassthroughAPIError 验证 do 归一化后的 *output.APIError 经 handleItemErr 原样返回
+// （不被 capped 分支误吞，也不被兜底重包丢 StatusCode）。回归保护。
+func TestHandleItemErrPassthroughAPIError(t *testing.T) {
+	orig := &output.APIError{StatusCode: 500, Code: "HTTP_500", Message: "boom", ExitCode: output.ExitAPIError}
+	err := handleItemErr(paging.Item{Err: orig}, io.Discard)
+	ae, ok := err.(*output.APIError)
+	if !ok || ae != orig {
+		t.Fatalf("应原样返回 *output.APIError, got %#v", err)
+	}
+}
+
+// TestHandleItemErrWrapsBareError 验证非 APIError/非 ErrCapped 的裸 error 兜底包成
+// *output.APIError{ExitNetTimeout}（保持原 iterate 行为不退化）。
+func TestHandleItemErrWrapsBareError(t *testing.T) {
+	bare := fmt.Errorf("something weird")
+	err := handleItemErr(paging.Item{Err: bare}, io.Discard)
+	ae, ok := err.(*output.APIError)
+	if !ok {
+		t.Fatalf("want *output.APIError, got %T", err)
+	}
+	if ae.ExitCode != output.ExitNetTimeout {
+		t.Fatalf("exit code = %d, want ExitNetTimeout", ae.ExitCode)
+	}
+	if !strings.Contains(ae.Message, "something weird") {
+		t.Fatalf("消息应保留原 error 文本, got %q", ae.Message)
 	}
 }
 

@@ -5,6 +5,7 @@ import (
 	"context"
 	"crypto/tls"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -242,11 +243,7 @@ func (e *Engine) iterate(ctx context.Context, req *resolvedReq, op *tree.Operati
 		var collected []map[string]any
 		for it := range items {
 			if it.Err != nil {
-				// do 已归一化；若上层传入非 *output.APIError，兜底包一层保证带 exit code。
-				if _, ok := it.Err.(*output.APIError); ok {
-					return it.Err
-				}
-				return &output.APIError{Code: "paging", Message: it.Err.Error(), ExitCode: output.ExitNetTimeout}
+				return handleItemErr(it, errw)
 			}
 			if !totalEmitted && it.Total != nil {
 				fmt.Fprintf(errw, `{"_meta":{"total":%d}}`+"\n", *it.Total)
@@ -265,10 +262,7 @@ func (e *Engine) iterate(ctx context.Context, req *resolvedReq, op *tree.Operati
 	// 默认 json：流式 NDJSON（每行一个 item.Raw，大列表不爆内存）
 	for it := range items {
 		if it.Err != nil {
-			if _, ok := it.Err.(*output.APIError); ok {
-				return it.Err
-			}
-			return &output.APIError{Code: "paging", Message: it.Err.Error(), ExitCode: output.ExitNetTimeout}
+			return handleItemErr(it, errw)
 		}
 		if !totalEmitted && it.Total != nil {
 			fmt.Fprintf(errw, `{"_meta":{"total":%d}}`+"\n", *it.Total)
@@ -277,6 +271,23 @@ func (e *Engine) iterate(ctx context.Context, req *resolvedReq, op *tree.Operati
 		fmt.Fprintln(opts.Out, string(it.Raw))
 	}
 	return nil
+}
+
+// handleItemErr 归一化 paging.Item.Err 为 Execute 返回值。
+//   - ErrCapped（触达 MaxItems/MaxPages 硬上限）：打 stderr warning + 返回
+//     *output.APIError{ExitCode: ExitPagingOver(4)}。区别于真实错误：截断不是失败，
+//     已收到的数据有效，但用户须知道结果可能不完整。
+//   - *output.APIError（do 已归一化的 HTTP/net 错误）：原样返回，保留 exit code。
+//   - 其他 error：兜底包一层 *output.APIError{ExitNetTimeout}，保证带 exit code。
+func handleItemErr(it paging.Item, errw io.Writer) error {
+	if errors.Is(it.Err, paging.ErrCapped) {
+		fmt.Fprintln(errw, "warning: hit paging cap, results may be incomplete")
+		return &output.APIError{Code: "paging_capped", Message: "hit paging cap", ExitCode: output.ExitPagingOver}
+	}
+	if _, ok := it.Err.(*output.APIError); ok {
+		return it.Err
+	}
+	return &output.APIError{Code: "paging", Message: it.Err.Error(), ExitCode: output.ExitNetTimeout}
 }
 
 // do 发一次 HTTP 请求，返回 body + status。网络错误归一化成 ExitNetTimeout/ExitNet 类。

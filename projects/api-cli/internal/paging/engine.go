@@ -4,6 +4,7 @@ package paging
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 
 	"api-cli/internal/tree"
@@ -22,6 +23,10 @@ type Item struct {
 	Err   error  // 翻页中途错误（DoFunc 失败）；非 nil 时 Raw 为空
 	Total *int   // 首条 item 携带信封里的 total（若有）；仅第一条非 nil
 }
+
+// ErrCapped 触达 MaxItems/MaxPages 硬上限时发出（作为 Item.Err），
+// 消费方据此打 warning + exit 4，区别于真实翻页错误（DoFunc 失败）。
+var ErrCapped = errors.New("paging capped: hit MaxItems or MaxPages")
 
 // Options 翻页选项。
 type Options struct {
@@ -59,7 +64,8 @@ func Iter(ctx context.Context, pg *tree.Pagination, do DoFunc, firstBody []byte,
 		}
 		count := 0
 		var totalComputed bool // 全局仅首条 item 携带 total：首次 respBody 后算一次，之后不再算
-		for page := 0; page < opts.MaxPages; page++ {
+		page := 0
+		for ; page < opts.MaxPages; page++ {
 			respBody, err := do(ctx, body, req)
 			if err != nil {
 				// 错误不能静默吞：发一个 Item{Err} 让消费方感知失败，
@@ -99,6 +105,11 @@ func Iter(ctx context.Context, pg *tree.Pagination, do DoFunc, firstBody []byte,
 					return
 				}
 				if count >= opts.MaxItems {
+					// 触顶 MaxItems：发 ErrCapped（区别于真实错误），select 兼顾 ctx 已取消。
+					select {
+					case out <- Item{Err: ErrCapped}:
+					case <-ctx.Done():
+					}
 					return
 				}
 			}
@@ -109,6 +120,14 @@ func Iter(ctx context.Context, pg *tree.Pagination, do DoFunc, firstBody []byte,
 			}
 			body = nextBody
 			req = nextReq
+		}
+		// 循环因 page 达 MaxPages 上限退出（非 more=false / 非错误 / 非 MaxItems）：
+		// 发 ErrCapped 提示结果可能不完整。default 兼顾 channel 满不阻塞。
+		if page >= opts.MaxPages {
+			select {
+			case out <- Item{Err: ErrCapped}:
+			default:
+			}
 		}
 	}()
 	return out
