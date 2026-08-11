@@ -664,3 +664,33 @@ resources:
         path: /api/flowable_service/v1/service_instance/{instanceId}
         params:
           instanceId: { in: path, type: string, required: true, description: "服务实例 id" }
+
+      sort:
+        description: 服务排序。serviceIdList + sortList 两个数组一一对应，按 sortList 值排序。
+        method: POST
+        path: /api/flowable_service/v1/service_instance/sort
+        body:
+          type: object
+          required: [serviceIdList, sortList]
+          description: "服务排序请求"
+          properties:
+            serviceIdList: { type: array, items: { type: string }, description: "服务 id 列表（排序后顺序）" }
+            sortList:     { type: array, items: { type: integer }, description: "对应 sort 值列表" }
+
+      export:
+        description: 导出服务实例（按 id 列表导出为文件）。instanceIds 逗号分隔。返回二进制文件流。
+        method: GET
+        path: /api/flowable_service/v1/export/service_instance
+        params:
+          instanceIds: { in: query, type: string, required: true, description: "服务实例 id 列表，逗号分隔" }
+          isMain:     { in: query, type: boolean, description: "是否只导出流程定义主版本" }
+
+      import:
+        description: 导入服务实例（上传文件到指定目录）。multipart/form-data。onlyCheck=true 仅校验不上传。
+        method: POST
+        path: /api/flowable_service/v1/service_catalog/{serviceId}/import
+        params:
+          serviceId: { in: path, type: string, required: true, description: "目标服务目录 id" }
+        body:
+          type: object
+          description: "multipart/form-data：file=服务文件；onlyCheck=仅校验"

@@ -282,6 +282,9 @@ systems:
         get:    "服务详情（含关联流程/负责人/SLA）"
         edit:   "改服务（全量覆盖元信息）"
         delete: "删服务（有工单流转拒；builtIn 不可删）"
+        sort:   "服务排序（serviceIdList+sortList）"
+        export: "导出服务实例（instanceIds 逗号分隔，返回文件流）"
+        import: "导入服务实例（multipart 上传到目录，onlyCheck 仅校验）"
       ticket:
         list:         "工单搜索（V4 POST 高级过滤；Q/status/creator/serviceId/ctime；token 翻页）"
         delete:       "删工单（仅作废的；instanceIds 分号）"
