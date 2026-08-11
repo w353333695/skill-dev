@@ -811,51 +811,79 @@ objects:
 
   # ---------- ITSM 触发器（trigger）----------
   itsm_trigger:
-    description: ITSM 触发器——绑定流程/任务事件（event）到动作列表（config.actionList）。被服务实例/流程节点引用。CRUD 在 /v1/trigger（8134 flowable_service）。
-    source: data/api-doc/itsm-trigger.xlsx + data/sources/backend/ITSM/flowable_service/trigger/validators/request_validate_trees.go:31,35
+    description: ITSM 触发器——绑定流程/任务事件（event）到动作列表（config.actionList）。被服务实例/流程节点引用。CRUD 在 /v1/trigger（8134 flowable_service）。⚠️event/scope/action 的完整合法值见 api_behavior.trigger_enums（来自枚举接口，非自由文本）。
+    source: data/api-doc/itsm-trigger.xlsx + trigger/validators/request_validate_trees.go:15,35 + 枚举接口 GET /api/flowable_service/v1/enums/trigger_enums（trigger_service.go:99 GetTriggerEnums）
     api: trigger
     fields:
-      instanceId:    { type: string, anchor: true, desc: "触发器 id（13 hex，正则 ^[0-9a-z]{13}$）" }
+      instanceId:    { type: string, anchor: true, desc: "触发器 id（13 hex，正则 ^[0-9a-z]{13}$，validator request_validate_trees.go:35）" }
       name:          { type: string, required: true, desc: "触发器名" }
-      scope:         { type: string, required: true, desc: "作用域，如 process_task / process_instance" }
+      scope:         { type: string, required: true, desc: "作用域=triggerEvent.kind.key。合法值见 api_behavior.trigger_enums（process_instance/process_task/service_instance/scheduler_ticket/process_instance_sla/process_task_sla）。⚠️event 必须属于该 scope（scope→event 是树结构）" }
       status:        { type: string, required: true, enum: [enabled, disabled], desc: "启用状态" }
-      event:         { type: string, required: true, desc: "触发事件，如 process_task.todo / process_instance.start" }
-      config:        { type: object, required: true, desc: "动作配置 {actionList:[{name, args, condition}]}。name=send_message 时 args={notifyPolicyId, notifyInterval(如 5m), notifyTimes}" }
+      event:         { type: string, required: true, desc: "触发事件=triggerEvent.children[].key，随 scope 变化（process_task.todo/process_instance.start/service_instance.enabled 等）。完整 scope→event 映射见 api_behavior.trigger_enums" }
+      config:        { type: object, required: true, desc: "动作配置 {actionList:[{name, args, condition}]}。name 取值见 api_behavior.trigger_actions（send_message/update_process_instance_status/update_priority/update_service_status/update_process_task_status/exec_tool）。args 结构随 name 变化（send_message→{notifyPolicyId,notifyInterval,notifyTimes}；exec_tool→{toolId,...}；update_*→对应字段）。condition 用 trigger_condition_variables 的变量名组表达式（可选）" }
       memo:          { type: string, desc: "备注" }
-      domainModelId: { type: string, desc: "关联领域模型 id（13 hex）" }
+      domainModelId: { type: string, desc: "关联领域模型 id（13 hex，validator request_validate_trees.go:15 正则 ^[0-9a-z]{13}$，可选）" }
       creator:       { type: string, desc: "创建者（系统自带为 defaultUser）" }
     relations:
       - { to: itsm_notify_policy, type: association, cardinality: "N:N", via: "config.actionList[].args.notifyPolicyId", desc: "触发器动作引用通知策略（send_message 的 notifyPolicyId）" }
+    api_behavior:
+      trigger_enums: |
+        权威源：GET /api/flowable_service/v1/enums/trigger_enums（trigger_service.go:99）。scope→event 树（event 必须属于所选 scope）：
+        • process_instance（工单信号，11 events）: start/finish/suspend/supervise/activate/cancel/close/revoke/comment/urge/common
+        • process_task（工单任务信号，13 events）: todo/pass/reject/jump/withdraw/assign/distribute/cc/cc_read/add/add_reject/claim/common
+        • service_instance（服务信号，2 events）: enabled/disabled
+        • scheduler_ticket（定时工单信号，0 events）
+        • process_instance_sla（SLA服务协议，2 events）: warning/timeout
+        • process_task_sla（SLA服务协议，4 events）: answer_warning/answer_timeout/done_warning/done_timeout
+      trigger_actions: |
+        config.actionList[].name 合法值（6 种，枚举接口 triggerAction）：
+        • send_message（发送通知消息）→ args={notifyPolicyId(→notify_policy), notifyInterval(如5m), notifyTimes}
+        • update_process_instance_status（修改工单状态）→ args=状态相关
+        • update_priority（修改优先级）→ args=优先级相关
+        • update_service_status（修改服务状态）→ args=服务状态相关
+        • update_process_task_status（修改任务状态）→ args=任务状态相关
+        • exec_tool（执行工具）→ args={toolId(→autoops tool), ...}（跨 system→easyops-autoops）
+        ⚠️各 action 的 args 完整字段需查对应 action handler 或前端配置器；此处只确认 name 枚举 + send_message 的 args（实测样例）。
+      trigger_condition_variables: |
+        config.actionList[].condition 可用的变量（枚举接口 triggerConditionVariable，11 个）：process_instance_name/creator/urgency/influence_scope/priority/service_category/curr_assignee/status_change/priority_change/process_task_status_change/service_status_change。条件表达式语法（布尔/比较运算符细节）属前端解释型 DSL，API 透传不校验——gap：具体表达式语法需前端配置器或 designer 产物确认。
     side_effects:
       - op: trigger.create
-        rule: "POST /v1/trigger。name/scope/status/event/config 必填。instanceId CMDB 生成返回。建触发器前通常先有 notify_policy（config 引用其 id）。"
+        rule: "POST /v1/trigger。name/scope/status/event/config 必填（validator request_validate_trees.go:15）。instanceId CMDB 生成返回。建触发器前通常先有 notify_policy（send_message 引用其 id）。"
       - op: trigger.update
-        rule: "PUT /v1/trigger/:triggerId 全量覆盖。triggerId 正则 ^[0-9a-z]{13}$（validator 证实）。"
+        rule: "PUT /v1/trigger/:triggerId 全量覆盖。triggerId 正则 ^[0-9a-z]{13}$（validator request_validate_trees.go:35）。"
       - op: trigger.delete
         rule: "DELETE /v1/trigger/:triggerIds。triggerIds 走 path 分号分隔批量。系统自带（defaultUser 建）触发器勿删。"
 
   # ---------- ITSM 通知策略（notify_policy）----------
   itsm_notify_policy:
-    description: ITSM 通知策略——「信号(triggerSignal)→通知谁(notifyRange)→怎么发(notifyMode)→发什么(content)」。被 trigger 经 notifyPolicyId 引用。CRUD 在 /api/itsc_trigger/v1/notify_policy（⚠️前缀 itsc_trigger 非 flowable_service，但仍 8134 端口）。
-    source: data/api-doc/itsm-notify_policy.xlsx + data/sources/backend/ITSM/flowable_service/notify_policy/{route.go:7-14, validators/api_validator.go:75-99}
+    description: ITSM 通知策略——「信号(triggerSignal)→通知谁(notifyRange)→怎么发(notifyMode)→发什么(content)」。被 trigger 经 notifyPolicyId 引用。CRUD 在 /api/itsc_trigger/v1/notify_policy（⚠️前缀 itsc_trigger 非 flowable_service，但仍 8134 端口）。⚠️notifyType/triggerSignal/notifyRange/content变量 的合法值见 api_behavior（来自 fixtures rawSetting + 枚举接口，非自由文本）。
+    source: data/api-doc/itsm-notify_policy.xlsx + notify_policy/{route.go:7-14, validators/api_validator.go:75-99, fixtures/notify_setting.go:9 rawSetting（全量枚举权威源）} + 枚举接口 GET /api/itsc_trigger/v1/notify_type
     api: notify_policy
     fields:
-      instanceId:    { type: string, anchor: true, desc: "通知策略 id（13 hex）" }
+      instanceId:    { type: string, anchor: true, desc: "通知策略 id（13 hex，update 正则 ^[0-9a-z]{13}$，validator request_validate_trees.go:43）" }
       name:          { type: string, required: true, desc: "策略名" }
-      notifyType:    { type: string, required: true, desc: "通知类型，如 process_instance / process_task" }
-      triggerSignal: { type: string, required: true, desc: "触发信号，如 start / finish" }
-      notifyRange:   { type: array, items: string, required: true, desc: "通知范围，如 [creator]" }
-      notifyMode:    { type: array, items: string, required: true, desc: "通知渠道，如 [email]" }
-      content:       { type: string, required: true, desc: "通知正文模板（支持 ${process_instance_id}/${process_instance_number} 等变量，后端透传前端解释）" }
-      subject:       { type: string, desc: "通知主题" }
-      customUserGroup: { type: array, items: string, desc: "自定义通知用户组" }
+      notifyType:    { type: string, required: true, desc: "通知类型。合法值见 api_behavior.notify_enums（process_instance/process_task/service_instance/duty_shift_change）。⚠️triggerSignal/content变量 都随 notifyType 变化" }
+      triggerSignal: { type: string, required: true, desc: "触发信号。合法值随 notifyType 变化（非全局枚举），见 api_behavior.notify_enums 的 notifyType→signal 映射" }
+      notifyRange:   { type: array, items: string, required: true, desc: "通知范围。合法值随 triggerSignal 变化，见 api_behavior.notify_enums（creator/todo_user/oper_user/permission_operator/curr_operator/supervisor/custom_user/all/cc_user 等；duty_shift 专属 hand_over_*/take_over_*）" }
+      notifyMode:    { type: array, items: string, required: true, desc: "通知渠道。⚠️fixtures 未列枚举，validator 仅校验非空——实测样例 [email]。完整渠道（短信/站内信/微信/钉钉？）gap：需前端配置器或 ListAllNotifyTypeV2 接口确认" }
+      content:       { type: string, required: true, desc: "通知正文模板。支持 ${var} 变量，可用变量随 notifyType 变化，见 api_behavior.notify_enums 的 variables 清单。后端透传前端解释（API 200 ≠ 变量替换正确）" }
+      subject:       { type: string, desc: "通知主题（推断同 content 支持变量，未在 fixtures 明确）" }
+      customUserGroup: { type: array, items: string, desc: "自定义通知用户组（notifyRange 含 custom_user 时填，引用用户组 id，跨域→user 系统）" }
       builtin:       { type: bool, desc: "是否系统自带（勿动/勿删）" }
+      domainModel:   { type: string, desc: "领域模型（语义未深挖）" }
     relations:
       - { to: itsm_trigger, type: association, cardinality: "N:N", desc: "被触发器经 notifyPolicyId 反向引用" }
     api_behavior:
       path_prefix: "⚠️前缀 /api/itsc_trigger/v1（≠ flowable_service），但同在 8134 端口（route.go 注册在 flowable_service）"
       delete_via_query: "delete 无 path param——instanceIds 走 query（validator ctx.BindQuery 证实，route.go:8），分号分隔。与 trigger/sla/duty_group 的 path 分号批量不同，易错。"
       content_is_template: "content 是模板字符串，后端透传不校验结构——API 200 只表存下，前端渲染/变量替换是否正确需前端验证（onboarding 证据纪律规则2）。"
+      notify_enums: |
+        权威源：notify_policy/fixtures/notify_setting.go:9 rawSetting（全量）+ 枚举接口 GET /api/itsc_trigger/v1/notify_type。notifyType→triggerSignal→notifyRange 是三层映射（非独立枚举）：
+        • process_instance（工单信号）: 16 signals（start提交/finish完成/suspend挂起/supervise督办/activate重启/cancel作废/close关单/revoke撤销/comment评价/invite_comment邀请评价/priority_change优先级变更/warning预警SLA/timeout超时SLA/common通用/urge催办/delete删除）；range 含 creator/todo_user/oper_user/permission_operator/curr_operator/supervisor/custom_user；variables 11 个（${process_instance_id/name/number/creator/ctime/status} ${supervisor} ${action} ${service_name/catalog/category}）
+        • process_task（工单任务信号）: 18 signals（todo/pass/reject/jump/withdraw/assign/distribute/cc/cc_read/add/add_reject/claim/ack/answer_warning/answer_timeout/done_warning/done_timeout/common）；range 含 creator/todo_user/permission_operator/curr_operator/extra_assignee/cc_user/cc_creator/custom_user；variables 13 个（含 ${process_instance_step_name/id/operator/status}）
+        • service_instance（服务信号）: 3 signals（enabled/disabled/common）；range 含 all/permission_operator/custom_user；variables 4 个（${service_category/name/manager} ${action}）
+        • duty_shift_change（交接班信号）: 2 signals（handOver交班/takeOver接班）；range 含 hand_over_leader/hand_over_group/take_over_leader/take_over_group/custom_user；variables 9 个（${hand_over_leader/group/user} ${take_over_leader/group/user} ${shift_change_log_url} ${shift_change_time} ${duty_group_name}）
+        变量语法统一 ${var_name}。notifyRange 含 custom_user 时，填 customUserGroup 指定具体人员。
 
   # ---------- ITSM 服务级别协议（sla）----------
   itsm_sla:
@@ -878,6 +906,7 @@ objects:
     api_behavior:
       list_is_post_search: "⚠️list 是 POST /sla/rule/_search（非 GET list，GET 返 404）；分页+过滤参数都在 body。返回 data.list[] 含 basicInfo 展开字段 + slaConfig[]。"
       cross_system_dependency: "workingCalendarId 引用 work_calendar——⚠️work_calendar 在独立微服务 sys_setting:8271（见 sys_setting_work_calendar 对象 + easyops-sys-setting system），非 8134。建 SLA 前通常先在 sys-setting 建工作日历拿 24hex id。"
+      validator_truth: "create/update 仅校验 basicInfo(object)+slaConfig(SLAConfig[]) 顶层必填（validator request_validate_trees.go:14,114）；ruleId/bindingId/levelName/agreementType/duration 等内部字段均无正则/枚举校验（运行时不验，前端约束）。levelName 的 plan/common/priority/emergency、agreementType 的 done 来自实测样例非源码枚举——gap：完整值域需前端配置器确认。"
     side_effects:
       - op: sla.create
         rule: "POST /v1/sla/rule。basicInfo + slaConfig 必填。建 SLA 前通常先有 work_calendar（levelConfig.workingCalendarId 引用其 24hex id）。"
@@ -887,36 +916,39 @@ objects:
   # ---------- ITSM 值班组（duty_group）----------
   itsm_duty_group:
     description: ITSM 值班组——定义值班组的名/周期(dutyCycle)/班次(dutyShift[])/弹性时间(flexTime)。被 SLA/工单排班引用。CRUD 在 /v1/duty_group（8134）。duty_group_config（日历配置/导入）系列未纳入（场景不需要，按「不增噪声」原则）。
-    source: data/api-doc/itsm-duty_group.xlsx + 实测详情样例（duty_group 658c1d374b66b）
+    source: data/api-doc/itsm-duty_group.xlsx + duty_group/validators/{request_validate_trees.go:15,95, api_validator.go:58} + parse_date.go:175-187 + 实测样例（658c1d374b66b）
     api: duty_group
     fields:
-      instanceId:    { type: string, anchor: true, desc: "值班组 id（13 hex）" }
-      name:          { type: string, required: true, desc: "值班组名" }
-      dutyCycle:     { type: string, required: true, desc: "值班周期，如 2026-01~2026-12" }
-      status:        { type: string, required: true, enum: [enabled, disabled], desc: "启用状态" }
-      dutyShift:     { type: array, items: object, required: true, desc: "班次列表 [{name, dutyTime:'08:00~12:00'}]" }
+      instanceId:    { type: string, anchor: true, desc: "值班组 id（13 hex，update 正则 ^[0-9a-z]{13}$，validator request_validate_trees.go:95）" }
+      name:          { type: string, required: true, desc: "值班组名（validator 无正则）" }
+      dutyCycle:     { type: string, required: true, desc: "值班周期，实测 '2026-01~2026-12'。⚠️validator 无正则校验（request_validate_trees.go:15 field_type=string 无 pattern），但后端 parse_date.go 用 ParseDateFromStringOnlyMonth 解析——格式实为 YYYY-MM（起止月由前端拼 ~ 分隔）。自由度未完全确认" }
+      status:        { type: string, required: true, desc: "状态（validator 无枚举校验，实测 enabled/disabled）" }
+      dutyShift:     { type: array, items: object, required: true, desc: "班次列表 [{name(自由文本), dutyTime}]。validator 仅校验 object[] 非空，dutyTime 内部无正则——格式实测 '08:00~12:00'（跨天表示未在源码确认）" }
       memo:          { type: string, desc: "备注" }
-      flexTime:      { type: integer, desc: "弹性时间（分钟）" }
-      useFormBuilder: { type: boolean, desc: "是否用表单构建器" }
+      flexTime:      { type: integer, desc: "弹性时间（分钟，validator 无范围校验，实测 10）" }
+      useFormBuilder: { type: boolean, desc: "是否用表单构建器（true 时关联 form 实例，跨域→itsm form；validator 不强制）" }
+    api_behavior:
+      validator_loose: "create/update（request_validate_trees.go:15,95）仅校验 name/dutyCycle/status/dutyShift 顶层必填 + instanceId/groupId 正则；dutyCycle/dutyTime/flexTime/status 无正则/枚举校验，靠前端约束。dutyCycle 的 ~ 分隔起止月是前端拼约定非后端验。"
     side_effects:
       - op: duty_group.create
-        rule: "POST /v1/duty_group。name/dutyCycle/status/dutyShift 必填。instanceId CMDB 生成返回。"
+        rule: "POST /v1/duty_group。name/dutyCycle/status/dutyShift 必填（validator request_validate_trees.go:15）。instanceId CMDB 生成返回。"
       - op: duty_group.delete
         rule: "DELETE /v1/duty_group/:groupIds。groupIds 走 path 分号分隔批量。"
 
   # ---------- 系统设置·工作日历（work_calendar，sys_setting 微服务）----------
   sys_setting_work_calendar:
-    description: 系统设置·工作日历（营业时间）——定义工作日/休息日/工作时段，供 SLA 计算达成时长时剔除非工作时间。被 ITSM SLA 经 workingCalendarId 引用。CRUD 在 /api/sys_setting/v1/work/calendar（⚠️独立微服务 sys_setting:8271，非 8134；id 是 24hex MongoDB ObjectId ≠ flowable_service 的 13hex）。
-    source: data/api-doc/itsm-work_calendar.xlsx + data/sources/backend/platform/sys_setting/work_calendar/{route.go:9-24, controller.go, service.go} + 实测样例（63a285ca7ea068c42a26ee26）
+    description: 系统设置·工作日历（营业时间）——定义工作日/休息日/工作时段/节假日，供 SLA 计算达成时长时剔除非工作时间。被 ITSM SLA 经 workingCalendarId 引用。CRUD 在 /api/sys_setting/v1/work/calendar（⚠️独立微服务 sys_setting:8271，非 8134；id 是 24hex MongoDB ObjectId ≠ flowable_service 的 13hex）。⚠️config 完整结构见 api_behavior.config_schema（含 workDayList/holidayList/independenceDayList 三部分，validator 证实）。
+    source: data/api-doc/itsm-work_calendar.xlsx + sys_setting/work_calendar/{route.go:9-24, validators/request_validate_trees.go:23,31, internal/working_calendar/generator.go:43,81} + 实测样例（63a285ca7ea068c42a26ee26）
     api: work_calendar
     fields:
-      id:      { type: string, anchor: true, desc: "日历 id（24 hex MongoDB ObjectId）" }
-      name:    { type: string, required: true, desc: "日历名" }
-      config:  { type: object, required: true, desc: "日历配置 {mode, workDayList:[{weekday(1-7), hours:'08:30~12:00,14:00~18:00'}]}" }
+      id:      { type: string, anchor: true, desc: "日历 id（24 hex MongoDB ObjectId，validator 正则 ^[0-9a-fA-F]{24}$，request_validate_trees.go:47,51,55）" }
+      name:    { type: string, required: true, desc: "日历名（validator 无正则/长度校验）" }
+      config:  { type: object, required: true, desc: "日历配置，含 workDayList（每周工作日时段）+ holidayList（节假日）+ independenceDayList（独立放假日）。完整结构 + hours 正则见 api_behavior.config_schema" }
       memo:    { type: string, desc: "备注" }
       builtin: { type: bool, desc: "是否系统自带（勿删）" }
-      status:  { type: string, desc: "状态" }
-      key:     { type: string, desc: "日历 key（内置日历标识）" }
+      status:  { type: string, desc: "状态（validator 未校验枚举）" }
+      key:     { type: string, desc: "日历 key（内置日历标识，自定义通常不填）" }
+      year:    { type: string, desc: "年份（日历按年生成，create 可选）" }
       creator: { type: string, desc: "创建者" }
     relations:
       - { to: itsm_sla, type: association, cardinality: "1:N", desc: "被 SLA 规则经 workingCalendarId 反向引用（一个日历可被多个 SLA 级别引用）" }
@@ -924,11 +956,21 @@ objects:
       separate_microservice: "⚠️work_calendar 在 sys_setting:8271（独立微服务 logic.sys_setting），非 flowable_service:8134。源码 data/sources/backend/platform/sys_setting/work_calendar/。"
       why_separate_spec: "api-cli endpoint 是 service 级，不支持 per-resource 绑不同端口（schema.go 无 Endpoint 字段），故 work_calendar 在独立 spec easyops-sys-setting.yaml + 独立 system。CLI --spec 切。"
       id_format: "id 是 24hex MongoDB ObjectId（≠ flowable_service 13hex 微秒时间戳）——印证不同存储。delete path ids 分号批量，值是 24hex。"
+      config_schema: |
+        config 完整结构（validator request_validate_trees.go:23 CreateWorkCalendarValidateTree 证实，三层）：
+        • workDayList: [{ weekday(int 1-7 周一到周日), hours }]
+        • holidayList: [{ from(YYYY-MM-DD), to(YYYY-MM-DD), hours }]  —— 节假日范围，可覆盖工作日变休息日
+        • independenceDayList: [{ date(YYYY-MM-DD), hours }]  —— 独立放假日
+        hours 正则（validator 证实）：^([01]\d|2[0-3]):[0-5]\d~([01]\d|2[0-3]):[0-5]\d
+        即【单时段】 HH:MM~HH:MM（⚠️非逗号多时段——实测样例见的 "08:30~12:00,14:00~18:00" 是前端展示拼接，存盘是单时段或多条记录）。
+        休息日表示：不在 workDayList 的 weekday 默认全天休息（OffHours=00:00~24:00，generator.go:81）；holidayList 命中日 = 休息。
+        config.mode：validator 未校验枚举（实测值 ""/custom）——gap：mode 完整值域 + 不同 mode 下结构差异需前端配置器确认。
+        PUT v1（EditWorkCalendarConfig）与 POST v2（EditWorkCalendarConfigV2）：validator 树相同（request_validate_trees.go:31 vs 35），v2 是新版前端用，差异在内部生成逻辑非 wire 层。
     side_effects:
       - op: work_calendar.create
-        rule: "POST /v1/work/calendar。name + config 必填。返回新日历 id（24hex）。建 SLA 前常先建工作日历拿此 id。"
+        rule: "POST /v1/work/calendar。name + config 必填（validator request_validate_trees.go:23）。返回新日历 id（24hex）。建 SLA 前常先建工作日历拿此 id。"
       - op: work_calendar.update
-        rule: "PUT /v1/work/calendar/:id 全量覆盖 config——触发重新生成日历。"
+        rule: "PUT /v1/work/calendar/:id 全量覆盖 config——触发重新生成日历（generator.go 按 workDayList/holidayList/independenceDayList 生成全年每日 WorkingHours/OffHours）。"
       - op: work_calendar.delete
         rule: "DELETE /v1/work/calendar/:ids。ids 走 path 分号分隔批量（24hex）。系统自带（builtin，如「国家法定节假日」）勿删。"
 
