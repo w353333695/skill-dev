@@ -52,7 +52,13 @@ func Iter(ctx context.Context, pg *tree.Pagination, do DoFunc, firstBody []byte,
 		body := append([]byte(nil), firstBody...) // 拷贝，翻页改副本
 		req := copyMap(firstQuery)
 		seen := map[string]bool{}
+		// totalPath 只依赖 pg.TotalPath/pg.ItemsPath，提到循环外避免每页重算。
+		totalPath := pg.TotalPath
+		if totalPath == "" {
+			totalPath = parentPath(pg.ItemsPath) + ".total"
+		}
 		count := 0
+		var totalComputed bool // 全局仅首条 item 携带 total：首次 respBody 后算一次，之后不再算
 		for page := 0; page < opts.MaxPages; page++ {
 			respBody, err := do(ctx, body, req)
 			if err != nil {
@@ -65,15 +71,14 @@ func Iter(ctx context.Context, pg *tree.Pagination, do DoFunc, firstBody []byte,
 				return
 			}
 			items := gjson.GetBytes(respBody, pg.ItemsPath).Array()
-			// 首次响应抽 total（默认 totalPath = itemsPath 父级 + ".total"）
-			totalPath := pg.TotalPath
-			if totalPath == "" {
-				totalPath = parentPath(pg.ItemsPath) + ".total"
-			}
+			// 首次响应抽 total（保证全局仅首条 item 携带，多页不再重算）
 			var firstTotal *int
-			if t := gjson.GetBytes(respBody, totalPath); t.Exists() {
-				n := int(t.Int())
-				firstTotal = &n
+			if !totalComputed {
+				if t := gjson.GetBytes(respBody, totalPath); t.Exists() {
+					n := int(t.Int())
+					firstTotal = &n
+				}
+				totalComputed = true
 			}
 			for _, it := range items {
 				id := gjson.Get(it.Raw, "id").String()
