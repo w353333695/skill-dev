@@ -62,7 +62,7 @@ scripts/run.sh --spec <spec-path> <resource> <verb> [args] [--print-curl|--dry-r
 
 分发打包：`scripts/pack-go.sh --skill <name> --target <os/arch> [--dist]` 读 manifest 编译到 `bin/` + 可选打 tar.gz。**无 setup**——Go 预编译二进制随 skill 打包，不需要安装 runtime、不配 PATH、不要 go。
 
-**先用 `--print-curl` 或 `--dry-run` 预览请求**，确认无误再真调（写操作尤其）。
+**安全调用**：读操作直接调；写操作先展示影响面（要建/改/删什么），用户确认后执行。`--print-curl`/`--dry-run` 是排查工具（首次用某 verb / 请求报错时用），非常规步骤——真正的安全来自确认，不是预览 curl。
 
 **调用姿势（防污染）**：`scripts/run.sh` 用**绝对路径**调，cwd 保持用户工作目录——勿 `cd` 进 skill 再用相对路径，否则临时产物会写进 skill 目录（见「关键纪律」状态持久化）。body 优先用 `--body '<json>'`（inline，api-cli UX 改造后支持，零落盘），其次进程替换 `--body-file <(printf '%s' '<json>')`，避免任何临时文件。
 
