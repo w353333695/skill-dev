@@ -7,9 +7,11 @@ skill 的调度分三挡位，按需求的意图 + 复杂度选挡。
 调度靠 LLM 推理、**无代码引擎兜底**——platforms 读取须守此纪律，保证一致 + 省 token：
 
 1. **粗筛（必读，第一步）**：读 `systems.yaml` 的 `systems.<system>.capabilities`（resource.verb → 一句话用途），判需求可达性、命中哪个系统哪个 verb。systems.yaml 不大，全量读（含 `runtime` 坑一并看，避免踩雷如 update body flat / run inputs map）。
-2. **按需读详情（命中后，禁止全量）**：命中 resource.verb 后，按需读对应段，**禁止 `Read` spec/objects 全文**（大文件用 `grep` 定位行 → `Read --offset` 取该段）：
-   - spec `<system>.yaml`：读命中 `resource.verb` 的 `description` + `body` + `params`（grep `^\s*<verb>:` 定位 operation 段）
-   - `objects.yaml`：读命中对象的 `fields` + `side_effects`（grep 对象名定位）
+2. **按需读详情（命中后，禁止全量）**：命中 resource.verb 后，按需读对应段：
+   - **精准定位**：先 `grep -n "关键词" platforms/demo/objects.yaml` 拿行号 → `Read --offset=<行号> limit=30` 取该段。一步命中，不读全文。
+   - spec `<system>.yaml`：`grep -n "^\s*<verb>:" easyops-*.yaml` 定位 → Read 该 operation 段
+   - `objects.yaml`：`grep -n "<对象名>:" objects.yaml` 定位 → Read 该对象的 fields + side_effects 段
+   - `entities.yaml`：`grep -n "common_models\|<field>" entities.yaml` → 取速查表 / 锚
    - `flows/<flow>.yaml`：需求匹配某 flow 的 `trigger` 时才读该 flow（单文件不大可全读）
 3. **禁止**：跳过 capabilities 直接猜 verb；不读 `runtime` 坑就写操作；`Read` spec/objects 全文（数百行费 token）。
 
