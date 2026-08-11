@@ -771,6 +771,30 @@ objects:
       - op: ticket.export_excel
         rule: "POST /v1/file/batch/ticket/excel_export。ticketIds JSON 数组；fields 空用服务默认导出配置。返回二进制 Excel 流。e2e 实测：running 工单导出成功(8KB Excel)，done 工单报 permission denied——导出权限与工单状态/可见范围相关（非 API 格式问题）。"
 
+  # ---------- ITSM 服务目录（service_catalog）----------
+  itsm_service_catalog:
+    description: ITSM 服务目录树节点——服务实例的容器。一级目录（事件管理/服务请求/...）+ 子目录。服务实例挂在目录下。CRUD 全在 /v1/service_catalog。
+    source: data/sources/backend/ITSM/flowable_service/service_catalog/service_catalog_service.go + internal/cmdb_service/service_catalog/manager.go
+    api: service_catalog
+    fields:
+      instanceId:    { type: string, anchor: true, desc: "目录 id（13 hex）" }
+      name:          { type: string, required: true, desc: "目录名称（同父下唯一）" }
+      parentId:      { type: string, desc: "父目录 id（空=一级目录）" }
+      description:   { type: string, desc: "目录描述" }
+      builtIn:       { type: bool, desc: "是否内置目录（不可删）" }
+      url:           { type: string, desc: "自定义 URL" }
+      isTargetBlank: { type: boolean, desc: "URL 新窗口打开" }
+    relations:
+      - { to: itsm_service_catalog, type: composition, cardinality: "1:N", via: parentId, desc: "目录有子目录（递归树）" }
+      - { to: itsm_service_instance, type: composition, cardinality: "1:N", desc: "目录包含服务实例" }
+    side_effects:
+      - op: service_catalog.create
+        rule: "POST /v1/service_catalog。parentID 指定父目录（空=一级）；name 同父下唯一校验（IsDuplicated）。instanceId CMDB 生成返回。"
+      - op: service_catalog.delete
+        rule: "DELETE /v1/service_catalog/:instanceId。⚠️两层约束（manager.go:243 CheckCatalogRemovable）：①builtIn=true→『服务目录为内置，不允许删除』；②目录下有服务实例→『服务目录下存在服务实例，不允许删除』——须先迁移或删除子服务。"
+      - op: service_catalog.set_permission
+        rule: "POST /v1/set_catalog_permission。modifyUserList 自动获得 read 权限（去重合并到 readUserList）。权限沿树传播：授 read 须授所有祖先；取消 read 须取消所有子孙。"
+
 # =============================================================================
 # 接口级行为（跨对象，编排时必须知道）
 # =============================================================================

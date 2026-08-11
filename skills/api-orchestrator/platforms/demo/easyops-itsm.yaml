@@ -429,7 +429,80 @@ resources:
             isDesensitization:      { type: boolean, description: "是否脱敏（仅 useFormBuilder=true 生效）" }
 
   # ===========================================================================
-  # ITSM 工单实例（process_instance）—— 同 flowable_service，运行态。
+  # ITSM 服务目录（service_catalog）—— 同 flowable_service，目录树 CRUD + 权限。
+  # 数据来源：后端 service_catalog/（route.go + service_catalog_service.go + manager.go）
+  #          + Catalog struct（internal/cmdb_service/knowledge/models.go）。
+  # ===========================================================================
+  service_catalog:
+    description: ITSM 服务目录树（服务实例的容器）。一级目录如 事件管理/服务请求；子目录如 请求目录。服务实例挂在目录下。CRUD 全在 /v1/service_catalog。
+    path: ""
+
+    operations:
+      list:
+        description: 列目录（按 parentId 查子目录）。parentId 空查一级目录；ignoreEmpty=true 忽略空目录；category 过滤分类。返回目录列表含服务实例数。
+        method: GET
+        path: /api/flowable_service/v1/service_catalog
+        params:
+          parentId:     { in: query, type: string, description: "父目录 id（空=查一级目录）" }
+          category:     { in: query, type: string, description: "分类过滤（如 事件管理）" }
+          ignoreEmpty:  { in: query, type: boolean, description: "true=忽略无服务的目录" }
+
+      list_tree:
+        description: 列完整目录树（递归）。返回嵌套树结构，含每个目录的服务实例数。查整个目录结构用它。
+        method: GET
+        path: /api/flowable_service/v1/service_catalog_tree
+        params:
+          category:    { in: query, type: string, description: "分类过滤" }
+          ignoreEmpty: { in: query, type: boolean, description: "true=忽略空目录" }
+
+      create:
+        description: 建目录。parentID 指定父目录（空=一级目录）；name 必填且同父下唯一。场景②建 test-permission 用它。
+        method: POST
+        path: /api/flowable_service/v1/service_catalog
+        body:
+          type: object
+          required: [name]
+          description: "建目录请求"
+          properties:
+            name:          { type: string, description: "目录名称（同父下唯一）" }
+            parentID:      { type: string, description: "父目录 id（空=一级目录）" }
+            description:   { type: string, description: "目录描述" }
+            url:           { type: string, description: "自定义 URL" }
+            isTargetBlank: { type: boolean, description: "URL 新窗口打开" }
+
+      edit:
+        description: 编辑目录（全量覆盖：name/description/url/isTargetBlank）。instanceId 路径参数。
+        method: PUT
+        path: /api/flowable_service/v1/service_catalog/{instanceId}
+        params:
+          instanceId: { in: path, type: string, required: true, description: "目录 id" }
+        body:
+          type: object
+          properties:
+            name:          { type: string }
+            description:   { type: string }
+            url:           { type: string }
+            isTargetBlank: { type: boolean }
+
+      delete:
+        description: 删除目录。⚠️内置目录(builtIn)不可删（『服务目录为内置，不允许删除』）。目录下有服务实例不可删（『服务目录下存在服务实例，不允许删除』）——须先迁移或删除子服务。manager.go:243 CheckCatalogRemovable。
+        method: DELETE
+        path: /api/flowable_service/v1/service_catalog/{instanceId}
+        params:
+          instanceId: { in: path, type: string, required: true, description: "目录 id" }
+
+      set_permission:
+        description: 设目录权限（读+管理）。modifyUserList 自动获得 read 权限。场景②配管理员用它。⚠️字段名是 instanceId 不是 catalogId。
+        method: POST
+        path: /api/flowable_service/v1/set_catalog_permission
+        body:
+          type: object
+          required: [instanceId]
+          description: "设目录权限请求"
+          properties:
+            instanceId:      { type: string, description: "目录 id（字段名是 instanceId 不是 catalogId）" }
+            readUserList:    { type: array, items: { type: string }, description: "读权限用户列表（自动含 modifyUserList）" }
+            modifyUserList:  { type: array, items: { type: string }, description: "管理权限用户列表（自动授予 read）" }
   # 工单发起涉及前端表单渲染+生命周期脚本，不适合 API——本域只管 list/delete/state/export。
   # 数据来源：契约 data/api-doc/itsm-process_instance.json（6 EAML，取 4 个有效）
   #          + 后端 process_instance/ + service_catalog/。

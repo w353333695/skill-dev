@@ -287,6 +287,13 @@ systems:
         delete:       "删工单（仅作废的；instanceIds 分号）"
         set_state:    "改工单状态（suspend仅running/activate仅suspended/cancel仅running；分号批量）"
         export_excel: "导出工单 Excel（ticketIds 数组；fields 空用服务默认配置）"
+      service_catalog:
+        list:            "列子目录（parentId 过滤；category/ignoreEmpty）"
+        list_tree:       "列完整目录树（递归嵌套）"
+        create:          "建目录（name/parentID/description/url）"
+        edit:            "改目录"
+        delete:          "删目录（builtIn 不可删；有服务实例不可删）"
+        set_permission:  "设目录权限（read/modify 用户列表）"
 
     # 运维知识（实测，真相来源）—— 表单内容模型/坑见 objects.yaml#itsm_form_definition
     runtime:
