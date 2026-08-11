@@ -25,9 +25,24 @@ import (
 
 func main() {
 	if err := run(); err != nil {
-		output.PrintError(os.Stderr, err)
+		jsonMode := hasJSONFormat(os.Args[1:])
+		output.PrintError(os.Stderr, err, jsonMode)
 		os.Exit(output.ExitCode(err))
 	}
+}
+
+// hasJSONFormat 扫 args 判断错误输出是否走 JSON（与 --format=json 对齐）。
+// 识别 --format=json 和 --format json（拆两 token）。
+func hasJSONFormat(args []string) bool {
+	for i, a := range args {
+		if a == "--format=json" {
+			return true
+		}
+		if a == "--format" && i+1 < len(args) && args[i+1] == "json" {
+			return true
+		}
+	}
+	return false
 }
 
 func run() error {
