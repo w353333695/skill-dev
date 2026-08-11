@@ -52,7 +52,7 @@ func helpFunc(tr *tree.OperationTree) func(c *cobra.Command, args []string) {
 			ann := c.Annotations
 			if rname, verb, ok := fromAnnotations(ann); ok {
 				if r, op, locErr := locate(tr, rname, verb); locErr == nil {
-					encErr := emitHelpJSON(stdout(), r, op)
+					encErr := emitHelpJSON(c.OutOrStdout(), r, op)
 					if encErr == nil {
 						return
 					}
@@ -62,7 +62,14 @@ func helpFunc(tr *tree.OperationTree) func(c *cobra.Command, args []string) {
 				}
 			}
 		}
-		// 默认帮助：让 cobra 用内置模板渲染到 stdout。
+		// text 分支：叶子 operation 命令渲染分类参数块（path/query/body）。
+		if rname, verb, ok := fromAnnotations(c.Annotations); ok {
+			if r, op, locErr := locate(tr, rname, verb); locErr == nil {
+				renderTextHelp(c.OutOrStdout(), c, r, op)
+				return
+			}
+		}
+		// 非叶子命令 / 反查失败：cobra 默认模板。
 		c.Root().UsageFunc()(c)
 	}
 }
@@ -114,4 +121,44 @@ func locateIn(r *tree.Resource, rname, verb string) (opHit, error) {
 		}
 	}
 	return opHit{}, fmt.Errorf("子树 %q 未命中 %s/%s", r.Name, rname, verb)
+}
+
+// renderTextHelp 渲染 verb 的人类可读 help：Usage + Path params(positional) + Query params + Body 入口 + Flags。
+// 数据源与 emitHelpJSON / explainCmd 同（op.Params / op.Body），复用 splitParams 分 path/other。
+func renderTextHelp(w io.Writer, c *cobra.Command, r *tree.Resource, op *tree.Operation) {
+	fmt.Fprintf(w, "Usage:\n  %s %s [PATH_ARGS] [flags]\n\n", r.Name, op.Verb)
+	if op.Description != "" {
+		fmt.Fprintf(w, "%s\n\n", op.Description)
+	}
+	pathP, otherP := splitParams(op)
+	if len(pathP) > 0 {
+		fmt.Fprintln(w, "Path params (positional, in order):")
+		for _, p := range pathP {
+			req := ""
+			if p.Required {
+				req = " (required)"
+			}
+			fmt.Fprintf(w, "  %s   %s%s\n", p.Name, p.Description, req)
+		}
+		fmt.Fprintln(w)
+	}
+	var queryP []tree.Param
+	for _, p := range otherP {
+		if p.In == "query" {
+			queryP = append(queryP, p)
+		}
+	}
+	if len(queryP) > 0 {
+		fmt.Fprintln(w, "Query params (--<name>=<value>):")
+		for _, p := range queryP {
+			fmt.Fprintf(w, "  --%s   %s\n", p.Name, p.Description)
+		}
+		fmt.Fprintln(w)
+	}
+	if op.Body != nil {
+		fmt.Fprintln(w, "Body: --body '<json>' | --body-file <path|->")
+		fmt.Fprintln(w)
+	}
+	fmt.Fprintln(w, "Flags:")
+	fmt.Fprint(w, c.Flags().FlagUsages())
 }

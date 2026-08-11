@@ -92,10 +92,10 @@ verb（create/read/update/delete）有**默认 method**（POST/GET/PATCH/DELETE�
 |---|---|---|
 | `path`（URL 里的 `{id}`） | **按位置**跟在 verb 后 | `widget read w-1` → `id=w-1` |
 | `query` / `header` / `body` | **按 flag**（参数名即 flag 名） | `widget list --fields name,size` |
-| 嵌套/复杂 body | `--body-file body.json` 或 MCP `_body` | `widget create --body-file ./new.json` |
+| 嵌套/复杂 body | `--body '<json>'` / `--body-file body.json`（`-` 读 stdin）/ MCP `_body` | `widget create --body '{"a":1}'` |
 
 ### 必看：`--help` 与 `--explain`
-- `api-cli <resource> <verb> --help`：人读的命令帮助。
+- `api-cli <resource> <verb> --help`：人读 help，**列出 Path params（位置，有序）/ Query params / Body 入口 / Flags** 分类块（易找参数）。
 - `api-cli <resource> <verb> --help-format=json`：结构化 JSON（resource/verb/method/path/params/body），给脚本/LLM 消费。
 - `api-cli explain <resource> <verb>`：输出该 operation 的**完整 input + output schema**（含嵌套 body、响应字段、required），调接口前先看这个最清楚。
 - `--help-format=json` 单独给（不带 `--help`）也触发 help（iter3 修复）。
@@ -111,7 +111,9 @@ verb（create/read/update/delete）有**默认 method**（POST/GET/PATCH/DELETE�
 | `--print-curl` | 不真发，打印等价 curl |
 | `--yes` | 跳过写操作（POST/PUT/PATCH/DELETE）的确认 |
 | `--limit N` / `--all` | 分页：拉够 N 条停 / 拉到尽头 |
-| `--body-file <path>` | 请求 body（JSON 文件，支持嵌套/复杂结构） |
+| `--body '<json>'` | 请求 body（inline JSON，优先级高于 --body-file，两者互斥） |
+| `--body-file <path\|->` | 请求 body（JSON 文件，支持嵌套/复杂；`-` 读 stdin） |
+| `--reveal-auth` | print-curl 显示真实 auth 值（默认遮蔽 `<redacted>`） |
 | `--insecure` | 跳过 TLS 证书校验（自签证书） |
 | `--timeout 30s` | HTTP 超时 |
 | `--output, -o <path>` | 输出到文件（binary 响应落盘 / 文本写文件，默认 stdout） |
@@ -135,6 +137,8 @@ api-cli --spec s.yaml widget search --limit 100            # 拉够 100 条停
 api-cli --spec s.yaml widget search --all --format table   # table 表格（中文表头取响应字段 description）
 ```
 分页规则在清单的 `pagination` 里声明（cursor / offset，page 在 query 或 body）——见 §6。
+
+**分页输出**：stdout 是流式 NDJSON（每行一个 item）；**total 在 stderr**（`{"_meta":{"total":N}}`），不污染 stdout 管道——读 stdout 的脚本不受影响，要 total 读 stderr。`--all` 触顶硬上限（默认 10000 条 / 1000 页）时 stderr 打 `warning: hit paging cap...` 且 **exit code 4**（`ExitPagingOver`，结果可能不完整）。
 
 ### 发请求前先预览（写操作尤其有用）
 ```bash
@@ -348,7 +352,11 @@ Claude Desktop / Cursor 等配置示例（stdio）：
 
 ## 8. 错误排查
 
+错误默认**人类可读到 stderr**（`error: <code>: <message>`）；`--format=json` 时输出结构化 JSON（机器解析）。未知 flag / 缺参数等都会清晰报错（不再静默）。
+
 | 现象 | 原因 / 解法 |
+|---|---|
+| `--all` exit 4 + warning | 分页命中硬上限（10000 条/1000 页），结果可能不完整——缩小范围或分批 |
 |---|---|
 | `找不到清单` | 用 `--spec` 或设 `API_CLI_SPEC`，或放到 `.api-cli/spec.yaml` |
 | `缺少 path 参数 X` | path 参数没按位置传（如 `widget read` 漏了 id） |

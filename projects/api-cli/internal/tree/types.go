@@ -75,6 +75,7 @@ type Pagination struct {
 	Size          int    // offset：每页大小
 	HasMorePath   string // 空 → 引擎用 "本轮条数 < size 或 items 空" 隐式判断
 	PageIn        string // page 在哪：空/"query" 默认 / "body"
+	TotalPath     string // 可选：total 在响应信封的 gjson 路径；空则推 <ItemsPath 父>.total
 }
 
 // Schema 参数/body/response 的结构描述（MVP 用最小子集，支持 type/required/properties）。

@@ -178,3 +178,58 @@ func TestPageInBodyPaging(t *testing.T) {
 		t.Fatalf("got %v want %v", got, want)
 	}
 }
+
+// TestIterCappedEmitsErrCapped 验证 MaxItems 触顶时 Iter 发出 Item{Err:ErrCapped}，
+// 区别于真实翻页错误（DoFunc 失败）——消费方据此打 warning + exit 4，而非把截断当失败。
+//
+// 触发条件：每页 5 条，opts.MaxItems=3 → 第 3 条后命中硬上限，应发 ErrCapped 再 close。
+// 旧实现：触顶静默 return，消费方拿到截断数据 exit 0 无感。
+func TestIterCappedEmitsErrCapped(t *testing.T) {
+	pg := &tree.Pagination{Type: "implicit", ItemsPath: "data.list", Size: 10}
+	// 每页 5 条，MaxItems=3 → 触顶
+	resp := []byte(`{"data":{"list":[{"id":"a"},{"id":"b"},{"id":"c"},{"id":"d"},{"id":"e"}]}}`)
+	do := func(ctx context.Context, body []byte, q map[string]string) ([]byte, error) {
+		return resp, nil
+	}
+	items := Iter(context.Background(), pg, do, nil, nil, Options{MaxItems: 3})
+	var capped bool
+	count := 0
+	for it := range items {
+		if it.Err != nil && it.Err == ErrCapped {
+			capped = true
+		}
+		count++
+	}
+	if !capped {
+		t.Fatalf("want ErrCapped when MaxItems hit, got %d items no cap", count)
+	}
+}
+
+// TestIterEmitsTotal 验证 Iter 把响应信封里的 total 经 Item.Total 传出（仅首条 item 携带）。
+// totalPath 默认 = itemsPath 父 + ".total"；data.list -> data.total。
+func TestIterEmitsTotal(t *testing.T) {
+	pg := &tree.Pagination{Type: "implicit", ItemsPath: "data.list", Size: 10}
+	// 响应信封含 data.total=3 + data.list 一条
+	resp := []byte(`{"data":{"total":3,"list":[{"id":"a"}]}}`)
+	do := func(ctx context.Context, body []byte, q map[string]string) ([]byte, error) {
+		return resp, nil
+	}
+	items := Iter(context.Background(), pg, do, nil, nil, Options{Limit: 10})
+	var gotTotal *int
+	count := 0
+	for it := range items {
+		if it.Total != nil {
+			gotTotal = it.Total
+		}
+		if it.Err != nil {
+			t.Fatalf("unexpected err: %v", it.Err)
+		}
+		count++
+	}
+	if gotTotal == nil || *gotTotal != 3 {
+		t.Fatalf("want total=3, got %v", gotTotal)
+	}
+	if count != 1 {
+		t.Fatalf("want 1 item, got %d", count)
+	}
+}

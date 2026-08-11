@@ -103,7 +103,9 @@ func bindGlobalFlags(root *cobra.Command) {
 	root.PersistentFlags().Bool("yes", false, "跳过写操作确认")
 	root.PersistentFlags().Int("limit", 0, "分页拉取上限（条数）")
 	root.PersistentFlags().Bool("all", false, "拉全部分页（受硬上限约束）")
-	root.PersistentFlags().String("body-file", "", "请求 body JSON 文件路径（覆盖 body 参数，支持复杂/嵌套 body）")
+	root.PersistentFlags().String("body-file", "", "请求 body JSON 文件路径（覆盖 body 参数，支持复杂/嵌套 body；- 读 stdin）")
+	root.PersistentFlags().String("body", "", "请求 body JSON（内联；优先级高于 --body-file）")
+	root.PersistentFlags().Bool("reveal-auth", false, "print-curl 时显示真实 auth 值（默认遮蔽）")
 	root.PersistentFlags().Bool("insecure", false, "跳过 TLS 证书校验（自签证书）")
 	root.PersistentFlags().Duration("timeout", 0, "HTTP 超时（如 30s、500ms；0=不限）")
 	root.PersistentFlags().StringP("output", "o", "", "输出到文件（binary 响应落盘 / 文本写文件，默认 stdout）")
@@ -124,6 +126,8 @@ func globalOpts(cmd *cobra.Command) (engine.Options, error) {
 		All:       boolFlag(f, "all"),
 		Limit:     intFlag(f, "limit"),
 		BodyFile:  strFlag(f, "body-file"),
+		Body:      strFlag(f, "body"),
+		RevealAuth: boolFlag(f, "reveal-auth"),
 		Insecure:  boolFlag(f, "insecure"),
 		Timeout:   durationFlag(f, "timeout"),
 		Out:       stdout(),
