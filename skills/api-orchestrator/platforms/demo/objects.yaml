@@ -809,6 +809,129 @@ objects:
     relations:
       - { to: itsm_service_instance, type: association, cardinality: "N:N", via: commonServices, desc: "常用服务关联多个服务实例" }
 
+  # ---------- ITSM 触发器（trigger）----------
+  itsm_trigger:
+    description: ITSM 触发器——绑定流程/任务事件（event）到动作列表（config.actionList）。被服务实例/流程节点引用。CRUD 在 /v1/trigger（8134 flowable_service）。
+    source: data/api-doc/itsm-trigger.xlsx + data/sources/backend/ITSM/flowable_service/trigger/validators/request_validate_trees.go:31,35
+    api: trigger
+    fields:
+      instanceId:    { type: string, anchor: true, desc: "触发器 id（13 hex，正则 ^[0-9a-z]{13}$）" }
+      name:          { type: string, required: true, desc: "触发器名" }
+      scope:         { type: string, required: true, desc: "作用域，如 process_task / process_instance" }
+      status:        { type: string, required: true, enum: [enabled, disabled], desc: "启用状态" }
+      event:         { type: string, required: true, desc: "触发事件，如 process_task.todo / process_instance.start" }
+      config:        { type: object, required: true, desc: "动作配置 {actionList:[{name, args, condition}]}。name=send_message 时 args={notifyPolicyId, notifyInterval(如 5m), notifyTimes}" }
+      memo:          { type: string, desc: "备注" }
+      domainModelId: { type: string, desc: "关联领域模型 id（13 hex）" }
+      creator:       { type: string, desc: "创建者（系统自带为 defaultUser）" }
+    relations:
+      - { to: itsm_notify_policy, type: association, cardinality: "N:N", via: "config.actionList[].args.notifyPolicyId", desc: "触发器动作引用通知策略（send_message 的 notifyPolicyId）" }
+    side_effects:
+      - op: trigger.create
+        rule: "POST /v1/trigger。name/scope/status/event/config 必填。instanceId CMDB 生成返回。建触发器前通常先有 notify_policy（config 引用其 id）。"
+      - op: trigger.update
+        rule: "PUT /v1/trigger/:triggerId 全量覆盖。triggerId 正则 ^[0-9a-z]{13}$（validator 证实）。"
+      - op: trigger.delete
+        rule: "DELETE /v1/trigger/:triggerIds。triggerIds 走 path 分号分隔批量。系统自带（defaultUser 建）触发器勿删。"
+
+  # ---------- ITSM 通知策略（notify_policy）----------
+  itsm_notify_policy:
+    description: ITSM 通知策略——「信号(triggerSignal)→通知谁(notifyRange)→怎么发(notifyMode)→发什么(content)」。被 trigger 经 notifyPolicyId 引用。CRUD 在 /api/itsc_trigger/v1/notify_policy（⚠️前缀 itsc_trigger 非 flowable_service，但仍 8134 端口）。
+    source: data/api-doc/itsm-notify_policy.xlsx + data/sources/backend/ITSM/flowable_service/notify_policy/{route.go:7-14, validators/api_validator.go:75-99}
+    api: notify_policy
+    fields:
+      instanceId:    { type: string, anchor: true, desc: "通知策略 id（13 hex）" }
+      name:          { type: string, required: true, desc: "策略名" }
+      notifyType:    { type: string, required: true, desc: "通知类型，如 process_instance / process_task" }
+      triggerSignal: { type: string, required: true, desc: "触发信号，如 start / finish" }
+      notifyRange:   { type: array, items: string, required: true, desc: "通知范围，如 [creator]" }
+      notifyMode:    { type: array, items: string, required: true, desc: "通知渠道，如 [email]" }
+      content:       { type: string, required: true, desc: "通知正文模板（支持 ${process_instance_id}/${process_instance_number} 等变量，后端透传前端解释）" }
+      subject:       { type: string, desc: "通知主题" }
+      customUserGroup: { type: array, items: string, desc: "自定义通知用户组" }
+      builtin:       { type: bool, desc: "是否系统自带（勿动/勿删）" }
+    relations:
+      - { to: itsm_trigger, type: association, cardinality: "N:N", desc: "被触发器经 notifyPolicyId 反向引用" }
+    api_behavior:
+      path_prefix: "⚠️前缀 /api/itsc_trigger/v1（≠ flowable_service），但同在 8134 端口（route.go 注册在 flowable_service）"
+      delete_via_query: "delete 无 path param——instanceIds 走 query（validator ctx.BindQuery 证实，route.go:8），分号分隔。与 trigger/sla/duty_group 的 path 分号批量不同，易错。"
+      content_is_template: "content 是模板字符串，后端透传不校验结构——API 200 只表存下，前端渲染/变量替换是否正确需前端验证（onboarding 证据纪律规则2）。"
+
+  # ---------- ITSM 服务级别协议（sla）----------
+  itsm_sla:
+    description: ITSM SLA 规则——约定工单/任务节点在各级别（plan/common/priority/emergency）的达成时长。basicInfo=协议元信息；slaConfig[]=配置数组，每条 levelConfig[] 按 4 级别设 duration，workingCalendarId 引用 work_calendar（按时长计算剔除非工作时间）。CRUD 在 /v1/sla/rule（8134）。
+    source: data/api-doc/itsm-sla.xlsx + 实测 _search 样例（sla 658c21d6beda6）
+    api: sla
+    fields:
+      instanceId:        { type: string, anchor: true, desc: "SLA 规则 id（13 hex）" }
+      name:              { type: string, required: true, desc: "SLA 名（在 basicInfo 内）" }
+      status:            { type: string, enum: [enabled, disabled], desc: "启用状态" }
+      type:              { type: string, enum: [inst, step], desc: "inst=工单级 / step=任务节点级" }
+      ownerId:           { type: string, desc: "负责人 id" }
+      ownerName:         { type: string, desc: "负责人名" }
+      serviceInstanceId: { type: string, ref: itsm_service_instance, desc: "关联服务实例 id" }
+      basicInfo:         { type: object, required: true, desc: "协议基本信息对象（name/status/type/owner*/service*/memo）" }
+      slaConfig:         { type: array, items: object, required: true, desc: "配置数组，每条 {bindID, bindName, levelConfig:[{levelName, agreementType, workingCalendarId, duration, criticalRate}]}" }
+    relations:
+      - { to: sys_setting_work_calendar, type: association, cardinality: "N:N", via: "slaConfig[].levelConfig[].workingCalendarId", desc: "SLA 级别配置引用工作日历（24hex，跨 system：sys_setting 微服务）" }
+      - { to: itsm_service_instance, type: association, cardinality: "N:1", via: serviceInstanceId, desc: "SLA 绑定到服务实例" }
+    api_behavior:
+      list_is_post_search: "⚠️list 是 POST /sla/rule/_search（非 GET list，GET 返 404）；分页+过滤参数都在 body。返回 data.list[] 含 basicInfo 展开字段 + slaConfig[]。"
+      cross_system_dependency: "workingCalendarId 引用 work_calendar——⚠️work_calendar 在独立微服务 sys_setting:8271（见 sys_setting_work_calendar 对象 + easyops-sys-setting system），非 8134。建 SLA 前通常先在 sys-setting 建工作日历拿 24hex id。"
+    side_effects:
+      - op: sla.create
+        rule: "POST /v1/sla/rule。basicInfo + slaConfig 必填。建 SLA 前通常先有 work_calendar（levelConfig.workingCalendarId 引用其 24hex id）。"
+      - op: sla.delete
+        rule: "DELETE /v1/sla/rule/:ruleIds。ruleIds 走 path 分号分隔批量。"
+
+  # ---------- ITSM 值班组（duty_group）----------
+  itsm_duty_group:
+    description: ITSM 值班组——定义值班组的名/周期(dutyCycle)/班次(dutyShift[])/弹性时间(flexTime)。被 SLA/工单排班引用。CRUD 在 /v1/duty_group（8134）。duty_group_config（日历配置/导入）系列未纳入（场景不需要，按「不增噪声」原则）。
+    source: data/api-doc/itsm-duty_group.xlsx + 实测详情样例（duty_group 658c1d374b66b）
+    api: duty_group
+    fields:
+      instanceId:    { type: string, anchor: true, desc: "值班组 id（13 hex）" }
+      name:          { type: string, required: true, desc: "值班组名" }
+      dutyCycle:     { type: string, required: true, desc: "值班周期，如 2026-01~2026-12" }
+      status:        { type: string, required: true, enum: [enabled, disabled], desc: "启用状态" }
+      dutyShift:     { type: array, items: object, required: true, desc: "班次列表 [{name, dutyTime:'08:00~12:00'}]" }
+      memo:          { type: string, desc: "备注" }
+      flexTime:      { type: integer, desc: "弹性时间（分钟）" }
+      useFormBuilder: { type: boolean, desc: "是否用表单构建器" }
+    side_effects:
+      - op: duty_group.create
+        rule: "POST /v1/duty_group。name/dutyCycle/status/dutyShift 必填。instanceId CMDB 生成返回。"
+      - op: duty_group.delete
+        rule: "DELETE /v1/duty_group/:groupIds。groupIds 走 path 分号分隔批量。"
+
+  # ---------- 系统设置·工作日历（work_calendar，sys_setting 微服务）----------
+  sys_setting_work_calendar:
+    description: 系统设置·工作日历（营业时间）——定义工作日/休息日/工作时段，供 SLA 计算达成时长时剔除非工作时间。被 ITSM SLA 经 workingCalendarId 引用。CRUD 在 /api/sys_setting/v1/work/calendar（⚠️独立微服务 sys_setting:8271，非 8134；id 是 24hex MongoDB ObjectId ≠ flowable_service 的 13hex）。
+    source: data/api-doc/itsm-work_calendar.xlsx + data/sources/backend/platform/sys_setting/work_calendar/{route.go:9-24, controller.go, service.go} + 实测样例（63a285ca7ea068c42a26ee26）
+    api: work_calendar
+    fields:
+      id:      { type: string, anchor: true, desc: "日历 id（24 hex MongoDB ObjectId）" }
+      name:    { type: string, required: true, desc: "日历名" }
+      config:  { type: object, required: true, desc: "日历配置 {mode, workDayList:[{weekday(1-7), hours:'08:30~12:00,14:00~18:00'}]}" }
+      memo:    { type: string, desc: "备注" }
+      builtin: { type: bool, desc: "是否系统自带（勿删）" }
+      status:  { type: string, desc: "状态" }
+      key:     { type: string, desc: "日历 key（内置日历标识）" }
+      creator: { type: string, desc: "创建者" }
+    relations:
+      - { to: itsm_sla, type: association, cardinality: "1:N", desc: "被 SLA 规则经 workingCalendarId 反向引用（一个日历可被多个 SLA 级别引用）" }
+    api_behavior:
+      separate_microservice: "⚠️work_calendar 在 sys_setting:8271（独立微服务 logic.sys_setting），非 flowable_service:8134。源码 data/sources/backend/platform/sys_setting/work_calendar/。"
+      why_separate_spec: "api-cli endpoint 是 service 级，不支持 per-resource 绑不同端口（schema.go 无 Endpoint 字段），故 work_calendar 在独立 spec easyops-sys-setting.yaml + 独立 system。CLI --spec 切。"
+      id_format: "id 是 24hex MongoDB ObjectId（≠ flowable_service 13hex 微秒时间戳）——印证不同存储。delete path ids 分号批量，值是 24hex。"
+    side_effects:
+      - op: work_calendar.create
+        rule: "POST /v1/work/calendar。name + config 必填。返回新日历 id（24hex）。建 SLA 前常先建工作日历拿此 id。"
+      - op: work_calendar.update
+        rule: "PUT /v1/work/calendar/:id 全量覆盖 config——触发重新生成日历。"
+      - op: work_calendar.delete
+        rule: "DELETE /v1/work/calendar/:ids。ids 走 path 分号分隔批量（24hex）。系统自带（builtin，如「国家法定节假日」）勿删。"
+
 # =============================================================================
 # 接口级行为（跨对象，编排时必须知道）
 # =============================================================================

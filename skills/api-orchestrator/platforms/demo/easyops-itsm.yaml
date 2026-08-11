@@ -759,3 +759,478 @@ resources:
           description: "关联服务请求"
           properties:
             commonServices: { type: array, items: { type: string }, description: "服务实例 id 列表" }
+
+  # ---------------------------------------------------------------------------
+  # 资源：trigger —— 触发器（流程/任务事件 → 动作列表）。
+  # 8134 flowable_service，前缀 /api/flowable_service/v1/trigger。
+  # delete 路径 :triggerIds（分号分隔批量）；config.actionList[].args.notifyPolicyId
+  # 引用 notify_policy（跨资源依赖，见 objects.yaml#itsm_trigger）。
+  # 数据源：契约 itsm-trigger.xlsx + trigger/validators/request_validate_trees.go:31,35。
+  # ---------------------------------------------------------------------------
+  trigger:
+    description: ITSM 触发器——绑定流程/任务事件（event，如 process_task.todo）到动作列表（config.actionList：发通知 send_message / 改字段等）。scope=作用域（process_instance/process_task 等）；status=enabled/disabled。config.actionList[].args.notifyPolicyId 引用 notify_policy 实例。系统自带触发器（builtin/defaultUser 建）勿动。
+    path: ""
+
+    operations:
+      list:
+        description: 触发器列表（分页）。Q 模糊搜名称；scope/domainModelId 精确过滤；instanceId 多个用逗号精确过滤。list 元素含 instanceId/name/scope/event/status。
+        method: GET
+        path: /api/flowable_service/v1/trigger
+        params:
+          page:          { in: query, type: integer, description: "页码，默认 1" }
+          pageSize:      { in: query, type: integer, description: "每页条数，默认 10" }
+          Q:             { in: query, type: string, description: "名称模糊搜索" }
+          scope:         { in: query, type: string, description: "作用域过滤，如 process_task/process_instance" }
+          domainModelId: { in: query, type: string, description: "领域模型 id 过滤" }
+          instanceId:    { in: query, type: string, description: "实例 id 过滤，多个用逗号分隔" }
+        response:
+          type: object
+          description: "{ code, data: { page, pageSize, total, list[] } }"
+          properties:
+            code: { type: integer }
+            data:
+              type: object
+              properties:
+                total: { type: integer }
+                list:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      instanceId: { type: string, description: "触发器 id（13 hex）" }
+                      name:       { type: string }
+                      scope:      { type: string }
+                      event:      { type: string }
+                      status:     { type: string }
+        pagination:
+          type: offset
+          page_in: query
+          items_path: data.list
+          page_param: page
+          size_param: pageSize
+          size: 10
+
+      get:
+        description: 触发器详情（含完整 config.actionList 与 processVersionTasks 引用关系）。
+        method: GET
+        path: /api/flowable_service/v1/trigger/{triggerId}
+        params:
+          triggerId: { in: path, type: string, required: true, description: "触发器 id（13 hex）" }
+
+      create:
+        description: 新建触发器。config 必填是动作对象 {actionList:[{name,args,condition}]}；常见 name=send_message，args 含 notifyPolicyId（→notify_policy 实例）、notifyInterval（如 5m）、notifyTimes。event 形如 process_task.todo / process_instance.start。
+        method: POST
+        path: /api/flowable_service/v1/trigger
+        body:
+          type: object
+          required: [name, scope, status, event, config]
+          description: "新建触发器。name/scope/status/event/config 必填。"
+          properties:
+            name:          { type: string, description: "触发器名" }
+            scope:         { type: string, description: "作用域，如 process_task / process_instance" }
+            status:        { type: string, enum: [enabled, disabled], description: "启用状态" }
+            event:         { type: string, description: "触发事件，如 process_task.todo" }
+            config:        { type: object, description: "动作配置 {actionList:[{name, args, condition}]}。name=send_message 时 args={notifyPolicyId(notify_policy id), notifyInterval(如 5m), notifyTimes}（结构据真实实例 trigger 5c9a95cd583c2）" }
+            memo:          { type: string, description: "备注" }
+            domainModelId: { type: string, description: "关联领域模型 id（13 hex）" }
+        response:
+          type: object
+          description: "{ code, data: { instanceId, ... } }"
+          properties:
+            code: { type: integer }
+            data: { type: object, additional_properties: true }
+
+      update:
+        description: 修改触发器（全量覆盖 name/scope/status/event/config）。triggerId 正则 ^[0-9a-z]{13}$（validator 证实）。
+        method: PUT
+        path: /api/flowable_service/v1/trigger/{triggerId}
+        params:
+          triggerId: { in: path, type: string, required: true, description: "触发器 id（13 hex，正则 ^[0-9a-z]{13}$）" }
+        body:
+          type: object
+          required: [name, scope, status, event, config]
+          description: "修改触发器（全量覆盖）。"
+          properties:
+            name:          { type: string }
+            scope:         { type: string }
+            status:        { type: string, enum: [enabled, disabled] }
+            event:         { type: string }
+            config:        { type: object, description: "动作配置（结构同 create）" }
+            memo:          { type: string }
+            domainModelId: { type: string }
+
+      delete:
+        description: 删除触发器（批量）。triggerIds 走 path 分号分隔。系统自带（builtin）触发器勿删。
+        method: DELETE
+        path: /api/flowable_service/v1/trigger/{triggerIds}
+        params:
+          triggerIds: { in: path, type: string, required: true, description: "触发器 id，分号分隔（如 5c9a95cd583c2;5c9a94cd91014）" }
+
+  # ---------------------------------------------------------------------------
+  # 资源：notify_policy —— 通知策略。
+  # 8134 flowable_service，但前缀是 /api/itsc_trigger/v1/notify_policy（≠ flowable_service！）。
+  # delete 无 path param——instanceIds 走 query（validator BindQuery 证实，route.go:8）。
+  # 被 trigger.config.actionList[].args.notifyPolicyId 引用。
+  # 数据源：契约 itsm-notify_policy.xlsx + notify_policy/validators/api_validator.go:75-99。
+  # ---------------------------------------------------------------------------
+  notify_policy:
+    description: ITSM 通知策略——定义「什么信号（triggerSignal）→ 通知谁（notifyRange）→ 怎么发（notifyMode）→ 发什么（subject/content）」。notifyType=通知载体类型（process_instance/process_task 等）；triggerSignal=触发信号（start/finish 等）；notifyRange=收件范围数组（如 [creator]）；notifyMode=渠道数组（如 [email]）；content 支持模板变量（${process_instance_id} 等，前端解释）。被 trigger 通过 notifyPolicyId 引用。
+    path: ""
+
+    operations:
+      list:
+        description: 通知策略列表（分页）。Q 模糊匹配 名称/类型/信号/模式/范围；也可按 name/notifyType/triggerSignal/notifyRange/notifyMode/creator/st/et 高级过滤。
+        method: GET
+        path: /api/itsc_trigger/v1/notify_policy
+        params:
+          page:          { in: query, type: integer, description: "页码，默认 1" }
+          pageSize:      { in: query, type: integer, description: "每页数据量" }
+          Q:             { in: query, type: string, description: "模糊搜索（匹配 名称/类型/信号/模式/范围）" }
+          name:          { in: query, type: string, description: "高级搜索-通知名称" }
+          notifyType:    { in: query, type: string, description: "高级搜索-通知类型" }
+          triggerSignal: { in: query, type: string, description: "高级搜索-触发信号" }
+          notifyRange:   { in: query, type: string, description: "高级搜索-通知范围" }
+          notifyMode:    { in: query, type: string, description: "高级搜索-通知模式" }
+          creator:       { in: query, type: string, description: "高级搜索-创建人" }
+          st:            { in: query, type: string, description: "开始时间" }
+          et:            { in: query, type: string, description: "结束时间" }
+        response:
+          type: object
+          description: "{ code, data: { page, pageSize, total, list[] } }"
+          properties:
+            code: { type: integer }
+            data:
+              type: object
+              properties:
+                total: { type: integer }
+                list:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      instanceId:    { type: string, description: "通知策略 id（13 hex）" }
+                      name:          { type: string }
+                      notifyType:    { type: string }
+                      triggerSignal: { type: string }
+                      builtin:       { type: boolean, description: "系统自带勿动" }
+        pagination:
+          type: offset
+          page_in: query
+          items_path: data.list
+          page_param: page
+          size_param: pageSize
+          size: 10
+
+      get:
+        description: 通知策略详情（含完整 content 模板 + notifyRange/notifyMode 数组）。
+        method: GET
+        path: /api/itsc_trigger/v1/notify_policy/{instanceId}
+        params:
+          instanceId: { in: path, type: string, required: true, description: "通知策略 id（13 hex）" }
+
+      create:
+        description: 新建通知策略。content 是模板字符串（支持 ${process_instance_id} 等变量，后端透传前端解释）。
+        method: POST
+        path: /api/itsc_trigger/v1/notify_policy
+        body:
+          type: object
+          required: [name, notifyType, triggerSignal, notifyRange, notifyMode, content]
+          description: "新建通知策略。name/notifyType/triggerSignal/notifyRange/notifyMode/content 必填。"
+          properties:
+            name:           { type: string, description: "策略名" }
+            notifyType:     { type: string, description: "通知类型，如 process_instance / process_task" }
+            triggerSignal:  { type: string, description: "触发信号，如 start / finish" }
+            notifyRange:    { type: array, items: { type: string }, description: "通知范围，如 [creator]" }
+            notifyMode:     { type: array, items: { type: string }, description: "通知渠道，如 [email]" }
+            content:        { type: string, description: "通知正文模板（支持 ${process_instance_id}/${process_instance_number} 等变量）" }
+            subject:        { type: string, description: "通知主题" }
+            customUserGroup: { type: array, items: { type: string }, description: "自定义通知用户组" }
+            domainModel:    { type: string, description: "领域模型" }
+        response:
+          type: object
+          description: "{ code, data: { instanceId, ... } }"
+          properties:
+            code: { type: integer }
+            data: { type: object, additional_properties: true }
+
+      update:
+        description: 修改通知策略（全量覆盖）。字段同 create。
+        method: PUT
+        path: /api/itsc_trigger/v1/notify_policy/{instanceId}
+        params:
+          instanceId: { in: path, type: string, required: true, description: "通知策略 id（13 hex）" }
+        body:
+          type: object
+          required: [name, notifyType, triggerSignal, notifyRange, notifyMode, content]
+          description: "修改通知策略（全量）。"
+          properties:
+            name:           { type: string }
+            notifyType:     { type: string }
+            triggerSignal:  { type: string }
+            notifyRange:    { type: array, items: { type: string } }
+            notifyMode:     { type: array, items: { type: string } }
+            content:        { type: string }
+            subject:        { type: string }
+            customUserGroup: { type: array, items: { type: string } }
+            domainModel:    { type: string }
+
+      delete:
+        description: 删除通知策略（批量）。⚠️与其它资源不同——无 path param，instanceIds 走 query（validator ctx.BindQuery 证实）。分号分隔。builtin 策略勿删。
+        method: DELETE
+        path: /api/itsc_trigger/v1/notify_policy
+        params:
+          instanceIds: { in: query, type: string, required: true, description: "通知策略 id，分号分隔（如 5ab9f10a6ef88;5abb0dca9971d）" }
+
+  # ---------------------------------------------------------------------------
+  # 资源：sla —— 服务级别协议（SLA）规则。
+  # 8134 flowable_service，前缀 /api/flowable_service/v1/sla/rule。
+  # ⚠️list 是 POST _search（GET list 返 404，实测）。slaConfig[].levelConfig[].workingCalendarId
+  # 引用 work_calendar（24 hex，跨资源依赖，见 objects.yaml#itsm_sla）。
+  # 数据源：契约 itsm-sla.xlsx + 实测 _search 样例（sla 658c21d6beda6）。
+  # ---------------------------------------------------------------------------
+  sla:
+    description: ITSM 服务级别协议规则——约定工单/任务节点在各级别（plan/common/priority/emergency）的达成时长。basicInfo=协议基本信息（名/状态/类型/负责人/服务实例）；slaConfig[]=配置数组，每条 levelConfig[] 按 4 个级别设 duration，workingCalendarId 引用 work_calendar（用来按时长计算剔除非工作时间）。type=inst(工单级)/step(任务节点级)。
+    path: ""
+
+    operations:
+      list:
+        description: SLA 规则搜索（POST _search，非 GET list——GET list 返 404）。body 含分页+过滤。返回 data.list[]，每条含 basicInfo 展开字段 + slaConfig[]。Q 模糊搜；serviceName/ownerName/priorityId/instanceIds 精确过滤。
+        method: POST
+        path: /api/flowable_service/v1/sla/rule/_search
+        body:
+          type: object
+          description: "SLA 搜索请求（分页参数也在 body）"
+          properties:
+            page:            { type: integer, description: "页码，默认 1" }
+            pageSize:        { type: integer, description: "每页条数" }
+            Q:               { type: string, description: "模糊搜索" }
+            name:            { type: string, description: "名称" }
+            serviceCategory: { type: string, description: "服务分类" }
+            status:          { type: string, description: "状态" }
+            serviceName:     { type: string, description: "应用对象（服务实例）名称" }
+            ownerName:       { type: string, description: "负责人名称" }
+            priorityId:      { type: string, description: "引用的优先级 id 过滤" }
+            instanceIds:     { type: array, items: { type: string }, description: "sla 实例 id 过滤（in 查询）" }
+        response:
+          type: object
+          description: "{ code, data: { page, page_size, total, list[] } }"
+          properties:
+            code: { type: integer }
+            data:
+              type: object
+              properties:
+                total: { type: integer }
+                list:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      instanceId:          { type: string, description: "SLA 规则 id（13 hex）" }
+                      name:                { type: string }
+                      status:              { type: string }
+                      type:                { type: string, description: "inst=工单级 / step=节点级" }
+                      ownerName:           { type: string }
+                      serviceInstanceName: { type: string }
+
+      get:
+        description: SLA 规则详情（含完整 slaConfig[].levelConfig[]，每级 workingCalendarId→work_calendar）。
+        method: GET
+        path: /api/flowable_service/v1/sla/rule/{ruleId}
+        params:
+          ruleId: { in: path, type: string, required: true, description: "SLA 规则 id（13 hex）" }
+
+      create:
+        description: 新建 SLA 规则。basicInfo（协议基本信息对象）+ slaConfig（配置数组，每条 levelConfig 按级别设 duration+workingCalendarId）必填。结构据真实实例 sla 658c21d6beda6。
+        method: POST
+        path: /api/flowable_service/v1/sla/rule
+        body:
+          type: object
+          required: [basicInfo, slaConfig]
+          description: "新建 SLA 规则。basicInfo + slaConfig 必填。"
+          properties:
+            basicInfo:
+              type: object
+              description: "协议基本信息（结构据真实实例）。"
+              properties:
+                name:                { type: string, description: "SLA 名" }
+                status:              { type: string, enum: [enabled, disabled] }
+                type:                { type: string, enum: [inst, step], description: "inst=工单级 / step=任务节点级" }
+                ownerId:             { type: string, description: "负责人 id" }
+                ownerName:           { type: string }
+                serviceInstanceId:   { type: string, description: "关联服务实例 id" }
+                serviceInstanceName: { type: string }
+                serviceCategory:     { type: string }
+                memo:                { type: string }
+            slaConfig:
+              type: array
+              description: "协议配置数组。"
+              items:
+                type: object
+                properties:
+                  bindID:   { type: string }
+                  bindName: { type: string }
+                  levelConfig:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        levelName:         { type: string, description: "优先级名：plan/common/priority/emergency" }
+                        agreementType:     { type: string, description: "达成类型，如 done" }
+                        workingCalendarId: { type: string, description: "引用 work_calendar 实例 id（24 hex）" }
+                        duration:          { type: string, description: "时长，如 1h" }
+                        criticalRate:      { type: integer }
+        response:
+          type: object
+          description: "{ code, data: { instanceId, ... } }"
+          properties:
+            code: { type: integer }
+            data: { type: object, additional_properties: true }
+
+      update:
+        description: 修改 SLA 规则（全量覆盖 basicInfo + slaConfig）。
+        method: PUT
+        path: /api/flowable_service/v1/sla/rule/{ruleId}
+        params:
+          ruleId: { in: path, type: string, required: true, description: "SLA 规则 id（13 hex）" }
+        body:
+          type: object
+          required: [basicInfo, slaConfig]
+          description: "修改 SLA 规则（全量）。字段结构同 create。"
+          properties:
+            basicInfo:
+              type: object
+              additional_properties: true
+              description: "协议基本信息（结构同 create.basicInfo）"
+            slaConfig:
+              type: array
+              description: "协议配置数组（结构同 create.slaConfig）"
+              items: { type: object, additional_properties: true }
+
+      delete:
+        description: 删除 SLA 规则（批量）。ruleIds 走 path 分号分隔。
+        method: DELETE
+        path: /api/flowable_service/v1/sla/rule/{ruleIds}
+        params:
+          ruleIds: { in: path, type: string, required: true, description: "SLA 规则 id，分号分隔" }
+
+  # ---------------------------------------------------------------------------
+  # 资源：duty_group —— 值班组。
+  # 8134 flowable_service，前缀 /api/flowable_service/v1/duty_group。
+  # delete 路径 :groupIds（分号分隔批量）。dutyShift=班次数组。duty_group_config
+  # 系列（日历配置/导入）按场景「不增噪声」未纳入（如需再补）。
+  # 数据源：契约 itsm-duty_group.xlsx + 实测详情样例（duty_group 658c1d374b66b）。
+  # ---------------------------------------------------------------------------
+  duty_group:
+    description: ITSM 值班组——定义一个值班组的名/周期（dutyCycle，如 2026-01~2026-12）/班次（dutyShift[]：名+时段）/弹性时间（flexTime 分钟）。status=enabled/disabled。被 SLA/工单排班引用。
+    path: ""
+
+    operations:
+      list:
+        description: 值班组列表（分页）。Q 模糊搜；name/dutyCycle/memo/creator/dutyShiftName 精确；dutyGroupIds 多个逗号；st/et 时间范围。
+        method: GET
+        path: /api/flowable_service/v1/duty_group
+        params:
+          page:         { in: query, type: integer, description: "页码，默认 1" }
+          pageSize:     { in: query, type: integer, description: "每页条数" }
+          dutyGroupIds: { in: query, type: string, description: "值班组 id，多个逗号分隔" }
+          Q:            { in: query, type: string, description: "模糊搜索" }
+          name:         { in: query, type: string }
+          dutyCycle:    { in: query, type: string, description: "值班周期，如 2026-01~2026-12" }
+          memo:         { in: query, type: string }
+          creator:      { in: query, type: string }
+          dutyShiftName: { in: query, type: string, description: "班次名" }
+          st:           { in: query, type: string, description: "开始时间" }
+          et:           { in: query, type: string, description: "结束时间" }
+        response:
+          type: object
+          description: "{ code, data: { page, pageSize, total, list[] } }"
+          properties:
+            code: { type: integer }
+            data:
+              type: object
+              properties:
+                total: { type: integer }
+                list:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      instanceId: { type: string, description: "值班组 id（13 hex）" }
+                      name:       { type: string }
+                      dutyCycle:  { type: string }
+                      status:     { type: string }
+        pagination:
+          type: offset
+          page_in: query
+          items_path: data.list
+          page_param: page
+          size_param: pageSize
+          size: 10
+
+      get:
+        description: 值班组详情（含 dutyShift 班次数组 + flexTime）。
+        method: GET
+        path: /api/flowable_service/v1/duty_group/{groupId}
+        params:
+          groupId: { in: path, type: string, required: true, description: "值班组 id（13 hex）" }
+
+      create:
+        description: 新建值班组。name/dutyCycle/status/dutyShift 必填。dutyShift 班次结构 {name, dutyTime:"08:00~12:00"}（据真实实例 duty_group 658c1d374b66b）。
+        method: POST
+        path: /api/flowable_service/v1/duty_group
+        body:
+          type: object
+          required: [name, dutyCycle, status, dutyShift]
+          description: "新建值班组。name/dutyCycle/status/dutyShift 必填。"
+          properties:
+            name:          { type: string, description: "值班组名" }
+            dutyCycle:     { type: string, description: "值班周期，如 2026-01~2026-12" }
+            status:        { type: string, enum: [enabled, disabled] }
+            dutyShift:
+              type: array
+              description: "班次列表"
+              items:
+                type: object
+                properties:
+                  name:     { type: string, description: "班次名，如 白" }
+                  dutyTime: { type: string, description: "时段，如 08:00~12:00" }
+            memo:          { type: string }
+            flexTime:      { type: integer, description: "弹性时间（分钟）" }
+            useFormBuilder: { type: boolean, description: "是否用表单构建器" }
+        response:
+          type: object
+          description: "{ code, data: { instanceId, ... } }"
+          properties:
+            code: { type: integer }
+            data: { type: object, additional_properties: true }
+
+      update:
+        description: 修改值班组（全量覆盖）。字段同 create。
+        method: PUT
+        path: /api/flowable_service/v1/duty_group/{groupId}
+        params:
+          groupId: { in: path, type: string, required: true, description: "值班组 id（13 hex）" }
+        body:
+          type: object
+          required: [name, dutyCycle, status, dutyShift]
+          description: "修改值班组（全量）。"
+          properties:
+            name:          { type: string }
+            dutyCycle:     { type: string }
+            status:        { type: string, enum: [enabled, disabled] }
+            dutyShift:
+              type: array
+              items:
+                type: object
+                properties:
+                  name:     { type: string }
+                  dutyTime: { type: string }
+            memo:          { type: string }
+            flexTime:      { type: integer }
+
+      delete:
+        description: 删除值班组（批量）。groupIds 走 path 分号分隔。
+        method: DELETE
+        path: /api/flowable_service/v1/duty_group/{groupIds}
+        params:
+          groupIds: { in: path, type: string, required: true, description: "值班组 id，分号分隔" }

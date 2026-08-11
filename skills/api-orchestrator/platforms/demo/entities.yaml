@@ -129,6 +129,44 @@ entities:
     used_by:
       - service_instance.get / edit / delete（path {instanceId}）
 
+  # ---------- ITSM 触发器/通知/SLA/值班组 id（2026-08-11，均 8134 flowable_service）----------
+  trigger_id:
+    description: 触发器主键锚。trigger resource path 参数 triggerId / triggerIds。
+    format: "13 位 hex（^[0-9a-z]{13}$，validator 证实）；delete 用 triggerIds 分号批量（path）"
+    used_by:
+      - trigger.get / update（path triggerId）
+      - trigger.delete（path triggerIds 分号）
+  notify_policy_id:
+    description: 通知策略主键锚。notify_policy resource。
+    format: "13 位 hex；⚠️delete 用 instanceIds 但走 query（非 path）—— DELETE /notify_policy?instanceIds=a;b"
+    used_by:
+      - notify_policy.get / update（path instanceId）
+      - notify_policy.delete（query instanceIds 分号）
+  sla_rule_id:
+    description: SLA 规则主键锚。sla resource path 参数 ruleId / ruleIds。
+    format: "13 位 hex；delete 用 ruleIds 分号批量（path）"
+    used_by:
+      - sla.get / update（path ruleId）
+      - sla.delete（path ruleIds 分号）
+  duty_group_id:
+    description: 值班组主键锚。duty_group resource path 参数 groupId / groupIds。
+    format: "13 位 hex；delete 用 groupIds 分号批量（path）"
+    used_by:
+      - duty_group.get / update（path groupId）
+      - duty_group.delete（path groupIds 分号）
+
+  # ---------- 工作日历 id（跨 system：sys_setting 微服务，⚠️24hex ≠ 13hex）----------
+  work_calendar_id:
+    description: |
+      工作日历主键锚（sys_setting 微服务 :8271，独立 system easyops-sys-setting）。
+      ⚠️格式 24 位 hex MongoDB ObjectId（≠ flowable_service 的 13hex 微秒时间戳）——
+      印证 work_calendar 属不同存储/微服务。被 ITSM SLA 经
+      sla.slaConfig[].levelConfig[].workingCalendarId 引用（跨 system 接力）。
+    format: "24 位 hex MongoDB ObjectId"
+    used_by:
+      - work_calendar.get / update / delete（path id / ids 分号批量，均在 sys-setting system 的 spec）
+      - sla.create/update 的 body slaConfig[].levelConfig[].workingCalendarId（跨 system：先在 sys-setting 建日历拿 id，再填入 itsm 的 sla body）
+
   # ===========================================================================
   # 常用 CMDB 模型速查表（省去按语义查 model id）
   # 编排时直接用 objectId，不用先 object_model.list?q=主机 → 拿 id。
@@ -246,3 +284,29 @@ transitions:
     pick: data.list[].vInstanceId（versionId）
     to: [process_version.get, process_version.edit, process_version.delete, process_version.set_main, process_form.set]
     how: "list 返回版本 id → 喂下游。delete 参数名 versionIds（复数）"
+  # ---------- ITSM 触发器/通知/SLA/值班组（2026-08-11）----------
+  - from: trigger.list
+    pick: data.list[].instanceId（triggerId）
+    to: [trigger.get, trigger.update, trigger.delete]
+    how: "list 返回触发器 instanceId → 作为 {triggerId} 喂 get/update；delete 拼 ;-串喂 {triggerIds}"
+  - from: notify_policy.list
+    pick: data.list[].instanceId
+    to: [notify_policy.get, notify_policy.update, notify_policy.delete]
+    how: "list 返回策略 instanceId → 作为 {instanceId} 喂 get/update；delete 拼 ;-串喂 query instanceIds（⚠️非 path）"
+  - from: sla.list
+    pick: data.list[].instanceId（ruleId）
+    to: [sla.get, sla.update, sla.delete]
+    how: "list（POST _search）返回规则 instanceId → 作为 {ruleId} 喂 get/update；delete 拼 ;-串喂 {ruleIds}"
+  - from: duty_group.list
+    pick: data.list[].instanceId（groupId）
+    to: [duty_group.get, duty_group.update, duty_group.delete]
+    how: "list 返回值班组 instanceId → 作为 {groupId} 喂 get/update；delete 拼 ;-串喂 {groupIds}"
+  # ---------- 工作日历（sys-setting system）+ 跨 system 接力到 SLA（itsm system）----------
+  - from: work_calendar.list
+    pick: data.list[].id（24hex）
+    to: [work_calendar.get, work_calendar.update, work_calendar.delete]
+    how: "list 返回日历 id（24hex）→ 作为 {id} 喂 get/update；delete 拼 ;-串喂 {ids}。⚠️均在 sys-setting system 的 spec（--spec easyops-sys-setting.yaml）"
+  - from: work_calendar.create
+    pick: data.id（24hex）
+    to: [sla.create, sla.update]
+    how: "跨 system 接力：sys-setting 的 work_calendar.create 返回 24hex id → 填入 itsm 的 sla body 的 slaConfig[].levelConfig[].workingCalendarId（场景：建 SLA 前先建工作日历）"
