@@ -44,7 +44,7 @@ scripts/run.sh --spec platforms/demo/easyops-cmdb.yaml <resource> <verb> [args] 
 场景"有几个/多少" → `object_instance.search` 读 **stderr** 的 `_meta.total`（新版 binary）：
 
 ```bash
-# objectId 速查 entities.yaml#common_models（物理机=PHYSICAL_SERVER@ONEMODEL、主机=HOST）
+# objectId 速查 systems.yaml#easyops-cmdb.common_models（物理机=PHYSICAL_SERVER@ONEMODEL、主机=HOST）
 scripts/run.sh --spec platforms/demo/easyops-cmdb.yaml object_instance search PHYSICAL_SERVER@ONEMODEL \
   --body '{"fields":["instanceId"],"page":1,"page_size":1,"ignore_missing_field_error":true}'
 # stderr → {"_meta":{"total":N}}；stdout 是 NDJSON 实例（计数时 page_size:1，几乎不拉数据）

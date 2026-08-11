@@ -11,7 +11,7 @@ skill 的调度分三挡位，按需求的意图 + 复杂度选挡。
    - **精准定位**：先 `grep -n "关键词" platforms/demo/objects.yaml` 拿行号 → `Read --offset=<行号> limit=30` 取该段。一步命中，不读全文。
    - spec `<system>.yaml`：`grep -n "^\s*<verb>:" easyops-*.yaml` 定位 → Read 该 operation 段
    - `objects.yaml`：`grep -n "<对象名>:" objects.yaml` 定位 → Read 该对象的 fields + side_effects 段
-   - `entities.yaml`：`grep -n "common_models\|<field>" entities.yaml` → 取速查表 / 锚
+   - `entities.yaml`：`grep -n "<field>" entities.yaml` → 取字段锚
    - `flows/<flow>.yaml`：需求匹配某 flow 的 `trigger` 时才读该 flow（单文件不大可全读）
 3. **禁止**：跳过 capabilities 直接猜 verb；不读 `runtime` 坑就写操作；`Read` spec/objects 全文（数百行费 token）。
 
@@ -29,7 +29,9 @@ skill 的调度分三挡位，按需求的意图 + 复杂度选挡。
 
 计数场景（"有几个/多少"）：默认读 stderr `_meta.total`（新版 binary），非空结果即输出；
   空结果（0 条）stderr 无 total——exit 0 即代表 0 条（错误走 exit≠0，可读）。
-  objectId 速查 `entities.yaml#common_models`，body 最小化 `{fields:[instanceId],page_size:1}`。
+  若当前 system 在 `systems.yaml` 声明了 `common_models`（高频资源「自然语言→objectId」速查表），
+  先按 `aliases` 匹配自然资源名直出 objectId，省 object_model.list 搜索；
+  未声明或 alias 未命中再退回 object_model.list --q。body 最小化 `{fields:[instanceId],page_size:1}`。
 
 无规划、无确认、一轮 bash。
 

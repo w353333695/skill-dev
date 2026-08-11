@@ -69,7 +69,7 @@ scripts/run.sh --spec <spec-path> <resource> <verb> [args] [--print-curl|--dry-r
 **api-cli UX 改造后行为要点**（2026-08-11，`worktree-api-cli-ux` 落地）。
 当前 `bin/api-cli` 已是该版本（`go build` 自 `projects/api-cli`）——下列行为均已生效：
 - **错误默认人类可读到 stderr**（`error: <code>: <msg>`）——`--q` 等未知 flag 不再静默，会清晰报错。`--format=json` 时错误输出 JSON。
-- **分页 total 在 stderr**（`{"_meta":{"total":N}}`），stdout 仍是纯 NDJSON（读 stdout 的脚本不受影响；要 total 读 stderr）。⚠️ 空结果（total=0）时 stderr 无输出、stdout 也空——total 绑定首条 item，无 item 即不输出；此时 **exit 0 即代表 0 条**（错误走 exit≠0 且可读），计数见 `entities.yaml#common_models.count_recipe`。
+- **分页 total 在 stderr**（`{"_meta":{"total":N}}`），stdout 仍是纯 NDJSON（读 stdout 的脚本不受影响；要 total 读 stderr）。⚠️ 空结果（total=0）时 stderr 无输出、stdout 也空——total 绑定首条 item，无 item 即不输出；此时 **exit 0 即代表 0 条**（错误走 exit≠0 且可读），计数配方见 `systems.yaml` 中声明了 `common_models` 的 system 段（`count_recipe`）。
 - **`--all` 触顶 exit 4**（硬上限 10000 条/1000 页，结果可能不完整，stderr 有 warning）。
 - **`--print-curl` 默认遮蔽 auth**（Cookie/Authorization 显示 `<redacted>`，加 `--reveal-auth` 显真值）；curl 现含 Host/Content-Type/query（完整可复现）。
 - **`--help` 列 path/query/body 参数分类**（不再只列 global flag）。
