@@ -36,6 +36,7 @@ type Options struct {
 	Out       io.Writer     // 输出目标（默认 os.Stdout；测试注入 bytes.Buffer）
 	OutCloser io.Closer     // 非空时调用方（cobracli RunE）在 Execute 后 Close（--output 指向文件场景）
 	Err       io.Writer     // stderr（total / warning 输出；空则 engine 内部用 os.Stderr）
+	Body      string        // inline JSON body（--body flag；优先级：Body > BodyFile > body 参数）
 }
 
 // Engine 执行器。可被 cobracli/mcp 共用。
@@ -85,9 +86,27 @@ func (e *Engine) Execute(ctx context.Context, ep *tree.Endpoint, r *tree.Resourc
 		return &output.APIError{Code: "resolve", Message: err.Error(), ExitCode: output.ExitParamError}
 	}
 
+	// --body 与 --body-file 互斥（T5）。
+	if opts.Body != "" && opts.BodyFile != "" {
+		return &output.APIError{Code: "body_conflict", Message: "--body 与 --body-file 互斥", ExitCode: output.ExitParamError}
+	}
+
+	// --body inline（JSON）：覆盖 body 参数（不动 multipart CT）。
+	if opts.Body != "" {
+		req.Body = []byte(opts.Body)
+		req.ContentType = ""
+	}
+
 	// body-file：覆盖 req.Body（支持复杂/嵌套 body，弥补单层 body 参数的不足）。
+	// "-" 读 stdin（T5）。
 	if opts.BodyFile != "" {
-		b, err := os.ReadFile(opts.BodyFile)
+		var b []byte
+		var err error
+		if opts.BodyFile == "-" {
+			b, err = io.ReadAll(os.Stdin)
+		} else {
+			b, err = os.ReadFile(opts.BodyFile)
+		}
 		if err != nil {
 			return &output.APIError{Code: "body_file", Message: err.Error(), ExitCode: output.ExitParamError}
 		}
@@ -98,7 +117,7 @@ func (e *Engine) Execute(ctx context.Context, ep *tree.Endpoint, r *tree.Resourc
 		req.ContentType = ""
 	}
 
-	// BodyBytes（MCP _body）：最高优先级，覆盖 --body-file 和 body 参数。
+	// BodyBytes（MCP _body）：最高优先级，覆盖 --body/--body-file 和 body 参数。
 	// 用途：MCP tools/call 的 _body 是嵌套对象，单层 body flag（string map）marshal 不出来；
 	// 由 mcp/server.go 提前 marshal 成字节，经此通道直传，绕过 resolve 的 flat 限制。
 	if len(opts.BodyBytes) > 0 {
