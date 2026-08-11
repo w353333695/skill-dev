@@ -89,7 +89,7 @@
 **⑤ print-curl 完整 header（默认遮蔽 auth）**
 - 现状：`renderPreview`（execute.go:316-339，iter4 加 isMultipart）只遍历 `req.Header`（org/user）；缺 Host（`resolvedReq.Host` 独立字段）、Content-Type（`resolvedReq.ContentType`）、auth（`auth.Apply` 在 122-139，dry-run 在 110-113 提前 return 跳过）。
 - 做法：
-  - auth.Apply 提前到 preview 之前（或 renderPreview 对 req 副本跑一次）。
+  - auth.Apply 提前到 preview 之前——dry-run/print-curl 分支也跑 auth（不再在 execute.go:110-113 提前 return 跳过），让 renderPreview 看到完整鉴权头。
   - renderPreview 补：Host（`-H 'Host: <host>'`）、Content-Type、auth 头（默认 `<redacted>`）。
   - 新 flag `--reveal-auth`：显真值。
   - 衔接 iter4：保留 isMultipart 省略 body 分支。
