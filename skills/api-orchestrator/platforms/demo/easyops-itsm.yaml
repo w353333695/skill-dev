@@ -1,7 +1,7 @@
 # =============================================================================
 # EasyOps ITSM（flowable_service）—— api-cli 集中清单
 # -----------------------------------------------------------------------------
-# 当前覆盖：表单管理（form/form_version）+ 流程定义（process_definition/process_version/process_form）+ 服务实例（service_instance）。未来 ITSM 其它域统一并入本清单。
+# 当前覆盖：表单管理（form/form_version）+ 流程定义（process_definition/process_version/process_form）+ 服务实例（service_instance）+ 工单实例（ticket）。未来 ITSM 其它域统一并入本清单。
 # 表单三层体系：
 #   ① form        表单层（FormSchema）—— 表单本身的 list/save(新建+首版本)/delete
 #   ② form_version 表单版本层（FormSchemaVersion）—— 版本的 list/get/update/delete/set_main
@@ -429,11 +429,93 @@ resources:
             isDesensitization:      { type: boolean, description: "是否脱敏（仅 useFormBuilder=true 生效）" }
 
   # ===========================================================================
-  # ITSM 服务实例（service）—— 同 flowable_service，CRUD。
-  # 路径统一 /api/flowable_service/v1/service_instance[/:instanceId]。
-  # 数据来源：契约 data/api-doc/itsm-service_instance.json（7 EAML，取 CRUD 5 个）
-  #          + 后端 service_catalog/（service_catalog_service.go）。
+  # ITSM 工单实例（process_instance）—— 同 flowable_service，运行态。
+  # 工单发起涉及前端表单渲染+生命周期脚本，不适合 API——本域只管 list/delete/state/export。
+  # 数据来源：契约 data/api-doc/itsm-process_instance.json（6 EAML，取 4 个有效）
+  #          + 后端 process_instance/ + service_catalog/。
   # ===========================================================================
+  ticket:
+    description: ITSM 工单实例（运行中的流程实例）。发起工单走前端（表单渲染+脚本），API 只管查询/删除/状态变更/导出。工单状态三态：running(运行中)/done(已完成)/closed(已关单)，另有挂起(isSuspended)/作废(isCancelled) 布尔标记。
+    path: ""
+
+    operations:
+      list:
+        description: 工单搜索（V4 高级搜索）。POST body 含 filter（standard_fields/process_fields 条件）+ 分页参数（token 翻页）。按 Q 模糊搜名称/状态/服务名；按 status/serviceCategory/creator/ctime 等精确过滤。返回 ProcessInstanceBasic 列表 + total + nextToken。
+        method: POST
+        path: /api/flowable_service/v4/process_instance_filter
+        body:
+          type: object
+          description: "工单搜索请求"
+          properties:
+            Q:                { type: string, description: "模糊搜索 name/status/service/form" }
+            status:           { type: string, enum: [running, done, closed], description: "工单状态" }
+            name:             { type: string, description: "工单名称" }
+            orderNum:         { type: string, description: "工单编号" }
+            serviceCategory:  { type: string, description: "服务分类 change/event/req/question/release" }
+            serviceId:        { type: string, description: "服务实例 id" }
+            creator:          { type: string, description: "发起人" }
+            currentAssignee:  { type: string, description: "当前处理人" }
+            idList:           { type: array, items: { type: string }, description: "工单 id 列表（精确）" }
+            pageSize:         { type: integer, description: "每页条数默认 10" }
+            token:            { type: string, description: "翻页 token（上一页返回的 nextToken）" }
+            filter:
+              type: object
+              description: "高级过滤 {standard_fields:[{field,operator,value}], process_fields:[{field,operator,value}]}。operator: ==/!==~/!~。process_fields 支持 name/status/creator/ctime/serviceCategory/serviceId/ete 等。"
+              additional_properties: true
+        response:
+          type: object
+          description: "{ code, data: { total, list:[ProcessInstanceBasic], pageSize, nextToken, previousToken } }"
+          properties:
+            code: { type: integer }
+            data:
+              type: object
+              properties:
+                total:     { type: integer }
+                nextToken: { type: string, description: "下一页 token（空=无下一页）" }
+                list:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      instanceId:  { type: string, description: "工单 id" }
+                      orderNum:    { type: string, description: "工单号" }
+                      name:        { type: string, description: "工单名称" }
+                      status:      { type: string, description: "running/done/closed" }
+                      isSuspended: { type: boolean }
+                      isCancelled: { type: boolean }
+
+      delete:
+        description: 删除工单（批量）。⚠️只有作废(isCancelled)的工单才能删除——running/done/closed 的须先作废再删。instanceIds 分号分隔。
+        method: DELETE
+        path: /api/flowable_service/v1/process_instance/{instanceIds}
+        params:
+          instanceIds: { in: path, type: string, required: true, description: "工单 id，分号分隔" }
+
+      set_state:
+        description: 批量修改工单状态（挂起/激活/作废）。⚠️只有 running 的工单能挂起；作废后才能删除。instanceIds 分号分隔。
+        method: PUT
+        path: /api/flowable_service/v1/process_instance_state
+        body:
+          type: object
+          required: [instanceIds, action]
+          description: "工单状态变更请求"
+          properties:
+            instanceIds:          { type: string, description: "工单 id，分号分隔" }
+            action:              { type: string, enum: [suspend, activate, cancel], description: "suspend=挂起(仅running)/activate=激活(仅suspended)/cancel=作废(仅running)" }
+            memo:                { type: string, description: "操作说明" }
+            autoRestartInterval: { type: integer, description: "自动激活时间（小时），0=不自动" }
+
+      export_excel:
+        description: 批量导出工单详情 Excel。ticketIds 指定工单；fields 指定导出字段（空=用服务工单导出配置）。返回二进制 Excel 流。
+        method: POST
+        path: /api/flowable_service/v1/file/batch/ticket/excel_export
+        body:
+          type: object
+          required: [ticketIds]
+          description: "工单导出请求"
+          properties:
+            ticketIds: { type: array, items: { type: string }, description: "工单 id 列表" }
+            fields:    { type: array, items: { type: string }, description: "导出字段（空=用服务配置）。支持 ticketNum/name/status/creator/ctime/ete/serviceCategory/serviceName 等" }
   service_instance:
     description: ITSM 服务实例（服务目录里的一个服务条目）。用户在 ITSM 前端选服务发起工单；服务关联一个流程定义（associatedProcess）。CRUD 全在 /v1/service_instance。
     path: ""
