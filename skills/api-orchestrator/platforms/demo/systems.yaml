@@ -303,6 +303,31 @@ systems:
         update:       "改常用服务"
         delete:       "删常用服务"
         set_services: "关联服务实例到常用服务（commonServices id 列表）"
+      # ---- 触发器/通知/SLA/值班组（8134 flowable_service，2026-08-11 接入）----
+      trigger:
+        list:   "触发器列表（Q 模糊名；scope/domainModelId/instanceId 过滤）"
+        get:    "触发器详情（config.actionList 含 notifyPolicyId→notify_policy）"
+        create: "建触发器（name/scope/status/event/config 必填；config.actionList[].args.notifyPolicyId 引用 notify_policy）"
+        update: "改触发器（全量覆盖）"
+        delete: "删触发器（path triggerIds 分号批量）"
+      notify_policy:
+        list:   "通知策略列表（Q 模糊；notifyType/triggerSignal/notifyRange/notifyMode/creator/st/et 高级过滤）"
+        get:    "策略详情（content 模板含 ${process_instance_id} 等变量）"
+        create: "建策略（name/notifyType/triggerSignal/notifyRange/notifyMode/content 必填）"
+        update: "改策略（全量）"
+        delete: "删策略（⚠️instanceIds 走 query 非 path；分号批量）"
+      sla:
+        list:   "SLA 规则搜索（⚠️POST _search 非 GET list；Q/serviceName/ownerName/priorityId/instanceIds 过滤）"
+        get:    "规则详情（slaConfig[].levelConfig[].workingCalendarId→work_calendar）"
+        create: "建规则（basicInfo+slaConfig 必填；levelConfig.workingCalendarId 引用 work_calendar@sys-setting）"
+        update: "改规则（全量）"
+        delete: "删规则（path ruleIds 分号批量）"
+      duty_group:
+        list:   "值班组列表（Q 模糊；name/dutyCycle/dutyShiftName/st/et 过滤）"
+        get:    "组详情（dutyShift 班次数组）"
+        create: "建组（name/dutyCycle/status/dutyShift 必填）"
+        update: "改组（全量）"
+        delete: "删组（path groupIds 分号批量）"
 
     # 运维知识（实测，真相来源）—— 表单内容模型/坑见 objects.yaml#itsm_form_definition
     runtime:
@@ -327,6 +352,13 @@ systems:
       process_delete_constraints: "删流程定义须先清所有版本（『存在流程定义版本，不允许删除』）。删版本路径 versionIds(复数分号)但只删第一个——批量是壳。约束任一即拒(HTTP412)：绑表单/关联工单/主版本+绑服务/被引用。删末版本隐式级联删 def"
       process_form_flow: "表单决定流转三层：①sequenceFlow conditionExpression ${pass==1} ②userTask isFormDecision=1+formExpressionName(变量映射DSL '变量名:userTaskId.containId.index.componentId') ③后端 govaluate 求值。⚠️和表单 displayCondition #{容器.控件}【不同套】（流转后端求值决定走线/displayCondition前端求值决定显隐）。完整见 objects.yaml#itsm_process_form_flow"
       process_form_binding: "表单绑到【节点】(userTaskId)非版本（ITSC_PROCESS_FORM_RELATION 每节点一条）。process_form.set 按 formRelationInstanceId+formId 组合 绑/解/换（4动作）。useFormBuilder=false 时后端默认取表单主版本绑"
+      # ---- 触发器/通知/SLA/值班组（2026-08-11 接入）运维知识 ----
+      notify_policy_delete_via_query: "⚠️notify_policy.delete 无 path param，instanceIds 走 query（validator ctx.BindQuery 证实，route.go:8）——与 trigger/sla/duty_group 的 path 分号批量不同，易错"
+      notify_policy_prefix: "⚠️notify_policy 前缀是 /api/itsc_trigger/v1（≠ 其它 flowable_service 前缀），但仍在 8134 端口（route.go 同在 flowable_service）"
+      sla_list_post_search: "⚠️SLA list 是 POST /sla/rule/_search（非 GET list，GET 返 404）；分页参数也在 body"
+      trigger_notify_dependency: "trigger.config.actionList[].args.notifyPolicyId 引用 notify_policy 实例（13hex）——建触发器前通常先有 notify_policy"
+      sla_work_calendar_dependency: "sla.slaConfig[].levelConfig[].workingCalendarId 引用 work_calendar 实例（24hex）——⚠️work_calendar 在【独立微服务 sys_setting:8271】（见 easyops-sys-setting system），非 8134；建 SLA 前通常先有 work_calendar"
+      duty_group_id_format: "duty_group/trigger/notify_policy/sla 的 instanceId 均为 13hex（flowable_service 微秒时间戳）；delete path 参数均分号批量"
 
     # e2e 验收 URL（前端）—— 表单类操作后在此可视化校验
     acceptance_urls:
@@ -336,3 +368,66 @@ systems:
       process_detail: "${EASYOPS_CMDB_FRONTEND_URL}/next/itsc-process-manage/{definitionId}/versionCreate-v2/{versionId}?activeTab=0"   # definitionId=流程定义id；versionId=版本id
       service_list:   "${EASYOPS_CMDB_FRONTEND_URL}/next/itsc-service-management/setting-list?page=1&pageSize=10&catalog={catalogName}&catalogId={catalogId}&builtIn=true"   # catalog/catalogId/builtIn 必填（前端默认不渲染否则）
       service_detail: "${EASYOPS_CMDB_FRONTEND_URL}/next/itsc-service-management/setting-list/{instanceId}"   # 服务实例 id（13hex）
+      # ---- 触发器/通知/SLA/值班组验收 URL（2026-08-11，据 scenarios/itsm-other.md）----
+      trigger_list:    "${EASYOPS_CMDB_FRONTEND_URL}/next/itsc-advanced-settings/trigger-manage?page=1&q={name}"   # q 模糊搜名
+      trigger_detail:  "${EASYOPS_CMDB_FRONTEND_URL}/next/itsc-advanced-settings/trigger-manage/update/{instanceId}"   # 触发器 id（13hex）
+      notify_list:     "${EASYOPS_CMDB_FRONTEND_URL}/next/itsc-advanced-settings/notify-config?visible=true&page=1&q={name}&triggerSignal={signal}&creator={creator}"   # q/name/triggerSignal/creator/st/et 可选
+      notify_create:   "${EASYOPS_CMDB_FRONTEND_URL}/next/itsc-advanced-settings/notify-config/create?instanceId={instanceId}"   # 通知策略 id（13hex）
+      sla_list:        "${EASYOPS_CMDB_FRONTEND_URL}/next/itsc-advanced-settings/service-agreement-list?visible=true&page=1&name={name}&ownerName={owner}"   # name/ownerName 可选
+      sla_detail:      "${EASYOPS_CMDB_FRONTEND_URL}/next/itsc-advanced-settings/service-agreement-list/service-agreement-detail?instanceId={instanceId}"   # SLA 规则 id（13hex）
+      duty_group_list: "${EASYOPS_CMDB_FRONTEND_URL}/next/itsc-operation-management/duty-configuration?visible=true&page=1&pageSize=10&q={name}&name={name}&creator={creator}&dutyShiftName={shift}"   # q/name/creator/dutyShiftName 可选
+      duty_group_create: "${EASYOPS_CMDB_FRONTEND_URL}/next/itsc-operation-management/duty-configuration/create/duty-basic-info?instanceId={instanceId}"   # 值班组 id（13hex）
+
+  # ===========================================================================
+  # 系统设置（sys_setting 微服务）—— 工作日历等平台级配置域
+  # ===========================================================================
+  easyops-sys-setting:
+    description: |
+      EasyOps 系统设置（sys_setting 微服务，监听 :8271）—— 当前覆盖【工作日历】
+      （work_calendar）。sys_setting 还含 organization/announce/comment/site_msg/
+      traffic_limit/workbench 等域，未来按需并入。
+      核心对象：work_calendar——工作日历（营业时间），定义工作日/休息日/工作时段，供
+      ITSM SLA 计算达成时长时剔除非工作时间。被 sla.slaConfig[].levelConfig[].
+      workingCalendarId 引用（24hex id，跨 system 接力）。
+      ⚠️为何独立 system（不在 easyops-itsm）：api-cli endpoint 是 service 级+运行时 flag，
+      不支持 per-resource 绑不同端口（api-cli schema.go:28-46）。sys_setting:8271 ≠
+      flowable_service:8134，故 work_calendar 必须另起 spec+独立 system。CLI 经 --spec
+      切，MCP 经 system 名找 spec。
+
+    spec: easyops-sys-setting.yaml          # api-cli 清单，相对本目录
+    default_endpoint: backend               # 直连 sys_setting :8271（路径带 /api/sys_setting/...）
+
+    endpoints:
+      backend:                              # 直连后端（HTTP，无 path 前缀；全 verb 通用）
+        base_url: ${EASYOPS_SYS_SETTING_BACKEND_URL}
+
+    auth: easyops-cookie                    # 与 cmdb/autoops/itsm 同一 cookie
+
+    env:                                    # 部署所需环境变量（ORG/USER 复用 itsm 那套）
+      EASYOPS_SYS_SETTING_BACKEND_URL: "http://172.30.0.232:8271"   # sys_setting 后端（实测 200）
+      EASYOPS_CMDB_FRONTEND_URL: "https://172.30.0.232"             # 前端页面（工作日历列表/详情）
+
+    capabilities:
+      work_calendar:
+        list:   "工作日历列表（page/pageSize/name 过滤；返 24hex id）"
+        get:    "日历配置详情（含 config.workDayList）"
+        create: "建日历（name+config 必填；config={mode,workDayList:[{weekday,hours}]}）"
+        update: "改日历（全量；触发重新生成）"
+        delete: "删日历（path ids 分号批量；24hex；builtin 勿删）"
+
+    runtime:
+      admin_user: easyops
+      env_required:
+        - "EASYOPS_SYS_SETTING_BACKEND_URL=http://172.30.0.232:8271"
+        - "EASYOPS_ORG=18832008"
+        - "EASYOPS_USER=easyops"
+      ports: { sys_setting_backend: 8271, frontend: 232 }
+      host_header: admin.easyops.local      # IP 直连须带 Host 头
+      auth: "三件套（与 itsm 一致）：cookie(PHPSESSID) + org header + user header（orguser 中间件）"
+      id_format: "⚠️work_calendar id 是 24hex MongoDB ObjectId（≠ flowable_service 的 13hex 微秒时间戳）——印证它属不同存储/微服务"
+      cross_system_ref: "work_calendar 被 ITSM 的 sla.slaConfig[].levelConfig[].workingCalendarId 引用——建 SLA 规则前通常先在【本 system】建工作日历拿 24hex id，再填入 sla body（跨 system 接力，见 entities.yaml）"
+      why_separate_system: "sys_setting:8271 与 flowable_service:8134 不同端口；api-cli 不支持 per-resource endpoint 覆盖（schema.go 无 Endpoint 字段），故 work_calendar 必须独立 spec+system，CLI --spec 切换"
+
+    acceptance_urls:
+      work_calendar_list:   "${EASYOPS_CMDB_FRONTEND_URL}/next/work-calendar/list?page=1&q={name}"   # q 模糊搜名
+      work_calendar_detail: "${EASYOPS_CMDB_FRONTEND_URL}/next/work-calendar/detail/{id}"   # 日历 id（24hex）
