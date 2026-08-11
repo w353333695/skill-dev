@@ -17,6 +17,14 @@ SKILL_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
 source "$SKILL_DIR/manifest.sh" 2>/dev/null || {
     echo "run.sh: 找不到 manifest.sh（$SKILL_DIR/manifest.sh）" >&2; exit 1; }
 
+# --- 自动加载非密环境变量（密钥仍由 api-cli 走 ~/.api-cli/auth.d）---
+# 约定：~/.api-cli/env.d/<deployment>.env 放 org/user/endpoint 等非密值；
+#   调用方零传输——初始化一次后 run.sh 自动 source。opt-in：无文件即跳过。
+#   API_CLI_ENV_FILE 直指文件；API_CLI_DEPLOYMENT 选部署（默认 demo）。
+#   ⚠️ 文件里的值会覆盖 shell 已设的同名 env（set -a 导出）；想临时覆盖，调用前 export。
+_ENV_FILE="${API_CLI_ENV_FILE:-$HOME/.api-cli/env.d/${API_CLI_DEPLOYMENT:-demo}.env}"
+[ -f "$_ENV_FILE" ] && { set -a; . "$_ENV_FILE"; set +a; }
+
 # --- Go skill ---
 if [ "${#GOLANG_PROJECTS[@]}" -gt 0 ]; then
     BIN_NAME="${GOLANG_PROJECTS[0]}"

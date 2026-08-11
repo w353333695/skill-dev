@@ -25,6 +25,10 @@ skill 的调度分三挡位，按需求的意图 + 复杂度选挡。
 3. bash 调 api-cli：`api-cli --spec <spec> <resource> <verb> [args] [--format json]`（开发态用 `scripts/run.sh` 等价）。
 4. 后处理（jq 数量/抽取字段/格式化）→ 答。
 
+计数场景（"有几个/多少"）：默认读 stderr `_meta.total`（新版 binary），非空结果即输出；
+  空结果（0 条）stderr 无 total——exit 0 即代表 0 条（错误走 exit≠0，可读）。
+  objectId 速查 `entities.yaml#common_models`，body 最小化 `{fields:[instanceId],page_size:1}`。
+
 无规划、无确认、一轮 bash。
 
 ## 确认挡（简单写操作）

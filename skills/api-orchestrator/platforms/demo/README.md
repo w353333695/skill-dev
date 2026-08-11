@@ -25,8 +25,8 @@
 ## 快速调用
 
 ```bash
-export EASYOPS_CMDB_BACKEND_URL=http://172.30.0.232:8079
-export EASYOPS_ORG=18832008 EASYOPS_USER=easyops   # 测试 org + 模型系统管理员（0/1/2 禁动）
+# 鉴权已统一：cookie@~/.api-cli/auth.d/（密钥）+ 非密 env@~/.api-cli/env.d/demo.env（run.sh 自动 source）
+# 调用方零传输——无需手 export EASYOPS_*。
 scripts/run.sh --spec platforms/demo/easyops-cmdb.yaml <resource> <verb> [args] --insecure   # 统一入口（自动检测环境）
 ```
 
@@ -34,6 +34,21 @@ scripts/run.sh --spec platforms/demo/easyops-cmdb.yaml <resource> <verb> [args] 
 - 建模/属性/关系/约束/接口行为 → 查 `objects.yaml`
 - 字段格式/编排接线 → 查 `entities.yaml`
 - 端到端建/改/删模型 → 查 `flows/`
+
+## 计数 / total
+
+场景"有几个/多少" → `object_instance.search` 读 **stderr** 的 `_meta.total`（新版 binary）：
+
+```bash
+# objectId 速查 entities.yaml#common_models（物理机=PHYSICAL_SERVER@ONEMODEL、主机=HOST）
+scripts/run.sh --spec platforms/demo/easyops-cmdb.yaml object_instance search PHYSICAL_SERVER@ONEMODEL \
+  --body '{"fields":["instanceId"],"page":1,"page_size":1,"ignore_missing_field_error":true}'
+# stderr → {"_meta":{"total":N}}；stdout 是 NDJSON 实例（计数时 page_size:1，几乎不拉数据）
+```
+
+- 非空结果：stderr `_meta.total` = 总数。
+- 空结果（0 条）：stderr 无 total、stdout 空 → **exit 0 即代表 0 条**（新版错误可读到 stderr 且 exit≠0）。
+- 鉴权（cookie + org/user/endpoint）由 `auth.d/` + `env.d/demo.env` 自动加载，无需 export。
 
 ## 三层体系（19 verb）
 

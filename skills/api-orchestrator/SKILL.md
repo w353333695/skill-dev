@@ -66,9 +66,10 @@ scripts/run.sh --spec <spec-path> <resource> <verb> [args] [--print-curl|--dry-r
 
 **调用姿势（防污染）**：`scripts/run.sh` 用**绝对路径**调，cwd 保持用户工作目录——勿 `cd` 进 skill 再用相对路径，否则临时产物会写进 skill 目录（见「关键纪律」状态持久化）。body 优先用 `--body '<json>'`（inline，api-cli UX 改造后支持，零落盘），其次进程替换 `--body-file <(printf '%s' '<json>')`，避免任何临时文件。
 
-**api-cli UX 改造后行为要点**（2026-08-11，`worktree-api-cli-ux` 落地）：
+**api-cli UX 改造后行为要点**（2026-08-11，`worktree-api-cli-ux` 落地）。
+当前 `bin/api-cli` 已是该版本（`go build` 自 `projects/api-cli`）——下列行为均已生效：
 - **错误默认人类可读到 stderr**（`error: <code>: <msg>`）——`--q` 等未知 flag 不再静默，会清晰报错。`--format=json` 时错误输出 JSON。
-- **分页 total 在 stderr**（`{"_meta":{"total":N}}`），stdout 仍是纯 NDJSON（读 stdout 的脚本不受影响；要 total 读 stderr）。
+- **分页 total 在 stderr**（`{"_meta":{"total":N}}`），stdout 仍是纯 NDJSON（读 stdout 的脚本不受影响；要 total 读 stderr）。⚠️ 空结果（total=0）时 stderr 无输出、stdout 也空——total 绑定首条 item，无 item 即不输出；此时 **exit 0 即代表 0 条**（错误走 exit≠0 且可读），计数见 `entities.yaml#common_models.count_recipe`。
 - **`--all` 触顶 exit 4**（硬上限 10000 条/1000 页，结果可能不完整，stderr 有 warning）。
 - **`--print-curl` 默认遮蔽 auth**（Cookie/Authorization 显示 `<redacted>`，加 `--reveal-auth` 显真值）；curl 现含 Host/Content-Type/query（完整可复现）。
 - **`--help` 列 path/query/body 参数分类**（不再只列 global flag）。
