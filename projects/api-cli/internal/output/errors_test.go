@@ -61,3 +61,25 @@ func TestFormatTableDeterministic(t *testing.T) {
 		t.Fatalf("row 2 column order wrong: got %q", lines[2])
 	}
 }
+
+func TestPrintErrorHumanReadableByDefault(t *testing.T) {
+	var buf bytes.Buffer
+	ae := &APIError{Code: "unknown_flag", Message: "unknown flag: --q", ExitCode: ExitParamError}
+	PrintError(&buf, ae, false)
+	out := buf.String()
+	if !strings.Contains(out, "error:") {
+		t.Errorf("默认应人类可读含 'error:'，got: %s", out)
+	}
+	if strings.HasPrefix(strings.TrimSpace(out), "{") {
+		t.Errorf("默认不该是 JSON，got: %s", out)
+	}
+}
+
+func TestPrintErrorJSONWhenJSONMode(t *testing.T) {
+	var buf bytes.Buffer
+	ae := &APIError{Code: "x", Message: "m", ExitCode: ExitParamError}
+	PrintError(&buf, ae, true)
+	if !strings.HasPrefix(strings.TrimSpace(buf.String()), "{") {
+		t.Errorf("jsonMode 应输出 JSON，got: %s", buf.String())
+	}
+}

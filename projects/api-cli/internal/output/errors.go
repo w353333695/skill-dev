@@ -26,14 +26,19 @@ type APIError struct {
 
 func (e *APIError) Error() string { return fmt.Sprintf("api error %d: %s", e.StatusCode, e.Message) }
 
-// PrintError 把错误以结构化 JSON 写到 stderr（spec §11.3）。
-func PrintError(w io.Writer, err error) {
+// PrintError 把错误写到 w：默认人类可读（error: <code>: <message>），
+// jsonMode=true 时输出结构化 JSON（机器可解析，与 --format=json 对齐）。spec §11.3 / T4。
+func PrintError(w io.Writer, err error, jsonMode bool) {
 	ae, ok := err.(*APIError)
 	if !ok {
 		ae = &APIError{Code: "internal", Message: err.Error(), ExitCode: ExitParamError}
 	}
-	b, _ := json.Marshal(ae)
-	fmt.Fprintln(w, string(b))
+	if jsonMode {
+		b, _ := json.Marshal(ae)
+		fmt.Fprintln(w, string(b))
+		return
+	}
+	fmt.Fprintf(w, "error: %s: %s\n", ae.Code, ae.Message)
 }
 
 // ExitCode 从 err 推断 exit code。

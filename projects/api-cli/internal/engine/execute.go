@@ -5,9 +5,11 @@ import (
 	"context"
 	"crypto/tls"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
+	"net/url"
 	"os"
 	"strings"
 	"sync"
@@ -34,6 +36,9 @@ type Options struct {
 	Timeout   time.Duration // HTTP 超时（0 = 不限）；用 context.WithTimeout 包装 ctx，http.Do 尊重 deadline
 	Out       io.Writer     // 输出目标（默认 os.Stdout；测试注入 bytes.Buffer）
 	OutCloser io.Closer     // 非空时调用方（cobracli RunE）在 Execute 后 Close（--output 指向文件场景）
+	Err       io.Writer     // stderr（total / warning 输出；空则 engine 内部用 os.Stderr）
+	Body      string        // inline JSON body（--body flag；优先级：Body > BodyFile > body 参数）
+	RevealAuth bool         // print-curl 显示真实 auth 值（默认遮蔽 <redacted>）
 }
 
 // Engine 执行器。可被 cobracli/mcp 共用。
@@ -83,9 +88,27 @@ func (e *Engine) Execute(ctx context.Context, ep *tree.Endpoint, r *tree.Resourc
 		return &output.APIError{Code: "resolve", Message: err.Error(), ExitCode: output.ExitParamError}
 	}
 
+	// --body 与 --body-file 互斥（T5）。
+	if opts.Body != "" && opts.BodyFile != "" {
+		return &output.APIError{Code: "body_conflict", Message: "--body 与 --body-file 互斥", ExitCode: output.ExitParamError}
+	}
+
+	// --body inline（JSON）：覆盖 body 参数（不动 multipart CT）。
+	if opts.Body != "" {
+		req.Body = []byte(opts.Body)
+		req.ContentType = ""
+	}
+
 	// body-file：覆盖 req.Body（支持复杂/嵌套 body，弥补单层 body 参数的不足）。
+	// "-" 读 stdin（T5）。
 	if opts.BodyFile != "" {
-		b, err := os.ReadFile(opts.BodyFile)
+		var b []byte
+		var err error
+		if opts.BodyFile == "-" {
+			b, err = io.ReadAll(os.Stdin)
+		} else {
+			b, err = os.ReadFile(opts.BodyFile)
+		}
 		if err != nil {
 			return &output.APIError{Code: "body_file", Message: err.Error(), ExitCode: output.ExitParamError}
 		}
@@ -96,7 +119,7 @@ func (e *Engine) Execute(ctx context.Context, ep *tree.Endpoint, r *tree.Resourc
 		req.ContentType = ""
 	}
 
-	// BodyBytes（MCP _body）：最高优先级，覆盖 --body-file 和 body 参数。
+	// BodyBytes（MCP _body）：最高优先级，覆盖 --body/--body-file 和 body 参数。
 	// 用途：MCP tools/call 的 _body 是嵌套对象，单层 body flag（string map）marshal 不出来；
 	// 由 mcp/server.go 提前 marshal 成字节，经此通道直传，绕过 resolve 的 flat 限制。
 	if len(opts.BodyBytes) > 0 {
@@ -105,20 +128,10 @@ func (e *Engine) Execute(ctx context.Context, ep *tree.Endpoint, r *tree.Resourc
 		req.ContentType = ""
 	}
 
-	// dry-run / print-curl：渲染预览，不发请求。
-	// 必须先于写闸门：dry-run 是安全预览（不发请求），update/delete --dry-run 非 TTY 不该被 gateWrite 拦。
-	if opts.DryRun || opts.PrintCurl {
-		fmt.Fprintln(opts.Out, renderPreview(req, opts))
-		return nil
-	}
-
-	// 写操作闸门（create/update/delete 需 --yes 或 TTY 交互确认）。
-	if err := gateWrite(op.Verb, opts); err != nil {
-		return err
-	}
-
 	// auth.Apply：endpoint.Auth 空 / "none" 时跳过；其余按名加载 provider。
-	// 直接 import pkg/adapter 构造 AuthRequest，删去 authReqAdapter/mergeAuth 迂回（controller 修正 #2）。
+	// 提前到 preview 之前（T6）：让 dry-run/print-curl 看到完整鉴权头。
+	// DryRun guard：dry-run/print-curl 时传 DryRun=true，防 oauth2 等有状态 provider 刷新
+	// （easyops cookie/openapi 无副作用，DryRun 对它们 no-op；oauth2 provider 留 TODO）。
 	if ep.Auth != "" && ep.Auth != "none" {
 		provider, err := auth.Load(ep.Auth)
 		if err != nil {
@@ -126,6 +139,7 @@ func (e *Engine) Execute(ctx context.Context, ep *tree.Endpoint, r *tree.Resourc
 		}
 		ar, err := provider.Apply(ctx, &adapter.AuthRequest{
 			Method: req.Method, URL: req.URL, Body: req.Body, Headers: req.Header, Query: req.Query,
+			DryRun: opts.DryRun || opts.PrintCurl,
 		})
 		if err != nil {
 			return &output.APIError{Code: "auth_apply", Message: err.Error(), ExitCode: output.ExitAuthError}
@@ -136,6 +150,17 @@ func (e *Engine) Execute(ctx context.Context, ep *tree.Endpoint, r *tree.Resourc
 		for k, v := range ar.Query {
 			req.Query[k] = v
 		}
+	}
+
+	// dry-run / print-curl：渲染预览，不发请求（auth 已在上完成，curl 可见鉴权头）。
+	if opts.DryRun || opts.PrintCurl {
+		fmt.Fprintln(opts.Out, renderPreview(req, opts))
+		return nil
+	}
+
+	// 写操作闸门（create/update/delete 需 --yes 或 TTY 交互确认）。
+	if err := gateWrite(op.Verb, opts); err != nil {
+		return err
 	}
 
 	// 选 client：--insecure 用跳过 TLS 校验的（自签证书）。
@@ -228,17 +253,24 @@ func (e *Engine) iterate(ctx context.Context, req *resolvedReq, op *tree.Operati
 		limit = 0 // 0 = 不限，受 paging.Options.MaxItems 硬上限约束
 	}
 	items := paging.Iter(ctx, op.Pagination, do, req.Body, first, paging.Options{Limit: limit})
+	// stderr：默认 os.Stderr；opts.Err 注入（测试用 bytes.Buffer 断言）。
+	// total 经首条 item 携带，发出一次后置 totalEmitted=true（多页/重试不再重复）。
+	errw := opts.Err
+	if errw == nil {
+		errw = os.Stderr
+	}
+	totalEmitted := false
 	// format=table|yaml：缓冲全部 items（json.Unmarshal 成 map 收集），末尾整体 FormatTable/Format。
 	// 取舍：缓冲换确定性表头/列对齐；json 默认仍走流式 NDJSON（大列表不爆内存）。
 	if opts.Format == "table" || opts.Format == "yaml" {
 		var collected []map[string]any
 		for it := range items {
 			if it.Err != nil {
-				// do 已归一化；若上层传入非 *output.APIError，兜底包一层保证带 exit code。
-				if _, ok := it.Err.(*output.APIError); ok {
-					return it.Err
-				}
-				return &output.APIError{Code: "paging", Message: it.Err.Error(), ExitCode: output.ExitNetTimeout}
+				return handleItemErr(it, errw)
+			}
+			if !totalEmitted && it.Total != nil {
+				fmt.Fprintf(errw, `{"_meta":{"total":%d}}`+"\n", *it.Total)
+				totalEmitted = true
 			}
 			var m map[string]any
 			if err := json.Unmarshal(it.Raw, &m); err == nil {
@@ -253,14 +285,32 @@ func (e *Engine) iterate(ctx context.Context, req *resolvedReq, op *tree.Operati
 	// 默认 json：流式 NDJSON（每行一个 item.Raw，大列表不爆内存）
 	for it := range items {
 		if it.Err != nil {
-			if _, ok := it.Err.(*output.APIError); ok {
-				return it.Err
-			}
-			return &output.APIError{Code: "paging", Message: it.Err.Error(), ExitCode: output.ExitNetTimeout}
+			return handleItemErr(it, errw)
+		}
+		if !totalEmitted && it.Total != nil {
+			fmt.Fprintf(errw, `{"_meta":{"total":%d}}`+"\n", *it.Total)
+			totalEmitted = true
 		}
 		fmt.Fprintln(opts.Out, string(it.Raw))
 	}
 	return nil
+}
+
+// handleItemErr 归一化 paging.Item.Err 为 Execute 返回值。
+//   - ErrCapped（触达 MaxItems/MaxPages 硬上限）：打 stderr warning + 返回
+//     *output.APIError{ExitCode: ExitPagingOver(4)}。区别于真实错误：截断不是失败，
+//     已收到的数据有效，但用户须知道结果可能不完整。
+//   - *output.APIError（do 已归一化的 HTTP/net 错误）：原样返回，保留 exit code。
+//   - 其他 error：兜底包一层 *output.APIError{ExitNetTimeout}，保证带 exit code。
+func handleItemErr(it paging.Item, errw io.Writer) error {
+	if errors.Is(it.Err, paging.ErrCapped) {
+		fmt.Fprintln(errw, "warning: hit paging cap, results may be incomplete")
+		return &output.APIError{Code: "paging_capped", Message: "hit paging cap", ExitCode: output.ExitPagingOver}
+	}
+	if _, ok := it.Err.(*output.APIError); ok {
+		return it.Err
+	}
+	return &output.APIError{Code: "paging", Message: it.Err.Error(), ExitCode: output.ExitNetTimeout}
 }
 
 // do 发一次 HTTP 请求，返回 body + status。网络错误归一化成 ExitNetTimeout/ExitNet 类。
@@ -316,8 +366,17 @@ func (e *Engine) do(ctx context.Context, req *resolvedReq, hc *http.Client) ([]b
 func renderPreview(req *resolvedReq, opts Options) string {
 	isMultipart := strings.HasPrefix(req.ContentType, "multipart/form-data")
 	if opts.PrintCurl {
-		curl := "curl -X " + req.Method + " '" + req.URL + "'"
+		curl := "curl -X " + req.Method + " '" + buildCurlURL(req) + "'"
+		if req.Host != "" {
+			curl += " -H 'Host: " + req.Host + "'"
+		}
+		if req.ContentType != "" && !isMultipart {
+			curl += " -H 'Content-Type: " + req.ContentType + "'"
+		}
 		for k, v := range req.Header {
+			if isAuthHeader(k) && !opts.RevealAuth {
+				v = "<redacted>"
+			}
 			curl += " -H '" + k + ": " + v + "'"
 		}
 		if isMultipart {
@@ -336,6 +395,33 @@ func renderPreview(req *resolvedReq, opts Options) string {
 	}
 	return fmt.Sprintf("DRY-RUN %s %s insecure=%v query=%v header=%v body=%s",
 		req.Method, req.URL, opts.Insecure, req.Query, req.Header, bodyRepr)
+}
+
+// buildCurlURL 把 req.Query 拼进 URL（print-curl 显示用；真请求在 do() 拼）。
+// 修 T6/③：原来 print-curl 的 URL 是裸 req.URL（无 query），让人误以为 query 没传。
+func buildCurlURL(req *resolvedReq) string {
+	u := req.URL
+	if len(req.Query) > 0 {
+		v := url.Values{}
+		for k, val := range req.Query {
+			v.Set(k, val)
+		}
+		sep := "?"
+		if strings.Contains(u, "?") {
+			sep = "&"
+		}
+		u += sep + v.Encode()
+	}
+	return u
+}
+
+// isAuthHeader 判断是否鉴权头（print-curl 遮蔽目标）：Cookie / Authorization。
+func isAuthHeader(k string) bool {
+	switch strings.ToLower(k) {
+	case "cookie", "authorization":
+		return true
+	}
+	return false
 }
 
 // copySS 浅拷贝 map[string]string。
