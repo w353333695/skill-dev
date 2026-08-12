@@ -110,12 +110,14 @@ render_config() {
     [[ -f "$TEMPLATE_JSON" && -f "$USERS_JSON" ]] || die "模板或用户清单缺失."
     local tmp
     tmp="$(mktemp)"
-    # clients 数组（从 users.json 构建，字段顺序与 Xray 一致）
+    # clients 数组（从 users.json 构建，注入 Xray inbound.settings.clients）
+    # 注意字段名必须用 "id"（Xray VLESS 协议认 id 作为 UUID），不是 uuid；
+    # users.json 内部仍存 uuid（脚本的真相源），render 层做字段名翻译。
     local clients
     clients="$(jq -c 'to_entries | map({
-        name:    .key,
-        uuid:    .value.uuid,
-        flow:    (.value.flow // "xtls-rprx-vision")
+        name: .key,
+        id:   .value.uuid,
+        flow: (.value.flow // "xtls-rprx-vision")
     })' "$USERS_JSON")"
     # 用 jq 把 clients 注入模板的 inbounds[0].clients
     jq --argjson clients "$clients" \
