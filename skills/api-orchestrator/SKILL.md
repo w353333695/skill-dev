@@ -26,6 +26,14 @@ description: 通用 API 编排 skill——自然语言需求 → 跨系统调用
 ```
 需求进来
 │
+├─[0] 环境就绪检查（所有编排前置，强制）
+│      echo 确认：
+│        · platforms 可达：$API_CLI_PLATFORMS_DIR/<dep>/ 存在，或 fallback skill 内置 platforms/<dep>/
+│        · env.d：$API_CLI_DEPLOYMENT_ROOT/env.d/<dep>.env 存在
+│        · auth.d：$API_CLI_AUTH_D/ 下有 *.yaml 密钥文件
+│      ├─ 三项俱全 → 继续 [1]
+│      └─ 缺任一 → 【停下，打印缺失项 + 配置方法，问用户】
+│
 ├─[1] 是"接入新系统/加能力域"吗？
 │      是 → onboarding 模式（见 references/onboarding.md）—— 从输入生成 platforms 资料
 │      否 ↓
@@ -40,6 +48,19 @@ description: 通用 API 编排 skill——自然语言需求 → 跨系统调用
        · 确认挡：查资料 → (search) → 展示确认 → 写 → 答
        · 规划挡：解析需求 → 查 entities/objects/flows → 生成 plan → 确认 → 分步执行 → 接线 → 校验 → (失败)回滚
 ```
+
+### 步 0 详解：环境就绪门禁（防 LLM 猜环境拼凑）
+
+环境未就绪时，**禁止三种降级行为**（实测踩坑）：
+- ❌ 读 `systems.yaml` 的 `env:` 段当运行时值用——env: 段是变量契约（值已置空），端口事实在 `runtime.ports`。
+- ❌ 用原 home 目录位置（`$HOME` 下的 `.api-cli/`）旧位置——已废弃，密钥/env 统一走部署根。
+- ❌ 自行 `export EASYOPS_*=默认值` 凑数——IP/org/user 是部署时才知道的环境配置，不能猜。
+- ✅ 唯一正确动作：停下，打印缺失项 + 指向 `references/onboarding.md`「初始化部署根」，问用户。
+
+三项语义：
+- **platforms 可达**：部署根 `$PLATFORMS_ROOT/<dep>/` 存在用项目级；不存在 fallback skill 内置（合法，不算缺失）。
+- **env.d 存在**：`$API_CLI_DEPLOYMENT_ROOT/env.d/<dep>.env` 必须存在（skill 内置不提供业务变量）。
+- **auth.d 有密钥**：`$API_CLI_AUTH_D/` 下有 `*.yaml`（skill 内置不提供密钥）。
 
 ## 资料（platforms/，可替换）
 
