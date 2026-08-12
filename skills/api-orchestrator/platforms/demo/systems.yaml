@@ -62,7 +62,7 @@ systems:
         base_url: ${EASYOPS_CMDB_FRONTEND_URL}
         host: admin.easyops.local
       openapi:                           # openapi 网关（外网/非内网；AK/SK 签名）—— base_url=内网IP + path_prefix=/cmdbservice + auth=easyops-openapi。详见 easyops-cmdb.yaml endpoints.openapi + runtime.openapi_gateway_config
-        base_url: http://172.30.0.232
+        base_url: ${EASYOPS_OPENAPI_GATEWAY_URL}   # 内网网关 IP（连接地址）；值在部署根 env.d/demo.env
         path_prefix: /cmdbservice
         auth: easyops-openapi
 
@@ -72,6 +72,7 @@ systems:
       EASYOPS_CMDB_BACKEND_URL: ""       # cmdb_service 后端完整 URL（含 IP+端口）；端口事实见 runtime.ports.cmdb_backend
       EASYOPS_CMDB_FRONTEND_URL: ""      # 前端页面/网关完整 URL
       EASYOPS_USER_SERVICE_URL: ""       # user_service（org 查询）完整 URL；端口见 runtime.ports.user_service
+      EASYOPS_OPENAPI_GATEWAY_URL: ""    # openapi 网关内网 IP（仅用 openapi endpoint 时）；勿直连公网 openapi.easyops-only.com
 
     # 能力清单（resource.verb）—— 编排挡据此判断意图可达性
     capabilities:
