@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 # run.sh —— 通用 skill CLI 执行入口（Go / Python 均适用）。
 # 用法: scripts/run.sh <cli-args...>
-# 例:   scripts/run.sh --spec platforms/demo/easyops-itsm.yaml form list
+# 例:   scripts/run.sh --spec $PLATFORMS_ROOT/demo/easyops-itsm.yaml form list
+#        （PLATFORMS_ROOT 见 orchestration.md「步骤 0」；run.sh 自动 export API_CLI_PLATFORMS_DIR）
 #
 # 所有路径相对 run.sh 自身定位，skill 换位置不影响。
 # 自动读 manifest.sh 判断 Go/Python，查找顺序：
