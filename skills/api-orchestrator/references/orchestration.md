@@ -6,9 +6,24 @@ skill 的调度分三挡位，按需求的意图 + 复杂度选挡。
 
 调度靠 LLM 推理、**无代码引擎兜底**——platforms 读取须守此纪律，保证一致 + 省 token：
 
+### 步骤 0：先定位 platforms 根（所有读取前置，强制）
+
+platforms 根不是固定路径，每次编排先求值（部署根默认 `$PWD/.api-orchestrator`，随 cwd 走）：
+
+```bash
+echo "PLATFORMS_ROOT=${API_CLI_PLATFORMS_DIR:-<未设，按链解析>} dep=${API_CLI_DEPLOYMENT:-demo}"
+# 解析规则（最高优先在前）：
+#   1. $API_CLI_PLATFORMS_DIR 显式设 → 直接用
+#   2. $PWD/.api-orchestrator/platforms/<dep>/ 存在 → 用项目级（随 cwd 走）
+#   3. fallback → skill 内置 platforms/<dep>/
+```
+
+确认 PLATFORMS_ROOT 实际目录后，后续所有 grep/Read 全用 **`$PLATFORMS_ROOT/<dep>/...` 绝对路径**。
+（run.sh 已自动 export `API_CLI_PLATFORMS_DIR`；echo 确认即可。）
+
 1. **粗筛（必读，第一步）**：读 `systems.yaml` 的 `systems.<system>.capabilities`（resource.verb → 一句话用途），判需求可达性、命中哪个系统哪个 verb。systems.yaml 不大，全量读（含 `runtime` 坑一并看，避免踩雷如 update body flat / run inputs map）。
 2. **按需读详情（命中后，禁止全量）**：命中 resource.verb 后，按需读对应段：
-   - **精准定位**：先 `grep -n "关键词" platforms/demo/objects.yaml` 拿行号 → `Read --offset=<行号> limit=30` 取该段。一步命中，不读全文。
+   - **精准定位**：先 `grep -n "关键词" $PLATFORMS_ROOT/<dep>/objects.yaml`（PLATFORMS_ROOT 见上「步骤 0」）拿行号 → `Read --offset=<行号> limit=30` 取该段。一步命中，不读全文。
    - spec `<system>.yaml`：`grep -n "^\s*<verb>:" easyops-*.yaml` 定位 → Read 该 operation 段
    - `objects.yaml`：`grep -n "<对象名>:" objects.yaml` 定位 → Read 该对象的 fields + side_effects 段
    - `entities.yaml`：`grep -n "<field>" entities.yaml` → 取字段锚
@@ -22,7 +37,7 @@ skill 的调度分三挡位，按需求的意图 + 复杂度选挡。
 触发：读查询、单系统、单步（如"查下有多少主机""列出 X 的实例"）。
 
 流程：
-1. 查 `platforms/<dep>/systems.yaml` → 找到目标系统的 spec + resource/verb。
+1. 先走「读取纪律·步骤 0」求值 `$PLATFORMS_ROOT`。查 `$PLATFORMS_ROOT/<dep>/systems.yaml` → 找到目标系统的 spec + resource/verb。
 2. 查 `entities.yaml`（如涉及跨字段）确认锚字段。
 3. bash 调 api-cli：`api-cli --spec <spec> <resource> <verb> [args] [--format json]`（开发态用 `scripts/run.sh` 等价）。
 4. 后处理（jq 数量/抽取字段/格式化）→ 答。
