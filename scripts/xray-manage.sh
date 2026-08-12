@@ -317,6 +317,15 @@ EOF
     chmod 600 "$CONFIG_JSON"
 
     _step "安装 systemd 服务"
+    # 清理可能存在的 drop-in（官方 Xray-install 会留下
+    # /etc/systemd/system/xray.service.d/10-donot_touch_single_conf.conf，
+    # 它用 ExecStart= 覆盖主 unit，把 xray 强制指向 /usr/local/etc/xray/config.json，
+    # 导致本脚本写的 config 路径不生效）。install 前必须先移除，否则 ExecStart 被劫持。
+    local dropin_dir="/etc/systemd/system/xray.service.d"
+    if [[ -d "$dropin_dir" ]]; then
+        _warn "检测到 systemd drop-in 目录 $dropin_dir（残留自官方安装脚本），将移除以免劫持 ExecStart."
+        rm -rf "$dropin_dir"
+    fi
     cat > "$UNIT_FILE" <<EOF
 [Unit]
 Description=Xray Service (VLESS-Reality)
@@ -343,6 +352,8 @@ EOF
     else
         _err "xray 启动失败，日志："
         journalctl -u xray -n 20 --no-pager || true
+        _warn "提示：systemd 实际用的 ExecStart 可用以下命令确认："
+        _warn "  systemctl cat xray  （若仍有 drop-in 覆盖，会看到多段 ExecStart）"
         die "请检查配置后 'systemctl start xray'."
     fi
 
@@ -503,6 +514,8 @@ cmd_uninstall() {
     systemctl stop xray 2>/dev/null || true
     systemctl disable xray 2>/dev/null || true
     rm -f "$UNIT_FILE"
+    # 同步移除 drop-in 目录（官方安装脚本残留），否则下次 install 仍会被劫持
+    rm -rf "/etc/systemd/system/xray.service.d"
     systemctl daemon-reload 2>/dev/null || true
 
     _step "备份 users.json"
