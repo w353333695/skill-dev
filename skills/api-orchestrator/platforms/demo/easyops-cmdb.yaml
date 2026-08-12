@@ -16,12 +16,12 @@
 # 接入面：
 #   • backend —— 直连 cmdb_service :8079（HTTP）。契约示例与后端路由都以此为准，
 #     object 域所有 verb 都能干净命中（无 per-API 网关前缀问题）。**默认走 backend**。
-#   • frontend —— 走前端网关 https://172.30.0.90 + Host 头。注意：网关按 *每个 API*
+#   • frontend —— 走前端网关（${EASYOPS_CMDB_FRONTEND_URL}，值在部署根 env.d）+ Host 头。注意：网关按 *每个 API*
 #     路由（path_prefix 形如 /next/api/gateway/cmdb.cmdb_object.<Verb>），一个 endpoint
 #     只能持一个 path_prefix，故 frontend 对 object 域多 verb 不通用；仅 instance.search
 #     可走 frontend（其网关前缀固定 cmdb.instance.PostSearchV3）。object 管理请用 backend。
 #
-# 鉴权：auth: easyops-cookie（~/.api-cli/auth.d/easyops-cookie.yaml，provider=cookie，
+# 鉴权：auth: easyops-cookie（部署根 auth.d/easyops-cookie.yaml，API_CLI_AUTH_D 指向；原 home 目录位置已废弃；provider=cookie，
 #   持 PHPSESSID 会话 cookie）。backend/frontend 均用同一 cookie。
 #
 # ⚠️ cookie 不够！直连后端还要 org+user 两个 header（见 endpoint.headers）。
@@ -36,22 +36,22 @@ service:
   default_endpoint: backend
   endpoints:
     backend:
-      base_url: ${EASYOPS_CMDB_BACKEND_URL}        # http://172.30.0.232:8079
+      base_url: ${EASYOPS_CMDB_BACKEND_URL}        # 值在部署根 env.d/demo.env（含 IP+端口）；端口事实见 systems.yaml runtime.ports.cmdb_backend
       host: admin.easyops.local                     # IP 直连，Host 由 endpoint.Host 注入
       path_prefix: ""                               # 后端路由挂在 gin root（无前缀）
       auth: none                                    # 直连后端：auth=none 跳过 cookie 加载（engine/execute.go:135）。org/user 由 endpoint.headers 注入，独立于 auth（engine/request.go:40-43）。实测 cmdb:8079 无 cookie 直 200。cookie 仅 frontend/openapi 网关面需要。
       headers:                                      # endpoint 级固定 header（每个请求都带，api-cli 自动注入）
-        org: ${EASYOPS_ORG}                         # EasyOps 租户 org。系统自带 0/1/2 禁动（业务库）；测试用 18832008。export EASYOPS_ORG=<值>
-        user: ${EASYOPS_USER}                       # EasyOps 用户标识。模型系统管理员=easyops（有 ObjectImport 权限）。export EASYOPS_USER=easyops
+        org: ${EASYOPS_ORG}                         # EasyOps 租户 org（系统自带 0/1/2 禁动）；值在部署根 env.d/demo.env
+        user: ${EASYOPS_USER}                       # EasyOps 用户标识（模型系统管理员=easyops 有 ObjectImport 权限）；值在部署根 env.d/demo.env
     frontend:
-      base_url: ${EASYOPS_CMDB_FRONTEND_URL}        # https://172.30.0.90
+      base_url: ${EASYOPS_CMDB_FRONTEND_URL}        # 值在部署根 env.d/demo.env（前端页面/网关完整 URL）
       host: admin.easyops.local
       path_prefix: /next/api/gateway/cmdb.instance.PostSearchV3   # 仅对 instance.search 通用
       auth: easyops-cookie
     openapi:                                        # openapi 网关（外网/非内网；AK/SK 签名）。需后端 api_gateway/conf/openapi.yaml 放行
-      base_url: http://172.30.0.232                  # 内网网关 IP（连接地址；勿直连公网 openapi.easyops-only.com）
+      base_url: ${EASYOPS_OPENAPI_GATEWAY_URL}      # 内网网关 IP（连接地址；勿直连公网 openapi.easyops-only.com）；值在部署根 env.d/demo.env
       path_prefix: /cmdbservice                      # cmdb app_name 前缀（网关按 /<app>/<uri> 路由）
-      auth: easyops-openapi                          # ~/.api-cli/auth.d/easyops-openapi.yaml（host=openapi.easyops-only.com 作签名 Host 头，网关按 Host 路由）
+      auth: easyops-openapi                          # 部署根 auth.d/easyops-openapi.yaml（API_CLI_AUTH_D；原 home 目录位置已废弃；host=openapi.easyops-only.com 作签名 Host 头，网关按 Host 路由）
 
 # -----------------------------------------------------------------------------
 # 资源 1：object_model —— CMDB 模型（object）层。e2e 场景全落在这里。
