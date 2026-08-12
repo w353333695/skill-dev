@@ -17,13 +17,22 @@ SKILL_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
 source "$SKILL_DIR/manifest.sh" 2>/dev/null || {
     echo "run.sh: 找不到 manifest.sh（$SKILL_DIR/manifest.sh）" >&2; exit 1; }
 
-# --- 自动加载非密环境变量（密钥仍由 api-cli 走 ~/.api-cli/auth.d）---
-# 约定：~/.api-cli/env.d/<deployment>.env 放 org/user/endpoint 等非密值；
+# --- 部署根解析（platforms/auth/env 三者归一到 $API_CLI_DEPLOYMENT_ROOT）---
+# 默认随调用方 cwd 项目走（$PWD/.api-orchestrator）；想固定则 shell rc 里 export API_CLI_DEPLOYMENT_ROOT。
+# ⚠️ env 变量始终最高优先级覆盖；env.d/<dep>.env 里只放业务变量，不放路径变量（不自举）。
+_APIORCH_ROOT="${API_CLI_DEPLOYMENT_ROOT:-$PWD/.api-orchestrator}"
+: "${API_CLI_DEPLOYMENT_ROOT:=$_APIORCH_ROOT}"
+: "${API_CLI_AUTH_D:=$_APIORCH_ROOT/auth.d}"
+: "${API_CLI_ENV_FILE:=$_APIORCH_ROOT/env.d/${API_CLI_DEPLOYMENT:-demo}.env}"
+: "${API_CLI_PLATFORMS_DIR:=$_APIORCH_ROOT/platforms}"
+export API_CLI_AUTH_D API_CLI_ENV_FILE API_CLI_PLATFORMS_DIR API_CLI_DEPLOYMENT_ROOT
+
+# --- 自动加载非密环境变量（密钥由 api-cli 走 $API_CLI_AUTH_D，默认部署根/auth.d）---
+# 约定：$API_CLI_DEPLOYMENT_ROOT/env.d/<dep>.env 放 org/user/endpoint 等非密值；
 #   调用方零传输——初始化一次后 run.sh 自动 source。opt-in：无文件即跳过。
 #   API_CLI_ENV_FILE 直指文件；API_CLI_DEPLOYMENT 选部署（默认 demo）。
 #   ⚠️ 文件里的值会覆盖 shell 已设的同名 env（set -a 导出）；想临时覆盖，调用前 export。
-_ENV_FILE="${API_CLI_ENV_FILE:-$HOME/.api-cli/env.d/${API_CLI_DEPLOYMENT:-demo}.env}"
-[ -f "$_ENV_FILE" ] && { set -a; . "$_ENV_FILE"; set +a; }
+[ -f "$API_CLI_ENV_FILE" ] && { set -a; . "$API_CLI_ENV_FILE"; set +a; }
 
 # --- Go skill ---
 if [ "${#GOLANG_PROJECTS[@]}" -gt 0 ]; then
