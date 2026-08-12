@@ -66,12 +66,12 @@ systems:
         path_prefix: /cmdbservice
         auth: easyops-openapi
 
-    auth: easyops-cookie                 # ~/.api-cli/auth.d/easyops-cookie.yaml：provider=cookie，持 PHPSESSID
+    auth: easyops-cookie                 # 部署根 auth.d/easyops-cookie.yaml（API_CLI_AUTH_D 指向；原 home 目录位置已废弃）：provider=cookie，持 PHPSESSID
 
-    env:                                 # 部署所需环境变量（供 api-cli / shell 注入）
-      EASYOPS_CMDB_BACKEND_URL: "http://172.30.0.232:8079"  # cmdb_service 后端（实测）
-      EASYOPS_CMDB_FRONTEND_URL: "https://172.30.0.232"      # 前端页面/网关
-      EASYOPS_USER_SERVICE_URL: "http://172.30.0.232:8111"      # user_service（org 查询等）
+    env:                                 # 环境变量契约（仅声明需要哪些变量 + 用途；【值在部署根 env.d/<dep>.env，勿从此处取】）
+      EASYOPS_CMDB_BACKEND_URL: ""       # cmdb_service 后端完整 URL（含 IP+端口）；端口事实见 runtime.ports.cmdb_backend
+      EASYOPS_CMDB_FRONTEND_URL: ""      # 前端页面/网关完整 URL
+      EASYOPS_USER_SERVICE_URL: ""       # user_service（org 查询）完整 URL；端口见 runtime.ports.user_service
 
     # 能力清单（resource.verb）—— 编排挡据此判断意图可达性
     capabilities:
@@ -145,10 +145,10 @@ systems:
     # 运维知识（实测，真相来源）—— 完整叙述见 README「接入真相」「调用踩坑录」
     runtime:
       admin_user: easyops              # 模型系统管理员（ObjectImport/删除权限）；读模型元数据任意非空 user 可，写必须 easyops
-      env_required:                    # 调用前 export
-        - "EASYOPS_CMDB_BACKEND_URL=http://172.30.0.232:8079"
-        - "EASYOPS_ORG=18832008"       # 测试 org（0/1/2 禁动）
-        - "EASYOPS_USER=easyops"
+      env_required:                    # 调用前 export（仅列变量名；值在部署根 env.d/<dep>.env）
+        - "EASYOPS_CMDB_BACKEND_URL"   # 完整 URL（含 IP+端口）；端口事实见本 system runtime.ports.cmdb_backend
+        - "EASYOPS_ORG"                # EasyOps 租户 org（系统自带 0/1/2 禁动）
+        - "EASYOPS_USER"               # 用户标识（模型系统管理员=easyops）
       ports: { cmdb_backend: 8079, user_service: 8111, frontend: 232 }
       host_header: admin.easyops.local # IP 直连须带 Host 头
       auth: "直连 backend（endpoint.auth=none）只需 org+user header——缺任一报 empty org/user (100003)。源码 cmdb_service/main.go:549,691（orguser 中间件读 header）。cookie 仅 frontend/openapi 网关面需要，见 cookie_optional_direct"
@@ -217,11 +217,11 @@ systems:
         base_url: ${EASYOPS_AUTOOPS_FRONTEND_URL}
         host: admin.easyops.local
 
-    auth: easyops-cookie                    # 与 cmdb 同一 cookie（~/.api-cli/auth.d/easyops-cookie.yaml：PHPSESSID）
+    auth: easyops-cookie                    # 与 cmdb 同一 cookie（部署根 auth.d/easyops-cookie.yaml，API_CLI_AUTH_D；原 home 目录位置已废弃）
 
-    env:                                    # 部署所需环境变量（ORG/USER 复用 cmdb 那套）
-      EASYOPS_AUTOOPS_BACKEND_URL: "http://172.30.0.232:8181"   # tool_service 后端（实测）
-      EASYOPS_AUTOOPS_FRONTEND_URL: "https://172.30.0.232"      # 前端页面/网关
+    env:                                    # 环境变量契约（值在部署根 env.d/<dep>.env，勿从此处取）
+      EASYOPS_AUTOOPS_BACKEND_URL: ""   # tool_service 后端完整 URL；端口见 runtime.ports.autoops_backend
+      EASYOPS_AUTOOPS_FRONTEND_URL: ""  # 前端页面/网关完整 URL
 
     # 能力清单（resource.verb）—— 编排挡据此判意图可达性
     capabilities:
@@ -250,10 +250,10 @@ systems:
     # 运维知识（实测，真相来源）—— 完整工具包格式/内置变量见 objects.yaml
     runtime:
       admin_user: easyops              # 写操作用户（与 cmdb 同）
-      env_required:                    # 调用前 export
-        - "EASYOPS_AUTOOPS_BACKEND_URL=http://172.30.0.232:8181"
-        - "EASYOPS_ORG=18832008"       # 测试 org（0/1/2 禁动，与 cmdb 共用）
-        - "EASYOPS_USER=easyops"
+      env_required:                    # 调用前 export（值在部署根 env.d/<dep>.env）
+        - "EASYOPS_AUTOOPS_BACKEND_URL"   # 完整 URL；端口见 runtime.ports.autoops_backend
+        - "EASYOPS_ORG"                   # 与 cmdb 共用
+        - "EASYOPS_USER"                  # 与 cmdb 共用
       ports: { autoops_backend: 8181, frontend: 232 }
       host_header: admin.easyops.local
       auth: "直连 backend（endpoint.auth=none）只需 org+user header——缺任一报 empty org/user。orguser 中间件 cmd/tool_service/main.go:624"
@@ -301,11 +301,11 @@ systems:
         base_url: ${EASYOPS_ITSM_BACKEND_URL}
         host: admin.easyops.local            # IP 直连，网关按 Host 路由
 
-    auth: easyops-cookie                     # 与 cmdb/autoops 同一 cookie（~/.api-cli/auth.d/easyops-cookie.yaml：PHPSESSID）
+    auth: easyops-cookie                     # 与 cmdb/autoops 同一 cookie（部署根 auth.d/easyops-cookie.yaml，API_CLI_AUTH_D；原 home 目录位置已废弃）
 
-    env:                                     # 部署所需环境变量（ORG/USER 复用 cmdb 那套）
-      EASYOPS_ITSM_BACKEND_URL: "http://172.30.0.232:8134"   # flowable_service 后端（实测）
-      EASYOPS_CMDB_FRONTEND_URL: "https://172.30.0.232"      # 前端页面（表单列表/详情）
+    env:                                     # 环境变量契约（值在部署根 env.d/<dep>.env，勿从此处取）
+      EASYOPS_ITSM_BACKEND_URL: ""          # flowable_service 后端完整 URL；端口见 runtime.ports.itsm_backend
+      EASYOPS_CMDB_FRONTEND_URL: ""         # 前端页面（表单列表/详情）完整 URL
 
     # 能力清单（resource.verb）—— 编排挡据此判意图可达性
     capabilities:
@@ -391,10 +391,10 @@ systems:
     # 运维知识（实测，真相来源）—— 表单内容模型/坑见 objects.yaml#itsm_form_definition
     runtime:
       admin_user: easyops              # 写操作用户（与 cmdb/autoops 同；具备 itsc:form_management_* 4 权限）
-      env_required:                    # 调用前 export
-        - "EASYOPS_ITSM_BACKEND_URL=http://172.30.0.232:8134"
-        - "EASYOPS_ORG=18832008"       # 测试 org（0/1/2 禁动，与 cmdb 共用）
-        - "EASYOPS_USER=easyops"
+      env_required:                    # 调用前 export（值在部署根 env.d/<dep>.env）
+        - "EASYOPS_ITSM_BACKEND_URL"   # 完整 URL；端口见 runtime.ports.itsm_backend
+        - "EASYOPS_ORG"                # 与 cmdb 共用
+        - "EASYOPS_USER"               # 与 cmdb 共用
       ports: { itsm_backend: 8134, frontend: 232 }
       host_header: admin.easyops.local # IP 直连须带 Host 头
       auth: "直连 backend（endpoint.auth=none）只需 org+user header（orguser 中间件 cmd/flowable_service/.../main_start.go:336-344；缺一报『org、user获取失败』）+ 额外 itsc:form_management_{access,create,update,delete} 4 权限（service.go:31-34，缺报 403）。cookie 仅网关面需要，见 cookie_optional_direct"
@@ -463,9 +463,9 @@ systems:
 
     auth: easyops-cookie                    # 与 cmdb/autoops/itsm 同一 cookie
 
-    env:                                    # 部署所需环境变量（ORG/USER 复用 itsm 那套）
-      EASYOPS_SYS_SETTING_BACKEND_URL: "http://172.30.0.232:8271"   # sys_setting 后端（实测 200）
-      EASYOPS_CMDB_FRONTEND_URL: "https://172.30.0.232"             # 前端页面（工作日历列表/详情）
+    env:                                    # 环境变量契约（值在部署根 env.d/<dep>.env，勿从此处取）
+      EASYOPS_SYS_SETTING_BACKEND_URL: ""  # sys_setting 后端完整 URL；端口见 runtime.ports.sys_setting_backend
+      EASYOPS_CMDB_FRONTEND_URL: ""        # 前端页面完整 URL
 
     capabilities:
       work_calendar:
@@ -477,10 +477,10 @@ systems:
 
     runtime:
       admin_user: easyops
-      env_required:
-        - "EASYOPS_SYS_SETTING_BACKEND_URL=http://172.30.0.232:8271"
-        - "EASYOPS_ORG=18832008"
-        - "EASYOPS_USER=easyops"
+      env_required:                    # 调用前 export（值在部署根 env.d/<dep>.env）
+        - "EASYOPS_SYS_SETTING_BACKEND_URL"   # 完整 URL；端口见 runtime.ports.sys_setting_backend
+        - "EASYOPS_ORG"                       # 与 itsm 共用
+        - "EASYOPS_USER"                      # 与 itsm 共用
       ports: { sys_setting_backend: 8271, frontend: 232 }
       host_header: admin.easyops.local      # IP 直连须带 Host 头
       auth: "直连 backend（endpoint.auth=none）只需 org+user header（orguser 中间件）。cookie 仅网关面需要，见 cookie_optional_direct"
