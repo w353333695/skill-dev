@@ -19,20 +19,23 @@ description: 通用 API 编排 skill——自然语言需求 → 跨系统调用
 - **调度器 = 你（LLM）**：读本 SKILL 的决策树，对每个需求推理分派。没有代码调度引擎。
 - **执行 = bash 调 scripts/run.sh**：统一执行入口（读 manifest.sh 自动定位 binary，Go/Python 通用），每个系统是一份 api-cli 清单（spec）。
 - **知识 = platforms/ 资料**：系统目录/实体映射/对象关系/流程模板/格式包，全部可替换。
-- **部署根（platforms/auth/env 归一）**：三者默认归一到 `$PWD/.api-orchestrator`——**随调用时 cwd 走**；想固定则在 shell rc 里 `export API_CLI_DEPLOYMENT_ROOT=/abs/path`。无部署根时 fallback skill 内置 `platforms/demo`（行为不变）。详见 orchestration.md「步骤 0」。
+- **部署根（platforms/auth/env 归一）**：三者默认归一到 `$PWD/.api-orchestrator`——**随调用时 cwd 走**；想固定则在 shell rc 里 `export API_CLI_DEPLOYMENT_ROOT=/abs/path`。**部署根不存在则停下引导用户初始化，禁止读 skill 自带 platforms/demo（开发样例，非运行时数据）。** 详见 orchestration.md「步骤 0」。
 
 ## 调度决策树（拿到需求先走这个）
 
 ```
 需求进来
 │
-├─[0] 环境就绪检查（所有编排前置，强制）
-│      echo 确认：
-│        · platforms 可达：$API_CLI_PLATFORMS_DIR/<dep>/ 存在，或 fallback skill 内置 platforms/<dep>/
-│        · env.d：$API_CLI_DEPLOYMENT_ROOT/env.d/<dep>.env 存在
-│        · auth.d：$API_CLI_AUTH_D/ 下有 *.yaml 密钥文件
+├─[0] 环境就绪检查（强制硬门禁，无 fallback）
+│      三项必须全有，缺一即停，禁止用 skill 自带 platforms/demo 兜底：
+│        · 部署根 $PWD/.api-orchestrator/ 存在
+│        · $PWD/.api-orchestrator/env.d/<dep>.env 存在（EASYOPS_ORG/USER/*_URL）
+│        · $PWD/.api-orchestrator/auth.d/ 下有 *.yaml（cookie/密钥）
 │      ├─ 三项俱全 → 继续 [1]
-│      └─ 缺任一 → 【停下，打印缺失项 + 配置方法，问用户】
+│      └─ 缺任一 → 停下，打印「需初始化部署根」+ 下面命令，问用户：
+│            mkdir -p $PWD/.api-orchestrator/{platforms,auth.d,env.d}
+│            # 放 cookie 到 auth.d/easyops-cookie.yaml
+│            # 写 env.d/<dep>.env（见 onboarding.md「初始化部署根」）
 │
 ├─[1] 是"接入新系统/加能力域"吗？
 │      是 → onboarding 模式（见 references/onboarding.md）—— 从输入生成 platforms 资料
@@ -57,10 +60,10 @@ description: 通用 API 编排 skill——自然语言需求 → 跨系统调用
 - ❌ 自行 `export EASYOPS_*=默认值` 凑数——IP/org/user 是部署时才知道的环境配置，不能猜。
 - ✅ 唯一正确动作：停下，打印缺失项 + 指向 `references/onboarding.md`「初始化部署根」，问用户。
 
-三项语义：
-- **platforms 可达**：部署根 `$PLATFORMS_ROOT/<dep>/` 存在用项目级；不存在 fallback skill 内置（合法，不算缺失）。
-- **env.d 存在**：`$API_CLI_DEPLOYMENT_ROOT/env.d/<dep>.env` 必须存在（skill 内置不提供业务变量）。
-- **auth.d 有密钥**：`$API_CLI_AUTH_D/` 下有 `*.yaml`（skill 内置不提供密钥）。
+三项语义（全部硬性，任缺即停）：
+- **部署根存在**：`$PWD/.api-orchestrator/` 必须存在。不存在 = 缺失，不许 fallback skill 自带 platforms/demo（那是开发样例，非运行时数据）。
+- **env.d 存在**：`$PWD/.api-orchestrator/env.d/<dep>.env` 必须存在（业务变量 EASYOPS_ORG/USER/*_URL）。
+- **auth.d 有密钥**：`$PWD/.api-orchestrator/auth.d/` 下有 `*.yaml`（cookie/密钥）。
 
 ## 资料（platforms/，可替换）
 
