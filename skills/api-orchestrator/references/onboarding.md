@@ -1,6 +1,6 @@
 # onboarding.md —— 接入新系统 / 录入 platforms
 
-> onboarding 的目标：把「系统资料」（契约/抓包/源码/场景）整理录入 `platforms/<deployment>/`（符合 `asset-schema.md`），让 skill + platforms 能分发到**任意系统、任意 LLM**，读资料即能编排用户需求。
+> onboarding 的目标：把「系统资料」（契约/抓包/源码/场景）整理录入 **`$PLATFORMS_ROOT/<deployment>/`**（PLATFORMS_ROOT 解析见 orchestration.md「步骤 0」；符合 `asset-schema.md`），让 skill + platforms 能分发到**任意系统、任意 LLM**，读资料即能编排用户需求。**首次接入须先初始化部署根（见下「初始化部署根」）。**
 >
 > 本文件是 skill 本体，**零系统耦合**——流程通用；完整实战范例见 `platforms/demo/`（一个配置管理系统的 onboarding 产物，含全部坑）。
 
@@ -125,19 +125,63 @@ onboarding 的速度和质量取决于输入完整度。**开工前按此清单�
 - 验收 URL / 校验命令记录在 systems.yaml。
 - 提交；坑已回流 platforms（**不进记忆**——platforms 是唯一真相来源；本 skill 的所有知识落在 skill 本体，遵守 AGENTS.md §8 skill 自包含纪律）。
 
+## 初始化部署根（首次配置，一次即可）
+
+首次接入新项目/新部署，建部署根 + 三子目录骨架：
+
+```bash
+mkdir -p $PWD/.api-orchestrator/{platforms,auth.d,env.d}
+```
+
+env.d/<dep>.env 只放业务变量（**不放路径变量**——`API_CLI_DEPLOYMENT_ROOT` 由 run.sh 从 $PWD 推导，自举会死循环）：
+
+```bash
+cat > $PWD/.api-orchestrator/env.d/demo.env <<'EOF'
+export EASYOPS_ORG=18832008
+export EASYOPS_USER=easyops
+export EASYOPS_CMDB_BACKEND_URL=http://172.30.0.232:8079
+# ... 其它 EASYOPS_* 业务变量
+EOF
+```
+
+auth.d 放密钥（cookie 等），格式同原 `~/.api-cli/auth.d/`（api-cli 私有约定，不改格式）。
+
+## 首写门禁（onboarding 写 platforms 前置，强制）
+
+onboarding 是唯一能写 platforms 的模式。**写 platforms 前**必须先验证部署根解析后的**绝对路径**已存在：
+
+- 部署根存在 → 正常写 `$PLATFORMS_ROOT/<dep>/`
+- 部署根**不存在** → **停下，打印解析后的绝对路径问用户确认**，禁止隐式 mkdir 到意外 cwd：
+
+```bash
+# onboarding 写入前自检
+PLATFORMS_DIR="${API_CLI_PLATFORMS_DIR:-$PWD/.api-orchestrator/platforms}"
+if [ ! -d "$PLATFORMS_DIR" ]; then
+  echo "⚠️ 部署根 platforms 目录不存在: $PLATFORMS_DIR"
+  echo "   初始化请运行: mkdir -p $PWD/.api-orchestrator/{platforms,auth.d,env.d}"
+  echo "   确认在此 cwd ($PWD) 落地接入资料吗？请用户确认后再继续。"
+  # 停下，不自动 mkdir
+fi
+```
+
 ---
 
 ## 3. 产物核对表（onboarding 完成应具备）
 
+部署根 `$API_CLI_DEPLOYMENT_ROOT`（默认 `$PWD/.api-orchestrator`）下分 4 类（隔离，禁交叉写入）：
 ```
-platforms/<deployment>/
-├── README.md         索引（资料地图），无知识主体
-├── systems.yaml      接入：endpoints/auth/runtime(端口/租户/用户/env)/capabilities/acceptance
-├── objects.yaml      对象：fields/relations/constraints/side_effects/api_behavior
-├── entities.yaml     字段：anchor/transitions
-├── flows/*.yaml      流程：build/change 步骤序列
-├── <system>.yaml     api-cli 清单：resource/verb/body schema
-└── formats/<fmt>/    （有跨部署格式才需要）
+$API_CLI_DEPLOYMENT_ROOT/
+├── platforms/<deployment>/   ← 领域知识（onboarding 产物，本目录树聚焦此）
+│   ├── README.md         索引（资料地图），无知识主体
+│   ├── systems.yaml      接入：endpoints/auth/runtime(端口/租户/用户/env)/capabilities/acceptance
+│   ├── objects.yaml      对象：fields/relations/constraints/side_effects/api_behavior
+│   ├── entities.yaml     字段：anchor/transitions
+│   ├── flows/*.yaml      流程：build/change 步骤序列
+│   ├── <system>.yaml     api-cli 清单：resource/verb/body schema
+│   └── formats/<fmt>/    （有跨部署格式才需要）
+├── auth.d/                  ← 密钥（api-cli 读，env API_CLI_AUTH_D 指此；不入 git）
+├── env.d/<dep>.env          ← 非密配置（run.sh 读；只放业务变量 EASYOPS_*，不放路径变量）
+└── tmp/                     ← 编排中间产物（与前三者同级隔离）
 ```
 自检：换个 LLM 只读这些文件，能否无坑接上系统、复现场景？能 → onboarding 合格。
 
