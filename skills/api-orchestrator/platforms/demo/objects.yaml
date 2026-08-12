@@ -738,9 +738,16 @@ objects:
       slaRuleId:           { type: string, desc: "SLA 规则 id" }
     relations:
       - { to: itsm_process_definition, type: association, cardinality: "N:1", via: associatedProcess, desc: "服务关联一个流程定义" }
+      - { to: itsm_sla, type: association, cardinality: "N:1", via: "sla_config.slaConfig[].slaId", desc: "服务绑定的 SLA 规则（inst 模式 1 个）。⚠️绑定关系存于独立端点 sla_config（非 slaRuleId 字段），见 api_behavior.bind_sla_via_subpath" }
+    api_behavior:
+      bind_sla_via_subpath: "⚠️绑 SLA 到服务走【独立子路径端点】PUT /v1/service_instance/{instanceId}/sla_config（SetServiceSLAConfig，manager.go:559），body={scope, slaConfig:[{userTaskId, slaId}]}。**不是** service_instance.edit——edit body 不接受 slaRuleId 字段，实测传了也被静默忽略（code:0 但不落库）。源码：service_catalog/route.go 注册 PUT.../sla_config；validator api_validator.go:948 ValidateSetServiceSLAConfig。"
+      slaRuleId_field_dead: "service_instance.get 返回的 slaRuleId 字段实测【恒为 null】（CMDB 透传字段，未被 sla_config 端点填充）——查服务绑了哪个 SLA 用 get_sla_config 端点，别看 slaRuleId。"
+      inst_single_sla: "scope=inst（工单级）只允许绑 1 个 SLA（manager.go:560『服务模式下,只允许绑定一个sla协议』）；scope=step（任务节点级）可按 userTaskId 绑多个。解绑传 slaConfig:[]。e2e 实测 2026-08-12。"
     side_effects:
       - op: service_instance.create
         rule: "POST /v1/service_instance。必填 name/category/associatedProcess。catalogId 指定目录位置；owner 指定负责人。instanceId CMDB 生成返回。"
+      - op: service_instance.set_sla_config
+        rule: "PUT /v1/service_instance/{instanceId}/sla_config 绑/解 SLA。body={scope(inst|step), slaConfig:[{userTaskId, slaId}]}。inst 只许 1 条；空数组=解绑。⚠️这是绑 SLA 的正确端点（非 edit，见 api_behavior.bind_sla_via_subpath）。底层 manager.go:567 写 CMDB 的 slaConfig + ITSC_SLA_RULE 两个字段。"
       - op: service_instance.delete
         rule: "有工单在流转时拒绝（『服务尚有工单正在流转中,不允许删除』）——须先删完该服务所有工单。内置服务（builtIn=true）不可删。源码 service_catalog_service.go:1450-1460 CheckServiceRemovable。"
 
@@ -901,10 +908,11 @@ objects:
       ownerName:         { type: string, desc: "负责人名" }
       serviceInstanceId: { type: string, ref: itsm_service_instance, desc: "关联服务实例 id" }
       basicInfo:         { type: object, required: true, desc: "协议基本信息对象（name/status/type/owner*/service*/memo）" }
-      slaConfig:         { type: array, items: object, required: true, desc: "配置数组，每条 {bindID, bindName, levelConfig:[{levelName, agreementType, workingCalendarId, duration, criticalRate}]}" }
+      slaConfig:         { type: array, items: object, required: true, desc: "配置数组，每条 {bindID, bindName, levelConfig:[{levelName, agreementType, workingCalendarId, duration, criticalRate}], notifyPolicy:[{notifyType(warning|timeout), notifyPolicyId(→notify_policy), interval, count}]}。⚠️notifyPolicy 内嵌在 slaConfig[]（SLA 详情 get 可见），建 SLA 时可直接配预警/超时通知，无需额外建 trigger——e2e 实测 2026-08-12。" }
     relations:
       - { to: sys_setting_work_calendar, type: association, cardinality: "N:N", via: "slaConfig[].levelConfig[].workingCalendarId", desc: "SLA 级别配置引用工作日历（24hex，跨 system：sys_setting 微服务）" }
-      - { to: itsm_service_instance, type: association, cardinality: "N:1", via: serviceInstanceId, desc: "SLA 绑定到服务实例" }
+      - { to: itsm_service_instance, type: association, cardinality: "1:N", via: "service_config.slaConfig[].slaId", desc: "SLA 被服务实例引用（一条 SLA 可绑多个服务）。⚠️实际绑定关系存于 service_instance 的 sla_config 子端点（见 itsm_service_instance.api_behavior.bind_sla_via_subpath），非 basicInfo.serviceInstanceId 字段——后者 list 视图展平用，详情 get 时为空" }
+      - { to: itsm_notify_policy, type: association, cardinality: "N:N", via: "slaConfig[].notifyPolicy[].notifyPolicyId", desc: "SLA 内嵌通知策略引用（warning/timeout 各一）" }
     api_behavior:
       list_is_post_search: "⚠️list 是 POST /sla/rule/_search（非 GET list，GET 返 404）；分页+过滤参数都在 body。返回 data.list[] 含 basicInfo 展开字段 + slaConfig[]。"
       cross_system_dependency: "workingCalendarId 引用 work_calendar——⚠️work_calendar 在独立微服务 sys_setting:8271（见 sys_setting_work_calendar 对象 + easyops-sys-setting system），非 8134。建 SLA 前通常先在 sys-setting 建工作日历拿 24hex id。"
