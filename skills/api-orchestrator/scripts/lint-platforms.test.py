@@ -96,6 +96,74 @@ def main():
                 if kw not in out:
                     fails.append(f"[bad] 期望输出含「{kw}」\n{out}")
 
+        # ============ 规则①②：禁 ~/.api-cli 字面串 + env 段值禁非空 URL/IP ============
+        s1 = os.path.join(base, "test-stale-path")
+        write(os.path.join(s1, "README.md"), "# x\n")
+        write(os.path.join(s1, "systems.yaml"), """
+            deployment: test-stale-path
+            systems:
+              sys:
+                description: ok
+                spec: sys.yaml
+                auth: easyops-cookie     # 原 ~/.api-cli/auth.d/ 位置（应禁字面串）
+        """)
+        write(os.path.join(s1, "sys.yaml"), """
+            spec: api-cli/v1
+            service: { name: sys, default_endpoint: be, endpoints: { be: { base_url: http://x, auth: none } } }
+            resources:
+              widget:
+                description: w
+                operations:
+                  read: { method: GET, path: "/{id}" }
+        """)
+        write(os.path.join(s1, "objects.yaml"), """
+            objects:
+              widget:
+                api: widget
+                source: sys.yaml:1
+                fields:
+                  id: { type: string }
+        """)
+        rc, out = run(base, "test-stale-path")
+        if rc == 0:
+            fails.append(f"[stale-path] 期望 exit 1（含 ~/.api-cli 字面串），实际 {rc}\n{out}")
+        elif "~/.api-cli" not in out:
+            fails.append(f"[stale-path] 期望输出含「~/.api-cli」ERR\n{out}")
+
+        s2 = os.path.join(base, "test-env-value")
+        write(os.path.join(s2, "README.md"), "# x\n")
+        write(os.path.join(s2, "systems.yaml"), """
+            deployment: test-env-value
+            systems:
+              sys:
+                description: ok
+                spec: sys.yaml
+                env:
+                  EASYOPS_X_BACKEND_URL: "http://172.30.0.232:8079"   # 非空 URL（应禁）
+        """)
+        write(os.path.join(s2, "sys.yaml"), """
+            spec: api-cli/v1
+            service: { name: sys, default_endpoint: be, endpoints: { be: { base_url: http://x, auth: none } } }
+            resources:
+              widget:
+                description: w
+                operations:
+                  read: { method: GET, path: "/{id}" }
+        """)
+        write(os.path.join(s2, "objects.yaml"), """
+            objects:
+              widget:
+                api: widget
+                source: sys.yaml:1
+                fields:
+                  id: { type: string }
+        """)
+        rc, out = run(base, "test-env-value")
+        if rc == 0:
+            fails.append(f"[env-value] 期望 exit 1（env 段含非空 URL），实际 {rc}\n{out}")
+        elif "EASYOPS_X_BACKEND_URL" not in out:
+            fails.append(f"[env-value] 期望输出含「EASYOPS_X_BACKEND_URL」ERR\n{out}")
+
         # ============ resolve_base 解析链 case（env 变量 / 部署根派生）============
         import importlib.util
         spec = importlib.util.spec_from_file_location("lint_mod", LINT)
