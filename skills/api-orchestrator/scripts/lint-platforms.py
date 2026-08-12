@@ -213,6 +213,39 @@ def main():
                 warn(f"README 引用 {m} 但文件不存在（若引用外部/其他 deployment 可忽略）")
         ok("README .yaml 引用闭合校验完成")
 
+    # ---- 8. 规则①：platforms 数据禁 ~/.api-cli/ 字面串（干净切换，防回潮）----
+    import re as _re
+    _STALE = "~/.api-cli/"
+    for root, dirs, files in os.walk(base):
+        # 跳过 __pycache__
+        dirs[:] = [d for d in dirs if d != "__pycache__"]
+        for fn in files:
+            if not (fn.endswith(".yaml") or fn.endswith(".yml") or fn.endswith(".md")):
+                continue
+            fp = os.path.join(root, fn)
+            try:
+                with open(fp, encoding="utf-8") as f:
+                    content = f.read()
+            except Exception:
+                continue
+            if _STALE in content:
+                rel = os.path.relpath(fp, base)
+                err(f"{rel}: 含「{_STALE}」字面串（已废弃旧位置）—— 改「原 home 目录位置已废弃」措辞，密钥/env 统一走部署根")
+
+    # ---- 9. 规则②：systems.yaml 的 env: 段值禁非空 URL/IP（防 LLM 复用默认值）----
+    _URL_OR_IP = _re.compile(r"(https?://|\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})")
+    if os.path.isfile(sys_path):
+        d2, e2 = load_yaml(sys_path)
+        if d2 and isinstance(d2.get("systems"), dict):
+            for sname, s in d2["systems"].items():
+                if not isinstance(s, dict):
+                    continue
+                env = s.get("env")
+                if isinstance(env, dict):
+                    for k, v in env.items():
+                        if isinstance(v, str) and v and _URL_OR_IP.search(v):
+                            err(f"systems.{sname}.env.{k}: 值「{v}」含 URL/IP（环境配置只在部署根 env.d，systems.yaml 只留变量契约 key）")
+
     # ---- 报告 ----
     print(f"lint platforms/{args.deployment}/")
     for m in oks:
