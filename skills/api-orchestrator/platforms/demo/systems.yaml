@@ -342,6 +342,8 @@ systems:
         sort:   "服务排序（serviceIdList+sortList）"
         export: "导出服务实例（instanceIds 逗号分隔，返回文件流）"
         import: "导入服务实例（multipart 上传到目录，onlyCheck 仅校验）"
+        get_sla_config: "查服务绑的 SLA 配置（scope+slaConfig[].slaId）。⚠️别看 service_instance.get 的 slaRuleId（恒 null）"
+        set_sla_config: "⚠️绑/解 SLA 到服务的正确端点（非 edit）。scope=inst 只许1个；空数组=解绑"
       ticket:
         list:         "工单搜索（V4 POST 高级过滤；Q/status/creator/serviceId/ctime；token 翻页）"
         delete:       "删工单（仅作废的；instanceIds 分号）"

@@ -695,6 +695,60 @@ resources:
           type: object
           description: "multipart/form-data：file=服务文件；onlyCheck=仅校验"
 
+      get_sla_config:
+        description: 查服务的 SLA 绑定配置（scope + slaConfig[]）。返回 data={scope, slaConfig:[{userTaskId, slaId}]}。⚠️service_instance.get 返回的 slaRuleId 字段实测恒为 null（CMDB 透传字段未填）——查服务绑了哪个 SLA 规则，用本 verb 而非看 slaRuleId。
+        method: GET
+        path: /api/flowable_service/v1/service_instance/{instanceId}/sla_config
+        params:
+          instanceId: { in: path, type: string, required: true, description: "服务实例 id（13 hex）" }
+        response:
+          type: object
+          description: "{ code, data: { scope, slaConfig: [{ userTaskId, slaId }] } }"
+          properties:
+            code: { type: integer }
+            data:
+              type: object
+              properties:
+                scope:    { type: string, description: "绑定模式：inst(工单级)/step(任务节点级)" }
+                slaConfig:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      userTaskId: { type: string, description: "任务节点 id（scope=step 时填具体节点；scope=inst 留空）" }
+                      slaId:      { type: string, description: "绑定的 SLA 规则 id（13 hex，→sla.instanceId）" }
+
+      set_sla_config:
+        description: 绑定/解绑服务的 SLA 规则（⚠️这是绑 SLA 到服务的正确端点，非 service_instance.edit——edit 不接受 slaRuleId 字段，实测被静默忽略）。scope=inst 工单级只允许绑 1 个 SLA（后端 manager.go:559 校验）；scope=step 任务节点级可按 userTaskId 绑多个。解绑传 slaConfig:[]。e2e 实测（2026-08-12，3 服务绑 SLA 658d0b178d51e）。
+        method: PUT
+        path: /api/flowable_service/v1/service_instance/{instanceId}/sla_config
+        params:
+          instanceId: { in: path, type: string, required: true, description: "服务实例 id（13 hex）" }
+        body:
+          type: object
+          required: [scope, slaConfig]
+          description: "绑定 SLA 配置。scope+slaConfig 必填。scope=inst 时 slaConfig 只能 1 条（userTaskId 留空）；解绑传空数组。"
+          properties:
+            scope:
+              type: string
+              enum: [inst, step]
+              description: "inst=工单级（整单一个 SLA，只许 1 个）/ step=任务节点级（按 userTaskId 绑多个）"
+            slaConfig:
+              type: array
+              description: "SLA 绑定条目数组。inst 模式只能 1 条；空数组=解绑。"
+              items:
+                type: object
+                required: [slaId]
+                properties:
+                  userTaskId: { type: string, description: "任务节点 id（scope=step 必填；scope=inst 留空字符串）" }
+                  slaId:      { type: string, description: "SLA 规则 id（13 hex，sla.instanceId）" }
+        response:
+          type: object
+          description: "{ code:0, data: null }（成功返回 data 为 null）"
+          properties:
+            code: { type: integer }
+            data: { type: object, additional_properties: true, nullable: true }
+
   # ===========================================================================
   # ITSM 默认常用服务（common_service）—— ITSM 前端门户的"常用服务"快捷入口配置。
   # 路径 /api/flowable_service/v1/process_common/default_common_service。
