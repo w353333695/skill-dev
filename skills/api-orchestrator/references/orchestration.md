@@ -11,11 +11,11 @@ skill 的调度分三挡位，按需求的意图 + 复杂度选挡。
 platforms 根不是固定路径，每次编排先求值（部署根默认 `$PWD/.api-orchestrator`，随 cwd 走）：
 
 ```bash
-echo "PLATFORMS_ROOT=${API_CLI_PLATFORMS_DIR:-<未设，按链解析>} dep=${API_CLI_DEPLOYMENT:-demo}"
-# 解析规则（最高优先在前）：
+echo "PLATFORMS_ROOT=${API_CLI_PLATFORMS_DIR:-$PWD/.api-orchestrator/platforms} dep=${API_CLI_DEPLOYMENT:-demo}"
+# 解析规则（无 fallback，部署根缺失即停）：
 #   1. $API_CLI_PLATFORMS_DIR 显式设 → 直接用
-#   2. $PWD/.api-orchestrator/platforms/<dep>/ 存在 → 用项目级（随 cwd 走）
-#   3. fallback → skill 内置 platforms/<dep>/
+#   2. $PWD/.api-orchestrator/platforms/<dep>/ 不存在 → 停下，引导用户初始化部署根（见 SKILL.md 步0）
+#   ⚠️ 禁止读 skill 自带 platforms/demo 兜底。
 ```
 
 确认 PLATFORMS_ROOT 实际目录后，后续所有 grep/Read 全用 **`$PLATFORMS_ROOT/<dep>/...` 绝对路径**。
