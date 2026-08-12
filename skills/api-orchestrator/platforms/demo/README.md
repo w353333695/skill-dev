@@ -29,7 +29,7 @@
 ## 快速调用
 
 ```bash
-# 鉴权已统一：cookie@~/.api-cli/auth.d/（密钥）+ 非密 env@~/.api-cli/env.d/demo.env（run.sh 自动 source）
+# 鉴权已统一：cookie@部署根 auth.d/（密钥，API_CLI_AUTH_D 指向）+ 非密 env@部署根 env.d/demo.env（run.sh 自动 source）。部署根默认 $PWD/.api-orchestrator；原 home 目录位置已废弃。
 # 调用方零传输——无需手 export EASYOPS_*。
 scripts/run.sh --spec platforms/demo/easyops-cmdb.yaml <resource> <verb> [args] --insecure   # 统一入口（自动检测环境）
 ```
