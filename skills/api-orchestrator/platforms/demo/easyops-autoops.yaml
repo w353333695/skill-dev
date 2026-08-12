@@ -23,11 +23,11 @@
 # 接入面：
 #   • backend —— 直连 tool_service :8181（HTTP，无 path 前缀）。rewrite 中间件两边都挂，
 #     故对外用复数 /tools/:toolId 直连也能命中（原始注册是单数 /tool/:toolId）。**默认走 backend**。
-#   • frontend —— 走前端网关 https://172.30.0.232 + Host 头。网关按 *每个 API* 路由
+#   • frontend —— 走前端网关（${EASYOPS_AUTOOPS_FRONTEND_URL}，值在部署根 env.d）+ Host 头。网关按 *每个 API* 路由
 #     （per-API path_prefix），一个 endpoint 只能持一个前缀，对 tool 域多 verb 不通用。
 #     仅作备选，默认不用。
 #
-# 鉴权：auth: easyops-cookie（~/.api-cli/auth.d/easyops-cookie.yaml，provider=cookie，
+# 鉴权：auth: easyops-cookie（部署根 auth.d/easyops-cookie.yaml，API_CLI_AUTH_D 指向；原 home 目录位置已废弃；provider=cookie，
 #   持 PHPSESSID）。与 cmdb 完全一致——backend/frontend 均用同一 cookie。
 #   ⚠️ cookie 不够！直连后端还要 org+user 两个 header（orguser 中间件，
 #      cmd/tool_service/main.go:624；缺一报 empty org/user）。见 endpoint.headers。
@@ -52,15 +52,15 @@ service:
   default_endpoint: backend
   endpoints:
     backend:
-      base_url: ${EASYOPS_AUTOOPS_BACKEND_URL}        # http://172.30.0.232:8181
+      base_url: ${EASYOPS_AUTOOPS_BACKEND_URL}        # 值在部署根 env.d/demo.env（含 IP+端口）；端口事实见 systems.yaml runtime.ports.autoops_backend
       host: admin.easyops.local                        # IP 直连，Host 由 endpoint.Host 注入
       path_prefix: ""                                  # 路由挂在 gin root（无前缀）
       auth: none                                       # 直连后端：auth=none 跳过 cookie 加载（engine/execute.go:135）。org/user 由 endpoint.headers 注入，独立于 auth（engine/request.go:40-43）。实测 autoops:8181 无 cookie 直 200（见 systems.yaml cookie_optional_direct）。
       headers:                                         # endpoint 级固定 header（每请求自动注入）
-        org: ${EASYOPS_ORG}                            # EasyOps 租户 org。系统自带 0/1/2 禁动；测试用 18832008。export EASYOPS_ORG=<值>
-        user: ${EASYOPS_USER}                          # EasyOps 用户标识。模型系统管理员=easyops（写权限）。export EASYOPS_USER=easyops
+        org: ${EASYOPS_ORG}                            # EasyOps 租户 org（系统自带 0/1/2 禁动）；值在部署根 env.d/demo.env
+        user: ${EASYOPS_USER}                          # EasyOps 用户标识（模型系统管理员=easyops 写权限）；值在部署根 env.d/demo.env
     frontend:
-      base_url: ${EASYOPS_AUTOOPS_FRONTEND_URL}        # https://172.30.0.232（前端网关）
+      base_url: ${EASYOPS_AUTOOPS_FRONTEND_URL}        # 值在部署根 env.d/demo.env（前端网关完整 URL）
       host: admin.easyops.local
       auth: easyops-cookie
       # path_prefix 网关 per-API 路由（形如 /next/api/gateway/logic.tool_service.<Verb>），
