@@ -48,6 +48,7 @@ def main():
             objects:
               widget:
                 api: widget
+                source: sys.yaml:1
                 fields:
                   id: { type: string }
         """)
@@ -126,10 +127,6 @@ def main():
         if got != expected:
             fails.append(f"[resolve C] fallback: got {got}, expected {expected}")
 
-        # 清理环境变量，避免污染后续
-        os.environ.pop("API_CLI_PLATFORMS_DIR", None)
-        os.environ.pop("API_CLI_DEPLOYMENT_ROOT", None)
-
         # ============ 报告 ============
         if fails:
             print("❌ lint 自测失败:")
@@ -138,6 +135,9 @@ def main():
             sys.exit(1)
         print("✓ lint 自测通过：good 放行（exit 0 无 ERR）/ bad 抓错（exit 1，含 README缺失 + ref未闭合 + flow op未注册）")
     finally:
+        # 清理环境变量（异常安全——resolve_base 用例设过则必清，避免污染父进程）
+        os.environ.pop("API_CLI_PLATFORMS_DIR", None)
+        os.environ.pop("API_CLI_DEPLOYMENT_ROOT", None)
         shutil.rmtree(tmp, ignore_errors=True)
 
 if __name__ == "__main__":
