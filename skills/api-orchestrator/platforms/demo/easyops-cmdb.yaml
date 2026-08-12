@@ -39,7 +39,7 @@ service:
       base_url: ${EASYOPS_CMDB_BACKEND_URL}        # http://172.30.0.232:8079
       host: admin.easyops.local                     # IP 直连，Host 由 endpoint.Host 注入
       path_prefix: ""                               # 后端路由挂在 gin root（无前缀）
-      auth: easyops-cookie
+      auth: none                                    # 直连后端：auth=none 跳过 cookie 加载（engine/execute.go:135）。org/user 由 endpoint.headers 注入，独立于 auth（engine/request.go:40-43）。实测 cmdb:8079 无 cookie 直 200。cookie 仅 frontend/openapi 网关面需要。
       headers:                                      # endpoint 级固定 header（每个请求都带，api-cli 自动注入）
         org: ${EASYOPS_ORG}                         # EasyOps 租户 org。系统自带 0/1/2 禁动（业务库）；测试用 18832008。export EASYOPS_ORG=<值>
         user: ${EASYOPS_USER}                       # EasyOps 用户标识。模型系统管理员=easyops（有 ObjectImport 权限）。export EASYOPS_USER=easyops

@@ -49,7 +49,7 @@ service:
       base_url: ${EASYOPS_ITSM_BACKEND_URL}          # http://172.30.0.232:8134
       host: admin.easyops.local                       # IP 直连，Host 由 endpoint.Host 注入
       path_prefix: ""                                 # 路由挂在 /api/flowable_service/...（每 op 持完整路径）
-      auth: easyops-cookie
+      auth: none                                      # 直连后端：auth=none 跳过 cookie 加载（engine/execute.go:135）。org/user 由 endpoint.headers 注入，独立于 auth（engine/request.go:40-43）。实测 itsm:8134 无 cookie form list 直 200。
       headers:                                        # endpoint 级固定 header（每个请求都带）
         org: ${EASYOPS_ORG}                           # EasyOps 租户 org（测试 18832008；0/1/2 禁动）。export EASYOPS_ORG=<值>
         user: ${EASYOPS_USER}                         # EasyOps 用户（easyops 具备 itsc:form_management_* 4 权限）。export EASYOPS_USER=easyops

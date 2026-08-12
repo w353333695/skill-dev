@@ -28,6 +28,19 @@ platform_conventions:
       - domain: "编排侧 api-cli 缺口补丁（sdk/easyops_client.py）"
         why: "api-cli 不支持 multipart/binary（tool_package 导入导出真调）与 openapi AK/SK 签名编排侧调用；该 SDK 仅在编排侧/开发机运行，【不进 agent、不作为工具脚本依赖】。"
         scope: "编排挡做 tool_package export/import、openapi 模式调用时用；产出的 agent 工具脚本仍须自包含，不得 import 它。"
+  auth: |
+    平台级鉴权公约（跨 cmdb/autoops/itsm/sys-setting 四系统，2026-08-12 实测归纳）：
+    直连后端（backend endpoint）【免 cookie】——org + user + Host 三件 header 即够，全部 backend
+    spec 的 endpoint.auth 已设 none（api-cli 不会再因找不到 cookie 配置而 auth_load 退出）。
+    机制锚点：engine/execute.go:135（auth=none 跳过 auth.Apply）+ engine/request.go:40-43
+    （endpoint.headers 的 org/user 在 resolve 阶段独立注入，不依赖 auth provider）。
+    各系统的实测佐证见各自 runtime.cookie_optional_direct。
+    ── 关于「登录换 cookie」（重要反向结论，勿重复踩）──
+    不要为直连去探测/记录登录 API 端点：本部署前端是 SPA（/next/auth/login），登录 API 经
+    nginx 网关按方法放行（实测 /next/auth/api/login POST 直接 405，且 bundle 里 /auth/login 是
+    前端路由非 API 端点）。账密换 PHPSESSID 在网关面是死路；而直连面根本不需要 cookie。
+    故：① 直连编排 → 不碰 cookie，三件 header 即可；② 网关面（frontend/openapi endpoint）
+    真要 cookie 时，从已登录浏览器复制 PHPSESSID，不要试图程序化登录。
 
 systems:
   easyops-cmdb:
@@ -138,7 +151,8 @@ systems:
         - "EASYOPS_USER=easyops"
       ports: { cmdb_backend: 8079, user_service: 8111, frontend: 232 }
       host_header: admin.easyops.local # IP 直连须带 Host 头
-      auth: "三件套：cookie(PHPSESSID @ ~/.api-cli/auth.d/easyops-cookie.yaml) + org header + user header；缺任一报 empty org/user (100003)。源码 cmdb_service/main.go:549,691"
+      auth: "直连 backend（endpoint.auth=none）只需 org+user header——缺任一报 empty org/user (100003)。源码 cmdb_service/main.go:549,691（orguser 中间件读 header）。cookie 仅 frontend/openapi 网关面需要，见 cookie_optional_direct"
+      cookie_optional_direct: "实测（2026-08-12，api-cli auth=none 经 run.sh 验证）：直连 cmdb:8079 时 cookie 非必需——org+user+Host 三件 header 直接 200（USER search total=2）。与 autoops:8181 历史实测一致。机制：engine/execute.go:135 auth=none 跳过 auth.Apply；org/user 由 endpoint.headers 在 resolve 阶段独立注入（engine/request.go:40-43），不依赖 auth provider。故 backend spec auth 已改 none——cookie 配置缺失不再阻断直连调用。网关面（frontend endpoint，auth=easyops-cookie）仍需 cookie"
       org_query: "user_service GET ${EASYOPS_USER_SERVICE_URL}/api/v1/org/list（Cookie + Host）"
       default_org_chain: "user_service: agollo common.org > $COMMON_ORG > yaml default_org；validator gte:1（org=0 报 Can not find 0 database）"
       protected_orgs: [0, 1, 2]        # 系统自带禁动（0 无库、1 主业务 22 模型、2 名字服务 9 模型）
@@ -242,7 +256,7 @@ systems:
         - "EASYOPS_USER=easyops"
       ports: { autoops_backend: 8181, frontend: 232 }
       host_header: admin.easyops.local
-      auth: "三件套（与 cmdb 一致）：cookie(PHPSESSID @ ~/.api-cli/auth.d/easyops-cookie.yaml) + org header + user header；缺任一报 empty org/user。orguser 中间件 cmd/tool_service/main.go:624"
+      auth: "直连 backend（endpoint.auth=none）只需 org+user header——缺任一报 empty org/user。orguser 中间件 cmd/tool_service/main.go:624"
       rewrite_paths: "后端原始注册单数 /tool/:toolId，rewrite 中间件改写复数 /tools/:toolId——直连后端用复数即可命中（两边都挂 rewrite）。list/execution/lib 等本就是复数"
       create_version: "新建版本无独立端点：PUT /tools/:toolId 改 version 字段即派生新版本。⚠️(1) body **flat**（不要套 {tool:{}}）；(2) 派生版 envType=development、vName 默认=vId；(3) 响应只返 {toolId}（无新 vId）——须 tool_version.list 复查。场景3：get 当前 → flat body 改 inputs/content → update → version.list 复查"
       delete_semantics: "删除软删（置 delete_me=true，非物理删）。force=true（query 字符串 \"true\"）仅绕 ReadOnly。versionId 不填=删整个工具，填=只删该版本。'有实例不删模型'那层在被清理的 CMDB 侧，不在 tool_service"
@@ -253,7 +267,7 @@ systems:
       python_runtime: "agent 默认 /usr/local/easyops/python/bin/python（py2）。工具脚本须【自包含】调 cmdb/easyops（py2 stdlib urllib2 + EASYOPS_* 环境变量），不得 import 外部 .py——见顶层 platform_conventions.code"
       openapi_requirement: "⚠️ openapi 模式调用 tool_service 需后端 api_gateway/conf/openapi.yaml 配 app_route 放行（app_name/service_name 对应 tool_service，uri 列 tool 域端点如 /tools、/tools/{toolId} 等），否则 nginx 405。配置机制 + 示例见 easyops-cmdb.runtime.openapi_gateway_config（cmdb 段）"
       wrapper: "标准响应 {code, codeExplain, error, data}；code=0 成功（与 cmdb 的 {code,message,error,data} 略不同——autoops 多 codeExplain）。tool.list 后端响应 {code,data:{list,total}} wrapper（取 data.list；api-cli 流式输出 NDJSON 每行一个 Tool，是 api-cli 分页输出特性非后端格式）；tool_version.list 同 wrapper"
-      cookie_optional_direct: "实测：直连后端 8181 时 cookie 非必需——org+user header 够（SDK 无 cookie 导出仍 200 成功）。cookie 主要在网关层校验；建议仍带（~/.api-cli/auth.d/easyops-cookie.yaml）以兼容网关面"
+      cookie_optional_direct: "实测（含 2026-08-12 复核 + api-cli auth=none 经 run.sh 验证）：直连 autoops:8181 时 cookie 非必需——org+user+Host 三件 header 直接 200（历史 SDK 无 cookie 导出仍成功 + 本轮 api-cli auth=none 复现）。机制：engine/execute.go:135 auth=none 跳过 auth.Apply；org/user 由 endpoint.headers 独立注入（engine/request.go:40-43）。故 backend spec auth 已改 none——cookie 配置缺失不再阻断直连调用。cookie 主要在网关层校验；网关面（frontend endpoint）仍需 cookie"
       e2e_findings: "e2e 实测坑汇总（2026-08-10，org 18832008，6 场景全通）：① tool.list 后端响应是 {data:{list}} wrapper（api-cli 流式 NDJSON 是其分页输出特性非后端格式；SDK 取 data.list）；② tool.update body flat（非 {tool:{}}，否则 updateFields=[tool] 假成功）；③ tool_execution.run inputs 是 map（非 [{name,value}] 数组）；④ run vId 默认 $latest_production 对 development 工具报 100005（用具体 vId 或 $latest_development）；⑤ update 响应只返 {toolId}（派生须 tool_version.list 复查）；⑥ 直连后端 cookie 非必需（org+user 够）。各坑详见 objects.yaml api_behavior + 对应 flow 的 key_rule"
 
     # e2e 验收 URL（前端）—— 工具类操作后在此可视化校验
@@ -381,8 +395,9 @@ systems:
         - "EASYOPS_USER=easyops"
       ports: { itsm_backend: 8134, frontend: 232 }
       host_header: admin.easyops.local # IP 直连须带 Host 头
-      auth: "三件套（与 cmdb/autoops 一致）：cookie(PHPSESSID) + org header + user header（orguser 中间件 cmd/flowable_service/.../main_start.go:336-344；缺一报『org、user获取失败』）+ 额外 itsc:form_management_{access,create,update,delete} 4 权限（service.go:31-34，缺报 403）"
+      auth: "直连 backend（endpoint.auth=none）只需 org+user header（orguser 中间件 cmd/flowable_service/.../main_start.go:336-344；缺一报『org、user获取失败』）+ 额外 itsc:form_management_{access,create,update,delete} 4 权限（service.go:31-34，缺报 403）。cookie 仅网关面需要，见 cookie_optional_direct"
       save_not_upsert: "POST /v2/form 永远新建 form + 首个 isMain=true 版本；formId/versionId 不可指定（CMDB 生成返回）。要『改』走 form_version.update。无单 form 详情端点（GET /form/:formId 不存在）"
+      cookie_optional_direct: "实测（2026-08-12，api-cli auth=none 经 run.sh 验证）：直连 itsm:8134 时 cookie 非必需——org+user+Host 三件直接 200（form list total=2）。机制同 cmdb：execute.go:135 auth=none 跳过 auth.Apply；headers 独立注入（request.go:40-43）。backend spec auth 已改 none。网关面仍需 cookie"
       update_asymmetric: "PUT /v2/.../version/:versionId 是 upsert 但非对称：当前版 state==done → 新建 isMain=false 草稿（场景④加版本）；unfinished → 就地改。同时改 form.name/category/memo。versionName 唯一（重复报『重复的表单版本号』）"
       delete_constraints: "删 form 须先清所有版本（有版本报『表单存在版本,无法删除』）。删版本路径参数是 versionIds（复数分号，契约误写单数 versionId）；代码只用第一个（批量是壳）。删版本被流程引用拒绝『表单已绑定节点』。⚠️删最后一个版本隐式级联删 form"
       set_main: "POST .../version/:versionId 设主版本=发布；目标须 state==done（unfinished 报错）；旧主自动降级；旧主被流程绑定时触发 ITSC_PROCESS_FORM_RELATION 换绑（业务连续）；已主版本幂等"
@@ -466,7 +481,8 @@ systems:
         - "EASYOPS_USER=easyops"
       ports: { sys_setting_backend: 8271, frontend: 232 }
       host_header: admin.easyops.local      # IP 直连须带 Host 头
-      auth: "三件套（与 itsm 一致）：cookie(PHPSESSID) + org header + user header（orguser 中间件）"
+      auth: "直连 backend（endpoint.auth=none）只需 org+user header（orguser 中间件）。cookie 仅网关面需要，见 cookie_optional_direct"
+      cookie_optional_direct: "实测（2026-08-12，api-cli auth=none 经 run.sh 验证）：直连 sys-setting:8271 时 cookie 非必需——org+user+Host 三件直接 200（work_calendar list total=1）。机制同 cmdb：execute.go:135 auth=none 跳过 auth.Apply；headers 独立注入（request.go:40-43）。backend spec auth 已改 none。网关面仍需 cookie"
       id_format: "⚠️work_calendar id 是 24hex MongoDB ObjectId（≠ flowable_service 的 13hex 微秒时间戳）——印证它属不同存储/微服务"
       cross_system_ref: "work_calendar 被 ITSM 的 sla.slaConfig[].levelConfig[].workingCalendarId 引用——建 SLA 规则前通常先在【本 system】建工作日历拿 24hex id，再填入 sla body（跨 system 接力，见 entities.yaml）"
       why_separate_system: "sys_setting:8271 与 flowable_service:8134 不同端口；api-cli 不支持 per-resource endpoint 覆盖（schema.go 无 Endpoint 字段），故 work_calendar 必须独立 spec+system，CLI --spec 切换"
