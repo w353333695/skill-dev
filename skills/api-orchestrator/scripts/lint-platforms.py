@@ -35,18 +35,35 @@ def load_yaml(path):
     except Exception as e:
         return None, f"YAML 解析失败: {e}"
 
+def resolve_base(deployment, override=None):
+    """解析 platforms base 目录（与 run.sh 部署根解析同语义）。
+
+    优先级（高→低）：
+      1. override（--base 显式，自测用）
+      2. $API_CLI_PLATFORMS_DIR/<deployment>
+      3. $API_CLI_DEPLOYMENT_ROOT/platforms/<deployment>（目录存在才用）
+      4. fallback <skill>/platforms/<deployment>
+    """
+    if override:
+        return os.path.join(override, deployment)
+    env_platforms = os.getenv("API_CLI_PLATFORMS_DIR")
+    if env_platforms:
+        return os.path.join(env_platforms, deployment)
+    root = os.getenv("API_CLI_DEPLOYMENT_ROOT", os.path.join(os.getcwd(), ".api-orchestrator"))
+    candidate = os.path.join(root, "platforms", deployment)
+    if os.path.isdir(candidate):
+        return candidate
+    skill_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))  # skills/api-orchestrator/
+    return os.path.join(skill_dir, "platforms", deployment)
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("deployment", nargs="?", default="demo")
     ap.add_argument("--api-cli", help="api-cli 二进制路径，提供则额外校验 spec 可被 api-cli 解析")
-    ap.add_argument("--base", help="platforms 根目录覆盖（自测用；默认 <skill>/platforms）")
+    ap.add_argument("--base", help="platforms 根目录覆盖（自测用；默认按解析链：API_CLI_PLATFORMS_DIR → 部署根 → skill 内置）")
     args = ap.parse_args()
 
-    if args.base:
-        base = os.path.join(args.base, args.deployment)
-    else:
-        skill_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))  # skills/api-orchestrator/
-        base = os.path.join(skill_dir, "platforms", args.deployment)
+    base = resolve_base(args.deployment, override=args.base)
     errs, warns, oks = [], [], []
     def ok(msg): oks.append(msg)
     def warn(msg): warns.append(msg)

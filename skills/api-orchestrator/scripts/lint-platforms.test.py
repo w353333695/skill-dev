@@ -95,6 +95,41 @@ def main():
                 if kw not in out:
                     fails.append(f"[bad] 期望输出含「{kw}」\n{out}")
 
+        # ============ resolve_base 解析链 case（env 变量 / 部署根派生）============
+        import importlib.util
+        spec = importlib.util.spec_from_file_location("lint_mod", LINT)
+        lint_mod = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(lint_mod)
+
+        # Case A: API_CLI_PLATFORMS_DIR 设了 → base = <dir>/<dep>
+        os.environ["API_CLI_PLATFORMS_DIR"] = os.path.join(tmp, "ext-platforms")
+        os.environ.pop("API_CLI_DEPLOYMENT_ROOT", None)
+        write(os.path.join(tmp, "ext-platforms", "envdep", "systems.yaml"), "deployment: envdep\n")
+        write(os.path.join(tmp, "ext-platforms", "envdep", "README.md"), "# x\n")
+        got = lint_mod.resolve_base("envdep")
+        if got != os.path.join(tmp, "ext-platforms", "envdep"):
+            fails.append(f"[resolve A] PLATFORMS_DIR: got {got}")
+
+        # Case B: 无 PLATFORMS_DIR，有 DEPLOYMENT_ROOT 且目录存在 → 派生
+        del os.environ["API_CLI_PLATFORMS_DIR"]
+        os.environ["API_CLI_DEPLOYMENT_ROOT"] = os.path.join(tmp, "myroot")
+        write(os.path.join(tmp, "myroot", "platforms", "rdep", "systems.yaml"), "deployment: rdep\n")
+        got = lint_mod.resolve_base("rdep")
+        if got != os.path.join(tmp, "myroot", "platforms", "rdep"):
+            fails.append(f"[resolve B] ROOT派生: got {got}")
+
+        # Case C: 都没设，目录不存在 → fallback skill 内置（含 <skill>/platforms/<dep>）
+        del os.environ["API_CLI_DEPLOYMENT_ROOT"]
+        got = lint_mod.resolve_base("nonexist_dep_xyz")
+        skill_dir = os.path.dirname(os.path.dirname(os.path.abspath(LINT)))
+        expected = os.path.join(skill_dir, "platforms", "nonexist_dep_xyz")
+        if got != expected:
+            fails.append(f"[resolve C] fallback: got {got}, expected {expected}")
+
+        # 清理环境变量，避免污染后续
+        os.environ.pop("API_CLI_PLATFORMS_DIR", None)
+        os.environ.pop("API_CLI_DEPLOYMENT_ROOT", None)
+
         # ============ 报告 ============
         if fails:
             print("❌ lint 自测失败:")
