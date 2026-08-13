@@ -1,0 +1,265 @@
+# =============================================================================
+# formats/inspection-kit/suite-package.yaml
+# 巡检套件（v1 体系，INSPECTION_INFO）包格式与四对象组装。
+#
+# ⚠️真调实测定调（2026-08-13，.90/org8888）：平台当前用【v1 旧体系】——
+#   INSPECTION_INFO 20 套件/INSPECTION_COLLECTOR 19 脚本/INSPECTION_REPORT_TEMPLATE 19 模板。
+#   v2 新体系（INSP_SUITE）0 套件，仅录兼容索引（见末尾）。
+#
+# 巡检套件 ≠ 采集套件（collector-kit）！本格式包是【巡检】套件，区别：
+#   - 存储：采集套件 1 个 CMDB 模型；巡检套件 4 个 CMDB 模型组装
+#   - 包格式：采集 zip(plugin.yaml)；巡检 tar.gz(5 个 yaml/json)
+#   - 脚本协议：采集 [{dims,vals}]；巡检 start/end 标记包裹（见 script-protocol.yaml）
+#
+# 权威源：
+#   A. inspection 源码 import_export/import_export_service.go（v1 包结构常量+导入流程）
+#   B. inspection 源码 internal/database/cmdb/{info,metrics,collector,report_template}/message.go（模型）
+#   C. 真调实测（2026-08-13）：weblogic/mssql/oracle/redis 等真实套件字段
+#
+# 相关文件（本格式包内）：
+#   script-protocol.yaml — py2 脚本协议（参数注入头/start-end标记/阈值平台判）
+#   args-design.yaml     — args 参数设计（password类型/source规则）
+#   metric-threshold.yaml — 指标阈值规则（comparator/level/评分）
+# =============================================================================
+
+# -----------------------------------------------------------------------------
+# 一、巡检套件 = 四对象组装（核心范式）
+# 一个巡检套件由 4 个 CMDB 模型的实例组装而成，共享 pluginId（=info.id）：
+# -----------------------------------------------------------------------------
+suite_composition:
+  description: |
+    巡检套件不是一个单一对象，而是 4 个 CMDB 模型实例的组装体，用 pluginId 串联：
+      INSPECTION_INFO       — 套件元信息（pluginId = info.id，主键）
+      INSPECTION_COLLECTOR  — 采集脚本（pluginId 关联，1 套件通常 1 脚本）
+      INSPECTION_METRIC_GROUP — 指标组（含子指标 vals + 阈值 conditions，1 套件多组）
+      INSPECTION_REPORT_TEMPLATE — 报告模板（详情+总览展示模板，1 套件多模板，可选）
+    导入套件包时，平台按顺序建这 4 类对象；查询单个套件时跨这 4 个模型聚合。
+  object_ids:
+    info: "INSPECTION_INFO@EASYOPS"
+    collector: "INSPECTION_COLLECTOR@EASYOPS"
+    metric_group: "INSPECTION_METRIC_GROUP@EASYOPS"
+    report_template: "INSPECTION_REPORT_TEMPLATE@EASYOPS"
+    source: "inspection/internal/utils/constants.go:3-18"
+  plugin_id_linkage: "所有对象的 pluginId 必须相同（导入校验，不一致报『套件信息中,pluginId存在不同值』，import_export_service.go:282-297）"
+
+# -----------------------------------------------------------------------------
+# 二、套件包格式（v1，tar.gz 5 文件）
+# 压缩：tar.gz（gzip over tar）
+# source: import_export_service.go:577（gzip）、:84-100（文件名常量）、:539-589（CreateTar）
+# -----------------------------------------------------------------------------
+package_format:
+  compression: "tar.gz"
+  top_level_dir: "根目录名 = info.id（pluginId），如 weblogic/mysql"
+  structure: |
+    <pluginId>/
+    ├── info.yaml              # 套件元信息（必需，无此文件报『导入的文件数据格式有误』）
+    ├── metrics.yaml           # 指标组列表（数组，每个含 vals+conditions）
+    ├── collectors/
+    │   ├── __init__.py        # 空文件（Python 包标记占位）
+    │   └── script.py          # ⚠️脚本元数据（YAML 格式！文件名叫 script.py 但内容是 YAML，见下）
+    ├── reports_temp/
+    │   └── detail.yaml        # 报告模板列表（可选，导入失败不回退可页面新建）
+    └── models.json            # 关联 CMDB 模型定义（可选，JSON，仅导出第一个模型）
+  source: "import_export_service.go:84-100（常量）; :539-589（CreateTar）; :680-790（Create各文件）"
+
+  filename_constants:
+    infoYaml: "info.yaml"
+    metricsYaml: "metrics.yaml"
+    collectorScript: "script.py"   # ⚠️文件名误导：内容是 YAML 非 Python 源码
+    reportsTempDetail: "detail.yaml"
+    modelsJson: "models.json"
+    source: "import_export_service.go:94-100"
+
+  required_vs_optional:
+    required: [info.yaml]   # 必需，无则报错
+    optional: [metrics.yaml, collectors/script.py, reports_temp/detail.yaml, models.json]
+    note: "除 info.yaml 外其他文件缺失不报错（switch 默认忽略），import_export_service.go:185-187,299-331"
+
+# -----------------------------------------------------------------------------
+# 三、info.yaml —— 套件元数据（YAML，对应 Info struct）
+# source: internal/database/cmdb/info/message.go:10-54
+# 真调实测：weblogic 套件（instanceId=6350f72ef0491）
+# -----------------------------------------------------------------------------
+info_yaml_schema:
+  real_example: |
+    # 实测 weblogic 套件（.90 环境）
+    instanceid: ""                                    # 新建留空，平台生成
+    internalid: ""
+    id: weblogic                                      # pluginId，套件唯一标识（英文，如 mysql/redis）
+    name: Weblogic巡检                                # 套件显示名（中文）
+    isapp: false                                      # 是否应用类
+    issystem: true                                    # ⚠️内置套件=true（自定义应为 false）
+    memo: default                                     # 备注
+    index: 0                                          # 排序
+    objectid: INSPEC_WEBLOGIC                         # ⚠️巡检目标 CMDB 模型 id（需先在 CMDB 建此模型）
+    objectname: Weblogic巡检                          # 目标对象名
+    method: agent                                     # 巡检方式（agent=远程主机执行）
+    keys:                                             # ⚠️唯一键（CMDB 属性 id 列表，定位巡检实例）
+      - serverName
+    countersideid: HOST                               # 对端模型（DB类常用 HOST，通过关系关联主机）
+    relationidwithhost: INSPEC_WEBLOGIC_HOST_INSPEC_WEBLOGIC_HOST  # 与 host 的关系 id
+    status: ok                                        # 状态（ok/object_deleted/keys_deleted/...，平台维护）
+    subplugins: []                                    # 子插件（组合套件用）
+    creator: easyops                                  # 创建人（平台填）
+  fields_meaning:
+    id: "套件唯一标识（pluginId），英文小写，如 mysql。zip 顶层目录名=此值。导入时所有文件 pluginId 必须一致"
+    name: "套件显示名（中文），如『MySQL巡检』"
+    objectid: "巡检目标 CMDB 模型 id。⚠️开发套件前必须先在 CMDB 确认此模型存在（object_model 查），无则设计新建（见 develop flow step 1-3 门禁）"
+    keys: "唯一键列表（CMDB 属性 id），用于定位巡检实例。DB 类常用 [serverName]/[instanceName]"
+    method: "agent（远程主机执行）/ 其他。默认 agent"
+    countersideid: "对端模型 id。DB/中间件类套件通常关联 HOST（执行宿主机），counterSideId=host/HOST"
+    relationidwithhost: "与 HOST 的关系 id（CMDB relation），格式 <模型>_host_<模型>_HOST。agent 类套件靠此找到执行主机"
+  source: "internal/database/cmdb/info/message.go:10-54; 真调实测 weblogic(6350f72ef0491)/mssql/oracle"
+
+# -----------------------------------------------------------------------------
+# 四、metrics.yaml —— 指标组列表（YAML 数组）
+# source: internal/database/cmdb/metrics/message.go:13-89
+# 真调实测：weblogic 8 个指标组
+# -----------------------------------------------------------------------------
+metrics_yaml_schema:
+  real_example_fragment: |
+    # 实测 weblogic 指标组（片段）
+    - instanceid: ""
+      id: connection_info                      # 指标组 id（套件内唯一）
+      pluginid: weblogic                       # ⚠️必须与 info.id 一致
+      name: 线程连接数信息                       # 指标组显示名
+      category: 整体状态.连接数                 # ⚠️两级分类（点分隔，服务端强校验必须正好1个点）
+      memo: ""
+      dims:                                    # 维度列
+        - id: hostname
+          name: 主机名
+      vals:                                    # 指标值列表（必填，至少1个）
+        - id: active_connections               # 指标 id（脚本输出 vals[].id 要对应）
+          name: 活动连接数
+          type: int                            # ⚠️仅 string|int（校验，message.go:412-428）
+          unit: ""
+          weight: 1                            # 权重 0-100
+          conditions:                          # 阈值条件数组（见 metric-threshold.yaml）
+            - comparators: gt                  # gt|lt|between|eq|neq|in|nin
+              level: 5                         # ⚠️仅 0|5|10（notice|warn|emergency）
+              value: ""                        # type=string 时用
+              maxvalue: 100                    # type=int 区间用
+              minvalue: 80                     # gt 时 minvalue 为触发下限
+  fields_meaning:
+    id: "指标组业务 id（套件内唯一，创建时查重）"
+    pluginid: "必须与 info.id 一致（导入强校验）"
+    category: "⚠️两级分类，点分隔（如 整体状态.连接数），必须正好1个点，否则报『分类格式错误』"
+    vals: "指标值列表，至少1个（CheckVals 校验非空）。每个 val 的 id 必须与脚本输出的 vals[].id 对应"
+    vals.type: "⚠️仅 string|int（导入校验）。type 决定 conditions 可用 comparator（见 metric-threshold.yaml）"
+    vals.weight: "权重 0-100，影响评分（MaxWeight=100）"
+    vals.conditions: "阈值条件数组，平台据此判定异常等级（见 metric-threshold.yaml）"
+  source: "internal/database/cmdb/metrics/message.go:13-89; 真调实测 weblogic(mysql 类似)"
+
+# -----------------------------------------------------------------------------
+# 五、collectors/script.py —— 脚本元数据（⚠️YAML 格式，文件名误导）
+# source: internal/database/cmdb/collector/message.go:9-46; import_export_service.go:680-702
+# ⚠️文件名 script.py 但内容是 yaml.Marshal(Collector)，不是 Python 源码！
+# 真正的 Python 源码在 content 字段（多行字符串）
+# -----------------------------------------------------------------------------
+collector_yaml_schema:
+  warning: "⚠️文件名叫 script.py 但内容是 YAML（yaml.Marshal 序列化的 Collector struct）。Python 源码在 content 字段内。这是历史命名遗留，易误解。"
+  real_example: |
+    # 实测 weblogic 脚本元数据
+    instanceid: ""
+    collectorid: ""
+    pluginid: weblogic                         # 与 info.id 一致
+    name: script                               # 脚本名
+    script: python                             # python|shell（默认 python）
+    args:                                      # 参数定义数组（详见 args-design.yaml）
+      - key: username
+        alias: Weblogic用户名
+        type: text                             # text|password（password=密码类型，见 args-design.yaml）
+        require: true
+        source: custom                         # attr_id（从CMDB取）| custom（用户填）
+        default: ""
+        memo: ""
+      - key: password
+        alias: Weblogic密码
+        type: password                         # ⚠️密码类型（加密存储，手填也要用 password）
+        require: true
+        source: custom
+        default: ""
+        memo: ""
+    content: |                                 # ⚠️真正的 Python 源码（多行字符串，py2）
+      #!/usr/local/easyops/python/bin/python
+      # -*- coding: utf-8 -*-
+      ...（脚本协议见 script-protocol.yaml）
+  fields_meaning:
+    pluginid: "与 info.id 一致"
+    script: "python|shell，决定执行解释器（默认 python，py2.7）"
+    args: "参数定义数组。详见 args-design.yaml（password 类型规范/source 规则）"
+    content: "Python/Shell 源码（py2 语法）。脚本协议（参数注入/输出标记）见 script-protocol.yaml"
+  note: "v1 只导出第一个脚本（import_export_service.go:692-700，if len(collectors)>0 取 collectors[0]）"
+  source: "internal/database/cmdb/collector/message.go:9-46; import_export_service.go:680-702; 真调实测 weblogic/mssql/oracle"
+
+# -----------------------------------------------------------------------------
+# 六、reports_temp/detail.yaml —— 报告模板（可选）
+# source: internal/database/cmdb/report_template/message.go:10-84
+# -----------------------------------------------------------------------------
+report_template_schema:
+  optional: "可选。导入失败不回退（可页面新建），import_export_service.go:218-222"
+  fields:
+    name: "模板名"
+    pluginid: "与 info.id 一致"
+    summarytemplates: "总览模板（metricgroups+metrics 数组，含 displaytype: Form/LineChart/BarChart/DoughnutChart/Card）"
+    metricgroups: "详情模板（displaytype: LineChart/BarChart/Form/CycleChart）"
+  source: "report_template/message.go:10-84"
+
+# -----------------------------------------------------------------------------
+# 七、models.json —— 关联 CMDB 模型定义（可选）
+# source: import_export_service.go:773-790（仅导出第一个模型）; :131-149（导入时若模型不存在用 ImportV2 建）
+# -----------------------------------------------------------------------------
+models_json_schema:
+  optional: "可选。导入时若该模型在 CMDB 不存在（错误码 133114），调 CmdbObject.ImportV2 创建"
+  format: "JSON（jsonpb 序列化的 cmdbModel.CmdbObject）"
+  note: "仅导出第一个模型。开发套件时此文件通常省略（模型单独在 CMDB 建）"
+  source: "import_export_service.go:773-790"
+
+# -----------------------------------------------------------------------------
+# 八、导入流程与冲突策略
+# source: import_export_service.go:103-121（ImportSuite）、177-223（ImportInspection）
+# -----------------------------------------------------------------------------
+import_flow:
+  steps:
+    - "解 gzip、解 tar"
+    - "遍历 tar entry，按文件名 basename 分发收集（CheckFileName:299-331）"
+    - "pluginId 一致性校验（所有文件 pluginId 必须相同，CheckAllInspection:282-297）"
+    - "导入顺序：ImportModels（CMDB模型，失败忽略）→ ImportInfo（套件，失败返回）→ ImportMetrics（指标组，失败回退删套件）→ ImportCollector（脚本，失败回退删套件+指标组）→ ImportReport（模板，失败忽略）"
+  conflict_strategy:
+    rule: "⚠️不幂等！对已存在的 pluginId/id 重复导入直接报错（mongo InsertMetricGroups/CreateInfo 等重复键 E11000 报错）"
+    implication: "重复导入同名套件会失败，需先删除旧套件再导，或改 pluginId"
+  rollback: "导入有部分回退：metric 失败删 info；collector 失败删 info+metrics；但 model/report 失败不回退"
+  source: "import_export_service.go:177-223,255-280; test 2131-2144（Code 11000 重复键）"
+
+# -----------------------------------------------------------------------------
+# 九、导出流程
+# source: import_export_service.go:484-531
+# -----------------------------------------------------------------------------
+export_flow:
+  steps:
+    - "拉套件信息 GetInfo(pluginId)"
+    - "拉指标组 GetMetricGroups(pluginId)"
+    - "拉报告模板 ListReportTemplate(pluginId)"
+    - "拉脚本 ListCollector(pluginId,'',1,3000)（硬编码 limit 3000）"
+    - "拉关联 CMDB 模型 GetObjectAll(suiteInfo.ObjectId)"
+    - "CreateTar 组装 tar.gz 流"
+  response: "application/octet-stream, Content-Disposition: attachment;filename=<pluginId>.tar.gz"
+  source: "import_export_service.go:484-531,517-530"
+
+# -----------------------------------------------------------------------------
+# 十、v2 新体系兼容索引（.90 当前 0 套件，仅记录端点不深入）
+# -----------------------------------------------------------------------------
+v2_compatibility_index:
+  status: ".90 实测 INSP_SUITE 0 套件，v2 未启用。仅录端点索引，不深入开发支持。"
+  endpoints:
+    create: "POST /api/inspection_service/v1/suite"
+    update: "POST /api/inspection_service/v1/suite/:instanceId"
+    get: "GET /api/inspection_service/v1/suite/:instanceId"
+    list: "GET /api/inspection_service/v1/suite"
+    delete: "DELETE /api/inspection_service/v1/suite/batch"
+    export: "GET /api/v1/inspection/export_suite"
+    import: "POST /api/v1/inspection/import_suite"
+  package_format: "suite.json（单一主文件，套件+指标+脚本全内嵌 JSON）+ tools/<toolId>.tar.gz（可选工具包）"
+  storage: "CMDB INSP_SUITE@EASYOPS（v2）vs MongoDB（v1）"
+  when_to_use: "v2 是未来方向（组合式单文件），但当前平台无数据。开发新套件仍走 v1（与现有 20 套件一致）"
+  source: "suite/route.go:6-14; internal/suite_export/export.go:48-96"
