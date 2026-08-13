@@ -140,8 +140,15 @@ output_protocols:
       CMDB 资产字段（brand/mdl/sn 等）人工录入，采集脚本不应覆盖。约定：
       采集字段用 c* 前缀（cBrand/cMdl/cSn），资产字段无前缀（brand/mdl/sn）。
       脚本输出前过滤：维护 HUMAN_MANAGED_FIELDS 集合，剔除这些字段。
-    gap_note: "标记解析逻辑在 agent/collector_proxy_server（源码不在本地），协议格式来自文档对比表，未逐字实锤。source: simple-script-guide.md:61,188"
-    source: "simple-script-guide.md:61,183-193; docs/archive/legacy-features/cmdb-kits-develop-skill/plan.md:431,445"
+    protocol_parsing_location: |
+      ✅ 协议解析位置确认（2026-08-13 探索 collector_proxy_server Rust 源码）：
+      collector_proxy_server 是【纯字节转发网关】（反向隧道），对 GATHERING DATA 标记/dims.vals/object_id/pks/upsert
+      完全不解析——它把脚本 stdout 原样经 easy_tunnel 隧道透传给调用方。
+      解析 GATHERING DATA + 写回 CMDB 的逻辑在【agent 端 sampler runtime】（easy_tunnel 客户端，
+      源码不在本地仓库）。proxy 只搬运字节，不动 body（plugin.rs:84/88-93 仅改 URL+header）。
+      含义：开发套件时协议契约的对手方是 agent runtime，不是 proxy——脚本只要按本标记格式 print 到 stdout，
+      proxy 不会破坏它。
+    source: "simple-script-guide.md:61,183-193（标记格式）; docs/archive/legacy-features/cmdb-kits-develop-skill/plan.md:431,445（标记）; collector_proxy_server 源码确认纯转发(data/sources/backend/HyperInsight/collector_proxy_server/packages/reverse_server/src/plugin.rs:84,88-93)"
 
 # -----------------------------------------------------------------------------
 # 采集脚本 Python2 规范（用户确认，2026-08-13，agent 默认 py2.7）
