@@ -1,0 +1,118 @@
+# =============================================================================
+# platforms/collector/entities.yaml
+# 字段锚（主键/关键字段格式约定）+ 跨实体/跨 service/跨 step 的字段接力（编排挡 dataflow 用）。
+# 编排挡规划 e2e 时，按 transitions 把上一步输出字段喂给下一步。
+# =============================================================================
+
+entities:
+  # —— 主键锚 ——
+  plugin_instance_id:
+    description: "采集套件实例ID（_COLLECTOR_EASYOPS_PLUGIN 模型主键）。贯穿 collector_plugin_service.plugin + collector_service.kit + collector_job.plugins"
+    format: "13 位 [0-9a-z]（微秒时间戳 hex）"
+    anchor: true
+    pattern: '^[0-9a-z]{13}$'
+    rules:
+      - "create_with_script/metricbeat/package 返回（CMDB 生成，不可指定）"
+      - "detail/delete/update_with_*/export/import_update 的 path 参数"
+      - "kit.activate 的 body.instanceId"
+      - "真调示例：6054d815e3fd9"
+    used_by: [plugin.create_with_script, plugin.create_with_metricbeat, plugin.create_with_package, plugin.detail, plugin.delete, plugin.update_with_script, plugin.update_with_metricbeat, plugin.update_with_package, plugin_package.export, plugin_package.import_update, kit.activate, kit.update]
+
+  log_plugin_instance_id:
+    description: "日志套件实例ID。⚠️log_plugin 的 delete/get/update 用 query/body 传（非 path），与 plugin 不同"
+    format: "13 位 [0-9a-z]"
+    anchor: true
+    pattern: '^[0-9a-z]{13}$'
+    used_by: [log_plugin.create, log_plugin.delete, log_plugin.get, log_plugin.update]
+
+  package_version_id:
+    description: "程序包版本ID（32hex）。package 型套件用。升级时新旧 VersionId 比较决定是否触发 modification.modified 标记"
+    format: "32 位 hex"
+    used_by: [plugin.create_with_package, plugin.update_with_package]
+
+  package_id:
+    description: "程序包ID（UUID）。package 型套件 create 强校验非空，update 校验被注释"
+    format: "UUID（8-4-4-4-12 hex，连字符可选）"
+    pattern: '^[a-fA-F0-9]{8}-?[a-fA-F0-9]{4}-?[a-fA-F0-9]{4}-?[a-fA-F0-9]{4}-?[a-fA-F0-9]{4}-?[a-fA-F0-9]{12}$'
+    used_by: [plugin.create_with_package, plugin.update_with_package]
+
+  alias_metric_name:
+    description: "别名指标名（dashboard/alertRule 引用此）。⚠️不能与 CMDB 模型属性ID/关系ID 同名（激活失败）。建议加前缀 m_/mon_/metric_"
+    format: "字符串，建议加前缀"
+    rules:
+      - "displayName 在同 objectId 内唯一"
+      - "name 不能与 relateObjectId 模型属性/关系ID 同名"
+    used_by: [metric_management.import_plugin_alias_metrics, metric_management.import_alias_metric_check]
+
+  # —— 环境锚（复用 demo 同 EasyOps 平台）——
+  org:
+    description: "EasyOps 租户 org。collector deployment=8888（env.d/collector.env）"
+    format: "整数"
+    used_by: [所有端点 endpoint.headers.org]
+
+  user:
+    description: "EasyOps 用户标识。写操作用 easyops"
+    format: "字符串"
+    used_by: [所有端点 endpoint.headers.user]
+
+# =============================================================================
+# transitions —— 跨实体/跨 service/跨 step 字段接力（e2e dataflow 用）
+# =============================================================================
+transitions:
+  # —— 开发→导入→激活 完整接力（metric_sampler 监控套件 e2e）——
+  - name: develop_import_activate_metric
+    desc: "监控套件 e2e：开发套件包→导入→拿 instanceId→激活"
+    steps:
+      - from: "(套件开发)"
+        produce: "zip 包（plugin.yaml + src/*.py + origin_metric.json + alias_metric.json）"
+        note: "按 formats/collector-kit/ 打包，py2 脚本，metric_sampler 输出 [{dims,vals}]"
+      - from: plugin_package.import
+        pick: data.instanceId
+        to: [plugin.detail, kit.activate]
+        how: "import 返回 data.instanceId（13hex），存为变量 PLUGIN_ID 喂下一步"
+      - from: kit.activate
+        pick: data.totalStatus
+        to: []
+        how: "body.instanceId=${PLUGIN_ID}；成功判定 totalStatus!=fail"
+
+  # —— CMDB 采集套件 e2e（process_sampler）——
+  - name: develop_import_activate_process
+    desc: "CMDB采集套件 e2e：开发→导入→激活（脚本输出 GATHERING DATA 标记）"
+    steps:
+      - from: "(套件开发)"
+        produce: "zip 包（plugin.yaml samplerType=process_sampler + src/*.py 输出 BEGIN/END GATHERING DATA + relateObjectId模型.json）"
+      - from: plugin_package.import
+        pick: data.instanceId
+        to: [kit.activate]
+        how: "同 metric，PLUGIN_ID 接力"
+
+  # —— 升级 e2e ——
+  - name: upgrade_plugin
+    desc: "升级套件：detail 拿现状→改包→import_update"
+    steps:
+      - from: plugin.detail
+        pick: data.instanceId
+        to: [plugin_package.import_update]
+        how: "detail path 用 instanceId；import_update path 用同一 instanceId"
+      - from: plugin_package.import_update
+        pick: data.instanceId
+        to: []
+        how: "version 必填且唯一；agentType 不可变"
+
+  # —— 删除 e2e（含前置检查）——
+  - name: delete_plugin
+    desc: "删除套件：detail 确认→delete（前置：无采集任务引用）"
+    steps:
+      - from: plugin.detail
+        pick: data.instanceId
+        to: [plugin.delete]
+        how: "delete path 用 instanceId；若被 _COLLECTOR_JOB 引用会报错『此套件关联有采集任务不允许删除』"
+
+  # —— 跨 service 接力（collector_plugin_service → collector_service）——
+  - name: cross_service_plugin_to_kit
+    desc: "套件定义（8151）→ 激活（12000）跨 service 接力"
+    steps:
+      - from: plugin_package.import   # collector_plugin_service:8151
+        pick: data.instanceId
+        to: [kit.activate]            # collector_service:12000
+        how: "import 返回 instanceId → kit.activate body.instanceId。⚠️跨端口跨 spec，CLI 用 --spec 切换（easyops-collector-plugin.yaml → easyops-collector-service.yaml），且 kit.activate 需带 giraffe-contract-name header"
