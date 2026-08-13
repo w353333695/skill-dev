@@ -101,7 +101,7 @@ steps:
     expect: "status=available（自定义）/enabled（内置）；字段与设计一致"
   - n: 10
     args: ["<PLUGIN_ID>", "--header giraffe-contract-name:<contract@版本>"]
-    desc: "(可选) 激活套件→生成采集任务。⚠️kit.activate 在 collector_service:12000，需 giraffe-contract-name header（contract 版本待探测，见 systems.yaml e2e_verified.gaps）"
+    desc: "(可选) 激活套件→生成采集任务。⚠️kit.activate 在 collector_service:12000，需 giraffe-contract-name header（contract 版本待探测，见 systems.yaml runtime.contract_version_gap）"
     expect: "HTTP 200 且 totalStatus!=fail。激活异步，需轮询 collector_job 验证任务生效"
 
 note: |
