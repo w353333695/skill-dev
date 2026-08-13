@@ -82,7 +82,13 @@ packaging_format_conflict:
   resolution_strategy:
     current: "未真调验证前，两种都录入。e2e 真调时先用 ZIP_STORED（现代文档主推），若 import 端点拒绝再试 ZIP_DEFLATED+UTF8 flag"
     verify_method: "用两种格式各打一个测试包，分别 POST /api/v1/plugin/import，记录哪个能成功 import + activate"
-    commit_back: "真调结果回流本字段 packaging_format_conflict.resolution_strategy.verified"
+    verified: |
+      ✅ 真调验证（2026-08-13，org 8888，172.30.0.90:8151）：
+      ZIP_STORED + UTF-8 flag（bit 11）→ import 成功（code:0，返回 instanceId）。
+      测试套件『主机端口可达性监控套件』『主机信息采集套件』均用此格式导入成功，
+      中文名目录（=plugin.yaml name）+ UTF-8 flag 被正确解析（scriptPath 能匹配）。
+      结论：用 ZIP_STORED + UTF-8 flag（pack_kit.py 默认）。ZIP_DEFLATED 未测（STORED 已够）。
+      打包脚本：tmp 产物 pack_kit.py（可固化到 sdk/ 供复用）。
 
   exclusion_rules:
     # 无论哪种格式，打包时必须排除这些文件（upload.md:29）
@@ -157,6 +163,15 @@ import_api:
     rule: "multipart/form-data，api-cli 的 --body-file 只发 JSON 不支持 formData"
     workaround: "真调走 Python SDK（client.import_plugin(file=...)）或 curl -F；api-cli 仅 --print-curl 预览"
     sdk_reference: "复用 demo sdk/easyops_client.py 模式（见 autoops tool_package 先例）"
+    verified: |
+      ✅ 真调验证（2026-08-13）：curl -F 上传成功。
+      curl 范例（直连 8151）：
+        curl -X POST -H "org: 8888" -H "user: easyops" -H "Host: admin.easyops.local" \
+          -F "attachment=@<套件名>_v1.0.0.zip" -F "name=<套件名>" -F "version=1.0.0" \
+          -F "category=自定义" -F "upsert=false" \
+          "http://172.30.0.90:8151/api/v1/plugin/import"
+      响应：{code:0, codeExplain:"", error:"", data:{instanceId:"<13hex>", agentType:"easyops"}}
+      protected 三分支走 cmdb 查 _COLLECTOR_EASYOPS_PLUGIN by name（total=0→新建 upsert=false）。
 
 # -----------------------------------------------------------------------------
 # 四、导出 API 契约（ExportPlugin，zip 流）
