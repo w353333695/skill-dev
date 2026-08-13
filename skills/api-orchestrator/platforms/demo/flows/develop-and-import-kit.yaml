@@ -112,5 +112,6 @@ note: |
 side_effects: "见 objects.yaml#collector_plugin.side_effects（import 同名冲突/升级 agentType不可变/删除前置检查）"
 rollback: "plugin.delete <PLUGIN_ID>（导入错了删掉；前置：未被采集任务引用）"
 acceptance: |
-  前端：${EASYOPS_COLLECTOR_FRONTEND_URL}/next/monitor-kit/kit/easyops/<PLUGIN_ID>/detail?tab=readme
+  前端列表：${EASYOPS_COLLECTOR_FRONTEND_URL}/next/collect-platform/kit-repo/list?page=1&q={套件名}
+  前端详情：${EASYOPS_COLLECTOR_FRONTEND_URL}/next/monitor-kit/kit/easyops/<PLUGIN_ID>/detail   # 用户前端实测(2026-08-13)
   api-cli：plugin detail <PLUGIN_ID> 确认 status=available

@@ -577,8 +577,8 @@ systems:
 
     # e2e 验收 URL（前端）
     acceptance_urls:
-      kit_list: "${EASYOPS_COLLECTOR_FRONTEND_URL}/next/monitor-kit/kit/easyops?page=1&pageSize=20"
-      kit_detail: "${EASYOPS_COLLECTOR_FRONTEND_URL}/next/monitor-kit/kit/easyops/{instanceId}/detail?tab=readme"
+      kit_list: "${EASYOPS_COLLECTOR_FRONTEND_URL}/next/collect-platform/kit-repo/list?page=1&q={keyword}"   # 用户前端实测(2026-08-13)
+      kit_detail: "${EASYOPS_COLLECTOR_FRONTEND_URL}/next/monitor-kit/kit/easyops/{instanceId}/detail"   # 用户前端实测(2026-08-13)
 
 # =============================================================================
 # e2e 真调验证状态（2026-08-13，org 8888，172.30.0.90）
@@ -665,8 +665,8 @@ systems:
       sync_to_bypass_timer: "activate 后想立即生效不等 600s：调 collector_service:8125 POST /api/v1/sync-job-config（config/route.go:11）主动同步"
 
     acceptance_urls:
-      kit_list: "${EASYOPS_COLLECTOR_FRONTEND_URL}/next/monitor-kit/kit/easyops?page=1&pageSize=20"
-      kit_detail: "${EASYOPS_COLLECTOR_FRONTEND_URL}/next/monitor-kit/kit/easyops/{instanceId}/detail?tab=readme"
+      kit_list: "${EASYOPS_COLLECTOR_FRONTEND_URL}/next/collect-platform/kit-repo/list?page=1&q={keyword}"   # 用户前端实测(2026-08-13)
+      kit_detail: "${EASYOPS_COLLECTOR_FRONTEND_URL}/next/monitor-kit/kit/easyops/{instanceId}/detail"   # 用户前端实测(2026-08-13)
 e2e_verified:
   collector_plugin_service_8151:
     plugin_list: "✅ 真调通过（198套件，响应 data.total）"
