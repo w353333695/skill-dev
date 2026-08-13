@@ -1120,7 +1120,7 @@ api_behavior:
       【知识型对象，非 REST 资源】——交付 provider 是本地代码工程（写 py + 配 PLUGIN_CONFIG + 打包），
       不调远端 API。此对象沉淀"怎么造 provider"的契约知识，LLM/人据它 + flows/build-sso-provider.yaml
       按客户协议交付可解压部署的 provider 包。
-    source: data/sources/源代码/sso-adapter/handlers/providers/base_provider.py（Provider 基类 7 方法）+ oauth2/oauth2.py（模板方法范式）+ cas/cas.py（直白范式）+ settings/setting.py（PLUGIN_CONFIG）+ provider_cache/cache.py（注册加载）+ utils/import_util.py（dynamic_imp_class）+ .pkgbuild/sso_adapter/PKGBUILD（pluginList 白名单）
+    source: sso-adapter 源码（开发方 onboarding 时提炼用；【源码不进 skill 包、运行时不依赖】）。溯源：handlers/providers/base_provider.py（Provider 基类 7 方法）+ oauth2/ + cas/（两范式）+ settings/setting.py（PLUGIN_CONFIG）+ provider_cache/cache.py（注册）+ utils/import_util.py（dynamic_imp_class）+ .pkgbuild/sso_adapter/PKGBUILD（白名单）。本对象所有契约/约束已内联在 fields/api_behavior，自包含。
     fields:
       name:              { type: string, required: true, desc: "provider 标识。⚠️【四位一体约定】：目录名=文件名=类名=PLUGIN_CONFIG 的 key，全相同（如 oauth2 → handlers/providers/oauth2/oauth2.py 的 class oauth2 → PLUGIN_CONFIG.oauth2）" }
       pre_signin:        { type: method, required: true, desc: "登录前：返回统一认证服务器登录地址（带参数）。入参 params（dict，URL query）。返回 str（登录 URL）或 PreSignInRequest 对象（含 login_url/method/request_args）。handlers.py PreSignIn 调用" }
@@ -1160,12 +1160,26 @@ api_behavior:
         否则 PKGBUILD 不打包它（解压目录里没该 provider，服务加载不到）。
         独立 provider 包（解压到已部署 sso-adapter 目录）不受此限——直接 cp 到 handlers/providers/ 即可。
       two_paradigms: |
-        交付新 provider 选范式（按客户协议接近哪个）：
-        ①【模板方法范式】继承 oauth2（oauth2.py）：基类把流程拆成大量小 hook
-          （signin_authorization_params/method/headers/body、user_info_endpoint、parse_user_info 等），
-          非标协议只重写个别 hook 即可适配。适合准 OAuth2/OIDC 协议——多数情况只改配置不写代码。
-        ②【直白范式】仿 cas（cas.py）：自己管 client 类，4 必填方法直写。适合私有协议/集成平台跳转。
-        两范式 __init__ 都做 jsonschema 校验 self._config。
+        交付新 provider 选范式（按客户协议接近哪个）。两范式 __init__ 都做 jsonschema 校验 self._config。
+        ①【模板方法范式】（适合准 OAuth2/OIDC 协议，多数情况只改配置不写代码）：
+          基类把登录流程拆成大量小 hook，非标协议只重写个别 hook 即可适配。完整 hook 清单（按登录阶段）：
+          · pre_signin 阶段：pre_signin_required_params（必填参数 response_type/client_id/redirect_uri/access_type）、
+            pre_signin_scope（scope 可选）、pre_signin_state（state 生成，默认 uuid）。
+          · signin 阶段：signin_state（解析 state）、signin_authorization_params（code 换 token 的请求参数：
+            grant_type/client_id/client_secret/redirect_uri）、signin_authorization_method（默认 POST）、
+            signin_authorization_headers（默认 form-urlencoded）、signin_authorization_body（默认 None）、
+            signin_parse_response（默认 resp.json()）。
+          · user_info 阶段（access_type=online 直接用 access_token；offline 先 refresh）：
+            user_info_validate（校验 authorization_info schema）、user_info_refresh（refresh_token 换 access_token，
+            子 hook _method/_params/_headers/_body/_parse_response）、user_info_endpoint（带 Authorization 头取用户信息）、
+            user_info_endpoint_response（默认 resp.json()）、parse_user_info（⚠️从 user_info 取 login_key/login_value，
+            默认 ("name", user_info["sub"])——客户协议用户字段不是 sub 时【必须重写这里】）。
+          · sign_out 默认返回空串（access_token/refresh_token 不特殊处理）。
+        ②【直白范式】（适合私有协议/集成平台跳转，自己管 client 类，4 必填方法直写）：
+          参考 cas 的实现要点：pre_signin 返回 client.get_login_url(service_url)；signin 把 ticket 包成
+          authorization_info={ticket}；user_info 调 client.perform_service_validate(ticket) 拿 user，返回
+          (login_name 配置项的值, user)；sign_out 返回 client.get_logout_url(service_url)。
+          CAS client 核心是 service validate（ticket→user），私有协议等价于"凭证→用户"的交换逻辑自己写。
       delivery_artifact: |
         交付物 = 解压即部署包，含：① provider 代码（handlers/providers/<name>/）；
         ② setting_custom.py 配置片段（PLUGIN_CONFIG.<name> 的参数 + 改 default 指向）；
@@ -1177,7 +1191,7 @@ api_behavior:
     description: |
       provider 的 PLUGIN_CONFIG 配置项（每个 provider 自定义，无统一 schema）。oauth2/cas 的配置项作参考。
       【知识型对象，非 REST 资源】。setting_custom.py 里的 PLUGIN_CONFIG.<name> 即此实例。
-    source: data/sources/源代码/sso-adapter/settings/setting.py（PLUGIN_CONFIG 各 provider 配置范例）+ setting.sample.py
+    source: sso-adapter settings/setting.py + setting.sample.py（开发方 onboarding 提炼；【源码不进包、运行时不依赖】）。配置项清单已内联在 fields.config_items，自包含。
     fields:
       provider_name:   { type: string, desc: "PLUGIN_CONFIG 的 key，与 provider 类名一致（四位一体）" }
       config_items:    { type: dict, desc: "该 provider 的配置项（协议特定）。oauth2: login_url/authorization_url/refresh_url/user_info_url/client_id/client_secret/redirect_uri/response_type/access_type/scope/grant_type；cas: login_url/redirect_uri/auth_prefix/login_name；easy_work: login_token_key/access_key/secret_key/easy_work_ip/login_key/redirect_url_key" }
@@ -1189,4 +1203,4 @@ api_behavior:
         ⚠️setting_custom.py 是 Python（dict 字面量），不是 yaml/json——部署人员改它要懂点 Python。
       validation: |
         provider __init__ 用 jsonschema validate self._config（必填项缺失 raise）。
-        交付时配置项 schema 要在 provider 代码里声明（仿 oauth2.py 的 config_schema），缺必填启动即报清晰错。
+        交付时配置项 schema 要在 provider 代码里声明（jsonschema config_schema，仿 two_paradigms 范式①的 hook 契约），缺必填启动即报清晰错。
