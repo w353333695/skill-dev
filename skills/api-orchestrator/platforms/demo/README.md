@@ -8,7 +8,7 @@
 |---|---|---|---|
 | **easyops-cmdb** | cmdb_service:8079 | easyops-cmdb.yaml | 模型/关系/实例（19 verb）|
 | **easyops-autoops** | tool_service:8181 | easyops-autoops.yaml | 工具/版本/库 + 执行/导入导出 |
-| **easyops-itsm** | flowable_service:8134 | easyops-itsm.yaml | 表单/流程/服务/工单 + 触发器/通知/SLA/值班组（2026-08-11）|
+| **easyops-itsm** | flowable_service:8134 | easyops-itsm.yaml | 表单/流程/服务/工单 + 触发器/通知/SLA/值班组（2026-08-11）+ sso-adapter provider 交付知识（2026-08-13）|
 | **easyops-sys-setting** | sys_setting:8271 | easyops-sys-setting.yaml | 工作日历 work_calendar（2026-08-11）|
 
 > ⚠️ itsm 的 notify_policy 前缀是 `/api/itsc_trigger/v1`（非 flowable_service）但仍走 8134。
@@ -19,9 +19,9 @@
 | 文件 | 装什么 | 何时查 |
 |---|---|---|
 | **systems.yaml** | 4 系统接入：鉴权三件套（+ itsc 权限 for itsm）/ 端口 / org / user / capabilities | 「怎么连」「用哪个 org/user」|
-| **objects.yaml** | 4 系统对象模型 + 副作用：cmdb(模型/实例) + autoops(工具/内置变量/工具包) + itsm(表单/版本/容器/控件/脚本/继承/条件显示 + 触发器/通知/SLA/值班组) + sys-setting(工作日历) | 「对象规则」「接口行为」|
+| **objects.yaml** | 4 系统对象模型 + 副作用：cmdb(模型/实例) + autoops(工具/内置变量/工具包) + itsm(表单/版本/容器/控件/脚本/继承/条件显示 + 触发器/通知/SLA/值班组 + sso_provider 交付契约) + sys-setting(工作日历) | 「对象规则」「接口行为」|
 | **entities.yaml** | 字段锚 + 转换：4 系统主键格式 + 跨实体/跨 system step 接力（含 work_calendar 24hex → sla） | 「字段格式」「编排接线」|
-| **flows/*.yaml** | e2e 流程模板：cmdb(模型/实例/链路) + autoops(工具) + itsm(表单 build/add-version/delete/list) | 「规划挡 build/change」「直通挡 读/链路」|
+| **flows/*.yaml** | e2e 流程模板：cmdb(模型/实例/链路) + autoops(工具) + itsm(表单 build/add-version/delete/list + sso-adapter provider 交付 build-sso-provider) | 「规划挡 build/change」「直通挡 读/链路」|
 | **easyops-{cmdb,autoops,itsm,sys-setting}.yaml** | 各系统 api-cli 清单：命令树 + body schema | 「实际调用」|
 | **sdk/** | 编排侧 Python SDK（api-cli 缺口补丁）：`easyops_client.py`（自包含 py2/3，双模式 openapi AK/SK 签名 + 内网直连，补 multipart/binary 缺口）。【编排侧 tool_package 导入导出/openapi 用；非 agent 工具脚本依赖，属 platform_conventions 例外】| 「编排侧 tool_package 导入导出」「外网 AK/SK 调用」|
 | formats/ | （本部署不适用——无 BPMN/插件格式包）| — |

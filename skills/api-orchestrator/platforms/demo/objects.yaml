@@ -1107,3 +1107,86 @@ api_behavior:
       ③ 表单级数据源 FormDataSource（独立 CMDB 实体 _ITSC_FORM_DATA_SOURCE，Config 不透明 JSON；版本经 dataSourceIdList 反向关联多数据源）；
       ④ CMDB 模型实例（CmdbInstanceSelect/CmdbCascader/business_table 绑 objectId；级联用 objectIdPath）；
       ⑤ 静态 options.defaultValue。
+
+  # ============================================================================
+  # sso-adapter provider 交付（知识型对象，无 api 字段——非 REST，本地代码工程）
+  # 服务：logic.sso-adapter:8211（py2）。归属 easyops-itsm 能力域（前台业务服务）。
+  # 交付流程见 flows/build-sso-provider.yaml。
+  # ============================================================================
+  sso_provider:
+    description: |
+      EasyOps SSO 适配器（logic.sso-adapter:8211）的登录插件 provider。插件制——每个 provider 对接一个客户
+      SSO 协议（OAuth2/CAS/私有），实现 Provider 基类约定方法即可接入，无需改 api_gateway / brick_next。
+      【知识型对象，非 REST 资源】——交付 provider 是本地代码工程（写 py + 配 PLUGIN_CONFIG + 打包），
+      不调远端 API。此对象沉淀"怎么造 provider"的契约知识，LLM/人据它 + flows/build-sso-provider.yaml
+      按客户协议交付可解压部署的 provider 包。
+    source: data/sources/源代码/sso-adapter/handlers/providers/base_provider.py（Provider 基类 7 方法）+ oauth2/oauth2.py（模板方法范式）+ cas/cas.py（直白范式）+ settings/setting.py（PLUGIN_CONFIG）+ provider_cache/cache.py（注册加载）+ utils/import_util.py（dynamic_imp_class）+ .pkgbuild/sso_adapter/PKGBUILD（pluginList 白名单）
+    fields:
+      name:              { type: string, required: true, desc: "provider 标识。⚠️【四位一体约定】：目录名=文件名=类名=PLUGIN_CONFIG 的 key，全相同（如 oauth2 → handlers/providers/oauth2/oauth2.py 的 class oauth2 → PLUGIN_CONFIG.oauth2）" }
+      pre_signin:        { type: method, required: true, desc: "登录前：返回统一认证服务器登录地址（带参数）。入参 params（dict，URL query）。返回 str（登录 URL）或 PreSignInRequest 对象（含 login_url/method/request_args）。handlers.py PreSignIn 调用" }
+      signin:            { type: method, required: true, desc: "登录回调：用 code/ticket 换凭证。入参 params（dict，含 code/ticket 等）。返回 authorization_info（dict，协议特定：oauth2={access_token,refresh_token,token_type,expires_in}；cas={ticket}）。handlers.py SignIn/SignAuth 调用" }
+      user_info:         { type: method, required: true, desc: "取用户信息：从 authorization_info 拿 (login_key, login_value)。⚠️login_value 必须是 cmdb 唯一用户凭证（如 name/sub）。handlers.py SignIn 调用，返回值用于登录 brick next" }
+      sign_out:          { type: method, required: true, desc: "登出：返回登出 URL。入参 params。返回 str（logout URL）或 SignOutRequest 对象。handlers.py SignOut 调用" }
+      authorize_post_deal: { type: method, required: false, desc: "授权后处理（可选，默认空 return）。入参 query dict。handlers.py AuthorizePostDeal 调用" }
+      custom_auth:       { type: method, required: false, desc: "自定义密码校验（可选）。入参 params。返回 bool（False→AuthenticationExcept 账号密码错误）。handlers.py CustomAuth 调用" }
+      sso_global_sign_out: { type: method, required: false, desc: "全局登出回调解析（可选）。入参 params（含 logoutRequest）。返回 ticket。handlers.py SSOGlobalSigOut 调用" }
+    relations:
+      - { to: sso_provider_config, type: composition, cardinality: "1:1", via: PLUGIN_CONFIG.<name>, desc: "每个 provider 对应 PLUGIN_CONFIG 里一个同名 key 的配置 dict" }
+    api_behavior:
+      runtime_env: |
+        ⚠️Python 2 运行时（shebang /usr/local/easyops/python/bin/python）。provider 代码必须 py2 兼容：
+        urllib/urllib2/urlparse（非 urllib.parse）、print x（非 print(x) 必须）、except Exception, e（非 as）、
+        unicode 类型判定、dict.iteritems()。依赖：requests、jsonschema（第三方，已装）。
+      config_injection: |
+        所有参数走 PLUGIN_CONFIG，不硬编码。provider __init__ 里 self._config = PLUGIN_CONFIG.get("<name>")，
+        拿不到 raise；jsonschema validate self._config（必填项缺失 raise）。
+        PLUGIN_CONFIG 顶层在 settings/setting.py，但【setting_custom.py 优先级最高】——
+        easy_tornado SettingCombiner._dict_merge 深度合并覆盖（setting_custom.py 的同名 key 递归覆盖 setting.py）。
+        → 交付 provider 时，参数片段写进 setting_custom.py 的 PLUGIN_CONFIG（不动 setting.py）。
+      plugin_registration: |
+        注册由 provider_cache/cache.py load_plugins() 启动时完成：遍历 PLUGIN_CONFIG keys →
+        dynamic_imp_class('handlers:providers:<name>:<name>') 动态导入目录下 .py → 找 class <name> → 实例化缓存。
+        运行时 handlers.py 按 URL /api/v1/signin/<pk> 的 pk（=protocol 名=provider 名）取 provider。
+        ⚠️PLUGIN_CONFIG 必须有 "default" key 指向某 provider，否则启动 raise。
+      four_in_one_convention: |
+        ⚠️【四位一体】强制约定，违反则 dynamic_imp_class 找不到类：
+        目录名 = 文件名 = 类名 = PLUGIN_CONFIG key。
+        例：oauth2 → handlers/providers/oauth2/oauth2.py 里 `class oauth2(Provider)` → PLUGIN_CONFIG.oauth2。
+        类名小写（与现 cas/oauth2/easy_work 一致，非 PascalCase）。
+      pkgbuild_whitelist: |
+        ⚠️【打包白名单坑】.pkgbuild/sso_adapter/PKGBUILD 的 package() 里有硬编码 pluginList：
+          pluginList=("cas" "demo" "easy_work" "eiac" "oauth2")
+        只有白名单里的 provider 才 cp 进包。新交付 provider 打整包部署时，【必须】加进此 pluginList，
+        否则 PKGBUILD 不打包它（解压目录里没该 provider，服务加载不到）。
+        独立 provider 包（解压到已部署 sso-adapter 目录）不受此限——直接 cp 到 handlers/providers/ 即可。
+      two_paradigms: |
+        交付新 provider 选范式（按客户协议接近哪个）：
+        ①【模板方法范式】继承 oauth2（oauth2.py）：基类把流程拆成大量小 hook
+          （signin_authorization_params/method/headers/body、user_info_endpoint、parse_user_info 等），
+          非标协议只重写个别 hook 即可适配。适合准 OAuth2/OIDC 协议——多数情况只改配置不写代码。
+        ②【直白范式】仿 cas（cas.py）：自己管 client 类，4 必填方法直写。适合私有协议/集成平台跳转。
+        两范式 __init__ 都做 jsonschema 校验 self._config。
+      delivery_artifact: |
+        交付物 = 解压即部署包，含：① provider 代码（handlers/providers/<name>/）；
+        ② setting_custom.py 配置片段（PLUGIN_CONFIG.<name> 的参数 + 改 default 指向）；
+        ③ 安装说明（解压目录、PKGBUILD 白名单是否需改、重启 sso-adapter、验收方法）。
+        两种部署形态：整包（改 PKGBUILD pluginList 重打 sso-adapter 包）/ 独立包（cp 到已部署目录）。
+        详见 flows/build-sso-provider.yaml。
+
+  sso_provider_config:
+    description: |
+      provider 的 PLUGIN_CONFIG 配置项（每个 provider 自定义，无统一 schema）。oauth2/cas 的配置项作参考。
+      【知识型对象，非 REST 资源】。setting_custom.py 里的 PLUGIN_CONFIG.<name> 即此实例。
+    source: data/sources/源代码/sso-adapter/settings/setting.py（PLUGIN_CONFIG 各 provider 配置范例）+ setting.sample.py
+    fields:
+      provider_name:   { type: string, desc: "PLUGIN_CONFIG 的 key，与 provider 类名一致（四位一体）" }
+      config_items:    { type: dict, desc: "该 provider 的配置项（协议特定）。oauth2: login_url/authorization_url/refresh_url/user_info_url/client_id/client_secret/redirect_uri/response_type/access_type/scope/grant_type；cas: login_url/redirect_uri/auth_prefix/login_name；easy_work: login_token_key/access_key/secret_key/easy_work_ip/login_key/redirect_url_key" }
+      default:         { type: string, required: true, desc: "PLUGIN_CONFIG.default 指向默认 provider 名（启动校验非空，缺失 raise）" }
+    api_behavior:
+      merge_priority: |
+        配置合并优先级（setting_util.py SettingCombiner）：setting_custom.py 深度覆盖 setting.py。
+        交付 provider 时把配置写进 setting_custom.py 的 PLUGIN_CONFIG（覆盖默认占位 __XXX__）。
+        ⚠️setting_custom.py 是 Python（dict 字面量），不是 yaml/json——部署人员改它要懂点 Python。
+      validation: |
+        provider __init__ 用 jsonschema validate self._config（必填项缺失 raise）。
+        交付时配置项 schema 要在 provider 代码里声明（仿 oauth2.py 的 config_schema），缺必填启动即报清晰错。
