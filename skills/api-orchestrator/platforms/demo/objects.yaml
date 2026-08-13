@@ -1300,10 +1300,10 @@ objects:
     fields:
       id: { type: string, required: true, desc: "指标id（套件内唯一）。⚠️脚本输出 vals[].id 必须对应此" }
       name: { type: string, desc: "指标显示名" }
-      type: { type: string, required: true, enum: [string, int], desc: "⚠️仅string|int（无float）。决定 conditions 可用 comparator" }
+      type: { type: string, required: true, enum: [string, num], desc: "⚠️实际值是 string|num（真调实测，非源码注释的 int）。决定 conditions 可用 comparator" }
       unit: { type: string, desc: "单位" }
       weight: { type: integer, desc: "权重0-100，影响评分" }
-      conditions: { type: array, items: insp_condition, desc: "阈值条件数组（平台据此判定异常level）。详见 formats/inspection-kit/metric-threshold.yaml" }
+      conditions: { type: array, items: insp_condition, desc: "阈值条件数组。【可空！真实套件多留空[]】，套件定义时不强制配，通常任务里覆盖（task.vals）。非空时按 type 校验（详见 formats/inspection-kit/metric-threshold.yaml）" }
 
   insp_condition:
     description: "阈值条件（insp_val.conditions 元素）"
