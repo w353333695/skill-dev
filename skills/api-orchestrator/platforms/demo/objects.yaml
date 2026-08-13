@@ -1120,7 +1120,7 @@ api_behavior:
       【知识型对象，非 REST 资源】——交付 provider 是本地代码工程（写 py + 配 PLUGIN_CONFIG + 打包），
       不调远端 API。此对象沉淀"怎么造 provider"的契约知识，LLM/人据它 + flows/build-sso-provider.yaml
       按客户协议交付可解压部署的 provider 包。
-    source: sso-adapter 源码（开发方 onboarding 时提炼用；【源码不进 skill 包、运行时不依赖】）。溯源：handlers/providers/base_provider.py（Provider 基类 7 方法）+ oauth2/ + cas/（两范式）+ settings/setting.py（PLUGIN_CONFIG）+ provider_cache/cache.py（注册）+ utils/import_util.py（dynamic_imp_class）+ .pkgbuild/sso_adapter/PKGBUILD（白名单）。本对象所有契约/约束已内联在 fields/api_behavior，自包含。
+    source: 本对象契约/约束自包含（fields/api_behavior 内联）。标准协议 provider 的【实物范本】在 formats/sso-provider/（oauth2/ + cas/，随 skill 包分发，直接仿写，勿探测 sso-adapter 源码）。开发方 onboarding 溯源：sso-adapter handlers/providers/base_provider.py + oauth2/ + cas/ + settings/setting.py + provider_cache/cache.py + utils/import_util.py + .pkgbuild/PKGBUILD。
     fields:
       name:              { type: string, required: true, desc: "provider 标识。⚠️【四位一体约定】：目录名=文件名=类名=PLUGIN_CONFIG 的 key，全相同（如 oauth2 → handlers/providers/oauth2/oauth2.py 的 class oauth2 → PLUGIN_CONFIG.oauth2）" }
       pre_signin:        { type: method, required: true, desc: "登录前：返回统一认证服务器登录地址（带参数）。入参 params（dict，URL query）。返回 str（登录 URL）或 PreSignInRequest 对象（含 login_url/method/request_args）。handlers.py PreSignIn 调用" }
@@ -1160,7 +1160,7 @@ api_behavior:
         否则 PKGBUILD 不打包它（解压目录里没该 provider，服务加载不到）。
         独立 provider 包（解压到已部署 sso-adapter 目录）不受此限——直接 cp 到 handlers/providers/ 即可。
       two_paradigms: |
-        交付新 provider 选范式（按客户协议接近哪个）。两范式 __init__ 都做 jsonschema 校验 self._config。
+        交付新 provider 选范式（按客户协议接近哪个）。【实物范本在 formats/sso-provider/——oauth2/(范式①) + cas/(范式②)，直接复制改名仿写，勿探测 sso-adapter 源码】。两范式 __init__ 都做 jsonschema 校验 self._config。
         ①【模板方法范式】（适合准 OAuth2/OIDC 协议，多数情况只改配置不写代码）：
           基类把登录流程拆成大量小 hook，非标协议只重写个别 hook 即可适配。完整 hook 清单（按登录阶段）：
           · pre_signin 阶段：pre_signin_required_params（必填参数 response_type/client_id/redirect_uri/access_type）、
