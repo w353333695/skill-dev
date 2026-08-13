@@ -20,7 +20,7 @@
 # -----------------------------------------------------------------------------
 package_structure:
   top_level_rule:
-    rule: "zip 顶层目录名必须与 plugin.yaml 的 name 完全一致，否则上传失败"
+    rule: "zip 顶层目录名必须与 plugin.yaml 的 name 完全一致，否则上传失败；目录条目（mode 755）+ 文件 mode 664，否则上传后会报错permission denied"
     source: "upload.md:24"
 
   tree: |
