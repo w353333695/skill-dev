@@ -76,6 +76,9 @@ steps:
           ⚠️$.field 的 field 必须 step 2/3 确认的模型 attrList 里真实存在（否则导入报错『$.类型的参数要来源于cmdb模型且有应用场景』）
         - 用户填写 → defaultValue: "", paramType=const
         - 密钥 → isFromSecret:true, isEncrypt:true（自动注入 secretName）
+        - ⚠️密码/凭证类入参【即使是用户自己手填】（isFromSecret:false）也必须设为密码类型：
+          isEncrypt:true（+valueType:password）——禁止当普通 string 明文存储。
+          明文存的密码会在 detail 回显/任务参数/日志中泄漏。
   - n: 5
     desc: "本地模拟环境变量跑脚本，验证输出格式（metric 检查 [{dims,vals}]；process 检查 GATHERING DATA 标记）"
     expect: "stdout 输出合法 JSON；dims/vals 齐全；vals 数值型（metric）"
