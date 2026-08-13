@@ -1,0 +1,84 @@
+# 流程模板：交付一个 SSO provider（解压即部署包）。知识型流程（非 REST，本地代码工程）。
+# 归属 easyops-itsm 能力域（sso-adapter 服务 logic.sso-adapter:8211）。
+# 契约知识见 objects.yaml#sso_provider / sso_provider_config。
+name: build-sso-provider
+intent: 按客户提供的 SSO 协议，交付一个可解压部署的 sso-adapter provider 包（含代码 + setting_custom 配置片段 + 安装说明）
+trigger: ["接入客户SSO", "新建SSO provider", "交付单点登录插件", "对接OAuth2登录", "对接CAS登录", "客户私有协议登录", "sso-adapter扩展", "登录适配器"]
+guard: 知识型流程（非 REST、不调 run.sh）—— 本地写 provider 代码 + 配置，打包交付。须展示交付物结构 + 配置项给用户确认。
+key_rule: |
+  ⚠️这是【本地代码工程】，不是调远端 API。步骤全是写文件/改配置，无 op（不调 api-cli）。
+  provider 必须守【四位一体约定】：目录名=文件名=类名=PLUGIN_CONFIG key（详见 objects.yaml#sso_provider.api_behavior.four_in_one_convention）。
+  ⚠️代码 py2 兼容（运行时 /usr/local/easyops/python/bin/python）。
+  ⚠️配置写 setting_custom.py（优先级最高，深度覆盖 setting.py），不写 setting.py。
+  ⚠️整包部署须改 PKGBUILD 的 pluginList 白名单（否则不进包）；独立包部署（cp 到已部署目录）不受此限。
+prerequisites:
+  input: "客户提供的 SSO 协议资料 ≥1：① 协议类型（OAuth2/CAS/OIDC/私有）；② 认证端点 URL（登录/授权/换 token/取用户信息）；③ client_id/client_secret 或等价凭证；④ 用户信息字段映射（哪个字段对应 cmdb 用户名）；⑤ 登录回调 redirect_uri；⑥ 登出端点（若有）"
+  env: "本地开发环境（能跑 py2 语法检查）；sso-adapter 源码（参照 handlers/providers/oauth2 或 cas 范式）"
+steps:
+  - n: 1
+    transform: 分析客户协议，选范式
+    desc: |
+      按客户协议接近哪个标准，选交付范式（决定代码量）：
+        · 客户协议是标准/近似 OAuth2-OIDC（有 authorization_url/user_info_url/code 换 token）→【范式①模板方法】
+          继承 oauth2，通常只改 PLUGIN_CONFIG（端点/字段映射）不写代码；非标处重写个别 hook（如 parse_user_info 改用户字段、signin_authorization_params 改参数名）。
+        · 客户协议是 CAS（ticket + service validate）→【范式①变体】继承或仿 cas，配 CASClient。
+        · 客户协议是私有协议/集成平台跳转（token 交换非标准、或自定义 header）→【范式②直白】
+          仿 cas.py 直写，自己管 client，4 必填方法全自定义。
+      判不准时优先范式①（改动小、可回退）。
+  - n: 2
+    transform: 实现 provider 代码（本地）
+    desc: |
+      新建 handlers/providers/<name>/<name>.py（<name>=四位一体的 provider 名，小写）。
+      class <name>(Provider)，__init__ 里：
+        self._config = PLUGIN_CONFIG.get("<name>")
+        if self._config is None: raise Exception(u"导入<name>模块异常, setting.py中PLUGIN_CONFIG.<name>配置不存在")
+        jsonschema validate self._config（声明 config_schema，必填项缺失 raise 清晰错）
+      实现 4 必填方法（pre_signin/signin/user_info/sign_out），可选 3 个按需（authorize_post_deal/custom_auth/sso_global_sign_out）。
+      方法契约逐个见 objects.yaml#sso_provider.fields（入参/返回/调用时机）。
+      ⚠️py2 写法：urllib/urllib2/urlparse（非 urllib.parse）、print x、except Exception, e、unicode 判定。
+      ⚠️user_info 返回的 login_value 必须是 cmdb 唯一用户凭证（如 name/sub），否则登录 brick next 对不上用户。
+  - n: 3
+    transform: 写 setting_custom.py 配置片段（本地）
+    desc: |
+      在 setting_custom.py 的 PLUGIN_CONFIG 加两段（不动 setting.py——setting_custom 优先级最高，深度覆盖）：
+        ① PLUGIN_CONFIG["<name>"] = { ...该 provider 的配置项... }（参数值来自客户提供的端点/凭证，替换占位）
+        ② PLUGIN_CONFIG["default"] = "<name>"（设为默认 provider，否则启动校验 raise；或按客户要求指向其他）
+      配置项清单参考 objects.yaml#sso_provider_config.fields.config_items（oauth2/cas 各自的项）。
+      ⚠️setting_custom.py 是 Python dict 字面量，不是 yaml/json。
+  - n: 4
+    transform: 改 PKGBUILD 白名单（仅整包部署需要）
+    desc: |
+      若交付形态是【整包】（重打 sso-adapter 包部署）：必须改 .pkgbuild/sso_adapter/PKGBUILD 的 package()：
+        pluginList=("cas" "demo" "easy_work" "eiac" "oauth2")  →  加上 "<name>"
+      否则 PKGBUILD 不 cp 该 provider，包里没有，服务加载不到。
+      若交付形态是【独立包】（cp 到已部署 sso-adapter 的 handlers/providers/ 目录）：跳过此步，白名单不影响。
+  - n: 5
+    transform: 语法检查 + 打包（本地）
+    desc: |
+      语法检查（py2 兼容）：python2 -m py_compile handlers/providers/<name>/<name>.py（或用 py_compile 模块）。
+      打交付包（解压即部署），结构：
+        <name>.sso-provider.tar.gz
+        ├── handlers/providers/<name>/         # provider 代码（<name>.py + __init__.py + 可选 client 类）
+        ├── settings/setting_custom.py          # 配置片段（PLUGIN_CONFIG.<name> + default）—— 若已有则给 diff/合并说明
+        └── README-INSTALL.md                   # 安装说明（见 acceptance 字段）
+  - n: 6
+    transform: 验收（部署后）
+    desc: |
+      部署到 sso-adapter 目录后重启服务，验收登录链路：
+        · pre_signin：GET /api/v1/pre-signin/<name> → 返回统一认证服务器登录 URL（重定向正确）
+        · signin：GET /api/v1/signin/<name>?code/ticket=... → 返回 loginKey/loginValue（user_info 拿到的 cmdb 用户凭证）
+        · sign_out：POST /api/v1/sign-out/<name> → 返回登出 URL
+      实际端到端验收：浏览器走一遍登录→跳 brick next→登出。
+note: |
+  ⚠️此流程不调 api-cli/run.sh——sso-adapter provider 交付是本地代码工程，靠写文件+打包完成。
+  交付物里的代码【不是 agent 工具脚本】（不进 autoops agent），是 sso-adapter 服务的插件，无需自包含调 cmdb。
+  但 provider 内部调客户 SSO 服务器（requests 库），需 py2 + requests/jsonschema（sso-adapter 运行环境已装）。
+side_effects: "本地写文件（handlers/providers/<name>/、settings/setting_custom.py、.pkgbuild PKGBUILD）；不改远端系统。"
+rollback: "删 handlers/providers/<name>/ 目录 + 还原 setting_custom.py 的 PLUGIN_CONFIG 片段 + 还原 PKGBUILD 白名单"
+acceptance: |
+  交付包解压后含三件套（provider 代码 + setting_custom 配置 + README-INSTALL）。README-INSTALL 写明：
+    ① 解压目录：tar xzf <name>.sso-provider.tar.gz -C <sso-adapter 安装根>
+    ② 配置合并：把 setting_custom.py 的 PLUGIN_CONFIG 片段合进目标 sso-adapter 的 settings/setting_custom.py
+    ③ （整包部署才需要）PKGBUILD pluginList 加 <name>
+    ④ 重启：按 sso-adapter 部署方式重启（systemd/脚本）
+    ⑤ 验收：访问 /api/v1/pre-signin/<name> 返回登录 URL；浏览器端到端登录通

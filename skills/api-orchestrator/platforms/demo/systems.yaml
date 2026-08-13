@@ -388,6 +388,11 @@ systems:
         create: "建组（name/dutyCycle/status/dutyShift 必填）"
         update: "改组（全量）"
         delete: "删组（path groupIds 分号批量）"
+      # ---- sso-adapter provider 交付（知识型，非 REST——不调 run.sh）----
+      # sso-adapter 服务 logic.sso-adapter:8211（py2），归属 itsm 能力域。交付 SSO provider 是本地代码工程
+      # （写 py + 配 PLUGIN_CONFIG + 打包），不是调远端 API，故无 resource.verb。
+      # 知识在 objects.yaml#sso_provider / sso_provider_config；交付流程在 flows/build-sso-provider.yaml。
+      # 触发词："接入客户SSO/对接OAuth2/CAS/私有协议登录/交付单点登录插件" -> 走 build-sso-provider flow。
 
     # 运维知识（实测，真相来源）—— 表单内容模型/坑见 objects.yaml#itsm_form_definition
     runtime:
