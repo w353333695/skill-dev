@@ -1212,6 +1212,165 @@ objects:
         rule: "删除前置：不能被日志采集任务引用（COLLECTOR_LOG_JOB@EASYOPS），否则拒删"
         source: "log_plugin_service.go:50-62"
 
+
+  # ===========================================================================
+  # 巡检域对象（v1 体系 INSPECTION_INFO）—— 2026-08-13 接入
+  # ===========================================================================
+
+  insp_info:
+    description: |
+      巡检套件元信息（INSPECTION_INFO@EASYOPS，v1体系）。一个巡检套件=info+collector+metric_group+template四对象组装，pluginId=info.id串联。
+      ⚠️isSystem=true是内置套件（禁改，需克隆）；开发新套件 isSystem=false。
+    source: data/sources/backend/AutoOps/inspection/internal/database/cmdb/info/message.go:10-54; 真调实测 weblogic(6350f72ef0491)/mssql
+    api: insp_info
+    fields:
+      instanceId: { type: string, anchor: true, pattern: '^[0-9a-z]{13}$', desc: "套件实例ID（13hex，平台生成）" }
+      id: { type: string, anchor: true, required: true, pattern: '^[a-zA-Z_][0-9a-zA-Z_]{0,31}$', desc: "⚠️pluginId，套件唯一标识（英文如 mysql/redis）。包根目录名/所有对象pluginId 必须一致于此。≠instanceId" }
+      name: { type: string, required: true, desc: "套件显示名（中文），如 MySQL巡检" }
+      objectId: { type: string, required: true, desc: "巡检目标 CMDB 模型 id（如 MYSQL@ONEMODEL）。开发前必须确认模型存在（flow step 1-3 门禁）" }
+      objectName: { type: string, desc: "目标对象显示名" }
+      method: { type: string, desc: "巡检方式（agent=远程主机执行，默认）" }
+      keys: { type: array, items: string, desc: "唯一键列表（CMDB属性id，定位巡检实例）。DB类常用 [serverName]" }
+      isSystem: { type: bool, desc: "⚠️true=内置套件（禁改）；开发新套件 false" }
+      isApp: { type: bool, desc: "是否应用类" }
+      counterSideId: { type: string, desc: "对端模型（DB/中间件类常用 HOST，执行宿主机）" }
+      relationIdWithHost: { type: string, desc: "与HOST的关系id（agent 找执行宿主机用）。格式 <模型>_host_<模型>_HOST" }
+      status: { type: string, desc: "状态（ok/object_deleted/keys_deleted/...，平台维护，只读）" }
+      subPlugins: { type: array, desc: "子插件（组合套件用）" }
+      memo: { type: string, desc: "备注" }
+      creator: { type: string, desc: "创建人（平台填，只读）" }
+      ctime: { type: string, desc: "创建时间（只读）" }
+    relations:
+      - { to: insp_collector, type: composition, cardinality: "1:N", via: pluginId, desc: "套件挂多个采集脚本（通常1个）" }
+      - { to: insp_metric_group, type: composition, cardinality: "1:N", via: pluginId, desc: "套件挂多个指标组" }
+      - { to: insp_template, type: composition, cardinality: "1:N", via: pluginId, desc: "套件挂多个报告模板（可选）" }
+      - { to: cmdb_model, type: reference, cardinality: "N:1", via: objectId, desc: "套件关联巡检目标 CMDB 模型" }
+    constraints:
+      - "id（pluginId）全局唯一；所有对象 pluginId 必须一致（导入强校验）"
+      - "isSystem=true 内置套件禁改，需 clone 后改 pluginId"
+
+  insp_collector:
+    description: "巡检采集脚本（INSPECTION_COLLECTOR）。py2 脚本+args 参数定义。⚠️脚本协议见 formats/inspection-kit/script-protocol.yaml（与采集套件完全不同）"
+    source: data/sources/backend/AutoOps/inspection/internal/database/cmdb/collector/message.go:9-46; 真调实测 weblogic/mssql/oracle
+    api: insp_collector
+    fields:
+      instanceId: { type: string, anchor: true, pattern: '^[0-9a-z]{13}$' }
+      pluginId: { type: string, required: true, desc: "所属套件 id（=insp_info.id）" }
+      name: { type: string, desc: "脚本名（通常 script）" }
+      script: { type: string, enum: [python, shell], desc: "脚本类型（python=py2.7默认）" }
+      args: { type: array, items: insp_arg, desc: "参数定义数组（key/alias/type/require/source/default）。详见 formats/inspection-kit/args-design.yaml，含password类型规范" }
+      content: { type: string, desc: "Python/Shell 源码（py2 语法，协议见 script-protocol.yaml：参数注入头+start/end标记+instanceId标记）" }
+    side_effects:
+      - op: insp_collector.debug
+        rule: "在线试跑脚本（开发调试用），不持久化。可验证脚本输出是否符合 start/end 标记协议"
+
+  insp_arg:
+    description: "巡检脚本参数定义（insp_collector.args 元素）。运行时按 source/type 决定取值与注入方式"
+    source: data/sources/backend/AutoOps/inspection/internal/database/cmdb/collector/message.go:21-46
+    fields:
+      key: { type: string, required: true, desc: "参数键名。custom注入为无前缀变量；attr_id注入为 EASYOPS_<key>" }
+      alias: { type: string, required: true, desc: "参数显示名（中文）" }
+      type: { type: string, required: true, enum: [text, password], desc: "⚠️text=普通；password=密码（加密存储）。密码类即使手填也必须password，禁止text明文" }
+      require: { type: bool, desc: "是否必填" }
+      source: { type: string, required: true, enum: [custom, attr_id], desc: "custom=用户填写；attr_id=从CMDB实例属性取" }
+      default: { type: string, desc: "默认值（custom适用）" }
+
+  insp_metric_group:
+    description: "巡检指标组（INSPECTION_METRIC_GROUP）。含子指标 vals（阈值 conditions）+维度 dims。⚠️阈值平台判分（脚本只出原始值）"
+    source: data/sources/backend/AutoOps/inspection/internal/database/cmdb/metrics/message.go:13-89; 真调实测 weblogic(8组)
+    api: insp_metric_group
+    fields:
+      instanceId: { type: string, anchor: true, pattern: '^[0-9a-z]{13}$' }
+      id: { type: string, required: true, desc: "指标组业务id（套件内唯一）。⚠️脚本输出 payload[].id 必须对应此" }
+      pluginId: { type: string, required: true, desc: "所属套件 id（与insp_info.id一致）" }
+      name: { type: string, desc: "指标组显示名" }
+      category: { type: string, required: true, pattern: '^([^.]*\.)*[^.]*$', desc: "⚠️两级分类点分（如 整体状态.连接数，正好1个点，否则报分类格式错误）" }
+      dims: { type: array, items: object, desc: "维度列[{id,name}]" }
+      vals: { type: array, items: insp_val, desc: "指标值列表（至少1个）。每项id必须与脚本输出 vals[].id 对应" }
+    side_effects:
+      - op: insp_metric_group.update
+        rule: "Update 时 vals 必填（至少1个）。删掉的 val 级联删 task 和 report_template 中的引用"
+        source: "metric_group_service.go:164,182-194"
+      - op: insp_metric_group.delete
+        rule: "删组级联删 report_template 和 task 中的引用"
+
+  insp_val:
+    description: "巡检指标（insp_metric_group.vals 元素）。含阈值 conditions，平台执行后判分"
+    source: data/sources/backend/AutoOps/inspection/internal/database/cmdb/metrics/message.go:80-89; internal/database/cmdb/task/message.go:130-151
+    fields:
+      id: { type: string, required: true, desc: "指标id（套件内唯一）。⚠️脚本输出 vals[].id 必须对应此" }
+      name: { type: string, desc: "指标显示名" }
+      type: { type: string, required: true, enum: [string, int], desc: "⚠️仅string|int（无float）。决定 conditions 可用 comparator" }
+      unit: { type: string, desc: "单位" }
+      weight: { type: integer, desc: "权重0-100，影响评分" }
+      conditions: { type: array, items: insp_condition, desc: "阈值条件数组（平台据此判定异常level）。详见 formats/inspection-kit/metric-threshold.yaml" }
+
+  insp_condition:
+    description: "阈值条件（insp_val.conditions 元素）"
+    source: data/sources/backend/AutoOps/inspection/internal/database/cmdb/task/message.go:135-151
+    fields:
+      comparators: { type: string, enum: [between, gt, lt, eq, neq, in, nin], desc: "比较器。int用between/gt/lt/eq/neq；string用in/nin/eq/neq" }
+      level: { type: integer, enum: [0, 5, 10], desc: "⚠️仅0/5/10=notice/warn/emergency（对应80/50/20分）" }
+      value: { type: string, desc: "阈值串（type=string 时用：in/nin包含串、eq/neq比较串）" }
+      maxValue: { type: number, desc: "区间上限（type=int 的 between）" }
+      minValue: { type: number, desc: "区间下限（type=int 的 between/gt触发下限）" }
+
+  insp_template:
+    description: "巡检报告模板（INSPECTION_REPORT_TEMPLATE，可选）。详情模板(metricgroups)+总览模板(summarytemplates)"
+    source: data/sources/backend/AutoOps/inspection/internal/database/cmdb/report_template/message.go:10-84
+    api: insp_template
+    fields:
+      instanceId: { type: string, anchor: true, pattern: '^[0-9a-z]{13}$' }
+      name: { type: string, required: true, desc: "模板名" }
+      pluginId: { type: string, desc: "所属套件 id" }
+      metricgroups: { type: array, desc: "详情模板（displaytype: LineChart/BarChart/Form/CycleChart）" }
+      summarytemplates: { type: object, desc: "总览模板（displaytype: Form/LineChart/BarChart/DoughnutChart/Card）" }
+    side_effects:
+      - op: insp_template.delete
+        rule: "⚠️前置：模板被巡检任务引用拒删（『已关联巡检任务，不可删除』）"
+        source: "template_service.go:182-205"
+
+  insp_task:
+    description: "巡检任务（v1主线，关联套件+巡检目标+调度+通知）。e2e: create建任务→调度触发产生jobId→history查结果"
+    source: data/sources/backend/AutoOps/inspection/internal/database/cmdb/task/message.go:22-60
+    api: insp_task
+    fields:
+      instanceId: { type: string, anchor: true, pattern: '^[0-9a-z]{13}$', desc: "任务实例id（=inspectionTaskId，13hex）" }
+      inspectionTaskId: { type: string, desc: "任务id（同instanceId）" }
+      pluginId: { type: string, required: true, desc: "关联套件id（=insp_info.id）" }
+      name: { type: string, required: true, desc: "任务名" }
+      targets: { type: array, items: object, desc: "巡检目标实例[{instanceId(必填)}]。" }
+      taskType: { type: string, enum: [once, crontab], desc: "调度类型（once=单次绝对时间/crontab=cron表达式）" }
+      taskScheduler: { type: string, desc: "once=2006-01-02 15:04:05；crontab=cron" }
+      taskSchedulerId: { type: string, desc: "外部scheduler返回的定时任务id（只读）" }
+      args: { type: array, items: object, desc: "连接参数[{key,value}]（username/password/db_name等，对应脚本args定义）" }
+      vals: { type: array, items: object, desc: "阈值覆盖（valSet=false用自定义conditions，否则套件默认）" }
+      isAllNotify: { type: bool, desc: "是否全量通知" }
+      notifyMethod: { type: string, desc: "通知方式（email）" }
+      notifyUser: { type: array, desc: "通知人" }
+      creator: { type: string, desc: "创建人（只读）" }
+    side_effects:
+      - op: insp_task.create
+        rule: "创建后注册外部 scheduler（once到点/crontab周期回调 inspection 执行）。无内置cron，定时委托外部scheduler服务"
+      - op: insp_task.delete
+        rule: "删任务同步删外部 scheduler 注册"
+
+  insp_history:
+    description: "巡检执行历史与结果（v1，按jobId查）。执行产生jobId→list看历史→get看详情（评分/达标）→abnormal下钻"
+    source: data/sources/backend/AutoOps/inspection/internal/database/tsdb/job_history/api.go:8-42; job_result/api.go:11-37
+    fields:
+      jobId: { type: string, anchor: true, desc: "执行id（历史主键）" }
+      pluginId: { type: string, desc: "套件id" }
+      inspectionTaskId: { type: string, desc: "任务id" }
+      targets: { type: array, items: object, desc: "每目标结果[{instanceId,status,score,ip,hostname}]（status:normal/abnormal/failed）" }
+      status: { type: string, enum: [run, ok, failed], desc: "执行状态（ok=至少1目标正常执行）" }
+      passingRate: { type: number, desc: "通过率=passingCount(normal+abnormal)/totalTargets" }
+      score: { type: number, desc: "总评分（加权，详见 formats/inspection-kit/metric-threshold.yaml score_algorithm）" }
+      startTime: { type: string, desc: "开始时间" }
+      endTime: { type: string, desc: "结束时间" }
+    constraints:
+      - "评分公式：v1 加权扣分（MaxScore100，level对应80/50/20，见 metric-threshold.yaml）"
+      - "状态：脚本失败→failed(0分)；成功有异常→abnormal；成功无异常→normal"
 api_behavior:
   pagination:
     rule: "list/search 分页时 api-cli 以流式 NDJSON 输出——每行一个完整对象，非 {data:{list:[...]}} 包装。解析须逐行 json.loads。单对象接口（detail）才是 {code,data:{...}}。"

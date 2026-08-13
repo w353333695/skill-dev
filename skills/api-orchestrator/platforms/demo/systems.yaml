@@ -667,3 +667,79 @@ systems:
     acceptance_urls:
       kit_list: "${EASYOPS_COLLECTOR_FRONTEND_URL}/next/collect-platform/kit-repo/list?page=1&q={keyword}"   # 用户前端实测(2026-08-13)
       kit_detail: "${EASYOPS_COLLECTOR_FRONTEND_URL}/next/monitor-kit/kit/easyops/{instanceId}/detail"   # 用户前端实测(2026-08-13)
+
+  # ===========================================================================
+  # inspection —— 巡检服务（套件开发/管理/执行/历史）
+  # ===========================================================================
+  inspection:
+    description: |
+      EasyOps 巡检服务（logic.inspection:8103）—— v1 体系（INSPECTION_INFO）。
+      巡检套件 = 4 对象组装（INSPECTION_INFO 元信息 + INSPECTION_COLLECTOR 脚本 + INSPECTION_METRIC_GROUP 指标组
+      + INSPECTION_REPORT_TEMPLATE 报告模板），pluginId 串联。
+      e2e 链路：建套件(4对象)→建任务(task)→调度执行产生 jobId→history 查结果/报告。
+      ⚠️实测定调（2026-08-13）：.90 平台当前用 v1（INSPECTION_INFO 20套件）；v2（INSP_SUITE 0套件）未启用，仅录兼容索引。
+      脚本协议/阈值/包格式见 formats/inspection-kit/。
+      与采集套件（collector-kit）完全不同：包 tar.gz(非zip)、参数注入脚本头(非环境变量)、输出 start/end标记(非[{dims,vals}])。
+
+    spec: easyops-inspection.yaml
+    default_endpoint: backend                # 直连 :8103（全 verb 通用）
+
+    endpoints:
+      backend:                               # 直连后端（HTTP，无 path 前缀）
+        base_url: ${EASYOPS_INSPECTION_BACKEND_URL}
+        host: admin.easyops.local
+      frontend:
+        base_url: ${EASYOPS_CMDB_FRONTEND_URL}
+        host: admin.easyops.local
+
+    auth: easyops-cookie
+
+    env:
+      EASYOPS_INSPECTION_BACKEND_URL: ""     # :8103 完整 URL
+
+    capabilities:
+      insp_info:           { create: "建套件元信息", list: "套件列表", get: "套件详情", update: "改套件", delete: "删套件", clone: "克隆套件" }
+      insp_metric_group:   { create: "建指标组", list: "指标组列表", get: "组详情", update: "改组(含阈值)", delete: "删组(级联)" }
+      insp_collector:      { create: "建脚本(py2+args)", list: "脚本列表", get: "脚本详情", update: "改脚本", delete: "删脚本", debug: "在线试跑脚本" }
+      insp_template:       { create: "建报告模板", list: "模板列表", update: "改模板", delete: "删模板(前置查任务)" }
+      insp_task:           { create: "建任务(触发调度)", list: "任务列表", get: "任务详情", update: "改任务", delete: "删任务" }
+      insp_history:        { list: "执行历史", get: "执行详情(评分)", statistics: "执行统计", abnormal_metrics: "异常指标", export_excel: "导Excel", export_word: "导Word" }
+      insp_execution:      { terminate: "终止执行" }
+      insp_statistics:     { overview: "巡检总览", abnormal_metric_group: "异常指标组下钻" }
+      insp_package:        { export: "导出套件tar.gz(走SDK)", import: "导入套件(multipart走SDK)" }
+
+    runtime:
+      admin_user: easyops
+      env_required:
+        - "EASYOPS_INSPECTION_BACKEND_URL"
+        - "EASYOPS_ORG"
+        - "EASYOPS_USER"
+      ports: { inspection_backend: 8103, frontend: 80 }
+      host_header: admin.easyops.local
+      auth: "直连 backend（endpoint.auth=none）只需 org+user header。实测 8103 直 200（info/metric-groups/collector/history/overview 全通）"
+      suite_is_4_objects: |
+        ⚠️巡检套件=4对象组装（区别采集套件单模型）：INFO(元信息)+COLLECTOR(脚本)+METRIC_GROUP(指标组)+REPORT_TEMPLATE(模板)，
+        pluginId 串联。开发套件要建全 4 对象，或用导入导出（tar.gz 包含全部）。
+        各 CMDB objectId：INSPECTION_INFO@EASYOPS / INSPECTION_COLLECTOR@EASYOPS / INSPECTION_METRIC_GROUP@EASYOPS / INSPECTION_REPORT_TEMPLATE@EASYOPS。
+      v1_vs_v2: |
+        ⚠️两套体系：v1（INSPECTION_INFO，.90 当前 20套件，本服务主线）vs v2（INSP_SUITE，0套件未启用）。
+        v1 包=tar.gz(5文件：info.yaml/metrics.yaml/collectors/script.py[内容是YAML!]/reports_temp/detail.yaml/models.json)；
+        v2 包=suite.json+tools/*.tar.gz（单文件组合式，未来方向但当前无数据）。
+        详见 formats/inspection-kit/suite-package.yaml。
+      plugin_id_linkage: "所有对象 pluginId 必须相同=info.id（导入强校验，不一致报『套件信息中,pluginId存在不同值』）"
+      package_not_idempotent: "⚠️导入不幂等：重复 pluginId 直接报错（mongo 重复键 E11000）。需先删旧套件或改 id"
+      script_protocol_differs: |
+        ⚠️巡检脚本协议与采集套件完全不同（formats/inspection-kit/script-protocol.yaml）：
+        - 参数：注入脚本头部变量赋值（非环境变量）；EASYOPS_前缀=instanceId/唯一键/CMDB属性，无前缀=自定义参数
+        - 输出：必须两组标记——INSTANCE ID START/END（结果归属）+ start/end（指标组数组JSON，id↔metrics.yaml精确对应）
+        - 阈值：平台判（脚本只出原始值），按 conditions 的 comparator/level 判分
+        - py2.7（/usr/local/easyops/python/bin/python）
+      metric_category_two_level: "metric_group 的 category 必须两级点分（如 整体状态.连接数，正好1个点，否则报『分类格式错误』）"
+      metric_threshold: "阈值 comparator/level/评分规则见 formats/inspection-kit/metric-threshold.yaml（level 仅 0/5/10=notice/warn/emergency，对应 80/50/20分）"
+      no_builtin_cron: "任务定时委托外部 scheduler 服务（taskType=once绝对时间/crontab cron表达式），inspection 不内置 cron"
+      import_rollback: "导入顺序：模型→套件→指标组→采集器→模板；metric失败回退删套件，collector失败回退删套件+指标组，model/template失败不回退"
+      multipart_uses_sdk: "import(multipart file)/export/excel/word(二进制流) api-cli 仅 --print-curl，真调走 curl -F / SDK"
+
+    acceptance_urls:
+      suite_list: "${EASYOPS_CMDB_FRONTEND_URL}/next/automatic-inspection/suite"   # 待前端实测确认精确路径
+      history_detail: "${EASYOPS_CMDB_FRONTEND_URL}/next/automatic-inspection/inspection/{{plugin_id}}/history/{{job_id}}/summary-report"   # 源码 config.go:126 模板
