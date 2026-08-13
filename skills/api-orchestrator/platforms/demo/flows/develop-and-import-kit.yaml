@@ -19,7 +19,43 @@ prerequisites:
 
 steps:
   - n: 1
-    desc: "确定套件类型+采集目标+指标，生成 plugin.yaml + src/<script>.py + origin_metric.json + alias_metric.json + metric_set.json + readme"
+    desc: "需求确认：明确采集对象（什么设备/服务）、采集内容（监控指标 / CMDB 配置）、采集方式（SNMP/HTTP/CLI/SQL）、采集参数来源。向用户确认套件类型+目标 CMDB 模型（客户预期是已有模型还是需新建）"
+    expect: "得到：套件类型倾向（simple-script/metricbeat/exporter）、目标模型ID（若有）、采集对象清单、参数来源（哪些从CMDB实例取、哪些用户填）"
+    note: "⚠️此步是【硬前置门禁】——必须先和客户对齐需求，禁止跳过直接生成套件"
+
+  - n: 2
+    op: object_model.list
+    args: ["--q <采集对象关键词>", "--category <分类>"]
+    desc: |
+      【CMDB 模型确认——必做】在 CMDB 查是否已有合适的采集目标模型。
+      用关键词/分类搜模型（demo cmdb 的 object_model.list），找到候选后 object_model.detail 看 attrList/relation_list 是否满足采集需求（能存下要采集的字段）。
+      若找到合适模型 → 记下 objectId，跳到 step 4（生成套件）。
+      若没找到 → step 3 设计新模型。
+    dataflow: |
+      api-cli（deployment=demo）：
+        scripts/run.sh --spec easyops-cmdb.yaml object_model list --q <关键词> --page 1 --pageSize 20
+        scripts/run.sh --spec easyops-cmdb.yaml object_model detail <候选objectId>
+      判断标准：模型 attrList 含采集目标字段（如 HOST 有 ip/hostname）；relation_list 能挂采集结果。
+    expect: "确定目标模型 objectId（已有）或确认需新建（进 step 3）"
+
+  - n: 3
+    desc: |
+      【模型设计+客户确认——仅当 step 2 未找到合适模型时】
+      设计新模型：模型名/objectId、属性清单（id+类型+显示名）、关系（关联到哪个父模型）。
+      ⚠️模型设计必须【向客户确认】——属性是否齐全、字段类型是否合适、关系方向是否符合业务。
+      客户确认后用 object_model.import 声明式建模型（demo cmdb 的 import，upsert 一次定义属性+关系+视图）。
+    dataflow: |
+      设计产出（向客户确认）：
+        - 模型 objectId（如 XXX_MONITOR_POINTS，正则 ^[a-zA-Z_][0-9a-zA-Z_]{0,46}(@[A-Z]{1,16})?$）
+        - 属性清单 attrList：[{id, type[int/str/float/struct...], name(显示名), required}]
+        - 关系 relation_list：[{left_id, right_object_id, name}]（关联父模型，如挂到 HOST）
+      客户确认后建模型：
+        scripts/run.sh --spec easyops-cmdb.yaml object_model import --body-file <model-def.json>
+    expect: "客户确认属性+关系 → object_model.import 建成 → object_model.detail 复核 → 拿到 objectId 进 step 4"
+    note: "⚠️属性设计影响套件参数（$.attr 只能引用模型真实存在的属性）和采集输出（vals 字段要对应模型属性）。设计错了套件激活会失败。"
+
+  - n: 4
+    desc: "确定套件类型+采集目标+指标，生成 plugin.yaml + src/<script>.py + origin_metric.json + alias_metric.json + metric_set.json + readme。⚠️plugin.yaml 的 relateObjectId 必须填 step 2/3 确定的 objectId"
     dataflow: |
       类型选择（formats/collector-kit/plugin-yaml-schema.yaml kit_types）：
         - simple-script（最灵活，自定义脚本）→ agentType=easyops
@@ -31,15 +67,16 @@ steps:
         - CMDB采集 → process_sampler（脚本输出 BEGIN/END GATHERING DATA 标记包裹，dims含object_id/pks/upsert）
       参数设计（formats/collector-kit/param-mechanism.yaml）：
         - 设备属性（ip/instanceId/hostname）→ defaultValue: $.field, paramType=cmdb
+          ⚠️$.field 的 field 必须 step 2/3 确认的模型 attrList 里真实存在（否则导入报错『$.类型的参数要来源于cmdb模型且有应用场景』）
         - 用户填写 → defaultValue: "", paramType=const
         - 密钥 → isFromSecret:true, isEncrypt:true（自动注入 secretName）
-  - n: 2
+  - n: 5
     desc: "本地模拟环境变量跑脚本，验证输出格式（metric 检查 [{dims,vals}]；process 检查 GATHERING DATA 标记）"
     expect: "stdout 输出合法 JSON；dims/vals 齐全；vals 数值型（metric）"
-  - n: 3
+  - n: 6
     desc: "用 pack_kit.py 打 zip（ZIP_STORED + UTF-8 flag，排除 .version/.git/__pycache__）"
     expect: "zip 顶层目录名 = plugin.yaml name；UTF-8 flag 全覆盖"
-  - n: 4
+  - n: 7
     desc: "查 cmdb _COLLECTOR_EASYOPS_PLUGIN by name 确定走新建/覆盖/拒绝"
     dataflow: "POST /v3/object/_COLLECTOR_EASYOPS_PLUGIN/instance/_search {query:{name:<套件名>},fields:[instanceId,name,protected,status]}"
     expect: "total=0→新建(upsert=false)；total>0且protected=false→覆盖(upsert=true)；protected=true→改名"
