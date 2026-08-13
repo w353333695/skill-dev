@@ -987,6 +987,231 @@ objects:
 # =============================================================================
 # 接口级行为（跨对象，编排时必须知道）
 # =============================================================================
+  # ===========================================================================
+  # collector 域对象（采集套件）—— 原 collector deployment 合并，2026-08-13
+  # ===========================================================================
+  # ===========================================================================
+  # collector_plugin —— 采集套件（核心对象，对应 api-cli resource: plugin）
+  # ===========================================================================
+  collector_plugin:
+    description: |
+      EasyOps 采集套件。一个套件 = 类型(simple-script/metricbeat/exporter/prometheus) + 关联CMDB模型(relateObjectId)
+      + 采集参数(paramDefine) + 指标定义(origin_metric/alias_metric/metric_set) + 可选(dashboard/alertRule)。
+      3 类型各有独立 create/update 端点（字段集不同），无单 type 字段做联合判别（由端点隐式区分）。
+      字段结构权威源：plugin.detail 真调（2026-08-13）+ easyops_plugin_service.go 响应映射:572-677。
+    source: data/sources/backend/HyperInsight/collector_plugin_service/easyops_plugin/easyops_plugin_service.go:572-677（GetPlugin/ListPlugin 响应映射）
+    api: plugin
+    fields:
+      # —— 主键 / 锚 ——
+      instanceId:
+        type: string
+        anchor: true
+        pattern: '^[0-9a-z]{13}$'
+        desc: "套件实例ID（13hex 微秒时间戳）。create 返回；detail/delete/update path 参数。CMDB 模型 _COLLECTOR_EASYOPS_PLUGIN 的主键"
+      name:
+        type: string
+        required: true
+        desc: "套件名（中文）。⚠️zip顶层目录名/上传name参数/import_update 隐式必须与此一致。命名建议『XXX监控套件』（监控）/『XXX信息采集』（CMDB采集）"
+      agentType:
+        type: string
+        required: true
+        enum: [easyops, metricbeat, prometheus, log, zabbix-agent, sql, filebeat, cloudScript, eventScan, detect, process, cloudSdk, remoteScan, localScan, eBPFCollect]
+        desc: "采集器类型（运行态身份）。simple-script=easyops, metricbeat=metricbeat, exporter/prometheus=prometheus。⚠️升级不可变。真调见 eventScan 等更多值"
+      samplerType:
+        type: string
+        default: metric_sampler
+        enum: [metric_sampler, process_sampler, event_sampler, trace_sampler, log_sampler, detect_sampler, pipeline_sampler]
+        desc: "采样器，决定 collector_service 路由+脚本输出协议。metric_sampler(监控)/process_sampler(CMDB采集)。详见 formats/collector-kit/sampler-types.yaml"
+      type:
+        type: string
+        desc: "套件包类型（plugin.yaml.type）：simple-script/metricbeat/exporter。由 agentType 映射（imexport_service.go:85-90），非独立字段"
+      relateObjectId:
+        type: string
+        pattern: '^[a-zA-Z_][0-9a-zA-Z_]{0,46}(@[A-Z]{1,16})?$'
+        desc: "关联CMDB模型ID（采集数据归属）。如 HOST@ONEMODEL。$.attr 引用字段须属此模型"
+
+      # —— 版本 / 包 ——
+      packageId: { type: string, pattern: '^[a-fA-F0-9-]+$', desc: "程序包ID（UUID），package 型套件用" }
+      packageVersionId: { type: string, desc: "程序包版本ID。⚠️create_with_package 服务层强校验非空（validator树未覆盖）" }
+      packageVersion: { type: string, desc: "程序包版本号" }
+      packageUrl: { type: string, desc: "脚本包URL（script 型）" }
+      installPath: { type: string, desc: "安装路径（无空格标识符），create 时默认=name" }
+      installInfo: { type: "object|null", desc: "安装信息" }
+
+      # —— 脚本（simple-script）——
+      scriptType: { type: string, enum: [python, shell, json], desc: "脚本类型（仅 simple-script）。⚠️Python2.7 运行时" }
+      interpreter: { type: string, desc: "解释器路径（空=内置py2.7）" }
+      content: { type: string, desc: "脚本内容/配置内容（log_plugin 存 processSteps 序列化JSON）" }
+      encodeType: { type: string, desc: "编码类型（metricbeat）" }
+      template: { type: string, desc: "metricbeat 配置模板（Go template）" }
+      metricbeatName: { type: string, desc: "metricbeat 模块名（redis/mysql/nginx，对应 conf.module.yaml）" }
+
+      # —— 参数 / 处理 ——
+      params: { type: array, items: collector_param, desc: "采集参数定义列表（paramDefine）。机制见 formats/collector-kit/param-mechanism.yaml" }
+      processors: { type: array, items: object, desc: "后处理函数链 {name,action{func,param},output,parents}。metricbeat 几乎必用，simple-script 通常空" }
+      extInfo: { type: "object|null", desc: "扩展信息" }
+      collectAgent: { type: string, desc: "采集Agent取值，常用 $.ip（从CMDB实例动态取）" }
+      collectType: { type: array, items: string, desc: "采集类型列表" }
+      jobFilter: { type: "null", desc: "采集范围过滤，通常null" }
+
+      # —— 元信息 ——
+      category: { type: string, desc: "分类（计算资源/网络资源/数据库/中间件/自定义，点分多级）" }
+      memo: { type: string, desc: "备注" }
+      icon: { type: "object|null", desc: "图标{Icon,Lib,Category,Prefix,Color}" }
+      image: { type: string, desc: "套件图标URL" }
+      picURLs: { type: array, items: string, desc: "截图URL列表" }
+      readme: { type: string, desc: "文档" }
+
+      # —— 指标（关联，套件激活后才有数据）——
+      aliasMetrics: { type: array, items: collector_alias_metric, desc: "别名指标（告警指标）列表" }
+      metricSets: { type: array, items: object, desc: "指标集列表" }
+      metricThresholdRules: { type: array, items: object, desc: "指标阈值规则" }
+      dashboards: { type: array, items: object, desc: "仪表盘列表" }
+      alertRules: { type: array, items: object, desc: "告警规则列表" }
+
+      # —— plugin.yaml 元信息（导出/详情含）——
+      pluginYaml: { type: object, desc: "plugin.yaml 元信息 {Version,Name,Type,Command}" }
+
+      # —— 只读审计字段（真调实锤）——
+      status: { type: string, enum: [enabled, available], desc: "套件状态。enabled=内置(protected禁覆盖)/available=自定义(可覆盖)。⚠️赋值在外部域服务，本服务只读回显" }
+      creator: { type: string, desc: "创建人（真调见 defaultUser/easyops）" }
+      ctime: { type: string, desc: "创建时间（YYYY-MM-DD HH:MM:SS）" }
+      modifier: { type: string, desc: "修改人" }
+      mtime: { type: string, desc: "修改时间" }
+      protected: { type: bool, desc: "是否内置受保护。true 禁止覆盖上传（需改名）" }
+
+    relations:
+      - { to: collector_alias_metric, type: composition, cardinality: "1:N", via: aliasMetrics, desc: "一个套件定义多个别名指标" }
+      - { to: cmdb_model, type: reference, cardinality: "N:1", via: relateObjectId, desc: "套件关联CMDB模型（采集数据归属）" }
+      - { to: collector_job, type: association, cardinality: "1:N", via: plugins.instanceId, desc: "套件被采集任务引用（_COLLECTOR_JOB.plugins）" }
+
+    constraints:
+      - "3 类型各有独立 create/update 端点（无单 type 字段联合判别，由端点隐式区分）"
+      - "升级（import_update）时 agentType 不可变（报『更新套件时不允许变更套件类型』）"
+      - "升级时 version 必须唯一（重复报『已存在同名版本』）"
+      - "删除前置：未被 _COLLECTOR_JOB 引用"
+      - "$.attr 参数引用的字段必须属于 relateObjectId 模型（含继承链）真实属性"
+
+    side_effects:
+      - op: plugin.delete
+        rule: "删除前置：查 _COLLECTOR_JOB by plugins.instanceId，有引用报『此套件关联有采集任务不允许删除』。删除级联清空 MetricObjectId 下所有 collectorPlugin.instanceId==id 的指标实例（分页500批量删）。非软删（物理删 domainService.Delete）"
+        source: "easyops_plugin_service.go:461-476,483-531"
+      - op: plugin.create_with_script
+        rule: "任一 param isFromSecret=true 且无 secretName 参数→自动注入 secretName 参数（display=false，use 继承首个secret参数）。调 domainService.Create"
+        source: "easyops_plugin_service.go:138-165"
+      - op: plugin.update_with_script
+        rule: "对已存在参数强制保留旧 isEncrypt/isFromSecret（不可改）。Processors 用空切片重建（非追加）。ExtInfo 直接用请求值（不保留旧）。包版本变更→UpdateInstance 标记 _COLLECTOR_EASYOPS_PLUGIN modification.modified=true"
+        source: "easyops_plugin_service.go:715-718,737,752,780-798"
+      - op: plugin.update_with_metricbeat
+        rule: "⚠️与 script update 行为相反：Processors 继承旧值再 append；ExtInfo 保留旧值仅 request 非空时覆盖"
+        source: "easyops_plugin_service.go:221-239"
+      - op: plugin.update_with_package
+        rule: "packageId/packageVersionId 必填校验【被注释掉】（与 create_with_package 强校验不一致）。其余同 script update"
+        source: "easyops_plugin_service.go:806-808"
+      - op: plugin_package.import
+        rule: "同名冲突默认报错，upsert=true 覆盖。importOther 导入附属资源（metric/关联模型/dashboard/alertRule/自动发现策略/资源发现配置/版本关系）+ PostEvent 发『安装套件』事件"
+        source: "imexport_service.go:369-376,473-500,754-817"
+      - op: plugin_package.import_update
+        rule: "升级：取旧实例→版本冲突校验→解压→agentType不可变校验→参数加密位继承（唯一迁移）→UpsertPlugin→importOther。无显式回滚（UpsertPlugin 成功但 importOther 失败=部分失败无补偿）"
+        source: "imexport_service.go:555-670"
+      - op: plugin_package.export
+        rule: "导出 zip 含：套件包本体（存储后端tar.gz重组为zip）+重写plugin.yaml+可选dashboard+关联metric+关联资源+readme。流式20KB chunk返回，写完异步删临时文件"
+        source: "imexport_service.go:191-322"
+
+    api_behavior:
+      list_pagination: "plugin.list 响应是 {code,data:{list,total,page,page_size}}，total 在 data.total（body内），非 api-cli stderr _meta.total。计数读 data.total"
+      response_wrapper: "标准响应 {code,codeExplain,error,data}；code=0 成功。error 字段含可读错误（如『此套件关联有采集任务不允许删除』）"
+      create_response: "3 个 create 端点响应 data:{instanceId}（13hex），用于后续 detail/delete/activate"
+      detail_full_fields: "plugin.detail 返回全字段（含只读审计字段+pluginYaml），list 是精简版（不含 content/template/readme/pluginYaml/creator/ctime/mtime）"
+
+  # ===========================================================================
+  # collector_param —— 采集参数（paramDefine 元素）
+  # ===========================================================================
+  collector_param:
+    description: "采集参数定义（paramDefine 元素）。运行时注入环境变量 EASYOPS_COLLECTOR_<name>。详细机制见 formats/collector-kit/param-mechanism.yaml"
+    source: data/sources/backend/HyperInsight/collector_plugin_service/easyops_plugin/easyops_plugin_service.go:45-63
+    fields:
+      name: { type: string, required: true, desc: "参数名。环境变量 EASYOPS_COLLECTOR_<name>（大小写敏感）" }
+      valueType: { type: string, required: true, enum: [string, int, boolean, password], desc: "值类型。password 配合 isEncrypt" }
+      defaultValue: { type: string, desc: "默认值。$.开头=动态参数(paramType=cmdb)；非空非$=普通参数(const)；空串=必填用户填" }
+      display: { type: bool, default: true, desc: "是否界面展示。secretName 等隐藏参数 display=false" }
+      displayName: { type: string, desc: "界面显示名（中文）" }
+      description: { type: string, desc: "参数描述" }
+      use: { type: string, required: true, enum: [collectorParams, instanceMapping], desc: "用途。collectorParams=连接参数，instanceMapping=实例映射" }
+      optional: { type: bool, desc: "是否可选。false=必填" }
+      isEncrypt: { type: bool, desc: "是否加密存储。Update 时对已存在参数强制保留旧值（不可改）" }
+      isFromSecret: { type: bool, desc: "是否从密钥管理获取。Update 时强制保留旧值。任一 true 且无 secretName→自动注入 secretName" }
+      secretName: { type: string, desc: "密钥实例名（isFromSecret=true 时平台填充）" }
+      extraArgs: { type: "object|null", desc: "额外参数{isSingleChoice,srcObjectId,isDisplayLink,linkText,query}" }
+
+  # ===========================================================================
+  # collector_alias_metric —— 别名指标（告警指标）
+  # ===========================================================================
+  collector_alias_metric:
+    description: "别名指标（告警指标）。基于 origin_metric 派生，用于 dashboard/alertRule 引用。存 CMDB CollectorAliasMetric 模型"
+    source: data/sources/backend/HyperInsight/collector_plugin_service/internal/plugin_package/types.go:29-46
+    fields:
+      name: { type: string, anchor: true, desc: "别名指标名（dashboard/alertRule 引用此）。⚠️不能与 CMDB 模型属性ID/关系ID 同名，否则激活失败。建议加前缀 m_/mon_/metric_" }
+      displayName: { type: string, desc: "显示名" }
+      objectId: { type: string, desc: "所属CMDB模型（同套件 relateObjectId）" }
+      dataType: { type: string, enum: [double, string, long], desc: "数据类型" }
+      type: { type: string, desc: "指标类型" }
+      dims: { type: array, items: object, desc: "维度定义[{dimName,originDimName,isArray,dimDisplayName}]" }
+      metricSet: { type: string, desc: "所属指标集（默认『默认指标集』）" }
+      originalMetrics: { type: array, desc: "关联原始指标（origin_metric 的 key）" }
+      unit: { type: string, desc: "单位" }
+      expression: { type: string, desc: "计算表达式（PromQL 风格）" }
+    constraints:
+      - "displayName 在同 objectId 内不能重复（pluginutil.go:390-393）"
+      - "name 不能与 CMDB 模型属性ID/关系ID 同名（否则激活失败）"
+
+  # ===========================================================================
+  # collector_job —— 采集任务（_COLLECTOR_JOB 模型，激活产物）
+  # ===========================================================================
+  collector_job:
+    description: |
+      采集任务（_COLLECTOR_JOB CMDB 模型）。激活套件（kit.activate）触发 AssignJobs 生成的运行态任务。
+      关联套件方式：plugins 字段存 pluginInstanceId 列表。生命周期在 collector_service:8125（旧版有 collector_job CRUD 端点）。
+    source: tmp/源代码/collector_service/cmd/collector_service/conf/contract/easyops/model/collector_service/CollectorJob.yaml
+    api: collector_job   # 注：collector_job 端点在 collector_service:8125，本 deployment 暂未录其 spec（kit 能力优先）
+    fields:
+      instanceId: { type: string, anchor: true, pattern: '^[0-9a-z]{13}$', desc: "任务实例ID" }
+      objectId: { type: string, desc: "监控目标模型ID" }
+      jobName: { type: string, desc: "任务名" }
+      filter: { type: string, desc: "采集范围过滤" }
+      enabled: { type: bool, desc: "是否启用。AssignJobs 前置：enabled=true 才下发，false 则 RemoveJobs" }
+      interval: { type: integer, desc: "采集间隔（秒）" }
+      timeout: { type: integer, desc: "超时（秒）" }
+      agentType: { type: string, enum: [zabbix-agent, prometheus, easyops, custom, detect, log, snmp], desc: "采集器类型" }
+      plugins: { type: array, items: object, desc: "关联套件[{instanceId,...}]。AssignJobs 取 Plugins[0].InstanceId 作 kitId" }
+      collectorParams: { type: array, items: object, desc: "采集器参数[{key,value,paramType:const|cmdb}]" }
+      params: { type: array, items: object, desc: "采集参数[{key,value,paramType}]" }
+    constraints:
+      - "AssignJobs 前置三件：EnableAgentJob=true、Plugins 非空、Enabled=true（任一不满足静默失败）"
+      - "paramType 铁律：value 以 $. 开头必须 paramType=cmdb，否则 const（详见 formats/collector-kit/param-mechanism.yaml）"
+    side_effects:
+      - op: kit.activate
+        rule: "激活触发 AssignJobs（assign_job.go:28）：CMDB事件驱动→OnCmdbObjectChange→AssignJobs→生成任务下发 collector_proxy_server + 刷新 kit 统计。兜底 HyperInsightJobRefreshTask 每 600s refresh 全量"
+        source: "tmp/源代码/collector_service/agent_job/assign_job.go:28-115"
+
+  # ===========================================================================
+  # log_plugin —— 日志套件
+  # ===========================================================================
+  log_plugin:
+    description: "日志采集套件（log_plugin）。与监控套件区别：用 processSteps 链式处理（非脚本），samplerType=pipeline_sampler，scriptType 固定 json。每个 step 必须有 action"
+    source: data/sources/backend/HyperInsight/collector_plugin_service/log_plugin/log_plugin_service.go
+    api: log_plugin
+    fields:
+      instanceId: { type: string, anchor: true, pattern: '^[0-9a-z]{13}$' }
+      name: { type: string, required: true, desc: "套件名" }
+      relateObjectId: { type: string, pattern: '^[a-zA-Z_][0-9a-zA-Z_]{0,46}(@[A-Z]{1,16})?$' }
+      content: { type: string, desc: "processSteps 序列化的 JSON" }
+      processSteps: { type: array, items: object, desc: "处理流程链[{name,parents,output,action{func,param}}]，action 必填" }
+    side_effects:
+      - op: log_plugin.delete
+        rule: "删除前置：不能被日志采集任务引用（COLLECTOR_LOG_JOB@EASYOPS），否则拒删"
+        source: "log_plugin_service.go:50-62"
+
 api_behavior:
   pagination:
     rule: "list/search 分页时 api-cli 以流式 NDJSON 输出——每行一个完整对象，非 {data:{list:[...]}} 包装。解析须逐行 json.loads。单对象接口（detail）才是 {code,data:{...}}。"
@@ -1204,3 +1429,13 @@ api_behavior:
       validation: |
         provider __init__ 用 jsonschema validate self._config（必填项缺失 raise）。
         交付时配置项 schema 要在 provider 代码里声明（jsonschema config_schema，仿 two_paradigms 范式①的 hook 契约），缺必填启动即报清晰错。
+  # ---- collector api_behavior（原 collector deployment）----
+  kit_status_meaning:
+    rule: "kit.list 的 status 字段：enabled=平台内置套件（protected=true，禁覆盖）；available=用户自定义套件（protected=false，可覆盖）"
+    source: "tmp/easyops-cli/.../kits-develop/upload.md:206-209"
+  multipart_bypass_api_cli:
+    rule: "plugin_package 的 export/import/import_update 是 multipart/binary 流。api-cli 的 params.in 无 formData、response 无 --output 存文件。真调走 Python SDK（sdk/easyops_client.py 扩展 collector_plugin 方法）或 curl -F"
+    source: "formats/collector-kit/package-format.yaml api_cli_limitation"
+  protected_three_branch:
+    rule: "上传前校验同名套件 protected：不存在→新建(upsert=false)；存在且protected=false→覆盖(upsert=true)；存在且protected=true→禁覆盖需改名"
+    source: "formats/collector-kit/package-format.yaml protected_check"
