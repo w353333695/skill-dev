@@ -116,3 +116,37 @@ scripts/run.sh --spec platforms/demo/easyops-cmdb.yaml object_instance search PH
 | ③ 新建主机申请表单（多机/VM配置/物理机选实例）| 规划 | `form.save`（formDefinition 构造）→ flows/build-form.yaml |
 | ④ 加版本+主机类型多选+条件显示 | 规划 | `form_version.get` → 改 → `form_version.update`（done 版派生新草稿）→ flows/add-version.yaml |
 | ⑤ 删 test 表单 | 规划 | `form_version.delete` 清版本（末版本级联删 form）→ `form.delete` → flows/delete-form.yaml |
+
+---
+
+# 采集套件域（collector_plugin_service + collector_service）
+
+> 原 collector deployment 于 2026-08-13 合并入 demo（同一套 EasyOps 系统，迁移场景）。
+> 真调环境 172.30.0.90 / org 8888（collector 域已就绪；cmdb/autoops/itsm/sys-setting 暂在 .232 待迁）。
+
+## 两个系统
+
+- **collector_plugin_service:8151** —— 采集套件管理（CRUD/导入导出/指标导入）。spec: `easyops-collector-plugin.yaml`
+- **collector_service kit:12000** —— 套件激活/列表（⚠️8125 是旧版无 kit 模块，kit 端点在 12000，需 giraffe-contract-name header）。spec: `easyops-collector-service.yaml`
+
+## 关键认知（collector 域）
+
+1. **无启用/禁用端点** —— collector_plugin_service 无 enable/disable/activate。激活在 collector_service.kit.activate（:12000）。
+2. **激活机制** —— activate 触发 AssignJobs（CMDB事件驱动+600s兜底）。成功判定 totalStatus!=fail。
+3. **multipart 走 SDK** —— plugin_package.export/import/import_update 是 multipart/binary，api-cli 仅 --print-curl，真调走 curl -F / Python SDK。
+4. **list 计数坑** —— plugin.list 的 total 在 data.total（body内），非 stderr _meta.total。
+5. **采集脚本 py2.7** —— print 语句/requests/subprocess 无 timeout（详见 formats/collector-kit/sampler-types.yaml）。
+6. **两种 samplerType** —— metric_sampler 输出 [{dims,vals}]（监控）/ process_sampler 输出 GATHERING DATA 标记（CMDB采集，解析在 agent 端，proxy 纯转发）。
+7. **$.attr 取参** —— `$.` 开头配 paramType=cmdb，取值对象=采集目标实例（详见 formats/collector-kit/param-mechanism.yaml）。
+
+## 套件开发能力（formats/collector-kit/）
+
+跨部署复用的套件包格式知识（在 `formats/collector-kit/`）：plugin-yaml-schema / sampler-types / param-mechanism / package-format。
+e2e 流程：`flows/develop-and-import-kit.yaml` / `upgrade-plugin.yaml` / `delete-plugin.yaml`。
+
+## e2e 真调状态（2026-08-13）
+
+- ✅ collector_plugin_service:8151 完整验证（import/export/import_update/delete/metricbeat_list）
+- ⚠️ collector_service kit:12000 activate contract gap（ActivateCollectorKit@1.0.19 穷尽排查 not found，需前端抓包）
+- e2e 测试套件A『主机端口可达性监控套件』instanceId=658e73a176ad1 已导入保留
+- 详见 systems.yaml 的 e2e_verified 段
