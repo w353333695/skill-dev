@@ -115,6 +115,31 @@ systems:
       kit_list: "${EASYOPS_COLLECTOR_FRONTEND_URL}/next/monitor-kit/kit/easyops?page=1&pageSize=20"
       kit_detail: "${EASYOPS_COLLECTOR_FRONTEND_URL}/next/monitor-kit/kit/easyops/{instanceId}/detail?tab=readme"
 
+# =============================================================================
+# e2e 真调验证状态（2026-08-13，org 8888，172.30.0.90）
+# =============================================================================
+e2e_verified:
+  collector_plugin_service_8151:
+    plugin_list: "✅ 真调通过（198套件，响应 data.total）"
+    plugin_detail: "✅ 真调通过（完整字段集实锤，见 objects.yaml#collector_plugin fields）"
+    plugin_import: "✅ 真调通过（curl -F 上传，两套件均 code:0 返回 instanceId+agentType）"
+    plugin_export: "✅ 真调通过（GET zip 流 130KB，含 HOST.json/alias_metric/origin_metric/metric_set/package.conf.yaml/dashboard/alertRule）"
+    plugin_import_update: "✅ 真调通过（version 必填：缺则报 key version not found；版本唯一：重复报 code:100007 已存在同名版本）"
+    plugin_delete: "✅ 真调通过（curl DELETE code:0；前置检查：无引用可删，有引用报此套件关联有采集任务不允许删除）"
+    metricbeat_list: "✅ 真调通过（返回 moduleCache 模块表）"
+  collector_service_kit_12000:
+    activate: "⚠️ GAP——端点在 12000（giraffe-contract-name 路由确认），但 contract 实际版本/名未确定（kits.go 的 ActivateCollectorKit@1.0.19 实测 not found，试 1.0.0~1.0.20 全 not found）。需前端实际激活操作抓包拿真实 giraffe-contract-name header 回流"
+    list: "⚠️ 同 activate，contract 版本未确定"
+  kit_samples_imported:
+    desc: "e2e 导入的两个测试套件（保留套件A用于后续激活验证）"
+    metric_sampler: "套件A『主机端口可达性监控套件』instanceId=658e73a176ad1（simple-script/metric_sampler，采集HOST端口可达性，保留未删）"
+    process_sampler: "套件B『主机信息采集套件』instanceId=658e73d07bdbd（simple-script/process_sampler，采集HOST写回CMDB，已验证后删除）"
+  packaging_format: "✅ ZIP_STORED + UTF-8 flag 确认可用（DEFLATED 未测，STORED 已够）。打包脚本 pack_kit.py"
+  gaps:
+    - "kit.activate contract 版本号（需前端抓包）"
+    - "采集脚本 py2.7 实际执行（.90 HOST _agentStatus=未安装，无 agent 接收；套件导入/激活链路可验，采集执行依赖 agent 是另一层）"
+    - "process_sampler GATHERING DATA 协议解析（在 collector_proxy_server/agent 端，源码不在本地）"
+
   # ===========================================================================
   # collector_service —— 采集服务（套件激活 / 采集任务管理）
   # ===========================================================================

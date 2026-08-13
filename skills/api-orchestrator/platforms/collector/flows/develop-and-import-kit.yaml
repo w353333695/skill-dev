@@ -1,0 +1,73 @@
+# 流程模板：开发采集套件并导入平台（端到端）。规划挡（写、跨步骤、产出 zip 制品）。
+name: develop-and-import-kit
+intent: 根据监控/采集需求开发套件（plugin.yaml+脚本+指标定义）→打包 zip→导入平台→验证
+trigger: ["开发套件", "做个采集套件", "开发监控插件", "开发CMDB采集套件", "生成套件压缩包", "交付套件zip"]
+guard: 规划挡（写、产出制品、跨步骤）
+
+key_rule: |
+  套件开发三要素（详见 formats/collector-kit/）：
+  ① plugin.yaml（4类型字段字典见 plugin-yaml-schema.yaml）
+  ② 采集脚本（py2.7 规范见 sampler-types.yaml：print语句/requests/subprocess无timeout；
+     samplerType 决定输出协议——metric_sampler 直接[{dims,vals}] / process_sampler 用 BEGIN/END GATHERING DATA 标记）
+  ③ 参数设计（$.attr 动态取参见 param-mechanism.yaml：$.开头配 paramType=cmdb，取值对象=采集目标实例）
+  打包（见 package-format.yaml）：ZIP_STORED + UTF-8 flag，zip顶层目录名=plugin.yaml name（必须一致）。
+
+prerequisites:
+  env: [EASYOPS_COLLECTOR_PLUGIN_BACKEND_URL, EASYOPS_ORG, EASYOPS_USER]
+  payload: "套件需求（采集对象/指标/参数来源）+ 目标 CMDB 模型ID（如 HOST）"
+  format_knowledge: "读 formats/collector-kit/{plugin-yaml-schema,sampler-types,param-mechanism,package-format}.yaml"
+
+steps:
+  - n: 1
+    desc: "确定套件类型+采集目标+指标，生成 plugin.yaml + src/<script>.py + origin_metric.json + alias_metric.json + metric_set.json + readme"
+    dataflow: |
+      类型选择（formats/collector-kit/plugin-yaml-schema.yaml kit_types）：
+        - simple-script（最灵活，自定义脚本）→ agentType=easyops
+        - metricbeat（复用模块）→ agentType=metricbeat, noPackage=true
+        - exporter（自带二进制）→ agentType=prometheus + deploy/+bin/
+        - prometheus 直接抓取 → type=exporter, agentType=prometheus, noPackage=true
+      samplerType（formats/collector-kit/sampler-types.yaml）：
+        - 监控指标 → metric_sampler（脚本输出 [{dims,vals}] JSON）
+        - CMDB采集 → process_sampler（脚本输出 BEGIN/END GATHERING DATA 标记包裹，dims含object_id/pks/upsert）
+      参数设计（formats/collector-kit/param-mechanism.yaml）：
+        - 设备属性（ip/instanceId/hostname）→ defaultValue: $.field, paramType=cmdb
+        - 用户填写 → defaultValue: "", paramType=const
+        - 密钥 → isFromSecret:true, isEncrypt:true（自动注入 secretName）
+  - n: 2
+    desc: "本地模拟环境变量跑脚本，验证输出格式（metric 检查 [{dims,vals}]；process 检查 GATHERING DATA 标记）"
+    expect: "stdout 输出合法 JSON；dims/vals 齐全；vals 数值型（metric）"
+  - n: 3
+    desc: "用 pack_kit.py 打 zip（ZIP_STORED + UTF-8 flag，排除 .version/.git/__pycache__）"
+    expect: "zip 顶层目录名 = plugin.yaml name；UTF-8 flag 全覆盖"
+  - n: 4
+    desc: "查 cmdb _COLLECTOR_EASYOPS_PLUGIN by name 确定走新建/覆盖/拒绝"
+    dataflow: "POST /v3/object/_COLLECTOR_EASYOPS_PLUGIN/instance/_search {query:{name:<套件名>},fields:[instanceId,name,protected,status]}"
+    expect: "total=0→新建(upsert=false)；total>0且protected=false→覆盖(upsert=true)；protected=true→改名"
+  - n: 5
+    op: plugin_package.import
+    args: ["curl -F 上传（api-cli 不支持 multipart，走 curl 或 SDK）"]
+    desc: "导入套件 zip（multipart：attachment + name/version/category/upsert）"
+    dataflow: |
+      curl -F "attachment=@<套件名>_v<ver>.zip" -F "name=<套件名>" -F "version=<ver>" \
+           -F "upsert=<true|false>" http://<8151>/api/v1/plugin/import
+    expect: "code:0，data.instanceId（13hex）+ agentType。存为 PLUGIN_ID 喂下一步"
+  - n: 6
+    op: plugin.detail
+    args: ["<PLUGIN_ID>"]
+    desc: "验证套件已导入（确认 name/agentType/samplerType/relateObjectId/status）"
+    expect: "status=available（自定义）/enabled（内置）；字段与设计一致"
+  - n: 7
+    args: ["<PLUGIN_ID>", "--header giraffe-contract-name:<contract@版本>"]
+    desc: "(可选) 激活套件→生成采集任务。⚠️kit.activate 在 collector_service:12000，需 giraffe-contract-name header（contract 版本待探测，见 systems.yaml e2e_verified.gaps）"
+    expect: "HTTP 200 且 totalStatus!=fail。激活异步，需轮询 collector_job 验证任务生效"
+
+note: |
+  api-cli 对 plugin_package.import/export/import_update 仅 --print-curl 预览（multipart/binary 不支持），
+  真调走 curl -F 或 Python SDK（sdk/easyops_client.py 扩展 collector_plugin 方法）。
+  读操作（list/detail/metricbeat_list）api-cli 直接可调。
+
+side_effects: "见 objects.yaml#collector_plugin.side_effects（import 同名冲突/升级 agentType不可变/删除前置检查）"
+rollback: "plugin.delete <PLUGIN_ID>（导入错了删掉；前置：未被采集任务引用）"
+acceptance: |
+  前端：${EASYOPS_COLLECTOR_FRONTEND_URL}/next/monitor-kit/kit/easyops/<PLUGIN_ID>/detail?tab=readme
+  api-cli：plugin detail <PLUGIN_ID> 确认 status=available
