@@ -1,0 +1,137 @@
+# =============================================================================
+# EasyOps 采集服务（collector_service）—— api-cli 集中清单
+# -----------------------------------------------------------------------------
+# collector_service:8125，套件激活/列表的能力域。
+# ⚠️本 spec 与 easyops-collector-plugin.yaml 分离的原因：collector_service(:8125) 与
+#   collector_plugin_service(:8151) 端口不同，api-cli endpoint 是 service 级（不支持
+#   per-resource 绑端口），故跨端口能力必须独立 spec + CLI --spec 切换（同 demo 的
+#   sys-setting:8271 先例）。
+#
+# 数据来源（⚠️契约源特殊）：
+#   • 权威契约 easyops-cli（官方 CLI 的 contracts + 实现）：
+#        - tmp/easyops-cli/content-packages/easyops-platform/easyops-cli/contracts/mutation-semantics.json
+#        - tmp/easyops-cli/content-packages/easyops-platform/easyops-cli/internal/platform/kits.go
+#   • ⚠️ collector_service Go 源码（tmp/源代码/collector_service）是【旧版，缺 kit 模块】：
+#     grep kit/activate/ActivateCollectorKit/ListCollectorKitInfo 在该源码 0 命中。
+#     activate/list-kit-info 端点的权威定义【只在 easyops-cli 契约】，源码落后。
+#     真调以此 spec（契约）为准，不可用源码说「端点不存在」。
+#
+# 接入面：
+#   • backend —— 直连 collector_service :8125（HTTP）。**默认走 backend**。
+#
+# 鉴权：与 collector_plugin_service 同 EasyOps 平台。直连 backend（auth=none）只需 org+user header。
+#   cookie 非必需（机制同 cmdb/collector_plugin_service）。
+#
+# ⚠️ api-cli 能力边界：
+#   activate/list 是 JSON 交互（非 multipart），api-cli 可正常真调。
+#   但 activate 的实际效果（下发采集任务）是异步的，需轮询 collector_job 状态验证。
+#
+# 知识分文件：
+#   激活机制（CMDB 事件驱动 AssignJobs + 600s 兜底）→ systems.yaml runtime.activation_mechanism；
+#   collector_job/采集任务结构 → objects.yaml#collector_job；
+#   activate/import/激活 e2e 流程 → flows/。
+# =============================================================================
+spec: api-cli/v1
+service:
+  name: easyops-collector-service
+  version: "1.0"
+  default_endpoint: backend
+  endpoints:
+    backend:
+      base_url: ${EASYOPS_COLLECTOR_SERVICE_BACKEND_URL}   # 值在部署根 env.d/demo.env（含 IP+端口 8125）
+      host: admin.easyops.local                              # IP 直连，Host 由 endpoint.Host 注入
+      path_prefix: ""
+      auth: none                                              # 直连后端 auth=none，org/user 由 headers 注入
+      headers:
+        org: ${EASYOPS_ORG}
+        user: ${EASYOPS_USER}
+
+# -----------------------------------------------------------------------------
+# 资源 1：kit —— 套件激活/列表（collector_service.job 模块）
+# ⚠️源码此版本（tmp/源代码/collector_service）无 kit 模块，契约权威源是 easyops-cli/kits.go。
+# -----------------------------------------------------------------------------
+resources:
+  kit:
+    description: |
+      采集套件的运行态操作（激活/更新/列表）。与 collector_plugin_service.plugin 的区别：
+      plugin 管「套件定义的 CRUD」，kit 管「把定义激活成运行中的采集任务」。
+      ⚠️激活机制：activate 不直接建任务，而是触发 collector_service 的 AssignJobs
+      （CMDB 事件驱动 + 600s 定时兜底，assign_job.go:28；详见 systems.yaml runtime.activation_mechanism）。
+      成功判定：HTTP 成功且响应 totalStatus != "fail"（kits.go:134）。
+    path: ""
+
+    operations:
+      # ---------- 激活套件（首次部署 / 更新同步）----------
+      activate:
+        description: |
+          激活套件（把套件定义变成运行中的采集任务）。proto: ActivateCollectorKit@1.0.19。
+          必填 instanceId。可选 objectId（关联模型）/params（采集参数 JSON）/centralizedEnable（集中式）/hostIds（目标主机）/collectAgent。
+          ⚠️同一端点也用于「更新套件同步到任务」（kits update 复用本端点，body 加 syncToJobs/dashboards/dashboardStrategy）。
+          成功判定：HTTP 200 且响应 totalStatus != "fail"（fail 报 KITS_005）。
+          激活是异步的（触发 AssignJobs），激活后采集任务实际生效可能需轮询 collector_job 状态。
+          权威实现：tmp/easyops-cli/.../platform/kits.go:95-139（registerKitsActivate）。
+        method: POST
+        path: /api/v1/collector/kit/activate
+        body:
+          type: object
+          required: [instanceId]
+          description: "ActivateCollectorKit 请求。instanceId=套件实例ID（来自 collector_plugin_service.plugin import/create 返回）。"
+          properties:
+            instanceId: { type: string, description: "套件实例ID（13hex，必填）。来自 plugin.import 或 plugin.create_with_*" }
+            objectId: { type: string, description: "关联CMDB模型ID（如 HOST@ONEMODEL）。激活时指定采集目标模型" }
+            params: { type: object, description: "采集参数（JSON 对象，覆盖套件 paramDefine 默认值）。⚠️参数 paramType 规则见 formats/collector-kit/param-mechanism.yaml" }
+            centralizedEnable: { type: boolean, description: "是否集中式启用" }
+            hostIds: { type: array, items: { type: string }, description: "目标主机ID列表" }
+            collectAgent: { type: string, description: "采集Agent（如 $.ip）" }
+        response:
+          type: object
+          description: "激活结果。⚠️totalStatus=fail 表示激活失败（即使 HTTP 200）。"
+          properties:
+            code: { type: integer, description: "0=成功" }
+            data: { type: object, additional_properties: true, description: "激活结果（含 totalStatus: success|fail）" }
+
+      # ---------- 更新套件（同步到采集任务，复用 activate 端点）----------
+      update:
+        description: |
+          更新套件并同步到关联的采集任务（复用 activate 端点，proto 同 ActivateCollectorKit@1.0.19）。
+          与 activate 的区别：body 字段不同。syncToJobs=true 才同步到任务；dashboards/dashboardStrategy 控制仪表盘更新。
+          ⚠️dashboardStrategy 仅允许 overwrite|rename（kits.go:154-156）。
+          权威实现：kits.go:141-171（registerKitsUpdate）。
+        method: POST
+        path: /api/v1/collector/kit/activate
+        body:
+          type: object
+          required: [instanceId]
+          description: "更新套件请求（复用 activate 端点）"
+          properties:
+            instanceId: { type: string, description: "套件实例ID（13hex，必填）" }
+            syncToJobs: { type: boolean, description: "是否同步更新到所有关联采集任务" }
+            dashboards: { type: array, items: { type: string }, description: "要更新的仪表盘ID列表" }
+            dashboardStrategy: { type: string, enum: [overwrite, rename], description: "仪表盘更新策略（仅 overwrite|rename）" }
+        response:
+          type: object
+          description: "更新结果（同 activate 响应）"
+          properties:
+            code: { type: integer }
+            data: { type: object, additional_properties: true }
+
+      # ---------- 套件列表（含运行态信息）----------
+      list:
+        description: |
+          列出套件（含运行态 status/params/metricSets/pluginUpdateTime）。proto: ListCollectorKitInfo@1.0.5。
+          双源合并：本端点（collector_service）返套件基本信息 + CMDB _COLLECTOR_EASYOPS_PLUGIN search 补 status/params/metricSets/collectAgent。
+          status=enabled=内置套件（protected，禁覆盖）；status=available=自定义套件（可覆盖）。
+          权威实现：kits.go:32-67（registerKitsList，主端点 + 旁路 cmdb search merge）。
+        method: GET
+        path: /api/v1/collector/kit/info/list
+        params:
+          page: { in: query, type: integer, description: "页码" }
+          pageSize: { in: query, type: integer, description: "每页数" }
+          keyword: { in: query, type: string, description: "关键词（模糊匹配 name/memo）" }
+          status: { in: query, type: string, description: "状态过滤（enabled=内置/available=自定义）" }
+        response:
+          type: object
+          description: "套件列表（含运行态字段）。list 元素字段见 collector_plugin_service.plugin.list + status/params/metricSets/pluginUpdateTime/collectAgent"
+          properties:
+            code: { type: integer }
+            data: { type: object, properties: { list: { type: array, items: { type: object, additional_properties: true } }, total: { type: integer } } }

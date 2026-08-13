@@ -1,0 +1,529 @@
+# =============================================================================
+# EasyOps 采集套件管理（collector_plugin_service）—— api-cli 集中清单
+# -----------------------------------------------------------------------------
+# 4 个能力域（23 端点，端口 8151）：
+#   ① plugin            套件 CRUD（10）—— 3 类型各有 create/update（script/metricbeat/package）
+#   ② plugin_package    导出/导入/升级（3）—— zip 流 / multipart，api-cli 仅预览，真调走 SDK
+#   ③ log_plugin        日志套件 CRUD（4）—— processSteps 链式处理
+#   ④ metric_management 指标导入（6）—— 4 adapter（prometheus/zabbix/easyagent/metricbeat）
+#
+# 数据来源（契约缺失，全靠源码）：
+#   • 后端 data/sources/backend/HyperInsight/collector_plugin_service/
+#        - easyops_plugin/{route,controller,easyops_plugin_service}.go（CRUD）
+#        - export_import_custom/{route,controller,imexport_service}.go（导入导出升级）
+#        - log_plugin/{route,controller,log_plugin_service}.go（日志套件）
+#        - metric_management/{route,controller,metric_management_service}.go（指标导入）
+#        - 各 validators/（校验树）
+#   • 外部域包 collector_plugin_domain_package（实体/Package 结构）源码不在本地，
+#     字段从 service 构造/响应映射/测试反推，置信度高但非逐字（见 objects.yaml gap 标注）。
+#
+# 接入面：
+#   • backend —— 直连 collector_plugin_service :8151（HTTP，无 path 前缀）。**默认走 backend**。
+#   • frontend —— 走前端网关（path_prefix 形如 /next/api/gateway/collector_plugin_service.<Verb>），
+#     网关 per-API 路由，多 verb 不通用，仅作备选。
+#
+# 鉴权：与 cmdb/autoops/itsm/sys-setting 同 EasyOps 平台。
+#   • 直连 backend（endpoint.auth=none）：只需 org+user header（orguser 中间件），cookie 非必需
+#     （机制同 cmdb：engine/execute.go:135 auth=none 跳过 auth.Apply；headers 独立注入）。
+#   • 网关面（frontend）仍需 cookie（auth.d/easyops-cookie.yaml）。
+#
+# ⚠️ api-cli 能力边界（影响 plugin_package）：
+#   • params.in 仅 path/query/header/body，**无 formData** → multipart 上传（import/import_update）
+#     api-cli 做不了真调，用 --print-curl 或走 Python SDK。
+#   • response 仅 io.ReadAll + 宽松 JSON 解码，**无 --output 存文件** → zip 二进制流（export）
+#     api-cli 直接调会乱码，走 Python SDK 流式下载或 --print-curl + curl。
+#   故 export/import/import_update 的 description 标注「api-cli 仅预览，真调走 SDK」。
+#
+# ⚠️ 激活能力【不在本服务】：collector_plugin_service 无 enable/disable/activate 端点。
+#   激活在 collector_service:8125 的 POST /api/v1/collector/kit/activate（见 easyops-collector-service.yaml）。
+#   本服务只管套件定义的 CRUD + 导入导出；激活=把定义变成运行中的采集任务，跨服务。
+#
+# 知识按 SKILL.md 设计分文件存放（本目录是外接 collector_plugin_service 唯一真相来源）：
+#   接入/端口/激活机制/multipart坑 → systems.yaml runtime；
+#   套件结构/字段/副作用/导入导出契约 → objects.yaml；
+#   字段锚 instanceId/packageVersionId → entities.yaml；建/改/删/导入导出/激活流程 → flows/；
+#   套件包格式/plugin.yaml schema/py2规范/$.attr → formats/collector-kit/；
+#   索引导航 → README.md。
+# =============================================================================
+spec: api-cli/v1
+service:
+  name: easyops-collector-plugin
+  version: "1.0"
+  default_endpoint: backend
+  endpoints:
+    backend:
+      base_url: ${EASYOPS_COLLECTOR_PLUGIN_BACKEND_URL}   # 值在部署根 env.d/demo.env（含 IP+端口 8151）
+      host: admin.easyops.local                            # IP 直连，Host 由 endpoint.Host 注入
+      path_prefix: ""                                      # 路由挂在 gin root（无前缀）
+      auth: none                                            # 直连后端：auth=none 跳过 cookie 加载。org/user 由 endpoint.headers 注入。实测同 cmdb/autoops，cookie 非必需。
+      headers:
+        org: ${EASYOPS_ORG}                                # EasyOps 租户 org（系统自带 0/1/2 禁动；值在 env.d/demo.env）
+        user: ${EASYOPS_USER}                              # 用户标识（写操作 easyops）
+    frontend:
+      base_url: ${EASYOPS_COLLECTOR_PLUGIN_FRONTEND_URL}   # 前端网关完整 URL（值在 env.d/demo.env）
+      host: admin.easyops.local
+      auth: easyops-cookie
+      # path_prefix 网关 per-API 路由（/next/api/gateway/collector_plugin_service.<Verb>），
+      # 多 verb 不通用 → 默认走 backend。
+
+# -----------------------------------------------------------------------------
+# 资源 1：plugin —— 套件 CRUD（easyops_plugin 模块，10 端点）
+# 3 种套件类型各有独立 create/update 端点（script/metricbeat/package）。
+# ⚠️无 enable/disable 端点（激活在 collector_service，见 easyops-collector-service.yaml）。
+# 路径 disparate（/api/v1/plugin/with_*、/api/v1/plugin/:instanceId 等无公共前缀），
+# resource.path 留空，每 operation 持完整路径。
+# -----------------------------------------------------------------------------
+resources:
+  plugin:
+    description: |
+      EasyOps 采集套件（easyops_plugin）。一个套件 = 类型(simple-script/metricbeat/exporter) + 关联CMDB模型 + 采集参数(paramDefine) + 指标定义。
+      3 种类型各有独立 create/update 端点（字段集不同）。无单 type 字段做联合判别（由端点隐式区分）。
+      ⚠️无启用/禁用/激活端点——激活在 collector_service:8125（见 easyops-collector-service.yaml plugin.activate）。
+      删除前置：套件不能被采集任务引用（_COLLECTOR_JOB），否则拒删。字段结构见 objects.yaml#collector_plugin。
+    path: ""
+
+    operations:
+      # ---------- 创建脚本型套件 ----------
+      create_with_script:
+        description: "创建脚本型套件（simple-script，agentType=easyops）。必填 name/agentType；samplerType 默认 metric_sampler。脚本通过 EASYOPS_COLLECTOR_<param> 环境变量取参（py2.7，见 formats/collector-kit/sampler-types.yaml）。"
+        method: POST
+        path: /api/v1/plugin/with_script_info
+        body:
+          type: object
+          required: [name, agentType]
+          description: "CreatePluginWithScriptInfoRequest。samplerType 默认 metric_sampler。"
+          properties:
+            name: { type: string, description: "套件名（zip顶层目录名/上传name 必须一致）" }
+            agentType: { type: string, enum: [easyops, log, cloudScript], description: "采集器类型" }
+            samplerType: { type: string, description: "采样器（默认 metric_sampler，CMDB采集用 process_sampler）" }
+            scriptType: { type: string, enum: [python, shell], description: "脚本类型" }
+            interpreter: { type: string, description: "解释器路径（空=内置py2.7）" }
+            content: { type: string, description: "脚本内容" }
+            packageUrl: { type: string, description: "脚本包 URL" }
+            relateObjectId: { type: string, pattern: '^[a-zA-Z_][0-9a-zA-Z_]{0,46}(@[A-Z]{1,16})?$', description: "关联CMDB模型" }
+            category: { type: string, description: "分类" }
+            memo: { type: string, description: "备注" }
+            icon: { type: object, description: "图标{Icon,Lib,Category,Prefix,Color}" }
+            params: { type: array, items: { type: object }, description: "参数列表（见 paramDefine，结构见 formats/collector-kit/plugin-yaml-schema.yaml param_define_fields）" }
+            readme: { type: string, description: "文档" }
+            picURLs: { type: array, items: { type: string }, description: "截图URL" }
+            image: { type: string, description: "镜像" }
+            collectAgent: { type: string, description: "采集Agent（常用 $.ip）" }
+            processors: { type: array, items: { type: object }, description: "处理器链" }
+            extInfo: { type: object, description: "扩展信息" }
+        response:
+          type: object
+          description: "Wrapper: {code, data:{instanceId}}"
+          properties:
+            code: { type: integer, description: "0=成功" }
+            data: { type: object, properties: { instanceId: { type: string, description: "套件实例ID（13hex）" } } }
+
+      # ---------- 创建 metricbeat 型套件 ----------
+      create_with_metricbeat:
+        description: "创建 metricbeat 型套件（agentType=metricbeat，noPackage=true）。必填 name/agentType。metricbeatName 引用预置模块（GET plugin.metricbeat_list 可列举）。"
+        method: POST
+        path: /api/v1/plugin/with_metricbeat_info
+        body:
+          type: object
+          required: [name, agentType]
+          description: "CreatePluginWithMetricbeatInfoRequest"
+          properties:
+            name: { type: string, description: "套件名" }
+            agentType: { type: string, enum: [metricbeat], description: "固定 metricbeat" }
+            samplerType: { type: string, description: "默认 metric_sampler" }
+            metricbeatName: { type: string, description: "metricbeat模块名（redis/mysql/nginx等，对应 conf.module.yaml）" }
+            template: { type: string, description: "metricbeat配置模板（Go template）" }
+            encodeType: { type: string, description: "编码类型" }
+            relateObjectId: { type: string, pattern: '^[a-zA-Z_][0-9a-zA-Z_]{0,46}(@[A-Z]{1,16})?$', description: "关联CMDB模型" }
+            category: { type: string, description: "分类" }
+            memo: { type: string, description: "备注" }
+            icon: { type: object, description: "图标" }
+            params: { type: array, items: { type: object }, description: "参数列表" }
+            readme: { type: string, description: "文档" }
+            picURLs: { type: array, items: { type: string }, description: "截图URL" }
+            image: { type: string, description: "镜像" }
+            collectAgent: { type: string, description: "采集Agent" }
+            processors: { type: array, items: { type: object }, description: "处理器链" }
+            extInfo: { type: object, description: "扩展信息" }
+        response:
+          type: object
+          description: "Wrapper: {code, data:{instanceId}}"
+          properties:
+            code: { type: integer }
+            data: { type: object, properties: { instanceId: { type: string } } }
+
+      # ---------- 创建 package 型套件 ----------
+      create_with_package:
+        description: "创建带程序包套件（exporter 自带二进制等）。⚠️服务内强校验：packageId 和 packageVersionId 不能为空（imexport_service.go:374-376，validator树未覆盖此强校验）。"
+        method: POST
+        path: /api/v1/plugin/with_package_info
+        body:
+          type: object
+          required: [name, agentType, packageId, packageVersionId]
+          description: "CreatePluginWithPackageInfoRequest。packageId/packageVersionId 服务层强校验非空。"
+          properties:
+            name: { type: string, description: "套件名" }
+            agentType: { type: string, enum: [prometheus, easyops], description: "采集器类型" }
+            samplerType: { type: string, description: "默认 metric_sampler" }
+            packageId: { type: string, pattern: '^[a-fA-F0-9]{8}-?[a-fA-F0-9]{4}-?[a-fA-F0-9]{4}-?[a-fA-F0-9]{4}-?[a-fA-F0-9]{4}-?[a-fA-F0-9]{12}$', description: "包ID（UUID）" }
+            packageVersionId: { type: string, description: "包版本ID（⚠️服务层强校验非空）" }
+            packageVersion: { type: string, description: "包版本号" }
+            relateObjectId: { type: string, pattern: '^[a-zA-Z_][0-9a-zA-Z_]{0,46}(@[A-Z]{1,16})?$', description: "关联CMDB模型" }
+            category: { type: string, description: "分类" }
+            memo: { type: string, description: "备注" }
+            icon: { type: object, description: "图标" }
+            params: { type: array, items: { type: object }, description: "参数列表" }
+            readme: { type: string, description: "文档" }
+            picURLs: { type: array, items: { type: string }, description: "截图URL" }
+            image: { type: string, description: "镜像" }
+            collectAgent: { type: string, description: "采集Agent" }
+            processors: { type: array, items: { type: object }, description: "处理器链" }
+            extInfo: { type: object, description: "扩展信息" }
+        response:
+          type: object
+          description: "Wrapper: {code, data:{instanceId}}"
+          properties:
+            code: { type: integer }
+            data: { type: object, properties: { instanceId: { type: string } } }
+
+      # ---------- 列出套件 ----------
+      list:
+        description: "分页列出套件（List 不返回 content/template/metricbeatName/readme/creator/ctime/mtime/modifier/pluginYaml，比 detail 精简）。"
+        method: GET
+        path: /api/v1/plugin/list
+        params:
+          page: { in: query, type: integer, required: true, description: "页码（gte 1）" }
+          pageSize: { in: query, type: integer, required: true, description: "每页数（gte 1）" }
+        response:
+          type: object
+          description: "Wrapper: {code, data:{total,page,pageSize,list:[{instanceId,name,agentType,...}]}}"
+          properties:
+            code: { type: integer }
+            data:
+              type: object
+              properties:
+                total: { type: integer }
+                page: { type: integer }
+                pageSize: { type: integer }
+                list: { type: array, items: { type: object, additional_properties: true } }
+
+      # ---------- 套件详情 ----------
+      detail:
+        description: "获取单个套件完整详情（含 pluginYaml/params/processors 等全字段，含只读字段 instanceId/installPath/package/status/creator/ctime/mtime/modifier）。"
+        method: GET
+        path: /api/v1/plugin/detail/{instanceId}
+        params:
+          instanceId: { in: path, type: string, required: true, pattern: '^[0-9a-z]{13}$', description: "套件实例ID（13hex）" }
+        response:
+          type: object
+          description: "GetPluginResponse（完整字段，权威结构见 objects.yaml#collector_plugin）"
+          properties:
+            code: { type: integer }
+            data: { type: object, additional_properties: true, description: "完整套件定义" }
+
+      # ---------- 列出内置 metricbeat 模块模板 ----------
+      metricbeat_list:
+        description: "列出内置 metricbeat 模块模板（来自进程启动时注入的 moduleCache，读 conf.module.yaml：aerospike/apache/beat/ceph/docker/kafka/mysql/nginx/redis/system 等）。无参数。"
+        method: GET
+        path: /api/v1/metricbeat_info/list
+        response:
+          type: object
+          description: "{list:[{metricbeatName,template}],total}"
+          properties:
+            list: { type: array, items: { type: object, properties: { metricbeatName: { type: string }, template: { type: string } } } }
+            total: { type: integer }
+
+      # ---------- 删除套件 ----------
+      delete:
+        description: |
+          删除套件。⚠️前置：套件不能被任何采集任务引用（查 _COLLECTOR_JOB by plugins.instanceId，有则报『此套件关联有采集任务不允许删除』）。
+          删除会级联清空该套件下所有指标实例（MetricObjectId 模型，collectorPlugin.instanceId==id，分页500批量删）。
+          非软删（物理删 domainService.Delete + 清指标）。
+        method: DELETE
+        path: /api/v1/plugin/{instanceId}
+        params:
+          instanceId: { in: path, type: string, required: true, pattern: '^[0-9a-z]{13}$', description: "套件实例ID" }
+        response:
+          type: object
+          description: "Wrapper: {code, data:{instanceId}}"
+          properties:
+            code: { type: integer }
+            data: { type: object, properties: { instanceId: { type: string } } }
+
+      # ---------- 更新脚本型套件 ----------
+      update_with_script:
+        description: |
+          更新脚本型套件。⚠️副作用：(1)参数的 isEncrypt/isFromSecret 对已存在参数强制保留旧值（不可改）；
+          (2)Processors 用空切片重建（非追加）；(3)ExtInfo 直接用请求值（不保留旧值，与 metricbeat update 相反）；
+          (4)包版本变更（newVersionId!=oldVersionId）则 UpdateInstance 标记 _COLLECTOR_EASYOPS_PLUGIN modification.modified=true。
+        method: PUT
+        path: /api/v1/plugin/with_script_info/{instanceId}
+        params:
+          instanceId: { in: path, type: string, required: true, pattern: '^[0-9a-z]{13}$', description: "套件实例ID" }
+        body:
+          type: object
+          description: "UpdatePluginWithScriptInfoRequest（body字段无必填，仅 instanceId path 必填）"
+          additional_properties: true
+        response:
+          type: object
+          description: "Wrapper: {code, data:{instanceId}}"
+          properties:
+            code: { type: integer }
+            data: { type: object, properties: { instanceId: { type: string } } }
+
+      # ---------- 更新 metricbeat 型套件 ----------
+      update_with_metricbeat:
+        description: |
+          更新 metricbeat 型套件。⚠️副作用差异（vs script update）：(1)Processors 继承旧值再 append（非空切片重建）；
+          (2)ExtInfo 保留旧值，仅 request.ExtInfo 非空时覆盖（与 script update 相反）。
+        method: PUT
+        path: /api/v1/plugin/with_metricbeat_info/{instanceId}
+        params:
+          instanceId: { in: path, type: string, required: true, pattern: '^[0-9a-z]{13}$', description: "套件实例ID" }
+        body:
+          type: object
+          description: "UpdatePluginWithMetricbeatInfoRequest"
+          additional_properties: true
+        response:
+          type: object
+          description: "Wrapper: {code, data:{instanceId}}"
+          properties:
+            code: { type: integer }
+            data: { type: object, properties: { instanceId: { type: string } } }
+
+      # ---------- 更新 package 型套件 ----------
+      update_with_package:
+        description: |
+          更新 package 型套件。⚠️与 Create 不一致：packageId/packageVersionId 必填校验【被注释掉】（Create 强制必填，Update 不校验）。
+          行为同 script update（空切片重建 processors，ExtInfo 用请求值，版本变更触发 modified 标记）。
+        method: PUT
+        path: /api/v1/plugin/with_package_info/{instanceId}
+        params:
+          instanceId: { in: path, type: string, required: true, pattern: '^[0-9a-z]{13}$', description: "套件实例ID" }
+        body:
+          type: object
+          description: "UpdatePluginWithPackageInfoRequest"
+          additional_properties: true
+        response:
+          type: object
+          description: "Wrapper: {code, data:{instanceId}}"
+          properties:
+            code: { type: integer }
+            data: { type: object, properties: { instanceId: { type: string } } }
+
+  # -----------------------------------------------------------------------------
+  # 资源 2：plugin_package —— 导入/导出/升级（export_import_custom 模块，3 端点）
+  # ⚠️ multipart/binary 流，api-cli 仅 --print-curl 预览，真调走 Python SDK。
+  # 文件结构与契约详见 formats/collector-kit/package-format.yaml。
+  # -----------------------------------------------------------------------------
+  plugin_package:
+    description: |
+      套件包导入导出。zip 归档（含 plugin.yaml + src/ + origin_metric.json + alias_metric.json + ...）。
+      export 返回 zip 二进制流、import/import_update 是 multipart——api-cli 都做不了真调，仅 --print-curl 预览，
+      真调走 Python SDK（sdk/easyops_client.py 扩展 collector_plugin 方法）或 curl -F。
+      套件包结构与导入导出契约详见 formats/collector-kit/package-format.yaml。
+    path: ""
+
+    operations:
+      # ---------- 导出（GET zip 流，走 SDK）----------
+      export:
+        description: |
+          导出套件为 zip（响应 application/zip 二进制流，Content-Disposition: attachment）。
+          含：套件程序包本体 + 重写的plugin.yaml + 可选dashboard + 关联metric + 关联资源 + readme。
+          api-cli 无法存盘——真调走 Python SDK client.export_plugin(instanceId, save_to=...) 流式下载，或 --print-curl + curl。
+          详见 formats/collector-kit/package-format.yaml export_api。
+        method: GET
+        path: /api/v1/plugin/export/{instanceId}
+        params:
+          instanceId: { in: path, type: string, required: true, pattern: '^[0-9a-z]{13}$', description: "套件实例ID" }
+          dashboardId: { in: query, type: string, pattern: '^[0-9a-z]{13}$', description: "可选，附加指定 dashboard" }
+        response:
+          type: file
+          description: "application/zip 二进制流。api-cli 直接调会乱码——走 Python SDK 下载。"
+
+      # ---------- 导入（multipart，走 SDK）----------
+      import:
+        description: |
+          导入套件 zip 包（multipart/form-data：attachment 上传 zip + form 字段 name/version/category/upsert/protected/...）。
+          同名冲突默认报错，upsert=true 覆盖。导入会 importOther 附属资源（metric/关联模型/dashboard/alertRule/自动发现策略/资源发现配置/版本关系）+ 发安装事件。
+          ⚠️multipart——api-cli 仅 --print-curl 预览，真调走 Python SDK client.import_plugin(file=...) 或 curl -F。
+          详见 formats/collector-kit/package-format.yaml import_api。
+        method: POST
+        path: /api/v1/plugin/import
+        # body 是 multipart/form-data（attachment + form 字段），api-cli 不支持 formData，
+        # 故此处不声明 JSON body schema——真调用 Python SDK 的 requests.files 上传。
+        response:
+          type: object
+          description: "Wrapper: {code, data:{instanceId, agentType}}"
+          properties:
+            code: { type: integer }
+            data: { type: object, properties: { instanceId: { type: string }, agentType: { type: string } } }
+
+      # ---------- 升级（multipart，走 SDK）----------
+      import_update:
+        description: |
+          用 zip 升级现有套件（multipart：attachment + version 必填）。
+          ⚠️约束：agentType 不可变（报『更新套件时不允许变更套件类型』）；version 必须唯一（重复报『已存在同名版本』，仅当 Package.Id/VersionId 非空时查）。
+          唯一迁移：参数 isFromSecret/isEncrypt 从旧实例继承。无显式回滚（UpsertPlugin 成功但 importOther 失败=部分失败无补偿）。
+          ⚠️multipart——api-cli 仅 --print-curl 预览，真调走 Python SDK client.update_plugin(file=, plugin_id=, version=) 或 curl -F。
+          详见 formats/collector-kit/package-format.yaml upgrade_api。
+        method: PUT
+        path: /api/v1/plugin/import_update/{instanceId}
+        params:
+          instanceId: { in: path, type: string, required: true, pattern: '^[0-9a-z]{13}$', description: "套件实例ID" }
+        # multipart（attachment + version），api-cli 不支持，走 SDK
+        response:
+          type: object
+          description: "Wrapper: {code, data:{instanceId}}"
+          properties:
+            code: { type: integer }
+            data: { type: object, properties: { instanceId: { type: string } } }
+
+  # -----------------------------------------------------------------------------
+  # 资源 3：log_plugin —— 日志套件 CRUD（log_plugin 模块，4 端点）
+  # 日志套件用 processSteps 链式处理（非 scriptPath），samplerType=pipeline_sampler。
+  # 端点路径用连字符（create-log-plugin），instanceId 经 body/query 传（非 path）。
+  # -----------------------------------------------------------------------------
+  log_plugin:
+    description: |
+      EasyOps 日志采集套件（log_plugin）。与监控套件区别：用 processSteps 链式处理（非脚本），
+      samplerType=pipeline_sampler，scriptType 固定 json，interpreter 固定空。
+      每个 processStep 必须有 action 字段（否则报『第N个处理流程缺少action字段』）。
+      ⚠️删除前置：套件不能被日志采集任务引用（COLLECTOR_LOG_JOB@EASYOPS），否则拒删。
+      processSteps 结构 {name,parents,output,action{func,param}}。
+    path: ""
+
+    operations:
+      create:
+        description: "创建日志套件。必填 name；relateObjectId 可选。processSteps 序列化为 JSON 存 content 字段，scriptType 固定 json。每个 step 必须有 action。"
+        method: POST
+        path: /api/v1/create-log-plugin
+        body:
+          type: object
+          required: [name]
+          description: "CreateLogPluginRequest"
+          properties:
+            name: { type: string, description: "套件名" }
+            relateObjectId: { type: string, pattern: '^[a-zA-Z_][0-9a-zA-Z_]{0,46}(@[A-Z]{1,16})?$', description: "关联CMDB模型（可选）" }
+            processSteps: { type: array, items: { type: object }, description: "处理流程链，每元素{name,parents,output,action{func,param}}，action 必填" }
+        response:
+          type: object
+          description: "Wrapper: {code, data:{instanceId}}"
+          properties:
+            code: { type: integer }
+            data: { type: object, properties: { instanceId: { type: string } } }
+
+      delete:
+        description: "删除日志套件。⚠️前置：不能被日志采集任务引用（COLLECTOR_LOG_JOB@EASYOPS），否则拒删。instanceId 经 query 传。"
+        method: DELETE
+        path: /api/v1/delete-log-plugin
+        params:
+          instanceId: { in: query, type: string, required: true, pattern: '^[0-9a-z]{13}$', description: "套件实例ID" }
+        response:
+          type: object
+          description: "Wrapper: {code, data:{instanceId}}"
+          properties:
+            code: { type: integer }
+            data: { type: object, properties: { instanceId: { type: string } } }
+
+      get:
+        description: "获取日志套件详情。instanceId 经 query 传。"
+        method: GET
+        path: /api/v1/get-log-plugin
+        params:
+          instanceId: { in: query, type: string, required: true, pattern: '^[0-9a-z]{13}$', description: "套件实例ID" }
+        response:
+          type: object
+          description: "日志套件详情（含 processSteps/content）"
+          properties:
+            code: { type: integer }
+            data: { type: object, additional_properties: true }
+
+      update:
+        description: "更新日志套件。instanceId/relateObjectId 均可选（validator 树 required=false）。"
+        method: PUT
+        path: /api/v1/update-log-plugin
+        body:
+          type: object
+          description: "UpdateLogPluginRequest"
+          properties:
+            instanceId: { type: string, pattern: '^[0-9a-z]{13}$', description: "套件实例ID（校验可选）" }
+            relateObjectId: { type: string, pattern: '^[a-zA-Z_][0-9a-zA-Z_]{0,46}(@[A-Z]{1,16})?$' }
+            processSteps: { type: array, items: { type: object }, description: "处理流程链" }
+        response:
+          type: object
+          description: "Wrapper: {code, data:{instanceId}}"
+          properties:
+            code: { type: integer }
+            data: { type: object, properties: { instanceId: { type: string } } }
+
+  # -----------------------------------------------------------------------------
+  # 资源 4：metric_management —— 指标导入（metric_management 模块，6 端点）
+  # 仅 4 种 agentType 支持自动解析导入指标：prometheus/zabbix-agent/easyops/metricbeat。
+  # log/sql/filebeat 等无 adapter，不能走 ImportMetrics（报『不支持插件类型』）。
+  # -----------------------------------------------------------------------------
+  metric_management:
+    description: |
+      套件指标管理（metric_management）。把原始采集数据解析为 CollectorMetric/别名指标导入平台。
+      仅 4 种 agentType 有 adapter：prometheus(Prometheus text)/zabbix-agent(Zabbix XML)/easyops(JSON [{dims,vals}])/metricbeat(JSON event)。
+      其他类型（log/sql/filebeat）报『不支持插件类型 %s』。metricset 为空默认『默认指标集』。
+    path: ""
+
+    operations:
+      import_alias_metric_check:
+        description: "导入别名指标前校验（按 pluginId）。"
+        method: POST
+        path: /api/v2/import/plugin/{pluginId}/alias/metric/check
+        params:
+          pluginId: { in: path, type: string, required: true, pattern: '^[0-9a-z]{13}$', description: "套件实例ID" }
+        body: { type: object, additional_properties: true, description: "校验请求" }
+        response: { type: object, additional_properties: true, description: "校验结果" }
+
+      import_metric_list:
+        description: "导入指标列表（按 pluginId）。"
+        method: POST
+        path: /api/v2/import/plugin/{pluginId}/metric_list
+        params:
+          pluginId: { in: path, type: string, required: true, pattern: '^[0-9a-z]{13}$', description: "套件实例ID" }
+        body: { type: object, additional_properties: true, description: "导入请求" }
+        response: { type: object, additional_properties: true }
+
+      import_metrics:
+        description: "导入指标（按 plugin_id，⚠️路径是 plugin_id 下划线非 pluginId 驼峰）。走 adapter 解析原始数据。"
+        method: POST
+        path: /api/v1/import/plugin/{plugin_id}/metrics
+        params:
+          plugin_id: { in: path, type: string, required: true, pattern: '^[0-9a-z]{13}$', description: "套件实例ID（⚠️参数名 plugin_id 非 pluginId）" }
+        body: { type: object, additional_properties: true, description: "导入请求（原始采集数据）" }
+        response: { type: object, additional_properties: true }
+
+      import_plugin_alias_metrics:
+        description: "导入套件别名指标（按 pluginId）。"
+        method: POST
+        path: /api/v2/import/plugin/{pluginId}/alias/metric/import
+        params:
+          pluginId: { in: path, type: string, required: true, pattern: '^[0-9a-z]{13}$', description: "套件实例ID" }
+        body: { type: object, additional_properties: true, description: "别名指标导入请求" }
+        response: { type: object, additional_properties: true }
+
+      list_plugin_metrics:
+        description: "列出套件的所有指标（按 pluginId）。"
+        method: GET
+        path: /api/v1/plugin/metrics/list/{pluginId}
+        params:
+          pluginId: { in: path, type: string, required: true, pattern: '^[0-9a-z]{13}$', description: "套件实例ID" }
+        response:
+          type: object
+          description: "套件指标列表"
+          properties:
+            code: { type: integer }
+            data: { type: object, additional_properties: true }
+
+      import_metric_check:
+        description: "导入指标前校验（按 pluginId）。"
+        method: POST
+        path: /api/v2/import/plugin/{pluginId}/metric_check
+        params:
+          pluginId: { in: path, type: string, required: true, pattern: '^[0-9a-z]{13}$', description: "套件实例ID" }
+        body: { type: object, additional_properties: true, description: "校验请求" }
+        response: { type: object, additional_properties: true }
