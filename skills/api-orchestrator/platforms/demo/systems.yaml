@@ -150,7 +150,7 @@ systems:
         - "EASYOPS_CMDB_BACKEND_URL"   # 完整 URL（含 IP+端口）；端口事实见本 system runtime.ports.cmdb_backend
         - "EASYOPS_ORG"                # EasyOps 租户 org（系统自带 0/1/2 禁动）
         - "EASYOPS_USER"               # 用户标识（模型系统管理员=easyops）
-      ports: { cmdb_backend: 8079, user_service: 8111, frontend: 232 }
+      ports: { cmdb_backend: 8079, user_service: 8111, frontend: 80 }
       host_header: admin.easyops.local # IP 直连须带 Host 头
       auth: "直连 backend（endpoint.auth=none）只需 org+user header——缺任一报 empty org/user (100003)。源码 cmdb_service/main.go:549,691（orguser 中间件读 header）。cookie 仅 frontend/openapi 网关面需要，见 cookie_optional_direct"
       cookie_optional_direct: "实测（2026-08-12，api-cli auth=none 经 run.sh 验证）：直连 cmdb:8079 时 cookie 非必需——org+user+Host 三件 header 直接 200（USER search total=2）。与 autoops:8181 历史实测一致。机制：engine/execute.go:135 auth=none 跳过 auth.Apply；org/user 由 endpoint.headers 在 resolve 阶段独立注入（engine/request.go:40-43），不依赖 auth provider。故 backend spec auth 已改 none——cookie 配置缺失不再阻断直连调用。网关面（frontend endpoint，auth=easyops-cookie）仍需 cookie"
@@ -255,7 +255,7 @@ systems:
         - "EASYOPS_AUTOOPS_BACKEND_URL"   # 完整 URL；端口见 runtime.ports.autoops_backend
         - "EASYOPS_ORG"                   # 与 cmdb 共用
         - "EASYOPS_USER"                  # 与 cmdb 共用
-      ports: { autoops_backend: 8181, frontend: 232 }
+      ports: { autoops_backend: 8181, frontend: 80 }
       host_header: admin.easyops.local
       auth: "直连 backend（endpoint.auth=none）只需 org+user header——缺任一报 empty org/user。orguser 中间件 cmd/tool_service/main.go:624"
       rewrite_paths: "后端原始注册单数 /tool/:toolId，rewrite 中间件改写复数 /tools/:toolId——直连后端用复数即可命中（两边都挂 rewrite）。list/execution/lib 等本就是复数"
@@ -401,7 +401,7 @@ systems:
         - "EASYOPS_ITSM_BACKEND_URL"   # 完整 URL；端口见 runtime.ports.itsm_backend
         - "EASYOPS_ORG"                # 与 cmdb 共用
         - "EASYOPS_USER"               # 与 cmdb 共用
-      ports: { itsm_backend: 8134, frontend: 232 }
+      ports: { itsm_backend: 8134, frontend: 80 }
       host_header: admin.easyops.local # IP 直连须带 Host 头
       auth: "直连 backend（endpoint.auth=none）只需 org+user header（orguser 中间件 cmd/flowable_service/.../main_start.go:336-344；缺一报『org、user获取失败』）+ 额外 itsc:form_management_{access,create,update,delete} 4 权限（service.go:31-34，缺报 403）。cookie 仅网关面需要，见 cookie_optional_direct"
       save_not_upsert: "POST /v2/form 永远新建 form + 首个 isMain=true 版本；formId/versionId 不可指定（CMDB 生成返回）。要『改』走 form_version.update。无单 form 详情端点（GET /form/:formId 不存在）"
@@ -487,7 +487,7 @@ systems:
         - "EASYOPS_SYS_SETTING_BACKEND_URL"   # 完整 URL；端口见 runtime.ports.sys_setting_backend
         - "EASYOPS_ORG"                       # 与 itsm 共用
         - "EASYOPS_USER"                      # 与 itsm 共用
-      ports: { sys_setting_backend: 8271, frontend: 232 }
+      ports: { sys_setting_backend: 8271, frontend: 80 }
       host_header: admin.easyops.local      # IP 直连须带 Host 头
       auth: "直连 backend（endpoint.auth=none）只需 org+user header（orguser 中间件）。cookie 仅网关面需要，见 cookie_optional_direct"
       cookie_optional_direct: "实测（2026-08-12，api-cli auth=none 经 run.sh 验证）：直连 sys-setting:8271 时 cookie 非必需——org+user+Host 三件直接 200（work_calendar list total=1）。机制同 cmdb：execute.go:135 auth=none 跳过 auth.Apply；headers 独立注入（request.go:40-43）。backend spec auth 已改 none。网关面仍需 cookie"
@@ -562,7 +562,7 @@ systems:
         - "EASYOPS_COLLECTOR_PLUGIN_BACKEND_URL"
         - "EASYOPS_ORG"
         - "EASYOPS_USER"
-      ports: { collector_plugin_backend: 8151, frontend: 232 }
+      ports: { collector_plugin_backend: 8151, frontend: 80 }
       host_header: admin.easyops.local
       auth: "直连 backend（endpoint.auth=none）只需 org+user header——实测 8151 直 200（plugin list total=198）。cookie 仅网关面需要"
       list_total_in_body: "⚠️plugin.list 响应 total 在 data.total（body 内），不是 api-cli stderr 的 _meta.total。计数场景读 data.total（jq .data.total）。空结果时 data.total=0"
@@ -623,7 +623,7 @@ systems:
         - "EASYOPS_COLLECTOR_SERVICE_BACKEND_URL"
         - "EASYOPS_ORG"
         - "EASYOPS_USER"
-      ports: { collector_service_legacy: 8125, collector_service_kit: 12000, frontend: 232 }
+      ports: { collector_service_legacy: 8125, collector_service_kit: 12000, frontend: 80 }
       host_header: admin.easyops.local
       auth: "直连 backend（endpoint.auth=none）只需 org+user header"
 
