@@ -1,0 +1,110 @@
+# 流程模板：开发巡检套件并部署（v1 体系）。规划挡（写、跨步骤、4对象组装）。
+name: develop-inspection-kit
+intent: 根据巡检需求开发巡检套件（4对象：info+collector+metric_group+template）→API逐对象建→建任务执行→查结果
+trigger: ["开发巡检套件", "做个巡检插件", "开发MySQL巡检", "巡检套件开发", "新增巡检"]
+guard: 规划挡（写、产出制品、4对象组装、跨CMDB取目标）
+
+key_rule: |
+  ⚠️硬前置门禁（step 1-3，禁止跳过）：
+  ① 需求确认——向客户对齐巡检对象/指标/参数来源/阈值
+  ② CMDB 模型确认——object_model.list/detail 查巡检目标模型是否存在（如 MYSQL@ONEMODEL）
+  ③ 模型设计+客户确认（无则设计属性+关系，客户拍板后建）
+  巡检套件 ≠ 采集套件！v1体系=4对象组装（详见 formats/inspection-kit/suite-package.yaml）：
+    info（元信息）+collector（脚本）+metric_group（指标组）+template（报告模板，可选）
+  ⚠️e2e 实测坑（2026-08-13 .90，必守）：
+  - 建 info：8必填 id/name/index/objectId/relationIdWithHost/method + validator 逐字段报错
+  - 建 metric_group：conditions【可空[]】（阈值通常任务里配）；type 实际用【num】非int；
+    string型不能设max/min（conditions 非空时按 metric-threshold.yaml 校验）
+  - 建 task：8必填 pluginId/name/performanceTargets/specifyHostPolicyInstanceId/targets/
+    templateId/taskType/taskScheduler
+  - 导入包(inspection-import)对补全字段的容错差，【API逐对象建更可靠】
+  脚本协议（formats/inspection-kit/script-protocol.yaml，与采集套件完全不同）：
+    py2 + 参数注入脚本头（非环境变量）+ 必须输出 INSTANCE ID + start/end 两组标记
+
+prerequisites:
+  env: [EASYOPS_INSPECTION_BACKEND_URL, EASYOPS_CMDB_BACKEND_URL, EASYOPS_ORG, EASYOPS_USER]
+  payload: "巡检需求（对象/指标/参数/阈值）；目标 CMDB 模型ID（如 MYSQL@ONEMODEL，无则 step 3 建）"
+  format_knowledge: "读 formats/inspection-kit/{suite-package,script-protocol,args-design,metric-threshold}.yaml"
+
+steps:
+  - n: 1
+    desc: "需求确认：巡检对象/采集方式（mysql命令/SNMP/API）/指标清单/参数来源/阈值。向客户对齐套件类型预期"
+    expect: "得到巡检对象模型ID/指标清单/连接参数（哪些attr_id从CMDB取、哪些custom用户填）"
+  - n: 2
+    op: object_model.list
+    args: ["--q <对象关键词>"]
+    desc: |
+      【CMDB模型确认——必做】查巡检目标模型是否存在，detail 看 attrList 是否够（如 MYSQL@ONEMODEL 有 ip/ports）。
+      有→记 objectId 进 step 4；无→step 3 设计新建。
+    expect: "确定目标模型 objectId 或需新建"
+  - n: 3
+    desc: |
+      【模型设计+客户确认——仅 step 2 无模型时】设计 objectId/属性/关系，客户确认后 object_model.import 建。
+      影响套件 keys（唯一键）+ collector args 的 attr_id（必须模型真实属性）。
+  - n: 4
+    op: insp_info.create
+    desc: |
+      建套件元信息（4对象之一）。必填 id/name/index/objectId/relationIdWithHost/method（validator逐字段报错）。
+      id=pluginId（英文唯一）；isSystem:false（自定义）；counterSideId:host（DB类通过HOST执行）。
+    dataflow: |
+      POST /api/v1/inspection body {id,name,objectId,objectName,method:"agent",keys:["ip"],
+      isSystem:false,isApp:false,index:0,counterSideId:"host",
+      relationIdWithHost:"ARTIFACT_INST@ONEMODEL_host_artifactInsts_HOST"}
+    expect: "code:0，返回 instanceId（=套件实例id）"
+  - n: 5
+    op: insp_collector.create
+    desc: |
+      建采集脚本（4对象之二）。body 含 script(python)/args(参数定义)/content(py2源码)。
+      ⚠️args 密码类必须 type:password；content 守 script-protocol.yaml（参数注入头+start/end标记）。
+    expect: "code:0，返回 collectorId"
+  - n: 6
+    op: insp_metric_group.create
+    desc: |
+      建指标组（4对象之三，循环建多个）。⚠️conditions 可空[]（套件定义不强制阈值，任务里配）；
+      type 用【num】（非int）；category 两级点分（整体状态.版本，正好1个点）。
+      vals[].id 必须与脚本输出 payload[].vals[].id 精确对应。
+    dataflow: |
+      循环 POST /api/v1/inspection/{pluginId}/metric-groups
+      body {id,name,pluginid,category:"整体状态.版本",dims:[{id:"hostname"}],
+      vals:[{id,name,type:"num",weight,conditions:[]}]}
+    expect: "code:0；string型+conditions非空时守 metric-threshold.yaml（不能设max/min）"
+  - n: 7
+    desc: "(可选)建报告模板 insp_template.create。套件无模板可跳过（任务 templateId 传空串）"
+  - n: 8
+    desc: "本地验证脚本：设参数变量跑脚本，确认输出 INSTANCE ID 标记 + start/end 标记包裹的指标组JSON"
+    expect: "stdout 含两组标记，payload[].id ↔ metric_group.id，payload[].vals[].id ↔ val.id"
+  - n: 9
+    op: insp_task.create
+    desc: |
+      建巡检任务（触发执行）。8必填：pluginId/name/performanceTargets(specifyHost)/
+      specifyHostPolicyInstanceId(空串)/targets(巡检目标instanceId)/templateId(空串)/
+      taskType(once|crontab)/taskScheduler(once=2006-01-02 15:04:05)。
+      args 填连接参数（username/password/port/db_name，对应脚本args定义）。
+    dataflow: |
+      POST /api/v1/inspection/{pluginId}/task body {name,performanceTargets:"specifyHost",
+      specifyHostPolicyInstanceId:"",targets:[{instanceId}],templateId:"",
+      taskType:"once",taskScheduler:"<时间>",args:[{key,value}]}
+    expect: "code:0，返回 inspectionTaskId + registerTimeId（scheduler注册id）。任务到点触发执行"
+  - n: 10
+    op: insp_history.list
+    desc: "查执行历史（等调度触发后）。最新一条是该任务的执行（jobId）。"
+    expect: "list 返回 jobId/status(failed|ok)/score/passingRate"
+  - n: 11
+    op: insp_history.get
+    desc: "查执行详情（每目标评分/状态/异常指标）。脚本执行失败→failed(0分)，但证明下发链路通"
+    expect: "targets[].status: normal/abnormal/failed"
+  - n: 12
+    op: insp_history.export_excel
+    desc: "(可选)导出 Excel 报告。⚠️二进制流走 curl -o / SDK"
+
+note: |
+  导入包(inspection-import)对字段容错差（缺 pathid 等环境字段会失败）——推荐 API 逐对象建（本流程）。
+  导入包适合「从其他环境搬迁完整套件」场景。
+  script 协议关键：参数是【脚本头部变量注入】（EASYOPS_<key> for attr_id，key for custom），
+  不是环境变量；必须输出 INSTANCE ID 标记（结果归属）+ start/end（指标数据）。
+
+side_effects: "见 objects.yaml#insp_template.delete(被任务引用拒删)/insp_metric_group.update(删val级联)"
+rollback: "逐对象删：insp_collector.delete → insp_metric_group.delete → insp_info.delete"
+acceptance: |
+  前端：${EASYOPS_CMDB_FRONTEND_URL}/next/automatic-inspection/suite（待前端实测确认精确路径）
+  API：insp_info.get <pluginId> 验证套件；insp_history.list 验证执行
