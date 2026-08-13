@@ -1,0 +1,201 @@
+# =============================================================================
+# formats/collector-kit/param-mechanism.yaml
+# 采集套件 $.attr 动态取参机制（参数如何从 CMDB 实例动态获取并注入脚本）。
+#
+# 职责：让套件开发能力正确设计 paramDefine 的 defaultValue（$.attr 表达式），
+# 并让 e2e 正确创建采集任务（paramType 铁律——这是最常见的坑）。
+#
+# 核心：套件 paramDefine 声明 defaultValue: $.field，运行时 collector_service 的
+# cmdb_path_helper 从【采集目标实例】取值，注入 _COLLECTOR_JOB，agent 转环境变量
+# EASYOPS_COLLECTOR_<name> 传给脚本。
+#
+# 权威源：
+#   A. collector_service 解析核心：tmp/源代码/collector_service/agent_job/cmdb_path_helper/
+#      {param.go, param_extract.go, cmdb_path_helper.go}
+#   B. 参数分流调用方：tmp/源代码/collector_service/agent_job/{agent_job_generator.go, param_extract.go}
+#   C. secretName 注入：collector_plugin_service/easyops_plugin/easyops_plugin_service.go:138-165
+#   D. easyops-cmdb 文档：.../skills/easyops-cmdb/guides/collect/api/create-params.md
+# =============================================================================
+
+# -----------------------------------------------------------------------------
+# 一、$.attr 表达式语法（基于 JSONPath 子集）
+# 识别规则：字符串以 $. 开头即为 cmdb 动态参数（IsCmdbParam）。
+# source: cmdb_path_helper/param.go:23-28
+# -----------------------------------------------------------------------------
+dollar_attr_syntax:
+  identification:
+    rule: "字符串以 \"\$.\" 开头 = cmdb 动态参数（paramType=cmdb）；否则 const 常量（paramType=const）"
+    source: "param.go:23-28 IsCmdbParam"
+
+  forms:
+    - name: "纯字段名"
+      syntax: "$.ip / $.instanceId / $.hostname"
+      mechanism: "去 $. 前缀得字段名，从采集目标实例 struct 取该 key 的值。"
+      source: "cmdb_path_helper.go:44-53 getPropertyPath; param_extract.go:102-108"
+      host_example: "$.ip（HOST 实例的 ip 字段）"
+
+    - name: "嵌套 struct 字段（点号分隔多级）"
+      syntax: "$.auth.community / $.kubernetesCluster.serviceSets.instanceId"
+      mechanism: "按 . split 得字段路径，递归进入子 struct 逐层取值。⚠️这是 struct 字段嵌套，不是 CMDB relation 跳转。"
+      source: "cmdb_path_helper.go:64-70 getProperties; param_extract.go:130-163"
+      host_example: "网络设备 $.auth.community（auth 结构体的 community 字段）"
+
+    - name: "数组过滤表达式（JSONPath 风格）"
+      syntax: "$.netdports[?(@.isMonitor == 是)].ifName"
+      mechanism: "[?(@...)] 成对识别为过滤段；支持 9 种操作符（==/!=/<=/</>=/>/in/nin/like）；运行时对每个数组元素 CompareFilterParam，不满足则丢弃整组。"
+      operators: "==, !=, <=, <, >=, >, in, nin, like（转 MongoDB 风格 $eq/$in/$like 等）"
+      source: "param.go:30-36 IsCmdbParamFilter; param.go:87-166 buildFilterQuery; param_extract.go:85-98"
+      host_example: "交换机端口 $.netdports[?(@.isMonitor == 是)].ifName（筛监控端口的 ifName）"
+
+    - name: "末尾 join 函数"
+      syntax: "$.netdports[?(@.isMonitor == 是)].ifName.join()"
+      mechanism: "通过 ( 定位函数名；join 把同一 paramName 的多组结果合并成数组去重排序。"
+      source: "cmdb_path_helper.go:55-62 getFunction; param_extract.go:215-246 mergeJoinParams"
+
+    - name: "跨实例关系（CMDB PathSearch 展开）"
+      syntax: "靠 SearchAllPaths 在 CMDB 端做关联查询，结果展开成 struct 再走本地 path 取值"
+      mechanism: "cmdb_path_helper 本地只走 struct 字段递归；跨实例关联靠 SearchAllPaths 的 PathSearchV3 在 CMDB 端查，把 $.field 路径作为 Fields 让 CMDB 一次查回。"
+      source: "cmdb_path_helper.go:113-162,190-230 SearchAllPaths"
+
+  value_source_instance:
+    rule: "取值对象 = 【采集目标实例】（_COLLECTOR_JOB 采集范围内的那个实例），不是套件实例"
+    evidence:
+      - "agent_job_generator.go:85-89 每个 path 对应一个采集目标实例"
+      - "agent_job_generator.go:118 GetParamGroupsFromInstance(ctx, path, ...) 传 path（采集目标查询结果）"
+      - "param_extract.go:20 instance = instance.GetListValue().Values[0] 取第一跳"
+    source: "agent_job_generator.go:85-89,118; param_extract.go:20"
+
+# -----------------------------------------------------------------------------
+# 二、paramType 铁律（最常见的坑，e2e 必守）
+# paramType 不是运行时推断，是创建采集任务时显式写入 _COLLECTOR_JOB 的字段。
+# source: cmdb_path_helper.go:21-24；create-params.md:94
+# -----------------------------------------------------------------------------
+param_type_rules:
+  enum:
+    const: "字面常量，value 直接用，不解析"
+    cmdb: "动态参数，value 必须是 $.xxx 形式，从采集目标实例取值"
+    source: "cmdb_path_helper.go:21-24 ParamTypeConst/ParamTypeCmdb（仅两个值）"
+
+  iron_rule:
+    rule: "value 以 $. 开头 → 必须 paramType=\"cmdb\"；否则 paramType=\"const\""
+    why: "collector_service 信任存储字段，不自动推断。若 value=\"$.ip\" 但 paramType=\"const\"，ConvertJobParams 会把 \"$.ip\" 当字面字符串塞进 const 分支，脚本拿到 EASYOPS_COLLECTOR_ip=\"$.ip\"（拿不到真实 IP）。"
+    source: "param_extract.go:88-108 ConvertJobParams 分流；create-params.md:94（CLI 明确规则）"
+    e2e_warning: "e2e 直接写 _COLLECTOR_JOB 时务必自检：value=\"$.ip\" 配 paramType=\"cmdb\"。否则采集拿不到值。"
+
+  cmdb_value_nil_guard:
+    rule: "paramType=cmdb 且 value 为 nil 时，参数被丢弃（不进 cmdbParams）"
+    source: "param_extract.go:99 param.GetValue() != nil 守卫"
+
+# -----------------------------------------------------------------------------
+# 三、参数完整数据流（套件定义 → 脚本环境变量）
+# -----------------------------------------------------------------------------
+data_flow:
+  steps:
+    - n: 1
+      where: "套件 paramDefine"
+      what: "声明 defaultValue: $.ip（cmdb 动态参数）或 \"6379\"（const）或 \"\"（必填用户填）"
+    - n: 2
+      where: "激活套件 / 创建采集任务"
+      what: "前端/CLI 把 paramDefine.defaultValue 转成 _COLLECTOR_JOB 的 collectParams[].value + paramType（$.开头→cmdb，否则const）"
+      source: "create-params.md:94"
+    - n: 3
+      where: "collector_service ListCollectorConfig"
+      what: "读 _COLLECTOR_JOB 实例的 collectorParams/params 字段（含 paramType）"
+      source: "config_service.go:834,860,987"
+    - n: 4
+      where: "ConvertJobParams 分流"
+      what: "按 paramType 分 constParams（字面）和 cmdbParams（$.path）"
+      source: "param_extract.go:88-108"
+    - n: 5
+      where: "GetParamGroupsFromInstance"
+      what: "对每个采集目标实例，递归取 cmdbParams 的值 + 合并 constParams，生成 paramGroup map"
+      source: "param_extract.go:14-57; agent_job_generator.go:118"
+    - n: 6
+      where: "SearchAllPaths（前置）"
+      what: "把所有 $.field 路径作为 Fields 让 CMDB 一次性查回 struct"
+      source: "cmdb_path_helper.go:190-230"
+    - n: 7
+      where: "下发给 agent"
+      what: "ParamGroups 作为 struct 数组下发"
+      source: "metric_agent_job.go:335-343"
+    - n: 8
+      where: "agent runtime（源码不在本地）"
+      what: "把 paramGroup 每个 key/value 转成 EASYOPS_COLLECTOR_<key>=<value> 环境变量"
+      source: "simple-script-guide.md:199-246（文档实锤，agent 源码 gap）"
+
+  custom_params_override:
+    rule: "用户创建任务时填的参数以 CustomParams 存在 _COLLECTOR_JOB（按 instanceId 维度），覆盖默认 collectParams"
+    encrypt_handling: "含 IsFromSecret/IsEncrypt 的自定义参数走 decrypt 解密后覆盖"
+    source: "agent_job_generator.go:83-115 initCustomParamsMap; :139-184 decryptCustomCollectorParams"
+
+# -----------------------------------------------------------------------------
+# 四、值类型序列化（struct/list 如何变成环境变量字符串）
+# source: cmdb_path_helper.go:164-182 convertValueToString
+# -----------------------------------------------------------------------------
+value_serialization:
+  StringValue: "原字符串"
+  NumberValue: "fmt.Sprintf(\"%v\")"
+  BoolValue: "fmt.Sprintf(\"%v\")"
+  ListValue: "marshal 成 JSON，trimListJson 剥掉 {\"values\":...} 包裹得纯数组 JSON"
+  StructValue: "直接 marshal 成 JSON 字符串"
+  other: "\"null\""
+  key_implication: |
+    struct 类型参数（如 auth）经环境变量传【JSON 字符串】，
+    脚本必须 json.loads 解析（py2）。
+    示例：EASYOPS_COLLECTOR_auth='{"community":"public","snmpVersion":"2c"}'
+    → auth = json.loads(os.environ.get('EASYOPS_COLLECTOR_auth', '{}'))
+  source: "cmdb_path_helper.go:164-188 convertValueToString/trimListJson"
+
+# -----------------------------------------------------------------------------
+# 五、secretName 自动注入机制
+# source: collector_plugin_service/easyops_plugin/easyops_plugin_service.go:138-165 checkAndGenSecret
+# -----------------------------------------------------------------------------
+secret_name_injection:
+  condition:
+    rule: "params 中【至少一个】IsFromSecret=true，且【不存在】name==\"secretName\" 的参数 → 自动注入 secretName 参数"
+    source: "easyops_plugin_service.go:144,148-150"
+  injected_param_definition:
+    name: "secretName"
+    valueType: "string"
+    defaultValue: '""'
+    display: false           # 不在界面展示
+    use: "<继承首个 isFromSecret 参数的 use>"
+    optional: false
+    isEncrypt: false
+    isFromSecret: false
+    source: "easyops_plugin_service.go:152-163"
+  call_points: "每个 Create/Update Plugin 路径都会调 checkAndGenSecret（CreatePluginWithMetricbeatInfo:65-68, UpdatePluginWithMetricbeatInfo:206-209, 及其他 Create/Update:295-300,382-387,546-547,630-631,702-703,828-829）"
+  runtime_consumption:
+    rule: "secretName 的值=密钥实例名，创建任务时 paramType=const。agent 拿到 EASYOPS_COLLECTOR_secretName=<密钥名> 后去密钥库取真实 user/password"
+    gap: "agent 端取密钥实现源码不在本地（在 agent 仓库），此为周边代码推断"
+    source: "agent_job_generator.go:139-184 decrypt; create.md:143"
+
+# -----------------------------------------------------------------------------
+# 六、HOST 模型可用于 $. 引用的字段（e2e 用 HOST，已实锤）
+# -----------------------------------------------------------------------------
+host_model_fields:
+  description: "e2e 用 HOST 模型时，最稳的 $. 引用字段（都有代码/文档实锤）"
+  fields:
+    ip:
+      syntax: "$.ip"
+      desc: "采集目标 IP，最常用。HOST 默认 collectAgent 就是 $.ip"
+      source: "easyops-cli/internal/cmdb/app_system.go:312 objectID=HOST, agent=$.ip"
+    instanceId:
+      syntax: "$.instanceId"
+      desc: "实例唯一标识，常用于 instanceMapping / process_sampler 写回主键"
+      source: "create-params.md:39,62"
+    hostname:
+      syntax: "$.hostname"
+      desc: "主机名，典型 dims"
+      source: "app_system.go:155 HOST: {instanceId,hostname}; simple-script-guide.md:319,348"
+  fields_to_verify:
+    desc: "其他字段（agentId/uuid/port 等）e2e 前用 easyops-cli cmdb model get --object_id HOST 查 attrList 确认再引用，避免 $.field 引用不存在字段报错"
+    error_if_missing: "$.类型的参数要来源于cmdb模型且有应用场景（引用 relateObjectId 模型不存在的字段时报此错）"
+    source: "create-params.md（$.约束）"
+
+  # ⚠️ 通用约束：$.field 的 field 必须是 relateObjectId 模型（含继承链）真实属性
+  dollar_field_constraint:
+    rule: "$.field 的 field 必须是关联模型（relateObjectId，含继承链）真实存在的属性"
+    common_misuse: "把 agent 运行环境相关的东西（CLI 命令路径/installPath/工具目录）当成设备属性用 $.installPath 引用——这些不是被采集设备属性，模型中没有，必报错"
+    correct_handling: "作为普通自定义入参（defaultValue=\"\", display=true 用户填），或脚本内依赖系统 PATH 不设为参数"
+    source: "create-params.md:78-82"
