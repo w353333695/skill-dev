@@ -24,7 +24,7 @@
 ```
 platforms/<deployment>/
 ├── README.md                    索引（资料地图 + 关键认知 + 真调状态），不承载知识主体
-├── systems.yaml                  接入面（端口/鉴权/org/user）+ capabilities + runtime坑 + e2e_verified
+├── systems.yaml                  接入面（端口/鉴权/org/user）+ capabilities + runtime坑（真调结论按 schema 归位 runtime/api_behavior，不自造字段）
 ├── objects.yaml                  对象结构（fields/relations/constraints）+ side_effects + api_behavior
 ├── entities.yaml                 字段锚（主键格式/正则）+ transitions（跨 step 接力）
 ├── <system>.yaml                 api-cli 清单（resource/verb/body schema 内联）
