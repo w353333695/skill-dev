@@ -49,6 +49,15 @@ source_rules:
     example_key: "ip / hostname / connectInfo / homePath"
     injection: "EASYOPS_ip='172.16.1.1'（加 EASYOPS_ 前缀）"
     use_when: "设备自身属性（IP/主机名/连接信息串），从巡检对象 CMDB 实例取，避免重复配置"
+    ⚠️script_read_rule: |
+      ⚠️脚本里读 attr_id 参数必须用 EASYOPS_<key>，不是 key！
+      错（取不到值，None）：host = globals().get("ip")           # ← ip 是 attr_id，注入的是 EASYOPS_ip
+      对                          ：host = globals().get("EASYOPS_ip")
+      对照表（按 source 决定脚本变量名）：
+        source:attr_id  → globals().get("EASYOPS_" + key)   # ip/hostname 等 CMDB 属性
+        source:custom   → globals().get(key)                # username/password/port/db_name 等
+        内置             → globals().get("EASYOPS_instanceId")
+      来源：python_operator.go:46-57（KeyTypeCMDB 走 EASYOPS_ 前缀分支）
     real_examples:
       mssql: "{key:connectInfo, alias:连接信息, type:text, source:attr_id}"
       oracle: "{key:homePath, alias:home目录, type:text, source:attr_id}"

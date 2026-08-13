@@ -41,19 +41,29 @@ param_injection:
     执行时平台构造 cmd = 参数赋值头 + instanceId 标记打印 + 脚本源码，整体交给解释器。
     参数不是环境变量、不是命令行参数——是【源码级注入的变量赋值】。
   injected_variable_rules:
-    EASYOPS_prefix: "instanceId/唯一键/CMDB属性键 → 注入为 EASYOPS_<key> 前缀变量"
-    no_prefix: "自定义参数（source:custom）/普通 CMDB 属性 → 注入为无前缀变量（key=value）"
+    rule_table: |
+      注入格式只看 args 的 source 字段（python_operator.go:pythonAssignFunc 46-57）：
+        source=attr_id（CMDB属性，含唯一键）→ EASYOPS_<key>=<value>   ← 加前缀
+        source=custom（用户填）            → <key>=<value>           ← 无前缀
+        instanceId（平台内置）             → EASYOPS_instanceId=...    ← 加前缀
+      ⚠️踩坑（2026-08-13 e2e）：attr_id 的参数（如 ip）在脚本里要读 EASYOPS_ip，
+      不是读 ip！否则取不到值（None），是巡检脚本 failed 的常见原因。
+    EASYOPS_prefix: "instanceId / 唯一键(info.keys) / 【所有 source:attr_id 的 CMDB 属性参数】 → EASYOPS_<key>"
+    no_prefix: "source:custom 的自定义参数（用户填）→ 无前缀 <key>=<value>"
     none_for_empty: "空字符串参数转 None（Python 字面量，py_marshal.JsonToPy）"
-    source: "python_operator.go:41-57"
+    source: "python_operator.go:46-57 (pythonAssignFunc switch keyType); collector/message.go:43 (SourceAttrId)"
   injection_header_example: |
-    # 平台注入的头部（执行时拼在脚本前）：
+    # 平台注入的头部（执行时拼在脚本前），假设 args: [{key:ip,source:attr_id},{key:username,source:custom},{key:password,type:password,source:custom},{key:db_name,source:custom}]
     #!<解释器>
     # -*- coding: UTF-8 -*-
     EASYOPS_instanceId="5894db498854a"        # instanceId 注入
-    EASYOPS_serverName="srv-01"               # 唯一键（info.keys）注入
-    username="root"                           # 自定义参数（args 里 source:custom）
-    password="secret123"                      # password 类型参数（解密后注入）
-    db_name=None                              # 空参数转 None
+    EASYOPS_ip="172.30.0.90"                  # source:attr_id 的参数（CMDB属性）→ 加前缀
+    username="root"                           # source:custom 自定义参数 → 无前缀
+    password="secret123"                      # password 类型（source:custom）解密后注入 → 无前缀
+    db_name=None                              # source:custom 空参数转 None
+    print ("-------INSTANCE ID START---------")
+    print (EASYOPS_instanceId)
+    print ("-------INSTANCE ID END---------")
   shell_variant: |
     Shell 脚本注入等价 bash 语法：EASYOPS_instanceId="..."/key=value，
     instanceId 标记用 echo + $EASYOPS_instanceId（shell_operator.go:52-62）
