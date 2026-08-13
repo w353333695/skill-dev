@@ -667,24 +667,3 @@ systems:
     acceptance_urls:
       kit_list: "${EASYOPS_COLLECTOR_FRONTEND_URL}/next/collect-platform/kit-repo/list?page=1&q={keyword}"   # 用户前端实测(2026-08-13)
       kit_detail: "${EASYOPS_COLLECTOR_FRONTEND_URL}/next/monitor-kit/kit/easyops/{instanceId}/detail"   # 用户前端实测(2026-08-13)
-e2e_verified:
-  collector_plugin_service_8151:
-    plugin_list: "✅ 真调通过（198套件，响应 data.total）"
-    plugin_detail: "✅ 真调通过（完整字段集实锤，见 objects.yaml#collector_plugin fields）"
-    plugin_import: "✅ 真调通过（curl -F 上传，两套件均 code:0 返回 instanceId+agentType）"
-    plugin_export: "✅ 真调通过（GET zip 流 130KB，含 HOST.json/alias_metric/origin_metric/metric_set/package.conf.yaml/dashboard/alertRule）"
-    plugin_import_update: "✅ 真调通过（version 必填：缺则报 key version not found；版本唯一：重复报 code:100007 已存在同名版本）"
-    plugin_delete: "✅ 真调通过（curl DELETE code:0；前置检查：无引用可删，有引用报此套件关联有采集任务不允许删除）"
-    metricbeat_list: "✅ 真调通过（返回 moduleCache 模块表）"
-  collector_service_kit_12000:
-    activate: "⚠️ GAP（2026-08-13 穷尽排查未突破）——权威 contract 名 easyops.api.collector_service.job.ActivateCollectorKit@1.0.19（来自 easyops-cli/kits.go）。已测试全部姿势均失败：(1) 8151 collector_plugin_service 无 kit 路由 404；(2) 8125 collector_service 旧版无 kit 路由 404（只有 collector_job）；(3) 12000 giraffe 网关带 giraffe-contract-name header→ActivateCollectorKit@1.0.0~1.0.20 全 contract not found（该环境 12000 未部署 collector_service.job.* 这批 contract）。需从前端 monitor-kit 页面实际激活操作时浏览器 DevTools 抓包，拿真实请求 URL+端口+giraffe-contract-name header 回流"
-    list: "⚠️ 同 activate，ListCollectorKitInfo@1.0.5/1.0.0 在 12000 全 not found"
-  kit_samples_imported:
-    desc: "e2e 导入的两个测试套件（保留套件A用于后续激活验证）"
-    metric_sampler: "套件A『主机端口可达性监控套件』instanceId=658e73a176ad1（simple-script/metric_sampler，采集HOST端口可达性，保留未删）"
-    process_sampler: "套件B『主机信息采集套件』instanceId=658e73d07bdbd（simple-script/process_sampler，采集HOST写回CMDB，已验证后删除）"
-  packaging_format: "✅ ZIP_STORED + UTF-8 flag 确认可用（DEFLATED 未测，STORED 已够）。打包脚本 pack_kit.py"
-  gaps:
-    - "kit.activate contract 版本号（穷尽排查：8151/8125/12000 + path前缀/header + ActivateCollectorKit@1.0.0~1.0.20 全失败；12000 giraffe 网关未部署 collector_service.job.* contract。需前端抓包）"
-    - "采集脚本 py2.7 实际执行（.90 HOST _agentStatus=未安装，无 agent 接收；套件导入/激活链路可验，采集执行依赖 agent 是另一层）"
-    - "process_sampler GATHERING DATA 协议解析：✅已确认在【agent 端 sampler runtime】（collector_proxy_server 是纯字节转发网关，源码 data/sources/backend/HyperInsight/collector_proxy_server 印证 plugin.rs:84/88-93 仅改URL+header 不动body）。解析逻辑源码不在本地"

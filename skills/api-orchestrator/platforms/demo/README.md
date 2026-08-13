@@ -146,7 +146,7 @@ e2e 流程：`flows/develop-and-import-kit.yaml` / `upgrade-plugin.yaml` / `dele
 
 ## e2e 真调状态（2026-08-13）
 
-- ✅ collector_plugin_service:8151 完整验证（import/export/import_update/delete/metricbeat_list）
-- ⚠️ collector_service kit:12000 activate contract gap（ActivateCollectorKit@1.0.19 穷尽排查 not found，需前端抓包）
-- e2e 测试套件A『主机端口可达性监控套件』instanceId=658e73a176ad1 已导入保留
-- 详见 systems.yaml 的 e2e_verified 段
+- ✅ collector_plugin_service:8151 完整验证（import/export/import_update/delete/metricbeat_list）—— 真调结论已回流各 runtime/api_behavior 字段
+- ⚠️ collector_service kit:12000 activate contract gap（ActivateCollectorKit@1.0.19 穷尽排查 not found，详见 systems.yaml runtime.contract_version_gap，需前端抓包）
+- e2e 测试套件A『主机端口可达性监控套件』instanceId=658e73a176ad1 已导入保留（供后续 activate 验证）
+- 待解 gap：kit.activate contract 版本（需前端抓包）/ 采集脚本 py2 实际执行（.90 HOST 未装 agent）/ process_sampler GATHERING DATA 解析（在 agent 端源码不在本地）
