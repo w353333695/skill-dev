@@ -13,7 +13,7 @@ key_rule: |
   ⚠️整包部署须改 PKGBUILD 的 pluginList 白名单（否则不进包）；独立包部署（cp 到已部署目录）不受此限。
 prerequisites:
   input: "客户提供的 SSO 协议资料 ≥1：① 协议类型（OAuth2/CAS/OIDC/私有）；② 认证端点 URL（登录/授权/换 token/取用户信息）；③ client_id/client_secret 或等价凭证；④ 用户信息字段映射（哪个字段对应 cmdb 用户名）；⑤ 登录回调 redirect_uri；⑥ 登出端点（若有）"
-  knowledge: "本 flow 自包含——所有契约/范式/约束在 objects.yaml#sso_provider + #sso_provider_config，无需 sso-adapter 源码（源码仅开发方 onboarding 时提炼知识用，不进 skill 包，不依赖）。"
+  knowledge: "本 flow + objects.yaml#sso_provider + formats/sso-provider/（oauth2/cas 实物范本）三件套自包含。标准协议 provider 的真实 .py 代码在 formats/sso-provider/，直接复制改名仿写，勿探测 sso-adapter 源码（源码不在 skill 包）。"
   env: "本地开发环境（能跑 py2 语法检查即可）"
 steps:
   - n: 1
@@ -27,16 +27,16 @@ steps:
         · 客户协议是私有协议/集成平台跳转（token 交换非标准、或自定义 header）→【范式②直白】
           自己管 client，4 必填方法全自定义。
       判不准时优先范式①（改动小、可回退）。
-      ⚠️选范式只读 objects.yaml 的 two_paradigms 知识即可，【不要去探测 sso-adapter 源码】——源码不进 skill 包，
-      本 flow 的契约知识已自包含（onboarding 时提炼进 objects，运行时不依赖源码）。
+      ✅选定范式后，去 formats/sso-provider/ 复制对应范本目录（oauth2/ 或 cas/）→ 改名为 <新provider名>/，
+      仿照实物写。formats 里有【真实可运行的 .py 实物】，勿探测 sso-adapter 源码（源码不在 skill 包）。
   - n: 2
     transform: 实现 provider 代码（本地）
     desc: |
-      新建 handlers/providers/<name>/<name>.py（<name>=四位一体的 provider 名，小写）。
-      class <name>(Provider)，__init__ 里：
-        self._config = PLUGIN_CONFIG.get("<name>")
-        if self._config is None: raise Exception(u"导入<name>模块异常, setting.py中PLUGIN_CONFIG.<name>配置不存在")
-        jsonschema validate self._config（声明 config_schema，必填项缺失 raise 清晰错）
+      ✅从 formats/sso-provider/ 复制选定的范本目录（oauth2/ 或 cas/）→ 改名为 handlers/providers/<name>/，
+      文件/类名同步改 <name>（四位一体，小写）。在范本基础上改：
+        · 范式①（oauth2 范本）：多数只改配置项引用；非标处重写个别 hook（hook 清单见 objects.yaml#sso_provider.api_behavior.two_paradigms）。
+        · 范式②（cas 范本）：4 必填方法按客户协议直改，cas_client 等价换成客户的"凭证→用户"交换 client。
+      __init__ 里 self._config = PLUGIN_CONFIG.get("<name>")；拿不到 raise；jsonschema validate self._config（声明 config_schema，必填项缺失 raise 清晰错）。
       实现 4 必填方法（pre_signin/signin/user_info/sign_out），可选 3 个按需（authorize_post_deal/custom_auth/sso_global_sign_out）。
       方法契约逐个见 objects.yaml#sso_provider.fields（入参/返回/调用时机）。
       ⚠️py2 写法：urllib/urllib2/urlparse（非 urllib.parse）、print x、except Exception, e、unicode 判定。
