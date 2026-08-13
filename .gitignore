@@ -33,6 +33,9 @@ workspace-all.zip
 # Runtime artifacts（工具运行产物：录制/导出结果等，按工具追加）
 .browser-recorder/
 
+# api-orchestrator 本地状态（运行态缓存/会话产物，不入库）
+.api-orchestrator/
+
 # 敏感凭证与公司内部源码（绝不进版本库）
 platforms/*/auth/
 platforms/*/sources/raw/
