@@ -150,3 +150,36 @@ e2e 流程：`flows/develop-and-import-kit.yaml` / `upgrade-plugin.yaml` / `dele
 - ⚠️ collector_service kit:12000 activate contract gap（ActivateCollectorKit@1.0.19 穷尽排查 not found，详见 systems.yaml runtime.contract_version_gap，需前端抓包）
 - e2e 测试套件A『主机端口可达性监控套件』instanceId=658e73a176ad1 已导入保留（供后续 activate 验证）
 - 待解 gap：kit.activate contract 版本（需前端抓包）/ 采集脚本 py2 实际执行（.90 HOST 未装 agent）/ process_sampler GATHERING DATA 解析（在 agent 端源码不在本地）
+
+---
+
+# 巡检域（inspection:8103，v1 体系）
+
+> 2026-08-13 接入。实测定调：.90 平台用 **v1 体系**（INSPECTION_INFO 20 套件）；v2（INSP_SUITE 0 套件）仅兼容索引。
+
+## 巡检套件 = 4 对象组装（区别于采集套件单模型）
+
+```
+巡检套件（pluginId 串联）
+├── INSPECTION_INFO          元信息（id=pluginId/objectId/keys/method）
+├── INSPECTION_COLLECTOR     脚本（py2 + args 含 password 类型）
+├── INSPECTION_METRIC_GROUP  指标组（vals + conditions 阈值，平台判分）
+└── INSPECTION_REPORT_TEMPLATE 报告模板（可选）
+```
+
+## 关键认知
+
+1. **包格式 tar.gz**（5 文件：info.yaml/metrics.yaml/collectors/script.py[内容是YAML!]/reports_temp/detail.yaml/models.json）——详见 formats/inspection-kit/suite-package.yaml
+2. **脚本协议不同**：参数注入脚本头（非环境变量）；必须输出 INSTANCE ID + start/end 两组标记——详见 formats/inspection-kit/script-protocol.yaml
+3. **阈值平台判**：脚本只出原始值，按 conditions 的 comparator/level（0/5/10→80/50/20分）判分——详见 formats/inspection-kit/metric-threshold.yaml
+4. **args 密码规范**：password 类型（手填也要 password 禁 text 明文）——详见 formats/inspection-kit/args-design.yaml
+5. **导入不幂等**：重复 pluginId 直接报错（先删旧或改 id）
+6. **category 两级点分**：指标组分类必须正好 1 个点（如 整体状态.连接数）
+7. **无内置 cron**：任务定时委托外部 scheduler（once 绝对时间 / crontab cron 表达式）
+
+## e2e 链路
+
+```
+CMDB 确认模型 → 开发套件包(tar.gz) → import → 建4对象 → insp_task.create(建任务)
+→ 调度执行产生 jobId → insp_history.list/get(评分/异常) → export_excel/word(报告)
+```
