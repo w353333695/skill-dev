@@ -1,35 +1,38 @@
 # =============================================================================
-# EasyOps 采集服务（collector_service）—— api-cli 集中清单
+# EasyOps 采集服务套件激活面（kit activate/list）—— api-cli 集中清单
 # -----------------------------------------------------------------------------
-# collector_service:8125，套件激活/列表的能力域。
-# ⚠️本 spec 与 easyops-collector-plugin.yaml 分离的原因：collector_service(:8125) 与
-#   collector_plugin_service(:8151) 端口不同，api-cli endpoint 是 service 级（不支持
-#   per-resource 绑端口），故跨端口能力必须独立 spec + CLI --spec 切换（同 demo 的
-#   sys-setting:8271 先例）。
+# ⚠️真调环境（172.30.0.90）拓扑实测（2026-08-13）：
+#   • collector_service:8125 —— 旧版，collector_job 端点在（/api/v1/collector_job HTTP400=参数错），
+#     但 kit 端点（/api/v1/collector/kit/activate|info/list）全 404（缺 kit 模块，源码 tmp/源代码/collector_service 印证）。
+#   • :12000 —— kit activate/info/list 端点【实际在这里】，需 giraffe-contract-name header 路由。
+#     实测错误链：缺 header → 'get giraffe-contract-name none'；带 header → 'contract <name>@<版本> not found'。
+#     contract 实际版本号待 e2e 探测（kits.go 用 ActivateCollectorKit@1.0.19 / ListCollectorKitInfo@1.0.5，
+#     但 .90 环境返回 not found，实际版本可能不同——e2e 激活时探测真实 contract 名回流）。
+#   故 default_endpoint 指向 :12000（base_url=${EASYOPS_COLLECTOR_SERVICE_BACKEND_URL} 改指 12000）。
 #
-# 数据来源（⚠️契约源特殊）：
-#   • 权威契约 easyops-cli（官方 CLI 的 contracts + 实现）：
-#        - tmp/easyops-cli/content-packages/easyops-platform/easyops-cli/contracts/mutation-semantics.json
-#        - tmp/easyops-cli/content-packages/easyops-platform/easyops-cli/internal/platform/kits.go
-#   • ⚠️ collector_service Go 源码（tmp/源代码/collector_service）是【旧版，缺 kit 模块】：
-#     grep kit/activate/ActivateCollectorKit/ListCollectorKitInfo 在该源码 0 命中。
-#     activate/list-kit-info 端点的权威定义【只在 easyops-cli 契约】，源码落后。
-#     真调以此 spec（契约）为准，不可用源码说「端点不存在」。
+# 数据来源（契约权威在 easyops-cli，Go 源码旧版无 kit 模块）：
+#   • tmp/easyops-cli/.../contracts/mutation-semantics.json（端点 path 契约）
+#   • tmp/easyops-cli/.../internal/platform/kits.go（实现：body 字段、成功判定）
+#   • ⚠️不可用 tmp/源代码/collector_service 说「端点不存在」——那是旧版。
 #
 # 接入面：
-#   • backend —— 直连 collector_service :8125（HTTP）。**默认走 backend**。
+#   • backend —— :12000（HTTP，giraffe-contract-name header 路由）。
 #
-# 鉴权：与 collector_plugin_service 同 EasyOps 平台。直连 backend（auth=none）只需 org+user header。
-#   cookie 非必需（机制同 cmdb/collector_plugin_service）。
+# 鉴权：与 collector_plugin_service 同 EasyOps 平台。org+user header；cookie 非必需。
 #
-# ⚠️ api-cli 能力边界：
-#   activate/list 是 JSON 交互（非 multipart），api-cli 可正常真调。
-#   但 activate 的实际效果（下发采集任务）是异步的，需轮询 collector_job 状态验证。
+# ⚠️ giraffe-contract-name 路由（关键，影响每个请求）：
+#   每个端点必须带 header `giraffe-contract-name: <proto服务名>@<版本>` 才能路由。
+#   proto 服务名见各 operation 的 contract 注释。⚠️api-cli endpoint.headers 是【固定 header】
+#   （每请求注入），但 contract-name 因 operation 而异（activate≠list），无法用 endpoint.headers
+#   统一设——真调时用 --header 逐 operation 传，或走 Python SDK 在 call 时注入。
+#   （e2e 阶段先探测真实 contract 版本号，再决定是 endpoint.headers 固化还是 per-op 传）
+#
+# ⚠️ api-cli 能力边界：activate/list 是 JSON 交互，api-cli 可真调（需带 contract-name header）。
+#   activate 实际效果（下发采集任务）异步，需轮询 collector_job 状态验证。
 #
 # 知识分文件：
-#   激活机制（CMDB 事件驱动 AssignJobs + 600s 兜底）→ systems.yaml runtime.activation_mechanism；
-#   collector_job/采集任务结构 → objects.yaml#collector_job；
-#   activate/import/激活 e2e 流程 → flows/。
+#   激活机制（CMDB 事件驱动 AssignJobs + 600s 兜底）+ 拓扑 → systems.yaml runtime；
+#   collector_job 结构 → objects.yaml#collector_job；activate e2e → flows/。
 # =============================================================================
 spec: api-cli/v1
 service:
@@ -38,13 +41,14 @@ service:
   default_endpoint: backend
   endpoints:
     backend:
-      base_url: ${EASYOPS_COLLECTOR_SERVICE_BACKEND_URL}   # 值在部署根 env.d/demo.env（含 IP+端口 8125）
+      base_url: ${EASYOPS_COLLECTOR_SERVICE_BACKEND_URL}   # 值在 env.d/collector.env，指 http://172.30.0.90:12000（实测 kit 端点在 12000 非 8125）
       host: admin.easyops.local                              # IP 直连，Host 由 endpoint.Host 注入
       path_prefix: ""
-      auth: none                                              # 直连后端 auth=none，org/user 由 headers 注入
+      auth: none                                              # 直连 auth=none，org/user 由 headers 注入
       headers:
         org: ${EASYOPS_ORG}
         user: ${EASYOPS_USER}
+        # giraffe-contract-name 不在此设——它因 operation 而异（activate≠list），真调 per-op 用 --header 传
 
 # -----------------------------------------------------------------------------
 # 资源 1：kit —— 套件激活/列表（collector_service.job 模块）
