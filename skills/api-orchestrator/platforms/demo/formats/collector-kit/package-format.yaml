@@ -1,0 +1,283 @@
+# =============================================================================
+# formats/collector-kit/package-format.yaml
+# 采集套件 zip 包结构 + 打包规范 + 导入/导出/升级 API 契约。
+#
+# 职责：让套件开发能力正确打包 zip（平台能解压识别），并让编排挡知道
+# 导入/导出/升级是 multipart/binary 流（api-cli 无法真调，走 SDK）。
+#
+# 权威源：
+#   A. collector_plugin_service 导入导出源码：export_import_custom/imexport_service.go
+#   B. 上传校验：export_import_custom/validators/{api_validator.go,types.go}
+#   C. easyops-monitor 上传文档：.../kits-develop/upload.md（现代，ZIP_STORED）
+#   D. 已删除的过时 easyops_skills（ZIP_DEFLATED+UTF8 flag，与现代文档冲突）
+#   ⚠️ C 与 D 冲突：以 C（现代文档）为主，但 import 端点对两种格式的实际接受度
+#      待真调验证（见 packaging_format_conflict），结果回流本字段。
+# =============================================================================
+
+# -----------------------------------------------------------------------------
+# 一、zip 包内部结构
+# source: imexport_service.go（按文件名读取的代码路径）+ upload.md:5-22
+# -----------------------------------------------------------------------------
+package_structure:
+  top_level_rule:
+    rule: "zip 顶层目录名必须与 plugin.yaml 的 name 完全一致，否则上传失败"
+    source: "upload.md:24"
+
+  tree: |
+    {套件名}.zip
+    └── {套件名}/                   # ⚠️顶层目录名 = plugin.yaml name
+        ├── plugin.yaml             # 核心配置（必填，所有类型）
+        ├── metric_set.json         # 指标集定义（监控套件必填，CMDB 采集可空 []）
+        ├── origin_metric.json      # 原始指标定义（监控套件必填，CMDB 采集为 []）
+        ├── alias_metric.json       # 别名指标定义（监控套件必填）
+        ├── config.template.yaml    # metricbeat 类型必填（Go template）
+        ├── resource_discovery_define.json  # 资源发现配置（CMDB 采集套件用）
+        ├── readme                  # 使用说明（注意：无扩展名，可选）
+        ├── image.png               # 套件图标（可选）
+        ├── src/                    # 采集脚本目录（simple-script 必填）
+        │   ├── <脚本名>.py
+        │   └── <脚本名>.orig        # 原始脚本（不含环境变量注入，改名时用）
+        ├── dashboard/              # 仪表盘 JSON（可选，多文件，自动导入）
+        ├── alertRule/              # 告警规则 JSON（可选，多文件，自动导入）
+        ├── deploy/                 # 部署脚本（exporter 类型必填）
+        │   ├── start_script.sh
+        │   ├── stop_script.sh
+        │   ├── monitor_script.sh
+        │   └── package.conf.yaml
+        └── bin/                    # 二进制（exporter 类型必填）
+
+  files_by_type:
+    simple-script: [plugin.yaml, src/<script>.py, origin_metric.json, alias_metric.json, metric_set.json, readme]
+    metricbeat: [plugin.yaml, config.template.yaml, origin_metric.json, alias_metric.json, metric_set.json]
+    exporter: [plugin.yaml, deploy/*, bin/*, origin_metric.json, alias_metric.json, metric_set.json]
+    prometheus: [plugin.yaml, origin_metric.json, alias_metric.json, metric_set.json]   # noPackage，最简
+
+  optional_files_recognized_on_import:
+    # 这些文件 import 时若存在会被特殊处理（imexport_service.go importOther）
+    origin_metric.json: "若存在→ImportMetricFromFile 导入指标（imexport_service.go:755-762）"
+    alias_metric_json: "ParsePluginAliasMetrics（imexport_service.go:509,824）"
+    "<relateObjectId>.json": "关联 CMDB 模型定义，object_list 数组，ImportV3（imexport_service.go:848-880）"
+    auto_discovery_strategy.json: "自动发现策略数组，每条注入 collectorPlugin，ImportInstance 到 COLLECTOR_CMDB_AUTO_STRATEGY@EASYOPS（imexport_service.go:882-921）"
+    resource_discovery_define.json: "资源发现配置数组（imexport_service.go:923-962）"
+    readme: "升级时从包内 readme 文件读 readme 文本（无扩展名，imexport_service.go:633）"
+    dashboard/: "目录有 JSON 文件→自动导入（ParsePluginMetadata 的 dashboards key）"
+    alertRule/: "自动导入（ParsePluginMetadata 的 alertRules key，过 checkAlertRules 严格校验）"
+    source: "imexport_service.go:754-817 importOther"
+
+# -----------------------------------------------------------------------------
+# 二、打包格式冲突（⚠️ 待真调验证，关键坑）
+# -----------------------------------------------------------------------------
+packaging_format_conflict:
+  modern_doc_says:
+    format: "ZIP_STORED（不压缩）"
+    reason: "平台端解压服务不支持 ZIP_DEFLATED 压缩格式，用压缩模式会导致 permission denied 错误"
+    source: "upload.md:28-29"
+
+  legacy_skill_says:
+    format: "ZIP_DEFLATED + 强制 UTF-8 flag（bit 11）"
+    reason: "macOS zip 不设 UTF-8 flag，中文文件名 CP437 存储，Go archive/zip 解码乱码，scriptPath 匹配失败，激活报 illegal base64 data at input byte 0"
+    note: "此为已删除的过时 easyops_skills 资料（resource-collector-kit/scripts/pack_plugin.py）"
+    source: "过时资源（已删除，仅作冲突对照）"
+
+  resolution_strategy:
+    current: "未真调验证前，两种都录入。e2e 真调时先用 ZIP_STORED（现代文档主推），若 import 端点拒绝再试 ZIP_DEFLATED+UTF8 flag"
+    verify_method: "用两种格式各打一个测试包，分别 POST /api/v1/plugin/import，记录哪个能成功 import + activate"
+    commit_back: "真调结果回流本字段 packaging_format_conflict.resolution_strategy.verified"
+
+  exclusion_rules:
+    # 无论哪种格式，打包时必须排除这些文件（upload.md:29）
+    - ".easyops-cli/（凭据和 license）"
+    - ".git/（版本控制）"
+    - "__pycache__/（Python 缓存）"
+    - "*.pyc（编译缓存）"
+    - ".DS_Store（macOS 元数据）"
+    - "*.zip（已有的 zip 包本身）"
+    - ".version（版本管理文件，不进包）"
+    source: "upload.md:29"
+
+  utf8_filename_warning:
+    rule: "中文文件名（如 src/动环监控.py）在 zip 内的编码处理是激活成败关键"
+    detail: "plugin.yaml 的 command.collect.scriptPath 必须与 zip 内实际路径匹配；若中文文件名编码不一致，匹配失败报 illegal base64 data at input byte 0"
+    source: "过时资料 pack_plugin.py 注释（冲突源之一，但 UTF-8 编码问题本身是真实存在的）"
+
+# -----------------------------------------------------------------------------
+# 三、导入 API 契约（ImportPlugin，multipart）
+# source: imexport_service.go:368-506; validators/api_validator.go:52-87; validators/types.go:32-41
+# -----------------------------------------------------------------------------
+import_api:
+  endpoint:
+    method: POST
+    path: "/api/v1/plugin/import"
+    service: collector_plugin_service.easyops_plugin.ImportPlugin
+    handler: "controller.go:54-83 ImportPlugin"
+    source: "route.go:8"
+
+  request_format:
+    type: multipart/form-data
+    file_field: "attachment"   # ⚠️文件字段名固定 attachment
+    file_validation:
+      filename_must_contain: "zip"   # ⚠️子串包含（非扩展名校验），xxx.zip/zip.tar/backup_zip 都过
+      no_size_limit: true            # 无大小限制
+      no_mime_check: true            # 无 MIME/Content-Type 校验
+      no_signature: true             # 无签名/校验和
+      source: "api_validator.go:77-83"
+    form_fields:
+      name: { required: true, desc: "套件名（必须与 plugin.yaml name 一致）" }
+      version: { required: false, desc: "版本号，空则用 plugin.yaml version 或 time.Now().Unix()" }
+      category: { required: false, desc: "分类" }
+      upsert: { required: false, desc: "同名冲突时 true=覆盖更新，false（默认）=报错" }
+      protected: { required: false, desc: "true=标记内置套件保护位" }
+      collectMethod: { required: false, desc: "采集方式（逗号分隔，覆盖 group 拆分）" }
+      collectContents: { required: false, desc: "采集内容（逗号分隔）" }
+      cloudTypes: { required: false, desc: "云类型（逗号分隔）" }
+      source: "validators/types.go:32-41"
+
+  conflict_strategy:
+    same_name:
+      default: "报错『已存在同名套件'<name>'』（NewErrorAlreadyExists）"
+      override: "PostForm upsert=true → 走 UpsertPlugin 覆盖"
+      source: "imexport_service.go:374-376"
+    version: "导入侧不查版本冲突（直接用 request.Version 或时间戳）"
+    source: "imexport_service.go:369-376,403-408"
+
+  flow:
+    steps:
+      - "同名查重（Find by name），冲突且非 upsert 则报错"
+      - "unZipAttachment 解压到临时目录（filename 不含 zip 子串则报『上传文件不是zip文件』）"
+      - "LoadPluginInfoFile 读 plugin.yaml（失败报『读取套件程序包plugin.yaml文件失败』）"
+      - "脚本型改名处理（ScriptType 非空且 name 变更→handleScriptTypePlugin 重新生成注入脚本）"
+      - "覆盖字段（name/version/category，Group 按 4 类白名单重组）"
+      - "回写 plugin.yaml + 重打 zip"
+      - "UpsertPlugin 创建/更新套件"
+      - "importOther 导入附属资源（metric/关联模型/dashboard/alertRule/自动发现策略/资源发现配置/版本关系）"
+      - "PostEvent 发『安装套件』系统事件"
+    source: "imexport_service.go:368-506"
+
+  api_cli_limitation:
+    rule: "multipart/form-data，api-cli 的 --body-file 只发 JSON 不支持 formData"
+    workaround: "真调走 Python SDK（client.import_plugin(file=...)）或 curl -F；api-cli 仅 --print-curl 预览"
+    sdk_reference: "复用 demo sdk/easyops_client.py 模式（见 autoops tool_package 先例）"
+
+# -----------------------------------------------------------------------------
+# 四、导出 API 契约（ExportPlugin，zip 流）
+# source: imexport_service.go:191-322; validators/api_validator.go:20-50
+# -----------------------------------------------------------------------------
+export_api:
+  endpoint:
+    method: GET
+    path: "/api/v1/plugin/export/{instanceId}?dashboardId=<可选>"
+    service: collector_plugin_service.easyops_plugin.ExportPlugin
+    handler: "controller.go:27-52 ExportPlugin"
+    source: "route.go:7"
+
+  request_params:
+    instanceId: { in: path, required: true, pattern: '^[0-9a-z]{13}$', desc: "套件实例 ID" }
+    dashboardId: { in: query, required: false, pattern: '^[0-9a-z]{13}$', desc: "可选，附加指定 dashboard" }
+    source: "validators/request_validate_trees.go:9"
+
+  response:
+    content_type: "application/zip"
+    content_disposition: "attachment; filename=<pkgInfo.Name>"
+    format: "zip 二进制流（20KB chunk 流式返回，写完异步删临时文件）"
+    source: "imexport_service.go:310-321"
+
+  includes:
+    - "套件程序包本体（从存储后端 tar.gz 解包重组为 zip）"
+    - "重写的 plugin.yaml（含实例字段）"
+    - "可选 dashboard（AttachDashboard）"
+    - "关联 metric（AttachMetrics）"
+    - "关联资源定义（AttachPluginRelateResource）"
+    - "readme（从 _COLLECTOR_EASYOPS_PLUGIN 实例 readme 字段）"
+    source: "imexport_service.go:218-308"
+
+  api_cli_limitation:
+    rule: "响应是 application/zip 二进制流，api-cli 无法存盘"
+    workaround: "真调走 Python SDK（client.export_plugin(instanceId, save_to=...)）流式下载；api-cli --print-curl 预览"
+
+# -----------------------------------------------------------------------------
+# 五、升级 API 契约（UpdatePluginWithFile，multipart）
+# source: imexport_service.go:555-670; validators/api_validator.go:89-125; validators/types.go:42
+# -----------------------------------------------------------------------------
+upgrade_api:
+  endpoint:
+    method: PUT
+    path: "/api/v1/plugin/import_update/{instanceId}"
+    service: collector_plugin_service.easyops_plugin.UpdatePluginWithFile
+    handler: "controller.go:85-114 UpdatePluginWithFile"
+    source: "route.go:9"
+
+  request_format:
+    type: multipart/form-data
+    file_field: "attachment"
+    file_validation: "同 import（filename 必含 zip 子串）"
+    form_fields:
+      version: { required: true, desc: "⚠️升级时 version 必填（updatePluginRequestKeys=[version]）" }
+    path_params:
+      instanceId: { required: true, pattern: '^[0-9a-z]{13}$' }
+    source: "validators/types.go:42; request_validate_trees.go"
+
+  constraints:
+    agent_type_immutable:
+      rule: "⚠️升级时不允许变更 agentType（报『更新套件时不允许变更套件类型』）"
+      source: "imexport_service.go:590-592"
+    version_unique:
+      rule: "版本号必须唯一，重复报『已存在同名版本』（仅当 Package.Id/VersionId 非空时查 SearchPluginVersionName）"
+      source: "imexport_service.go:563-571"
+    no_semver: "无 semver 比较，仅存在性检查（理论上可 1.0→0.5 只要 0.5 没用过）"
+
+  migration:
+    only_one: "参数的 IsFromSecret/IsEncrypt 从旧实例同名参数继承（唯一迁移逻辑）"
+    other_fields: "dashboard/metric/告警规则/关联资源一律按新包重新导入覆盖，无字段级 merge"
+    source: "imexport_service.go:607-613"
+
+  rollback:
+    rule: "无显式回滚机制。UpsertPlugin 成功但 importOther 失败时，实例和版本已更新但附属资源没导（部分失败无补偿）"
+    source: "imexport_service.go:658-661"
+
+  flow:
+    steps:
+      - "取旧实例（domainService.Get），记 oldVersionId"
+      - "版本号冲突校验（SearchPluginVersionName）"
+      - "解压（临时 zip 名用 instanceId 非 name）"
+      - "读新 plugin.yaml"
+      - "agentType 不可变校验"
+      - "脚本改名处理 + 参数加密位继承"
+      - "强制 version=request.Version，name=旧实例 name（保持实例名）"
+      - "回写 plugin.yaml + 重打 zip + UpsertPlugin"
+      - "版本变更则 UpdateInstance 标记 modification.modified=true"
+      - "importOther 导入附属资源 + 读 readme"
+    source: "imexport_service.go:555-670"
+
+# -----------------------------------------------------------------------------
+# 六、上传 protected 三分支校验（上传前必查）
+# source: upload.md:94-117; kits.go:250-266
+# -----------------------------------------------------------------------------
+protected_check:
+  description: "上传前必须校验同名套件的 protected 状态（存储在 _COLLECTOR_EASYOPS_PLUGIN 实例）"
+  branches:
+    not_exist:
+      condition: "平台无同名套件"
+      action: "直接上传（新建），upsert=false"
+    exists_unprotected:
+      condition: "存在同名且 protected=false（自定义套件）"
+      action: "允许覆盖，upsert=true"
+    exists_protected:
+      condition: "存在同名且 protected=true（内置套件）"
+      action: "⚠️禁止上传，提示改名（如 MySQL监控套件 → MySQL监控套件-XX客户定制，version 从 1.0.0 起独立版本线）"
+  check_method: "CMDB PostSearchV3 查 _COLLECTOR_EASYOPS_PLUGIN by name 精确匹配，一步取 instanceId/name/protected"
+  source: "upload.md:94-117; kits.go:250-266"
+
+  status_meaning:
+    enabled: "status=enabled → 平台内置套件（protected=true），覆盖会被拒"
+    available: "status=available → 用户自定义套件（protected=false），可覆盖"
+    source: "upload.md:206-209"
+
+# -----------------------------------------------------------------------------
+# 七、版本号管理
+# -----------------------------------------------------------------------------
+version_management:
+  format: "语义化版本号（如 1.0.4），维护在套件目录 .version 文件（不打包进 zip）"
+  increment: "打包时递增 patch（1.0.3→1.0.4）；--no-increment 不递增（重打同版本）"
+  zip_naming: "{套件名}_v{版本号}.zip（如 Tomcat监控套件_v1.0.4.zip）"
+  custom_kit: "定制内置套件改名后，version 从 1.0.0 起独立版本线，不继承原内置版本号"
+  source: "upload.md:113,267-283（过时 pack_plugin.py 版本逻辑；命名规范一致）"
