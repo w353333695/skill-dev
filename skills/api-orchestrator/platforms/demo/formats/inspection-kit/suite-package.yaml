@@ -107,9 +107,55 @@ info_yaml_schema:
     objectid: "巡检目标 CMDB 模型 id。⚠️开发套件前必须先在 CMDB 确认此模型存在（object_model 查），无则设计新建（见 develop flow step 1-3 门禁）"
     keys: "唯一键列表（CMDB 属性 id），用于定位巡检实例。DB 类常用 [serverName]/[instanceName]"
     method: "agent（远程主机执行）/ 其他。默认 agent"
-    countersideid: "对端模型 id。DB/中间件类套件通常关联 HOST（执行宿主机），counterSideId=host/HOST"
-    relationidwithhost: "与 HOST 的关系 id（CMDB relation），格式 <模型>_host_<模型>_HOST。agent 类套件靠此找到执行主机"
-  source: "internal/database/cmdb/info/message.go:10-54; 真调实测 weblogic(6350f72ef0491)/mssql/oracle"
+    countersideid: "对端模型 id（关联主机用）。DB/中间件类套件通常关联 HOST（执行宿主机）。详见下方 host_relation_patterns。⚠️create-only：API create 端点 service 层(info_service.go:127)把此字段注释掉了，**API create/update 写不进**，只有 import 包导入能写入。"
+    relationid: "与对端模型的关系 id（如 artifactInsts）。可空——19 个实测套件里一半为空串也能工作（靠 relationIdWithHost 关联）。"
+    relationidwithhost: "与 HOST 的关系 id（CMDB relation 三段式）。⚠️这三个字段一起决定『巡检目标实例 → 执行主机』的关联：relationIdWithHost = {中间模型}@ONEMODEL_{counterSideId}_{relationId}_HOST。详见下方 host_relation_patterns。"
+  host_relation_patterns:
+    title: "关联主机字段实测规律（.90 平台 19 套件归纳，2026-08-13）"
+    rule: |
+      巡检套件必须能『从巡检目标实例找到执行主机』。靠三个字段组合表达：
+        relationIdWithHost = {中间模型}@ONEMODEL_{counterSideId}_{relationId}_HOST
+      按『中间模型』分 4 类模式（开发套件时按目标模型所属类别选）：
+    patterns:
+      artifact_inst_class:          # 最常见——DB/中间件/应用（mongodb/mssql/redis/rabbitmq/tomcat/apache/iis/kafka/zookeeper/...）
+        target_models: ["MONGODB@ONEMODEL", "MSSQL@ONEMODEL", "REDIS_SERVICE@ONEMODEL", "TOMCAT@ONEMODEL", ...]
+        countersideid: "host"
+        relationid: "artifactInsts"     # 可空（apache/elasticsearch 等留空串也工作）
+        relationidwithhost: "ARTIFACT_INST@ONEMODEL_host_artifactInsts_HOST"
+        note: "MySQL/MSSQL/Oracle/MongoDB/Redis/RabbitMQ/Tomcat 等通过 ARTIFACT_INST 中间模型关联主机——默认套这套"
+      service_class:                # 服务部署类（redis 用 relatedHost / ibmq 用 inspectionHost）
+        target_models: ["REDIS_SERVICE@ONEMODEL", "IBMMQ_SERVICE@ONEMODEL"]
+        countersideid: "relatedHost | inspectionHost"   # 看具体模型关系字段
+        relationid: ""
+        relationidwithhost_examples:
+          redis: "SERVICE@ONEMODEL_relatedHost_deployedServices_HOST"
+          ibmq: "SERVICE@ONEMODEL_inspectionHost_inspectionService_HOST"
+      direct_host_class:            # 直连主机（weblogic/oracle 用专用巡检模型）
+        target_models: ["INSPEC_WEBLOGIC", "INSPEC_ORACLE"]
+        countersideid: "HOST"
+        relationid: "INSPEC_WEBLOGIC | INSPEC_ORACLE"
+        relationidwithhost_examples:
+          weblogic: "INSPEC_WEBLOGIC_HOST_INSPEC_WEBLOGIC_HOST"
+      node_class:                   # 节点类（kafka/nginx/zookeeper_node_check）
+        target_models: ["KAFKA_SERVICE_NODE", "NGINX_SERVICE_NODE"]
+        countersideid: "HOST"
+        relationid: ""
+        relationidwithhost_examples:
+          kafka_node: "KAFKA_SERVICE_NODE_HOST_KAFKA_SERVICE_NODE_HOST"
+    how_to_pick: |
+      开发新套件时：
+      1. 确定 objectId（目标模型，先在 CMDB 确认存在）
+      2. 看目标模型『属于哪类』（查模型关系 relation_list：是否继承自 ARTIFACT_INST？是否 SERVICE？）
+      3. 套对应模式的三个字段值
+      4. ⚠️counterSideId 必须 import 包导入才能写入——见 import_only_caveat
+  import_only_caveat: |
+    ⚠️counterSideId 写入限制（实测，2026-08-13）：
+    - API create（POST /api/v1/inspection）：service 层 info_service.go:127 把 CounterSideId 赋值注释掉了，
+      所以 API 建的套件 counterSideId 永远空（即使入参传了也丢弃）。
+    - API update（PUT /api/v1/inspection/{pluginId}）：fieldsToSet 白名单不含 counterSideId（info_manager.go:190-200）。
+    - import 包导入（POST /api/v1/inspection-import）：走 manager 层 CreateInfo，Convert2Struct 全字段写入，**唯一能写 counterSideId 的路径**。
+    → 结论：要 counterSideId 有值（关联主机生效），必须用 import 包导入，不能依赖 API create/update。
+  source: "internal/database/cmdb/info/message.go:10-54; info/info_service.go:127(注释坑); info_manager.go:75,189-200(create/update白名单); 真调实测 weblogic/mssql/mongodb/redis/...19套件"
 
 # -----------------------------------------------------------------------------
 # 四、metrics.yaml —— 指标组列表（YAML 数组）
@@ -197,13 +243,32 @@ collector_yaml_schema:
 # source: internal/database/cmdb/report_template/message.go:10-84
 # -----------------------------------------------------------------------------
 report_template_schema:
-  optional: "可选。导入失败不回退（可页面新建），import_export_service.go:218-222"
+  optional: "可选。导入失败不回退（可页面新建），import_export_service.go:218-222。但建议开发套件时建——否则任务执行后无报告展示模板。e2e 实测：mssql 有 1 模板，mongodb 有 1 模板，新建套件之前容易漏建。"
+  file_location: "reports_temp/detail.yaml（YAML 数组，每元素一个模板；report_temp_list_file='reports_temp'）"
+  list_endpoint: "GET /api/v1/inspection/{pluginId}/report-templates 返回 {list:[...]} 分页结构；GET .../{pluginId}/report-templates/{templateId} 返回单模板详情"
   fields:
     name: "模板名"
-    pluginid: "与 info.id 一致"
-    summarytemplates: "总览模板（metricgroups+metrics 数组，含 displaytype: Form/LineChart/BarChart/DoughnutChart/Card）"
-    metricgroups: "详情模板（displaytype: LineChart/BarChart/Form/CycleChart）"
-  source: "report_template/message.go:10-84"
+    pluginid: "与 info.id 一致（CheckAllInspection 校验所有文件 pluginId 必须相同）"
+    summarytemplates: "总览模板（顶部摘要区）：{metricgroups:[], metrics:[{id, metricgroupid, index, width, height, displaytype, abscissaid}]}——metrics 引用 metrics.yaml 里的 val.id 和 metricgroup.id"
+    metricgroups: "详情模板（正文展示区）：[{id, index, displaytype, abscissaid, transposed}]——id 引用 metrics.yaml 里的 metricgroup.id"
+  real_example: |
+    # e2e mysql 报告模板（实测导入成功，detail.yaml）
+    - instanceid: "<13hex>"
+      internalid: "<24hex>"
+      name: mysql巡检默认模板
+      pluginid: mysql
+      summarytemplates:
+        metricgroups: []
+        metrics:
+        - {id: alive, metricgroupid: connection_status, index: 0, width: 4, height: 4, displaytype: Card, abscissaid: ""}
+        - {id: version, metricgroupid: version_info, index: 4, width: 4, height: 4, displaytype: BasicInfo, abscissaid: ""}
+      metricgroups:
+      - {id: connection_status, index: 0, displaytype: Form, abscissaid: "", transposed: false}
+      - {id: version_info, index: 2, displaytype: Form, abscissaid: "", transposed: false}
+      ctime: "2026-08-13 21:00:00"
+      creator: easyops
+  displaytype_enum: "Form（表单）/ Card（卡片）/ BasicInfo（基本信息）/ LineChart / BarChart / DoughnutChart / CycleChart"
+  source: "report_template/message.go:10-84; import_export_service.go:218-222; 真调实测 mssql(64229a10cba5fe934eec7844)/mongodb"
 
 # -----------------------------------------------------------------------------
 # 七、models.json —— 关联 CMDB 模型定义（可选）
@@ -226,8 +291,14 @@ import_flow:
     - "pluginId 一致性校验（所有文件 pluginId 必须相同，CheckAllInspection:282-297）"
     - "导入顺序：ImportModels（CMDB模型，失败忽略）→ ImportInfo（套件，失败返回）→ ImportMetrics（指标组，失败回退删套件）→ ImportCollector（脚本，失败回退删套件+指标组）→ ImportReport（模板，失败忽略）"
   conflict_strategy:
-    rule: "⚠️不幂等！对已存在的 pluginId/id 重复导入直接报错（mongo InsertMetricGroups/CreateInfo 等重复键 E11000 报错）"
-    implication: "重复导入同名套件会失败，需先删除旧套件再导，或改 pluginId"
+    rule: "⚠️不幂等！INSPECTION_INFO 唯一键是 id 和 name（实测）。重复导入 id 或 name 已存在的套件直接报『已存在重复的实例』（mongo E11000 重复键）"
+    implication: "重复导入同名套件会失败，需先删除旧套件（DELETE 级联删全部对象）再导，或改 pluginId + name"
+    duplicate_error_message: "code=100006 ERR_ABORTED「已存在重复的实例」= id 或 name 唯一键冲突；「数据写入部分失败」= instanceId 等必填字段空/格式错"
+    write_failure_cases: |
+      实测『数据写入部分失败』触发条件：
+      - info.yaml 的 instanceid 空（CMDB 要求非空，需填 13hex）
+      - 各对象（info/metrics/collector/detail）残留旧 instanceid/internalid 导致冲突
+      → 修复：每个对象的 instanceid 都换新（13hex 时间戳格式，参考真实导出包 606133b8ac335）
   rollback: "导入有部分回退：metric 失败删 info；collector 失败删 info+metrics；但 model/report 失败不回退"
   source: "import_export_service.go:177-223,255-280; test 2131-2144（Code 11000 重复键）"
 
@@ -258,7 +329,7 @@ v2_compatibility_index:
     list: "GET /api/inspection_service/v1/suite"
     delete: "DELETE /api/inspection_service/v1/suite/batch"
     export: "GET /api/v1/inspection/export_suite"
-    import: "POST /api/v1/inspection/import_suite"
+    import: "POST /api/v1/inspection-import（multipart file 字段，非 /api/v1/inspection/import）"
   package_format: "suite.json（单一主文件，套件+指标+脚本全内嵌 JSON）+ tools/<toolId>.tar.gz（可选工具包）"
   storage: "CMDB INSP_SUITE@EASYOPS（v2）vs MongoDB（v1）"
   when_to_use: "v2 是未来方向（组合式单文件），但当前平台无数据。开发新套件仍走 v1（与现有 20 套件一致）"

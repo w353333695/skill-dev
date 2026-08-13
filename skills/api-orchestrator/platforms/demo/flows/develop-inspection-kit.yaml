@@ -17,7 +17,17 @@ key_rule: |
     string型不能设max/min（conditions 非空时按 metric-threshold.yaml 校验）
   - 建 task：8必填 pluginId/name/performanceTargets/specifyHostPolicyInstanceId/targets/
     templateId/taskType/taskScheduler
-  - 导入包(inspection-import)对补全字段的容错差，【API逐对象建更可靠】
+  - 🔴关联主机字段（counterSideId/relationId/relationIdWithHost）：【import 包导入才能写完整】
+    API create 的 service 层(info_service.go:127)把 counterSideId 赋值注释掉了——**API 建的套件 counterSideId 永远空**，
+    导致「找不到关联主机」。必须用 import 包导入(POST /api/v1/inspection-import)写入 counterSideId=host。
+    relationIdWithHost 按 4 类模式选（见 suite-package.yaml host_relation_patterns）：
+      DB/中间件(ARTIFACT_INST类) → countersideid:host, relationid:artifactInsts,
+        relationidwithhost:ARTIFACT_INST@ONEMODEL_host_artifactInsts_HOST
+  - 🔴报告模板（reports_temp/detail.yaml）：之前容易漏建（套件可无模板，但无模板→任务执行后无报告展示）。
+    必须建——summarytemplates(总览)+metricgroups(详情)，displaytype: Form/Card/BasicInfo/...
+  - import 包坑（实测）：INSPECTION_INFO 唯一键是 id+name，重复报「已存在重复的实例」；
+    info/metrics/collector/detail 每个对象的 instanceid/internalid 必须换新(13hex)，残留旧值报「数据写入部分失败」
+  - import 成功要点：所有文件 pluginId 一致（CheckAllInspection 校验）；models.json 可省（目标模型已存在则跳过）
   脚本协议（formats/inspection-kit/script-protocol.yaml，与采集套件完全不同）：
     py2 + 参数注入脚本头（非环境变量）+ 必须输出 INSTANCE ID + start/end 两组标记
 
@@ -45,12 +55,14 @@ steps:
     op: insp_info.create
     desc: |
       建套件元信息（4对象之一）。必填 id/name/index/objectId/relationIdWithHost/method（validator逐字段报错）。
-      id=pluginId（英文唯一）；isSystem:false（自定义）；counterSideId:host（DB类通过HOST执行）。
+      id=pluginId（英文唯一）；isSystem:false（自定义）。
+      ⚠️counterSideId 此时即使传也会被丢弃（service层注释掉，见 key_rule）——counterSideId 在 step 7 import 时写入。
     dataflow: |
       POST /api/v1/inspection body {id,name,objectId,objectName,method:"agent",keys:["ip"],
-      isSystem:false,isApp:false,index:0,counterSideId:"host",
+      isSystem:false,isApp:false,index:0,
       relationIdWithHost:"ARTIFACT_INST@ONEMODEL_host_artifactInsts_HOST"}
-    expect: "code:0，返回 instanceId（=套件实例id）"
+      （counterSideId 此处传不传都不入库）
+    expect: "code:0，返回 instanceId（=套件实例id）。用于验证 API create 端点可用；正式建走 step 7 import"
   - n: 5
     op: insp_collector.create
     desc: |
@@ -69,7 +81,20 @@ steps:
       vals:[{id,name,type:"num",weight,conditions:[]}]}
     expect: "code:0；string型+conditions非空时守 metric-threshold.yaml（不能设max/min）"
   - n: 7
-    desc: "(可选)建报告模板 insp_template.create。套件无模板可跳过（任务 templateId 传空串）"
+    desc: |
+      【🔴关键】正式建套件：把 4 对象打成 tar.gz 包走 import（POST /api/v1/inspection-import）。
+      这是唯一能写入 counterSideId（关联主机）+ 报告模板的可靠路径。
+      包结构（根目录=<pluginId>/）：info.yaml + metrics.yaml + collectors/script.py + reports_temp/detail.yaml(+__init__.py) + 可选 models.json。
+      ⚠️导入前先删旧套件（DELETE 级联删全部对象，避免 id/name 唯一键冲突报『已存在重复的实例』）。
+      ⚠️每个对象的 instanceid/internalid 必须填新值(13hex)，空值或残留旧值报『数据写入部分失败』。
+      参考 formats/inspection-kit/suite-package.yaml 的 import_only_caveat + conflict_strategy。
+    dataflow: |
+      curl -F "file=@<pluginId>.tar.gz" http://$BACKEND/api/v1/inspection-import
+      info.yaml 含 countersideid:host + relationidwithhost:ARTIFACT_INST@ONEMODEL_host_artifactInsts_HOST
+      reports_temp/detail.yaml 含报告模板（summarytemplates+metricgroups，见 suite-package.yaml real_example）
+    expect: "code:0。随后 insp_info.get 验证 counterSideId=host 已写入、report-templates 有模板"
+  - n: 7b
+    desc: "报告模板（reports_temp/detail.yaml）建议建——套件无模板时任务执行后无报告展示。模板引用 metrics.yaml 的 val.id 和 metricgroup.id"
   - n: 8
     desc: "本地验证脚本：设参数变量跑脚本，确认输出 INSTANCE ID 标记 + start/end 标记包裹的指标组JSON"
     expect: "stdout 含两组标记，payload[].id ↔ metric_group.id，payload[].vals[].id ↔ val.id"
@@ -98,9 +123,10 @@ steps:
     desc: "(可选)导出 Excel 报告。⚠️二进制流走 curl -o / SDK"
 
 note: |
-  导入包(inspection-import)对字段容错差（缺 pathid 等环境字段会失败）——推荐 API 逐对象建（本流程）。
-  导入包适合「从其他环境搬迁完整套件」场景。
-  script 协议关键：参数是【脚本头部变量注入】（EASYOPS_<key> for attr_id，key for custom），
+  🔴正式建套件走 import 包（step 7），不走 API create——因为 counterSideId 只有 import 能写入（关联主机必需）。
+  API create/update 路径（step 4-6）用于：① 验证各对象端点可用 ② 理解各对象字段 ③ 单独建 collector/metric_group（这俩 API 可写入）。
+  import 包适合「正式建套件」「从其他环境搬迁完整套件」场景。
+  script 协议关键：参数是【脚本头部变量注入】（attr_id 来源注入无前缀变量名，custom 来源注入同名变量），
   不是环境变量；必须输出 INSTANCE ID 标记（结果归属）+ start/end（指标数据）。
 
 side_effects: "见 objects.yaml#insp_template.delete(被任务引用拒删)/insp_metric_group.update(删val级联)"
