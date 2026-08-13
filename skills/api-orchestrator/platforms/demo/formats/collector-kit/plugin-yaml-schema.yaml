@@ -321,7 +321,7 @@ param_define_fields:
   isEncrypt:
     type: bool
     required: false
-    desc: "是否加密存储。密码类字段必须 true。⚠️Update 时对已存在参数强制保留旧值（不可修改）。"
+    desc: "是否加密存储。密码/凭证类字段必须 true（即使 isFromSecret:false 用户自己手填，也必须 isEncrypt:true，禁止明文 string——否则 detail 回显/任务参数/日志会泄漏密码）。⚠️Update 时对已存在参数强制保留旧值（不可修改）。"
     source: "plugin-config.md:84; easyops_plugin_service.go:199-202,715-718"
 
   isFromSecret:
