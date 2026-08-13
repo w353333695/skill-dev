@@ -67,6 +67,8 @@ onboarding 的速度和质量取决于输入完整度。**开工前按此清单�
 
 ## 2. onboarding 流程（7 步）
 
+> **实战补充**：每步的操作清单、产物范例、踩坑 checklist 见 `references/onboarding-playbook.md`（从 collector_plugin_service 接入提炼，发起新模块接入时配合本文件用）。
+
 对应 SKILL.md 决策树 [1]。每步产出可校验。
 
 ### 步 1：核对输入 + 门禁 + 识别系统形态
