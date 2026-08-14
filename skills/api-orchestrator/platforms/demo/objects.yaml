@@ -1414,6 +1414,34 @@ objects:
         rule: "无鉴权。data.alert_receivers=[{name(用户名),method}]，整个 data 作为 msg_data 透传脚本。仅支持 cmdbUserObjectColName 非空的通知方式。"
     source: "platform/msgsender/{mail_config/config_handler.py:62-371, custom_sender/message_handler.py:362-998}；实测 .90:8095 v1明文/v2脱敏对照"
 
+  # ===========================================================================
+  # EasyOps 仪表盘（dashboard/hyper-insight）—— _DASHBOARD CMDB 实例。
+  # 无独立 CRUD API（全走 object_instance）；配置知识见 formats/dashboard-kit/。
+  # ===========================================================================
+  dashboard_instance:
+    description: "仪表盘（CMDB _DASHBOARD 模型实例，CRUD 走 object_instance）。配置 = panels(构件)+context(数据源)+variables(变量)+顶层布局。自然语言构建流程见 flows/build-dashboard.yaml；配置结构/构件选型/数据接入全文见 formats/dashboard-kit/。"
+    source: "知识库 data/sources/frontend/dashboard-dev-skill/（6域）+ 实测 .90 _DASHBOARD 22字段/85实例"
+    api: object_instance
+    fields:
+      instanceId: { type: string, anchor: true, desc: "CMDB 实例主键" }
+      name: { type: string, required: true, desc: "仪表盘名（唯一，import upsert keys）" }
+      panels: { type: array, required: true, desc: "构件实例数组（brickId/brickConf[JSON字符串]/formData/x/y/width/height）。数据绑定 brickConf.properties.data=<% CTX.DS.<context名> %>。详见 formats/dashboard-kit/dashboard-config.yaml#panel_schema" }
+      context: { type: array, required: true, desc: "数据源数组（11字段，type=cmdb-olap[指标]/cmdb[实例]/http/static）。模板见 formats/dashboard-kit/providers-context.yaml#context_types" }
+      variables: { type: array, desc: "变量（QUERY.{id} 引用，type=cmdb/cmdb-model/constant，可级联）" }
+      template: { type: string, enum: [normal, bigScreen], desc: "normal 普通/bigScreen 大屏" }
+      namespace: { type: string, desc: "命名空间（实例监控页用 模块.objectId 格式；独立大盘用 dashboard）" }
+      dashboardVersion: { type: string, desc: "v2（唯一在用）" }
+      timerange: { type: string, desc: "默认时间范围（now-1h 等，注入 QUERY.from/to）" }
+      category: { type: string, desc: "分类" }
+    relations:
+      - { to: cmdb_instance, type: association, cardinality: "1:1", via: instanceId, desc: "_DASHBOARD 模型实例" }
+    side_effects:
+      - op: object_instance.import (_DASHBOARD)
+        rule: "建/改仪表盘 = CMDB upsert（keys=[name]）：重复 import 同名即覆盖更新（迭代利器）。panels/context/variables 是数组对象直传。⚠️配置 JSON 里指标名/objectId 错误不报错——图表静默空白，必须 step2/3 查证（见 flows/build-dashboard）。"
+      - op: object_instance.delete (_DASHBOARD)
+        rule: "type=builtIn 是内置仪表盘（默认的 AGENT/Cmdb 统计等），删前确认；protected=true 禁删。"
+    source: "实测 .90（85 实例，含 builtIn）+ dashboard-kit formats"
+
 api_behavior:
   pagination:
     rule: "list/search 分页时 api-cli 以流式 NDJSON 输出——每行一个完整对象，非 {data:{list:[...]}} 包装。解析须逐行 json.loads。单对象接口（detail）才是 {code,data:{...}}。"
