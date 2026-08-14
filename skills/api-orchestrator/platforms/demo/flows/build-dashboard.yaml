@@ -58,9 +58,11 @@ steps:
     expect: "code=0；search 验证 instanceId 生成"
   - n: 6
     desc: |
-      验收：把前端 URL 给用户——
-      ${EASYOPS_CMDB_FRONTEND_URL}/next/dashboard-r/dashboard?name=<name>
-      （或按 namespace 的实例监控页路径）。用户在页面确认图表渲染正常（数据出/布局对）。
+      验收：把前端 URL 给用户（用户提供的真实格式，2026-08-14）——
+      ${EASYOPS_CMDB_FRONTEND_URL}/next/dashboard/dashboard/v2/<instanceId>?from=<timerange>&_namespace_=<namespace>
+      例：http://172.30.0.90/next/dashboard/dashboard/v2/658fc463b98e5?from=now-1h&_namespace_=dashboard
+      ⚠️URL 用 instanceId（import 后 search 取），非 name；_namespace_ = 实例的 namespace 字段。
+      用户在页面确认图表渲染正常（数据出/布局对/变量选择器可用）。
     expect: "用户确认图表正常显示"
   - n: 7
     op: object_instance.delete
