@@ -28,6 +28,11 @@ key_rule: |
   - import 包坑（实测）：INSPECTION_INFO 唯一键是 id+name，重复报「已存在重复的实例」；
     info/metrics/collector/detail 每个对象的 instanceid/internalid 必须换新(13hex)，残留旧值报「数据写入部分失败」
   - import 成功要点：所有文件 pluginId 一致（CheckAllInspection 校验）；models.json 可省（目标模型已存在则跳过）
+  - 🔴脚本命令路径严禁硬编码（红线）：目标主机环境千差万别，写死 '/usr/local/.../mysqladmin' 报 OSError。
+    DB 类首选 Python 客户端库直连（pymongo/pymssql/redis-py）；必须调命令则路径从实例属性 installPath(attr_id)拼：
+    脚本 os.path.join(globals().get("EASYOPS_installPath",""), "bin", cmd)，无则 fallback 走 PATH。详见 script-protocol.yaml#command_path_rule
+  - 参数设计：实例属性尽量用 attr_id（ip/installPath/connectInfo），业务参数用 custom，凭证用 custom+password
+    → 开发前先 object_model.detail 看目标模型属性（见 args-design.yaml#instance_driven_design）
   脚本协议（formats/inspection-kit/script-protocol.yaml，与采集套件完全不同）：
     py2 + 参数注入脚本头（非环境变量）+ 必须输出 INSTANCE ID + start/end 两组标记
 

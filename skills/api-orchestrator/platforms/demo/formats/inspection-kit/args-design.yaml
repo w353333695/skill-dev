@@ -59,9 +59,17 @@ source_rules:
         内置             → globals().get("EASYOPS_instanceId")
       来源：python_operator.go:46-57（KeyTypeCMDB 走 EASYOPS_ 前缀分支）
     real_examples:
-      mssql: "{key:connectInfo, alias:连接信息, type:text, source:attr_id}"
+      mssql: "{key:connectInfo, alias:连接信息, type:text, source:attr_id}（struct，含 manageHost/managePort/account/password，脚本 EASYOPS_connectInfo.get(...) 取嵌套字段）"
       oracle: "{key:homePath, alias:home目录, type:text, source:attr_id}"
-    constraint: "attr_id 的 key 必须 info.objectid 指向的 CMDB 模型有此属性，否则取不到值"
+      mysql_installPath: "{key:installPath, alias:安装路径, type:text, source:attr_id}（拼客户端命令路径，不硬编码。脚本 EASYOPS_installPath→os.path.join(install_path,'bin',cmd)）"
+    instance_driven_design: |
+      【设计原则】能用 CMDB 实例属性的尽量用 attr_id，减少用户每次填参负担：
+      - 连接地址/IP/端口 → attr_id（ip/ports/connectInfo）
+      - 安装路径/home目录 → attr_id（installPath/homePath），用于定位客户端命令（不硬编码）
+      - 凭证（用户名/密码）→ 视情况：实例 connectInfo 里有就 attr_id；否则 custom + type:password
+      - 业务参数（库名/实例名）→ custom
+      开发前先 object_model.detail 看目标模型有哪些属性可用（见 MYSQL@ONEMODEL: ip/installPath/ports/connectInfo/users/...）
+    constraint: "attr_id 的 key 必须 info.objectid 指向的 CMDB 模型有此属性，否则取不到值（None）"
     source: "python_operator.go:48-50（KeyTypeCMDB/Unique/InstanceId 加 EASYOPS_ 前缀）"
 
 # -----------------------------------------------------------------------------
