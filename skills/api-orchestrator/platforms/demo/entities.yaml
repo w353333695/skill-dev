@@ -238,6 +238,17 @@ entities:
     anchor: true
     used_by: [insp_history.get, insp_history.statistics, insp_history.abnormal_metrics, insp_history.export_excel, insp_execution.terminate]
 
+  # ---- msgsender 通知管理锚（2026-08-14 接入）----
+  notify_method_name:
+    description: "通知方式名（msg_config.name，=inform_type=send/alert 的 method）。send_message 的 receivers[].method 必须等于某 config.name。自定义方式 pluginName 也=name"
+    format: "通知方式名（实测：email/qywx/wechat_robot/dx/test111 等，无强制正则）"
+    anchor: true
+    used_by: [notify_method.list, notify_config.list, notify_config.create, notify_config.get, notify_config.update, notify_config.delete, notify_message.send, notify_message.debug, notify_alert.receive]
+  notify_config_instanceId:
+    description: "通知配置 CMDB 实例 id（_MSGSENDER_NOTIFY_CONFIG 的 instanceId，13hex）。config 单条 get/update/delete 的 path 参数"
+    anchor: true
+    used_by: [notify_config.get, notify_config.update, notify_config.delete]
+
 transitions:
   - from: object_model.list
     pick: objectId
