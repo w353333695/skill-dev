@@ -97,12 +97,21 @@ context_types:
     measures_dsl: "measures[] = {name, function: {expression: 聚合算子, args: [指标名]}}（getMeasures.yaml:6-16）。聚合算子全表（data_exchange internal/types/operators.go:13-27）：count/min/max/sum/avg/topK/last/divide/increase/rate/irate/quantile"
     filters_dsl: "filters[] = {name, operator, value}；前端自动 concat 默认 time>=from/time<=to（getOlapFiltersArg.yaml:5-24）。比较算子（operators.go:84-98）：== != <= < >= > =~ !~ in has nin and like nlike exists"
     backend: POST /next/api/gateway/logic.data_exchange/api/v1/data_exchange/olap（getUrlOfProvider.yaml:43）
+    response_shape: |
+      🔴前端 cmdb-olap 走 v1 端点 → transform DATA?.list 后是【平铺点数组】：
+      [{time, <measure名>: 值, _object_id, objectId}, ...]（实测 2026-08-14 .90：
+      [{"CPU使用率": 0.0011, "time": 1786705677}, ...]）。
+      ❌不是 v3 的 series 结构 [{name,dims,values:[{value,time}]}]——图表 xField/yField 按
+      字段消费平铺点；统计卡取当前值用 末位[measure名]（坑详见 dashboard-config.yaml#brick_selection.statistic_card_gotcha）。
+      dims 多于 time 时每行含各 dim 的字段值。
     metric_verification: |
       🔴指标名权威查证（勿编！指标错→图表静默空白）：
       ① 列表：collector_metric list（easyops-collector-service.yaml，POST /api/v2/collector-metric-names，
          body {page,pageSize,objectId:"HOST"}）——data.list[].metricName/unit/dims
       ② 详情：collector_metric get（objectId+metricName）
-      ③ 活性试查（指标是否有数据）：olap_metric query_v3（dims=["time"]+time>=now-1h+limit 1）
+      ③ 活性试查（指标是否有数据）：olap_metric query_v3（dims=["time"]+time>=now-1h+limit 1）——
+         ⚠️注意 v3 与前端实际用的 v1 行为可能不同（实测 v3 某些指标 30d total=0 而 v1 now-1h 有数据）：
+         试查结果存疑时用 v1 同参数复核，或直接对齐前端参数（v1 + now-1h）
          或 olap_metric select_raw（page_size 5+最近时间窗）
     source: "getTransformYaml.yaml:65-79 + getMeasures.yaml + getOlapFiltersArg.yaml + data_exchange operators.go"
 

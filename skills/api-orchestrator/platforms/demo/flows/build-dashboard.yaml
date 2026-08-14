@@ -47,7 +47,8 @@ steps:
       + measures[{name:v, function:{expression:avg, args:[指标名]}}]（🔴function 字段名是 expression 非 operator）
       + limit{limit:1} + withEmptyData:false——list 空=该指标近期无数据，换指标或弃图（与用户确认）。
       data_exchange 直连 :8152（EASYOPS_DATA_EXCHANGE_BACKEND_URL）。
-      注意：试查空 ≠ 端点错（.90 测试环境采集可能未跑，环境数据事实）。
+      注意：①试查空 ≠ 端点错（采集可能未跑）；②v3 与前端实际用的 v1 行为可能有差异
+      （实测 v3 某 30d total=0 而 v1 now-1h 有数据）——存疑时 v1 同参数复核。
     expect: "指标有数据点（或已换指标/弃图）"
   - n: 5
     desc: |

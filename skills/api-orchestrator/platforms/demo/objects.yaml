@@ -1425,6 +1425,14 @@ api_behavior:
     rule: "批量删真实路径 DELETE /object/{object_id}/instance_batch（契约误写 /instance/_batch，差一个斜杠，照契约写必 404）。源码 instance_extend/route.go:11 为准。"
   instance_search_name_field:
     rule: "search 的 fields 含 `name` 时依赖模型的『name relation』配置；模型若缺该配置（创建缺陷）报 133116「Can not find name relation of <OBJECT>」。规避：fields 不带 name，用 instanceId/ip 等字段（实例 name 仍存在，只是不能经此字段取）。e2e 实测 TESTWWH 即此坑。"
+  relation_data_probe:
+    rule: |
+      探测「实例的关系字段有没有数据」🔴禁用 query {"<关系名>":{"$exists":true}}——对关系字段语义不可靠
+      （实测 2026-08-14 .90：HOST 3 台实际关联了 serviceSets，$exists 却返回 0；属假阴性）。
+      正确方法（取值法）：fields 直接带关系名（如 ["hostname","serviceSets"]）+ relation_limit，
+      对返回值判非空数组。多跳取值（如 serviceSets.system.name）同理按返回值判断。
+      另：fields 带模型不存在的关系字段会整请求报 133116（Can not find xxx relation），
+      探测前先用 object_model.detail 的 relation_list（right_id=出边路径名）核对该关系存在。
   instance_relation_chain:
     rule: |
       多层关系链路（A→B→C→…）沿链取字段/过滤——两套机制（V3 专属 ProcessTransHierRelation；源码 instance_search_service.go:286-309）：
