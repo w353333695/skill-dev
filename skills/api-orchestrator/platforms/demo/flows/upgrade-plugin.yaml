@@ -5,11 +5,8 @@ trigger: ["升级套件", "更新套件版本", "套件发新版", "改套件"]
 guard: 确认挡（写）
 
 key_rule: |
-  ⚠️升级硬约束（objects.yaml#collector_plugin side_effects）：
-  ① agentType 不可变（报『更新套件时不允许变更套件类型』）
-  ② version 必填且唯一（重复报 code:100007『已存在同名版本<ver>』）
-  ③ 唯一迁移：参数 isFromSecret/isEncrypt 从旧实例继承（其余按新包覆盖）
-  ④ 无显式回滚（UpsertPlugin 成功但 importOther 失败=部分失败无补偿）
+  ⚠️升级硬约束（约束全文 + 报错原文见 objects.yaml#collector_plugin.side_effects 的 plugin_package.import_update rule）：agentType 不可变 / version 唯一 / 参数加密位继承 / 无回滚。
+  本文件不复述规则全文，只列【操作顺序】：detail 确认现状 → export 旧包 → 改 version/script/指标重打 → import_update 上传。
   version 建议：用 .version 文件管理，每次递增 patch（1.0.0→1.0.1）。
 
 prerequisites:

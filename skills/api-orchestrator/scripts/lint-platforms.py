@@ -246,6 +246,64 @@ def main():
                         if isinstance(v, str) and v and _URL_OR_IP.search(v):
                             err(f"systems.{sname}.env.{k}: 值「{v}」含 URL/IP（环境配置只在部署根 env.d，systems.yaml 只留变量契约 key）")
 
+    # ---- 10. 规则④：单一真相源（文件间）——flow 非指针字段禁复述 objects side_effect 规则 ----
+    # 设计原则④：同一规则全文只在一个权威文件，其余指针回指。lint 兜底：把 objects.yaml
+    # side_effects 里的显著规则子串（≥8 连续汉字/字母数字，去标点）抽出来，扫描 flows/*.yaml
+    # 里 side_effects: 行之外的内容，命中即 WARN（提示：删全文换指针「见 objects.yaml#X.side_effects」）。
+    # 阈值偏保守只 WARN 不 ERR——步骤值（API 请求体示例/字段名）是操作的一部分，不算复述。
+    if os.path.isfile(obj_path):
+        od, _ = load_yaml(obj_path)
+        rules = []
+        if od and isinstance(od.get("objects"), dict):
+            for obj in od["objects"].values():
+                if not isinstance(obj, dict):
+                    continue
+                se = obj.get("side_effects")
+                if isinstance(se, list):
+                    for item in se:
+                        if isinstance(item, dict):
+                            r = item.get("rule")
+                            if isinstance(r, str):
+                                rules.append(r)
+                if isinstance(se, dict):
+                    r = se.get("rule")
+                    if isinstance(r, str):
+                        rules.append(r)
+        # 抽显著子串——两类强信号（避免「所有版本/关系字段」等 4 字术语误报）：
+        # ① 报错原文 『...!』/『...』（规则最强特征，平台报错原话）
+        # ② 长中文片段 ≥8 字（过滤短操作术语）
+        _NOISE = {"不允许删除", "流程定义版本"}
+        sig_tokens = set()
+        for r in rules:
+            # 报错原文：『...』
+            for m in _re.findall(r"『[^』]{4,}』", r):
+                sig_tokens.add(m)
+            # 长中文片段 ≥8
+            for m in _re.findall(r"[一-龥]{8,}", r):
+                if m not in _NOISE:
+                    sig_tokens.add(m)
+        # 扫描 flows
+        flows_dir = os.path.join(base, "flows")
+        if os.path.isdir(flows_dir) and sig_tokens:
+            for fn in sorted(os.listdir(flows_dir)):
+                if not (fn.endswith(".yaml") or fn.endswith(".yml")):
+                    continue
+                fp = os.path.join(flows_dir, fn)
+                try:
+                    with open(fp, encoding="utf-8") as f:
+                        lines = f.readlines()
+                except Exception:
+                    continue
+                for li, line in enumerate(lines, 1):
+                    # 跳过 side_effects: 行（它本就该是指针）和指针引用行
+                    s = line.lstrip()
+                    if s.startswith("side_effects:") or "objects.yaml#" in line or "见 " in line or "详见 " in line:
+                        continue
+                    for tok in sig_tokens:
+                        if tok in line:
+                            warn(f"flows/{fn}:{li} 复述 objects.yaml side_effect 规则「{tok}…」—— 设计原则④：删全文换指针（见 objects.yaml#<object>.side_effects）。步骤值/字段名不算复述，可忽略。")
+                            break  # 一行只报一次
+
     # ---- 报告 ----
     print(f"lint platforms/{args.deployment}/")
     for m in oks:

@@ -154,7 +154,7 @@ objects:
       - op: object_instance.import（主键）
         rule: "datas 可带 instanceId 指定主键（须 ^[0-9a-z]{13}$），不填则后端按微秒时间戳 hex 自动生成。"
       - op: object_instance.delete
-        rule: "批量删：instanceIds 分号分隔；单个 id 即删单个。⚠️路径 /object/{id}/instance_batch（无斜杠；契约笔误 /instance/_batch，照写 404）。返回 data.deleteFailedInstances（空=全删成功）。无独立单删/按条件删 verb——单删传一个 id，按条件删先 search 取 instanceIds 再 delete。"
+        rule: "批量删：instanceIds 分号分隔；单个 id 即删单个。⚠️路径 /object/{id}/instance_batch（无斜杠；契约笔误 /instance/_batch，照写 404）。返回 data.deleteFailedInstances（空=全删成功）。无独立单删/按条件删 verb。【单删=传一个 id；按条件删=先 search 取 instanceIds 再 delete 的操作链 属编排知识，见 flows/delete-instances-by-range.yaml key_rule】"
 
   # ===========================================================================
   # EasyOps AutoOps 工具管理（tool_service）—— 第二系统。
@@ -192,7 +192,7 @@ objects:
       - op: tool.create
         rule: "新建工具同时建首个版本。必填 name/type/category/content（giraffe ValidatePostRequiredAndSetDefault 校验，非 gin binding tag）。默认 listVisible=true/sourceFrom=default/timeout=86400。返回 toolId+vId。"
       - op: tool.update（新建版本）
-        rule: "⚠️body 是 **flat**（顶层直接字段，不要套 {tool:{}}；实测 {tool:{}} 会让 updateFields=[tool] 命中『仅改 config』短路分支，假成功不生效）。改 ToolVersion 字段（inputs/content/outputDefs/tableDefs/vDesc/vName/type）触发派生新版本（manager.UpdateToolWithExists→CreateByExists，tool_manager.go:485-520）——派生版 envType=development，vName 不传则=vId。改 ToolConfig 字段（name/category）仅改配置不派生。⚠️响应 data 只含 {toolId}（无新 vId），派生成功否须 tool_version.list 复查。场景3『加版本』：get 当前 → flat body 改 inputs/content → update → version.list 复查新 development 版本。"
+        rule: "⚠️body 是 **flat**（顶层直接字段，不要套 {tool:{}}；实测 {tool:{}} 会让 updateFields=[tool] 命中『仅改 config』短路分支，假成功不生效）。改 ToolVersion 字段（inputs/content/outputDefs/tableDefs/vDesc/vName/type）触发派生新版本（manager.UpdateToolWithExists→CreateByExists，tool_manager.go:485-520）——派生版 envType=development，vName 不传则=vId。改 ToolConfig 字段（name/category）仅改配置不派生。⚠️响应 data 只含 {toolId}（无新 vId）。【派生成功否须 tool_version.list 复查 + 场景3『加版本』get→update→version.list 复查链 属编排知识，见 flows/add-tool-version.yaml key_rule】"
       - op: tool.delete
         rule: "软删（置 delete_me=true，非物理删）。force=true（query 字符串 \"true\"）仅绕 ReadOnly。versionId 不填=删整个工具（所有版本+配置）；填=只删该版本，删完若无版本才连带删配置。ReadOnly=true 不让删（除非 force）。被流程引用的防护在更上层，本服务层只认 ReadOnly。"
 
@@ -284,7 +284,7 @@ objects:
       - op: form.delete
         rule: "有版本时拒绝『表单存在版本,无法删除』——必须先删干净所有版本。form 不存在静默成功（幂等）。"
       - op: form.list
-        rule: "无单 form 详情端点（GET /form/:formId 不存在），取 form 元信息走 list 过滤或 form_version.get 的 formSchema 子对象。state 过滤的是【版本状态】非 form；isMain=true 只取主版本。list 字段 lastestMainVersion/lastestVersion 拼写少 t（API 如此）。"
+        rule: "无单 form 详情端点（GET /form/:formId 不存在）。state 过滤的是【版本状态】非 form；isMain=true 只取主版本。list 字段 lastestMainVersion/lastestVersion 拼写少 t（API 如此）。【取 form 元信息走 list 过滤还是 form_version.get 的子对象 属编排知识，见 flows/list-forms-and-versions.yaml】"
 
   itsm_form_version:
     description: ITSM 表单版本（FormSchemaVersion）—— 一个表单的一个版本，持表单内容 formDefinition。状态机两态：unfinished(草稿)/done(完成)。同时仅一版 isMain=true（主版本=对外生效，流程默认引用）。
@@ -305,13 +305,13 @@ objects:
       - { to: itsm_form, type: association, cardinality: "N:1", desc: "版本隶属一个表单" }
     side_effects:
       - op: form_version.update
-        rule: "upsert 非对称（PUT /v2/.../version/:versionId）：当前版本 state==done → 【新建一个 isMain=false 草稿】（基于已发布版派生）；state==unfinished → 就地更新。同时改 form 的 name/category/memo。versionName 唯一（done 新建/unfinished 改号都不能重，否则『重复的表单版本号』）。场景④『加版本』=对 done 版 update 派生新草稿。"
+        rule: "upsert 非对称（PUT /v2/.../version/:versionId）：当前版本 state==done → 【新建一个 isMain=false 草稿】（基于已发布版派生）；state==unfinished → 就地更新。同时改 form 的 name/category/memo。versionName 唯一（done 新建/unfinished 改号都不能重，否则『重复的表单版本号』）。【场景④『加版本』=对 done 版 update 派生新草稿 的操作链 属编排知识，见 flows/add-version.yaml】"
       - op: form_version.delete
         rule: "路径参数 versionIds（复数分号，契约误写单数 versionId）；代码 strings.Split 后只用第一个——批量是壳实际删一个。被流程节点引用拒绝『表单已绑定节点，不可删除!』。⚠️隐式级联：删完若 form 已无任何版本，连带删 form。删主版本代码不拦（不建议）。"
       - op: form_version.set_main
         rule: "设主版本（=发布/对外生效）。目标须 state==done（unfinished 报『未完成状态不能设置为主版本』）。旧主版本自动降级 isMain=false。若旧主版本被流程绑定，触发换绑：ITSC_PROCESS_FORM_RELATION 从旧主迁到新主（业务连续）。已是主版本则幂等。"
       - op: form.save / form_version.update（配置生效）
-        rule: "⚠️配置完版本（save 新建/update 改）后，须 form_version.set_main 标记为主版本才【生效】——前端默认展示主版本（isMain=true），非主版本的配置改动在前端看不到效果。新草稿(unfinished)→先 update 转 done→再 set_main。即：save/update 出来的非主版本，前端验收前必须 set_main。"
+        rule: "⚠️配置完版本（save 新建/update 改）后，form_version.set_main 标记为主版本才【生效】——前端默认展示主版本（isMain=true），非主版本的配置改动在前端看不到效果（固有的生效机制）。【以下属编排知识，暂存此处待建 flow：新草稿(unfinished)→先 update 转 done→再 set_main；save/update 出来的非主版本，前端验收前必须 set_main。生效机制部分见 flows/add-version.yaml key_rule】"
       - op: form_version.list
         rule: "name 参数实际是 versionName 精确匹配（非 form 名）。total=版本数（场景『有几个版本』读这个）。list 元素含 versionInfo（完整字段）+ processVersions（绑定流程）。"
       - op: form_version.get
@@ -535,7 +535,7 @@ objects:
       - op: process_definition.edit
         rule: "PUT /v2/process_definition/:definitionId 改元信息，非 upsert，须传已存在 definitionId，改 name 防重（排除自己）。"
       - op: process_definition.delete
-        rule: "⚠️有版本拒绝『存在流程定义版本，不允许删除』——必须先删干净所有版本。def 不存在静默成功（幂等）。删最后一个版本隐式级联删 def（见 itsm_process_version）。"
+        rule: "⚠️有版本拒绝『存在流程定义版本，不允许删除』。def 不存在静默成功（幂等）。删最后一个版本隐式级联删 def（见 itsm_process_version）。【删干净所有版本的清理顺序 属编排知识，见 flows/delete-process.yaml key_rule】"
 
   itsm_process_version:
     description: |
@@ -561,13 +561,13 @@ objects:
       - { to: itsm_process_form, type: association, cardinality: "1:N", desc: "每节点一条表单关系 ITSC_PROCESS_FORM_RELATION" }
     side_effects:
       - op: process_version.create
-        rule: "POST /v2/process_definition/:definitionId 建版本（bpmnXML/versionName/state/processSetting 必填）。versionId CMDB 生成。baseVersionId 传则克隆【表单关系+阶段设置】（不克隆 bpmnXML/processSetting，仍须 request 给）。cleanSetting 清掉引用不存在节点的配置。⚠️建版本不部署 Flowable，须再 set_main 才生效。"
+        rule: "POST /v2/process_definition/:definitionId 建版本（bpmnXML/versionName/state/processSetting 必填）。versionId CMDB 生成。baseVersionId 传则克隆【表单关系+阶段设置】（不克隆 bpmnXML/processSetting，仍须 request 给）。cleanSetting 清掉引用不存在节点的配置。⚠️建版本不部署 Flowable——部署走 set_main（固有的部署语义）。【完整建流程链顺序 属编排知识，见 flows/build-process.yaml key_rule】"
       - op: process_version.edit
         rule: "PUT /v2/.../version/:versionId 改版本。⚠️done 版本拒绝编辑『当前版本已完成，不可修改！』——只能改 unfinished。要改 done 须 create+baseVersionId 派生新版本。"
       - op: process_version.delete
-        rule: "路径 versionIds(复数分号)但只删第一个——批量是壳（service.go:1230-1231）。约束任一即拒(HTTP 412/400 ERR_FAILED_PRECONDITION)：①绑表单『当前流程已有绑定表单，不可删除!』(view.go:80)→先 process_form.set 解绑 ②关联工单『有正在流转中的工单，不可删除!』(view.go:84)→工单侧处理 ③主版本+绑服务『当前流程已绑定了服务且当前是主版本，请先删除服务或设置其它主版本!』(view.go:75)→删服务或换主版本（服务=ITSC_SERVICE_INSTANCE 跨域，须服务管理 API，不在本清单）④被父/子流程引用『当前流程被引用，不可删除!』(view.go:78)。删完若 def 无版本→隐式级联删 def。【清理顺序实测】按 ①→②→③→④ 逐项解，都清后删版本→末版本级联删 def。test 流程实测：①表单已解(0绑表单节点)→③卡服务绑定(须先删服务)。服务绑定是跨 process 域的依赖（服务管理 API 未 onboard），主版本+绑服务的流程删不掉除非先处理服务。"
+        rule: "路径 versionIds(复数分号)但只删第一个——批量是壳（service.go:1230-1231）。约束任一即拒(HTTP 412/400 ERR_FAILED_PRECONDITION)：①绑表单『当前流程已有绑定表单，不可删除!』(view.go:80) ②关联工单『有正在流转中的工单，不可删除!』(view.go:84) ③主版本+绑服务『当前流程已绑定了服务且当前是主版本，请先删除服务或设置其它主版本!』(view.go:75) ④被父/子流程引用『当前流程被引用，不可删除!』(view.go:78)。删完若 def 无版本→隐式级联删 def。【各约束解法+清理顺序+test 实测路径 属编排知识，见 flows/delete-process.yaml key_rule】"
       - op: process_version.set_main
-        rule: "PUT /v1/.../version/:versionId 设主版本。⚠️须 state==done。旧主自动降级（MAIN_VERSION 关系覆盖）。触发 deployProcessAndModifyCMDB：上传 BPMN 到 Flowable 引擎（替换占位符 ITSC-PROCESS-ID/NAME）+ 回填 deploymentId/flowableDefinitionId。只有 set_main 才部署。运行中工单不受影响（走旧 deploymentId）。⚠️set_main 偶发 140500『获取流程定义版本详情失败』（瞬时，重试即好）。⚠️首次 done 自动设主不可靠——实测 isMain 未自动置 true，须显式 set_main。完整建流程链：create def → create version（不部署）→ process_form.set 绑表单 → set_main（部署生效）。"
+        rule: "PUT /v1/.../version/:versionId 设主版本。⚠️须 state==done。旧主自动降级（MAIN_VERSION 关系覆盖）。触发 deployProcessAndModifyCMDB：上传 BPMN 到 Flowable 引擎（替换占位符 ITSC-PROCESS-ID/NAME）+ 回填 deploymentId/flowableDefinitionId。只有 set_main 才部署。运行中工单不受影响（走旧 deploymentId）。⚠️set_main 偶发 140500『获取流程定义版本详情失败』（瞬时，重试即好）。⚠️首次 done 自动设主不可靠——实测 isMain 未自动置 true，须显式 set_main。【完整建流程链顺序 属编排知识，见 flows/build-process.yaml】"
 
   itsm_process_bpmn:
     description: |
@@ -776,9 +776,9 @@ objects:
       - op: ticket.set_state
         rule: "PUT /v1/process_instance_state 批量状态变更。action=suspend(仅running)/activate(仅suspended)/cancel(仅running)。⚠️只有 running 的工单能挂起；只有作废(isCancelled)的能删除。"
       - op: ticket.delete
-        rule: "DELETE /v1/process_instance/:instanceIds。⚠️只有作废(isCancelled)的工单才能删除——running/done/closed 须先 cancel 再 delete。instanceIds 分号分隔。"
+        rule: "DELETE /v1/process_instance/:instanceIds。⚠️状态机：只有作废(isCancelled)的工单才能删除（running/done/closed 拒删）。instanceIds 分号分隔。【以下属编排知识，暂存此处待建 flow：running/done/closed 须先 ticket.set_state cancel 再 delete】"
       - op: ticket.export_excel
-        rule: "POST /v1/file/batch/ticket/excel_export。ticketIds JSON 数组；fields 空用服务默认导出配置。返回二进制 Excel 流。e2e 实测：running 工单导出成功(8KB Excel)，done 工单报 permission denied——导出权限与工单状态/可见范围相关（非 API 格式问题）。"
+        rule: "POST /v1/file/batch/ticket/excel_export。ticketIds JSON 数组；fields 空用服务默认导出配置。返回二进制 Excel 流。⚠️导出权限与工单状态/可见范围相关：done 工单可能报 permission denied（非 API 格式问题）。【以下属编排知识，暂存此处待建 flow：哪些状态/角色的工单能导出、失败后如何排查】"
 
   # ---------- ITSM 服务目录（service_catalog）----------
   itsm_service_catalog:

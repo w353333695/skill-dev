@@ -8,6 +8,20 @@
 1. **分文件、各司其职**：systems / objects / entities / flows / formats 各装一类知识，不堆进 README（README 只做索引）。大型系统知识庞杂，按文件分才能扩展。
 2. **结构化（YAML，机读）+ 可扩展**：新对象/流程/系统直接追加，不改既有结构。
 3. **唯一真相来源**：`platforms/` 是外接系统的全部知识载体，换环境/换 LLM 从此读，**不依赖记忆**。
+4. **单一真相源（文件间，禁全文复述）**：同一事实/规则在 platforms 内**只在一个权威文件写一次全文**，其余文件**只放一句话 + 指针**（如 `见 objects.yaml#X.side_effects` / `详见 formats/inspection-kit/script-protocol.yaml#command_path_rule`），**不得在 key_rule/note/desc/expect/trigger/side_effects 等任何字段里全文复述**。改规则只改权威文件一处，不会漏。
+
+   **权威层级**（低层指高层，知识「下沉」到能复用/承载机制的最权威处）：
+   | 知识类型 | 唯一权威文件 | 下游文件（只能指针） |
+   |---|---|---|
+   | 格式/协议/机制/真实套件范式（跨部署） | `formats/<fmt>/*.yaml` | objects/flows/spec/README |
+   | 对象副作用/接口行为（本部署） | `objects.yaml.side_effects` / `api_behavior` | flows/README |
+   | 接入/端口/鉴权/运行时坑 | `systems.yaml.runtime` | objects/flows/README |
+   | 字段格式/主键 | `entities.yaml` | objects/flows |
+   | 端到端步骤 | `flows/*.yaml`（步骤本身，非规则） | — |
+
+   **判定**：写到某字段时自问「这句话的全文，是否已在更权威的文件里存在？」是 → 删成本文，换成指针。flow 的步骤值（API 请求体示例、要填的字段）是**步骤操作的一部分**，不算复述，保留。
+
+   ⚠️这条与下文「证据纪律 §4 知识内联」不冲突——内联针对的是**禁止引用 platforms 外部文件**（tmp/、knowledge/），不针对 platforms 内部；内部仍守本条，用指针。
 
 ## 文件职责（对应 SKILL.md「资料」）
 
@@ -125,7 +139,7 @@ steps:                                   # 步骤序列
     dataflow: "..."                      # 字段怎么从上一步来 / 给下一步
     expect: "..."                        # 成功标志
     on_fail: "..."                       # 失败处理
-side_effects: <objects.yaml#object.side_effects>   # 回指，不重复
+side_effects: <objects.yaml#object.side_effects>   # 回指，不重复（见设计原则④，同适用于 key_rule/note/desc/expect 等所有字段）
 rollback: "..."                          # 失败回滚步骤
 acceptance: "..."                        # 验收方式
 ```
