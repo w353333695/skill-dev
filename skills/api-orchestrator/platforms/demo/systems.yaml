@@ -107,7 +107,7 @@ systems:
       # ⚠️配置里指标名/objectId 错误不报错——图表静默空白，构建前必须查证（flow step2/3）。
       dashboard:
         build: "自然语言 → panels/context/variables 配置 → object_instance.import(_DASHBOARD, keys=[name])"
-        examples: "知识库 data/sources/frontend/dashboard-dev-skill/05-examples/（4 黄金样例）；前端查看 ${EASYOPS_CMDB_FRONTEND_URL}/next/dashboard-r/dashboard?name=<name>"
+        examples: "知识库 data/sources/frontend/dashboard-dev-skill/05-examples/（4 黄金样例）；前端查看 ${EASYOPS_CMDB_FRONTEND_URL}/next/dashboard/dashboard/v2/<instanceId>?from=<timerange>&_namespace_=<namespace>（用户提供实测格式）"
 
     # 常用模型速查表（本 deployment 的 CMDB 高频资源「自然语言→objectId」映射）
     # 编排直通挡/计数场景优先匹配此处 → 直出 objectId，省 object_model.list 搜索；
