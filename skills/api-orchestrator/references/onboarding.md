@@ -96,7 +96,7 @@ onboarding 的速度和质量取决于输入完整度。**开工前按此清单�
 - 写作纪律（踩过的坑，见 api-cli USAGE「清单编写要点」）：
   - **无 `$ref`**——body/response schema 全部**内联**；多 operation 共用结构只能重复。
   - **`required` 双义**——`params.required` 是 bool；schema 的 `required` 是 `[]string`（父列必填子字段名）。在 schema 属性上写 `required: true` 会解析报错。
-  - **disparate 路由**用 `resource.path: ""` + 每 operation 持完整路径。
+  - **资源级 `path:` 一律留空 `""`，完整 path 只在 operation 级写**——api-cli 会把 resource.path 和 operation.path **拼接**，资源级非空 + 操作级写完整路径 = URL 双倍（实测 `/metric-groups/api/v1/inspection/.../metric-groups` → 404）。无论路由 disparate 还是统一，资源级都留空，统一在每 operation 写完整路径。修复/自查：`explain R V` 的 path 字段应只有一份完整路径；`R V --dry-run` 的 URL 不含重复段。
   - **每个 resource/operation 写 `description`**——它进 MCP tool description，决定 LLM 抉择准不准。
 - 验证：`scripts/run.sh --spec X --help`（resource/verb 渲染）+ `scripts/run.sh --spec X explain R V`（schema 透传）+ `scripts/run.sh --spec X R V --dry-run`（URL/body 构造）。
 
