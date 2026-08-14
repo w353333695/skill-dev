@@ -315,7 +315,15 @@ export_flow:
     - "拉关联 CMDB 模型 GetObjectAll(suiteInfo.ObjectId)"
     - "CreateTar 组装 tar.gz 流"
   response: "application/octet-stream, Content-Disposition: attachment;filename=<pluginId>.tar.gz"
-  source: "import_export_service.go:484-531,517-530"
+  cli_caveat: |
+    ⚠️api-cli 不支持二进制下载透传（实测 2026-08-14）：
+    `-o` flag 把二进制响应当 JSON 字符串编码写盘，非 ASCII 字节被 � 替换 → gzip 损坏不可用
+    （实测 export mongodb：api-cli 31793B 损坏 vs curl 8422B 干净，md5 不同，tar -tzf 失败）。
+    正解——curl 直接下载：
+      curl -s -o <pluginId>.tar.gz -H "org: 8888" -H "user: easyops" -H "Host: admin.easyops.local" \
+        "${EASYOPS_INSPECTION_BACKEND_URL}/api/v1/inspection-export/<pluginId>"
+    或走 SDK（platforms/demo/sdk/easyops_client.py）。
+  source: "import_export_service.go:484-531,517-530; api-cli -o 实测损坏"
 
 # -----------------------------------------------------------------------------
 # 十、v2 新体系兼容索引（.90 当前 0 套件，仅记录端点不深入）

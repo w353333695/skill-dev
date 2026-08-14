@@ -570,7 +570,8 @@ resources:
       export:
         description: |
           导出 v1 套件为 tar.gz（含指标组/模板/采集器/关联CMDB模型）。
-          ⚠️二进制流，api-cli 仅 --print-curl，真调走 curl -o / SDK 存盘。
+          ⚠️api-cli 不支持二进制下载（-o 会把响应当 JSON 字符串编码，gzip 字节损坏）。
+          真调走 curl -o / SDK（详见 formats/inspection-kit/suite-package.yaml#export_flow.cli_caveat）。
         method: GET
         path: /api/v1/inspection-export/{pluginId}
         params:
