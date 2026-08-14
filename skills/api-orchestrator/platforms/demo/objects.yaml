@@ -1641,3 +1641,82 @@ api_behavior:
   protected_three_branch:
     rule: "上传前校验同名套件 protected：不存在→新建(upsert=false)；存在且protected=false→覆盖(upsert=true)；存在且protected=true→禁覆盖需改名"
     source: "formats/collector-kit/package-format.yaml protected_check"
+
+  # ============================================================================
+  # dashboard 域（2026-08-14 二次接入，源码 07-source-repos 前端仓+data_exchange）
+  # 前端：next-apps-hyper-insign-v2/apps/dashboard（v2 唯一在用 app）
+  # ============================================================================
+  dashboard_instance:
+    description: |
+      仪表盘（CMDB _DASHBOARD 模型实例）。CRUD 走 easyops-cmdb.yaml#dashboard
+      （create=POST /v2/object/_DASHBOARD/instance、update=PUT .../instance/:id 全量覆盖、
+      delete=DELETE /object/.../instance/:id——镜像前端 CreateAndEditDashboardV2/route.yaml:402-530）。
+      配置主体 = panels(构件)+context(8种数据源)+variables(变量)。
+      配置结构/构件选型/变量全文见 formats/dashboard-kit/dashboard-config.yaml；
+      数据源类型与 args DSL/指标查证见 formats/dashboard-kit/providers-context.yaml。
+      自然语言建盘流程见 flows/build-dashboard.yaml。
+    source: "07-source-repos/next-apps-hyper-insign-v2/apps/dashboard/src/Pages/Dashboard/CreateAndEditDashboardV2/route.yaml:402-530 + contracts.yaml:3206-3262,5424-5425,6268-6272"
+    api: easyops-cmdb.yaml#dashboard
+    fields:
+      instanceId: { type: string, anchor: true, desc: "CMDB 实例主键（13 位 [0-9a-z]）；前端 URL /dashboard/v2/<instanceId> 用它" }
+      name:       { type: string, required: true, desc: "仪表盘名（create 必填）" }
+      category:   { type: string, required: true, desc: "分类（create 必填，route.yaml:462）" }
+      dashboardVersion: { type: string, desc: "固定 v2（route.yaml:407）" }
+      template:   { type: string, enum: [normal, bigScreen], desc: "normal 网格布局 / bigScreen 大屏（默认 1920x1080+黑底）" }
+      timerange:  { type: string, desc: "默认时间范围（now-1h 等），注入 QUERY.from/to" }
+      namespace:  { type: string, desc: "命名空间（新建默认 dashboard；实例监控页用 模块.objectId 格式）" }
+      panels:     { type: array, required: true, desc: "构件数组。brickConf 落库前 JSON.stringify（route.yaml:425-437）。结构见 formats/dashboard-kit/dashboard-config.yaml#panel_schema" }
+      context:    { type: array, required: true, desc: "数据源数组（8 种内置类型）。args DSL 见 formats/dashboard-kit/providers-context.yaml#context_types" }
+      variables:  { type: array, desc: "变量数组（QUERY.{id} 引用，5 种类型）见 formats/dashboard-kit/dashboard-config.yaml#variable_schema" }
+      type:       { type: string, desc: "前端固定注入 builtIn（route.yaml:441）——API 直建保持一致" }
+    relations:
+      - { to: cmdb_instance, type: association, cardinality: "1:1", via: instanceId, desc: "_DASHBOARD 模型实例（object_instance search 可查）" }
+      - { to: collector_metric, type: reference, cardinality: "N:1", via: "context[cmdb-olap].args.measures[].function.args[0]", desc: "cmdb-olap 数据源引用指标元数据（metricName 查证 collector_metric.list）" }
+    side_effects:
+      - op: dashboard.create
+        rule: "前端保存新建走 POST /v2/object/_DASHBOARD/instance（非 import upsert——import 仅本地 JSON 导入页且按 instanceId 匹配，Import/route.yaml:85-89）。前端固定注入 type=builtIn。返回 instanceId。"
+      - op: dashboard.update
+        rule: "PUT 全量覆盖非 patch——漏传字段被清掉。迭代姿势：先 object_instance search 取完整现配 → 本地改 → PUT 回。"
+      - op: dashboard.delete
+        rule: "单删 DELETE /object/_DASHBOARD/instance/:id。系统内置盘（默认 AGENT/Cmdb 统计等）删前确认；protected 实例禁删。"
+      - op: object_instance.import (_DASHBOARD)
+        rule: "API 侧仍可用（upsert by keys），但非前端路径、且与前端 create 注入的 type=builtIn 等默认字段有差异——幂等批量迁移可用，常规建改走 dashboard.create/update。"
+    api_behavior:
+      silent_config_errors: "配置 JSON 里指标名/objectId 错误后端不报错——图表静默空白。指标名必查证（collector_metric.list）、objectId 必查证（object_model.list），试查用 olap_metric.query_v3（详见 providers-context.yaml#context_types.cmdb_olap.metric_verification）"
+      frontend_verify: "brickConf/context 属「前端解释型内容」——API 落库 code=0 不代表前端渲染正确，须用户开 URL 验收（getDashboardDefaultUrl 的格式：/dashboard/v2/<instanceId>?from=<timerange>&_namespace_=<namespace>）"
+
+  dashboard_metric_query:
+    description: |
+      【知识型对象】cmdb-olap 指标查询的 DSL 与试查方法（dashboard 图表数据核心链路）。
+      链路：dashboard context[cmdb-olap] → 网关 logic.data_exchange → data_exchange
+      POST /api/v1/data_exchange/olap（前端 getUrlOfProvider.yaml:43 铁证）。
+      api-cli 面：easyops-data-exchange.yaml#olap_metric（query_v3 图表合用 + select_raw 试查）。
+    source: "07-source-repos/data_exchange/olap/olap_service.go:95-153,305-410,955-961 + internal/types/operators.go:13-27,84-98 + 前端 getUrlOfProvider.yaml:31-45"
+    api: easyops-data-exchange.yaml#olap_metric
+    fields:
+      model:     { type: string, desc: "数据源.表。前端写 easyops.<objectId>；SplitN 两段解析（olap_service.go:955-961）" }
+      dims:      { type: array, desc: "分组维度；time=时间维度" }
+      measures:  { type: array, desc: "{name, function:{expression:算子, args:[指标名]}}。算子全集：count/min/max/sum/avg/topK/last/divide/increase/rate/irate/quantile" }
+      filters:   { type: array, desc: "{name, operator, value}；时间 name=time 值支持 now-1h 相对时间" }
+    api_behavior:
+      v3_for_charts: "v3 按 series 分组返回 List[]{name,dims,values[]{value,time}}——图表接入首选（v1/v2 平铺行）"
+      data_probe: "试查指标活性：query_v3 dims=[\"time\"]+time>=now-1h+limit 1；或 select_raw page_size 5+最近窗。list 空=无数据（勿建图）"
+      org_isolation: "db 名=org 号，SQL 层自动 org 过滤（pkg/sqlclient/parse.go:168-171）——跨 org 数据不可见，属预期"
+
+  collector_metric:
+    description: |
+      【知识型对象】采集指标元数据（CollectorAliasMetric 目录）——「dashboard 有哪些指标可用」的
+      权威查询途径。data_exchange 的 tags-list 是空实现桩（olap_service.go:91-93）勿用。
+      api-cli 面：easyops-collector-service.yaml#collector_metric（list v2 分页 + get 详情）。
+    source: "07-source-repos/collector_service/metric/route.go:20-21,38 + request_validate_trees.go:67,71 + metric_service.go:756,835 + metric_service_test.go:4128-4177"
+    api: easyops-collector-service.yaml#collector_metric
+    fields:
+      metricName:  { type: string, anchor: true, desc: "指标名（snake_case，如 host_cpu_used_total）——cmdb-olap measures[].function.args 用它" }
+      objectId:    { type: string, desc: "所属模型（如 HOST）——按模型查指标用" }
+      displayName: { type: string, desc: "显示名（如 CPU使用率）" }
+      unit:        { type: string, desc: "单位（如 percent(1)）——图表 axis.unit 用" }
+      dims:        { type: array, desc: "维度列表" }
+      isKeyMetric: { type: boolean, desc: "关键指标（优先选）" }
+    api_behavior:
+      list_response: "wrapper {code, data:{list,total}}（kitweb JSONPb gogo 序列化）；list 元素见 fields"
+      port_pending: "metric 模块端口候选 :12000（kit 所在）/ :8125（legacy）——e2e 探测后回填 systems.yaml"

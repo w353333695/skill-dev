@@ -139,3 +139,77 @@ resources:
           properties:
             code: { type: integer }
             data: { type: object, properties: { list: { type: array, items: { type: object, additional_properties: true } }, total: { type: integer } } }
+
+# -----------------------------------------------------------------------------
+# 资源 2：collector_metric —— 指标元数据（collector_service.metric 模块）。
+# 源码：07-source-repos/collector_service/metric/route.go:20-21,38 + validators/
+# request_validate_trees.go:67,71 + metric_service.go:756,835。
+# 这是「dashboard 有哪些指标可用」的权威查询途径（data_exchange 的 tags-list 是空实现桩，
+# olap/olap_service.go:91-93——勿用它查指标元数据）。
+# ⚠️端口待 e2e 探测：metric 模块在 collector_service 进程，候选 :12000（kit 所在）或
+#   :8125（legacy collector_job 所在）——e2e 阶段确认后回填此处注释。
+# -----------------------------------------------------------------------------
+  collector_metric:
+    description: 采集指标元数据（CollectorAliasMetric 目录）——指标名/显示名/单位/维度/objectId/所属插件与套件。dashboard cmdb-olap 数据源选指标前用它查证（指标名错→图表静默空白）。list=v2 分页检索（支持 metricName 模糊/metricNames 精确集合/objectId/jobId/pluginId/metricSetId 过滤），get=单指标详情（objectId+metricName 定位）。
+    path: ""
+
+    operations:
+      # ---------- v2 列表（POST /api/v2/collector-metric-names）----------
+      list:
+        description: 分页检索指标元数据（metric/route.go:21 ListCollectorMetricNamesV2）。过滤参数（validator 树 request_validate_trees.go:71）：page/pageSize 必填；metricNames 逗号分隔精确集合（$in）；其余模糊/外键过滤选填。响应 data.list 元素 = CollectorMetricName（metric_service_test.go:4128-4177 实证字段）：metricId/metricName/objectId/description/unit/displayName/dims/isKeyMetric/keyMetricOrder。total=总数。查「HOST 有哪些指标」：object_id 传 HOST。
+        method: POST
+        path: /api/v2/collector-metric-names
+        body:
+          type: object
+          required: [page, pageSize]
+          description: "指标列表检索请求（ListCollectorMetricNamesV2Request）"
+          properties:
+            page:          { type: integer, description: "页码（≥1，必填）" }
+            pageSize:      { type: integer, description: "每页（≥1，必填）" }
+            metricNames:   { type: string, description: "精确指标名集合，逗号分隔（$in，如 cpu_usage,mem_usage）" }
+            metricName:    { type: string, description: "指标名模糊匹配（$like %x%）" }
+            metricDisplayName: { type: string, description: "显示名模糊匹配" }
+            objectId:      { type: string, description: "按模型过滤（如 HOST）——查某模型可用指标用这个" }
+            jobId:         { type: string, description: "按采集任务过滤（13 位 id）" }
+            pluginId:      { type: string, description: "按采集插件过滤（13 位 id）" }
+            metricSetId:   { type: string, description: "按指标集过滤（13 位 id）" }
+            types:         { type: string, description: "按数据类型过滤，逗号分隔" }
+        response:
+          type: object
+          description: "wrapper：{ code, data: { list, total } }（kitweb JSONPb gogo 序列化）"
+          properties:
+            code: { type: integer }
+            data:
+              type: object
+              properties:
+                total: { type: integer, description: "指标总数" }
+                list:
+                  type: array
+                  description: "CollectorMetricName 列表"
+                  items:
+                    type: object
+                    additional_properties: true
+                    properties:
+                      metricId:   { type: string, description: "指标 ID" }
+                      metricName: { type: string, description: "指标名（cmdb-olap measures[].function.args 用它，snake_case）" }
+                      displayName: { type: string, description: "显示名（如 CPU使用率）" }
+                      objectId:   { type: string, description: "所属模型" }
+                      unit:       { type: string, description: "单位（如 percent(1)/bibytes）" }
+                      dims:       { type: array, description: "维度列表", items: { type: object, additional_properties: true } }
+                      isKeyMetric: { type: boolean, description: "是否关键指标" }
+                      keyMetricOrder: { type: integer, description: "关键指标排序" }
+
+      # ---------- 详情（GET /api/v1/detail-collector-metric-name）----------
+      get:
+        description: 单指标详情（metric/route.go:38 DetailCollectorMetricName）。objectId+metricName 定位（request_validate_trees.go:35），返回指标完整定义（含 dims 维度、unit 单位、originalMetrics 来源插件）。dashboard 配指标前查证用。
+        method: GET
+        path: /api/v1/detail-collector-metric-name
+        params:
+          objectId:   { in: query, type: string, required: true, description: "模型 ID（如 HOST）" }
+          metricName: { in: query, type: string, required: true, description: "指标名（snake_case）" }
+        response:
+          type: object
+          description: "wrapper：{ code, data: { metricName, metricKey, ... } }（字段同 list 元素）"
+          properties:
+            code: { type: integer }
+            data: { type: object, additional_properties: true }
