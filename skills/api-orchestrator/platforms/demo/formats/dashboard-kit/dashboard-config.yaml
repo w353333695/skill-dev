@@ -102,10 +102,18 @@ brick_selection:
     「趋势/随时间」→ time-series-chart｜「当前使用率/状态值」→ statistic-card 或 gauge-chart
     「列表/明细」→ brick-table｜「占比/分布」→ pie/donut-chart｜「对比」→ bar-chart
   statistic_card_gotcha: |
-    🔴统计卡 value 必须单值——用表达式从数据源提取，禁止直接绑整个数据源：
-    错（绑趋势数组 → 显示 NaN%）： "value": "<% CTX.DS.cpuTrend %>"
-    对（取数组末位=当前值）      ： "value": "<% CTX.DS.cpuTrend[CTX.DS.cpuTrend.length - 1]?.CPU使用率 ?? 0 %>"
-    （前次接入实测踩坑 2026-08-14 .90；趋势图 xField/yField 消费数组无此问题）
+    🔴统计卡 value 必须单值——用表达式从数据源提取，禁止直接绑整个数据源（绑数组 → 显示 NaN%）。
+    🔴🔴先确认数据源结构再写取值表达式（取决于 olap 版本，实测踩坑 2026-08-14 盘 658fed519b211
+    ——表达式假设错结构则卡片恒 0，且不报错）：
+    · 前端 cmdb-olap context 实际走 v1 端点 → transform 后是【平铺点数组】
+      [{time, <measure名>: 值}, ...]，取当前值 = 末位点的 measure 字段：
+      "value": "<% CTX.DS.cpuTrend?.length ? (CTX.DS.cpuTrend[CTX.DS.cpuTrend.length-1]?.[\"CPU使用率\"] ?? 0) : 0 %>"
+      （measure 名做 key，中文/含数字须用 [\"...\"] 下标语法，不能点语法）
+    · 仅当数据源是 v3 series 结构（[{name,dims,values:[{value,time}]}]）才用：
+      "value": "<% CTX.DS.cpuTrend[CTX.DS.cpuTrend.length-1]?.values?.[...]?.value ?? 0 %>"
+    · 数据源出单值时直接： "value": "<% CTX.DS.系统数量[\"data\"] %>"
+    format: {precision:1, unit:"percent(1)"}；icon: {category,icon,lib:"easyops"}；iconPosition:"right"; showCard:false
+    趋势图无此问题（xField/yField 按字段消费数组）。⚠️值太小+precision:0 会显示 0%（数据真实非 bug）。
   source: "getDefaultBrickList.yaml brickId 清单（行号内联如上）+ 前次接入实测坑"
 
 # -----------------------------------------------------------------------------
@@ -121,7 +129,7 @@ variable_schema:
     showSelector: "bool 显示选择器 UI（默认 true）"
     showFullScreenSelector: "bool（默认 true，编辑态自动补 route.yaml:1896-1905）"
     selectorObjectId: "CMDB 模型 ID（type=cmdb）"
-    selectorQuery: "选择器过滤 JSON——🔴可含 <% QUERY.<其他变量id> %> 引用实现级联（唯一级联机制，无显式 cascade 配置）"
+    selectorQuery: "选择器过滤——🔴必须是【纯 JSON 字符串】（前端 JSON.parse 它），级联引用用 ${QUERY.<其他变量id>|string} 占位符嵌在 JSON 值里；🔴禁用 <% %> 表达式（整段表达式会 JSON.parse 崩 SyntaxError: Unexpected token '<'，实测踩坑 2026-08-14 盘 658fed519b211）。现网证据（一体化应用监控）：{\"appId.instanceId\": \"${QUERY.instanceId|string}\"}"
     selectorBrick: "选择器构件（默认 forms.general-select，:747）"
     selectorDefaultValue: "默认值（保存后 URL 自动带上，getDashboardDefaultUrl.yaml:5-22）"
     fieldsLabel: "选项显示字段（🔴object_model 查证真实属性；HOST 无 name 是 hostname/ip）"
@@ -134,7 +142,12 @@ variable_schema:
 # 五、表达式框架（<% %> 单表达式，跨文件通用）
 # -----------------------------------------------------------------------------
 expression_framework:
-  syntax: '"<% " + 单个JS表达式 + " %>"（求值）'
+  syntax: '"<% " + 单个JS表达式 + " %>"（求值）。⚠️与 ${QUERY.x|string} 占位符是【两套语法】——适用字段不同，用错即崩/失效：'
+  syntax_by_field: |
+    📌 <% %> 表达式（JS 求值）：brickConf.properties 值、context.transform、
+       cmdb-olap args 内的 query/filters value、http formData —— 这些是表达式求值上下文。
+    📌 ${QUERY.x|string} 占位符（JSON 内插值）：variables[].selectorQuery —— 该字段被前端
+       JSON.parse，只能是纯 JSON + 值内占位符；整段 <% %> 会崩（实测 SyntaxError 踩坑）。
   builtin_objects:
     QUERY: "URL query 参数（变量/timerange 注入：QUERY.instanceId / QUERY.from）"
     CTX: "上下文——数据源专用 CTX.DS.{context名}"
@@ -143,9 +156,10 @@ expression_framework:
     PIPES: "管道字典（PIPES.parseTimeRange/ yamlStringify/ yaml）"
     _: "Lodash（_.map/_.orderBy）"
     moment: "Moment 时间库"
-  js_subset: "✅箭头函数/三元/?./??/模板字符串/展开；❌if 语句/var/赋值/类（必须单表达式）"
+  js_subset: "✅箭头函数/三元/?./??/模板字符串/展开；❌if 语句/var/赋值/类（必须单表达式）；对象 key 是中文/数字开头须用 [\"...\"] 下标语法（.点语法取不到）"
   common_patterns: |
     取列表空兜底   ： <% DATA?.list ?? [] %>
     带默认值取参   ： <% QUERY.from ?? "now-1h" %>
     条件注入过滤   ： <% { ...(QUERY.ns ? {"ns": {"$in": QUERY.ns.split(",")}} : {}) } %>
-  source: "getOlapFiltersArg.yaml + getDefaultArgsOfDataType.yaml 表达式实例（源码仓内多处）"
+                      （仅限表达式上下文：cmdb-olap query/transform 等；selectorQuery 禁用，见 syntax_by_field）
+  source: "getOlapFiltersArg.yaml + getDefaultArgsOfDataType.yaml 表达式实例 + 现网盘实测（selectorQuery/统计卡踩坑 2026-08-14）"

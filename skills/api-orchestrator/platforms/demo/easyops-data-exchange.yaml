@@ -45,13 +45,13 @@ service:
 # -----------------------------------------------------------------------------
 resources:
   olap_metric:
-    description: 监控指标 OLAP 聚合查询（dashboard cmdb-olap 数据源的执行端点，前端 provider easyops.api.data_exchange.olap@Query:1.0.0）。v1/v2 返回平铺行、v3 按 series 分组（图表最合用，olap_service.go:305-410：List[]{name,dims,values[]{value,time}}）。同时是「指标是否有数据」的试查工具（time filter now-1h + limit 1）。
+    description: 监控指标 OLAP 聚合查询（dashboard cmdb-olap 数据源的执行端点，前端 provider easyops.api.data_exchange.olap@Query:1.0.0）。v1/v2 返回平铺行、v3 按 series 分组（olap_service.go:305-410：List[]{name,dims,values[]{value,time}}）。⚠️前端 dashboard 的 cmdb-olap 实际走 v1（getUrlOfProvider.yaml:43）——配盘内图表/统计卡须按 v1 平铺结构取值（坑见 platforms formats/dashboard-kit/）；v3 适合编排侧 API 消费（series 分组好解析），但试查结果与 v1 可能有差异（实测 v3 某指标 30d total=0 而 v1 now-1h 有数据），存疑时 v1 复核。
     path: ""
 
     operations:
-      # ---------- v3 查询（POST /api/v3/data_exchange/olap）—— 图表首选 ----------
+      # ---------- v3 查询（POST /api/v3/data_exchange/olap）—— 编排侧 API 消费合用 ----------
       query_v3:
-        description: OLAP 聚合查询 v3（按 series 分组，图表最合用）。请求字段全集（v3 最全）：model/dims/measures/filters/query/having/order/limitBy/limit{limit,offset}/epoch(s|ms)/minimumStep/withEmptyData/withoutObjectId/fillEmptyData/countTotal/translate/cmdbGroupDims/displayName/withShowKey/fieldsRelationFilter。聚合算子（operators.go:13-27）：count/min/max/sum/avg/topK/last/divide/increase/rate/irate/quantile。过滤算子（:84-98）：== != <= < >= > =~ !~ in has nin and like nlike exists；时间过滤 name=time，value 支持 now-30m 相对时间（pkg/sqlclient/parse.go:98-103）。试查「指标是否有数据」：dims=["time"] + filters=[{name:time,operator:>=,value:now-1h}] + limit={limit:1} + withEmptyData:false，看 list 是否空。
+        description: OLAP 聚合查询 v3（按 series 分组，API 消费好解析）。⚠️前端 dashboard 配盘内组件用 v1 平铺结构（见 resource description）。请求字段全集（v3 最全）：model/dims/measures/filters/query/having/order/limitBy/limit{limit,offset}/epoch(s|ms)/minimumStep/withEmptyData/withoutObjectId/fillEmptyData/countTotal/translate/cmdbGroupDims/displayName/withShowKey/fieldsRelationFilter。聚合算子（operators.go:13-27）：count/min/max/sum/avg/topK/last/divide/increase/rate/irate/quantile。过滤算子（:84-98）：== != <= < >= > =~ !~ in has nin and like nlike exists；时间过滤 name=time，value 支持 now-30m 相对时间（pkg/sqlclient/parse.go:98-103）。试查「指标是否有数据」：dims=["time"] + filters=[{name:time,operator:>=,value:now-1h}] + limit={limit:1} + withEmptyData:false，看 list 是否空（存疑时 v1 复核）。
         method: POST
         path: /api/v3/data_exchange/olap
         body:
