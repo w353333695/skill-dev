@@ -106,7 +106,7 @@ resources:
             enable: { type: boolean, description: "是否启用" }
             serverConfig: { type: object, additionalProperties: true, description: "脚本服务端配置（password 字段 base64）" }
             configFields: { type: array, items: { type: object, additionalProperties: true }, description: "[{name,type}]，type=password 走敏感协议" }
-            cmdbUserObjectColName: { type: string, description: "CMDB USER 模型取值字段（如 telephone/user_email）" }
+            cmdbUserObjectColName: { type: string, description: "CMDB USER 模型取值字段（user_tel/user_email/dingding_userid/wework_userid，详见 formats#config_fields）" }
             description: { type: string }
         response:
           type: object

@@ -86,7 +86,7 @@ config_fields:
   enable: "bool。false 时发送返回 'disable' 且 /method 不列出"
   serverConfig: "dict，脚本的服务端配置（smtp/corpid/api_key...）。敏感字段值须 base64 传输（见 sensitive_protocol）"
   configFields: "[{name, type}]，serverConfig 的字段元数据；type=password 的字段走脱敏/base64 协议"
-  cmdbUserObjectColName: "CMDB USER 模型上的取值字段名。内置约定：mail→user_email / wework→wework_userid / dingding*→dingding_userid（migrate_handler.py:42-60）。custom 自定（如 telephone），必须 USER 模型有此属性"
+  cmdbUserObjectColName: "CMDB USER 模型（objectId=裸 USER，无@后缀，实测 /object/USER 200、USER@EASYOPS 404）上的取值字段名。内置约定：mail→user_email / wework→wework_userid / dingding*→dingding_userid（migrate_handler.py:42-60 + cmdb_sdk.py:360）。custom 自定，必须 USER 模型有此属性（实测可用字段：user_tel 手机号/user_email/dingding_userid/wework_userid/name；⚠️无 telephone 字段）"
   description: "描述"
   instanceId_ctime_mtime_org: "CMDB 注入。mtime 被 load_plugins 用于判断脚本是否重载"
   source: "实测 .90 configs list（8 个实例字段全集）+ config_handler.py:100-113"
@@ -130,7 +130,7 @@ api_surface:
 custom_notify_flow:
   e2e_verified: "2026-08-14 .90 实测全链路通：create config(custom+scriptContent) → instanceId 658fb0301e7a1 → send_message method=config.name → data={config.name:[送达用户]}; debug 原地试跑 custom 脚本 → data=[用户]。测完已删 config 恢复 8 原始方式。"
   steps:
-    - "1. 写脚本：首行 # -*- coding: utf-8 -*-（含中文必填）+ def run(msg_data, users, cmdb_object_key, server_config={}, **kwargs)，py2。确定 cmdbUserObjectColName（CMDB USER 模型真实字段，如 telephone/name）"
+    - "1. 写脚本：首行 # -*- coding: utf-8 -*-（含中文必填）+ def run(msg_data, users, cmdb_object_key, server_config={}, **kwargs)，py2。确定 cmdbUserObjectColName（USER 模型真实字段：user_tel/user_email/dingding_userid/wework_userid/name，⚠️无 telephone）"
     - "2. 设计 serverConfig + configFields：普通字段 type=text；密码/密钥 type=password（值 base64 传输，脚本侧拿到的是已解码明文）"
     - "3. POST /api/v2/message_sender/configs（admin user header，api-cli 加 --yes 跳确认挡）建 config：{name, msgType:'custom', scriptContent, serverConfig, configFields, cmdbUserObjectColName, enable:true}。pluginName 服务端强制=name"
     - "4. POST /api/v2/message_sender/send_message_debug 调试（scriptContent+serverConfig+receivers 原地试跑，msg 内容被覆盖为测试文本——只验脚本可执行+receiver 解析）"

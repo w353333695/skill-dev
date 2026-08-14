@@ -6,7 +6,7 @@ guard: 规划挡（写 config 须系统管理员）—— 必须确认通知方�
 
 prerequisites:
   env: [EASYOPS_MSGSENDER_BACKEND_URL, EASYOPS_ORG, EASYOPS_USER]
-  payload: "通知需求（目标渠道：短信/语音/IM webhook 等）+ 取值字段（CMDB USER 模型上真实属性，如 telephone）+ 凭证（api_key/token，哪些敏感）"
+  payload: "通知需求（目标渠道：短信/语音/IM webhook 等）+ 取值字段（CMDB USER 模型真实属性，如 user_tel 手机号）+ 凭证（api_key/token，哪些敏感）"
   format_knowledge: "读 formats/notify-kit/notify-script-protocol.yaml（脚本契约+敏感协议+API面 全文在此）"
   admin_required: "config 写操作须系统管理员，send/debug 无鉴权（权限矩阵见 objects.yaml#msg_config.side_effects）"
 
@@ -24,8 +24,8 @@ steps:
     expect: "得到 cmdbUserObjectColName（USER 模型真实字段）+ serverConfig 草案 + configFields（标 password）"
   - n: 2
     op: object_model.detail
-    args: ["USER@EASYOPS"]
-    desc: "确认 CMDB USER 模型有 cmdbUserObjectColName 字段（如 telephone/手机号）。无则脚本 users 取不到值"
+    args: ["USER"]
+    desc: "确认 CMDB USER 模型有 cmdbUserObjectColName 字段（模型 ID 是裸 USER，无 @后缀——实测 /object/USER 200、USER@EASYOPS 404。真实字段参考：user_tel 手机号/user_email/dingding_userid/wework_userid；⚠️无 telephone 字段）。无则脚本 users 取不到值"
     expect: "USER 模型 attrList 含目标字段"
   - n: 3
     desc: |
