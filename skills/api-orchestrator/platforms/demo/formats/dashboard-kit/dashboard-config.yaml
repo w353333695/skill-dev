@@ -110,6 +110,13 @@ brick_selection:
     「趋势/随时间」→ time-series-chart｜「当前使用率/状态值」→ statistic-card 或 gauge-chart
     「列表/明细」→ brick-table｜「占比/分布」→ pie/donut-chart｜「对比」→ bar-chart
     「多实例对比趋势」→ multi-instance-metrics-trend-chart（复合）
+  statistic_card_gotcha: |
+    🔴统计卡（statistic-card）value 必须是【单值】——用表达式从数据源提取，禁止直接绑整个数据源：
+    错（绑趋势数组 → 显示 NaN%）： "value": "<% CTX.DS.cpuTrend %>"
+    对（取数组末位=当前值）        ： "value": "<% CTX.DS.cpuTrend[CTX.DS.cpuTrend.length - 1]?.CPU使用率 ?? 0 %>"
+    现网模式（数据源出单值时）    ： "value": "<% CTX.DS.系统数量[\"data\"] %>"（对照『应用系统统计报表』）
+    format: {precision:1, unit:"percent(1)"}；icon: {category,icon,lib:"easyops"}；iconPosition:"right"; showCard:false
+    趋势图无此问题（xField/yField 消费数组）。实测踩坑 2026-08-14。
   full_catalog_pointer: |
     构件全量（含 defaultProperties/propertiesConf 逐字段）不复制到 platforms——
     查知识库：data/sources/frontend/dashboard-dev-skill/01-build-bricks/
