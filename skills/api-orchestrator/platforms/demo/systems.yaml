@@ -100,6 +100,15 @@ systems:
         import: "批量建/改实例（upsert，keys+datas）—— 新建 + 改的统一入口（C+U）"
         delete: "批量删除实例（instanceIds 分号分隔；路径 instance_batch）"
 
+      # ---- 仪表盘（dashboard，2026-08-14 接入）----
+      # 仪表盘 = _DASHBOARD 模型实例，CRUD 复用 object_instance（无独立 API）。
+      # 自然语言构建流程见 flows/build-dashboard.yaml；
+      # 配置结构/构件选型/数据接入（10 Provider + cmdb-olap 查询三件套）见 formats/dashboard-kit/。
+      # ⚠️配置里指标名/objectId 错误不报错——图表静默空白，构建前必须查证（flow step2/3）。
+      dashboard:
+        build: "自然语言 → panels/context/variables 配置 → object_instance.import(_DASHBOARD, keys=[name])"
+        examples: "知识库 data/sources/frontend/dashboard-dev-skill/05-examples/（4 黄金样例）；前端查看 ${EASYOPS_CMDB_FRONTEND_URL}/next/dashboard-r/dashboard?name=<name>"
+
     # 常用模型速查表（本 deployment 的 CMDB 高频资源「自然语言→objectId」映射）
     # 编排直通挡/计数场景优先匹配此处 → 直出 objectId，省 object_model.list 搜索；
     # alias 未命中或资源不在表内时，退回 object_model.list --q。
