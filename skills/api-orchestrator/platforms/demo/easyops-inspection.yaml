@@ -570,21 +570,24 @@ resources:
       export:
         description: |
           导出 v1 套件为 tar.gz（含指标组/模板/采集器/关联CMDB模型）。
-          ⚠️api-cli 不支持二进制下载（-o 会把响应当 JSON 字符串编码，gzip 字节损坏）。
-          真调走 curl -o / SDK（详见 formats/inspection-kit/suite-package.yaml#export_flow.cli_caveat）。
+          api-cli 支持：response.format=binary + --output/-o <path> 落盘（字节直写，不损坏）。
         method: GET
         path: /api/v1/inspection-export/{pluginId}
         params:
           pluginId: { in: path, type: string, required: true, description: "套件 id" }
-        response: { type: file, description: "application/octet-stream，<pluginId>.tar.gz" }
+        response:
+          format: binary
+          description: "application/octet-stream，<pluginId>.tar.gz"
 
       import:
         description: |
           导入 v1 套件包（multipart file 上传 tar.gz）。导入顺序：模型→套件→指标组→采集器→模板（部分失败有回退）。
+          api-cli 支持：content_type=multipart-form-data + file(formData,format=binary) + --file @<包>。
           ⚠️不幂等——重复导入同 pluginId/name 报 E11000『已存在重复的实例』，重导须先 DELETE 旧套件（级联删全部对象）。
           不幂等规则/报错对照/instanceId 格式坑详见 formats/inspection-kit/suite-package.yaml#conflict_strategy。
-          multipart 走 curl -F "file=@<包>.tar.gz" / SDK（api-cli 不支持上传）。
         method: POST
         path: /api/v1/inspection-import
-        # multipart（file 字段），api-cli 不支持，走 SDK
+        content_type: multipart-form-data
+        params:
+          file: { in: formData, format: binary, required: true, description: "tar.gz 套件包" }
         response: { type: object, properties: { code: { type: integer } } }
