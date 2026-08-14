@@ -1372,6 +1372,48 @@ objects:
     constraints:
       - "评分公式：v1 加权扣分（MaxScore100，level对应80/50/20，见 metric-threshold.yaml）"
       - "状态：脚本失败→failed(0分)；成功有异常→abnormal；成功无异常→normal"
+  # ===========================================================================
+  # EasyOps 通知管理（msgsender）—— msg_config 通知方式配置。
+  # 权威源 data/sources/backend/platform/msgsender/{custom_sender/message_handler,mail_config/config_handler,lib/sensitive_fields_handler}.py
+  # 通知方式 = CMDB 实例(_MSGSENDER_NOTIFY_CONFIG@EASYOPS) + notify_scripts/<pluginName>.py 脚本。
+  # 脚本契约/三方开发/敏感协议 全文见 formats/notify-kit/notify-script-protocol.yaml（本文件不复述）。
+  # ===========================================================================
+  msg_config:
+    description: "通知方式配置（msgsender，CMDB _MSGSENDER_NOTIFY_CONFIG@EASYOPS 实例的 CRUD 代理）。一个通知方式 = config（name/msgType/scriptContent/serverConfig/configFields...）+ 脚本（内置4类/custom 动态加载）。脚本契约+三方开发流程见 formats/notify-kit/notify-script-protocol.yaml。"
+    source: "platform/msgsender/mail_config/config_handler.py:22-371；脚本协议 formats/notify-kit/notify-script-protocol.yaml"
+    api: notify_config
+    fields:
+      instanceId: { type: string, anchor: true, desc: "CMDB 实例主键（路由 {instanceId}）" }
+      name: { type: string, required: true, desc: "通知方式名（=inform_type=send 的 method）。唯一，409 冲突报『通知方式名称重复』" }
+      msgType: { type: string, required: true, enum: [email, wework, dingding, dingding_robot, custom], desc: "custom=三方脚本（pluginName强制=name）；其余内置（pluginName 由映射定）" }
+      pluginName: { type: string, desc: "脚本模块名。内置=映射；custom=name（服务端 create/update 覆写，勿手填错）" }
+      scriptContent: { type: string, desc: "custom 脚本源码（def run(msg_data, users, cmdb_object_key, server_config={}, **kwargs)，py2）。内置留空" }
+      enable: { type: boolean, desc: "false 时 send 返回 disable 且 method 不列出" }
+      serverConfig: { type: object, additionalProperties: true, desc: "脚本服务端配置（smtp/corpid/api_key...）。敏感字段 v2 出站 ******** / 入站 base64" }
+      configFields: { type: array, items: { type: object, additionalProperties: true }, desc: "[{name,type}]，serverConfig 字段元数据；type=password 走敏感协议（全文见 formats#sensitive_protocol）" }
+      cmdbUserObjectColName: { type: string, desc: "CMDB USER 模型取值字段（mail→user_email/wework→wework_userid/dingding*→dingding_userid；custom 自定须 USER 模型有此属性）" }
+      description: { type: string, desc: "描述" }
+    relations:
+      - { to: cmdb_instance, type: association, cardinality: "1:1", via: instanceId, desc: "config 是 _MSGSENDER_NOTIFY_CONFIG 模型的实例" }
+    side_effects:
+      - op: notify_config.create
+        rule: "须系统管理员（permission 服务校验 user 有『系统管理员』角色，否则 PermissionExcept『非系统管理员，无权限新增数据』）。msgType=custom 时 pluginName 服务端强制=name。409=CMDB name 冲突。敏感字段（configFields.type=password）值须 base64。v2 create 解码后存、返回脱敏；v1 不解码不脱敏。"
+      - op: notify_config.update
+        rule: "须系统管理员。v2 PUT 解码敏感字段（值=******** 表示未改→用 CMDB 原值；非 ********→base64 解码，失败报错）。msgType=custom 时同步 pluginName=name。v1 PUT 无敏感处理。"
+      - op: notify_config.delete
+        rule: "须系统管理员。仅 v1 路由（/api/v1/message_sender/configs/{id}），v2 无 DELETE。响应已脱敏。"
+      - op: notify_config.list
+        rule: "⚠️必须走 v2（/api/v2/...）—— v1 GET list 明文返回 serverConfig 密码（实测 .90：email.login_password 明文）。v2 对每项 mask_sensitive_fields。无鉴权（任意 org 请求可列）。内部固定 page_size=300，config 超限丢（get_plugin_configs）。"
+      - op: notify_config.get
+        rule: "仅 v1 路由（v2 无单条 GET）。⚠️明文返回 serverConfig 敏感值，仅排查用；常规读走 v2 list。无鉴权。"
+      - op: notify_message.send
+        rule: "无鉴权（任意带 org/user header 可发）。body {topic?, data:{receivers:[{user|user_group|email_addr, method}], msg_data:{content,...}}}。method=config.name。按 method 分桶查 CMDB USER/USER_GROUP，state!=valid 静默跳过。脚本异常该 method 置 'error'（整体仍200）。响应 data={method: 脚本返回值|'not support'|'disable'|'error'}。"
+      - op: notify_message.debug
+        rule: "无鉴权。不需先建 config——body 即 config 字段+receivers 原地试跑。一次一种方式；receivers[].method 必须=msgType。⚠️msg_data 内容被固定覆盖为测试文本（只验证脚本可执行+receiver 可解析，不验证业务渲染）。custom 临时脚本 finally 删（脚本 crash 可能留垃圾）。v2 debug 解码敏感字段。"
+      - op: notify_alert.receive
+        rule: "无鉴权。data.alert_receivers=[{name(用户名),method}]，整个 data 作为 msg_data 透传脚本。仅支持 cmdbUserObjectColName 非空的通知方式。"
+    source: "platform/msgsender/{mail_config/config_handler.py:62-371, custom_sender/message_handler.py:362-998}；实测 .90:8095 v1明文/v2脱敏对照"
+
 api_behavior:
   pagination:
     rule: "list/search 分页时 api-cli 以流式 NDJSON 输出——每行一个完整对象，非 {data:{list:[...]}} 包装。解析须逐行 json.loads。单对象接口（detail）才是 {code,data:{...}}。"
