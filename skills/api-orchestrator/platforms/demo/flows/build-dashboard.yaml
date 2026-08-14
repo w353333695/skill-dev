@@ -35,6 +35,8 @@ steps:
       查证指标名（若数据源是监控指标 cmdb-olap）：从已有仪表盘 context 找同类指标范例
       （object_instance search _DASHBOARD → 找含指标的 dashboard → 看 context[].args 的
       measures[].function.args）或问用户。🔴指标名错则图空。
+      e2e 实证（2026-08-14 .90）：85 个 dashboard 里 53 个 cmdb-olap context，
+      查得真实指标 cpu_status(last)/HOST、jolokia_jvm_*(last) 等——查证法有效。
     expect: "得到真实指标名（如 node.cpu.usage）+ 聚合方式（趋势avg/当前last）"
   - n: 4
     desc: |
