@@ -8,7 +8,7 @@ prerequisites:
   env: [EASYOPS_MSGSENDER_BACKEND_URL, EASYOPS_ORG, EASYOPS_USER]
   payload: "通知需求（目标渠道：短信/语音/IM webhook 等）+ 取值字段（CMDB USER 模型上真实属性，如 telephone）+ 凭证（api_key/token，哪些敏感）"
   format_knowledge: "读 formats/notify-kit/notify-script-protocol.yaml（脚本契约+敏感协议+API面 全文在此）"
-  admin_required: "config 写操作（create/update/delete）须 user 具备『系统管理员』角色；send/debug 无鉴权"
+  admin_required: "config 写操作须系统管理员，send/debug 无鉴权（权限矩阵见 objects.yaml#msg_config.side_effects）"
 
 key_rule: |
   通知方式 = config 实例（CMDB _MSGSENDER_NOTIFY_CONFIG）+ notify_scripts/<pluginName>.py 脚本。
