@@ -315,15 +315,19 @@ export_flow:
     - "拉关联 CMDB 模型 GetObjectAll(suiteInfo.ObjectId)"
     - "CreateTar 组装 tar.gz 流"
   response: "application/octet-stream, Content-Disposition: attachment;filename=<pluginId>.tar.gz"
-  cli_caveat: |
-    ⚠️api-cli 不支持二进制下载透传（实测 2026-08-14）：
-    `-o` flag 把二进制响应当 JSON 字符串编码写盘，非 ASCII 字节被 � 替换 → gzip 损坏不可用
-    （实测 export mongodb：api-cli 31793B 损坏 vs curl 8422B 干净，md5 不同，tar -tzf 失败）。
-    正解——curl 直接下载：
-      curl -s -o <pluginId>.tar.gz -H "org: 8888" -H "user: easyops" -H "Host: admin.easyops.local" \
-        "${EASYOPS_INSPECTION_BACKEND_URL}/api/v1/inspection-export/<pluginId>"
-    或走 SDK（platforms/demo/sdk/easyops_client.py）。
-  source: "import_export_service.go:484-531,517-530; api-cli -o 实测损坏"
+  binary_io_via_apicli: |
+    api-cli 支持套件包上传/下载（实测 2026-08-14，含 import 成功 code:0 + counterSideId 写入），
+    但 spec 必须正确声明二进制契约，否则 api-cli 走 JSON decode 损坏字节：
+      下载（export）：operation.response.format: binary  ← 不是 type: file（type: file api-cli 不认）
+        → api-cli export <pluginId> -o <pluginId>.tar.gz（字节直写落盘）
+      上传（import）：operation.content_type: multipart-form-data + params.file: { in: formData, format: binary }
+        → api-cli import --file <pluginId>.tar.gz（自动构造 multipart file 字段）
+    ⚠️踩坑史：曾因 spec 写 response.type:file（应为 format:binary）+ import 未声明 content_type，
+    误判「api-cli 不支持二进制」。实测纠正：声明对则支持。
+    curl 兜底（环境 export 端点偶发 500 或 api-cli 不可用时）：
+      下载: curl -s -o <pluginId>.tar.gz -H "org/user/Host" "${BACKEND}/api/v1/inspection-export/<pluginId>"
+      上传: curl -s -X POST -H "org/user/Host" -F "file=@<pluginId>.tar.gz" "${BACKEND}/api/v1/inspection-import"
+  source: "import_export_service.go:484-531,517-530; api-cli 二进制契约见 projects/api-cli/docs/USAGE.md §文件上传/下载"
 
 # -----------------------------------------------------------------------------
 # 十、v2 新体系兼容索引（.90 当前 0 套件，仅记录端点不深入）
