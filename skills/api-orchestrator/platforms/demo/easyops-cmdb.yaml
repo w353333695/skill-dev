@@ -658,35 +658,31 @@ resources:
     operations:
       # ---------- 建（POST /v2/object/_DASHBOARD/instance）—— 前端 CreateInstance ----------
       create:
-        description: 建仪表盘（前端保存新建走此端点，contracts.yaml:3206-3262 CreateInstance v1.1.0）。body.instance 为完整 _DASHBOARD 配置（dashboardVersion 固定 v2、template=normal|bigScreen、panels[].brickConf 须 JSON.stringify 成字符串、context 数组每项 type 见 formats/dashboard-kit/providers-context.yaml）。前端固定注入 type=builtIn——API 直建建议同样传 type=builtIn 保持与前端一致。返回 instanceId（前端随后跳 /dashboard/v2/<instanceId>）。
+        description: 建仪表盘（前端保存新建走此端点）。🔴body 是【平铺的实例字段】——勿包 instance 包装（e2e 实测 2026-08-14：包 {"instance":{...}} 后端把整个对象当字段丢弃，code=0 但 name 等全没存，静默坑！后端 validator 直接 msg.Body=req，create_v2_validator.go:110-124；contracts.yaml:3206 虽写 instance:map 但前端实际平铺发送）。字段全集（前端保存组装 route.yaml:405-470）：name/category(必填)/dashboardVersion(v2)/template(normal|bigScreen)/timerange/namespace/adaptive/context/panels/hiddenTimeRange/messages/type(builtIn)/background/size/*Authorizers/variables。panels[].brickConf 须 JSON.stringify 成字符串。
         method: POST
         path: /v2/object/{object_id}/instance
         params:
           object_id: { in: path, type: string, required: true, description: "固定 _DASHBOARD" }
         body:
           type: object
-          required: [instance]
-          description: "创建请求。instance 字段全集（前端保存组装 route.yaml:405-470）：name/category/dashboardVersion(v2)/timerange/namespace/adaptive/context/panels/hiddenTimeRange/messages/template/type(builtIn)/background/size/readAuthorizers/updateAuthorizers/deleteAuthorizers/variables。最小可用：name+category+panels+context（+template/dashboardVersion/timerange 默认值）。"
-          properties:
-            instance:
-              type: object
-              additional_properties: true
-              required: [name]
-              description: "完整仪表盘配置。字段结构详见 formats/dashboard-kit/dashboard-config.yaml#dashboard_schema（本 spec 不重复内联）"
-              example: { name: "AO-TEST-验证盘", category: "测试", dashboardVersion: "v2", template: "normal", timerange: "now-1h", namespace: "dashboard", type: "builtIn", panels: [], context: [], variables: [] }
+          additional_properties: true
+          required: [name, category]
+          description: "🔴平铺实例字段（无包装）。最小可用：name+category+panels+context。query 参数 only_instance_id/fill_metadata 可选（bool）。"
+          example: { name: "AO-TEST-验证盘", category: "测试", dashboardVersion: "v2", template: "normal", timerange: "now-1h", namespace: "dashboard", type: "builtIn", panels: [], context: [], variables: [] }
         response:
           type: object
-          description: "标准 wrapper：{ code, data: { instanceId } }"
+          description: "标准 wrapper：{ code, data: { instanceId, name, ...完整实例 } }"
           properties:
             code: { type: integer }
             data:
               type: object
+              additional_properties: true
               properties:
                 instanceId: { type: string, description: "新建实例 ID（13 位），前端据此跳转 /dashboard/v2/<instanceId>" }
 
       # ---------- 改（PUT /v2/object/_DASHBOARD/instance/:instanceId）—— 前端 UpdateInstanceV2 ----------
       update:
-        description: 改仪表盘（前端编辑保存走此端点，contracts.yaml:5424-5425 UpdateInstanceV2）。body 与 create 的 instance 相同结构（全量覆盖更新）。改配置迭代：先 object_instance search 取当前配置 → 本地改 → 本端点 PUT 回。⚠️全量更新非 patch——漏传字段会被清掉，务必带完整配置。
+        description: 改仪表盘（前端编辑保存走此端点）。body 同 create 平铺结构。⚠️全量覆盖更新非 patch——漏传字段会被清掉，务必先 search 取完整现配再改再 PUT（e2e 实测 2026-08-14：name/category/timerange 全改成功 _version+1）。
         method: PUT
         path: /v2/object/{object_id}/instance/{instance_id}
         params:
@@ -694,16 +690,11 @@ resources:
           instance_id:  { in: path, type: string, required: true, description: "仪表盘实例 ID（object_instance search _DASHBOARD 取）" }
         body:
           type: object
-          required: [instance]
-          description: "更新请求，instance 结构同 create。⚠️全量覆盖：先 search 取完整现配再改再 PUT。"
-          properties:
-            instance:
-              type: object
-              additional_properties: true
-              description: "完整仪表盘配置（结构同 create.instance；panels[].brickConf JSON 字符串）"
+          additional_properties: true
+          description: "🔴平铺实例字段（同 create，无 instance 包装）。⚠️全量覆盖：先 search 取完整现配再改再 PUT。"
         response:
           type: object
-          description: "标准 wrapper：{ code, message }；code=0 成功"
+          description: "标准 wrapper：{ code, data: { ...更新后完整实例 } }；code=0 成功"
           properties:
             code: { type: integer }
 

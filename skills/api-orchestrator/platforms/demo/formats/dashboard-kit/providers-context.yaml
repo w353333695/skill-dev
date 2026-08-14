@@ -93,7 +93,7 @@ context_types:
               function: {expression: avg, args: [host_cpu_used_total]}   # 🔴指标名必查证
           query: {instances: {query: {}, type: all}}   # 实例过滤（可含 QUERY.instanceId）
       transform: "<% DATA?.list ?? [] %>"
-    args_dsl: 'args = YAML[单元素数组{model, fillEmptyData, dims, filters, measures, translate, query}]（getTransformYaml.yaml:65-79）'
+    args_dsl: 'args = YAML[单元素数组{model, fillEmptyData, dims, filters, measures, translate, query}]（getTransformYaml.yaml:65-79）。dims 时间维度前端真实写法 time(auto)（现有盘 args 实测——time 后缀 (auto) 表自动粒度）'
     measures_dsl: "measures[] = {name, function: {expression: 聚合算子, args: [指标名]}}（getMeasures.yaml:6-16）。聚合算子全表（data_exchange internal/types/operators.go:13-27）：count/min/max/sum/avg/topK/last/divide/increase/rate/irate/quantile"
     filters_dsl: "filters[] = {name, operator, value}；前端自动 concat 默认 time>=from/time<=to（getOlapFiltersArg.yaml:5-24）。比较算子（operators.go:84-98）：== != <= < >= > =~ !~ in has nin and like nlike exists"
     backend: POST /next/api/gateway/logic.data_exchange/api/v1/data_exchange/olap（getUrlOfProvider.yaml:43）

@@ -49,6 +49,14 @@ service:
         org: ${EASYOPS_ORG}
         user: ${EASYOPS_USER}
         # giraffe-contract-name 不在此设——它因 operation 而异（activate≠list），真调 per-op 用 --header 传
+    backend_legacy:
+      base_url: ${EASYOPS_COLLECTOR_SERVICE_LEGACY_URL}     # :8125 旧版进程（metric/collector_job 端点所在）。实测（2026-08-14）：collector_metric list/get 直 200 免 contract header
+      host: admin.easyops.local
+      path_prefix: ""
+      auth: none
+      headers:
+        org: ${EASYOPS_ORG}
+        user: ${EASYOPS_USER}
 
 # -----------------------------------------------------------------------------
 # 资源 1：kit —— 套件激活/列表（collector_service.job 模块）
@@ -146,11 +154,11 @@ resources:
 # request_validate_trees.go:67,71 + metric_service.go:756,835。
 # 这是「dashboard 有哪些指标可用」的权威查询途径（data_exchange 的 tags-list 是空实现桩，
 # olap/olap_service.go:91-93——勿用它查指标元数据）。
-# ⚠️端口待 e2e 探测：metric 模块在 collector_service 进程，候选 :12000（kit 所在）或
-#   :8125（legacy collector_job 所在）——e2e 阶段确认后回填此处注释。
+# ✅端口已定案（e2e 2026-08-14）：metric 端点在 legacy 进程 :8125（endpoint backend_legacy，
+# 直 200 免 contract header；:12000 报 giraffe-contract-name 错）。
 # -----------------------------------------------------------------------------
   collector_metric:
-    description: 采集指标元数据（CollectorAliasMetric 目录）——指标名/显示名/单位/维度/objectId/所属插件与套件。dashboard cmdb-olap 数据源选指标前用它查证（指标名错→图表静默空白）。list=v2 分页检索（支持 metricName 模糊/metricNames 精确集合/objectId/jobId/pluginId/metricSetId 过滤），get=单指标详情（objectId+metricName 定位）。
+    description: 采集指标元数据（CollectorAliasMetric 目录）——指标名/显示名/单位/维度/objectId/所属插件与套件。dashboard cmdb-olap 数据源选指标前用它查证（指标名错→图表静默空白）。list=v2 分页检索（支持 metricName 模糊/metricNames 精确集合/objectId/jobId/pluginId/metricSetId 过滤），get=单指标详情（objectId+metricName 定位）。⚠️端点在 legacy 进程 :8125——调用加 --endpoint backend_legacy（:12000 报 giraffe-contract-name 错，实测 2026-08-14）。
     path: ""
 
     operations:

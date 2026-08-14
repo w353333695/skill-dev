@@ -43,9 +43,11 @@ steps:
   - n: 4
     op: olap_metric.query_v3
     desc: |
-      指标活性试查（仅 cmdb-olap）：dims=["time"] + filters[{name:time,operator:>=,value:now-1h}]
+      指标活性试查（仅 cmdb-olap）：model=easyops.<objectId> + dims=["time"] + filters[{name:time,operator:>=,value:now-1h}]
+      + measures[{name:v, function:{expression:avg, args:[指标名]}}]（🔴function 字段名是 expression 非 operator）
       + limit{limit:1} + withEmptyData:false——list 空=该指标近期无数据，换指标或弃图（与用户确认）。
-      ⚠️e2e 首次需先探测 data_exchange 端口（见 systems.yaml runtime.ports.data_exchange）。
+      data_exchange 直连 :8152（EASYOPS_DATA_EXCHANGE_BACKEND_URL）。
+      注意：试查空 ≠ 端点错（.90 测试环境采集可能未跑，环境数据事实）。
     expect: "指标有数据点（或已换指标/弃图）"
   - n: 5
     desc: |
@@ -63,9 +65,10 @@ steps:
     op: dashboard.create
     args: ["_DASHBOARD"]
     desc: |
-      建仪表盘：POST /v2/object/_DASHBOARD/instance，body {instance: <完整配置>}（镜像前端保存）。
+      建仪表盘：POST /v2/object/_DASHBOARD/instance，body = 🔴平铺配置字段（勿包 instance 包装！
+      包了 code=0 但字段静默丢失——e2e 实测坑，后端 validator 直接吃整个 body）。
       返回 instanceId。⚠️不用 import（非前端路径，且缺前端注入的 type=builtIn 等默认字段）。
-    expect: "code=0 + instanceId"
+    expect: "code=0 + instanceId + data.name 等字段回显正确"
   - n: 7
     desc: |
       验收 URL（用户开页面确认）：

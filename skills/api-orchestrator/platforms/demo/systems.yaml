@@ -615,6 +615,7 @@ systems:
 
     env:
       EASYOPS_COLLECTOR_SERVICE_BACKEND_URL: ""  # :12000 完整 URL；端口见 runtime.ports.collector_service_kit
+      EASYOPS_COLLECTOR_SERVICE_LEGACY_URL: ""   # :8125 完整 URL（collector_metric/collector_job 端点所在，e2e 实测 2026-08-14）
 
     capabilities:
       kit:
@@ -804,10 +805,10 @@ systems:
 
     endpoints:
       backend:
-        base_url: ${EASYOPS_DATA_EXCHANGE_BACKEND_URL}   # 端口 e2e 探测后固化（见 runtime.ports.data_exchange）
+        base_url: ${EASYOPS_DATA_EXCHANGE_BACKEND_URL}   # 指 http://172.30.0.90:8152（e2e 实测 2026-08-14）
         host: admin.easyops.local
 
-    auth: easyops-cookie                       # 直连 auth=none（同 cmdb 惯例）
+    auth: easyops-cookie                       # 直连 auth=none（同 cmdb 惯例；:8152 实测免 cookie）
 
     env:
       EASYOPS_DATA_EXCHANGE_BACKEND_URL: ""    # 完整 URL；端口待 e2e 探测
@@ -825,8 +826,17 @@ systems:
         - "EASYOPS_DATA_EXCHANGE_BACKEND_URL"
         - "EASYOPS_ORG"
         - "EASYOPS_USER"
-      ports: { data_exchange: "GAP-待e2e探测（前端走网关 /next/api/gateway/logic.data_exchange/*；直连端口候选见 easyops-data-exchange.yaml 头注释）", frontend: 80 }
+      ports: { data_exchange: 8152, frontend: 80 }
       host_header: admin.easyops.local
+      e2e_20260814: |
+        e2e 实测（2026-08-14 org 8888）：
+        • :8152 直连全通（olap v1/v3 + select_raw_data + tsdb_column/aggregate），org+user+Host 免 cookie。
+        • 🔴measures[].function JSON 字段名是 expression（传 Go struct 名 operator 报 not valid measure operator）。
+        • 🔴columndb filter 直调传对象（args YAML 里的 JSON 字符串是前端序列化格式）。
+        • dims 前端真实写法 time(auto)（现有盘 args 实测），API 直调 time 亦可。
+        • 网关面 /next/api/gateway/logic.data_exchange/* 需有效会话 cookie（过期报 ERR_UNAUTHENTICATED）——编排走 :8152 直连。
+        • 试查现状：.90 org 8888 的 HOST/KAFKA/PHYSICAL_SERVER 指标近期均无数据（采集未跑），
+          端点行为正确（code=0 + total=0）——试查空≠端点错，是环境数据事实。
       org_isolation: "db 名=org 号，SQL 层自动 org 过滤（pkg/sqlclient/parse.go:168-171）——跨 org 不可见属预期"
       operators: "聚合算子 internal/types/operators.go:13-27（count/min/max/sum/avg/topK/last/divide/increase/rate/irate/quantile）；过滤算子 :84-98（== != <= < >= > =~ !~ in has nin and like nlike exists）；时间过滤 name=time 支持 now-1h 相对时间"
 
