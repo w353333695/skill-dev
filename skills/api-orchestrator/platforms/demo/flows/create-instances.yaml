@@ -7,7 +7,7 @@ guard: 规划挡（写、批量）—— 须展示 datas 确认
 prerequisites:
   env: [EASYOPS_ORG（非 0/1/2 测试 org）, EASYOPS_USER=easyops, EASYOPS_CMDB_BACKEND_URL]
   model_exists: "目标模型（如 TESTWWH@EASYOPS）已存在；若要带关系，关系定义须已存在（见 object_model.import）"
-  relation_field: "若要关联对端实例：先 object_model.detail 拿 relation_list，找到指向对端模型的关系及其 Out.Id（实例上的关系字段名）；再查对端实例拿 instanceId"
+  relation_field: "若要关联对端实例：先 object_model.detail 拿 relation_list，找到指向对端模型的关系及其 Out.Id（实例上的关系字段名）；再查对端实例拿 instanceId。关系字段写值语义（字符串/对象/数组/嵌套创建）见 objects.yaml#cmdb_instance.side_effects 的 object_instance.import（关系字段）rule"
 steps:
   - n: 1
     op: object_instance.search
@@ -18,7 +18,7 @@ steps:
   - n: 2
     op: object_instance.import
     args: ["<OBJECT_ID>", --body-file, "<import.json>", --insecure, --yes]
-    desc: 批量建（upsert）。keys 选 ip（或 name）；datas 生成 10 条（ip 192.168.1.1~.10）；关系字段=<Out.Id>，值=easyops 系统实例的 instanceId
+    desc: 批量建（upsert）。keys 选 ip（或 name）；datas 生成 10 条（ip 192.168.1.1~.10）；对端关联字段=<Out.Id>（写值语义见权威源），值=easyops 系统实例的 instanceId
     body_hint: |
       { keys: ["ip"],
         datas: [

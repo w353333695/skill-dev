@@ -1,5 +1,5 @@
 # 流程模板：删除表单—— 场景⑤。规划挡（写、破坏性）。
-# 场景：删除 test 表单。⚠️有版本拒绝删 form，须先清版本；删最后一个版本会级联删 form。
+# 场景：删除 test 表单。删除约束/级联规则见 objects.yaml#itsm_form_version.side_effects（form_version.delete rule）+ objects.yaml#itsm_form.side_effects（form.delete rule）。本文件不复述规则全文。
 name: delete-form
 intent: 删除一个 ITSM 表单（含其所有版本）
 trigger: ["删除表单", "删掉 X 表单", "清理测试表单"]
@@ -21,22 +21,20 @@ steps:
     op: form_version.delete
     args: ["<formId>", "<versionId1>", --insecure, --yes]
     desc: |
-      逐个删版本。⚠️路径参数是 versionIds（复数），但代码只用第一个——一次只删一个，循环调。
-      被流程节点引用的版本拒绝（『表单已绑定节点，不可删除!』）——须先在流程侧解绑。
-      ⚠️隐式级联：删完若 form 已无任何版本，连带删 form——若这是最后一个版本，删完 form 也没了，step3 的 form.delete 会幂等返回（form 已不存在）。
-    on_fail: "『表单已绑定节点』→ 先在流程侧解绑该版本再删"
+      逐个删版本（循环单删——versionIds 路径复数但只删第一个）。
+      删除可能被流程节点引用拒绝（报错原文 + 约束清单 + 隐式级联行为见 objects.yaml#itsm_form_version.side_effects form_version.delete rule）。
+      若删的是最后一个版本，会隐式级联删 form（见权威源）——此时 step3 form.delete 幂等返回。
+    on_fail: "按 key_rule 解约束（流程侧解绑），解后重删版本"
 
   - n: 3
     op: form.delete
     args: ["<formId>", --insecure, --yes]
-    desc: 删 form（若 step2 已把版本清光，本步幂等成功；若还有版本残留则报『表单存在版本,无法删除』）
-    on_fail: "『表单存在版本,无法删除』→ 回 step1 确认版本没清干净，继续 step2 删剩余"
+    desc: 删 form（step2 清光版本后本步幂等成功）
+    on_fail: "『表单存在版本,无法删除』→ 回 step1 确认版本没清干净，继续 step2 删剩余（规则见 objects.yaml#itsm_form.side_effects）"
 
 key_rule: |
-  删 form 必须先清所有版本（有版本就拒绝）。两条等效路径：
-   ① 逐个 form_version.delete 清版本 → form.delete（显式）
-   ② 删最后一个版本时隐式级联删 form（step2 删完最后一个，form 自动没，step3 幂等）
-  delete 路径参数 versionIds（复数分号），但代码只用 [0]——批量是壳，循环单删。
-  被流程引用的版本不可删——须先解绑。
+  删 form = 先清所有版本（约束清单/级联规则见 objects.yaml#itsm_form_version.side_effects + objects.yaml#itsm_form.side_effects）。本文件只列【清理顺序】（怎么做）：
+   ① 逐个 form_version.delete 清版本（须先在流程侧解绑『表单已绑定节点』）
+   ② form.delete（step2 清光版本后幂等；或删最后一个版本时隐式级联已删 form）
 side_effects: objects.yaml#itsm_form_version.side_effects
 acceptance: "form.list 过滤该 formId → total 不含它（删干净）"

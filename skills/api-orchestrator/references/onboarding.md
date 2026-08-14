@@ -29,6 +29,7 @@
    - `platforms/<deployment>/` 是唯一真相来源，换环境/换 LLM 只读这些文件。引用外部文件（尤其 `tmp/` 临时文件、`knowledge/modules/` 等）= 知识依赖了随时会删的东西，分发即断。
    - `source:` 字段（如 `data/sources/backend/.../*.go:line`）仅标**溯源**（这条知识从哪段源码归纳的），不是「详见此处获取知识」——知识必须**内联**在 platforms 文件里。
    - 发现自己写「详见 tmp/xxx.md」「参考 knowledge/modules/xxx」时 → **停**，把那个文件里的关键知识提取内联到 platforms 对应文件，然后删掉引用。
+   - ⚠️**范围限定**：「内联」只针对**禁止依赖 platforms 外部文件**（tmp/knowledge/源码副本）。platforms **内部**文件之间**不**内联——遵守 asset-schema.md 设计原则④「单一真相源（文件间）」：同一规则全文只写在一处权威文件，其余用指针（如 `见 objects.yaml#X.side_effects`）。两者方向不同：对外拒绝指针（怕断），对内强制指针（防散落/防改漏）。
    - 实操：onboarding 完成时 grep `platforms/` 目录，确认零 `tmp/` 引用、零 `详见/参见/参考 + 外部路径`；`source:` 和 YAML 头注释里的 `data/` 路径是溯源 OK 的（不是知识依赖）。
 
 ---

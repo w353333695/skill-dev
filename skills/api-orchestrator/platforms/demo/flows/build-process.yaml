@@ -64,7 +64,7 @@ steps:
   - n: 3
     op: process_version.create
     args: ["<definitionId>", --body-file, "<version.json>", --insecure, --yes]
-    desc: 建流程版本（bpmnXML+processSetting+versionName+state=done）。⚠️建版本不部署 Flowable
+    desc: 建流程版本（bpmnXML+processSetting+versionName+state=done）。建版本后须 set_main 才生效（见权威源 process_version.create rule）
     body_hint: '{ "bpmnXML":<BPMN>, "versionName":"1.0.0", "state":"done", "processSetting":{...}, "memo":"初版" }'
     expect: "code=0；data.versionId"
     on_fail: "140501 表达式错误 → 检查 ${} 包裹；140200 部署失败 → 检查 8 要素（targetNamespace/isExecutable/V2属性精简）"
@@ -79,13 +79,13 @@ steps:
   - n: 5
     op: process_version.set_main
     args: ["<definitionId>", "<versionId>", --insecure, --yes]
-    desc: ⚠️设主版本=部署到 Flowable 引擎才生效（建版本不部署）。须 state==done。偶发 140500→重试
+    desc: 设主版本触发部署（部署生效规则见 objects.yaml#itsm_process_version.side_effects 的 process_version.set_main rule）。须 state==done，偶发 140500→重试
     expect: "code=0；flowableDefinitionId 形如 ITSC<defId>:<n>:<hex>（真部署）"
 
 key_rule: |
-  完整建流程链（实测 v2.3.0 验证）：
-  process_definition.create（建 def）→ process_version.create（建 BPMN 版本，不部署）
-  → process_form.set（⚠️显式绑表单，不靠 baseVersionId）→ process_version.set_main（部署生效）
+  完整建流程链（建 def → 建版本不部署 → 绑表单 → 设主版本部署生效）的部署语义
+  见 objects.yaml#itsm_process_version.side_effects（process_version.create / set_main rule）。本文件只列【步骤顺序】（怎么做）：
+  process_definition.create → process_version.create → process_form.set（⚠️显式绑表单，不靠 baseVersionId）→ process_version.set_main
 
   BPMN 构建 8 要素缺一不可（详见 prerequisites.bpmn_truth）：
   targetNamespace+xsi:schemaLocation（缺→140200）/ isExecutable（缺→复杂流程部署失败）
@@ -96,4 +96,4 @@ key_rule: |
   驳回：nodeSettings.rejectNodes 配（格式 `节点id:线名`），不画反向 sequenceFlow
 side_effects: objects.yaml#itsm_process_version.side_effects
 acceptance: "${EASYOPS_CMDB_FRONTEND_URL}/next/itsc-process-manage/<definitionId>/versionCreate-v2/<versionId>?activeTab=0"
-rollback: "process_version.delete 清版本（注意约束）→ process_definition.delete（或末版本级联删）"
+rollback: "process_version.delete 清版本（删除约束见 objects.yaml#itsm_process_version.side_effects）→ process_definition.delete（或末版本级联删 def，规则见 objects.yaml#itsm_process_definition.side_effects）"

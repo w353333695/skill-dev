@@ -1,5 +1,6 @@
 # 流程模板：按条件批量删除实例（cmdb-instance 场景④）。change 挡，破坏性。
 # 场景：删除 ip 范围 192.168.1.3-6 的实例。
+# delete 的路径/分号/契约笔误/无按条件删 verb 等行为见 objects.yaml#cmdb_instance.side_effects（object_instance.delete rule）。本文件不复述规则全文。
 name: delete-instances-by-range
 intent: 按某条件（ip 范围/网段/属性）删一批实例——search 取 instanceIds → delete 批量删
 trigger: ["删除 ip 范围 X 的实例", "按条件批量删实例", "清掉某网段的主机", "删掉符合条件的实例"]
@@ -18,12 +19,11 @@ steps:
   - n: 2
     op: object_instance.delete
     args: ["<OBJECT_ID>", --instanceIds, "<id1;id2;...>", --insecure, --yes]
-    desc: 批量删（⚠️路径 instance_batch，非 instance/_batch）
-    expect: "code=0；data.deleteFailedInstances=[]（空=全删成功）"
+    desc: 批量删（⚠️真实路径见 objects.yaml#cmdb_instance.side_effects 的 object_instance.delete rule）
+    expect: "code=0；data.deleteFailedInstances=[]（空=全删成功，含义见权威源）"
     on_fail: "deleteFailedInstances 非空 → 看每项 {instanceId,_object_id,name} 的失败原因（权限/protected/已不存在）"
 key_rule: |
-  delete 是批量接口，instanceIds 用分号分隔；单个 id 即删单个。
-  ⚠️路径 /object/{object_id}/instance_batch（契约笔误 /instance/_batch，照写 404）——清单已修正。
-  无独立的「按条件删」verb；先 search 取 instanceIds 再 delete（或对单条用 search 命中后删一个）。
+  本文件只列【操作顺序】（怎么做）：search 取 instanceIds → delete 批量删（先条件查询再删，无独立按条件删 verb）。
+  delete 的路径笔误坑 + instanceIds 分号语义 + 返回字段含义见 objects.yaml#cmdb_instance.side_effects（object_instance.delete rule）。
 side_effects: objects.yaml#cmdb_instance.side_effects
 acceptance: "object_instance search 同条件 → data.total=0（删干净）；前端 list 页该范围无实例"
