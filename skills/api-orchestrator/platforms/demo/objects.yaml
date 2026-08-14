@@ -1233,9 +1233,9 @@ objects:
       keys: { type: array, items: string, desc: "唯一键列表（CMDB属性id，定位巡检实例）。DB类常用 [serverName]" }
       isSystem: { type: bool, desc: "⚠️true=内置套件（禁改）；开发新套件 false" }
       isApp: { type: bool, desc: "是否应用类" }
-      counterSideId: { type: string, desc: "🔴关联主机的对端模型（DB/中间件类常用 host）。⚠️create-only：API create/update 写不进（service层info_service.go:127注释掉），只有 import 包导入能写入。详见 formats/inspection-kit/suite-package.yaml#import_only_caveat" }
-      relationId: { type: string, desc: "与对端模型的关系id（如 artifactInsts，可空）。和 counterSideId/relationIdWithHost 三者组合决定『目标实例→执行主机』关联" }
-      relationIdWithHost: { type: string, desc: "与HOST的关系id三段式：{中间模型}@ONEMODEL_{counterSideId}_{relationId}_HOST。ARTIFACT_INST类=ARTIFACT_INST@ONEMODEL_host_artifactInsts_HOST。详见 suite-package.yaml#host_relation_patterns" }
+      counterSideId: { type: string, desc: "关联主机的对端模型（DB/中间件类常用 host）。⚠️create-only：API create/update 写不进，只有 import 包导入能写入。机制见 formats/inspection-kit/suite-package.yaml#import_only_caveat" }
+      relationId: { type: string, desc: "与对端模型的关系id（如 artifactInsts，可空）。三者组合决定『目标实例→执行主机』关联，见 suite-package.yaml#host_relation_patterns" }
+      relationIdWithHost: { type: string, desc: "与HOST的关系id三段式，格式见 suite-package.yaml#host_relation_patterns" }
       status: { type: string, desc: "状态（ok/object_deleted/keys_deleted/...，平台维护，只读）" }
       subPlugins: { type: array, desc: "子插件（组合套件用）" }
       memo: { type: string, desc: "备注" }
@@ -1317,7 +1317,7 @@ objects:
       minValue: { type: number, desc: "区间下限（type=int 的 between/gt触发下限）" }
 
   insp_template:
-    description: "巡检报告模板（INSPECTION_REPORT_TEMPLATE）。详情模板(metricgroups)+总览模板(summarytemplates)。⚠️建议建——无模板时任务执行后无报告展示（套件定义可不配，但开发时应补）。建模板用 import 包(reports_temp/detail.yaml)，也可 insp_template.create API 建"
+    description: "巡检报告模板（INSPECTION_REPORT_TEMPLATE）。详情模板(metricgroups)+总览模板(summarytemplates)。结构+是否必建+import/API 两种建法，见 formats/inspection-kit/suite-package.yaml#report_template_schema"
     source: data/sources/backend/AutoOps/inspection/internal/database/cmdb/report_template/message.go:10-84
     api: insp_template
     fields:
