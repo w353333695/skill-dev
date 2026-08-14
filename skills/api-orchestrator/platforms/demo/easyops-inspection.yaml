@@ -563,8 +563,8 @@ resources:
     description: |
       巡检套件包导入导出（v1 体系）。tar.gz（info.yaml+metrics.yaml+collectors/script.py+reports_temp/detail.yaml+models.json）。
       包格式详见 formats/inspection-kit/suite-package.yaml。
-      ⚠️导出不幂等：重复 pluginId 导入直接报错（mongo 重复键），需先删旧或改 id。
-      multipart 上传 api-cli 不支持，真调走 curl -F "file=@<包>.tar.gz" 或 SDK。
+      ⚠️导入不幂等：重复 pluginId/name 报 E11000『已存在重复的实例』，需先删旧套件（级联删全部对象）再导。
+      二进制契约：export 用 export -o <包>（response.format=binary 已声明）；import 用 import --file <包>（content_type=multipart 已声明）。api-cli 原生支持，无需 curl。
     path: ""
     operations:
       export:
