@@ -123,12 +123,12 @@ brick_selection:
 variable_schema:
   desc: "dashboard 级 URL query 参数声明 + 选择器配置。值通过 QUERY.{id} 被 context/panel 表达式引用"
   fields:
-    id: "变量 ID（被 QUERY.{id} 引用，如 instanceId）"
+    id: "变量 ID（被 QUERY.{id} 引用，如 instanceId/ip）"
     name: "显示名（如 K8S 集群 ID）"
     type: "cmdb（从模型实例选）/ cmdb-model（从模型选）/ constant（常量列表）"
     selectorObjectId: "CMDB 模型 ID（type=cmdb 时，如 KUBERNETES_CLUSTER@ONEMODEL）"
-    fieldsLabel: "选项显示字段（如 [name, clusterId]）"
-    fieldsValue: "选项值字段（常 instanceId）"
+    fieldsLabel: "🔴选项显示字段——必须 object_model.detail 查证模型真实属性（HOST 无 name，是 hostname/ip！实测踩坑）。现网 HOST 范例 fieldsLabel=[ip]"
+    fieldsValue: "选项值字段——同时决定 context filters 用哪个字段过滤（fieldsValue=ip → filters 配 ip==QUERY.ip，配错则图空）"
     multiSelect: "多选（QUERY 值为逗号分隔串，消费端 .split(',')+$in）"
     selectorQuery: "选择器过滤 JSON（可含 <% QUERY.xxx %> 引用其他变量做级联）"
     showSelector: "是否显示选择器 UI（false=纯 URL 传参）"
