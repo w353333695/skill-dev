@@ -183,3 +183,31 @@ e2e 流程：`flows/develop-and-import-kit.yaml` / `upgrade-plugin.yaml` / `dele
 CMDB 确认模型 → 开发套件包(tar.gz) → import → 建4对象 → insp_task.create(建任务)
 → 调度执行产生 jobId → insp_history.list/get(评分/异常) → export_excel/word(报告)
 ```
+
+# Dashboard 域（cmdb:_DASHBOARD + collector_service:metric + data_exchange，2026-08-14 二次接入）
+
+> 仪表盘 = CMDB _DASHBOARD 实例。CRUD 走 easyops-cmdb.yaml#dashboard（create/update 镜像前端 v2
+> 保存行为——⚠️非 import upsert，前次接入的误判已纠正）；指标元数据查 collector_service
+> collector_metric（tags-list 是空桩勿用）；数据试查 data_exchange olap_metric。
+
+## 关键认知
+
+1. **CRUD 端点**：create=POST /v2/object/_DASHBOARD/instance / update=PUT .../instance/:id（全量覆盖！先 search 取现配）/ delete=DELETE /object/.../instance/:id
+2. **配置三件套**：panels（brickConf 须 JSON.stringify 字符串）+ context（8 种内置数据源类型，不只监控）+ variables（QUERY.{id} 引用，级联靠 selectorQuery 内表达式）
+3. **指标查证链**：collector_metric.list（objectId 过滤）→ olap_metric.query_v3 试查活性（空=勿建图）——指标名错图表静默空白，后端不报错
+4. **数据源 8 种**：cmdb-list/detail/count/count-multi/group（CMDB 系）+ cmdb-olap（监控指标）+ cmdb-columndb（历史数据统计，18 张 @EASYOPS 历史表）+ http/static
+5. **前端渲染 ≠ API 200**：brickConf/context 是前端解释型内容，落库后须用户开 URL 验收
+
+## 资料地图
+
+- 配置结构/构件选型/变量 → `formats/dashboard-kit/dashboard-config.yaml`
+- 数据源类型/args DSL/指标查证 → `formats/dashboard-kit/providers-context.yaml`
+- 建盘流程（9 步）→ `flows/build-dashboard.yaml`
+- 对象结构/副作用 → `objects.yaml#dashboard_instance` `#dashboard_metric_query` `#collector_metric`
+
+## e2e 链路
+
+```
+object_model.list(查证objectId) → collector_metric.list(查证指标名) → olap_metric.query_v3(试查活性)
+→ 组装配置(context+variables+panels) → dashboard.create → 前端 URL 验收 → update 迭代 → delete 清理
+```

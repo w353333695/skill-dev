@@ -99,6 +99,11 @@ systems:
         search: "按 MongoDB 风格 query 搜索实例（fields 必填，分页；总数读 data.total）"
         import: "批量建/改实例（upsert，keys+datas）—— 新建 + 改的统一入口（C+U）"
         delete: "批量删除实例（instanceIds 分号分隔；路径 instance_batch）"
+      dashboard:
+        create: "建仪表盘（_DASHBOARD 实例，POST /v2/object/_DASHBOARD/instance，镜像前端 v2 保存）——配置结构见 formats/dashboard-kit/"
+        update: "改仪表盘（PUT 全量覆盖——先 search 取现配再改再 PUT）"
+        delete: "删单个仪表盘（DELETE /object/_DASHBOARD/instance/:id）"
+        search: "查仪表盘 → 用 object_instance.search（object_id=_DASHBOARD）；配置结构/建盘流程见 flows/build-dashboard.yaml"
 
     # 常用模型速查表（本 deployment 的 CMDB 高频资源「自然语言→objectId」映射）
     # 编排直通挡/计数场景优先匹配此处 → 直出 objectId，省 object_model.list 搜索；
@@ -616,6 +621,9 @@ systems:
         activate: "激活套件（把定义变成运行中采集任务）。必填 instanceId；可选 objectId/params/hostIds/collectAgent"
         update:   "更新套件同步到任务（复用 activate 端点，body 加 syncToJobs/dashboards/dashboardStrategy）"
         list:     "列套件含运行态（status/params/metricSets），双源合并 collector_service + cmdb"
+      collector_metric:
+        list: "指标元数据检索（v2 分页：metricNames 精确/objectId 过滤/metricName 模糊）——dashboard 指标查证权威源（2026-08-14 接入，metric/route.go:21）"
+        get:  "单指标详情（objectId+metricName）——dims/unit/来源插件"
 
     runtime:
       admin_user: easyops
@@ -777,3 +785,50 @@ systems:
 
     runtime:
       ports: { backend: "8095" }
+
+  # ===========================================================================
+  # data_exchange —— 数据交换服务（监控指标 OLAP 查询 / 历史数据统计）
+  # ===========================================================================
+  data_exchange:
+    description: |
+      EasyOps 数据交换服务（data_exchange）—— dashboard 数据源的执行后端：
+      cmdb-olap（监控指标）→ /api/v1/data_exchange/olap；cmdb-columndb（历史数据统计）
+      → /api/v1/data_exchange/tsdb_column/aggregate（前端 getUrlOfProvider.yaml:31-45 铁证）。
+      v3 查询按 series 分组，图表最合用；select_raw_data 原始点试查（指标活性验证）。
+      ⚠️指标元数据不在本服务（tags-list 是空桩 olap_service.go:91-93）——查指标用
+      collector_service.collector_metric。
+      源码：07-source-repos/data_exchange/（路由 olap/route.go:7-14、database_proxy/route.go:7-21）。
+
+    spec: easyops-data-exchange.yaml
+    default_endpoint: backend
+
+    endpoints:
+      backend:
+        base_url: ${EASYOPS_DATA_EXCHANGE_BACKEND_URL}   # 端口 e2e 探测后固化（见 runtime.ports.data_exchange）
+        host: admin.easyops.local
+
+    auth: easyops-cookie                       # 直连 auth=none（同 cmdb 惯例）
+
+    env:
+      EASYOPS_DATA_EXCHANGE_BACKEND_URL: ""    # 完整 URL；端口待 e2e 探测
+
+    capabilities:
+      olap_metric:
+        query_v3: "监控指标聚合查询 v3（series 分组，图表合用）——dims/measures/filters DSL；兼指标活性试查"
+        select_raw: "原始时序点直查（分页）——指标是否有数据的权威试查"
+      column_history:
+        aggregate: "历史数据统计聚合（18 张 @EASYOPS 历史表：告警/CMDB变更/工具/CI/ITSM 等）"
+
+    runtime:
+      admin_user: easyops
+      env_required:
+        - "EASYOPS_DATA_EXCHANGE_BACKEND_URL"
+        - "EASYOPS_ORG"
+        - "EASYOPS_USER"
+      ports: { data_exchange: "GAP-待e2e探测（前端走网关 /next/api/gateway/logic.data_exchange/*；直连端口候选见 easyops-data-exchange.yaml 头注释）", frontend: 80 }
+      host_header: admin.easyops.local
+      org_isolation: "db 名=org 号，SQL 层自动 org 过滤（pkg/sqlclient/parse.go:168-171）——跨 org 不可见属预期"
+      operators: "聚合算子 internal/types/operators.go:13-27（count/min/max/sum/avg/topK/last/divide/increase/rate/irate/quantile）；过滤算子 :84-98（== != <= < >= > =~ !~ in has nin and like nlike exists）；时间过滤 name=time 支持 now-1h 相对时间"
+
+    acceptance_urls:
+      dashboard_view: "${EASYOPS_CMDB_FRONTEND_URL}/next/dashboard/dashboard/v2/<instanceId>?from=<timerange>&_namespace_=<namespace>"   # 仪表盘验收 URL（dashboard CRUD 在 easyops-cmdb，此处关联验收）

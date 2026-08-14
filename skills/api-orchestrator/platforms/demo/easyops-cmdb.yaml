@@ -638,3 +638,85 @@ resources:
                   type: array
                   description: "删除失败的实例（每项 {instanceId, _object_id, name}）"
                   items: { type: object, additional_properties: true }
+
+  # -----------------------------------------------------------------------------
+  # 资源：dashboard —— 仪表盘（_DASHBOARD 模型实例，前端 hyper-insign-v2 apps/dashboard）。
+  # 建模说明：镜像前端真实 CRUD 行为（源码 07-source-repos/next-apps-hyper-insign-v2/...
+  # apps/dashboard/src/Pages/Dashboard/CreateAndEditDashboardV2/route.yaml:402-530）：
+  #   create = POST /v2/object/_DASHBOARD/instance（CreateInstance）；update = PUT
+  #   /v2/object/_DASHBOARD/instance/:instanceId（UpdateInstanceV2）；delete/delete_batch
+  #   = object_instance 语义（DELETE /object/_DASHBOARD/instance_batch）。
+  #   ⚠️import upsert（keys=[name]）非前端路径——前端 import 仅本地 JSON 导入页用且按
+  #   instanceId 匹配（Import/route.yaml:85-89）；API 侧 import 仍可用作幂等批量建改，但
+  #   与前端行为有差异（type=builtIn 等字段前端固定注入，见 create description）。
+  # 配置结构知识（panels/context/variables 全字段）见 formats/dashboard-kit/。
+  # -----------------------------------------------------------------------------
+  dashboard:
+    description: 仪表盘（_DASHBOARD 模型实例）——create/update 镜像前端 v2 编辑器保存行为（前端源码 CreateAndEditDashboardV2/route.yaml:402-530），delete 走 object_instance。配置主体 panels(构件)+context(数据源)+variables(变量)，完整结构与写作模板见 formats/dashboard-kit/dashboard-config.yaml。查/搜沿用 object_instance search（object_id=_DASHBOARD）。
+    path: ""
+
+    operations:
+      # ---------- 建（POST /v2/object/_DASHBOARD/instance）—— 前端 CreateInstance ----------
+      create:
+        description: 建仪表盘（前端保存新建走此端点，contracts.yaml:3206-3262 CreateInstance v1.1.0）。body.instance 为完整 _DASHBOARD 配置（dashboardVersion 固定 v2、template=normal|bigScreen、panels[].brickConf 须 JSON.stringify 成字符串、context 数组每项 type 见 formats/dashboard-kit/providers-context.yaml）。前端固定注入 type=builtIn——API 直建建议同样传 type=builtIn 保持与前端一致。返回 instanceId（前端随后跳 /dashboard/v2/<instanceId>）。
+        method: POST
+        path: /v2/object/{object_id}/instance
+        params:
+          object_id: { in: path, type: string, required: true, description: "固定 _DASHBOARD" }
+        body:
+          type: object
+          required: [instance]
+          description: "创建请求。instance 字段全集（前端保存组装 route.yaml:405-470）：name/category/dashboardVersion(v2)/timerange/namespace/adaptive/context/panels/hiddenTimeRange/messages/template/type(builtIn)/background/size/readAuthorizers/updateAuthorizers/deleteAuthorizers/variables。最小可用：name+category+panels+context（+template/dashboardVersion/timerange 默认值）。"
+          properties:
+            instance:
+              type: object
+              additional_properties: true
+              required: [name]
+              description: "完整仪表盘配置。字段结构详见 formats/dashboard-kit/dashboard-config.yaml#dashboard_schema（本 spec 不重复内联）"
+              example: { name: "AO-TEST-验证盘", category: "测试", dashboardVersion: "v2", template: "normal", timerange: "now-1h", namespace: "dashboard", type: "builtIn", panels: [], context: [], variables: [] }
+        response:
+          type: object
+          description: "标准 wrapper：{ code, data: { instanceId } }"
+          properties:
+            code: { type: integer }
+            data:
+              type: object
+              properties:
+                instanceId: { type: string, description: "新建实例 ID（13 位），前端据此跳转 /dashboard/v2/<instanceId>" }
+
+      # ---------- 改（PUT /v2/object/_DASHBOARD/instance/:instanceId）—— 前端 UpdateInstanceV2 ----------
+      update:
+        description: 改仪表盘（前端编辑保存走此端点，contracts.yaml:5424-5425 UpdateInstanceV2）。body 与 create 的 instance 相同结构（全量覆盖更新）。改配置迭代：先 object_instance search 取当前配置 → 本地改 → 本端点 PUT 回。⚠️全量更新非 patch——漏传字段会被清掉，务必带完整配置。
+        method: PUT
+        path: /v2/object/{object_id}/instance/{instance_id}
+        params:
+          object_id:    { in: path, type: string, required: true, description: "固定 _DASHBOARD" }
+          instance_id:  { in: path, type: string, required: true, description: "仪表盘实例 ID（object_instance search _DASHBOARD 取）" }
+        body:
+          type: object
+          required: [instance]
+          description: "更新请求，instance 结构同 create。⚠️全量覆盖：先 search 取完整现配再改再 PUT。"
+          properties:
+            instance:
+              type: object
+              additional_properties: true
+              description: "完整仪表盘配置（结构同 create.instance；panels[].brickConf JSON 字符串）"
+        response:
+          type: object
+          description: "标准 wrapper：{ code, message }；code=0 成功"
+          properties:
+            code: { type: integer }
+
+      # ---------- 删（DELETE /object/_DASHBOARD/instance/:instanceId）—— 前端 DeleteInstance ----------
+      delete:
+        description: 删单个仪表盘（前端删除走此端点，contracts.yaml:6268-6272 DeleteInstance；DashboardDetailV2/route.yaml:676-688 confirm.ok 调用）。与 object_instance.delete（批量 instance_batch）等价语义，此为单删快捷入口。⚠️删前确认非内置盘（type=builtIn 是前端新建也默认带的标记，真正系统内置盘看 namespace/保护标记）；protected 实例禁删。
+        method: DELETE
+        path: /object/{object_id}/instance/{instance_id}
+        params:
+          object_id:    { in: path, type: string, required: true, description: "固定 _DASHBOARD" }
+          instance_id:  { in: path, type: string, required: true, description: "仪表盘实例 ID" }
+        response:
+          type: object
+          description: "标准 wrapper：{ code, message }"
+          properties:
+            code: { type: integer }

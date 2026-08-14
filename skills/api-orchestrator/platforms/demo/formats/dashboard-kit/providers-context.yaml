@@ -1,0 +1,169 @@
+# =============================================================================
+# formats/dashboard-kit/providers-context.yaml
+# 仪表盘数据接入 —— 8 种内置数据源类型 + context 结构 + args DSL + 试查方法。
+#
+# 权威源（源码仓 07-source-repos/next-apps-hyper-insign-v2/apps/dashboard/src/）：
+#   · 类型全集+官方语义  Pages/route.yaml:58-122
+#   · args 生成（DSL）    Functions/getTransformYaml.yaml:30-103
+#   · 各类型默认值        Functions/getDefaultArgsOfDataType.yaml:8-50
+#   · 真实后端端点        Functions/getUrlOfProvider.yaml:31-45
+#   · method/body 规则    Functions/getArgsOfProvider.yaml:9-28
+#   · cmdb-columndb 表单  Components/TplColumndbDataSourceForm.yaml:5-41
+#   · http 表单           Components/TplHttpDataSourceForm.yaml
+# 用户确认的官方语义（2026-08-14 接入评审）：数据源不限于监控，覆盖全部 8 种内置类型。
+# =============================================================================
+
+# -----------------------------------------------------------------------------
+# 一、context 项结构（落库字段）
+# -----------------------------------------------------------------------------
+context_schema:
+  fields:
+    id: "内部 ID（data_{N}_{name}，编辑器生成）"
+    name: "⚠️数据源名——被构件 <% CTX.DS.{name} %> 引用，全 dashboard 唯一（http 类型 pattern ^(?!\\d)[\\u4E00-\\u9FA5A-Za-z0-9_]+$，TplHttpDataSourceForm.yaml:53）"
+    type: "cmdb-list | cmdb-detail | cmdb-count | cmdb-count-multi | cmdb-group | cmdb-olap | cmdb-columndb | http | static | dynamic（废弃）"
+    provider: "运行时 Provider 全名（如 easyops.api.data_exchange.olap@Query:1.0.0）"
+    dataType: "返回类型 array | object"
+    args: "查询 DSL 的 YAML 字符串（结构因 type 而异，见 context_types）"
+    formData: "表单结构化数据（编辑器用；落库 omit formData.dataSource/formData.data）"
+    outputFields: "[{key, alisa}] 输出字段声明"
+    transform: '转换表达式（如 "<% DATA?.list ?? [] %>"——DATA 是接口原始返回）'
+  save_omit: "保存时 omit dataSource/formData.dataSource/formData.data 三个调试字段（CreateAndEditDashboardV2/route.yaml:416-424）"
+  source: "Functions/transformDataListToDS.yaml:7-29（11 键）+ route.yaml:416-424"
+
+# -----------------------------------------------------------------------------
+# 二、8 种内置数据源类型（官方语义 + args DSL 模板）
+# -----------------------------------------------------------------------------
+context_types:
+  cmdb_list:
+    official: "CMDB实例列表——指定模型，获取满足条件的实例列表"
+    template: |
+      name: hostList
+      type: cmdb-list
+      formData: {mode: form, name: "", objectId: HOST, page: 1, pageSize: 20,
+                 query: {instances: {query: {}, type: all}}, fields: [], sort: []}
+      transform: "<% DATA?.list ?? [] %>"
+    args_dsl: 'args = YAML[objectId, {page, pageSize, query, fields(uniq+["_object_id"]), sort}]（getTransformYaml.yaml:44-53）'
+    backend: POST /next/api/gateway/logic.cmdb.service/v3/object/{objectId}/instance/_search（getUrlOfProvider.yaml:44）
+    source: "getTransformYaml.yaml:44-53 + getDefaultArgsOfDataType.yaml:10-30"
+
+  cmdb_detail:
+    official: "CMDB实例详情——指定模型，获取指定实例的详情数据"
+    note: "method=GET（getArgsOfProvider.yaml:9-14）；args[YAML objectId, query实例定位]"
+    backend: CMDB 实例详情端点（getUrlOfProvider.yaml）
+    source: "getArgsOfProvider.yaml:9-28"
+
+  cmdb_count:
+    official: "CMDB单模型实例总数——指定模型，获取满足条件的实例总数"
+    args_dsl: 'args = YAML[objectId, {page,pageSize,query}]（同 cmdb-list 结构，transform 留空）'
+    source: "getDefaultArgsOfDataType.yaml:10-30"
+
+  cmdb_count_multi:
+    official: "CMDB多模型实例总数——指定多个模型，获取满足条件的实例总数"
+    template: |
+      name: resCount
+      type: cmdb-count-multi
+      formData: {mode: form, objectList: [{objectId: HOST, query: {}}, {objectId: APP@EASYOPS, query: {}}],
+                 isValidatePermission: true}
+      transform: "<% DATA?.objectInfo ?? [] %>"
+    args_dsl: 'args = YAML[{objectList: [{objectId, query}...], isValidatePermission}]（getTransformYaml.yaml:30-40）'
+    backend: POST /next/api/gateway/logic.cmdb.service/v1/batch/instance/count（getUrlOfProvider.yaml:42-43）
+    source: "getTransformYaml.yaml:30-40 + TplCmdbCountMultiDataSourceForm.yaml"
+
+  cmdb_group:
+    official: "CMDB实例聚合——指定模型，指定分组字段，统计实例数量"
+    args_dsl: 'args = YAML[objectId, {group_fields: [...], funcs: [...], query}]（getTransformYaml.yaml:55-63）'
+    source: "getTransformYaml.yaml:55-63"
+
+  cmdb_olap:
+    official: "监控指标——指定资源，获取指定指标的数据"
+    provider: "easyops.api.data_exchange.olap@Query:1.0.0"
+    template: |
+      name: cpuTrend
+      type: cmdb-olap
+      dataType: array
+      args: |
+        - model: easyops.HOST                    # easyops.<objectId>（getTransformYaml.yaml:71）
+          fillEmptyData: true
+          dims: [time, instanceId]               # time=自动时间粒度；可加分组维度
+          filters:
+            - {name: time, operator: ">=", value: "<% QUERY.from ?? \"now-1h\" %>"}
+            - {name: time, operator: "<=", value: "<% QUERY.to ?? \"now-1s\" %>"}
+          measures:
+            - name: CPU使用率                    # 输出列名
+              function: {expression: avg, args: [host_cpu_used_total]}   # 🔴指标名必查证
+          query: {instances: {query: {}, type: all}}   # 实例过滤（可含 QUERY.instanceId）
+      transform: "<% DATA?.list ?? [] %>"
+    args_dsl: 'args = YAML[单元素数组{model, fillEmptyData, dims, filters, measures, translate, query}]（getTransformYaml.yaml:65-79）'
+    measures_dsl: "measures[] = {name, function: {expression: 聚合算子, args: [指标名]}}（getMeasures.yaml:6-16）。聚合算子全表（data_exchange internal/types/operators.go:13-27）：count/min/max/sum/avg/topK/last/divide/increase/rate/irate/quantile"
+    filters_dsl: "filters[] = {name, operator, value}；前端自动 concat 默认 time>=from/time<=to（getOlapFiltersArg.yaml:5-24）。比较算子（operators.go:84-98）：== != <= < >= > =~ !~ in has nin and like nlike exists"
+    backend: POST /next/api/gateway/logic.data_exchange/api/v1/data_exchange/olap（getUrlOfProvider.yaml:43）
+    metric_verification: |
+      🔴指标名权威查证（勿编！指标错→图表静默空白）：
+      ① 列表：collector_metric list（easyops-collector-service.yaml，POST /api/v2/collector-metric-names，
+         body {page,pageSize,objectId:"HOST"}）——data.list[].metricName/unit/dims
+      ② 详情：collector_metric get（objectId+metricName）
+      ③ 活性试查（指标是否有数据）：olap_metric query_v3（dims=["time"]+time>=now-1h+limit 1）
+         或 olap_metric select_raw（page_size 5+最近时间窗）
+    source: "getTransformYaml.yaml:65-79 + getMeasures.yaml + getOlapFiltersArg.yaml + data_exchange operators.go"
+
+  cmdb_columndb:
+    official: "历史数据统计——包括cmdb变更历史、告警历史、工具执行历史、ci执行历史、itsm执行历史等（用户确认 2026-08-14）"
+    template: |
+      name: alertTrend
+      type: cmdb-columndb
+      formData: {mode: form, objectId: monitor_event@EASYOPS, filter: "{}",
+                 measures: [{field: instanceId, op: count, alias: 告警数}],
+                 group_by: [按天分组], followTimeRange: true}
+      transform: "<% DATA?.data ?? [] %>"
+    args_dsl: |
+      args = YAML[单元素数组]（getTransformYaml.yaml:88-103）：
+        database: "<% String(SYS.org) %>"      # org 号
+        filter: <JSON字符串，默认 "{}">
+        group_by: [分组字段]                    # 支持按天/小时分组模板
+        measures: [{field, op: count|sum|max|min, alias}]
+        object_ids: [<历史表>]                  # 单元素数组
+        start_time/end_time: 秒级时间戳（followTimeRange 时由 QUERY.from/to 注入）
+    backend: POST /next/api/gateway/logic.data_exchange/api/v1/data_exchange/tsdb_column/aggregate（getUrlOfProvider.yaml:45）
+    tables: "18 张历史表全清单（TplColumndbDataSourceForm.yaml:5-41）：monitor_event@EASYOPS（告警历史）/ monitor_event_last@EASYOPS（当前告警）/ cmdb_change_history@EASYOPS（CMDB变更）/ tool_oplog@EASYOPS（工具任务）/ flow_oplog@EASYOPS（流程任务）/ deploy_oplog@EASYOPS（发布任务）/ scheduler_oplog@EASYOPS（定时任务）/ database_delivery_oplog@EASYOPS（数据库变更）/ agent_management_oplog@EASYOPS（Agent管理）/ ops_automation_job_task@EASYOPS（运维自动化）/ app_pipeline_oplog@EASYOPS（流水线）/ inspection_history@EASYOPS（巡检自动化）/ pipeline_build@EASYOPS（CI任务）/ itsm_ticket@EASYOPS（ITSM工单）/ itsm_ticket_standard_field@EASYOPS / itsm_ticket_operation@EASYOPS（ITSM工单操作）"
+    source: "getTransformYaml.yaml:88-103 + TplColumndbDataSourceForm.yaml:5-41,85-111"
+
+  http:
+    official: "HTTP 请求——自建服务/openapi 数据"
+    provider: "basic.http-request"
+    template: |
+      name: myApi
+      type: http
+      formData: {name: "", url: "<接口>", method: POST, query: {}, body: {}, headers: {}}
+      transform: "<% DATA?.data?.list ?? [] %>"
+    args_dsl: 'args = YAML["", {url, method: GET|POST, query, body, headers}]（TplHttpDataSourceForm.yaml:53-228；请求时 body=argsJson[1].body、headers=argsJson[1].headers，getArgsOfProvider.yaml:19-22）'
+    source: "TplHttpDataSourceForm.yaml + getArgsOfProvider.yaml:19-22"
+
+  static:
+    official: "静态数据——演示/固定数据"
+    note: "data 字段存真实数组（context.data），provider=null，transform=null；每新盘自带 时间序列数据Demo/分类数据Demo 两个静态源可删"
+    source: "TplDataSourceCreateModal.yaml:18-22 + getDefaultArgsOfDataType.yaml"
+
+  deprecated:
+    dynamic: "接口契约请求（旧式 provider 选择，TplOtherDataSourceForm.yaml）——已废弃，建议用 http"
+
+# -----------------------------------------------------------------------------
+# 三、数据转换（transform——接口原始返回 → 构件可消费形态）
+# -----------------------------------------------------------------------------
+transform_rules:
+  syntax: '"<% JS表达式 %>"，DATA=接口原始返回；结果须对象/数组；空=不转换返回全部'
+  by_type_defaults: |
+    各类型默认 transform（getDefaultArgsOfDataType.yaml:8-50）：
+    cmdb-list/cmdb-group/cmdb-olap → "<% DATA?.list ?? [] %>"
+    cmdb-count-multi              → "<% DATA?.objectInfo ?? [] %>"
+    cmdb-columndb                 → "<% DATA?.data ?? [] %>"
+    cmdb-count/cmdb-detail        → 留空（直接用返回）
+  examples:
+    - "<% DATA?.list ?? [] %>                          # ★最常用：取list空兜底"
+    - "<% DATA.data.map(item => ({hostname: item.name})) %>   # 字段重命名"
+    - "<% _.orderBy(DATA.data, \"name\", \"desc\") %> # 排序"
+  source: "getDefaultArgsOfDataType.yaml:8-50"
+
+# -----------------------------------------------------------------------------
+# 四、CMDB 过滤比较器（cmdb 系 query.instances.query 用——区别于 OLAP 比较器）
+# -----------------------------------------------------------------------------
+cmdb_comparators: "$like(包含) / $nlike / $eq / $ne / $exists:false(为空) / $exists:true / $in / $gte / $lte——MongoDB 风格（object_instance search 同款语法）"

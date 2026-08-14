@@ -249,6 +249,24 @@ entities:
     anchor: true
     used_by: [notify_config.get, notify_config.update, notify_config.delete]
 
+  # ---- dashboard 域锚（2026-08-14 二次接入）----
+  dashboard_id:
+    description: "仪表盘实例 id（_DASHBOARD.instanceId，13hex）"
+    format: "13位 [0-9a-z]"
+    anchor: true
+    pattern: '^[0-9a-z]{13}$'
+    used_by: [dashboard.update, dashboard.delete, object_instance.search(_DASHBOARD), 前端URL /dashboard/v2/<id>]
+  metric_name:
+    description: "采集指标名（CollectorAliasMetric.name，snake_case 如 host_cpu_used_total）。⚠️勿从自然语言编造——collector_metric.list 查证后才可用"
+    format: "snake_case 字符串"
+    anchor: true
+    used_by: [collector_metric.list/get, olap_metric.query_v3/select_raw, "dashboard context[cmdb-olap].measures[].function.args"]
+  columndb_table:
+    description: "历史数据统计表（cmdb-columndb 的 object_ids，18 个 @EASYOPS 历史库之一，如 monitor_event@EASYOPS）"
+    format: "<表名>@EASYOPS"
+    anchor: true
+    used_by: [column_history.aggregate, "dashboard context[cmdb-columndb].args[0].object_ids"]
+
 transitions:
   - from: object_model.list
     pick: objectId
@@ -432,3 +450,24 @@ transitions:
         pick: "data.list[].instanceId"
         to: ["(insp_task.create 的 targets[].instanceId)"]
         how: "巡检目标实例 id 喂建任务的 targets"
+
+  # ---- dashboard 域 transitions ----
+  - name: dashboard_build_e2e
+    desc: "建仪表盘 e2e 跨 service 接力：查模型→查指标→试查数据→建盘→验收"
+    steps:
+      - from: object_model.list
+        pick: "data.list[].objectId"
+        to: [collector_metric.list(objectId), dashboard.create(context/objectId)]
+        how: "objectId 查证（HOST 等）——cmdb-olap model=easyops.<objectId>、cmdb 系 formData.objectId"
+      - from: collector_metric.list
+        pick: "data.list[].metricName"
+        to: ["olap_metric.query_v3 measures[].function.args", collector_metric.get]
+        how: "指标名查证——勿编；unit 同取（图表 axis 用）"
+      - from: olap_metric.query_v3
+        pick: "data.list[0].values"
+        to: ["(决定是否建图——空则换指标或弃图)"]
+        how: "指标活性试查：有数据点才建图，空则图表静默空白"
+      - from: dashboard.create
+        pick: "data.instanceId"
+        to: [dashboard.update, dashboard.delete, 前端URL]
+        how: "建盘返回 instanceId——迭代改盘 update 用、验收 URL 用、清理 delete 用"
