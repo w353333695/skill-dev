@@ -1674,15 +1674,16 @@ api_behavior:
       - { to: collector_metric, type: reference, cardinality: "N:1", via: "context[cmdb-olap].args.measures[].function.args[0]", desc: "cmdb-olap 数据源引用指标元数据（metricName 查证 collector_metric.list）" }
     side_effects:
       - op: dashboard.create
-        rule: "前端保存新建走 POST /v2/object/_DASHBOARD/instance（非 import upsert——import 仅本地 JSON 导入页且按 instanceId 匹配，Import/route.yaml:85-89）。前端固定注入 type=builtIn。返回 instanceId。"
+        rule: "前端保存新建走 POST /v2/object/_DASHBOARD/instance（非 import upsert——import 仅本地 JSON 导入页且按 instanceId 匹配，Import/route.yaml:85-89）。🔴body 平铺无 instance 包装（e2e 实测 2026-08-14：包了 code=0 但字段静默丢失——后端 validator msg.Body=req 直接吃整个 body，create_v2_validator.go:110-124）。前端固定注入 type=builtIn。返回 instanceId。"
       - op: dashboard.update
-        rule: "PUT 全量覆盖非 patch——漏传字段被清掉。迭代姿势：先 object_instance search 取完整现配 → 本地改 → PUT 回。"
+        rule: "PUT 全量覆盖非 patch——漏传字段被清掉。迭代姿势：先 object_instance search 取完整现配 → 本地改 → PUT 回（e2e 实测 _version+1 全字段生效）。body 同 create 平铺。"
       - op: dashboard.delete
-        rule: "单删 DELETE /object/_DASHBOARD/instance/:id。系统内置盘（默认 AGENT/Cmdb 统计等）删前确认；protected 实例禁删。"
+        rule: "单删 DELETE /object/_DASHBOARD/instance/:id（e2e 实测 code=0 即删）。系统内置盘（默认 AGENT/Cmdb 统计等）删前确认；protected 实例禁删。"
       - op: object_instance.import (_DASHBOARD)
         rule: "API 侧仍可用（upsert by keys），但非前端路径、且与前端 create 注入的 type=builtIn 等默认字段有差异——幂等批量迁移可用，常规建改走 dashboard.create/update。"
     api_behavior:
       silent_config_errors: "配置 JSON 里指标名/objectId 错误后端不报错——图表静默空白。指标名必查证（collector_metric.list）、objectId 必查证（object_model.list），试查用 olap_metric.query_v3（详见 providers-context.yaml#context_types.cmdb_olap.metric_verification）"
+      search_fields_guard: "🔴search 的 fields 只能带模型真实字段——带模型没有的字段（如 title）整请求报 133116 Can not find title relation（e2e 实测 2026-08-14）"
       frontend_verify: "brickConf/context 属「前端解释型内容」——API 落库 code=0 不代表前端渲染正确，须用户开 URL 验收（getDashboardDefaultUrl 的格式：/dashboard/v2/<instanceId>?from=<timerange>&_namespace_=<namespace>）"
 
   dashboard_metric_query:
@@ -1718,5 +1719,5 @@ api_behavior:
       dims:        { type: array, desc: "维度列表" }
       isKeyMetric: { type: boolean, desc: "关键指标（优先选）" }
     api_behavior:
-      list_response: "wrapper {code, data:{list,total}}（kitweb JSONPb gogo 序列化）；list 元素见 fields"
-      port_pending: "metric 模块端口候选 :12000（kit 所在）/ :8125（legacy）——e2e 探测后回填 systems.yaml"
+      list_response: "wrapper {code, data:{list,total}}（kitweb JSONPb gogo 序列化）；list 元素见 fields（实测还返回 dataType/type/expression/disabled/alertRuleBound/jobList 等扩展字段，total=200 for HOST）"
+      port_resolved: "✅已定案（e2e 2026-08-14）：metric 端点在 legacy 进程 :8125（EASYOPS_COLLECTOR_SERVICE_LEGACY_URL），直 200 免 contract header；:12000 报 giraffe-contract-name 错。调用加 --endpoint backend_legacy"
