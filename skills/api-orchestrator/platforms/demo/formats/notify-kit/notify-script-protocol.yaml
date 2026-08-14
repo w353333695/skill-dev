@@ -53,7 +53,15 @@ script_contract:
     server_config: "dict。= config.serverConfig（脚本自己的服务端配置，如 api_key/url）"
     kwargs: "平台附加：topic（send_message 的顶层 topic）、logger（logging 模块）"
   return: "建议 list（成功送达的标识列表，如 mail 返回 to_addrs、wework 返回 userids）。返回值进 API 响应 data"
-  runtime: "python2（.iteritems() 语法），shebang #!/usr/local/easyops/python/bin/python，可用 requests"
+  runtime: "python2（.iteritems() 语法），可用 requests。⚠️run 函数体含中文（注释/字符串）必须首行 # -*- coding: utf-8 -*-（实测：缺则 debug 报 SyntaxError Non-ASCII character，脚本含中文时是必踩坑，2026-08-14 e2e 实锤）"
+  dev_redlines: |
+    三方脚本开发红线（e2e 实测，2026-08-14）：
+    1. 🔴编码声明：脚本含任何非 ASCII（中文注释/字符串）必须首行 `# -*- coding: utf-8 -*-`，否则 py2 加载报 SyntaxError。
+    2. run 必须模块级可调用（def run(...)，非类方法），平台 dynamic_imp_fun('<module>:run') 取函数。
+    3. users 是 {username: user_obj}；user_obj[cmdb_object_key] 取值，缺字段用 .get 跳过（勿直接索引报 KeyError）。
+    4. server_config 的敏感字段（type=password）已由平台解码（base64→明文），脚本直接用，无需自己解。
+    5. 异常处理：脚本内 try/except + log，未捕获异常 → send 时该 method 置 'error'（整体仍 200），debug 时整体 500 'debug send msg plugin error: <异常>'。
+    6. cmdb_object_key 为空串时（send_message 的空 key 分支）run 收不到此位置参——若依赖它取值，config.cmdbUserObjectColName 必须非空。
   examples:
     minimal_robot: |
       # notify_scripts/dingding_robot.py 精简版（完整见源码）
@@ -120,11 +128,12 @@ api_surface:
 # 六、三方告警通知脚本开发流程（端到端）
 # -----------------------------------------------------------------------------
 custom_notify_flow:
+  e2e_verified: "2026-08-14 .90 实测全链路通：create config(custom+scriptContent) → instanceId 658fb0301e7a1 → send_message method=config.name → data={config.name:[送达用户]}; debug 原地试跑 custom 脚本 → data=[用户]。测完已删 config 恢复 8 原始方式。"
   steps:
-    - "1. 写脚本：def run(msg_data, users, cmdb_object_key, server_config={}, **kwargs)，py2 语法。确定 cmdbUserObjectColName（CMDB USER 模型上真实存在的字段，如 telephone）"
-    - "2. 设计 serverConfig + configFields：普通字段 type=text；密码/密钥 type=password（值 base64 传输）"
-    - "3. POST /api/v2/message_sender/configs（admin user header）建 config：{name, msgType:'custom', scriptContent, serverConfig, configFields, cmdbUserObjectColName, enable:true}"
-    - "4. POST /api/v2/message_sender/send_message_debug 调试（scriptContent+serverConfig+receivers 原地试跑，msg 内容被覆盖为测试文本）"
-    - "5. POST /api/v1/message_sender/send_message 正式发：receivers=[{user, method:<config.name>}]"
-  verification: "/api/v1/message_sender/method 应列出新建方式（enable=true 时）"
+    - "1. 写脚本：首行 # -*- coding: utf-8 -*-（含中文必填）+ def run(msg_data, users, cmdb_object_key, server_config={}, **kwargs)，py2。确定 cmdbUserObjectColName（CMDB USER 模型真实字段，如 telephone/name）"
+    - "2. 设计 serverConfig + configFields：普通字段 type=text；密码/密钥 type=password（值 base64 传输，脚本侧拿到的是已解码明文）"
+    - "3. POST /api/v2/message_sender/configs（admin user header，api-cli 加 --yes 跳确认挡）建 config：{name, msgType:'custom', scriptContent, serverConfig, configFields, cmdbUserObjectColName, enable:true}。pluginName 服务端强制=name"
+    - "4. POST /api/v2/message_sender/send_message_debug 调试（scriptContent+serverConfig+receivers 原地试跑，msg 内容被覆盖为测试文本——只验脚本可执行+receiver 解析）"
+    - "5. POST /api/v1/message_sender/send_message 正式发：receivers=[{user, method:<config.name>}]，msg_data={content,...}"
+  verification: "/api/v1/message_sender/method 应列出新建方式（enable=true 时）；send 响应 data[method]=脚返回的 list 而非 'not support'/'disable'/'error'"
   source: "config_handler.py:224-266（v2 create）+ message_handler.py:558-690（debug）+ 482-555（send）"
