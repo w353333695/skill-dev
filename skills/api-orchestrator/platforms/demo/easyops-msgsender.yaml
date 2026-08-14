@@ -1,0 +1,254 @@
+# =============================================================================
+# EasyOps msgsender 通知服务 —— api-cli 集中清单
+# -----------------------------------------------------------------------------
+# 服务：Python/Tornado :8095（logic.msgsender）。通知方式 = CMDB 实例 + 脚本。
+#
+# 数据来源（契约缺失，全靠源码路由 + 真调实测）：
+#   • data/sources/backend/platform/msgsender/msgsender_main.py（11 路由注册）
+#   • custom_sender/message_handler.py（send/debug/alert/method）
+#   • mail_config/config_handler.py（config CRUD v1/v2）
+#   • 真调实测（2026-08-14 .90:8095/org8888）：method/configs 200，8 个 config（4内置+4custom）
+#
+# 接入面：
+#   • backend —— 直连 :8095（HTTP，无 path 前缀）
+#
+# 鉴权：header 模式（org + user 三件套，Host: admin.easyops.local）。
+#   ⚠️config 写操作（POST/PUT/DELETE）须 user 具备『系统管理员』角色（permission 服务校验）。
+#   send/debug/alert 无鉴权。
+#
+# ⚠️api-cli 能力边界：本服务端点均为 JSON，无二进制上传/下载需求。
+#
+# 知识分文件（单一真相源）：
+#   脚本契约/三方开发/敏感字段协议/权限矩阵 → formats/notify-kit/notify-script-protocol.yaml
+#   字段锚 configName/instanceId → entities.yaml
+# =============================================================================
+spec: api-cli/v1
+
+service:
+  name: easyops-msgsender
+  description: |
+    msgsender 通知管理（:8095）。通知方式（config）CRUD + 发送 + 调试 + 告警接入。
+    三方告警通知脚本开发（scriptContent 动态加载）见 formats/notify-kit/notify-script-protocol.yaml。
+    ⚠️config 读写必须走 v2（v1 明文返回密码）；单条 GET/DELETE 仅 v1 有路由。
+  default_endpoint: backend
+  endpoints:
+    backend:
+      base_url: ${EASYOPS_MSGSENDER_BACKEND_URL}
+      host: admin.easyops.local
+      auth: none
+      headers:
+        org: ${EASYOPS_ORG}
+        user: ${EASYOPS_USER}
+
+resources:
+  notify_method:
+    description: |
+      当前已启用（enable=true）的通知方式列表（动态 config 视图，非内置类型清单）。
+      返回 snake_case 字段（inform_type/plugin_name/col_of_cmdb_user_object），serverConfig/scriptContent 已剥离。
+    path: ""
+    operations:
+      list:
+        description: 列出所有启用的通知方式（= send_message 可用的 method 值域）。
+        method: GET
+        path: /api/v1/message_sender/method
+        response:
+          type: object
+          properties:
+            code: { type: integer }
+            data:
+              type: array
+              items:
+                type: object
+                additionalProperties: true
+
+  notify_config:
+    description: |
+      通知方式配置（CMDB _MSGSENDER_NOTIFY_CONFIG@EASYOPS 实例的 CRUD 代理）。
+      字段字典 + 敏感字段协议（password 字段 base64 入站/‘********’ 出站）+ 内置类型对照
+      详见 formats/notify-kit/notify-script-protocol.yaml#config_fields / #sensitive_protocol。
+      ⚠️POST/PUT/DELETE 须系统管理员。list 必须走 v2（v1 明文泄漏密码，实测）。
+    path: ""
+    operations:
+      list:
+        description: |
+          列出全部通知配置（v2，serverConfig 敏感字段已脱敏 '********'）。
+          ⚠️内部固定 page_size=300，超限丢。
+        method: GET
+        path: /api/v2/message_sender/configs
+        params:
+          page: { in: query, type: integer, description: "页码" }
+          page_size: { in: query, type: integer, description: "页大小（内部上限 300）" }
+        response:
+          type: object
+          properties:
+            code: { type: integer }
+            data:
+              type: object
+              properties:
+                list:
+                  type: array
+                  items: { type: object, additionalProperties: true }
+
+      create:
+        description: |
+          新建通知方式（v2，须系统管理员）。三方脚本：msgType=custom + scriptContent + configFields
+          （password 字段值 base64 编码）。pluginName 服务端强制=name（custom 时）。
+          409『通知方式名称重复』= name 冲突。
+        method: POST
+        path: /api/v2/message_sender/configs
+        body:
+          type: object
+          required: [name, msgType]
+          properties:
+            name: { type: string, description: "通知方式名（唯一，=发送时的 method）" }
+            msgType: { type: string, enum: [email, wework, dingding, dingding_robot, custom], description: "custom=三方脚本" }
+            scriptContent: { type: string, description: "custom 脚本源码（def run(msg_data, users, cmdb_object_key, server_config={}, **kwargs)，py2）" }
+            enable: { type: boolean, description: "是否启用" }
+            serverConfig: { type: object, additionalProperties: true, description: "脚本服务端配置（password 字段 base64）" }
+            configFields: { type: array, items: { type: object, additionalProperties: true }, description: "[{name,type}]，type=password 走敏感协议" }
+            cmdbUserObjectColName: { type: string, description: "CMDB USER 模型取值字段（如 telephone/user_email）" }
+            description: { type: string }
+        response:
+          type: object
+          properties:
+            code: { type: integer }
+            data: { type: object, additionalProperties: true }
+
+      get:
+        description: |
+          单条配置详情（v1 路由——v2 无单条 GET）。
+          ⚠️v1 明文返回 serverConfig 敏感值，仅排查用；常规读走 v2 list。
+        method: GET
+        path: /api/v1/message_sender/configs/{instanceId}
+        params:
+          instanceId: { in: path, type: string, required: true, description: "config 实例 id" }
+        response:
+          type: object
+          properties:
+            code: { type: integer }
+            data: { type: object, additionalProperties: true }
+
+      update:
+        description: |
+          更新配置（v2，须系统管理员）。敏感字段：值传 '********' 表示不改（用 CMDB 原值），
+          改则传 base64。msgType=custom 时 pluginName 自动同步=name。
+        method: PUT
+        path: /api/v2/message_sender/configs/{instanceId}
+        params:
+          instanceId: { in: path, type: string, required: true, description: "config 实例 id" }
+        body:
+          type: object
+          additionalProperties: true
+        response:
+          type: object
+          properties:
+            code: { type: integer }
+            data: { type: object, additionalProperties: true }
+
+      delete:
+        description: 删除配置（v1 路由，须系统管理员，响应已脱敏）。
+        method: DELETE
+        path: /api/v1/message_sender/configs/{instanceId}
+        params:
+          instanceId: { in: path, type: string, required: true, description: "config 实例 id" }
+        response:
+          type: object
+          properties:
+            code: { type: integer }
+            data: { type: object, additionalProperties: true }
+
+  notify_message:
+    description: |
+      发送通知 + 调试。正式发送 receivers[].method=config.name；
+      调试不需先建 config（scriptContent 原地试跑，msg 内容被固定覆盖为测试文本）。
+      脚本契约/发送流程见 formats/notify-kit/notify-script-protocol.yaml#script_contract。
+    path: ""
+    operations:
+      send:
+        description: |
+          正式发送通知。body {topic?, data:{receivers, msg_data}}。
+          receivers 每项 {user | user_group | email_addr, method}，method=config.name。
+          msg_data 自由 dict（脚本自解读，常含 content/subject；邮件类还支持 cc_user/cc_group/cc_addr/appendix）。
+          ⚠️接收者 CMDB state!=valid 静默跳过。响应 data={method: 脚本返回值 | 'not support' | 'disable' | 'error'}。
+        method: POST
+        path: /api/v1/message_sender/send_message
+        body:
+          type: object
+          required: [data]
+          properties:
+            topic: { type: string, description: "主题透传给脚本 kwargs" }
+            data:
+              type: object
+              required: [receivers, msg_data]
+              properties:
+                receivers:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      user: { type: string, description: "CMDB 用户名" }
+                      user_group: { type: string, description: "CMDB 用户组名" }
+                      email_addr: { type: string, description: "直接邮箱地址" }
+                      method: { type: string, description: "通知方式名（=config.name）" }
+                msg_data:
+                  type: object
+                  additionalProperties: true
+                  description: "消息体（至少 content）"
+        response:
+          type: object
+          properties:
+            code: { type: integer }
+            data: { type: object, additionalProperties: true, description: "{method: 脚本返回}" }
+
+      debug:
+        description: |
+          调试发送（v2，不需先建 config）。body 即 config 字段（msgType/scriptContent/serverConfig/
+          cmdbUserObjectColName）+ receivers。一次调一种方式；receivers[].method 必须等于 msgType。
+          ⚠️msg_data 内容被服务端固定覆盖为测试文本（只验证脚本可执行+receiver 解析，不验业务渲染）。
+          敏感字段 base64（v2 解码）。custom 临时脚本用后即删。
+        method: POST
+        path: /api/v2/message_sender/send_message_debug
+        body:
+          type: object
+          required: [msgType, receivers]
+          properties:
+            name: { type: string, description: "通知方式名（自定义时）" }
+            msgType: { type: string, description: "email/wework/dingding/dingding_robot/custom" }
+            scriptContent: { type: string, description: "custom 脚本源码" }
+            serverConfig: { type: object, additionalProperties: true }
+            cmdbUserObjectColName: { type: string }
+            receivers:
+              type: array
+              items:
+                type: object
+                properties:
+                  user: { type: string }
+                  user_group: { type: string }
+                  email_addr: { type: string }
+                  method: { type: string, description: "必须 = msgType" }
+        response:
+          type: object
+          properties:
+            code: { type: integer }
+            data: { type: object, additionalProperties: true, description: "脚本 run 返回值" }
+
+  notify_alert:
+    description: |
+      告警源接入（第三方监控把告警转成 EasyOps 通知发出）。
+      data.alert_receivers=[{name(用户名), method}]；整个 data 作为 msg_data 透传脚本。
+    path: ""
+    operations:
+      receive:
+        description: |
+          接收告警并按 alert_receivers 分发通知。msg_data=整个 data（脚本读 content/subject）。
+          ⚠️仅支持 cmdbUserObjectColName 非空的通知方式（无空 key 分支）。
+        method: POST
+        path: /api/v1/alert_adapter/receive
+        body:
+          type: object
+          additionalProperties: true
+        response:
+          type: object
+          properties:
+            code: { type: integer }
+            data: { type: object, additionalProperties: true }

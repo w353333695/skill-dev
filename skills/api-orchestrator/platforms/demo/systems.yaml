@@ -743,3 +743,37 @@ systems:
     acceptance_urls:
       suite_list: "${EASYOPS_CMDB_FRONTEND_URL}/next/automatic-inspection/suite"   # 待前端实测确认精确路径
       history_detail: "${EASYOPS_CMDB_FRONTEND_URL}/next/automatic-inspection/inspection/{{plugin_id}}/history/{{job_id}}/summary-report"   # 源码 config.go:126 模板
+
+  # ===========================================================================
+  # msgsender —— 通知管理（通知方式 CRUD/发送/调试/告警接入）
+  # ===========================================================================
+  msgsender:
+    description: |
+      EasyOps 通知服务（logic.msgsender:8095，Python/Tornado）。
+      通知方式 = CMDB 实例(_MSGSENDER_NOTIFY_CONFIG@EASYOPS) + notify_scripts/<plugin>.py 脚本。
+      内置 4 类（email/wework/dingding_robot/dingding_easyops）；三方脚本走 msgType=custom + scriptContent 动态加载。
+      e2e 链路：建 config → debug 调试 → send_message 发送（receivers[].method=config.name）。
+      ⚠️config 读写走 v2（v1 明文密码，实测）；单条 GET/DELETE 仅 v1 有路由；写操作须系统管理员。
+      脚本契约/敏感字段协议/三方开发流程见 formats/notify-kit/notify-script-protocol.yaml。
+
+    spec: easyops-msgsender.yaml
+    default_endpoint: backend                # 直连 :8095
+
+    endpoints:
+      backend:
+        base_url: ${EASYOPS_MSGSENDER_BACKEND_URL}
+        host: admin.easyops.local
+
+    auth: easyops-cookie
+
+    env:
+      EASYOPS_MSGSENDER_BACKEND_URL: ""      # :8095 完整 URL
+
+    capabilities:
+      notify_method:  { list: "启用中的通知方式（send 可用 method 值域）" }
+      notify_config:  { list: "配置列表(v2脱敏)", create: "建通知方式(admin)", get: "单条详情(v1)", update: "改配置(v2,敏感base64)", delete: "删配置(admin)" }
+      notify_message: { send: "发通知(receivers+msg_data)", debug: "调试发送(免建config,msg内容被覆盖)" }
+      notify_alert:   { receive: "告警源接入(alert_receivers 分发)" }
+
+    runtime:
+      ports: { backend: "8095" }
