@@ -154,7 +154,7 @@ resources:
       ⚠️category 必须两级点分（如 整体状态.连接数，正好 1 个点，否则报『分类格式错误』）。
       vals[].type 仅 string|int；conditions 的 comparator/level 约束详见 formats/inspection-kit/metric-threshold.yaml。
       删除副作用：更新时删掉的 val 会同步从 task 和 report_template 删除引用；删组级联删模板和任务中的引用。
-    path: /api/v1/inspection/{pluginId}/metric-groups
+    path: ""   # 资源级留空，path 在各 operation 级写完整（api-cli 拼接资源级+操作级，资源级非空致 URL 双倍 → 404）
 
     operations:
       create:
@@ -226,7 +226,7 @@ resources:
       ⚠️脚本协议（参数注入/start-end标记/instanceId标记）见 formats/inspection-kit/script-protocol.yaml。
       ⚠️args 设计（含 password 类型安全规范）见 formats/inspection-kit/args-design.yaml。
       collector-debug 可在线试跑脚本（开发调试利器）。
-    path: /api/v1/inspection/{pluginId}/collector
+    path: ""   # 资源级留空，path 在各 operation 级写完整（api-cli 拼接资源级+操作级，资源级非空致 URL 双倍 → 404）
 
     operations:
       create:
@@ -303,7 +303,7 @@ resources:
       巡检报告模板（INSPECTION_REPORT_TEMPLATE）。详情模板（metricgroups）+ 总览模板（summarytemplates）。
       可选对象（套件可无模板，导入失败不回退可页面新建）。
       ⚠️删除前置：模板被巡检任务引用时拒删（『已关联巡检任务，不可删除』）。
-    path: /api/v1/inspection/{pluginId}/report-templates
+    path: ""   # 资源级留空，path 在各 operation 级写完整（api-cli 拼接资源级+操作级，资源级非空致 URL 双倍 → 404）
 
     operations:
       create:
@@ -372,7 +372,7 @@ resources:
       e2e 链路：create（建任务，触发注册 scheduler）→ 调度到点执行（或等定时）→ history 按 jobId 查结果。
       调度：taskType=once（绝对时间 2006-01-02 15:04:05）/ crontab（cron 表达式）。
       ⚠️无内置 cron，定时委托外部 scheduler 服务（到点回调 inspection 的 callback URL）。
-    path: /api/v1/inspection/{pluginId}/task
+    path: ""   # 资源级留空，path 在各 operation 级写完整（api-cli 拼接资源级+操作级，资源级非空致 URL 双倍 → 404）
 
     operations:
       create:
@@ -580,7 +580,9 @@ resources:
       import:
         description: |
           导入 v1 套件包（multipart file 上传 tar.gz）。导入顺序：模型→套件→指标组→采集器→模板（部分失败有回退）。
-          ⚠️重复 pluginId 报错（不幂等）。multipart 走 curl -F "file=@<包>.tar.gz" / SDK。
+          ⚠️不幂等——重复导入同 pluginId/name 报 E11000『已存在重复的实例』，重导须先 DELETE 旧套件（级联删全部对象）。
+          不幂等规则/报错对照/instanceId 格式坑详见 formats/inspection-kit/suite-package.yaml#conflict_strategy。
+          multipart 走 curl -F "file=@<包>.tar.gz" / SDK（api-cli 不支持上传）。
         method: POST
         path: /api/v1/inspection-import
         # multipart（file 字段），api-cli 不支持，走 SDK
