@@ -70,6 +70,33 @@ param_injection:
   source: "python_operator.go:41-69; processor.go:159-176; py_marshal/json_py.go:10-21"
 
 # -----------------------------------------------------------------------------
+# 二·补、外部命令路径规范（脚本设计红线）
+# 巡检脚本在目标主机 root 执行，目标主机环境千差万别——命令路径严禁硬编码。
+# -----------------------------------------------------------------------------
+command_path_rule:
+  problem: |
+    e2e 踩坑（2026-08-13）：脚本写死 '/usr/local/easyops/mysql/bin/mysqladmin' 报
+    OSError [Errno 2] No such file or directory——目标主机没有这个路径。
+  forbidden: "禁止硬编码绝对路径（如 /usr/local/easyops/mysql/bin/mysqladmin、/opt/xxx/bin/cli）"
+  solutions: |
+    三选一（按可靠性排序）：
+    1.【首选】用 Python 客户端库直连，不调外部命令——无路径问题。
+       真实套件范式：mongodb=pymongo / mssql=pymssql / redis=redis-py / oracle=cx_Oracle。
+       DB 类巡检一律走客户端库，不要调 mysqladmin/sqlcmd 之类。
+    2. 客户端路径从实例属性拼：installPath(attr_id) → EASYOPS_installPath，
+       脚本 os.path.join(install_path,'bin','mysqladmin')；无 installPath 则 fallback 'mysqladmin' 走 PATH。
+       适用：必须调外部命令（如某些 DB 没有 Python 客户端）。
+    3. 直接用命令名（'mysqladmin'），靠目标主机 PATH 解析。
+       适用：通用命令（ping/df/cat）。
+  real_examples: |
+    mongodb（库直连）：client = MongoClient('mongodb://%s:%s@%s:%s/'%(user,pass,host,port))
+    mssql（库直连）：conn = pymssql.connect(host, user, password, db)
+    mysql（命令+installPath拼路径，本次修正）：
+      install_path = globals().get("EASYOPS_installPath", "")
+      client = os.path.join(install_path,"bin","mysqladmin") if install_path else "mysqladmin"
+  source: "真调实测 mysql e2e（2026-08-13）；真实套件 mongodb/mssql/redis/oracle collector"
+
+# -----------------------------------------------------------------------------
 # 三、脚本必须输出的两组标记（协议核心）
 # 平台用正则从 stdout 解析这两组标记，缺了无法归属结果。
 # source: internal/msg_parser/msg_parser.go:11-46
