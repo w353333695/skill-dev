@@ -70,6 +70,14 @@ import sys
 #    E-P1 属性面板标题规则        （validateAllForm schema 驱动：必填/空格/≤20，同 E-S2/S3 语义）
 #    E-P2 Tab 页签至少一个       TAB_PANE_AT_LEAST_ONE（tabs 容器 tabPanes 数组非空）
 #    E-P3 Tab 页签标题1-128非空字符 TAB_PANE_TITLE_CHAR_LIMIT（每项 tab 匹配 ^\S{1,128}$）
+#    E-P4 枚举类数据源已配置     DATA_SOURCE_NOT_CONFIGURED  options 列表为空
+#         🔴路径按控件类型严格区分（反编译 @1172444 Te 表 + 设置工厂实测）：
+#           SELECT/MULTIPLESELECT/CHECKBOX → extraProps.items
+#           RADIO/CASCADER/MODALSELECT     → extraProps.options
+#         （迁移踩坑：RADIO 选项写成 items 前端保存报『的数据源未配置，请添加』——2026-08-15 用户实测）
+#    E-P5 枚举类选项配置完整     DATA_SOURCE_OPTIONS_INCOMPLETE  每项 label/value trim 非空
+#    E-P6 枚举类 value 无重复    DATA_SOURCE_DUPLICATE_VALUES
+#    E-P7 数值设置顺序合法        numberSetting：step≥0 / min≤default≤max（DATA_SETTINGS_* 系列）
 #    ⚠️后端不拦以上任何一条（2026-08-15 探针实测：label>20/modelField 重复/空 等全部 code=0 放行）——
 #    纯前端校验，绕过前端直调 API 时须自跑本校验器兜底。
 
@@ -196,6 +204,11 @@ def validate_version(version='', memo=None):
 # ---------------------------------------------------------------------------
 ID_RE = re.compile(r'^(?![0-9]+$)[a-zA-Z0-9_@]+$')   # 字段/容器 id：非纯数字，仅字母数字_@
 TAB_PANE_RE = re.compile(r'^\S{1,128}$')             # Tab 页签标题：1-128 个非空字符
+# 枚举类控件的数据源字段路径（反编译 Te 表：SELECT 系用 items，RADIO 系用 options）
+ENUM_DS_PATH = {
+    'SELECT': 'items', 'MULTIPLESELECT': 'items', 'CHECKBOX': 'items',
+    'RADIO': 'options', 'CASCADER': 'options', 'MODALSELECT': 'options',
+}
 
 
 def _walk_controls(container):
@@ -309,6 +322,43 @@ def validate_designer_form(form_definition):
                     add(len(sort_list) <= 1, 'E-F8_SORT_SINGLE', '只允许一个排序字段', ctx)
                     if len(sort_list) == 1:
                         add(bool(sort_list[0].get('field')), 'E-F9_SORT_FIELD_SELECTED', '排序字段未选择', ctx)
+
+    # ===== 属性面板（validateAllForm schema 规则）：枚举数据源 + 数值设置 =====
+    skipped_containers = {'BUSINESS_TABLE', 'BUSINESS_CMDB_INSTANCE_CHANGE_TABLE', 'CMDB_INSTANCE_OPERATE_CONTAINER'}
+    for c in containers:
+        if (c.get('type') or '').upper() in skipped_containers:
+            continue   # 前端 validateAllForm 跳过这三种容器
+        for p in _walk_controls(c):
+            ptype = (p.get('type') or '').upper()
+            opts = p.get('options') or {}
+            ep = opts.get('extraProps') or {}
+            ctx = '%s' % (p.get('label') or '')
+            # E-P4/P5/P6：枚举类数据源（按类型的字段路径）
+            ds_key = ENUM_DS_PATH.get(ptype)
+            if ds_key:
+                items = ep.get(ds_key) or []
+                if not items:
+                    add(False, 'E-P4_ENUM_DS_CONFIGURED', '的数据源未配置，请添加', ctx)
+                else:
+                    incomplete = [it for it in items
+                                  if not str(it.get('label') or '').strip() or not str(it.get('value') or '').strip()]
+                    add(not incomplete, 'E-P5_ENUM_DS_COMPLETE', '的数据源有选项配置不全，请添加', ctx)
+                    values = [str(it.get('value')) for it in items]
+                    add(len(set(values)) == len(values), 'E-P6_ENUM_DS_UNIQUE', '的数据源有重复的value', ctx)
+            # E-P7：数值设置顺序（NUMBERINPUT/SLIDER 的 numberSetting）
+            ns = ep.get('numberSetting')
+            if isinstance(ns, dict):
+                mx, mn, dv, st = ns.get('max'), ns.get('min'), ns.get('defaultValue'), ns.get('step')
+                if st is not None and st < 0:
+                    add(False, 'E-P7_NUMBER_SETTING', '的数据设置，步长不得为负数!', ctx)
+                elif mx is not None and dv is not None and dv > mx:
+                    add(False, 'E-P7_NUMBER_SETTING', '的数据设置，默认值不得超过最大值!', ctx)
+                elif mn is not None and dv is not None and dv < mn:
+                    add(False, 'E-P7_NUMBER_SETTING', '的数据设置，默认值不得小于最小值!', ctx)
+                elif mn is not None and mx is not None and mx < mn:
+                    add(False, 'E-P7_NUMBER_SETTING', '的数据设置，最大值要大于等于最小值!', ctx)
+                elif mx is not None and mn is not None and mn > mx:
+                    add(False, 'E-P7_NUMBER_SETTING', '的数据设置，最小值要小于等于最大值!', ctx)
 
     return results, has_err[0]
 
