@@ -25,6 +25,15 @@ key_rule: |
   ⑤ 网关直连网关（老平台常见）→ 合并消除：GW_a-[cond_a]->GW_b 的边删掉，对 GW_b 每条出边
      在 GW_a 复制 (cond_a && cond_b) 合并边；合并引入的变量补进上游决策节点声明
   ⑥ 节点名繁体 → 简体（显示层）
+  ⑦ 🔴表单按阶段拆分绑定（2026-08-15 用户更正：老平台一张大表单绑全部节点 = 设计不合理——
+     第一个节点不单反馈问题，还要处理、分析、改善，显然不对。实际流转中表单是每个阶段对应
+     一张，只含该阶段要填写的内容）：
+     · 拆分边界 = 老表单的 row/分组结构（事件管理实例：6 row = 发现并提交/事件解决/用户验证/
+       根因分析与改善措施/改善措施完成情况确认/隐藏；隐藏字段按语义归属打散进各阶段）
+     · 每张阶段表单独立 form.save→update(done)→set_main，再 process_form.set 绑到对应节点
+     · 字段一一对应零丢失（拆分前后 modelField 计数核对）
+     · ⚠️枚举类控件数据源路径按类型区分（RADIO/CASCADER/MODALSELECT→extraProps.options，
+       SELECT/MULTIPLESELECT/CHECKBOX→items——form-kit E-P4，老 radio 映射时极易错位）
 
 steps:
   - n: 1
@@ -93,5 +102,8 @@ note: |
     6决策节点+8表单动态处理人），网关直连消除+变量补声明后合规 0 error。
   · 事件管理流程（ncb_issue_prod v23）：7节点76字段——人工按钮分支型（3按钮节点，无条件
     表达式），验证人=loginUser，事件转问题 callActivity。
+    迁移后用户两次设计更正（都已在流程/表单侧修复）：①三按钮节点补排他网关（branch-gateway-only）；
+    ②74字段大表单按 key_rule⑦ 拆 5 张阶段表单绑各节点——其中暴露 label≤20、RADIO 数据源
+    路径两个前端设计器校验（form-kit E 类已全量复刻，落库前先过 check-controls）。
   老平台数据规律：ctrid↔ctrCode 字段映射在 formInfos[0].configs.dataSource.methods 主表 children；
   start/end 是序列表虚拟 code；处理人 processorName 在 workflowModelNodeProcessorList。
