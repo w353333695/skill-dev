@@ -12,10 +12,10 @@ BPMNDiagram 中的坐标（dc:Bounds / di:waypoint）。
   3. 坐标(placement): 每列从上到下堆叠、垂直居中对齐主干道；列间距固定
   4. 连线: 正交折线 —— 源节点右侧中心 → 列间中点 → 目标节点左侧中心
 
-用法:
-    python3 bpmn-relayout.py <bpmn文件> [-o 输出.bpmn]     # CLI：文件进出
-    from bpmn_relayout import relayout_xml                 # 库：XML 字符串进出（flow 内联用）
-    relayout_xml(bpmn_xml_str) -> 重排后的 bpmn_xml_str
+位置：platforms/demo/formats/bpmn-kit/relayout.py（ITSM 领域知识，非 skill 通用件——
+     skill scripts/ 保持零系统知识）。用法:
+    python3 relayout.py <bpmn文件> [-o 输出.bpmn]          # CLI：文件进出
+    sys.path.insert(0, '<deployment>/formats/bpmn-kit'); from relayout import relayout_xml  # 库
 
 api-orchestrator 集成（flows 调用姿势）:
   ① 设计时（生成即优化）: build-process flow 中 LLM 只产【纯语义 XML】（七要素，

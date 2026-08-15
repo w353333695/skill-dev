@@ -19,7 +19,7 @@ prerequisites:
     ⑥ processSetting.nodeSettings 配 rejectNodes/allowedOps/scriptSettings 等（驳回靠 rejectNodes 不画反向 sequenceFlow）
     ⑦ BPMN 合规要点：节点名≤20字不重名/网关不直连网关/userTaskId正则/全连通。V2 userTask XML 只保留核心属性（opsAllowed等放 nodeSettings）。完整 nodeSettings 结构见 objects.yaml#itsm_process_node_setting
     📌【坐标 = 算法，不手写】BPMNDI（⑥旧行已退役）不再手构——LLM 只产【纯语义 XML】（上面 7 要素，
-    不含 BPMNDiagram），组装完调 scripts/bpmn-relayout.py 的 relayout_xml() 自动算 DI
+    不含 BPMNDiagram），组装完调 formats/bpmn-kit/relayout.py 的 relayout_xml() 自动算 DI
     （Dagre LR：分层+重心排序+正交折线+绕行通道；语义零改动，实测 .90 前端渲染正常）。
     生成即优化，勿事后补救。存量烂图补救见 flows/relayout-process-diagram.yaml
 
@@ -43,10 +43,9 @@ steps:
       审批方法：strategy="emptyAssign" handling="directly"（核心属性在 XML；allowedOps 等在 nodeSettings）
       驳回：nodeSettings.rejectNodes=["Task_review:驳回技术复核"]（不画反向 sequenceFlow！）
       processSetting.nodeSettings[] 每节点一条（含 allowedOps/rejectNodes/scriptSettings/suspendSetting）
-      📌组装完必调布局算法（生成即优化）：
-        python3 -c "import sys; sys.path.insert(0,'<skill>/scripts'); from bpmn_relayout import relayout_xml; \
-          open('<out.bpmn>','w').write(relayout_xml(open('<semantic.bpmn>').read()))"
-        或 CLI：python3 scripts/bpmn-relayout.py semantic.bpmn -o out.bpmn
+      📌组装完必调布局算法（生成即优化；工具在 formats/bpmn-kit/relayout.py，属 ITSM 领域知识非 skill 通用件）：
+        python3 formats/bpmn-kit/relayout.py <semantic.bpmn> -o <out.bpmn>   # CLI
+        库：import sys; sys.path.insert(0,'formats/bpmn-kit'); from relayout import relayout_xml
     body_hint: |
       # BPMN 关键结构（7 要素见 prerequisites.bpmn_truth；BPMNDiagram 由 relayout 算法生成勿手写）
       bpmnXML = '<bpmn2:definitions ...targetNamespace...xsi:schemaLocation...>

@@ -6,7 +6,7 @@ guard: 规划挡（写 ITSM：派生新版本）—— 须展示将派生的版�
 
 prerequisites:
   env: [EASYOPS_ORG, EASYOPS_USER, EASYOPS_ITSM_BACKEND_URL]
-  tool: "scripts/bpmn-relayout.py（Dagre LR 算法：最长路径分层→重心法列内排序减交叉→正交折线→跨列/反向边上/下绕行通道嵌套）。语义零改动——process 元素树（节点/流/条件/flowable 扩展属性）逐项等价，仅 BPMNDiagram 坐标重写 + 前缀统一 bpmn2:→bpmn:（URI 不变，实测 .90 前端渲染正常）"
+  tool: "formats/bpmn-kit/relayout.py（Dagre LR 算法：最长路径分层→重心法列内排序减交叉→正交折线→跨列/反向边上/下绕行通道嵌套）。语义零改动——process 元素树（节点/流/条件/flowable 扩展属性）逐项等价，仅 BPMNDiagram 坐标重写 + 前缀统一 bpmn2:→bpmn:（URI 不变，实测 .90 前端渲染正常）"
   design_note: |
     布局正确的位置是【设计时】——build-process 生成纯语义 XML 后即调 relayout_xml()（生成即优化，见
     flows/build-process.yaml step2）。本 flow 是两类场景的兜底：①存量人工拖的烂图；②人在前端设计器
@@ -30,7 +30,7 @@ steps:
   - n: 3
     desc: |
       本地重排（纯算法，不调远端）：
-      python3 scripts/bpmn-relayout.py <拉回的.bpmn> -o <relayouted.bpmn>
+      python3 formats/bpmn-kit/relayout.py <拉回的.bpmn> -o <relayouted.bpmn>
       自检：节点/流数量不变；processSetting 原样带回（一字节不动）。
     expect: "重排后 bpmnXML（语义等价，DI 重写）"
 
@@ -50,7 +50,7 @@ steps:
     desc: |
       验收：前端打开草稿编辑页（用户看图）：
       ${EASYOPS_CMDB_FRONTEND_URL}/next/itsc-process-manage/<definitionId>/versionCreate-v2/<新versionId>?activeTab=0
-      用户确认布局满意（算法是 80 分底稿；个别节点不满意可手工微调，或改 bpmn-relayout.py 参数重跑）。
+      用户确认布局满意（算法是 80 分底稿；个别节点不满意可手工微调，或改 relayout.py 参数重跑）。
     expect: "用户确认布局可接受"
 
   - n: 6
