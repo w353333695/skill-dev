@@ -306,6 +306,8 @@ objects:
     side_effects:
       - op: form_version.update
         rule: "upsert 非对称（PUT /v2/.../version/:versionId）：当前版本 state==done → 【新建一个 isMain=false 草稿】（基于已发布版派生）；state==unfinished → 就地更新。同时改 form 的 name/category/memo。versionName 唯一（done 新建/unfinished 改号都不能重，否则『重复的表单版本号』）。【场景④『加版本』=对 done 版 update 派生新草稿 的操作链 属编排知识，见 flows/add-version.yaml】"
+      - op: form_version.update（🔴全量覆盖坑）
+        rule: "🔴update 是【全量覆盖非 patch】——body 不带 formDefinition 会把已存的表单定义【清空为空串】且 code=0 静默成功（实测 2026-08-15：两个迁移表单发布 done 时只传 name/category/versionName/state，48K 定义被清成 0，前端表单空白）。任何 update 必须带完整 formDefinition（先 form_version.get/list 取回现定义再改）。与 process_version.edit 的 processSetting 同类坑。补救：update 带完整定义 + versionName 改新号（如 1.0.0→1.0.1 绕过『重复的表单版本号』）→ set_main"
       - op: form_version.delete
         rule: "路径参数 versionIds（复数分号，契约误写单数 versionId）；代码 strings.Split 后只用第一个——批量是壳实际删一个。被流程节点引用拒绝『表单已绑定节点，不可删除!』。⚠️隐式级联：删完若 form 已无任何版本，连带删 form。删主版本代码不拦（不建议）。"
       - op: form_version.set_main
