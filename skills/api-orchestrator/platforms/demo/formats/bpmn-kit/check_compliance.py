@@ -461,6 +461,25 @@ def rule_no_gateway_join_fork(e: BO, t: Reporter, ctx) -> None:
             t.report(e.id, "Gateway forks and joins")
 
 
+
+
+def rule_branch_gateway_only(e: BO, t: Reporter, ctx) -> None:
+    """分支只能出现在网关上（2026-08-15 新增，用户需求）：
+    出边 > 1 的节点（分支点）必须是 Gateway——userTask/callActivity/Event 多出边
+    = 隐式分裂，EasyOps 设计规范要求分支统一由网关表达（含人工按钮分支：
+    节点后应插 exclusiveGateway 再分叉，否则引擎行为/前端展示不可控）。
+    比 off 状态的 no-implicit-split 更严：不看条件与 default，出边数即判。"""
+    if e.is_any(["bpmn:Task", "bpmn:Event", "bpmn:CallActivity", "bpmn:SubProcess"]):
+        outs = e.outgoing or []
+        if len(outs) > 1:
+            labels = ", ".join(f.name or f.id for f in outs)
+            t.report(e.id,
+                     "节点存在 {} 条出边（分支点必须在网关上）：{}。"
+                     "应在节点后插入排他网关再分叉".format(len(outs), labels[:60]))
+
+
+
+
 def rule_no_implicit_split(e: BO, t: Reporter, ctx) -> None:
     if e.is_any(["bpmn:Task", "bpmn:Event"]):
         outs = [f for f in (e.outgoing or [])
@@ -794,6 +813,7 @@ RULES: List[tuple] = [
     ("no-disconnected", "error", rule_no_disconnected),
     ("no-duplicate-sequence-flows", "error", rule_no_duplicate_sequence_flows),
     ("no-gateway-join-fork", "off", rule_no_gateway_join_fork),
+    ("branch-gateway-only", "error", rule_branch_gateway_only),
     ("no-implicit-split", "off", rule_no_implicit_split),
     ("no-inclusive-gateway", "off", rule_no_inclusive_gateway),
     ("single-blank-start-event", "error", rule_single_blank_start_event),
