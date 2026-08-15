@@ -31,6 +31,7 @@ import math
 import re
 import sys
 import tempfile
+from collections import deque
 import os
 import xml.etree.ElementTree as ET
 
@@ -108,22 +109,46 @@ def rank_layers(nodes, edges):
             preds[t].append(s)
             succs[s].append(t)
 
+    # 回边检测（DFS 灰边）：构成环的边不参与分层（否则环下游全部节点被卡死，
+    # Kahn 走不进、兜底字典序乱排——实测 30 节点图 28 个被误判环上、endEvent 落最左列）。
+    # 回边在路由阶段由 assign_lanes 按 backward 绕行通道处理，语义不变。
+    color = {}
+    back = set()
+    def _dfs(u):
+        color[u] = 1
+        for v in succs.get(u, []):
+            if color.get(v, 0) == 1:
+                back.add((u, v))
+            elif color.get(v, 0) == 0:
+                _dfs(v)
+        color[u] = 2
+    for n in nodes:
+        if color.get(n, 0) == 0:
+            _dfs(n)
+
+    # 标准 Kahn（最长路径分层）：只走非回边
     layer = {}
-    remaining = set(nodes)
-    while remaining:
-        progress = False
-        for nid in sorted(remaining):     # sorted: 结果确定性
-            # 就绪 = 所有已定位前驱都已分层（环上的前驱忽略）
-            if all(p in layer or p not in remaining for p in preds[nid]):
-                base = [layer[p] for p in preds[nid] if p in layer]
-                layer[nid] = (max(base) + 1) if base else 0
-                remaining.discard(nid)
-                progress = True
-        if not progress:                  # 环：强制解开
-            nid = sorted(remaining)[0]
-            base = [layer[p] for p in preds[nid] if p in layer]
-            layer[nid] = (max(base) + 1) if base else 0
-            remaining.discard(nid)
+    indeg = {n: len([p for p in preds[n] if (p, n) not in back]) for n in nodes}
+    queue = deque(sorted(n for n, d in indeg.items() if d == 0))
+    while queue:
+        nid = queue.popleft()
+        base = [layer[p] for p in preds[nid] if p in layer and (p, nid) not in back]
+        layer[nid] = (max(base) + 1) if base else 0
+        for t in succs[nid]:
+            if (nid, t) in back:
+                continue
+            indeg[t] -= 1
+            if indeg[t] == 0:
+                queue.append(t)
+    # 回边目标节点：层值提升到 max(自身, 源+1) 保证在源右侧不回叠
+    for s, t in back:
+        if s in layer and t in layer:
+            layer[t] = max(layer[t], layer[s] + 1)
+    # 兜底（理论到不了）：剩余按前驱已分层最大值
+    for n in nodes:
+        if n not in layer:
+            base = [layer[p] for p in preds[n] if p in layer]
+            layer[n] = (max(base) + 1) if base else 0
     return layer, preds, succs
 
 
