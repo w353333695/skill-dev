@@ -558,6 +558,53 @@ def rule_gateway_cannot_be_directly_connected_to_end(e: BO, t: Reporter, ctx) ->
 _GW_TYPES_COND = ["bpmn:InclusiveGateway", "bpmn:ExclusiveGateway", "bpmn:ParallelGateway"]
 
 
+def rule_form_decision_vars_consistent(e: BO, t: Reporter, ctx) -> None:
+    """表单决定流转的变量一致性（2026-08-15 新增，用户需求）：
+    R1(error) 网关任一出边表达式引用的每个变量，必须存在于【紧邻上游节点】的
+       flowable:formExpressionName 声明的变量名集合中——否则运行时变量无值，
+      流转判断失败/走错分支。
+    R2(warn)  上游决策节点声明的变量若在该网关全部出边表达式中均未出现——冗余声明，
+       提示清理（不阻断）。
+    说明：上游节点未声明任何变量（isFormDecision!=1）但出边表达式引用了变量时，
+    同样按 R1 报错（变量来源不明）。"""
+    if not e.is_any(["bpmn:ExclusiveGateway", "bpmn:InclusiveGateway", "bpmn:ParallelGateway"]):
+        return
+    ins = e.incoming or []
+    outs = e.outgoing or []
+    if not outs:
+        return
+    # 表达式变量全集（网关全部出边）
+    expr_vars: List[str] = []
+    for f in outs:
+        if f.conditionExpression and f.conditionExpression.body:
+            expr_vars.extend(extract_expr_vars(f.conditionExpression.body))
+    expr_vars = list(dict.fromkeys(expr_vars))   # 去重保序
+    if not expr_vars:
+        return
+    # 每条入边分别校验（多入边网关：任一上游没声明该变量即报——运行时走哪条入边不可预知）
+    for f in ins:
+        src = f.sourceRef
+        if src is None:
+            continue
+        fen = src.attrs_.get("flowable:formExpressionName") or ""
+        declared = [x.split(":")[0].strip() for x in fen.split(";")
+                    if ":" in x and x.split(":")[0].strip()]
+        # R1：表达式变量 ⊄ 声明集
+        missing = [v for v in expr_vars if v not in declared]
+        if missing:
+            t.report(f.id,
+                     "序列流表达式变量 {} 未在上游节点 [{}] 的 formExpressionName 变量（{}）中声明"
+                     .format(", ".join(missing), src.name or src.id,
+                             ", ".join(declared) if declared else "未声明"))
+        # R2：声明未用（仅提示）
+        if declared:
+            unused = [v for v in declared if v not in expr_vars]
+            if unused:
+                t.report(f.id,
+                         "上游节点声明变量 {} 在网关出边表达式中未使用（冗余声明）"
+                         .format(", ".join(unused)))
+
+
 def rule_flow_conditional_error(e: BO, t: Reporter, ctx) -> None:
     if not e.is_any(_GW_TYPES_COND):
         return
@@ -760,6 +807,7 @@ RULES: List[tuple] = [
     ("gateway-cannot-be-directly-connected-to-end", "warn", rule_gateway_cannot_be_directly_connected_to_end),
     # 业务扩展规则 flow-conditional-error / form-flow 已按要求永久关闭：
     # 两者对 flowable 表单表达式/网关符号的判定较激进，在现有流程中误报较多，默认不再检查。
+    ("form-decision-vars-consistent", "error", rule_form_decision_vars_consistent),
     ("flow-conditional-error", "off", rule_flow_conditional_error),
     ("inclusive-gateway", "error", rule_inclusive_gateway),
     ("form-flow", "off", rule_form_flow),
