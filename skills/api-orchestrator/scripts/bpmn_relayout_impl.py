@@ -192,74 +192,50 @@ def order_columns(nodes, edges, layer, preds, succs, sweeps=4):
 # ---------------------------------------------------------------- 4. 坐标（placement）
 
 def longest_spine(nodes, edges, layer):
-    """start→end 的关键路径（按层推进的贪心最长链）——主轴锚定集合。
-    每步从当前节点后继中选【可达 end 且层最大】者，保证链贯通到终点。"""
+    """主链（必经节点集）= dom(end)：所有 start→end 路径的公共节点。
+    标准支配节点数据流迭代：dom(entry)={entry}; dom(n)={n} ∪ ⋂dom(preds)。
+    替换此前手搓的贪心+可达集交集版（成堆边界补丁，且贪心选路会把网关分支误吃进主链）。
+    返回集合；坐标阶段按层排序即主轴序列。"""
     start = next((n for n in nodes if 'startEvent' in str(nodes[n]) or n.lower().startswith('start')), None)
     end = next((n for n in nodes if 'endEvent' in str(nodes[n]) or n.lower().startswith('event_')), None)
     if not start or not end:
         return set()
-    succs = {}
-    for _, s, t in edges:
-        if s in nodes and t in nodes:
-            succs.setdefault(s, []).append(t)
-    # 可达 end 的节点集（反向 BFS）
     preds = {}
     for _, s, t in edges:
         if s in nodes and t in nodes:
             preds.setdefault(t, []).append(s)
-    reach = {end}
-    dq = deque([end])
-    while dq:
-        n = dq.popleft()
-        for p in preds.get(n, []):
-            if p not in reach:
-                reach.add(p); dq.append(p)
-    chain = [start]
-    cur = start
-    guard = 0
-    while cur != end and guard < len(nodes) + 5:
-        guard += 1
-        # 过滤回边：目标是已入链节点（回环回到上游）或不在 reach 的边不算后继
-        fwd = [t for t in succs.get(cur, []) if t in reach and t not in chain]
-        # 回环侧支判定：该后继的全部后继都回到 cur 或已入链 → 是侧支（层最大者为主链继续）
-        real = []
-        for t in fwd:
-            t_succ = [x for x in succs.get(t, []) if x in reach and x != t]
-            if t_succ and all((x in chain) or (x == cur) for x in t_succ):
-                continue          # 回环侧支（如 子流程→TM分析），跳过
-            real.append(t)
-        cands = real
-        if not cands:
-            if fwd:               # 全是回环侧支：主链沿第一个侧支前的链终止
-                break
-            break
-        if len(cands) == 1:
-            cur = cands[0]
-            chain.append(cur)
-            continue
-        # 多分支（网关/多出边）：找汇合点——各分支【独立可达集】的交集中层最小者；
-        # 分支节点本身不进主链（平级条件分支，按列排开与主轴对齐，避免「同级审批一上一下」）
-        converge = None
-        reach_sets = []
-        for t in cands:
-            seen = {t}; dq = deque([t])
-            while dq:
-                n = dq.popleft()
-                for x in succs.get(n, []):
-                    if x not in seen and x in reach:
-                        seen.add(x); dq.append(x)
-            reach_sets.append(seen)
-        common = set.intersection(*reach_sets) if reach_sets else set()
-        # 汇合点可以是某条分支上的节点（当它被其他分支也到达=必经，如 财务分支→GW软件开发分流）
-        common = {t for t in common if t not in chain}
-        if common:
-            converge = min(common, key=lambda t: (layer.get(t, 0), t))
-        if converge:
-            chain.append(converge)
-            cur = converge
-        else:
-            break
-    return set(chain)
+    all_nodes = set(nodes)
+    # 去回边后的前驱（回边不参与支配计算——环上节点的支配关系按无环归约）
+    color, back = {}, set()
+    succs_all = {}
+    for _, s, t in edges:
+        if s in nodes and t in nodes:
+            succs_all.setdefault(s, []).append(t)
+    def _dfs(u):
+        color[u] = 1
+        for v in succs_all.get(u, []):
+            if color.get(v, 0) == 1: back.add((u, v))
+            elif color.get(v, 0) == 0: _dfs(v)
+        color[u] = 2
+    _dfs(start)
+    dom = {start: {start}}
+    changed = True
+    while changed:
+        changed = False
+        for n in sorted(all_nodes - {start}):
+            ps = [p for p in preds.get(n, []) if (p, n) not in back]
+            if not ps:
+                continue
+            new = {n} | (set.intersection(*(dom[p] for p in ps if p in dom))
+                         if all(p in dom for p in ps) else None or set())
+            if not new - {n} and ps:
+                # 前驱支配集尚未全算出——跳过本轮
+                if not all(p in dom for p in ps):
+                    continue
+            if new != dom.get(n):
+                dom[n] = new
+                changed = True
+    return dom.get(end, {end})
 
 
 def assign_coords(nodes, cols, spine=()):
