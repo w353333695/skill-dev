@@ -20,7 +20,8 @@ key_rule: |
      · 条件自动路由：sequenceRule{conditionFilter all/any, subItems[keyField eq/ne valueCode]}
        → 上游决策节点 isFormDecision=1 + formExpressionName + 网关出边 ${变量=='值'}
        （变量名必须 = 决策节点声明变量——合规检测 form-decision-vars-consistent 规则会查）
-     · 人工按钮分支（无条件表达式）：多出边 + 出边 name=按钮文案 + labelViews=['pass:按钮名']
+     · 人工按钮分支（无条件表达式）：userTask→排他网关→多条出边(name=按钮文案，无条件) +
+       labelViews=['pass:按钮名'] 配在 userTask nodeSettings。🔴节点直接多出边能建成但流转报错（必须上网关）
   ⑤ 网关直连网关（老平台常见）→ 合并消除：GW_a-[cond_a]->GW_b 的边删掉，对 GW_b 每条出边
      在 GW_a 复制 (cond_a && cond_b) 合并边；合并引入的变量补进上游决策节点声明
   ⑥ 节点名繁体 → 简体（显示层）
