@@ -44,6 +44,34 @@ import sys
 # D1 VERSION_REQUIRED         版本号必填              VERSION_NUMBER_REQUIRED
 # D2 VERSION_PATTERN          ^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}$  三段式 x.y.z
 # D3 VERSION_MEMO_PATTERN     ^[^\s]{1,20}$           版本说明≤20 且不含空白
+# E. 设计器保存链（反编译自运行中前端包 bricks/itsc-form-management/1.100.7，2026-08-15 实拉）
+#    getFormData 三层：validateSection（容器）→ validateField（控件，跳过 cmdb实例操作容器）→ validateAllForm
+#    E-S1 表单内容非空           CANNOT_SAVE_AN_EMPTY_FORM         容器列表为空
+#    E-S2 容器标题必填非空白     CONTROL_TITLE_CANNOT_BE_EMPTY     name 空/trim 空报；纯空格≠空但仍走长度
+#    E-S3 容器标题≤20           CONTROL_TITLE_LENGTH_EXCEEDS_20   name.length>20（trim 非空前提下）
+#    E-S4 容器 id 必填           CONTAINER_ID_CANNOT_BE_EMPTY      modelField 空/trim 空
+#    E-S5 容器 id 格式           CONTAINER_ID_NOT_VALID            ^(?![0-9]+$)[a-zA-Z0-9_@]+$（非纯数字）
+#    E-S6 容器 id 唯一           CONTAINER_ID_MUST_BE_UNIQUE       跨容器 modelField Set 查重
+#    E-S7 容器事件触发对象非空   TRIGGER_OBJECT_FOR_CONTAINER_EVENT_CANNOT_BE_EMPTY（listenStart 时）
+#    E-S8 容器事件脚本非空       SCRIPT_FOR_CONTAINER_EVENT_CANNOT_BE_EMPTY（listenEvents[0].remoteFunc.toolId）
+#    E-S9 SLA 计算字段非空       FIELDS_PARTICIPATING_IN_CONTAINER_EVENT_CALCULATION_CANNOT_BE_EMPTY（enableSlaCale 时）
+#    E-S10 table 容器禁多模型    TABLE_NOT_SUPPORT_CMDB_MULTI_MODEL（含 isMoreModel 的 CMDBINSTANCESELECT）
+#    E-S11 cmdb操作容器须模型    CMDB_OPERATE_CONTAINER_NO_MODEL_ID
+#    E-S12 cmdb操作容器须展示列  CMDB_OPERATE_CONTAINER_NO_SHOW_FIELDS（options.frontKey 非空）
+#    E-F1 字段标题必填           FIELD_TITLE_CANNOT_BE_EMPTY       label 空/trim 空
+#    E-F2 字段标题≤20           FIELD_TITLE_LENGTH_CANNOT_EXCEED_20（用户 2026-08-15 前端实测命中）
+#    E-F3 字段 id 必填           FIELD_ID_CANNOT_BE_EMPTY
+#    E-F4 字段 id 格式           FIELD_ID_NOT_VALID                ^(?![0-9]+$)[a-zA-Z0-9_@]+$
+#    E-F5 字段 id 唯一           FIELD_ID_MUST_BE_UNIQUE（同容器内 propertys Set 查重）
+#    E-F6 MODALSELECT 须事件脚本 EVENT_SCRIPT_IS_REQUIRED（remoteFunc.toolId）
+#    E-F7 脚本必填入参有值       THE_VALUE_OF_INPUT_PARAMETER_IS_REQUIRED（scriptInputs[].required&&!scriptValue）
+#    E-F8 CMDBINSTANCESELECT 排序字段至多1个 ONLY_ONE_SORT_FIELD_IS_ALLOWED（sort.sort.length>1）
+#    E-F9 单排序字段须选字段     NO_SORT_FIELD_SELECTED（sort[0].field 空）
+#    E-P1 属性面板标题规则        （validateAllForm schema 驱动：必填/空格/≤20，同 E-S2/S3 语义）
+#    E-P2 Tab 页签至少一个       TAB_PANE_AT_LEAST_ONE（tabs 容器 tabPanes 数组非空）
+#    E-P3 Tab 页签标题1-128非空字符 TAB_PANE_TITLE_CHAR_LIMIT（每项 tab 匹配 ^\S{1,128}$）
+#    ⚠️后端不拦以上任何一条（2026-08-15 探针实测：label>20/modelField 重复/空 等全部 code=0 放行）——
+#    纯前端校验，绕过前端直调 API 时须自跑本校验器兜底。
 
 FORM_NAME_RE = re.compile(r'^[\s\S]{1,20}$')
 FORM_ID_RE = re.compile(r'^[a-zA-Z]\w{0,29}$')
@@ -164,6 +192,134 @@ def validate_version(version='', memo=None):
 
 
 # ---------------------------------------------------------------------------
+# E. 设计器保存链（validateSection + validateField + 属性面板）——1:1 复刻
+# ---------------------------------------------------------------------------
+ID_RE = re.compile(r'^(?![0-9]+$)[a-zA-Z0-9_@]+$')   # 字段/容器 id：非纯数字，仅字母数字_@
+TAB_PANE_RE = re.compile(r'^\S{1,128}$')             # Tab 页签标题：1-128 个非空字符
+
+
+def _walk_controls(container):
+    """容器的控件平铺：普通容器 propertys；tabs 容器各 tabPanes 的 propertys。"""
+    props = list(container.get('propertys') or [])
+    for pane in container.get('tabPanes') or []:
+        props += pane.get('propertys') or []
+    return props
+
+
+def validate_designer_form(form_definition):
+    """设计器保存链全量校验（getFormData 三层的静态可测部分）。
+
+    form_definition: []Container（或 JSON 字符串自动解析）。
+    返回 (results, errors)——errors 非空等价于前端保存被拦。
+    """
+    if isinstance(form_definition, str):
+        try:
+            form_definition = json.loads(form_definition)
+        except json.JSONDecodeError:
+            return ([_r(False, 'E_FORM_DEFINITION_PARSE', 'formDefinition 不是合法 JSON')], True)
+
+    results, has_err = [], [False]
+
+    def add(ok, rule, msg, ctx=None):
+        if not ok:
+            has_err[0] = True
+            suffix = '（%s）' % ctx if ctx else ''
+            results.append(_r(False, rule, msg + suffix))
+        else:
+            results.append(_r(True, rule, None))
+
+    # ===== validateSection：容器层 =====
+    containers = form_definition or []
+    add(bool(containers), 'E-S1_FORM_NOT_EMPTY', '表单内容为空无法保存')
+    seen_cids = set()
+    for c in containers:
+        name, cid = c.get('name') or '', c.get('modelField') or ''
+        ctx = '%s' % name
+        add(bool(name and name.strip()), 'E-S2_CONTAINER_TITLE_REQUIRED', '容器标题不能为空', ctx)
+        if name and name.strip():
+            add(len(name) <= 20, 'E-S3_CONTAINER_TITLE_LENGTH', '容器标题长度不能超过20个字符', ctx)
+        add(bool(cid and cid.strip()), 'E-S4_CONTAINER_ID_REQUIRED', '容器id不能为空', ctx)
+        if cid and cid.strip():
+            add(bool(ID_RE.match(cid)), 'E-S5_CONTAINER_ID_PATTERN', '容器id不能为纯数字,不能包含@_外的特殊字符', ctx)
+        if cid:
+            add(cid not in seen_cids, 'E-S6_CONTAINER_ID_UNIQUE', '容器id不能重复', ctx)
+            seen_cids.add(cid)
+        opts = c.get('options') or {}
+        if opts.get('listenStart'):
+            le = (opts.get('listenEvents') or [{}])[0]
+            add(bool(le.get('componentList')), 'E-S7_CONTAINER_EVENT_TARGET', '容器事件设置触发对象不能为空', ctx)
+            add(bool(((le.get('remoteFunc') or {}).get('toolId'))), 'E-S8_CONTAINER_EVENT_SCRIPT', '容器事件设置脚本不能为空', ctx)
+        if opts.get('enableSlaCale'):
+            add(bool(opts.get('slaCaleFields')), 'E-S9_SLA_CALC_FIELDS', '容器事件设置参与计算的字段不能为空', ctx)
+        ctype = (c.get('type') or '').upper()
+        props = _walk_controls(c)
+        if ctype == 'TABLE':
+            multi = any((p.get('options') or {}).get('extraProps', {}).get('isMoreModel')
+                        if p.get('type') == 'CMDBINSTANCESELECT' else False for p in props)
+            add(not multi, 'E-S10_TABLE_NO_MULTI_MODEL', 'table容器不支持cmdb多模型选择', ctx)
+        if ctype in ('CMDB_INSTANCE_OPERATE_CONTAINER',):
+            add(bool((c.get('extraProps') or {}).get('cmdbInstanceChangeModel', {}).get('objectId')),
+                'E-S11_CMDB_OP_CONTAINER_MODEL', 'cmdb实例操作容器缺少模型id', ctx)
+            add(bool(opts.get('frontKey')), 'E-S12_CMDB_OP_CONTAINER_FIELDS', 'cmdb实例操作容器缺少展示字段', ctx)
+        # tabs 容器：页签规则（属性面板，同链路）
+        if ctype == 'TABS':
+            panes = c.get('tabPanes') or []
+            add(bool(panes), 'E-P2_TAB_PANE_AT_LEAST_ONE', 'Tab页签至少填写一个', ctx)
+            tabs = [p.get('tab') for p in panes]
+            ok = all(isinstance(t, str) and TAB_PANE_RE.match(t) for t in tabs)
+            add(ok, 'E-P3_TAB_PANE_TITLE', 'Tab页签标题只能使用1至128个非空字符', ctx)
+
+    # ===== validateField：控件层（前端跳过 cmdb实例操作容器）=====
+    checked = [c for c in containers if (c.get('type') or '').upper() != 'CMDB_INSTANCE_OPERATE_CONTAINER']
+    for c in checked:
+        for p in _walk_controls(c):
+            label, mf = p.get('label') or '', p.get('modelField') or ''
+            ctx = '%s' % label
+            add(bool(label and label.strip()), 'E-F1_FIELD_TITLE_REQUIRED', '字段标题不能为空', ctx)
+            if label and label.strip():
+                add(len(label) <= 20, 'E-F2_FIELD_TITLE_LENGTH', '字段标题长度不能超过20个字符', ctx)
+            add(bool(mf and mf.strip()), 'E-F3_FIELD_ID_REQUIRED', '字段id不能为空', ctx)
+            if mf and mf.strip():
+                add(bool(ID_RE.match(mf)), 'E-F4_FIELD_ID_PATTERN', '字段id不能为纯数字,不能包含@_外的特殊字符', ctx)
+    # 字段 id 唯一（前端逐容器 Set；跨容器不查——按容器分桶复刻）
+    for c in checked:
+        seen = set()
+        for p in _walk_controls(c):
+            mf = p.get('modelField') or ''
+            if not mf:
+                continue
+            add(mf not in seen, 'E-F5_FIELD_ID_UNIQUE', '控件字段id不能重复', '%s/%s' % (c.get('name'), mf))
+            seen.add(mf)
+    # 控件类型特有规则
+    for c in checked:
+        for p in _walk_controls(c):
+            opts = p.get('options') or {}
+            ctx = '%s' % (p.get('label') or '')
+            if p.get('type') == 'MODALSELECT':
+                add(bool((opts.get('remoteFunc') or {}).get('toolId')), 'E-F6_MODALSELECT_SCRIPT',
+                    '弹框选择控件必须配置事件脚本', ctx)
+                for si in (opts.get('remoteFunc') or {}).get('scriptInputs') or []:
+                    if si.get('required') and not si.get('scriptValue'):
+                        add(False, 'E-F7_SCRIPT_INPUT_REQUIRED',
+                            '输入参数【%s】的值不能为空' % si.get('name'), ctx)
+            if p.get('type') == 'CMDBINSTANCESELECT':
+                sort = (opts.get('extraProps') or {}).get('sort') or {}
+                sort_list = sort.get('sort') if isinstance(sort, dict) else sort
+                if isinstance(sort_list, list):
+                    add(len(sort_list) <= 1, 'E-F8_SORT_SINGLE', '只允许一个排序字段', ctx)
+                    if len(sort_list) == 1:
+                        add(bool(sort_list[0].get('field')), 'E-F9_SORT_FIELD_SELECTED', '排序字段未选择', ctx)
+
+    return results, has_err[0]
+
+
+# 兼容旧入口（只查字段标题长度）
+def validate_controls(form_definition):
+    results, _ = validate_designer_form(form_definition)
+    return [r for r in results if r['rule'] in ('E-F1_FIELD_TITLE_REQUIRED', 'E-F2_FIELD_TITLE_LENGTH')]
+
+
+# ---------------------------------------------------------------------------
 # CLI
 # ---------------------------------------------------------------------------
 def _report(results):
@@ -203,6 +359,9 @@ def main():
     p5.add_argument('--version', default='')
     p5.add_argument('--memo', default=None)
 
+    p6 = sub.add_parser('check-controls', help='设计器保存链全量校验 E（validateSection+validateField+属性面板）')
+    p6.add_argument('--form-definition', required=True, help='formDefinition JSON（[]Container 或字符串）')
+
     a = ap.parse_args()
     if a.cmd == 'check-form':
         return _report(validate_form_meta(a.name, a.category, a.form_id, a.description,
@@ -224,6 +383,18 @@ def main():
         return _report(validate_debug_result(data))
     if a.cmd == 'check-version':
         return _report(validate_version(a.version, a.memo))
+    if a.cmd == 'check-controls':
+        fd = a.form_definition
+        try:
+            fd = json.loads(fd)
+        except json.JSONDecodeError:
+            pass   # 传字符串让校验器按 formDefinition 字符串处理
+        rs, blocked = validate_designer_form(fd)
+        for r in rs:
+            if not r['ok']:
+                print(f"❌ [{r['rule']}] {r['message']}")
+        print(f"\n{'✅ 设计器保存链全部通过' if not blocked else '❌ 前端保存会被拦截（上面 %d 条）' % len([r for r in rs if not r['ok']])}")
+        return 0 if not blocked else 1
 
 
 if __name__ == '__main__':
