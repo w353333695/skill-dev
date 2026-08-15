@@ -219,13 +219,46 @@ def longest_spine(nodes, edges, layer):
     guard = 0
     while cur != end and guard < len(nodes) + 5:
         guard += 1
-        cands = [t for t in succs.get(cur, []) if t in reach]
+        # 过滤回边：目标是已入链节点（回环回到上游）或不在 reach 的边不算后继
+        fwd = [t for t in succs.get(cur, []) if t in reach and t not in chain]
+        # 回环侧支判定：该后继的全部后继都回到 cur 或已入链 → 是侧支（层最大者为主链继续）
+        real = []
+        for t in fwd:
+            t_succ = [x for x in succs.get(t, []) if x in reach and x != t]
+            if t_succ and all((x in chain) or (x == cur) for x in t_succ):
+                continue          # 回环侧支（如 子流程→TM分析），跳过
+            real.append(t)
+        cands = real
         if not cands:
+            if fwd:               # 全是回环侧支：主链沿第一个侧支前的链终止
+                break
             break
-        cur = max(cands, key=lambda t: (layer.get(t, 0), t))
-        if cur in chain:
+        if len(cands) == 1:
+            cur = cands[0]
+            chain.append(cur)
+            continue
+        # 多分支（网关/多出边）：找汇合点——各分支【独立可达集】的交集中层最小者；
+        # 分支节点本身不进主链（平级条件分支，按列排开与主轴对齐，避免「同级审批一上一下」）
+        converge = None
+        reach_sets = []
+        for t in cands:
+            seen = {t}; dq = deque([t])
+            while dq:
+                n = dq.popleft()
+                for x in succs.get(n, []):
+                    if x not in seen and x in reach:
+                        seen.add(x); dq.append(x)
+            reach_sets.append(seen)
+        common = set.intersection(*reach_sets) if reach_sets else set()
+        # 汇合点可以是某条分支上的节点（当它被其他分支也到达=必经，如 财务分支→GW软件开发分流）
+        common = {t for t in common if t not in chain}
+        if common:
+            converge = min(common, key=lambda t: (layer.get(t, 0), t))
+        if converge:
+            chain.append(converge)
+            cur = converge
+        else:
             break
-        chain.append(cur)
     return set(chain)
 
 
@@ -253,17 +286,21 @@ def assign_coords(nodes, cols, spine=()):
         for n in sp:
             w, h = node_size(nodes[n])
             geo[n] = (col_x[l] + (col_widths[l] - w) / 2, axis - h / 2, w, h)
-        # 侧支：主链上缘向上堆 / 主链下缘向下堆（各半，减少绕线）
+        # 同列无主链节点（纯分支列，如互斥网关的两条审批分支）：垂直居中——分支互相居中
+        # 即贴近主轴，符合「同级审批同一水平线附近」；只有与主链同列的（回环侧支）才挂上/下
         if sp:
             top_y = min(geo[n][1] for n in sp)
             bot_y = max(geo[n][1] + geo[n][3] for n in sp)
+            half = (len(side) + 1) // 2
+            ups, downs = side[:half], side[half:]
         else:
             sizes_side = [node_size(nodes[n]) for n in side]
             total_h = sum(h for _, h in sizes_side) + ROW_GAP * (len(side) - 1)
-            top_y = axis - total_h / 2
-            bot_y = top_y
-        half = (len(side) + 1) // 2
-        ups, downs = side[:half], side[half:]
+            y = axis - total_h / 2
+            for n, (w, h) in zip(side, sizes_side):
+                geo[n] = (col_x[l] + (col_widths[l] - w) / 2, y, w, h)
+                y += h + ROW_GAP
+            continue
         y = top_y - ROW_GAP
         for n in reversed(ups):              # 向上：后放的更靠上
             w, h = node_size(nodes[n])
