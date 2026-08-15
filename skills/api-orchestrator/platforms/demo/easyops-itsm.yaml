@@ -302,7 +302,7 @@ resources:
           pageSize: { in: query, type: integer, description: "每页默认 10 ≥1" }
         pagination: { type: offset, page_in: query, items_path: data.list, page_param: page, size_param: pageSize, size: 10 }
       create:
-        description: 新建流程定义（只建 def 元信息 name/category/memo/triggerIdList；不含版本。versionId 不可指定，CMDB 生成）。建完用 process_version.create 建 BPMN 版本。useFormBuilder=false（老表单）默认。
+        description: 新建流程定义（只建 def 元信息 name/category/memo/triggerIdList；不含版本。versionId 不可指定，CMDB 生成）。建完用 process_version.create 建 BPMN 版本。useFormBuilder=false（老表单）默认。⚠️name 全局防重：同名已存在报 409 ERR_ALREADY_EXISTS『已存在同名流程』（实测 2026-08-15 事件管理流程撞名）——迁移场景先 process_definition.list 查名，撞名加后缀区分。
         method: POST
         path: /api/flowable_service/v2/process_definition
         body:

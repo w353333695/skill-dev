@@ -322,7 +322,9 @@ objects:
 
   # ---------- 表单内容模型（formDefinition = []Container）----------
   # ⚠️控件 options 权威字段（缺了前端渲染崩 TypeError: t.map is not a function，2026-08-15 实测；
-  # 对照现网正常表单「wwh」实样提炼——生成 formDefinition 必须按类型补全）：
+  # 对照现网正常表单「wwh」(formId 64ccd7eacef75) 实样提炼——该表单含全部类型控件（SELECT/INPUT/
+  # LINK/UPLOAD/TEXTAREA/RICHTEXT/CMDBINSTANCESELECT+table/row 容器），是渲染权威样例库：
+  # 生成/排查 formDefinition 字段形态拿它对照）：
   #   SELECT/RADIO: options.dataIndex='label' 必填（前端对选中值 .map 定位显示列）
   #   UPLOAD: dataType='filearray'（非 array）、defaultValue=[]、dataIndex='fileName'、
   #           extraProps={buttonText,max_number:5,max_size:128,isEnableFileTypeLimit:false,fieldAttr:[]}
@@ -613,6 +615,11 @@ objects:
         ⑦ 📌BPMNDI 不手构——LLM 只产纯语义 XML，坐标调 formats/bpmn-kit/relayout.py 的 relayout_xml() 自动算（Dagre LR：分层+重心排序+正交折线+绕行通道；语义零改动实测 .90 前端正常。生成即优化，见 flows/build-process.yaml step2 / 存量补救 flows/relayout-process-diagram.yaml）。DI 结构要求（BPMNPlane+Shape/BPMNLabel/dc:Bounds/Edge di:waypoint）由算法保证，无须记忆
         ⑧ processSetting.nodeSettings 配 rejectNodes/allowedOps/scriptSettings 等（驳回靠 rejectNodes 不画反向 sequenceFlow）
         ⑨ 【布局质量原则（历史手调经验，现已由 relayout 算法承接）】：横平竖直零斜线/最少转角（1-2段）/连线不穿节点不交叉/网关分支从中心辐射/主流程贯通成轴。算法未覆盖的边界形态（并行网关/子流程展开）可参照此原则手调。反例警示（v2.6.0 自动生成）：4-6 段 U 型绕路、斜线分支——视觉混乱，勿复制。
+        📌【人工按钮分支建模】（事件管理流程迁移实测 2026-08-15）：老平台"按钮触发不同出线"（无
+        条件表达式）→ EasyOps = 节点多出边（无 conditionExpression）+ 出边 name=按钮文案 +
+        nodeSettings[].labelViews=['pass:按钮名']——审批人界面出现多按钮，点哪个走哪条线。
+        对照：表单自动路由 = isFormDecision + formExpressionName + ${条件}（两套机制勿混）。
+        多个 end 可合并为一个 endEvent（多入边），贴原版拓扑且布局更整。
         BPMN 合规要点（bpmnlint 27条精华）：节点名≤20字且不重名/必须1个startEvent+≥1endEvent+≥1userTask/节点全连通/网关不直连网关/排他包容网关后不接endEvent/userTaskId正则^[a-zA-Z][a-zA-Z0-9_]+$。V2 userTask XML 只保留 id/name/assignee(+Value/Type/List/Group)/strategy/handling/isFormDecision/formExpressionName——opsAllowed/setAssignee/subsequentConf/operationConf/suspendConf/memoLevel 全放 processSetting.nodeSettings（XML写了被忽略）。完整 nodeSettings 结构示例：{userTaskId,memoLevel(-1隐藏/0非必填/1必填),allowedOps[],rejectNodes["节点id:线名"],labelViews[],triggerIdList[],candidateSettings[{operation,candidates[],dataSource}],nextAssigneeSetting{enabled,nextAssignees[{userTaskId,label,candidates,dataSource}]},scriptSettings{preScript:{name,desc,scriptIdList[],operations[],isAsync},postScript:{...}},suspendSetting{isAutoActivate,activateTime(小时)}}。
 
   itsm_process_node_setting:
