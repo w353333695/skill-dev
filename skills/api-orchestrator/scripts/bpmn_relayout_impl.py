@@ -140,10 +140,11 @@ def rank_layers(nodes, edges):
             indeg[t] -= 1
             if indeg[t] == 0:
                 queue.append(t)
-    # 回边目标节点：层值提升到 max(自身, 源+1) 保证在源右侧不回叠
-    for s, t in back:
-        if s in layer and t in layer:
-            layer[t] = max(layer[t], layer[s] + 1)
+    # ⚠️不做回边目标层提升——主链节点（如 TM分析）同时是回边目标时会被推向右列，
+    #   破坏主链直线（实测：TM分析 层2 被推到 4，与 TM受理 同列）。
+    #   回环侧支（源节点）自然落在 目标层+1 列，与主链下游同列不同行（barycenter 排开），
+    #   回边由 assign_lanes 的 backward 绕行通道画回，视觉为侧支回环——符合
+    #   「侧支节点放对应节点上/下方」原则。
     # 兜底（理论到不了）：剩余按前驱已分层最大值
     for n in nodes:
         if n not in layer:
@@ -189,7 +190,48 @@ def order_columns(nodes, edges, layer, preds, succs, sweeps=4):
 
 
 # ---------------------------------------------------------------- 4. 坐标（placement）
-def assign_coords(nodes, cols):
+
+def longest_spine(nodes, edges, layer):
+    """start→end 的关键路径（按层推进的贪心最长链）——主轴锚定集合。
+    每步从当前节点后继中选【可达 end 且层最大】者，保证链贯通到终点。"""
+    start = next((n for n in nodes if 'startEvent' in str(nodes[n]) or n.lower().startswith('start')), None)
+    end = next((n for n in nodes if 'endEvent' in str(nodes[n]) or n.lower().startswith('event_')), None)
+    if not start or not end:
+        return set()
+    succs = {}
+    for _, s, t in edges:
+        if s in nodes and t in nodes:
+            succs.setdefault(s, []).append(t)
+    # 可达 end 的节点集（反向 BFS）
+    preds = {}
+    for _, s, t in edges:
+        if s in nodes and t in nodes:
+            preds.setdefault(t, []).append(s)
+    reach = {end}
+    dq = deque([end])
+    while dq:
+        n = dq.popleft()
+        for p in preds.get(n, []):
+            if p not in reach:
+                reach.add(p); dq.append(p)
+    chain = [start]
+    cur = start
+    guard = 0
+    while cur != end and guard < len(nodes) + 5:
+        guard += 1
+        cands = [t for t in succs.get(cur, []) if t in reach]
+        if not cands:
+            break
+        cur = max(cands, key=lambda t: (layer.get(t, 0), t))
+        if cur in chain:
+            break
+        chain.append(cur)
+    return set(chain)
+
+
+def assign_coords(nodes, cols, spine=()):
+    """spine = 主链节点集（start→end 最长路径）：锚定中轴 Y，不被同列侧支挤偏。
+    同列侧支节点：从主链节点上/下缘 +ROW_GAP 依次排开（符合「侧支放对应节点上下方」）。"""
     geo = {}                             # id → (x, y, w, h)
     col_widths = {l: max(node_size(nodes[n])[0] for n in items)
                   for l, items in cols.items()}
@@ -200,15 +242,36 @@ def assign_coords(nodes, cols):
         col_x[l] = x
         x += col_widths[l] + COL_GAP
 
-    # 每列垂直居中对齐同一水平中轴
     axis = MARGIN_Y
+    spine = set(spine)
     for l in sorted(cols):
         items = cols[l]
-        sizes = [node_size(nodes[n]) for n in items]
-        total_h = sum(h for _, h in sizes) + ROW_GAP * (len(items) - 1)
-        y = axis - total_h / 2
-        for n, (w, h) in zip(items, sizes):
-            # 同列节点统一左对齐到列宽中线，视觉更整齐
+        cx = col_x[l] + (col_widths[l] - 100) / 2 if col_widths[l] >= 100 else col_x[l]
+        sp = [n for n in items if n in spine]
+        side = [n for n in items if n not in spine]
+        # 主链节点：中轴对齐（居中其高度）
+        for n in sp:
+            w, h = node_size(nodes[n])
+            geo[n] = (col_x[l] + (col_widths[l] - w) / 2, axis - h / 2, w, h)
+        # 侧支：主链上缘向上堆 / 主链下缘向下堆（各半，减少绕线）
+        if sp:
+            top_y = min(geo[n][1] for n in sp)
+            bot_y = max(geo[n][1] + geo[n][3] for n in sp)
+        else:
+            sizes_side = [node_size(nodes[n]) for n in side]
+            total_h = sum(h for _, h in sizes_side) + ROW_GAP * (len(side) - 1)
+            top_y = axis - total_h / 2
+            bot_y = top_y
+        half = (len(side) + 1) // 2
+        ups, downs = side[:half], side[half:]
+        y = top_y - ROW_GAP
+        for n in reversed(ups):              # 向上：后放的更靠上
+            w, h = node_size(nodes[n])
+            geo[n] = (col_x[l] + (col_widths[l] - w) / 2, y - h, w, h)
+            y -= h + ROW_GAP
+        y = bot_y + ROW_GAP
+        for n in downs:                      # 向下
+            w, h = node_size(nodes[n])
             geo[n] = (col_x[l] + (col_widths[l] - w) / 2, y, w, h)
             y += h + ROW_GAP
     return geo
@@ -453,7 +516,8 @@ def relayout_xml(xml_str):
             continue
         layer, preds, succs = rank_layers(nodes, edges)
         cols = order_columns(nodes, edges, layer, preds, succs)
-        geo = assign_coords(nodes, cols)
+        spine = longest_spine(nodes, edges, layer)
+        geo = assign_coords(nodes, cols, spine)
         rebuild_diagram(tree, proc, nodes, edges, geo, diagram, layer)
     out = io.StringIO()
     tree.write(out, encoding="unicode", xml_declaration=True)
@@ -484,7 +548,8 @@ def main():
             continue
         layer, preds, succs = rank_layers(nodes, edges)
         cols = order_columns(nodes, edges, layer, preds, succs)
-        geo = assign_coords(nodes, cols)
+        spine = longest_spine(nodes, edges, layer)
+        geo = assign_coords(nodes, cols, spine)
         rebuild_diagram(tree, proc, nodes, edges, geo, diagram, layer)
         count += 1
         depth = max(layer.values()) + 1
