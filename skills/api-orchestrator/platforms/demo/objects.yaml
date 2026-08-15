@@ -321,6 +321,13 @@ objects:
         rule: "V2（/v2/...）比 V1 多返 businessRules + domainModel[](整列) + formDataSources[] + standardFields[] + userDisplayMap。取表单内容走 V2 get（本清单已用 V2）。"
 
   # ---------- 表单内容模型（formDefinition = []Container）----------
+  # ⚠️控件 options 权威字段（缺了前端渲染崩 TypeError: t.map is not a function，2026-08-15 实测；
+  # 对照现网正常表单「wwh」实样提炼——生成 formDefinition 必须按类型补全）：
+  #   SELECT/RADIO: options.dataIndex='label' 必填（前端对选中值 .map 定位显示列）
+  #   UPLOAD: dataType='filearray'（非 array）、defaultValue=[]、dataIndex='fileName'、
+  #           extraProps={buttonText,max_number:5,max_size:128,isEnableFileTypeLimit:false,fieldAttr:[]}
+  #   CHECKBOX: defaultValue 必须数组 []（非空串）
+  #   所有控件: options.extraProps.fieldAttr=[] 必含（前端遍历）
   itsm_form_definition:
     description: |
       表单内容定义 = JSON 字符串，解析后是 []Container（容器【平铺列表】，非深树——parser.go:21-57 直接 unmarshal 到 []Container，无递归 children）。
