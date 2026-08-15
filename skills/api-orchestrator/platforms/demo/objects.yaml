@@ -568,6 +568,11 @@ objects:
         rule: "路径 versionIds(复数分号)但只删第一个——批量是壳（service.go:1230-1231）。约束任一即拒(HTTP 412/400 ERR_FAILED_PRECONDITION)：①绑表单『当前流程已有绑定表单，不可删除!』(view.go:80) ②关联工单『有正在流转中的工单，不可删除!』(view.go:84) ③主版本+绑服务『当前流程已绑定了服务且当前是主版本，请先删除服务或设置其它主版本!』(view.go:75) ④被父/子流程引用『当前流程被引用，不可删除!』(view.go:78)。删完若 def 无版本→隐式级联删 def。【各约束解法+清理顺序+test 实测路径 属编排知识，见 flows/delete-process.yaml key_rule】"
       - op: process_version.set_main
         rule: "PUT /v1/.../version/:versionId 设主版本。⚠️须 state==done。旧主自动降级（MAIN_VERSION 关系覆盖）。触发 deployProcessAndModifyCMDB：上传 BPMN 到 Flowable 引擎（替换占位符 ITSC-PROCESS-ID/NAME）+ 回填 deploymentId/flowableDefinitionId。只有 set_main 才部署。运行中工单不受影响（走旧 deploymentId）。⚠️set_main 偶发 140500『获取流程定义版本详情失败』（瞬时，重试即好）。⚠️首次 done 自动设主不可靠——实测 isMain 未自动置 true，须显式 set_main。【完整建流程链顺序 属编排知识，见 flows/build-process.yaml】"
+    api_behavior:
+      processSetting_object_not_string: "🔴create/edit 的 processSetting 请求体须传【对象】——CMDB 存储态是 JSON 字符串（search/get 取回 str），但 API 请求传字符串报 json解析失败 readObjectStart: expect { or n（实测 2026-08-15 派生 1.0.2 时踩）。从旧版本搬运时 json.loads 再传"
+      get_param_order: "process_version.get 路径参数顺序 definitionId 在前、versionId 在后（/v2/definition/:defId/version/:verId）——URL 直觉相反易搞反，反了报 300305 instance 不存在（实测）"
+      get_may_not_return_setting: "get 端点可能不返 processSetting——fallback 从 CMDB _ITSC_PROCESS_VERSION search 取原始字段（fields 含 processSetting）"
+      bpmn_prefix_rewrite_ok: "relayout 算法输出会把前缀 bpmn2: 统一重写为 bpmn:（NS 注册表所致，URI 不变 XML 等价）——前端 bpmn-js 渲染正常，非损坏（实测 2026-08-15 .90 验证）"
 
   itsm_process_bpmn:
     description: |
@@ -595,17 +600,9 @@ objects:
         ④ <bpmn2:sequenceFlow> 连接节点；分支条件用 <bpmn2:conditionExpression xsi:type="bpmn2:tFormalExpression"> 表达式 </bpmn2:conditionExpression>
         ⑤ 条件表达式格式：整个表达式包在 ${} 内——非表单决策 `${变量==值}`（如 ${pass==1}）；表单决策(isFormDecision=1上游) `${变量=='值'}`（如 ${resourceType=='pm']}，全在${}内，字符串单引号）
         ⑥ formExpressionName = `变量名:userTaskId.containId.index.componentId.valueField`（jsonPath 格式，如 resourceType:Task_leader.c_base.0.hostType.value）。⚠️不是 modelField 短名——后端 step/manager.go:1107-1137 按 . 拆路径解析：[0]=userTaskId [1]=containId [2]=index(跳过) [3]=componentId [4]=valueField
-        ⑦ <bpmndi:BPMNDiagram> 必含 BPMNPlane+Shape(含BPMNLabel+dc:Bounds)+Edge(di:waypoint)
+        ⑦ 📌BPMNDI 不手构——LLM 只产纯语义 XML，坐标调 scripts/bpmn-relayout.py 的 relayout_xml() 自动算（Dagre LR：分层+重心排序+正交折线+绕行通道；语义零改动实测 .90 前端正常。生成即优化，见 flows/build-process.yaml step2 / 存量补救 flows/relayout-process-diagram.yaml）。DI 结构要求（BPMNPlane+Shape/BPMNLabel/dc:Bounds/Edge di:waypoint）由算法保证，无须记忆
         ⑧ processSetting.nodeSettings 配 rejectNodes/allowedOps/scriptSettings 等（驳回靠 rejectNodes 不画反向 sequenceFlow）
-        ⑨ 【BPMNDI 图形布局原则（实测 v2.6.1 手调验证）】：
-           a. 连线全用横平竖直——只有水平段(x不变)和垂直段(y不变)，零斜线。
-           b. 分支节点放网关正上/正下方（同 x 中心对齐），不放右侧——分支连线只需 1 段垂直。
-           c. 默认分支（如虚拟机）走主轴水平直通到汇合节点，不绕路。
-           d. 附加分支（如物理机→系统组领导）走完回来用 L 型（水平→垂直），不用 U 型绕远。
-           e. 最少转角：每条连线尽量 1-2 段，不用 3-4 段。
-           f. 所有节点同一 y 轴对齐（主轴），分支节点上偏或下偏到独立 y 行。
-           反例（v2.6.0 自动生成）：网关→sysgroup 用 4 段绕路(水平→垂直→水平)，vm 分支 6 段 U 型绕——视觉混乱。
-           正例（v2.6.1 手调）：网关→sysgroup 1 段垂直(正上方)，vm 1 段水平直走，sysgroup→impl 2 段 L 型。
+        ⑨ 【布局质量原则（历史手调经验，现已由 relayout 算法承接）】：横平竖直零斜线/最少转角（1-2段）/连线不穿节点不交叉/网关分支从中心辐射/主流程贯通成轴。算法未覆盖的边界形态（并行网关/子流程展开）可参照此原则手调。反例警示（v2.6.0 自动生成）：4-6 段 U 型绕路、斜线分支——视觉混乱，勿复制。
         BPMN 合规要点（bpmnlint 27条精华）：节点名≤20字且不重名/必须1个startEvent+≥1endEvent+≥1userTask/节点全连通/网关不直连网关/排他包容网关后不接endEvent/userTaskId正则^[a-zA-Z][a-zA-Z0-9_]+$。V2 userTask XML 只保留 id/name/assignee(+Value/Type/List/Group)/strategy/handling/isFormDecision/formExpressionName——opsAllowed/setAssignee/subsequentConf/operationConf/suspendConf/memoLevel 全放 processSetting.nodeSettings（XML写了被忽略）。完整 nodeSettings 结构示例：{userTaskId,memoLevel(-1隐藏/0非必填/1必填),allowedOps[],rejectNodes["节点id:线名"],labelViews[],triggerIdList[],candidateSettings[{operation,candidates[],dataSource}],nextAssigneeSetting{enabled,nextAssignees[{userTaskId,label,candidates,dataSource}]},scriptSettings{preScript:{name,desc,scriptIdList[],operations[],isAsync},postScript:{...}},suspendSetting{isAutoActivate,activateTime(小时)}}。
 
   itsm_process_node_setting:
