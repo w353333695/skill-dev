@@ -297,10 +297,15 @@ def col_cx(geo, nid):
     return x + w / 2
 
 
-def edge_waypoints(geo, src, dst, lane=None):
+def edge_waypoints(geo, src, dst, lane=None, nodes=None, multi_in_dst=False):
     """正交折线。lane = (lane_y, exit_dx, entry_dx) 时经通道绕行：
     上方通道从源顶边出发、进目标顶边（连线先向上出发，不与下方连线相交）；
-    下方通道从底边出、进底边。exit_dx/entry_dx 错开同节点同侧的出入口。"""
+    下方通道从底边出、进底边。exit_dx/entry_dx 错开同节点同侧的出入口。
+
+    L 形路由（2026-08-15 用户需求）——目标是一次转弯，不是 Z 形两次：
+    · 网关→分支：网关【顶/底边中心】出 → 竖直 → 水平进分支左沿（先上下后右）
+    · 侧支→汇聚：侧支【右沿】出 → 水平 → 竖直进汇聚【顶/底边中心】（先右后上下）
+    · 其余跨行边：维持 Z 形（列间中点转，不穿节点）"""
     sx, sy, sw, sh = geo[src]
     tx, ty, tw, th = geo[dst]
     scx, scy = sx + sw / 2, sy + sh / 2        # 源中心
@@ -309,6 +314,15 @@ def edge_waypoints(geo, src, dst, lane=None):
     if lane is None:
         if abs(scy - tcy) < 1:                  # 同行相邻列：直线
             return [(sx + sw, scy), (tx, tcy)]
+        src_is_gw = bool(nodes) and "Gateway" in str(nodes.get(src, ""))
+        if src_is_gw and tx > sx:               # 网关→分支：先竖后横 L 形
+            if tcy < scy:                       # 分支在上方：网关顶出
+                return [(scx, sy), (scx, tcy), (tx, tcy)]
+            return [(scx, sy + sh), (scx, tcy), (tx, tcy)]   # 下方：底出
+        if multi_in_dst and tx > sx:            # 侧支→汇聚：先横后竖 L 形（目标顶/底入）
+            if tcy < scy:                       # 汇聚在上方（侧支在下）
+                return [(sx + sw, scy), (tcx, scy), (tcx, ty + th)]
+            return [(sx + sw, scy), (tcx, scy), (tcx, ty)]
         mid = (sx + sw + tx) / 2                # Z 形正交折线
         return [(sx + sw, scy), (mid, scy), (mid, tcy), (tx, tcy)]
 
@@ -336,7 +350,8 @@ def seg_cross(e1, e2):
     return n
 
 
-def assign_lanes(nodes, edges, geo, layer):
+def assign_lanes(nodes, edges, geo, layer, multi_in=None):
+    multi_in = multi_in or {}
     """给跨列(>1)或反向的边分配绕行通道。
 
     高度规则（按需加深，满足"同高优先"）:
@@ -374,7 +389,8 @@ def assign_lanes(nodes, edges, geo, layer):
             ca = abs(layer.get(dst, 0) - layer.get(src, 0))
             backward = col_cx(geo, dst) < col_cx(geo, src)
             if not (ca > 1 or backward):
-                statics.append(edge_waypoints(geo, src, dst, None))
+                statics.append(edge_waypoints(geo, src, dst, None, nodes=nodes,
+                                               multi_in_dst=multi_in.get(dst, 1) > 1))
 
     def side_depths(side_members):
         """嵌套深度: 跨度升序（短边在内），与已放置重叠时 = max+1，
@@ -399,7 +415,8 @@ def assign_lanes(nodes, edges, geo, layer):
             lane_y = (base_up - depths[fid] * 36) if side == "top" \
                 else (base_down + depths[fid] * 36)
             src, dst = lane_edges[fid][0], lane_edges[fid][1]
-            lines[fid] = edge_waypoints(geo, src, dst, (lane_y, 0, 0))
+            lines[fid] = edge_waypoints(geo, src, dst, (lane_y, 0, 0), nodes=nodes,
+                                        multi_in_dst=multi_in.get(dst, 1) > 1)
         return lines
 
     # 跨度降序贪心选侧
@@ -488,13 +505,17 @@ def rebuild_diagram(tree, proc, nodes, edges, geo, diagram, layer):
                            "width": str(lw), "height": "20"})
 
     # ---- 连线 ----
-    lanes = assign_lanes(nodes, edges, geo, layer)
+    multi_in = {}
+    for _, s_, t_ in edges:
+        multi_in[t_] = multi_in.get(t_, 0) + 1
+    lanes = assign_lanes(nodes, edges, geo, layer, multi_in)
     for fid, src, dst in edges:
         if src not in geo or dst not in geo:
             continue
         edge = ET.SubElement(plane, q("bpmndi", "BPMNEdge"),
                              {"id": f"{fid}_di", "bpmnElement": fid})
-        pts = edge_waypoints(geo, src, dst, lanes.get(fid))
+        pts = edge_waypoints(geo, src, dst, lanes.get(fid), nodes=nodes,
+                             multi_in_dst=multi_in.get(dst, 1) > 1)
         for px, py in pts:
             ET.SubElement(edge, q("di", "waypoint"),
                           {"x": str(int(px)), "y": str(int(py))})
