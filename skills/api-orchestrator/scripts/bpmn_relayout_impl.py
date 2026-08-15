@@ -552,7 +552,8 @@ def main():
 
     diagram = root.find(q("bpmndi", "BPMNDiagram"))
     if diagram is None:
-        sys.exit("错误: BPMN 中没有 BPMNDiagram，无法写入布局")
+        # 纯语义 XML（无 DI）——自动建空 diagram（与库入口 relayout_xml 行为一致）
+        diagram = ET.SubElement(root, q("bpmndi", "BPMNDiagram"))
 
     count = 0
     for proc in root.iter(q("bpmn", "process")):
