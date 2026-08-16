@@ -1,4 +1,29 @@
-# bpmn-kit —— BPMN 自动布局（ITSM 流程图 DI 重排）
+# bpmn-kit —— ITSM 流程图合规检测 + 自动布局
+
+## check_compliance.py —— 流程设计合规检测器
+
+bpmn-js-bpmnlint 27 条规则 + EasyOps 扩展的等价 Python 实现，零依赖（纯标准库），
+离线检测 BPMN 2.0 XML（flowable/camunda 扩展兼容）。
+
+- **权威源**（2026-08-16 对源重校准）：`data/sources/frontend/ITSM/itsc-form-management/process-detail.e0d5.e200490e.js`
+  （2.9MB lazy chunk = bricks/itsc-process-manage 1.84.9 流程设计 lazy-bricks，用户归档）
+  - 27 条规则实现体 `rD["bpmnlint/<name>"]` + 启用配置 `oD.rules`（error/warn/off 等级表）
+  - 中文消息对照表（144 条 en→zh 映射，检测消息已按此中文化）
+  - 表达式变量提取 `nD`（math.js AST SymbolNode——Python 侧用正则近似，保留字/函数名排除）
+- 规则分级（源码 oD 原样）：error 15 条 / warn 5 条 / off 7 条（`--include-off` 可开）
+- 与源码的已知差异（修正笔误）：源码多处写 `"bpmn:ParallelGatewa"`（漏 y），已修正为
+  `bpmn:ParallelGateway`——使并行网关被正确检查
+- EasyOps 侧补充（bpmnlint 之外）：
+  - `branch-gateway-only`（error）：节点多出边必须上网关（2026-08-15 用户实测——能建成但流转报错）
+  - `form-decision-vars-consistent`（error）：表单决定流转变量与网关表达式变量一致性
+  - `diagram-required` / `diagram-element-missing`：DI 图形坐标存在性（设计器渲染依赖）
+- 🔴form-flow 布尔语义（2026-08-16 node 对拍定案）：不报 **当且仅当** 条件含 `==`；
+  空条件/纯标识符/含 `>` `>=` 等一律报——旧注释把范围符号场景写反过，以 `rule_form_flow`
+  docstring 的实测矩阵为准
+- 入口：CLI `python3 check_compliance.py <file|XML|-> [--json] [--include-off] [--no-exit-code]`
+- 使用方：flows/build-process.yaml（建流程链 0 error 门禁）/ flows/migrate-legacy-process.yaml（迁移合规门）
+
+## relayout.py —— BPMN 自动布局（ITSM 流程图 DI 重排）
 
 relayout.py：读入 bpmnXML（含烂 DI 或纯语义无 DI），重算全部节点坐标+正交连线，流程语义零改动。
 - 算法：Kahn 最长路径分层（DFS 灰边剔回边）→ barycenter 列内排序 → dominator 必经链锚主轴
@@ -7,3 +32,10 @@ relayout.py：读入 bpmnXML（含烂 DI 或纯语义无 DI），重算全部节
 - 领域适配点（为何在 platforms 不在 skill）：flowable: 扩展属性、EasyOps parser 的
   incoming/outgoing 回填、userTask 100x80/网关 50x50 尺寸约定、bpmn2:→bpmn: 前缀重写（URI 等价）
 - 使用方：flows/build-process.yaml（设计时生成即布局）/ flows/relayout-process-diagram.yaml（存量补救）
+
+## 前端包重拉配方（换版本时）
+
+union bootstrap `sa-static/micro-apps/v3/itsc-union/<ver>/bootstrap-union.<hash>.json` 的
+brickPackages 里取 `bricks/itsc-process-manage/<ver>/dist/index.<hash>.js`（带 PHPSESSID cookie，
+路径前缀 `/next/sa-static/-/`）；设计器规则在 lazy chunk（process-detail/process-design.e0d5.*），
+主包里搜 `rD["bpmnlint/` 定位规则注册表。
