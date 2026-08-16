@@ -579,13 +579,106 @@ def rule_gateway_cannot_be_directly_connected_to_end(e: BO, t: Reporter, ctx) ->
 _GW_TYPES_COND = ["bpmn:InclusiveGateway", "bpmn:ExclusiveGateway", "bpmn:ParallelGateway"]
 
 
+# --------------------------------------------------------------------------- #
+# 表单绑定上下文（--form-bindings）：运行时取值路径校验的数据源
+# --------------------------------------------------------------------------- #
+def parse_form_bindings(spec) -> "Optional[Dict[str, List[dict]]]":
+    """解析 --form-bindings 输入为 {userTaskId: [container, ...]}。
+
+    支持两种形态：
+    1. 编排挡导出的精简形：{"<userTaskId>": [<formDefinition 的 []Container>], ...}
+    2. process_version.get 的 taskInfo 原始形：[{"node": {"id": ...},
+       "formInfo": {...}}...]（自动抽取）——或 {"taskInfo": [...]}
+    """
+    if spec is None:
+        return None
+    if isinstance(spec, str):
+        spec = json.loads(spec)
+    bindings: Dict[str, List[dict]] = {}
+    if isinstance(spec, dict):
+        task_info = spec.get("taskInfo")
+        if isinstance(task_info, list):
+            spec = task_info
+    if isinstance(spec, list):
+        # taskInfo 列表态
+        for it in spec:
+            if not isinstance(it, dict):
+                continue
+            node = it.get("node") or {}
+            utid = node.get("id")
+            form_def = None
+            fi = it.get("formInfo") or {}
+            raw = fi.get("formDefinition") or (fi.get("fbForm") or {}).get("fbFormSchema")
+            if isinstance(raw, str):
+                try:
+                    form_def = json.loads(raw)
+                except json.JSONDecodeError:
+                    form_def = None
+            elif isinstance(raw, list):
+                form_def = raw
+            if utid and isinstance(form_def, list):
+                bindings[utid] = form_def
+    elif isinstance(spec, dict):
+        # 精简形 {userTaskId: []Container}
+        for utid, form_def in spec.items():
+            if isinstance(form_def, str):
+                try:
+                    form_def = json.loads(form_def)
+                except json.JSONDecodeError:
+                    form_def = None
+            if isinstance(form_def, list):
+                bindings[utid] = form_def
+    return bindings or None
+
+
+def _form_path_index(containers: List[dict]) -> Dict[str, set]:
+    """从 []Container 建立取值路径索引：containId -> {componentKey, ...}。
+
+    对齐运行时消费（step/manager.go:1109 + form_data_getter.go:105）：
+    - componentId 按 Component.Key 匹配（控件 key），modelField 仅作显示名——
+      迁移生成的表单里 key 与 modelField 常见不一致，故两者都入索引（取并集，
+      key 命中是运行时真语义，modelField 命中视为弱命中，见 R3 消息分级）。
+    - tabs 容器的控件在 tabPanes 下；table 容器控件按行平铺（提交数据带行号，
+      设计态索引不区分行号）。
+    """
+    index: Dict[str, set] = {}
+    for c in containers or []:
+        if not isinstance(c, dict):
+            continue
+        cid = c.get("key") or c.get("modelField") or ""
+        if not cid:
+            continue
+        keys = index.setdefault(cid, set())
+        props = list(c.get("propertys") or [])
+        for pane in c.get("tabPanes") or []:
+            props += pane.get("propertys") or []
+        for p in props:
+            if not isinstance(p, dict):
+                continue
+            for k in (p.get("key"), p.get("modelField")):
+                if k:
+                    keys.add(k)
+    return index
+
+
 def rule_form_decision_vars_consistent(e: BO, t: Reporter, ctx) -> None:
-    """表单决定流转的变量一致性（2026-08-15 新增，用户需求）：
+    """表单决定流转的变量一致性（2026-08-15 新增，用户需求；2026-08-16 补 R3 运行时路径）：
     R1(error) 网关任一出边表达式引用的每个变量，必须存在于【紧邻上游节点】的
        flowable:formExpressionName 声明的变量名集合中——否则运行时变量无值，
       流转判断失败/走错分支。
     R2(warn)  上游决策节点声明的变量若在该网关全部出边表达式中均未出现——冗余声明，
        提示清理（不阻断）。
+    R3(error) 【运行时取值路径存在性】声明的每条 formExpressionName 必须可被后端
+       求值链路成功取值（--form-bindings 提供节点→表单定义时启用）。对齐
+       step/manager.go:1109 的解析 + GetFormValueByComponentId 的查找语义：
+       格式：var:userTaskId.containId.<row>.componentId[.valueField]
+       a. 段数 <4 → 后端 continue 静默跳过（变量无值→表达式假→走默认分支）——
+          设计期就该报，不让带病上线（运行时不报错但行为错，最隐蔽）。
+       b. userTaskId 不在流程节点集合 → 取值时"用户任务表单数据不存在"。
+       c. userTaskId 无绑定表单（--form-bindings 未提供该节点）→ 取值时同上。
+       d. containId 不在该节点表单的容器索引 → formPath 查不到。
+       e. componentId 不在容器的控件集 → "表单字段不存在"。
+       valueField 不校验（applySmartFormatDetection 按类型自适应，格式自由）。
     说明：上游节点未声明任何变量（isFormDecision!=1）但出边表达式引用了变量时，
     同样按 R1 报错（变量来源不明）。"""
     if not e.is_any(["bpmn:ExclusiveGateway", "bpmn:InclusiveGateway", "bpmn:ParallelGateway"]):
@@ -624,6 +717,63 @@ def rule_form_decision_vars_consistent(e: BO, t: Reporter, ctx) -> None:
                 t.report(f.id,
                          "上游节点声明变量 {} 在网关出边表达式中未使用（冗余声明）"
                          .format(", ".join(unused)))
+
+
+def rule_form_expression_path_resolvable(e: BO, t: Reporter, ctx) -> None:
+    """R3 独立规则（error）：formExpressionName 运行时取值路径存在性。
+
+    挂在【声明节点】（isFormDecision=1 的 userTask）上而非网关上——一条声明
+    可能喂多个网关，报在源头一次即可。需要 ctx.form_bindings（--form-bindings
+    提供）才启用实质校验；未提供时只做格式层检查（段数/分隔符）。"""
+    fb = getattr(ctx, "form_bindings", None)
+    if not e.is_a("bpmn:UserTask") or e.attrs_.get("flowable:isFormDecision") != "1":
+        return
+    fen = e.attrs_.get("flowable:formExpressionName") or ""
+    decls = [seg for seg in fen.split(";") if seg.strip()]
+    for seg in decls:
+        if ":" not in seg:
+            t.report(e.id, "formExpressionName 声明 [{}] 缺少 ':' 分隔（格式 var:path）".format(seg[:40]))
+            continue
+        var, raw_path = seg.split(":", 1)
+        var = var.strip()
+        path = raw_path.strip()
+        if not var:
+            t.report(e.id, "formExpressionName 声明 [{}] 变量名为空".format(seg[:40]))
+            continue
+        parts = path.split(".") if path else []
+        # a. 段数不足：后端 continue 静默跳过 → 变量无值（最隐蔽的运行时错误）
+        if len(parts) < 4:
+            t.report(e.id,
+                     "变量 [{}] 取值路径 [{}] 段数不足（{}<4）——运行时将被静默跳过，"
+                     "变量无值、表达式恒为假走默认分支".format(var, path[:60], len(parts)))
+            continue
+        if fb is None:
+            continue   # 未提供绑定上下文：格式层已查完
+        utid, contain_id, row, component_id = parts[0], parts[1], parts[2], parts[3]
+        # b/c. 节点存在性 + 绑定表单
+        containers = fb.get(utid)
+        if containers is None and utid == e.id:
+            containers = fb.get("")   # 编排挡允许用 "" 键表示"本流程统一表单"
+        if containers is None:
+            node_ids = set(fb.keys())
+            hint = "（流程节点集合内）" if utid in getattr(ctx, "all_node_ids", set()) else "（不是流程节点——运行时报『用户任务表单数据不存在』）"
+            t.report(e.id,
+                     "变量 [{}] 路径首段 [{}] 无绑定表单{}——运行时取值失败"
+                     .format(var, utid, hint if utid not in node_ids else "（该节点未在 --form-bindings 提供）"))
+            continue
+        # d. 容器存在性
+        index = _form_path_index(containers)
+        comp_keys = index.get(contain_id)
+        if comp_keys is None:
+            t.report(e.id,
+                     "变量 [{}] 容器 [{}] 不在该节点绑定表单的容器集（{}）——formPath 查不到"
+                     .format(var, contain_id, ", ".join(sorted(index))[:60]))
+            continue
+        # e. 控件存在性（Component.Key 语义；modelField 弱命中仅提示）
+        if component_id not in comp_keys:
+            t.report(e.id,
+                     "变量 [{}] 控件 [{}] 不在容器 [{}] 的控件集——运行时报『表单字段不存在』"
+                     .format(var, component_id, contain_id))
 
 
 def rule_flow_conditional_error(e: BO, t: Reporter, ctx) -> None:
@@ -846,6 +996,10 @@ RULES: List[tuple] = [
     # DI（图形坐标）存在性：缺了流程设计器报 "no diagram to display"（2026-08-04 主机申请流程实战补充）
     ("diagram-required", "error", rule_diagram_required),
     ("diagram-element-missing", "warn", rule_diagram_element_missing),
+    # 运行时取值路径存在性（2026-08-16 新增）：--form-bindings 提供节点→表单定义时
+    # 全量校验；未提供时仅格式层（段数/分隔符）。前端 bpmnlint 无此规则——前端靠
+    # 级联选择器结构性规避，直调 API 绕过前端时这里是唯一防线。
+    ("form-expression-path-resolvable", "error", rule_form_expression_path_resolvable),
 ]
 
 
@@ -855,17 +1009,21 @@ RULES: List[tuple] = [
 class Linter:
     """规则调度器，持有跨元素状态（如 no-duplicate-sequence-flows 的去重表）。"""
 
-    def __init__(self, include_off: bool = False):
+    def __init__(self, include_off: bool = False,
+                 form_bindings: Optional[Dict[str, List[dict]]] = None):
         self.include_off = include_off
         # no-duplicate-sequence-flows 跨元素共享状态
         self.dup_seen: Dict[str, BO] = {}
         self.dup_out: Dict[str, bool] = {}
         self.dup_in: Dict[str, bool] = {}
         self.model: Optional[BpmnModel] = None  # DI 规则经 ctx 访问
+        self.form_bindings = form_bindings      # R3 运行时路径校验数据源
+        self.all_node_ids: set = set()
 
     def lint(self, model: BpmnModel) -> List[Issue]:
         issues: List[Issue] = []
         self.model = model  # 供 DI 规则经 ctx 访问
+        self.all_node_ids = {e.id for e in model.all_elements() if e.id}
         for e in model.all_elements():
             for name, level, fn in RULES:
                 if level == "off" and not self.include_off:
@@ -933,6 +1091,10 @@ def main(argv: Optional[List[str]] = None) -> int:
                         help="同时运行默认关闭(off)的规则（按其等级报告）")
     parser.add_argument("--no-exit-code", action="store_true",
                         help="即使存在 error 级问题也返回退出码 0")
+    parser.add_argument("--form-bindings", default=None,
+                        help="节点→表单定义 JSON（文件路径或内联），启用运行时取值路径校验："
+                             "精简形 {\"<userTaskId>\": [<[]Container>]}} 或 process_version.get "
+                             "的 taskInfo 原始数组；传 @file 读文件")
     args = parser.parse_args(argv)
 
     try:
@@ -940,6 +1102,23 @@ def main(argv: Optional[List[str]] = None) -> int:
     except OSError as exc:
         print(f"读取输入失败: {exc}", file=sys.stderr)
         return 2
+
+    # 表单绑定（R3 数据源）
+    fb_spec = None
+    if args.form_bindings:
+        fb_raw = args.form_bindings
+        if fb_raw.startswith("@"):
+            try:
+                fb_raw = open(fb_raw[1:], encoding="utf-8").read()
+            except OSError as exc:
+                print(f"读取 --form-bindings 文件失败: {exc}", file=sys.stderr)
+                return 2
+        try:
+            fb_spec = json.loads(fb_raw)
+        except json.JSONDecodeError as exc:
+            print(f"--form-bindings 不是合法 JSON: {exc}", file=sys.stderr)
+            return 2
+    form_bindings = parse_form_bindings(fb_spec)
 
     try:
         model = BpmnModel(xml_text)
@@ -951,7 +1130,8 @@ def main(argv: Optional[List[str]] = None) -> int:
         print("未在 XML 中找到 <process> 元素，无法检测。", file=sys.stderr)
         return 2
 
-    issues = Linter(include_off=args.include_off).lint(model)
+    issues = Linter(include_off=args.include_off,
+                    form_bindings=form_bindings).lint(model)
 
     if args.json:
         print(format_json(issues))
