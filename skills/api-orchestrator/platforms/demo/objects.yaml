@@ -599,7 +599,7 @@ objects:
       sequenceFlow: { type: string, desc: "<bpmn2:sequenceFlow sourceRef targetRef><bpmn2:conditionExpression>${pass==1}</bpmn2:conditionExpression>——分支条件" }
       multiInstance: { type: string, desc: "<multiInstanceLoopCharacteristics isSequential='false' flowable:collection='assigneeList'><completionCondition>${nrOfCompletedInstances/nrOfInstances>=0.6}</completionCondition>——会签(false)/串签(true) + 通过比例" }
     constraints:
-      - "userTask 全部 flowable:扩展属性（converter_test.go:64 真实样例）：isFormDecision(0/1) | strategy(emptyAssign等) | script=[JSON前后置脚本] | handling(directly/send_directly/claim_directly/send_claim_directly) | assignee(占位符或指定用户) | assigneeValue | assigneeType | assigneeList(;分隔会签) | assigneeGroup | subsequentConf=[JSON下节点审批人] | operationConf=[JSON操作候选人] | suspendConf | memoLevel(-1隐藏/0非必填/1必填) | suspendTimeLimit | triggerIdList | setAssignee(true/false) | opsAllowed(;分隔done;assignee;cc) | formExpressionName(表单决定流转变量映射) | jumpableNodes | labelViews(⚰️按钮分支文案，新版已废弃)"
+      - "userTask 全部 flowable:扩展属性（converter_test.go:64 真实样例）：isFormDecision(0/1) | strategy(emptyAssign等) | script=[JSON前后置脚本] | handling(directly/send_directly/claim_directly/send_claim_directly) | assignee(占位符或指定用户) | assigneeValue | assigneeType | assigneeList(;分隔会签) | assigneeGroup | subsequentConf=[JSON下节点审批人] | operationConf=[JSON操作候选人] | suspendConf | memoLevel(-1隐藏/0非必填/1必填) | suspendTimeLimit | triggerIdList | setAssignee(true/false) | opsAllowed(;分隔done;assignee;cc) | formExpressionName(表单决定流转变量映射) | jumpableNodes | labelViews"
       - "userTaskId = BPMN <userTask id> = processSetting.nodeSettings[].userTaskId（join 锚，def_version.go:249-268 getNodeList）"
       - "校验 11 项（validator.go:302-314 ValidateProcessV2）：孤立节点/表达式正则/必须1个startEvent+≥1endEvent+≥1userTask/包容网关前节点须isFormDecision=1/userTaskId正则^[a-zA-Z][a-zA-Z0-9_]+$且唯一/子流程不接start网关/空跳过不接多分支网关/排他包容网关后不接endEvent/并行包容后子流程不引用同流程"
       - "分支条件正则（validator.go:15）：ConditionExpressionRegexp=\\$\\{(.*)\\}，须形如 ${pass==1}"
@@ -615,15 +615,16 @@ objects:
         ⑦ 📌BPMNDI 不手构——LLM 只产纯语义 XML，坐标调 formats/bpmn-kit/relayout.py 的 relayout_xml() 自动算（Dagre LR：分层+重心排序+正交折线+绕行通道；语义零改动实测 .90 前端正常。生成即优化，见 flows/build-process.yaml step2 / 存量补救 flows/relayout-process-diagram.yaml）。DI 结构要求（BPMNPlane+Shape/BPMNLabel/dc:Bounds/Edge di:waypoint）由算法保证，无须记忆
         ⑧ processSetting.nodeSettings 配 rejectNodes/allowedOps/scriptSettings 等（驳回靠 rejectNodes 不画反向 sequenceFlow）
         ⑨ 【布局质量原则（历史手调经验，现已由 relayout 算法承接）】：横平竖直零斜线/最少转角（1-2段）/连线不穿节点不交叉/网关分支从中心辐射/主流程贯通成轴。算法未覆盖的边界形态（并行网关/子流程展开）可参照此原则手调。反例警示（v2.6.0 自动生成）：4-6 段 U 型绕路、斜线分支——视觉混乱，勿复制。
-        ⚰️【人工按钮分支】已废弃（2026-08-16 用户告知：新版本已不支持此机制，旧知识仅存档勿再用）：
-        老平台"按钮触发不同出线"（无条件表达式）曾按此建模——出边 name=按钮文案（不写
-        conditionExpression）+ nodeSettings[].labelViews=['pass:按钮名']（审批人界面多按钮，
-        点哪个走哪条线）+ 分支点插 exclusiveGateway（节点直接多出边能建成但流转时报错）。
-        🔴新版本已不支持——迁移遇到老平台按钮分支节点时【停下问用户】新版替代方案，
-        勿按旧法建模。仍有效的通用约束：分支点必须在网关上（branch-gateway-only 规则）。
+        📌【人工按钮分支建模】（事件管理流程迁移实测 2026-08-15，🔴2026-08-15 用户更正）：
+        老平台"按钮触发不同出线"（无条件表达式）→ EasyOps = 出边 name=按钮文案 +
+        nodeSettings[].labelViews=['pass:按钮名']（审批人界面出现多按钮，点哪个走哪条线）。
+        🔴但分支点必须上网关：节点直接多出边（无网关）【能建成流程但流转时报错】（用户实测）。
+        正确建模：userTask → exclusiveGateway（无条件的排他网关）→ 多条出边（name=按钮文案），
+        出边不写 conditionExpression——按钮选择决定走哪条。labelViews 仍配在 userTask 的
+        nodeSettings 上。合规检测 branch-gateway-only 规则强制此约束。
         对照：表单自动路由 = isFormDecision + formExpressionName + ${条件}（两套机制勿混）。
         多个 end 可合并为一个 endEvent（多入边），贴原版拓扑且布局更整。
-        BPMN 合规要点（bpmnlint 27条精华）：节点名≤20字且不重名/必须1个startEvent+≥1endEvent+≥1userTask/节点全连通/网关不直连网关/排他包容网关后不接endEvent/userTaskId正则^[a-zA-Z][a-zA-Z0-9_]+$。V2 userTask XML 只保留 id/name/assignee(+Value/Type/List/Group)/strategy/handling/isFormDecision/formExpressionName——opsAllowed/setAssignee/subsequentConf/operationConf/suspendConf/memoLevel 全放 processSetting.nodeSettings（XML写了被忽略）。完整 nodeSettings 结构示例：{userTaskId,memoLevel(-1隐藏/0非必填/1必填),allowedOps[],rejectNodes["节点id:线名"],labelViews[](⚰️按钮分支文案，新版已废弃),triggerIdList[],candidateSettings[{operation,candidates[],dataSource}],nextAssigneeSetting{enabled,nextAssignees[{userTaskId,label,candidates,dataSource}]},scriptSettings{preScript:{name,desc,scriptIdList[],operations[],isAsync},postScript:{...}},suspendSetting{isAutoActivate,activateTime(小时)}}。
+        BPMN 合规要点（bpmnlint 27条精华）：节点名≤20字且不重名/必须1个startEvent+≥1endEvent+≥1userTask/节点全连通/网关不直连网关/排他包容网关后不接endEvent/userTaskId正则^[a-zA-Z][a-zA-Z0-9_]+$。V2 userTask XML 只保留 id/name/assignee(+Value/Type/List/Group)/strategy/handling/isFormDecision/formExpressionName——opsAllowed/setAssignee/subsequentConf/operationConf/suspendConf/memoLevel 全放 processSetting.nodeSettings（XML写了被忽略）。完整 nodeSettings 结构示例：{userTaskId,memoLevel(-1隐藏/0非必填/1必填),allowedOps[],rejectNodes["节点id:线名"],labelViews[],triggerIdList[],candidateSettings[{operation,candidates[],dataSource}],nextAssigneeSetting{enabled,nextAssignees[{userTaskId,label,candidates,dataSource}]},scriptSettings{preScript:{name,desc,scriptIdList[],operations[],isAsync},postScript:{...}},suspendSetting{isAutoActivate,activateTime(小时)}}。
 
   itsm_process_node_setting:
     description: |
@@ -646,7 +647,7 @@ objects:
       isFormDecision:    { type: string, enum: ["0", "1"], desc: "0否/1由表单决定多分支流转（配 formExpressionName）" }
       formExpressionName: { type: string, ref: itsm_process_form_flow, desc: "表单决定流转的变量映射 DSL" }
       buttonSetting:     { type: array, desc: "按钮配置" }
-      labelViews:        { type: array, items: string, desc: "⚰️操作文案 ['done:通过']——人工按钮分支专用，新版本已不支持该机制（2026-08-16 废弃），勿在新流程配置" }
+      labelViews:        { type: array, items: string, desc: "操作文案 ['done:通过']" }
       revokeRoles:       { type: array, items: string, desc: "允许撤销角色 admin/svcOwner/creator" }
       cancelRoles:       { type: array, items: string, desc: "允许作废角色" }
 
