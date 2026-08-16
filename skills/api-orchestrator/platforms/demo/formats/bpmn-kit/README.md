@@ -16,16 +16,30 @@ bpmn-js-bpmnlint 27 条规则 + EasyOps 扩展的等价 Python 实现，零依�
 - EasyOps 侧补充（bpmnlint 之外）：
   - `branch-gateway-only`（error）：节点多出边必须上网关（2026-08-15 用户实测——能建成但流转报错）
   - `form-decision-vars-consistent`（error）：表单决定流转变量与网关表达式变量一致性
+  - `flow-conditional-error`（error，2026-08-16 恢复）：多出边网关须有 `${}` 条件。
+    🔴按钮分支豁免语义（用户实测缺口1 校准）：上游 userTask 配了 labelViews
+    （`--node-settings` 提供 nodeSettings）才豁免「序列流缺少条件」——仅
+    isFormDecision=0 不够（修数流程 GW_analysis 双无条件边即漏配 labelViews 的
+    死分支：既非表达式也非按钮，流转无路由依据）。未提供 node-settings 时回退宽容。
+  - `form-flow`（error，2026-08-16 恢复+豁免）：非表单决定流转的表达式必须含 `==`
+    （源码布尔：不报当且仅当含 `==`）。同样在「上游配 labelViews」时豁免——
+    纯按钮分支流程（事件管理型）不会整片误报。
   - `form-expression-path-resolvable`（error，2026-08-16）：**运行时取值路径存在性**——
     formExpressionName 的 `var:userTaskId.containId[row].componentId[.valueField]`
     逐段对照真实表单校验。对齐后端求值链（step/manager.go:1109 静默跳过语义 +
     GetFormValueByComponentId 的 Component.Key 匹配）：段数<4（静默无值走默认分支，
     最隐蔽）/ 节点不存在 / 无绑定表单 / 容器不存在 / 控件不存在 五类全部设计期拦截。
+    🔴控件匹配【严格按 Component.Key】（运行时 findFormFieldByComponentId 只认 key，
+    form_data_getter.go:761）——key 不匹配但 modelField 命中会单独报
+    「表单重建后 key 漂移」指纹（2026-08-16 缺口3 校准：并集索引会放过这类必炸路径）。
     前端 bpmnlint **无此规则**（前端靠级联选择器结构性规避），直调 API 绕过前端时
     这里是唯一防线。用法：`--form-bindings <json|@file>`（精简形
     `{userTaskId: []Container}` 或 process_version.get 的 taskInfo 原始数组），
     不传时仅格式层校验
   - `diagram-required` / `diagram-element-missing`：DI 图形坐标存在性（设计器渲染依赖）
+- 完整检查配方（编排挡/CLI）：
+  `check_compliance.py <bpmn> --form-bindings @fb.json --node-settings @ns.json`
+  （fb=各节点绑定表单的 formDefinition 映射；ns=processSetting.nodeSettings 数组）
 - 🔴form-flow 布尔语义（2026-08-16 node 对拍定案）：不报 **当且仅当** 条件含 `==`；
   空条件/纯标识符/含 `>` `>=` 等一律报——旧注释把范围符号场景写反过，以 `rule_form_flow`
   docstring 的实测矩阵为准
