@@ -4,7 +4,9 @@
 BPMN 流程设计合规检测器
 =======================
 
-本脚本是后台 `applications_sa/itsc-union-standalone-NA/bricks/itsc-process-manage/dist/lazy-bricks/process-design.e0d5~lazy-bricks/process-detail.e0d5.fe534c4c.js` 中内嵌的
+本脚本是前端 `data/sources/frontend/ITSM/itsc-form-management/process-detail.e0d5.e200490e.js`（2.9MB
+lazy chunk = bricks/itsc-process-manage 1.84.9 的流程设计 lazy-bricks，2026-08-16 归档；同源于后台
+`applications_sa/itsc-union-standalone-NA/.../process-detail.e0d5.fe534c4c.js`）中内嵌的
 bpmn-js-bpmnlint（https://github.com/bpmn-io/bpmn-js-bpmnlint）27 条规则的
 等价 Python 实现，用于离线对 BPMN 2.0 XML（flowable/camunda 扩展兼容）做
 流程设计合规检查。
@@ -395,7 +397,7 @@ def rule_conditional_flows(e: BO, t: Reporter, ctx) -> None:
         return
     for f in outs:
         if not _has_cond(f) and e.default is not f:
-            t.report(f.id, "Sequence flow is missing condition")
+            t.report(f.id, "序列流缺少条件")
 
 
 def rule_end_event_required(e: BO, t: Reporter, ctx) -> None:
@@ -412,7 +414,7 @@ def rule_event_sub_process_typed_start_event(e: BO, t: Reporter, ctx) -> None:
             if not fe.is_a("bpmn:StartEvent"):
                 continue
             if len(fe.eventDefinitions) == 0:
-                t.report(fe.id, "Start event is missing event definition")
+                t.report(fe.id, "开始事件缺少事件定义")
 
 
 def rule_no_complex_gateway(e: BO, t: Reporter, ctx) -> None:
@@ -427,12 +429,12 @@ def rule_no_disconnected(e: BO, t: Reporter, ctx) -> None:
         n = e.incoming or []
         r = e.outgoing or []
         if e.is_a("bpmn:StartEvent") and not r:
-            t.report(e.id, "Element is not connected")
+            t.report(e.id, "进程有未连接的元素")
         if e.is_a("bpmn:EndEvent") and not n:
-            t.report(e.id, "Element is not connected")
+            t.report(e.id, "进程有未连接的元素")
         if not e.is_any(["bpmn:StartEvent", "bpmn:EndEvent"]):
             if not (n and r):
-                t.report(e.id, "Element is not connected")
+                t.report(e.id, "进程有未连接的元素")
 
 
 def rule_no_duplicate_sequence_flows(e: BO, t: Reporter, ctx) -> None:
@@ -442,12 +444,12 @@ def rule_no_duplicate_sequence_flows(e: BO, t: Reporter, ctx) -> None:
         dst = e.targetRef.id if e.targetRef else e.id
         key = f"{src}#{dst}#{body}"
         if key in ctx.dup_seen:
-            t.report(e.id, "SequenceFlow is a duplicate")
+            t.report(e.id, "有重复的序列流,请检查连线")
             if src and src not in ctx.dup_out:
-                t.report(src, "Duplicate outgoing sequence flows")
+                t.report(src, "有重复的传出序列流,请检查连线")
                 ctx.dup_out[src] = True
             if dst and dst not in ctx.dup_in:
-                t.report(dst, "Duplicate incoming sequence flows")
+                t.report(dst, "有重复的传入序列流,请检查连线")
                 ctx.dup_in[dst] = True
         else:
             ctx.dup_seen[key] = e
@@ -458,7 +460,7 @@ def rule_no_gateway_join_fork(e: BO, t: Reporter, ctx) -> None:
         n = e.incoming or []
         r = e.outgoing or []
         if len(n) > 1 and len(r) > 1:
-            t.report(e.id, "Gateway forks and joins")
+            t.report(e.id, "网关不能同时合并和分叉")
 
 
 
@@ -485,7 +487,7 @@ def rule_no_implicit_split(e: BO, t: Reporter, ctx) -> None:
         outs = [f for f in (e.outgoing or [])
                 if not _has_cond(f) and e.default is not f]
         if len(outs) > 1:
-            t.report(e.id, "Flow splits implicitly")
+            t.report(e.id, "流程隐式分裂（分支点应在网关上）")
 
 
 def rule_no_inclusive_gateway(e: BO, t: Reporter, ctx) -> None:
@@ -505,7 +507,7 @@ def rule_single_blank_start_event(e: BO, t: Reporter, ctx) -> None:
 
 def rule_single_event_definition(e: BO, t: Reporter, ctx) -> None:
     if e.is_a("bpmn:Event") and len(e.eventDefinitions) > 1:
-        t.report(e.id, "Event has multiple event definitions")
+        t.report(e.id, "事件有多个事件定义")
 
 
 def rule_start_event_required(e: BO, t: Reporter, ctx) -> None:
@@ -522,7 +524,7 @@ def rule_sub_process_blank_start_event(e: BO, t: Reporter, ctx) -> None:
             if not fe.is_a("bpmn:StartEvent"):
                 continue
             if len(fe.eventDefinitions) > 0:
-                t.report(fe.id, "Start event must be blank")
+                t.report(fe.id, "子流程开始事件必须为空事件")
 
 
 def rule_superfluous_gateway(e: BO, t: Reporter, ctx) -> None:
@@ -530,7 +532,7 @@ def rule_superfluous_gateway(e: BO, t: Reporter, ctx) -> None:
         n = e.incoming or []
         r = e.outgoing or []
         if len(n) == 1 and len(r) == 1:
-            t.report(e.id, "Gateway is superfluous. It only has one source and target.")
+            t.report(e.id, "网关多余（只有一个入口和一个出口）")
 
 
 def rule_inclusive_gateway_appear_in_pairs(e: BO, t: Reporter, ctx) -> None:
@@ -538,7 +540,7 @@ def rule_inclusive_gateway_appear_in_pairs(e: BO, t: Reporter, ctx) -> None:
     if n:
         r = [fe for fe in n if fe.is_a("bpmn:InclusiveGateway")]
         if len(r) % 2 != 0:
-            t.report(r[-1].id, "Gateway appear in pairs")
+            t.report(r[-1].id, "网关一般要成对出现")
 
 
 def rule_parallel_gateway_appear_in_pairs(e: BO, t: Reporter, ctx) -> None:
@@ -546,7 +548,7 @@ def rule_parallel_gateway_appear_in_pairs(e: BO, t: Reporter, ctx) -> None:
     if n:
         r = [fe for fe in n if fe.is_a("bpmn:ParallelGateway")]
         if len(r) % 2 != 0:
-            t.report(r[-1].id, "Gateway appear in pairs")
+            t.report(r[-1].id, "网关一般要成对出现")
 
 
 # 注意：源码此处为 "bpmn:ParallelGatewa"（笔误），已修正。
@@ -560,7 +562,7 @@ def rule_gateway_cannot_be_directly_connected(e: BO, t: Reporter, ctx) -> None:
         a = any(f.sourceRef and f.sourceRef.type_ in _GW_TYPES_DIRECT for f in ins)
         o = any(f.targetRef and f.targetRef.type_ in _GW_TYPES_DIRECT for f in outs)
         if a or o:
-            t.report(e.id, "Gateway cannot be directly connected")
+            t.report(e.id, "网关不能直接连接")
 
 
 def rule_gateway_cannot_be_directly_connected_to_end(e: BO, t: Reporter, ctx) -> None:
@@ -570,7 +572,7 @@ def rule_gateway_cannot_be_directly_connected_to_end(e: BO, t: Reporter, ctx) ->
         i = any(f.sourceRef and f.sourceRef.type_ == "bpmn:StartEvent" for f in ins)
         a = any(f.targetRef and f.targetRef.type_ == "bpmn:EndEvent" for f in outs)
         if i or a:
-            t.report(e.id, "Gateway cannot be directly connected to " + ("start" if i else "end"))
+            t.report(e.id, "网关不能直接连" + ("开始" if i else "结束"))
 
 
 # 注意：源码此处为 "bpmn:ParallelGatewa"（笔误），已修正。
@@ -637,7 +639,7 @@ def rule_flow_conditional_error(e: BO, t: Reporter, ctx) -> None:
                 if not re.match(r"^\$\{.*\}$", body):
                     t.report(f.id, "表达式需要用${}包裹")
             else:
-                t.report(f.id, "Sequence flow is missing condition")
+                t.report(f.id, "序列流缺少条件")
     # 入口上游若是「表单决定流向」节点，校验表单变量与出口表达式变量一致
     for f in n:
         src = f.sourceRef
@@ -649,13 +651,13 @@ def rule_flow_conditional_error(e: BO, t: Reporter, ctx) -> None:
             s = [x.split(":")[0] for x in o] if o else None  # 变量名
             l = [x.split(":")[1] for x in o] if o else None  # 表单字段
             if not (s and l and s[0] and l[0]):
-                t.report(f.id, "Used form to determine flow but did not configure variable names and form fields")
+                t.report(f.id, "使用了表单决定流转但未配置变量名和表单字段")
             for out_f in r:
                 a: List[str] = []
                 if out_f.conditionExpression and out_f.conditionExpression.body:
                     a = extract_expr_vars(out_f.conditionExpression.body)
                 if not (a and all(v in (s or []) for v in a)):
-                    t.report(f.id, "The variable name in the form determines the flow does not match the expression variable name on the sequence flow")
+                    t.report(f.id, "表单决定流转里的变量名与序列流上的表达式变量名不一致")
 
 
 def rule_inclusive_gateway(e: BO, t: Reporter, ctx) -> None:
@@ -666,10 +668,16 @@ def rule_inclusive_gateway(e: BO, t: Reporter, ctx) -> None:
         for f in n:
             src = f.sourceRef
             if not (src and src.attrs_.get("flowable:isFormDecision") == "1"):
-                t.report(f.id, "The node in front of the inclusive branch gateway must be set to form determines flow")
+                t.report(f.id, "包容分支网关前的节点必须要设置“表单决定流转”")
 
 
 def rule_form_flow(e: BO, t: Reporter, ctx) -> None:
+    """网关前节点非表单决定流转时表达式符号必须用 ==。
+    源码布尔（2026-08-16 用 node 直接执行源码表达式定案）：
+      不报 当且仅当 body 含 '=='（n_syms 范围符号判定的取反只影响 && 前段，
+      只要 body 缺 '==' —— 无论空/纯标识符/含 >、>= 等 —— 一律 report）。
+    实测矩阵：null/''/'abc'/'${x>1}'/'${x>=1}' 全报；'${x==1}' 不报。
+    旧实现 NOT(a AND b AND c) 恰好等价本语义——无行为差异，仅精化注释与中文消息。"""
     n_syms = [">=", "<=", ">", "<", "!=", "!=="]
     if not e.is_any(_GW_TYPES_COND):
         return
@@ -683,11 +691,9 @@ def rule_form_flow(e: BO, t: Reporter, ctx) -> None:
             continue
         for out_f in outs:
             body = out_f.conditionExpression.body if out_f.conditionExpression else None
-            a = body is not None and any(op in body for op in n_syms)
-            b = body is not None
-            c = body is not None and "==" in body
-            if not (a and b and c):
-                t.report(out_f.id, "The expression symbol that determines the flow of the gateway node is not a form and must be used==")
+            ok = body is not None and "==" in body and not any(op in body for op in n_syms if op != "!=" and op != "!==")
+            if not ok:
+                t.report(out_f.id, "网关前节点是非表单决定流转的表达式符号必须要用==")
 
 
 def rule_auto_pass(e: BO, t: Reporter, ctx) -> None:
@@ -698,7 +704,7 @@ def rule_auto_pass(e: BO, t: Reporter, ctx) -> None:
             for f in (e.outgoing or []):
                 if f.targetRef and f.targetRef.type_ in ["bpmn:InclusiveGateway", "bpmn:ExclusiveGateway"]:
                     t.report(f.sourceRef.id if f.sourceRef else e.id,
-                             'When the strategy for a user task is set to "xx skip" and not determined by a form, it cannot be followed by an inclusive/exclusive gateway')
+                             "用户任务的策略为『xx跳过』且非表单决定流转时，后面不能接 包容/排它网关")
 
 
 def rule_sub_process_start(e: BO, t: Reporter, ctx) -> None:
@@ -707,10 +713,10 @@ def rule_sub_process_start(e: BO, t: Reporter, ctx) -> None:
         outs = e.outgoing or []
         for f in r:
             if f.sourceRef and f.sourceRef.type_ == "bpmn:StartEvent":
-                t.report(f.id, "The starting node cannot directly connect to subprocesses")
+                t.report(f.id, "开始节点不能直接连接子流程")
         for f in outs:
             if f.targetRef and f.targetRef.type_ in ["bpmn:InclusiveGateway", "bpmn:ExclusiveGateway"]:
-                t.report(f.id, "Cannot connect to inclusive/exclusive gateway after subprocess")
+                t.report(f.id, "子流程后面不能接 包容/排它网关")
 
 
 def rule_sub_process_quote(e: BO, t: Reporter, ctx) -> None:
@@ -721,8 +727,8 @@ def rule_sub_process_quote(e: BO, t: Reporter, ctx) -> None:
             s = call_flows[0].targetRef
             l = call_flows[-1].targetRef
             if s and l and s.calledElement and l.calledElement and s.calledElement == l.calledElement:
-                t.report(s.id, "The subprocesses behind the inclusive/parallel gateway cannot reference the same subprocess")
-                t.report(l.id, "The subprocesses behind the inclusive/parallel gateway cannot reference the same subprocess")
+                t.report(s.id, "包容/并行网关后面的子流程，不能引用同一个子流程")
+                t.report(l.id, "包容/并行网关后面的子流程，不能引用同一个子流程")
 
 
 def _find_dup_group(items: List[BO], key: str) -> List[BO]:
@@ -749,12 +755,12 @@ def rule_name_required(e: BO, t: Reporter, ctx) -> None:
     dup = _find_dup_group(candidates, "name")
     if dup:
         for it in dup:
-            t.report(it.id, "Node names cannot be duplicated")
+            t.report(it.id, "节点名称不能重复")
     for it in candidates:
         if it.name and len(it.name) > 20:
-            t.report(it.id, "The node name cannot exceed 20 characters")
+            t.report(it.id, "节点名称不能超过20个字符")
         if not (it.name and it.name.strip()):
-            t.report(it.id, "Node name cannot be empty")
+            t.report(it.id, "节点名称不能为空")
 
 
 def rule_flow_elements_length(e: BO, t: Reporter, ctx) -> None:
