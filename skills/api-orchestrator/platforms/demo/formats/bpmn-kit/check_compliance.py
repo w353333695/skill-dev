@@ -364,12 +364,19 @@ class Reporter:
         或网关规则上报相连 SequenceFlow 的 id）。位置信息（类型/名称/行号）
         优先取 target_id 对应的真实元素；解析不到时退化为当前元素。
         """
+        self._add(target_id, message, self._level)
+
+    def report_warn(self, target_id: Optional[str], message: str) -> None:
+        """按 warn 级上报（规则本身为 error 时局部降级提示用，如 R2 冗余声明）。"""
+        self._add(target_id, message, "warn")
+
+    def _add(self, target_id: Optional[str], message: str, level: str) -> None:
         target = self._by_id.get(target_id) if target_id else None
         if target is None:
             target = self._element
         self._issues.append(Issue(
             rule=self._rule,
-            level=self._level,
+            level=level,
             element_id=target_id,
             element_type=target.type_,
             element_name=target.name,
@@ -719,13 +726,14 @@ def rule_form_decision_vars_consistent(e: BO, t: Reporter, ctx) -> None:
                      "序列流表达式变量 {} 未在上游节点 [{}] 的 formExpressionName 变量（{}）中声明"
                      .format(", ".join(missing), src.name or src.id,
                              ", ".join(declared) if declared else "未声明"))
-        # R2：声明未用（仅提示）
+        # R2：声明未用（仅提示——2026-08-16 降为 warn 输出：技术支持流程实测
+        # 声明冗余是常见存量状态（多变量声明只用到部分），不该按 error 挡发布）
         if declared:
             unused = [v for v in declared if v not in expr_vars]
             if unused:
-                t.report(f.id,
-                         "上游节点声明变量 {} 在网关出边表达式中未使用（冗余声明）"
-                         .format(", ".join(unused)))
+                t.report_warn(f.id,
+                              "上游节点声明变量 {} 在网关出边表达式中未使用（冗余声明）"
+                              .format(", ".join(unused)))
 
 
 def rule_form_expression_path_resolvable(e: BO, t: Reporter, ctx) -> None:
