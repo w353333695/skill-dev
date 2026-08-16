@@ -468,9 +468,8 @@ def rule_no_gateway_join_fork(e: BO, t: Reporter, ctx) -> None:
 def rule_branch_gateway_only(e: BO, t: Reporter, ctx) -> None:
     """分支只能出现在网关上（2026-08-15 新增，用户需求）：
     出边 > 1 的节点（分支点）必须是 Gateway——userTask/callActivity/Event 多出边
-    = 隐式分裂，EasyOps 设计规范要求分支统一由网关表达（历史的"人工按钮分支"模式
-    ⚰️2026-08-16 已废弃——新版本不支持该机制；规则本身仍通用有效：任何多出边
-    节点都应插 exclusiveGateway 再分叉，否则引擎行为/前端展示不可控）。
+    = 隐式分裂，EasyOps 设计规范要求分支统一由网关表达（含人工按钮分支：
+    节点后应插 exclusiveGateway 再分叉，否则引擎行为/前端展示不可控）。
     比 off 状态的 no-implicit-split 更严：不看条件与 default，出边数即判。"""
     if e.is_any(["bpmn:Task", "bpmn:Event", "bpmn:CallActivity", "bpmn:SubProcess"]):
         outs = e.outgoing or []
