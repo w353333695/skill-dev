@@ -17,11 +17,13 @@ key_rule: |
   ③ 处理人：静态部门/角色 → 'easyops' 占位（前端可改）；userSelectType=3 表单动态 →
      flowable:assignee="{{.formValue}}" + assigneeValue=表单字段；取发起人 → "{{.loginUser}}"
   ④ 分支两套机制（勿混）：
-     · 条件自动路由：sequenceRule{conditionFilter all/any, subItems[keyField eq/ne valueCode]}
+     · 条件自动路由（✅现行唯一机制）：sequenceRule{conditionFilter all/any, subItems[keyField eq/ne valueCode]}
        → 上游决策节点 isFormDecision=1 + formExpressionName + 网关出边 ${变量=='值'}
        （变量名必须 = 决策节点声明变量——合规检测 form-decision-vars-consistent 规则会查）
-     · 人工按钮分支（无条件表达式）：userTask→排他网关→多条出边(name=按钮文案，无条件) +
-       labelViews=['pass:按钮名'] 配在 userTask nodeSettings。🔴节点直接多出边能建成但流转报错（必须上网关）
+     · ⚰️人工按钮分支已废弃（2026-08-16 用户告知：新版本已不支持）：老平台"按钮触发不同出线"
+       （无条件表达式）的旧建模（排他网关+出边name=按钮文案+labelViews）勿再用——迁移遇到
+       按钮分支节点时【停下问用户】新版替代方案（可考虑改造成条件路由：按钮语义转为表单
+       字段+条件表达式，具体以用户新版设计为准）
   ⑤ 网关直连网关（老平台常见）→ 合并消除：GW_a-[cond_a]->GW_b 的边删掉，对 GW_b 每条出边
      在 GW_a 复制 (cond_a && cond_b) 合并边；合并引入的变量补进上游决策节点声明
   ⑥ 节点名繁体 → 简体（显示层）
@@ -81,7 +83,7 @@ steps:
       主流程 def（⚠️先 list 查名防 409 撞名）。BPMN 生成按 key_rule 四类映射；纯语义 XML
       （七要素无 DI）→ relayout.py 布局 → check_compliance.py 检测（0 error 才继续——
       网关直连/变量一致性/必经元素等都拦）→ process_version.create（nodeSettings 按节点配：
-      加签父节点 allowedOps+add、按钮节点 labelViews）→ process_form.set 绑表单。
+      加签父节点 allowedOps+add）→ process_form.set 绑表单。
     expect: "code=0 → versionId；合规 0 error"
 
   - n: 6
@@ -100,8 +102,9 @@ note: |
   实战两例（2026-08-15，.90）：
   · 业务修数变更流程（ncb_upd_data_change v36）：32节点94字段——条件路由型（6网关12条件+
     6决策节点+8表单动态处理人），网关直连消除+变量补声明后合规 0 error。
-  · 事件管理流程（ncb_issue_prod v23）：7节点76字段——人工按钮分支型（3按钮节点，无条件
-    表达式），验证人=loginUser，事件转问题 callActivity。
+  · 事件管理流程（ncb_issue_prod v23）：7节点76字段——原人工按钮分支型（3按钮节点，该机制
+    ⚰️2026-08-16 已废弃，新版不支持——当时旧法：无条件表达式+补排他网关），验证人=loginUser，
+    事件转问题 callActivity。
     迁移后用户两次设计更正（都已在流程/表单侧修复）：①三按钮节点补排他网关（branch-gateway-only）；
     ②74字段大表单按 key_rule⑦ 拆 5 张阶段表单绑各节点——其中暴露 label≤20、RADIO 数据源
     路径两个前端设计器校验（form-kit E 类已全量复刻，落库前先过 check-controls）。
