@@ -16,6 +16,15 @@ bpmn-js-bpmnlint 27 条规则 + EasyOps 扩展的等价 Python 实现，零依�
 - EasyOps 侧补充（bpmnlint 之外）：
   - `branch-gateway-only`（error）：节点多出边必须上网关（2026-08-15 用户实测——能建成但流转报错）
   - `form-decision-vars-consistent`（error）：表单决定流转变量与网关表达式变量一致性
+  - `form-expression-path-resolvable`（error，2026-08-16）：**运行时取值路径存在性**——
+    formExpressionName 的 `var:userTaskId.containId[row].componentId[.valueField]`
+    逐段对照真实表单校验。对齐后端求值链（step/manager.go:1109 静默跳过语义 +
+    GetFormValueByComponentId 的 Component.Key 匹配）：段数<4（静默无值走默认分支，
+    最隐蔽）/ 节点不存在 / 无绑定表单 / 容器不存在 / 控件不存在 五类全部设计期拦截。
+    前端 bpmnlint **无此规则**（前端靠级联选择器结构性规避），直调 API 绕过前端时
+    这里是唯一防线。用法：`--form-bindings <json|@file>`（精简形
+    `{userTaskId: []Container}` 或 process_version.get 的 taskInfo 原始数组），
+    不传时仅格式层校验
   - `diagram-required` / `diagram-element-missing`：DI 图形坐标存在性（设计器渲染依赖）
 - 🔴form-flow 布尔语义（2026-08-16 node 对拍定案）：不报 **当且仅当** 条件含 `==`；
   空条件/纯标识符/含 `>` `>=` 等一律报——旧注释把范围符号场景写反过，以 `rule_form_flow`
