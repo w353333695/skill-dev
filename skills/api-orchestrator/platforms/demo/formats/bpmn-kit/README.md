@@ -16,42 +16,34 @@ bpmn-js-bpmnlint 27 条规则 + EasyOps 扩展的等价 Python 实现，零依�
 - EasyOps 侧补充（bpmnlint 之外）：
   - `branch-gateway-only`（error）：节点多出边必须上网关（2026-08-15 用户实测——能建成但流转报错）
   - `form-decision-vars-consistent`（error）：表单决定流转变量与网关表达式变量一致性
-  - `flow-conditional-error`（error，2026-08-16 恢复）：多出边网关须有 `${}` 条件。
-    🔴按钮分支豁免语义（用户实测缺口1 校准）：上游 userTask 配了 labelViews
-    （`--node-settings` 提供 nodeSettings）才豁免「序列流缺少条件」——仅
-    isFormDecision=0 不够（修数流程 GW_analysis 双无条件边即漏配 labelViews 的
-    死分支：既非表达式也非按钮，流转无路由依据）。未提供 node-settings 时回退宽容。
-  - `form-flow`（error，2026-08-16 恢复+豁免）：非表单决定流转的表达式必须含 `==`
-    （源码布尔：不报当且仅当含 `==`）。同样在「上游配 labelViews」时豁免——
-    纯按钮分支流程（事件管理型）不会整片误报。
   - `form-expression-path-resolvable`（error，2026-08-16）：**运行时取值路径存在性**——
     formExpressionName 的 `var:userTaskId.containId[row].componentId[.valueField]`
     逐段对照真实表单校验。对齐后端求值链（step/manager.go:1109 静默跳过语义 +
     GetFormValueByComponentId 的 Component.Key 匹配）：段数<4（静默无值走默认分支，
     最隐蔽）/ 节点不存在 / 无绑定表单 / 容器不存在 / 控件不存在 五类全部设计期拦截。
-    🔴控件匹配【严格按 Component.Key】（运行时 findFormFieldByComponentId 只认 key，
-    form_data_getter.go:761）——key 不匹配但 modelField 命中会单独报
-    「表单重建后 key 漂移」指纹（2026-08-16 缺口3 校准：并集索引会放过这类必炸路径）。
     前端 bpmnlint **无此规则**（前端靠级联选择器结构性规避），直调 API 绕过前端时
     这里是唯一防线。用法：`--form-bindings <json|@file>`（精简形
     `{userTaskId: []Container}` 或 process_version.get 的 taskInfo 原始数组），
     不传时仅格式层校验
   - `diagram-required` / `diagram-element-missing`：DI 图形坐标存在性（设计器渲染依赖）
-- 完整检查配方（编排挡/CLI）：
-  `check_compliance.py <bpmn> --form-bindings @fb.json --node-settings @ns.json`
-  （fb=各节点绑定表单的 formDefinition 映射；ns=processSetting.nodeSettings 数组）
 - 🔴form-flow 布尔语义（2026-08-16 node 对拍定案）：不报 **当且仅当** 条件含 `==`；
   空条件/纯标识符/含 `>` `>=` 等一律报——旧注释把范围符号场景写反过，以 `rule_form_flow`
   docstring 的实测矩阵为准
 - 入口：CLI `python3 check_compliance.py <file|XML|-> [--json] [--include-off] [--no-exit-code]`
 - 使用方：flows/build-process.yaml（建流程链 0 error 门禁）/ flows/migrate-legacy-process.yaml（迁移合规门）
 
-## relayout.py —— BPMN 自动布局（ITSM 流程图 DI 重排）
+## relayout.py —— BPMN 自动布局（ITSM 流程图 DI 重排，无交叉版）
 
 relayout.py：读入 bpmnXML（含烂 DI 或纯语义无 DI），重算全部节点坐标+正交连线，流程语义零改动。
-- 算法：Kahn 最长路径分层（DFS 灰边剔回边）→ barycenter 列内排序 → dominator 必经链锚主轴
-  → 回环侧支挂上/下 → 正交折线 + 跨列/回边绕行通道（嵌套深度+贪心选侧）
-- 入口：CLI `python3 relayout.py <in> [-o out]`；库 `from relayout import relayout_xml`（XML 串进出）
+- 算法（v2 无交叉版，2026-08-16 替换 Dagre 风格旧版——旧版实测 34 节点图 18 处穿节点+4 交叉）：
+  长边虚拟节点化（跨层边拆链，结构上消除穿节点）→ 排序以零逆序为收敛判据
+  （median sweep + transpose 精化 + 固定 seed 重启）→ 坐标保序落位（主链锚主流道 /
+  虚拟链整链同走廊 y / 其余按相邻列前驱均值对齐，能对齐的直线连接）→
+  列间通道轨道 x 分配（同 gap 竖直段各占一轨）；出入口一律边沿中点。
+  CLI 内置几何校验器：节点重叠/连线穿节点/边-边交叉 三主指标非零 → exit 1。
+- 观感指标（34 节点实测）：主链纯水平直线、26/41 条边零弯折、其余基本一次直角转。
+- 入口：CLI `python3 relayout.py <in> [-o out] [--svg out.svg] [--no-strict]`；
+  库 `from relayout import relayout_xml`（XML 串进出，签名与旧版兼容）
 - 领域适配点（为何在 platforms 不在 skill）：flowable: 扩展属性、EasyOps parser 的
   incoming/outgoing 回填、userTask 100x80/网关 50x50 尺寸约定、bpmn2:→bpmn: 前缀重写（URI 等价）
 - 使用方：flows/build-process.yaml（设计时生成即布局）/ flows/relayout-process-diagram.yaml（存量补救）
