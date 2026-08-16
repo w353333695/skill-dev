@@ -632,36 +632,37 @@ def parse_form_bindings(spec) -> "Optional[Dict[str, List[dict]]]":
 
 
 def _form_path_index(containers: List[dict]):
-    """从 []Container 建立取值路径索引，对齐运行时两段消费：
+    """从 []Container 建立取值路径索引。
 
-    - key 索引 {containId: {componentKey}}：findFormFieldByComponentId 只按
-      Component.Key 匹配（form_data_getter.go:761）——运行时真语义。
-    - mf 索引 {containId: {modelField}}：仅用于 key 未命中时的降级提示
-      （"modelField 命中但 key 不匹配"= 表单重建后 key 漂移的典型指纹，
-      2026-08-16 缺口3 教训：并集索引会放过这类运行时必炸的路径）。
-    - tabs 容器的控件在 tabPanes 下。
+    🔴主索引=modelField（2026-08-16 定案，用户实测+前端源码双重确认）：
+    前端变量编辑器级联第 4 级 value=e.modelField（Vc 组件 propertys.map(e=>({value:e.modelField}))），
+    人工配置的路径必然是 modelField。运行时 GetFormValueByComponentId 的
+    findFormFieldByComponentId 虽按 Component.Key 匹配，但工单 formData 按
+    <containId>.<modelField> 提交存储（extractFormValueWithCustomLogic 以 formPath 取数），
+    与前端一致。key 索引仅用于「路径写了 key 而非 modelField」的漂移提示
+    （迁移脚本生成的路径常见此类错位——修数流程 10 处全部要换）。
     """
-    key_index: Dict[str, set] = {}
     mf_index: Dict[str, set] = {}
+    key_index: Dict[str, set] = {}
     for c in containers or []:
         if not isinstance(c, dict):
             continue
         cid = c.get("key") or c.get("modelField") or ""
         if not cid:
             continue
-        keys = key_index.setdefault(cid, set())
         mfs = mf_index.setdefault(cid, set())
+        keys = key_index.setdefault(cid, set())
         props = list(c.get("propertys") or [])
         for pane in c.get("tabPanes") or []:
             props += pane.get("propertys") or []
         for p in props:
             if not isinstance(p, dict):
                 continue
-            if p.get("key"):
-                keys.add(p["key"])
             if p.get("modelField"):
                 mfs.add(p["modelField"])
-    return key_index, mf_index
+            if p.get("key"):
+                keys.add(p["key"])
+    return mf_index, key_index
 
 
 def rule_form_decision_vars_consistent(e: BO, t: Reporter, ctx) -> None:
@@ -699,9 +700,14 @@ def rule_form_decision_vars_consistent(e: BO, t: Reporter, ctx) -> None:
     if not expr_vars:
         return
     # 每条入边分别校验（多入边网关：任一上游没声明该变量即报——运行时走哪条入边不可预知）
+    # 2026-08-16 修正：仅约束 isFormDecision=1 的上游——按钮分支（非表单决定流转）的
+    # 变量由后端按按钮点击注入（converter.go GetProcessVariable 拆 var=='文案'），
+    # 不经 formExpressionName，R1 不适用（用户实测：GW_analysis 补 ${pass=='..'} 后误报）
     for f in ins:
         src = f.sourceRef
         if src is None:
+            continue
+        if src.attrs_.get("flowable:isFormDecision") != "1":
             continue
         fen = src.attrs_.get("flowable:formExpressionName") or ""
         declared = [x.split(":")[0].strip() for x in fen.split(";")
@@ -765,20 +771,21 @@ def rule_form_expression_path_resolvable(e: BO, t: Reporter, ctx) -> None:
                      .format(var, utid, hint if utid not in node_ids else "（该节点未在 --form-bindings 提供）"))
             continue
         # d. 容器存在性
-        key_index, mf_index = _form_path_index(containers)
-        comp_keys = key_index.get(contain_id)
-        if comp_keys is None:
+        mf_index, key_index = _form_path_index(containers)
+        comp_mfs = mf_index.get(contain_id)
+        if comp_mfs is None:
             t.report(e.id,
                      "变量 [{}] 容器 [{}] 不在该节点绑定表单的容器集（{}）——formPath 查不到"
-                     .format(var, contain_id, ", ".join(sorted(key_index))[:60]))
+                     .format(var, contain_id, ", ".join(sorted(mf_index))[:60]))
             continue
-        # e. 控件存在性——严格 Component.Key（运行时 findFormFieldByComponentId 只认 key）
-        if component_id not in comp_keys:
-            if component_id in (mf_index.get(contain_id) or set()):
+        # e. 控件存在性——主判 modelField（前端级联/取数语义）
+        if component_id not in comp_mfs:
+            if component_id in (key_index.get(contain_id) or set()):
                 t.report(e.id,
-                         "变量 [{}] 控件 [{}] 在容器 [{}] 仅 modelField 命中、key 不匹配——"
-                         "运行时按 Component.Key 查找将报『表单字段不存在』"
-                         "（表单重建后 key 漂移的典型指纹）".format(var, component_id, contain_id))
+                         "变量 [{}] 控件 [{}] 在容器 [{}] 是控件 key 而非 modelField——"
+                         "前端变量配置用 modelField（级联第4级 value=e.modelField），"
+                         "迁移脚本按 key 生成的路径需替换（修数流程 10 处实例）"
+                         .format(var, component_id, contain_id))
             else:
                 t.report(e.id,
                          "变量 [{}] 控件 [{}] 不在容器 [{}] 的控件集——运行时报『表单字段不存在』"
