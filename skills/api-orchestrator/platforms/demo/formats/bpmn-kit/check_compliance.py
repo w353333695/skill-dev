@@ -631,34 +631,37 @@ def parse_form_bindings(spec) -> "Optional[Dict[str, List[dict]]]":
     return bindings or None
 
 
-def _form_path_index(containers: List[dict]) -> Dict[str, set]:
-    """从 []Container 建立取值路径索引：containId -> {componentKey, ...}。
+def _form_path_index(containers: List[dict]):
+    """从 []Container 建立取值路径索引，对齐运行时两段消费：
 
-    对齐运行时消费（step/manager.go:1109 + form_data_getter.go:105）：
-    - componentId 按 Component.Key 匹配（控件 key），modelField 仅作显示名——
-      迁移生成的表单里 key 与 modelField 常见不一致，故两者都入索引（取并集，
-      key 命中是运行时真语义，modelField 命中视为弱命中，见 R3 消息分级）。
-    - tabs 容器的控件在 tabPanes 下；table 容器控件按行平铺（提交数据带行号，
-      设计态索引不区分行号）。
+    - key 索引 {containId: {componentKey}}：findFormFieldByComponentId 只按
+      Component.Key 匹配（form_data_getter.go:761）——运行时真语义。
+    - mf 索引 {containId: {modelField}}：仅用于 key 未命中时的降级提示
+      （"modelField 命中但 key 不匹配"= 表单重建后 key 漂移的典型指纹，
+      2026-08-16 缺口3 教训：并集索引会放过这类运行时必炸的路径）。
+    - tabs 容器的控件在 tabPanes 下。
     """
-    index: Dict[str, set] = {}
+    key_index: Dict[str, set] = {}
+    mf_index: Dict[str, set] = {}
     for c in containers or []:
         if not isinstance(c, dict):
             continue
         cid = c.get("key") or c.get("modelField") or ""
         if not cid:
             continue
-        keys = index.setdefault(cid, set())
+        keys = key_index.setdefault(cid, set())
+        mfs = mf_index.setdefault(cid, set())
         props = list(c.get("propertys") or [])
         for pane in c.get("tabPanes") or []:
             props += pane.get("propertys") or []
         for p in props:
             if not isinstance(p, dict):
                 continue
-            for k in (p.get("key"), p.get("modelField")):
-                if k:
-                    keys.add(k)
-    return index
+            if p.get("key"):
+                keys.add(p["key"])
+            if p.get("modelField"):
+                mfs.add(p["modelField"])
+    return key_index, mf_index
 
 
 def rule_form_decision_vars_consistent(e: BO, t: Reporter, ctx) -> None:
@@ -762,26 +765,53 @@ def rule_form_expression_path_resolvable(e: BO, t: Reporter, ctx) -> None:
                      .format(var, utid, hint if utid not in node_ids else "（该节点未在 --form-bindings 提供）"))
             continue
         # d. 容器存在性
-        index = _form_path_index(containers)
-        comp_keys = index.get(contain_id)
+        key_index, mf_index = _form_path_index(containers)
+        comp_keys = key_index.get(contain_id)
         if comp_keys is None:
             t.report(e.id,
                      "变量 [{}] 容器 [{}] 不在该节点绑定表单的容器集（{}）——formPath 查不到"
-                     .format(var, contain_id, ", ".join(sorted(index))[:60]))
+                     .format(var, contain_id, ", ".join(sorted(key_index))[:60]))
             continue
-        # e. 控件存在性（Component.Key 语义；modelField 弱命中仅提示）
+        # e. 控件存在性——严格 Component.Key（运行时 findFormFieldByComponentId 只认 key）
         if component_id not in comp_keys:
-            t.report(e.id,
-                     "变量 [{}] 控件 [{}] 不在容器 [{}] 的控件集——运行时报『表单字段不存在』"
-                     .format(var, component_id, contain_id))
+            if component_id in (mf_index.get(contain_id) or set()):
+                t.report(e.id,
+                         "变量 [{}] 控件 [{}] 在容器 [{}] 仅 modelField 命中、key 不匹配——"
+                         "运行时按 Component.Key 查找将报『表单字段不存在』"
+                         "（表单重建后 key 漂移的典型指纹）".format(var, component_id, contain_id))
+            else:
+                t.report(e.id,
+                         "变量 [{}] 控件 [{}] 不在容器 [{}] 的控件集——运行时报『表单字段不存在』"
+                         .format(var, component_id, contain_id))
 
 
 def rule_flow_conditional_error(e: BO, t: Reporter, ctx) -> None:
+    """多出边网关的条件校验（2026-08-16 按用户实测缺口二段改造）：
+    出边 >1 时每条出边必须有 ${...} 包裹的条件。
+    【人工按钮分支】的豁免条件收紧为——上游 userTask 的 nodeSettings 配了
+    labelViews（'pass:按钮名'）。仅 isFormDecision=0 不够：修数流程 GW_analysis
+    上游 isFormDecision 为空【且 labelViews 空】→ 两出边无条件 = 流转时无任何
+    路由依据（既非表达式也非按钮）——正是用户实测漏报的「序列流缺少条件」。
+    nodeSettings 经 ctx.node_settings 提供（--node-settings 或编排挡注入；
+    未提供时回退：isFormDecision=0 视为按钮分支不报，保持宽容）。"""
     if not e.is_any(_GW_TYPES_COND):
         return
     n = e.incoming or []
     r = e.outgoing or []
-    # 出口 > 1：每条出口流必须有 ${...} 包裹的条件
+    form_decision_upstream = any(
+        f.sourceRef is not None and f.sourceRef.attrs_.get("flowable:isFormDecision") == "1"
+        for f in n)
+    # 按钮分支判定：上游 userTask 在 nodeSettings 配了非空 labelViews
+    ns = getattr(ctx, "node_settings", None) or {}
+    button_branch = False
+    if ns:
+        for f in n:
+            src = f.sourceRef
+            if src is None:
+                continue
+            lv = (ns.get(src.id) or {}).get("labelViews") or []
+            if lv:
+                button_branch = True
     if len(r) > 1:
         for f in r:
             body = f.conditionExpression.body if f.conditionExpression else None
@@ -789,7 +819,11 @@ def rule_flow_conditional_error(e: BO, t: Reporter, ctx) -> None:
                 if not re.match(r"^\$\{.*\}$", body):
                     t.report(f.id, "表达式需要用${}包裹")
             else:
-                t.report(f.id, "序列流缺少条件")
+                if form_decision_upstream:
+                    t.report(f.id, "序列流缺少条件")
+                elif ns and not button_branch:
+                    # 提供了 nodeSettings 且上游无 labelViews —— 既非表达式也非按钮
+                    t.report(f.id, "序列流缺少条件（网关出边无条件且上游未配置按钮 labelViews）")
     # 入口上游若是「表单决定流向」节点，校验表单变量与出口表达式变量一致
     for f in n:
         src = f.sourceRef
@@ -822,12 +856,11 @@ def rule_inclusive_gateway(e: BO, t: Reporter, ctx) -> None:
 
 
 def rule_form_flow(e: BO, t: Reporter, ctx) -> None:
-    """网关前节点非表单决定流转时表达式符号必须用 ==。
-    源码布尔（2026-08-16 用 node 直接执行源码表达式定案）：
-      不报 当且仅当 body 含 '=='（n_syms 范围符号判定的取反只影响 && 前段，
-      只要 body 缺 '==' —— 无论空/纯标识符/含 >、>= 等 —— 一律 report）。
-    实测矩阵：null/''/'abc'/'${x>1}'/'${x>=1}' 全报；'${x==1}' 不报。
-    旧实现 NOT(a AND b AND c) 恰好等价本语义——无行为差异，仅精化注释与中文消息。"""
+    """网关前节点非表单决定流转时表达式符号必须用 ==（2026-08-16 补按钮分支豁免）。
+    源码布尔（node 对拍定案）：不报当且仅当 body 含 '=='——空/纯标识符/含>、>= 全报。
+    EasyOps 适配：上游 userTask 配了 labelViews（按钮分支，--node-settings 提供）
+    时无条件出边合法，豁免——事件管理流程（纯按钮分支）7 边误报由此消除；
+    上游真用表达式但缺 == 的照报（用户实测缺口2）。"""
     n_syms = [">=", "<=", ">", "<", "!=", "!=="]
     if not e.is_any(_GW_TYPES_COND):
         return
@@ -835,9 +868,15 @@ def rule_form_flow(e: BO, t: Reporter, ctx) -> None:
     outs = e.outgoing or []
     if len(r) > 1:
         return
+    ns = getattr(ctx, "node_settings", None) or {}
     for f in r:
         src = f.sourceRef
-        if src and src.attrs_.get("flowable:isFormDecision") == "1":
+        if src is None:
+            continue
+        if src.attrs_.get("flowable:isFormDecision") == "1":
+            continue
+        # 按钮分支豁免（提供 node_settings 时判定；未提供保持源码严格语义）
+        if ns and (ns.get(src.id) or {}).get("labelViews"):
             continue
         for out_f in outs:
             body = out_f.conditionExpression.body if out_f.conditionExpression else None
@@ -981,12 +1020,18 @@ RULES: List[tuple] = [
     ("parallel-gateway-appear-in-pairs", "warn", rule_parallel_gateway_appear_in_pairs),
     ("gateway-cannot-be-directly-connected", "error", rule_gateway_cannot_be_directly_connected),
     ("gateway-cannot-be-directly-connected-to-end", "warn", rule_gateway_cannot_be_directly_connected_to_end),
-    # 业务扩展规则 flow-conditional-error / form-flow 已按要求永久关闭：
-    # 两者对 flowable 表单表达式/网关符号的判定较激进，在现有流程中误报较多，默认不再检查。
+    # flow-conditional-error / form-flow 曾因"误报多"被关闭（源码 oD 也是 error）。
+    # 2026-08-16 用户实测纠正：业务修数流程 GW_analysis 双出边无条件（流转必错）、
+    # 人工按钮分支无条件是 EasyOps 合法建模——需要区分：
+    #   · 出边【全无】条件 = 真错误（按钮分支至少有 labelViews 按钮语义，但按钮分支
+    #     上游 userTask 是 isFormDecision=0；表单决定流转节点(isFormDecision=1)后的
+    #     网关出边无条件 = 变量求值无意义 = 必报）
+    #   · 出边【部分有】条件 = 漏配 default，报缺失那条
+    # 恢复为 error，与源码 oD 一致；人工按钮分支经 isFormDecision=0 豁免（见规则实现）。
     ("form-decision-vars-consistent", "error", rule_form_decision_vars_consistent),
-    ("flow-conditional-error", "off", rule_flow_conditional_error),
+    ("flow-conditional-error", "error", rule_flow_conditional_error),
     ("inclusive-gateway", "error", rule_inclusive_gateway),
-    ("form-flow", "off", rule_form_flow),
+    ("form-flow", "error", rule_form_flow),
     ("auto-pass", "warn", rule_auto_pass),
     ("sub-process-start", "error", rule_sub_process_start),
     ("sub-process-quote", "error", rule_sub_process_quote),
@@ -1010,7 +1055,8 @@ class Linter:
     """规则调度器，持有跨元素状态（如 no-duplicate-sequence-flows 的去重表）。"""
 
     def __init__(self, include_off: bool = False,
-                 form_bindings: Optional[Dict[str, List[dict]]] = None):
+                 form_bindings: Optional[Dict[str, List[dict]]] = None,
+                 node_settings: Optional[Dict[str, dict]] = None):
         self.include_off = include_off
         # no-duplicate-sequence-flows 跨元素共享状态
         self.dup_seen: Dict[str, BO] = {}
@@ -1018,6 +1064,7 @@ class Linter:
         self.dup_in: Dict[str, bool] = {}
         self.model: Optional[BpmnModel] = None  # DI 规则经 ctx 访问
         self.form_bindings = form_bindings      # R3 运行时路径校验数据源
+        self.node_settings = node_settings or {}   # 按钮分支判定（labelViews）
         self.all_node_ids: set = set()
 
     def lint(self, model: BpmnModel) -> List[Issue]:
@@ -1095,6 +1142,10 @@ def main(argv: Optional[List[str]] = None) -> int:
                         help="节点→表单定义 JSON（文件路径或内联），启用运行时取值路径校验："
                              "精简形 {\"<userTaskId>\": [<[]Container>]}} 或 process_version.get "
                              "的 taskInfo 原始数组；传 @file 读文件")
+    parser.add_argument("--node-settings", default=None,
+                        help="processSetting.nodeSettings JSON（@file 支持）——供按钮分支判定："
+                             "网关出边无条件时，仅上游节点配了 labelViews 才豁免"
+                             "「序列流缺少条件」；未提供时对非表单决定流转的上游保持宽容")
     args = parser.parse_args(argv)
 
     try:
@@ -1120,6 +1171,34 @@ def main(argv: Optional[List[str]] = None) -> int:
             return 2
     form_bindings = parse_form_bindings(fb_spec)
 
+    # node_settings（按钮分支判定）：接受 nodeSettings 数组或 {userTaskId: {...}} 映射
+    node_settings: Dict[str, dict] = {}
+    if args.node_settings:
+        ns_raw = args.node_settings
+        if ns_raw.startswith("@"):
+            try:
+                ns_raw = open(ns_raw[1:], encoding="utf-8").read()
+            except OSError as exc:
+                print(f"读取 --node-settings 文件失败: {exc}", file=sys.stderr)
+                return 2
+        try:
+            ns_spec = json.loads(ns_raw)
+        except json.JSONDecodeError as exc:
+            print(f"--node-settings 不是合法 JSON: {exc}", file=sys.stderr)
+            return 2
+        if isinstance(ns_spec, list):
+            for it in ns_spec:
+                if isinstance(it, dict) and it.get("userTaskId"):
+                    node_settings[it["userTaskId"]] = it
+        elif isinstance(ns_spec, dict):
+            ti = ns_spec.get("nodeSettings")
+            if isinstance(ti, list):
+                for it in ti:
+                    if isinstance(it, dict) and it.get("userTaskId"):
+                        node_settings[it["userTaskId"]] = it
+            else:
+                node_settings = ns_spec
+
     try:
         model = BpmnModel(xml_text)
     except ET.ParseError as exc:
@@ -1131,7 +1210,8 @@ def main(argv: Optional[List[str]] = None) -> int:
         return 2
 
     issues = Linter(include_off=args.include_off,
-                    form_bindings=form_bindings).lint(model)
+                    form_bindings=form_bindings,
+                    node_settings=node_settings).lint(model)
 
     if args.json:
         print(format_json(issues))
