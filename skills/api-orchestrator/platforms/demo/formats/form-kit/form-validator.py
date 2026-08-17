@@ -388,7 +388,8 @@ def main():
     p1 = sub.add_parser('check-form', help='表单元信息校验 A1-A5')
     p1.add_argument('--name', default='')
     p1.add_argument('--category', default='')
-    p1.add_argument('--form-id', default='')
+    p1.add_argument('--form-id', default=None,
+                    help='不传则跳过 A4（API 编排路径 formId 由 CMDB 生成不可指定；前端弹窗路径才需校验）')
     p1.add_argument('--description', default='')
     p1.add_argument('--form-id-readonly', action='store_true', help='已有表单进入（QUERY.form）时 id 只读跳过 A4')
 

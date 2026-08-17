@@ -80,6 +80,10 @@ steps:
       网关直连/变量一致性/必经元素等都拦）→ process_version.create（nodeSettings 按节点配：
       加签父节点 allowedOps+add）→ process_form.set 绑表单。
     expect: "code=0 → versionId；合规 0 error"
+    on_fail: |
+      409 撞名 → 换名加后缀（如 -NCB迁移）重建 def；140501 表达式错误 → 检查 ${} 包裹
+      （变量+==+值全在 ${} 内）；140200 部署失败 → 检查七要素（targetNamespace/isExecutable/
+      V2属性精简）/ 网关直连未消除；140500（set_main 阶段偶发）→ 重试即好
 
   - n: 6
     desc: |
@@ -87,8 +91,9 @@ steps:
       流程图 ${EASYOPS_CMDB_FRONTEND_URL}/next/itsc-process-manage/<defId>/versionCreate-v2/<versionId>?activeTab=0
       表单 ${EASYOPS_CMDB_FRONTEND_URL}/next/itsc-form-management/form/<formId>
       用户确认后：process_version.edit(state=done) → set_main 发布（子流程占位也应 set_main，
-      否则主流程 callActivity 部署可能解析失败）。
+      否则主流程 callActivity 部署可能解析失败）。set_main 须 state==done；偶发 140500 重试。
     expect: "用户确认流程图/表单渲染正常"
+    on_fail: "140500 偶发瞬时错 → 重试即好（完整语义见 objects.yaml#itsm_process_version.side_effects set_main rule）；仍败核对 state==done / 子流程占位是否 set_main"
 
 side_effects: objects.yaml#itsm_process_version + #itsm_form_version（全量覆盖连环坑见那里）
 acceptance: "流程图布局合规（0 error）+ 表单渲染正常 + set_main 部署成功"
