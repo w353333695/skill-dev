@@ -25,21 +25,32 @@ steps:
       控件 json tag 是 propertys（少 y）；SELECT 选项放 options.extraProps.items:[{key,label,value}]。
     body_hint: |
       formDefinition = JSON.stringify([
-        { "key":"c_base","name":"基础信息","type":"row","propertys":[
+        { "key":"c_base","modelField":"c_base","name":"基础信息","type":"row","propertys":[
             {"key":"reason","label":"申请理由","type":"INPUT","modelField":"reason","options":{"required":true}},
             {"key":"hostType","label":"申请主机类型","type":"SELECT","modelField":"hostType",
              "options":{"extraProps":{"items":[{"key":"vm","label":"虚拟机","value":"vm"},{"key":"pm","label":"物理机","value":"pm"}]}}} ]},
-        { "key":"c_vm","name":"虚拟机申请","type":"table","propertys":[
+        { "key":"c_vm","modelField":"c_vm","name":"虚拟机申请","type":"table","propertys":[
             {"key":"vmSpec","label":"配置档位","type":"SELECT","modelField":"vmSpec","options":{"extraProps":{"items":[{"key":"s","label":"小","value":"s"}]}}},
             {"key":"mountPart","label":"是否挂载分区","type":"SWITCH","modelField":"mountPart","options":{}},
             {"key":"partType","label":"分区类型","type":"SELECT","modelField":"partType","options":{"extraProps":{"items":[{"key":"xfs","label":"xfs","value":"xfs"}]}}},
             {"key":"partSize","label":"分区大小(G)","type":"NUMBERINPUT","modelField":"partSize","options":{}},
             {"key":"mountPoint","label":"挂载位置","type":"INPUT","modelField":"mountPoint","options":{}} ]},
-        { "key":"c_pm","name":"物理机申请","type":"table","propertys":[
+        { "key":"c_pm","modelField":"c_pm","name":"物理机申请","type":"table","propertys":[
             {"key":"host","label":"选择物理机","type":"CMDBINSTANCESELECT","modelField":"host",
              "cmdbProps":{"class":"relation","foreignObjectId":"HOST"},
              "options":{"frontKey":"name"}} ]} ])
   - n: 2
+    desc: |
+      表单门禁（本地，改/建设计后必过——🔴后端不拦任何设计器规则，绕过前端直调 API 须自跑兜底，
+      否则带病数据能落库但前端打不开/保存不了）：
+      ① 控件树校验：python3 formats/form-kit/form-validator.py check-controls --form-definition '<formDefinition JSON>'
+        （E 类设计器保存链：容器标题/id 规则、控件标题≤20、id 唯一、🔴枚举数据源路径按类型区分
+        SELECT/MULTIPLESELECT/CHECKBOX→extraProps.items / RADIO/CASCADER/MODALSELECT→extraProps.options）
+      ② 元信息+版本号校验：check-form --name <名> --category <分类>；check-version --version <版本号> --memo <说明>
+        （A2 名称≤20 / D2 版本 x.y.z 三段式 / D3 说明≤20 无空白）
+      0 error 才进步骤 3；不过 → 回步骤 1 修 formDefinition
+    expect: "form-validator 全部通过（0 fail）"
+  - n: 3
     op: form.save
     args: [--body-file, "<form.json>", --insecure, --yes]
     desc: 新建表单（永远建 form + 首版本 isMain=true；非 upsert）
@@ -48,17 +59,19 @@ steps:
         "formDefinition": <上面的 JSON 字符串>,
         "state":"unfinished", "versionName":"1.0.0", "versionMemo":"初版" }
     expect: "code=0；data.instanceId=表单id，data.lastestVersion.instanceId=版本id"
-    on_fail: "403 鉴权失败 → user 缺 itsc:form_management_create 权限；必填缺失 → 补 name/category/formDefinition/state"
-  - n: 3
+    on_fail: "403 鉴权失败 → user 缺 itsc:form_management_create 权限；必填缺失 → 补 name/category/formDefinition/state/versionName"
+  - n: 4
     op: form_version.get
     args: ["<formId>", "<versionId>", --insecure]
     desc: 校验——get 回读 formDefinition 确认内容落库（formDefinition 是字符串，需二次 JSON.parse 看 []Container）
-    dataflow: "step2 返回的 formId + versionId → step3 path 参数"
+    dataflow: "step3 返回的 formId + versionId → step4 path 参数"
 
 key_rule: |
   form.save 非 upsert（永远新建）；formId/versionId 不可指定，CMDB 生成返回。
   formDefinition 是 JSON 字符串（wire 层 string），不是嵌套对象——save 时 JSON.stringify([]Container)。
-  想先验证表单内容可跑通，可先 save 成功再用 form_version.get 回读确认。
+  落库链：构造归一化 formDefinition → form-validator 门禁（check-controls + check-form/check-version，
+  0 fail 才落库）→ form.save → form_version.get 回读确认。
+  （校验器规则清单见 formats/form-kit/README.md；🔴后端不拦设计器规则，本地门禁是唯一防线）
 side_effects: objects.yaml#itsm_form_version.side_effects
 acceptance: "${EASYOPS_CMDB_FRONTEND_URL}/next/itsc-form-management/form-list/<formId>/<versionId>"
 rollback: "form.delete <formId>（须先清版本；但新建的首版本删了会级联删 form，见 delete-form.yaml）"
