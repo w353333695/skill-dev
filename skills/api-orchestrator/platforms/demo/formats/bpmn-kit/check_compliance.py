@@ -16,7 +16,8 @@ bpmn-js-bpmnlint（https://github.com/bpmn-io/bpmn-js-bpmnlint）27 条规则的
 - 接受「XML 文件路径」或「XML 原文」作为输入，一次性输出全部问题。
 - 每条问题标注：规则名、等级(error/warn)、元素 id、元素类型($type)、
   元素名称(name)、XML 源码行号、消息。
-- 默认按源码 oD 配置启用 error/warn 规则，off 规则默认跳过（可用 --include-off 开启）。
+- 全部 32 条规则默认以 error 运行（2026-08-17 定案：宁可误报不可漏检，无永久关闭
+  规则）；--include-off 开关保留，供将来可能的 off 规则使用。
 
 与源码的两处差异（修正明显笔误，详见 spec 文档「与源码差异」一节）：
 - `gateway-cannot-be-directly-connected` / `flow-conditional-error` /
@@ -962,7 +963,9 @@ def rule_diagram_element_missing(e: BO, t: Reporter, ctx) -> None:
 
 # --------------------------------------------------------------------------- #
 # 规则注册表：(规则名, 等级, check 函数)
-# 等级策略（2026-08-17 用户定案）：宁可误报不可漏检——除 2 条永久关闭外全部 error。
+# 等级策略（2026-08-17 用户定案，同日二次演进）：宁可误报不可漏检——全部 32 条 error，
+# 不保留永久关闭（重开 flow-conditional-error / form-flow：事件管理流程-v2 实测 7+7 条
+# 全为真问题非误报，且 conditional-flows 对「整网关出边全无条件」场景静默，关闭即漏检）。
 RULES: List[tuple] = [
 # 原「与前端源码 oD 配置一致」的对齐原则废弃；某条规则实战证明过于严苛（误报多）时
 # 再单独降级 warn/off 并在此记录原因。
@@ -985,12 +988,10 @@ RULES: List[tuple] = [
     ("parallel-gateway-appear-in-pairs", "error", rule_parallel_gateway_appear_in_pairs),
     ("gateway-cannot-be-directly-connected", "error", rule_gateway_cannot_be_directly_connected),
     ("gateway-cannot-be-directly-connected-to-end", "error", rule_gateway_cannot_be_directly_connected_to_end),
-    # 业务扩展规则 flow-conditional-error / form-flow 已按要求永久关闭：
-    # 两者对 flowable 表单表达式/网关符号的判定较激进，在现有流程中误报较多，默认不再检查。
     ("form-decision-vars-consistent", "error", rule_form_decision_vars_consistent),
-    ("flow-conditional-error", "off", rule_flow_conditional_error),
+    ("flow-conditional-error", "error", rule_flow_conditional_error),
     ("inclusive-gateway", "error", rule_inclusive_gateway),
-    ("form-flow", "off", rule_form_flow),
+    ("form-flow", "error", rule_form_flow),
     ("auto-pass", "error", rule_auto_pass),
     ("sub-process-start", "error", rule_sub_process_start),
     ("sub-process-quote", "error", rule_sub_process_quote),
