@@ -318,6 +318,9 @@ def extract_expr_vars(expr: str) -> List[str]:
     # 去掉 ${...} 包裹
     expr = re.sub(r"\$\{([^}]*)\}", r"\1", expr)
     expr = expr.replace("&&", " and ").replace("||", " or ")
+    # 剔除字符串字面量内容（'pm' / "vm" 是比较值，不是变量——不剔除会把值误当变量，
+    # form-decision-vars-consistent R1 稳定误报，2026-08-17 标准场景烟测命中）
+    expr = re.sub(r"'[^']*'|\"[^\"]*\"", "", expr)
     result: List[str] = []
     for m in re.finditer(r"[A-Za-z_]\w*", expr):
         tok = m.group(0)
@@ -959,35 +962,36 @@ def rule_diagram_element_missing(e: BO, t: Reporter, ctx) -> None:
 
 # --------------------------------------------------------------------------- #
 # 规则注册表：(规则名, 等级, check 函数)
-# 等级与源码 oD 配置完全一致。
-# --------------------------------------------------------------------------- #
+# 等级策略（2026-08-17 用户定案）：宁可误报不可漏检——除 2 条永久关闭外全部 error。
 RULES: List[tuple] = [
-    ("conditional-flows", "off", rule_conditional_flows),
+# 原「与前端源码 oD 配置一致」的对齐原则废弃；某条规则实战证明过于严苛（误报多）时
+# 再单独降级 warn/off 并在此记录原因。
+    ("conditional-flows", "error", rule_conditional_flows),
     ("end-event-required", "error", rule_end_event_required),
-    ("event-sub-process-typed-start-event", "off", rule_event_sub_process_typed_start_event),
+    ("event-sub-process-typed-start-event", "error", rule_event_sub_process_typed_start_event),
     ("no-complex-gateway", "error", rule_no_complex_gateway),
     ("no-disconnected", "error", rule_no_disconnected),
     ("no-duplicate-sequence-flows", "error", rule_no_duplicate_sequence_flows),
-    ("no-gateway-join-fork", "off", rule_no_gateway_join_fork),
+    ("no-gateway-join-fork", "error", rule_no_gateway_join_fork),
     ("branch-gateway-only", "error", rule_branch_gateway_only),
-    ("no-implicit-split", "off", rule_no_implicit_split),
-    ("no-inclusive-gateway", "off", rule_no_inclusive_gateway),
+    ("no-implicit-split", "error", rule_no_implicit_split),
+    ("no-inclusive-gateway", "error", rule_no_inclusive_gateway),
     ("single-blank-start-event", "error", rule_single_blank_start_event),
-    ("single-event-definition", "off", rule_single_event_definition),
+    ("single-event-definition", "error", rule_single_event_definition),
     ("start-event-required", "error", rule_start_event_required),
-    ("sub-process-blank-start-event", "off", rule_sub_process_blank_start_event),
-    ("superfluous-gateway", "off", rule_superfluous_gateway),
-    ("inclusive-gateway-appear-in-pairs", "warn", rule_inclusive_gateway_appear_in_pairs),
-    ("parallel-gateway-appear-in-pairs", "warn", rule_parallel_gateway_appear_in_pairs),
+    ("sub-process-blank-start-event", "error", rule_sub_process_blank_start_event),
+    ("superfluous-gateway", "error", rule_superfluous_gateway),
+    ("inclusive-gateway-appear-in-pairs", "error", rule_inclusive_gateway_appear_in_pairs),
+    ("parallel-gateway-appear-in-pairs", "error", rule_parallel_gateway_appear_in_pairs),
     ("gateway-cannot-be-directly-connected", "error", rule_gateway_cannot_be_directly_connected),
-    ("gateway-cannot-be-directly-connected-to-end", "warn", rule_gateway_cannot_be_directly_connected_to_end),
+    ("gateway-cannot-be-directly-connected-to-end", "error", rule_gateway_cannot_be_directly_connected_to_end),
     # 业务扩展规则 flow-conditional-error / form-flow 已按要求永久关闭：
     # 两者对 flowable 表单表达式/网关符号的判定较激进，在现有流程中误报较多，默认不再检查。
     ("form-decision-vars-consistent", "error", rule_form_decision_vars_consistent),
     ("flow-conditional-error", "off", rule_flow_conditional_error),
     ("inclusive-gateway", "error", rule_inclusive_gateway),
     ("form-flow", "off", rule_form_flow),
-    ("auto-pass", "warn", rule_auto_pass),
+    ("auto-pass", "error", rule_auto_pass),
     ("sub-process-start", "error", rule_sub_process_start),
     ("sub-process-quote", "error", rule_sub_process_quote),
     ("name-required", "error", rule_name_required),
@@ -995,7 +999,7 @@ RULES: List[tuple] = [
     ("is-empty-element", "error", rule_is_empty_element),
     # DI（图形坐标）存在性：缺了流程设计器报 "no diagram to display"（2026-08-04 主机申请流程实战补充）
     ("diagram-required", "error", rule_diagram_required),
-    ("diagram-element-missing", "warn", rule_diagram_element_missing),
+    ("diagram-element-missing", "error", rule_diagram_element_missing),
     # 运行时取值路径存在性（2026-08-16 新增）：--form-bindings 提供节点→表单定义时
     # 全量校验；未提供时仅格式层（段数/分隔符）。前端 bpmnlint 无此规则——前端靠
     # 级联选择器结构性规避，直调 API 绕过前端时这里是唯一防线。

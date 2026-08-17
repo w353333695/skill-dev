@@ -10,7 +10,9 @@ bpmn-js-bpmnlint 27 条规则 + EasyOps 扩展的等价 Python 实现，零依�
   - 27 条规则实现体 `rD["bpmnlint/<name>"]` + 启用配置 `oD.rules`（error/warn/off 等级表）
   - 中文消息对照表（144 条 en→zh 映射，检测消息已按此中文化）
   - 表达式变量提取 `nD`（math.js AST SymbolNode——Python 侧用正则近似，保留字/函数名排除）
-- 规则分级（源码 oD 原样）：error 15 条 / warn 5 条 / off 7 条（`--include-off` 可开）
+- 规则分级（2026-08-17 用户定案：宁可误报不可漏检）：除 `flow-conditional-error` / `form-flow`
+  2 条永久关闭（误报多）外**全部 error（30 条）**——原「与前端源码 oD 配置一致（error 15 /
+  warn 5 / off 7）」的对齐原则废弃；某条规则实战证明过于严苛时再单独降级并在脚本注册表注释记录原因
 - 与源码的已知差异（修正笔误）：源码多处写 `"bpmn:ParallelGatewa"`（漏 y），已修正为
   `bpmn:ParallelGateway`——使并行网关被正确检查
 - EasyOps 侧补充（bpmnlint 之外）：
