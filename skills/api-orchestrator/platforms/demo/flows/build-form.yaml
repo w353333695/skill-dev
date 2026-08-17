@@ -17,6 +17,7 @@ steps:
     desc: |
       按需求拼 []Container（容器平铺列表）。⚠️不能只填语义字段——前端逐字段读，缺 options.layout/belongToSection/remoteFunc/rules 等会白屏崩（"Cannot read properties of undefined"）。
       必须用归一化器补全：容器加 condition/layout/layoutConfig/modelField/displayCondition；控件加 belongToSection + 完整 options（layout/layoutSpan/labelCol/defaultValue/disabled/enabled/highLight/isMore/only/pattern/placeholder/note/question/displayCondition/remoteFunc{toolId,scriptInputs}/rules/extraProps/dataType/required）。完整字段集见 objects.yaml#itsm_form_definition constraints。
+      🔴layout.y=行号必须逐控件递增（enumerate 序号），一行一控件 y=i w=12；一行两列同 y、x=0/6、w=6 且 layoutSpan 同 w——全写 y=0 会导致所有控件挤一行（2026-08-17 .148 实测，语义见 objects.yaml#itsm_form_definition constraints「layout 坐标语义」）。
       最稳：get 一个正常表单（如「知识表单」）的 formDefinition 作模板，改里面的 type/label/modelField/extraProps.items。
       本场景结构：
       ① row 容器『基础信息』: 申请理由 INPUT(必填) + 申请主机类型 SELECT[物理机|虚拟机] + 申请主机类型 MULTIPLESELECT（决定后续 table 显隐，条件显示见 add-version.yaml）

@@ -348,6 +348,17 @@ objects:
         控件 Component 须含：belongToSection(=所属容器 key)、key、type、label、modelField、options{...}
         options 须含全字段：layout([0,row,12,1])、layoutSpan(12)、labelCol(3)、defaultValue(""或[])、required(bool)、dataType(string/number/object/...)、pattern、placeholder、disabled(false)、enabled(true)、highLight(false)、isMore(true)、only(false)、note、question([])、displayCondition("")、remoteFunc({toolId:"",scriptInputs:[]})、rules([])、extraProps({})(SELECT/RADIO/CHECKBOX 的选项放 extraProps.items:[{key,label,value}])
         崩点最常见：options.layout[0]（前端读栅格坐标）、options.remoteFunc.scriptInputs、belongToSection。→ 生成 formDefinition 必须用归一化器补默认值，不能只填语义字段。
+      - |
+        🔴【layout 坐标语义——y 是行号，写错全挤一行】(2026-08-17 .148「事件-发现并提交」1.0.0 实测：
+        45 控件全部 layout=[0,0,12,1]，渲染全挤一行；1.0.1 仅把 y 改为 0..44 递增即修复)。
+        语义（前端 form-renderer Lm 组件消费，源码 index.e5622707.js）：
+          layout=[x,y,w,h]：x=列偏移、y=行号、w=宽(栅格,antd Col span=2*w)、h=高
+          渲染=按 y 分组(groupBy "y")→每组一个 antd Row→组内 Col span=2*w（x 只算 offset）
+          ⇒ y 相同的控件挤同一行；y 不递增≠自动换行（前端无 compact 自动排，如实渲染坐标）
+          ⇒ 同容器内每控件 y 必须逐个递增（一行一控件 y=i；一行两控件则同 y、x 分 0/6、w=6）
+          容器自身 layout[1] 同理=容器在表单中的行序，多容器也要 y 递增（不能全 [0,*,12,1]）
+        生成纪律：构造 propertys 时 y=控件序号（enumerate），勿抄模板把 y 固定 0；
+        一行多列时 w=12/列数（两列 w=6）且 layoutSpan 与 w 一致（编辑态 w 取 layoutSpan 优先，源码 Mm 映射）。
 
   itsm_form_container:
     description: 容器（Container，definition.go:33-42）—— 表单内容的分组单元，type 决定形态。
@@ -420,7 +431,7 @@ objects:
   itsm_form_options:
     description: 控件配置（Options，component.go:51-73）—— 所有控件共享字段 + extraProps（控件特有）。
     fields:
-      layout:           { type: array, items: integer, desc: "栅格布局 [x,y,w,h]" }
+      layout:           { type: array, items: integer, desc: "栅格布局 [x,y,w,h]——🔴y=行号：同 y 挤同一行，每控件 y 须递增（全 0 → 45 控件挤一行，2026-08-17 实测）；w=宽(span=2*w)，一行两列 x=0/6 w=6。详见 itsm_form_definition constraints「layout 坐标语义」" }
       labelCol:         { type: integer, desc: "标签列宽" }
       defaultValue:     { type: any, desc: "静态默认值（动态默认值用 remoteFunc 脚本）" }
       required:         { type: bool, desc: "是否必填" }
