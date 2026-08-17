@@ -70,9 +70,9 @@ echo "PLATFORMS_ROOT=${API_CLI_PLATFORMS_DIR:-$PWD/.api-orchestrator/platforms} 
 流程：
 1. **解析需求** → 拆成要素（涉及哪些系统/对象/步骤）。
 2. **查资料** → entities（实体映射）+ objects（对象关系/副作用）+ flows（流程模板）+ formats（格式包）。
-3. **生成 plan** → 步骤序列（DAG 或增量），含数据流（step1 输出 → step2 输入）+ 副作用。写 `tmp/<task>/plan.md`。
+3. **生成 plan** → 步骤序列（DAG 或增量），含数据流（step1 输出 → step2 输入）+ 副作用。写 `$PWD/tmp/<task>/plan.md`。
 4. **展示 plan → 用户确认**（复杂必确认）。
-5. **分步执行** → bash 调 api-cli + 生成制品（BPMN/tar.gz）+ jq 数据流接线；中间产物写 `tmp/<task>/state.json`。
+5. **分步执行** → bash 调 api-cli + 生成制品（BPMN/tar.gz）+ jq 数据流接线；中间产物写 `$PWD/tmp/<task>/state.json`。
 6. **校验** → 查 objects/formats 校验一致性。
 7. **失败回滚** → 按 state.json 反向调 remove/delete。
 

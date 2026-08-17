@@ -119,8 +119,8 @@ skill 两种模式，决定能否写 `platforms/`：
 
 - **不硬编码任何系统/格式**：所有"调什么/字段怎么接/怎么校验"查 platforms 资料。
 - **写操作/复杂操作必确认**：展示 plan 或影响面，用户确认后执行。
-- **状态持久化（tmp 落点纪律）**：复杂编排的中间产物跨 bash 步传递时——① **优先不落盘**：body 用进程替换喂 `--body-file <(printf '%s' '<json>')`，能用内联/stdin 就不写文件；② **必须落盘时**用绝对路径锚定**调用方 cwd**（`$PWD/.api-orchestrator/tmp/<task>/` 或 `mktemp -d`），**严禁写 skill 目录**——勿 `cd` 进 skill 再用相对 `tmp/`，那会把运行时垃圾写进分发物，且顶层 `.gitignore` 的 `tmp/` 会让 git 静默、污染隐形。
-- **部署根内目录隔离**：`$PWD/.api-orchestrator/` 下只允许 4 类内容——`platforms/`（领域知识）、`auth.d/`（密钥）、`env.d/`（非密配置）、`tmp/`（编排中间产物）。tmp 与前三者同级，禁止交叉写入（如把密钥写进 platforms、或把 tmp 产物写进 auth.d）。
+- **状态持久化（tmp 落点纪律）**：复杂编排的中间产物跨 bash 步传递时——① **优先不落盘**：body 用进程替换喂 `--body-file <(printf '%s' '<json>')`，能用内联/stdin 就不写文件；② **必须落盘时**写到**项目根 `tmp/<task>/`**（即 `$PWD/tmp/`，对齐 AGENTS.md「skill 产物默认放 tmp/」；不存在则 mkdir，gitignore 已覆盖不入库）或 `mktemp -d`，**严禁写 skill 目录**——勿 `cd` 进 skill 再用相对 `tmp/`，那会把运行时垃圾写进分发物，且顶层 `.gitignore` 的 `tmp/` 会让 git 静默、污染隐形。**勿写部署根 `.api-orchestrator/`**——那里只放知识/密钥/配置，不放临时产物（2026-08-17 起 tmp 与部署根解耦）。
+- **部署根内目录隔离**：`$PWD/.api-orchestrator/` 下只允许 3 类内容——`platforms/`（领域知识）、`auth.d/`（密钥）、`env.d/`（非密配置）。禁止交叉写入（如把密钥写进 platforms、或把 tmp 产物写进 auth.d）；编排中间产物一律走项目根 `tmp/`，不进部署根。
 - **失败回滚**：记录已执行步骤，失败时反向调 remove/delete。
 - **platforms 只读（orchestration 模式）**：非 onboarding 不得 Write/Edit platforms 文件（防资料污染）；onboarding 改完必 lint。
 - **onboarding 输入门禁**：契约 / API 文档 / 后端源码至少一个才开工；缺则停下问用户（详见 `references/onboarding.md` 步 1）。

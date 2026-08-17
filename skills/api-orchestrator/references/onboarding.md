@@ -140,6 +140,8 @@ onboarding 的速度和质量取决于输入完整度。**开工前按此清单�
 mkdir -p $PWD/.api-orchestrator/{platforms,auth.d,env.d}
 ```
 
+（tmp 不在部署根——编排中间产物落项目根 `tmp/`，见 SKILL.md「tmp 落点纪律」。）
+
 env.d/<dep>.env 只放业务变量（**不放路径变量**——`API_CLI_DEPLOYMENT_ROOT` 由 run.sh 从 $PWD 推导，自举会死循环）：
 
 ```bash
@@ -187,9 +189,9 @@ $API_CLI_DEPLOYMENT_ROOT/
 │   ├── <system>.yaml     api-cli 清单：resource/verb/body schema
 │   └── formats/<fmt>/    （有跨部署格式才需要）
 ├── auth.d/                  ← 密钥（api-cli 读，env API_CLI_AUTH_D 指此；不入 git）
-├── env.d/<dep>.env          ← 非密配置（run.sh 读；只放业务变量 EASYOPS_*，不放路径变量）
-└── tmp/                     ← 编排中间产物（与前三者同级隔离）
+└── env.d/<dep>.env          ← 非密配置（run.sh 读；只放业务变量 EASYOPS_*，不放路径变量）
 ```
+（编排中间产物不放部署根——落项目根 `tmp/<task>/`，见 SKILL.md「tmp 落点纪律」。）
 自检：换个 LLM 只读这些文件，能否无坑接上系统、复现场景？能 → onboarding 合格。
 
 ---
