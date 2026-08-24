@@ -28,6 +28,13 @@ def test_check_unsupported():
     assert r.exit_code == 1  # 不支持的转换 -> 非零退出
 
 
+def test_check_accepts_file_path():
+    """check 传文件路径时自动取扩展名（容错用法）。"""
+    r = CliRunner().invoke(main, ["check", "tmp/a.md", "docx"])
+    assert r.exit_code == 0
+    assert "md-docx" in r.output
+
+
 def test_doctor():
     r = CliRunner().invoke(main, ["doctor"])
     assert r.exit_code == 0

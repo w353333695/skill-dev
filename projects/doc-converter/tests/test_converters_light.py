@@ -1,8 +1,26 @@
 """轻量转换测试（纯标准库 / openpyxl，不依赖 playwright/pandoc）。"""
 import json
+import struct
+import zlib
 from pathlib import Path
 
 from doc_converter.converters import get_converter
+
+
+def _make_png(path: Path, w: int, h: int):
+    """生成指定像素尺寸的纯色 PNG（手写最小 chunk，免依赖 Pillow）。"""
+    def chunk(tag: bytes, data: bytes) -> bytes:
+        return (struct.pack(">I", len(data)) + tag + data
+                + struct.pack(">I", zlib.crc32(tag + data) & 0xFFFFFFFF))
+
+    ihdr = struct.pack(">IIBBBBB", w, h, 8, 2, 0, 0, 0)  # 8bit RGB
+    raw = b"".join(b"\x00" + b"\xC0\x00\x00" * w for _ in range(h))
+    path.write_bytes(
+        b"\x89PNG\r\n\x1a\n"
+        + chunk(b"IHDR", ihdr)
+        + chunk(b"IDAT", zlib.compress(raw))
+        + chunk(b"IEND", b""),
+    )
 
 
 def test_json_to_csv(tmp_path: Path):
@@ -198,3 +216,38 @@ def test_md_html_mermaid_not_highlighted(tmp_path: Path):
     html = out.read_text(encoding="utf-8")
     assert 'class="mermaid"' in html     # mermaid 正确还原
     assert 'class="codehilite"' in html  # 普通代码块被高亮
+
+
+def test_md_to_docx_image_sizes(tmp_path: Path):
+    """图片尺寸：独立行与行内图同用自然尺寸封顶策略，同一图片两处尺寸一致。"""
+    import re
+    import zipfile
+
+    # 大图 1440x720（自然 20in -> 封顶）；小图 144x72（自然 2in -> 不放大）
+    _make_png(tmp_path / "big.png", 1440, 720)
+    _make_png(tmp_path / "small.png", 144, 72)
+
+    inp = tmp_path / "doc.md"
+    inp.write_text(
+        "独立大图\n\n![big](big.png)\n\n"
+        "行内大图 ![big](big.png) 文字\n\n"
+        "独立小图\n\n![small](small.png)\n\n",
+        encoding="utf-8",
+    )
+    out = tmp_path / "doc.docx"
+
+    c = get_converter("md", "docx")
+    assert c is not None
+    res = c.convert(inp, out)
+    assert res.success, res.message
+
+    with zipfile.ZipFile(out) as z:
+        xml = z.read("word/document.xml").decode("utf-8")
+    # EMU: 914400/inch；宽度应与 max_inches 上限(6)一致，行内同图不再被固定 2in
+    widths = [int(cx) / 914400 for cx in re.findall(r'<wp:extent cx="(\d+)"', xml)]
+    assert len(widths) == 3
+    # 大图独立 6.0（自然 20in 封顶）；同一大图行内 4.5（行内上限，不再固定 2in）；
+    # 小图保持自然 2.0（不放大）
+    assert widths[0] == 6.0
+    assert widths[1] == 4.5
+    assert widths[2] == 2.0

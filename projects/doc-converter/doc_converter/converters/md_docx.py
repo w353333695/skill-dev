@@ -33,6 +33,7 @@ _CURRENT_INPUT_PATH: Path | None = None
 _MATH_CACHE: list[str] = []   # 公式原文列表（按占位符序号索引）
 _FN_CACHE: list[tuple[int, str, str]] = []  # [(序号, id, 内容)]
 _CHECKBOX_SEQ: int = 0  # 复选框控件 id 递增计数器（每文档重置）
+_EMBEDDED_IMG_COUNT: int = 0  # 嵌入的本地图片数（独立行 + 行内，每文档重置）
 
 
 # ---------------------------------------------------------------------------
@@ -51,6 +52,38 @@ def _resolve_image_path(input_path: Path | None, src: str) -> Path | None:
     if input_path is None:
         return None
     return (input_path.parent / p).resolve()
+
+
+def _add_picture_sized(run, img_path: Path, max_inches: float = 6.0):
+    """插入图片：宽度取自然尺寸与上限的较小值（不放大），只给宽度保持纵横比。
+
+    独立行与行内两条插入路径共用本函数，保证同一图片在两种位置尺寸一致；
+    小图不再被强行拉到固定宽度。计入 _EMBEDDED_IMG_COUNT。
+    """
+    from docx.shared import Inches
+
+    native = _natural_width_inches(img_path)
+    width = Inches(min(native, max_inches)) if native is not None else Inches(max_inches)
+    run.add_picture(str(img_path), width=width)
+
+    global _EMBEDDED_IMG_COUNT
+    _EMBEDDED_IMG_COUNT += 1
+
+
+def _natural_width_inches(img_path: Path) -> float | None:
+    """读图片自然宽度（英寸），无 dpi 信息按 72dpi（python-docx 同样默认）。
+
+    读不出（格式异常等）返回 None，调用方回退固定上限宽度。
+    """
+    try:
+        from docx.image.image import Image as DocxImage
+        img = DocxImage.from_file(str(img_path))
+        dpi = img.horz_dpi or 72
+        if dpi <= 0:
+            dpi = 72
+        return img.px_width / dpi
+    except Exception:
+        return None
 
 
 def _set_run_font(run, font_name: str, font_size=None):
@@ -499,14 +532,15 @@ class _InlineParser(HTMLParser):
         run.font.color.rgb = RGBColor(0x1F, 0x3A, 0x68)
 
     def _add_img(self, attrs: dict):
-        from docx.shared import Pt, Inches, RGBColor
         alt = attrs.get("alt", "图片")
         src = (attrs.get("src") or "").strip()
         img_path = _resolve_image_path(_CURRENT_INPUT_PATH, src)
         if img_path and img_path.exists():
             run = self.para.add_run()
-            run.add_picture(str(img_path), width=Inches(2))
+            # 行内图上限低于独立图：同走自然尺寸封顶，观感与独立图接近
+            _add_picture_sized(run, img_path, max_inches=4.5)
         else:
+            from docx.shared import RGBColor
             run = self.para.add_run(f"[{alt}]")
             _set_run_font(run, self.font, self.size)
             run.font.color.rgb = RGBColor(0x66, 0x66, 0x66)
@@ -643,10 +677,10 @@ class MdToDocx(BaseConverter):
         from docx import Document
         from docx.shared import Pt
 
-        global _CURRENT_INPUT_PATH, _MATH_CACHE, _FN_CACHE, _CHECKBOX_SEQ
+        global _CURRENT_INPUT_PATH, _MATH_CACHE, _FN_CACHE, _CHECKBOX_SEQ, _EMBEDDED_IMG_COUNT
         _CURRENT_INPUT_PATH = input_path
         _CHECKBOX_SEQ = 0
-        self._embedded_img_count = 0
+        _EMBEDDED_IMG_COUNT = 0
 
         text = input_path.read_text(encoding="utf-8")
 
@@ -698,8 +732,8 @@ class MdToDocx(BaseConverter):
 
         msg = "Markdown 已转为 Word 文档"
         parts = []
-        if getattr(self, "_embedded_img_count", 0):
-            parts.append(f"{self._embedded_img_count} 张本地图片")
+        if _EMBEDDED_IMG_COUNT:
+            parts.append(f"{_EMBEDDED_IMG_COUNT} 张本地图片")
         img_count = len([v for v in mermaid_images.values() if v.exists()])
         if img_count:
             parts.append(f"{img_count} 个 Mermaid 图表")
@@ -956,8 +990,7 @@ class MdToDocx(BaseConverter):
             p = doc.add_paragraph()
             p.alignment = WD_ALIGN_PARAGRAPH.CENTER
             run = p.add_run()
-            run.add_picture(str(img_path), width=Inches(6))
-            self._embedded_img_count += 1
+            _add_picture_sized(run, img_path, max_inches=6.0)
             if alt_text and alt_text != "图片":
                 cap = doc.add_paragraph()
                 cap.alignment = WD_ALIGN_PARAGRAPH.CENTER

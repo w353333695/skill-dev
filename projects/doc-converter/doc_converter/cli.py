@@ -19,6 +19,18 @@ from .converters import get_converter, list_converters, list_conversions
 logger = logging.getLogger(__name__)
 
 
+def _fmt_from_arg(arg: str) -> str:
+    """从参数提取格式名：含路径分隔符或带扩展名时取扩展名，否则原样返回。
+
+    容错 check <源> <目标> 传文件路径的用法（如 `check tmp/a.md docx`）。
+    """
+    if "/" in arg or "\\" in arg:
+        return Path(arg).suffix.lstrip(".").lower() or arg
+    if arg.startswith("."):  # 如 ".md"
+        return arg.lstrip(".")
+    return arg
+
+
 def parse_options(option_list: tuple[str, ...] | None) -> dict:
     """解析 key=value 格式的选项（值尝试 JSON 解析为数字/布尔等）。"""
     if not option_list:
@@ -108,16 +120,18 @@ def list_cmd():
 @click.argument("source")
 @click.argument("target")
 def check(source, target):
-    """检查转换支持和依赖。"""
-    converter = get_converter(source, target)
+    """检查转换支持和依赖。参数为格式名，传文件路径时自动取扩展名。"""
+    source_fmt = _fmt_from_arg(source)
+    target_fmt = _fmt_from_arg(target)
+    converter = get_converter(source_fmt, target_fmt)
     if not converter:
-        click.echo(f"❌ 不支持: {source} -> {target}")
+        click.echo(f"❌ 不支持: {source_fmt} -> {target_fmt}")
         raise SystemExit(1)
     ok, missing = converter.check_dependencies()
     if ok:
-        click.echo(f"✅ {source} -> {target} ({converter.name}) 就绪")
+        click.echo(f"✅ {source_fmt} -> {target_fmt} ({converter.name}) 就绪")
     else:
-        click.echo(f"⚠️ {source} -> {target} ({converter.name}) 缺少依赖: {', '.join(missing)}")
+        click.echo(f"⚠️ {source_fmt} -> {target_fmt} ({converter.name}) 缺少依赖: {', '.join(missing)}")
 
 
 @main.command()
