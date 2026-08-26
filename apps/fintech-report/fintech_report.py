@@ -42,8 +42,14 @@ import urllib.error
 import urllib.parse
 import urllib.request
 import uuid
+import ssl
 from pathlib import Path
 from typing import Any
+
+# 内网部署常自签证书——人行 FICS 与 CMDB 网关 https 不校验
+_SSL_CTX = ssl.create_default_context()
+_SSL_CTX.check_hostname = False
+_SSL_CTX.verify_mode = ssl.CERT_NONE
 
 # ============================================================================
 # 配置区（仅环境连接 + 运行开关；业务配置全部从 CMDB FINTECH_REPORT_CONFIG 拉取）
@@ -399,7 +405,7 @@ class ReportCenter:
             "grant_type": "client_credentials"})
         req = urllib.request.Request(f"{url}?{qs}", method="POST")
         req.add_header("Content-Type", "application/json")
-        with urllib.request.urlopen(req, timeout=30) as resp:
+        with urllib.request.urlopen(req, timeout=30, context=_SSL_CTX) as resp:
             d = json.loads(resp.read())
         if not d.get("access_token"):
             raise RuntimeError(f"获取 token 失败: {json.dumps(d, ensure_ascii=False)[:200]}")
@@ -419,7 +425,7 @@ class ReportCenter:
         req.add_header("Charset", "UTF-8")
         if self.variant == "pboc":
             req.add_header("X-Access-Token", self._get_token())
-        with urllib.request.urlopen(req, timeout=60) as resp:
+        with urllib.request.urlopen(req, timeout=60, context=_SSL_CTX) as resp:
             return json.loads(resp.read())
 
     def report_data(self, branch_id: str, data: list[dict]) -> dict:
@@ -530,34 +536,40 @@ def report_one_model(rule: dict, report_obj: dict, conf: dict, variant: str,
                 continue
             converted[desc] = data
             pk_set[desc] = cate
-        # 2) 增量 diff（对上次成功任务原文）
-        prev_file, prev_data = _last_success_data(object_id)
+        # 2) 增量 diff（对『成功实例台账』: 跨任务合并的 confirmed 实例集合）
+        confirmed, prev_meta = _last_success_data(object_id)
         new_items, update_items, delete_items = [], [], []
-        if prev_data is None or scope_full:
+        if not confirmed or scope_full:
             new_items = list(converted.values())
         else:
-            prev = prev_data.get("instances", {})
             for desc, data in converted.items():
-                old = prev.get(desc)
+                old = confirmed.get(desc)
                 if old is None:
-                    new_items.append(data)
+                    new_items.append(data)              # 台账没有 → new
                 elif old.get("_hash") != _inst_content_hash({k: v for k, v in data.items()}):
-                    update_items.append(data)
-            for desc, old in prev.items():
+                    update_items.append(data)           # 内容变了 → update
+                # 否则一致 → 不报（已确认且无变化）
+            for desc, old in confirmed.items():
                 if desc not in converted:
                     delete_items.append({converter.key_desc: desc,
                                          converter.key_cate: old.get("_cate", "")})
-        # 3.1) 原文落盘（diff 基石；含 hash 与主键类目）
-        payload = {
-            "objectId": object_id, "taskId": task_id, "exportedAt": now,
-            "instances": {d: {**v, "_hash": _inst_content_hash(v), "_cate": pk_set[d]}
-                          for d, v in converted.items()},
-        }
+        # 3.1) 原文落盘（diff 基石）：本次实例先标 _confirmed=False，
+        #      批次回执成功后置 True（见下方批次循环）；未变且历史已 confirmed 的直接继承
+        payload_instances = {
+            d: {**v, "_hash": _inst_content_hash(v), "_cate": pk_set[d], "_confirmed": False}
+            for d, v in converted.items()}
+        for desc in set(confirmed.keys()) & converted.keys():
+            old = confirmed[desc]
+            if old.get("_hash") == _inst_content_hash({k: v for k, v in converted[desc].items()}):
+                payload_instances[desc]["_confirmed"] = True
+        payload = {"objectId": object_id, "taskId": task_id, "exportedAt": now,
+                   "instances": payload_instances}
         task["dataFile"] = save_report_data(task_id, payload)
-        # 3.2) 分批上报（new/update 各自成批；delete 一批）
+        # 3.2) 分批上报（new/update 各自成批；delete 一批）——批次成功即标记实例 confirmed
         center = ReportCenter(conf, variant)
         branch_ids = []
         counts = {"insert": 0, "update": 0, "remove": 0, "failed": 0}
+        type_count_key = {"new": "insert", "update": "update", "delete": "remove"}
         for rtype, items in ((REPORT_TYPE_NEW, new_items),
                              (REPORT_TYPE_UPDATE, update_items),
                              (REPORT_TYPE_DELETE, delete_items)):
@@ -571,7 +583,12 @@ def report_one_model(rule: dict, report_obj: dict, conf: dict, variant: str,
                     LOG.warning("[report] %s %s 批次失败: %s %s",
                                 object_id, rtype, resp["code"], resp["msg"][:100])
                 else:
-                    counts[{"new": "insert", "update": "update", "delete": "remove"}[rtype]] += len(batch)
+                    counts[type_count_key[rtype]] += len(batch)
+                    # 批次确认 → 原文里对应实例标 confirmed（new/update 按主键；delete 标记待剔除）
+                    for item in batch:
+                        desc = item.get(converter.key_desc)
+                        if desc and desc in payload_instances:
+                            payload_instances[desc]["_confirmed"] = True
         # 3.3) 查人行处理结果（首批）
         check_code, check_msg = "", ""
         if branch_ids:
@@ -591,6 +608,8 @@ def report_one_model(rule: dict, report_obj: dict, conf: dict, variant: str,
                      "errorMsg": "" if counts["failed"] == 0 else f"{counts['failed']} 条失败"})
         if not new_items and not update_items and not delete_items:
             task["status"] = "noReport"
+        # 回写原文（批次 confirmed 标记已更新，落盘供下次 diff 用）
+        save_report_data(task_id, payload)
         upsert_task(task)
         LOG.info("[report] %s: %d 实例（忽略 %d）→ new %d / update %d / delete %d，失败 %d，任务 %s",
                  object_id, len(converted), ignored, counts["insert"], counts["update"],
@@ -607,22 +626,47 @@ def report_one_model(rule: dict, report_obj: dict, conf: dict, variant: str,
         raise
 
 
-def _last_success_data(object_id: str) -> tuple[str | None, dict | None]:
-    """该模型最近一次 success 且未回滚任务的数据原文。"""
+def _last_success_data(object_id: str) -> tuple[dict, dict | None]:
+    """该模型的『成功实例台账』: 已确认被人行接收的实例集合。
+
+    台账来源：扫该 objectId 所有 success/partialSuccess 且未回滚任务（按时间倒序），
+    合并各任务原文里 _confirmed=True 的实例（去重，新覆盖旧）。
+
+    漏洞修复（2026-08-26）：
+      旧逻辑只取『最近一条 success 任务的整体原文』做 diff——若 T2 失败而 T1 成功，
+      基准仍是 T1，T2 已上报成功的批次被误判为『未变化』→ 漏报。
+      新逻辑用『实例级 confirmed 标记』，只对确认接收过的实例 diff；
+      失败批次（未 confirmed）下次自动当 new 重报。
+      partialSuccess 的成功批次也计入 confirmed，不再整任务丢弃。
+    """
+    confirmed: dict[str, dict] = {}
     rows = cmdb_search_all(
         OBJ_TASK, fields=["taskId", "dataFile", "rolledBack", "startTime", "status"],
-        expr=f'objectId = "{object_id}" AND status = "success" AND rolledBack = false')
-    if not rows:
-        return None, None
+        expr=f'objectId = "{object_id}" AND status in ["success","partialSuccess"] '
+             f'AND rolledBack = false')
     rows.sort(key=lambda r: str(r.get("startTime", "")), reverse=True)
+    prev_meta: dict | None = None
     for r in rows:
         f = r.get("dataFile")
-        if f and Path(f).exists():
-            try:
-                return f, load_report_data(f)
-            except (OSError, ValueError):
-                continue
-    return None, None
+        if not (f and Path(f).exists()):
+            continue
+        try:
+            data = load_report_data(f)
+        except (OSError, ValueError):
+            continue
+        if prev_meta is None:
+            prev_meta = data
+        # 合并该任务里 confirmed 的实例（旧任务先放、新任务覆盖 → 取最新 hash）
+        for desc, inst in (data.get("instances") or {}).items():
+            if inst.get("_confirmed"):
+                confirmed[desc] = inst
+    return confirmed, prev_meta
+
+
+def _confirmed_snapshot(payload: dict) -> dict[str, dict]:
+    """从任务原文 payload 提取 confirmed 实例集合（供 diff 用）。"""
+    return {d: inst for d, inst in (payload.get("instances") or {}).items()
+            if inst.get("_confirmed")}
 
 
 def cmd_report(scope: str, full: bool) -> int:
