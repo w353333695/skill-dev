@@ -210,6 +210,14 @@ objects:
       cmdbObjectId: { type: string, desc: "type=cmdbInstance(s) 时：CMDB 模型 id（限定目标实例范围）" }
       cmdbAttrId:   { type: string, desc: "CMDB 属性 id" }
       secretName:   { type: string, desc: "type=secretKey 时：密钥名（运行时 DecryptSecretKey 解）" }
+      selector:     { type: string, desc: "前端选择器类型；带范围过滤的实例选择用 cmdb.range.instance.query（配 cmdbQuery），2026-08-26 fintech 工具实测" }
+      cmdbSelector: { type: string, desc: "实例选择器样式：cmdb（默认全功能）/ simple-select（简表选择）" }
+      cmdbQuery:    { type: object, desc: "实例候选过滤。⚠️格式 {defaultInstanceId: [], query: \"<JSON字符串>\"}——query 是【序列化后的 v2 search query JSON 字符串】非嵌套对象（塞嵌套 dict 前端不识别）。操作符用 $like（如 {\\\"$and\\\":[{\\\"$or\\\":[{\\\"objectId\\\":{\\\"$like\\\":\\\"%@FINTECHDATA%\\\"}}]}]}）——【$regex 不支持】（实测前端不认，2026-08-26）" }
+      cmdbOptionSetting: { type: object, desc: "simple-select 样式的列配置：{displayFields: [展示属性id...], sortFields: [排序属性id...], sort: \"asc|desc|\"}" }
+      primitive:    { type: bool, desc: "是否原始类型入参（string/enum 等为 true；cmdbInstance(s) 为 false）" }
+    constraints:
+      - "cmdbQuery.query 用 $like 做包含匹配（'%xxx%'），不支持 mongo $regex（实测静默失效）"
+      - "脚本类型标记在 ToolVersion 层 type 字段（python/shell/...，tool_version.go:108 export:\"config\"）——打包 config 漏了它平台按默认类型渲染脚本（2026-08-26 fintech 工具踩坑）"
 
   autoops_output_def:
     description: 标量输出定义（OutputDef，tool_output.go:24）。脚本 PutStr(id,val) 回吐。
@@ -1516,6 +1524,13 @@ api_behavior:
       字段序列化靠 Go struct 的 export tag 分流（export:"dat"→dat 文件，export:"config"→config 文件）。导入是 upsert（toolId 锚定）。
       无编译步骤——工具定义 ↔ tar.gz 是纯序列化往返；运行时执行器把 SDK 库（按 type 选 main.sh/main.py/...）+ EASYOPS_* header + 用户 content 拼成脚本下发 agent。
       开发新工具包（承接工具包开发需求）：产出 dat+config+script 三件套（+ 可选 libs）打成 tar.gz；script 须【自包含】（py2，不 import 外部 .py，见 platform_conventions.code），用 PutStr/PutRow 回吐输出。
+      ── dat/config 实操细节（2026-08-26 fintech 工具包开发实测）──
+      · dat.package.type 写死 "3"（export.go:236 硬编码，与脚本语言无关，别动）；脚本语言标记在【config 的顶层 type 字段】（"python"/"shell"/...，ToolVersion 层 tool_version.go:108 export:"config"）——config 漏 type 平台按默认类型渲染脚本。
+      · dat 结构 {package: {...}, version: {versionId, name, packageId...}}；顶层目录名=工具中文名。
+      · config 需完整 ToolConfig 骨架（batchStrategy/containerSandbox/execPreAuth/blackList/whiteList/toolLibs 等空值也要给），inputs/outputDefs/tableDefs 按需——骨架缺字段导入可过但前端渲染异常。
+      · cmdbInstance(s) 入参的候选过滤 cmdbQuery 见 autoops_tool_input 字段说明（$like 支持、$regex 不支持、query 是序列化 JSON 字符串）。
+      · 实例选择器增强字段：selector=cmdb.range.instance.query（带查询过滤）/ cmdbSelector=simple-select+cmdbOptionSetting{displayFields,sortFields}（简表选择自定义列）。
+      · 导入通道：SDK easyops_client.import_tool（multipart，api-cli 不支持）；upsert 同 packageId 更新并派生新版本，get_tool data 复核 type/cmdbQuery 生效。
 
   # ===========================================================================
   # ITSM 表单接口级行为（flowable_service）—— 编排时必须知道
