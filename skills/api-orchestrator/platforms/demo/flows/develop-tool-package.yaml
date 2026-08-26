@@ -1,0 +1,81 @@
+# 流程模板：开发 EasyOps 工具包（tar.gz）→导入→迭代→平台执行调试（端到端闭环）。规划挡。
+# 2026-08-26 fintech 工具（人行金融数据上报）实战提炼；配套对象知识见 objects.yaml
+# #autoops_tool.package_format（dat/config 格式）与 #autoops_tool_input（入参字段）。
+name: develop-tool-package
+intent: 开发一个 python 工具脚本并打成平台工具包导入，支持多轮迭代与平台真实执行调试
+trigger: ["开发工具包", "做个EasyOps工具", "把脚本打成工具包", "打包工具导入平台", "调试工具执行"]
+guard: 规划挡（写、跨步骤、制品 tar.gz、平台执行验证）
+
+key_rule: |
+  开发路线二选一：
+  · 简单工具（少量入参、单脚本）→ build-cleanup-tool（tool.create 端点，content 内联）
+  · 完整工具包（多入参/输出表格/迭代维护）→ 本流程（本地三件套 tar.gz + import upsert）。
+  ⚠️包格式不对导入报 133037『解压文件失败/格式不合格』——dat/config 必须对照【真实导出包】
+  （export-tool 流程先导一个现成工具看格式），不能凭想象构造。
+  平台执行调试【必须走 tool_execution 真跑】——本地模拟发现不了执行器机制差异（见 step 5 四坑）。
+
+prerequisites:
+  env: [EASYOPS_AUTOOPS_BACKEND_URL, EASYOPS_ORG, EASYOPS_USER]
+  payload: "本地包目录 <工具中文名>/{._easyPackageConfig.dat, config, script}"
+  runtime: "目标主机 agent 在线（tool_execution 下发）"
+
+steps:
+  - n: 1
+    op: tool_package.export
+    desc: "先导一个平台现成工具（任意）拿真实包格式——dat 的 {package,version} 结构、config 的完整 ToolConfig 骨架、目录名=工具中文名"
+    expect: "tar 解出三件套；dat 里 packageId=toolId、type 固定 '3'"
+  - n: 2
+    desc: |
+      本地造三件套（格式细节见 objects.yaml#autoops_tool.package_format）：
+      · dat: {package:{packageId:<新uuid32hex>,type:"3",...}, version:{versionId:<uuid>,...}}（packageId 保持不变=后续 upsert 锚点）
+      · config: 完整 ToolConfig 骨架 + 顶层 type:"python"（ToolVersion 层字段，漏了前端渲染异常）
+        + inputs（含 @agents cmdbInstances HOST 执行目标 + 业务入参）
+        + outputDefs/tableDefs（脚本 PutStr/PutRow 对应）
+      · script: 自包含 py2/py3 兼容（规范见下方 script_rules + systems.yaml platform_conventions.code）
+      打包: tar czf <name>.tool.tar.gz <工具中文名>/
+  - n: 3
+    op: tool_package.import
+    desc: "SDK easyops_client.import_tool(file) 导入（multipart，api-cli 不支持）。upsert 语义：同 packageId 更新并派生新版本"
+    expect: "code=0；data.tool 含 toolId/vId"
+  - n: 4
+    op: tool.get
+    desc: "复核线上定义生效（type/cmdbQuery/inputs）；版本链多一个新 vId"
+    expect: "get_tool data.type=python 等字段正确"
+  - n: 5
+    op: tool_execution.run
+    desc: |
+      平台真实执行调试（agent py2.7 环境才是真相）。四类高频坑（2026-08-26 fintech 实战全部踩过）：
+      ① 入参注入：平台把 inputs 拼成【同名 python 变量赋值】注入脚本 header（源码
+         execution/script/creator.go:131 + param/format.go）——脚本读 globals() 同名变量，
+         不是环境变量也不是 argv。本地调试兜底 EASYOPS_TOOL_INPUT JSON / argv k=v。
+      ② CMDB 地址：EASYOPS_CMDB_SERVICE_HOST 是 header 变量且指向【集群真实地址】
+         （实测 232 环境=172.30.0.234:8079，非 agent 本机！）——脚本取值顺序
+         globals()['EASYOPS_CMDB_SERVICE_HOST'] > env 同名 > 回环兜底。ORG/USER 同理
+         （EASYOPS_ORG 是 int 型变量）。
+      ③ 输出协议：PutStr 收 str；PutRow 收 "k=v&k=v" URL编码字符串（dict 直接传
+         TypeError——SDK main.py:96 源码 rowVal + "&_E_TS="）。写 dict 需自适配层。
+      ④ py2 真实坑：re.fullmatch 无（用 re.match+\Z 封装）、gzip.compress 无
+         （GzipFile+StringIO）、from __future__ 禁用（平台注入 header 会炸）。
+      执行: run(inputs:{...业务参数}, agents:[IP], vId:<具体>) → execId →
+      get_status 轮询 → get_result 取 agentData.<IP>.msg（完整 stdout/traceback）
+      与 toolOutputs。
+    expect: "totalStatus=success（或符合预期的 fail）；exitStatus=0"
+    on_fail: "get_result 的 agentData.<ip>.msg 看完整 traceback 定位（行号对应 agent 拼装脚本）"
+  - n: 6
+    desc: 迭代——改本地三件套 → 重打包 → 再 import_tool（同 packageId 派生新版本）→ 再执行调试。
+      每轮迭代 get_tool 复核 + 平台真跑验证，不要只看导入 code=0。
+
+script_rules: |
+  工具脚本硬性规范（agent /usr/local/easyops/python/bin/python py2.7）：
+  · 自包含：不 import 外部 .py；py2 stdlib（urllib2/httplib）调平台服务
+  · py2/3 双兼容：PY2 = sys.version_info[0]==2 运行时判断；不用 f-string；
+    raise 不带 from；无 from __future__
+  · 平台交互全走 EASYOPS_* header 变量（globals 取，env 兜底）——变量清单见
+    objects.yaml#autoops_tool.builtin_vars
+  · 输出：PutStr(id, str) 标量 / PutRow(table, "k=v&k=v") 表格行
+
+side_effects: "见 objects.yaml#autoops_tool.package_format（导入 upsert 派生版本）"
+rollback: "tool.delete <toolId>（整个工具）；本地包目录在开发仓（如 apps/<app>/.local/tool-pkg/）"
+acceptance: |
+  平台执行 e2e 通过：tool_execution.run 各 action 入参组合真跑 exitStatus=0；
+  前端 tool_detail 可见最新版本；工具入参渲染正确（enum 下拉/实例选择器/表格列）。

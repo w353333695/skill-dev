@@ -1512,6 +1512,34 @@ api_behavior:
       条件注入：EASYOPS_ENCRYPT_KEY/IV（仅当工具有 encryptedString 输入；脚本 DecryptString 用）/ EASYOPS_SCHEDULER_ID+TRIGGER（仅定时调度触发）。
       agent 自取：EASYOPS_LOCAL_IP（本机 IP，从 sysconf.ini）/ EASYOPS_BASE_PATH（默认 /usr/local/easyops）。
       实操：拿本机 IP 用 $EASYOPS_LOCAL_IP；拿 org/user/token 用 $EASYOPS_ORG/$EASYOPS_USER/$EASYOPS_AUTHORIZATION_TOKEN；要 CMDB 实例作输入就在 inputs 定义 type:cmdbInstance 参数（平台按目标注入），别在脚本写 ${cmdb.xxx}。
+  tool_param_injection:
+    rule: |
+      ⚠️变量注入形态纠偏（2026-08-26 fintech 工具平台真跑实测，关键）：
+      EASYOPS_* 内置变量与工具 inputs 都【不是进程环境变量】（shell env 里看不到），而是执行器
+      把它们拼成【同名 python 变量赋值】注入脚本 header（源码 execution/script/creator.go:125-131
+      + param/format.go AssembleParams → python 形如 NAME="""值"""，拼在用户 content 之前）。
+      脚本取值正确姿势：globals().get("EASYOPS_ORG") / 直接引用同名变量；os.environ 取不到。
+      优先级：inputs > globalVars > toolEnv > flowEnv（creator.go:126 注释）。
+      CMDB 地址注意：EASYOPS_CMDB_SERVICE_HOST 注入的是【集群真实地址】（如 172.30.0.234:8079），
+      不一定是 agent 本机——别假设回环可用；脚本解析顺序建议 globals 变量 > env 同名 > 回环兜底。
+      EASYOPS_ORG 注入为 int 型。
+  tool_output_protocol:
+    rule: |
+      平台 SDK 输出协议（static/tool_lib/main.py 源码，随 header 注入）：
+      · PutStr(paramName, paramVal)——paramVal 收 str（None 跳过值段）；输出 ##PARAMETER_<name>## 标记段。
+      · PutRow(tableName, rowVal)——⚠️rowVal 收【"k=v&k=v" URL编码字符串】非 dict（源码 rowVal + "&_E_TS=..."
+        直接字符串拼接，传 dict 报 TypeError）。tableName=="table" 自动改 "default"。要输出结构化行
+        需自适配：dict → urllib.quote_plus 拼串（bool 转 true/false 小写）。
+      · PutFormRows(tableName, rowsVal)——多行表单形态，同为字符串拼接协议。
+  tool_py2_pitfalls:
+    rule: |
+      agent python 为 2.7（/usr/local/easyops/python/bin/python）——本地 py3 验证过了平台上仍可能炸，
+      py2 缺失函数清单（fintech 实战踩全）：
+      · re.fullmatch 无 → 封装 _fullmatch = re.match("(?:%s)\\Z" % pat, s)
+      · gzip.compress 无（py3 才有）→ gzip.GzipFile(fileobj=StringIO(), mode="wb").write()
+      · open("w").write(bytes) 在 py3 又炸 → 写文件用 "wb"+encode 或按 PY2 分支
+      · py2 兼容代码里的前向引用：模块顶部配置段若调用后文才定义的 helper（如 _text）会 NameError
+      本地调试兜底：脚本可加 EASYOPS_TOOL_INPUT(JSON)/argv k=v 双兜底，与平台变量注入共存。
   package_format:
     rule: |
       工具包（导入导出的 .tar.gz）文件结构（源码 import_export/export.go + import_tool/import.go）：
