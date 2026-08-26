@@ -50,3 +50,6 @@ data/
 .superpowers/
 
 .claude/settings.json
+
+# 项目内临时区（AGENTS.md 约定：本地凭证/中间产物，不入库）
+.local/
