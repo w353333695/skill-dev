@@ -43,6 +43,7 @@ import urllib.parse
 import urllib.request
 import uuid
 import ssl
+import traceback
 from pathlib import Path
 from typing import Any
 
@@ -50,6 +51,16 @@ from typing import Any
 _SSL_CTX = ssl.create_default_context()
 _SSL_CTX.check_hostname = False
 _SSL_CTX.verify_mode = ssl.CERT_NONE
+
+
+def _maybe_json(v: Any) -> Any:
+    """v 是字符串(含 py2 unicode)则 JSON parse；解析失败/非字符串原样返回。"""
+    if isinstance(v, (str, bytes)):
+        try:
+            return json.loads(v)
+        except (ValueError, TypeError):
+            return v
+    return v
 
 # ============================================================================
 # 配置区（仅环境连接 + 运行开关；业务配置全部从 CMDB FINTECH_REPORT_CONFIG 拉取）
@@ -243,12 +254,7 @@ def load_report_objects() -> dict[str, dict]:
         oid = r.get("objectId")
         if not oid:
             continue
-        define = r.get("objectDefine")
-        if isinstance(define, str):
-            try:
-                define = json.loads(define)
-            except ValueError:
-                define = None
+        define = _maybe_json(r.get("objectDefine"))
         if isinstance(define, dict) and define.get("attrList"):
             out[oid] = define
     return out
@@ -268,10 +274,11 @@ class Converter:
 
     def __init__(self, object_id: str, report_obj: dict, mapping_rule: list | None = None):
         self.object_id = object_id
-        self.attrs = report_obj.get("attrList") or []
+        self.attrs = (report_obj or {}).get("attrList") or []
         self.attr_by_id = {a["id"]: a for a in self.attrs}
         # 映射模式（source=mapping）: reportAttrId -> mappingAttrId
         self.mapping: dict[str, str] = {}
+        mapping_rule = _maybe_json(mapping_rule)
         if isinstance(mapping_rule, list):
             for m in mapping_rule:
                 if isinstance(m, dict) and m.get("reportAttrId"):
@@ -616,13 +623,14 @@ def report_one_model(rule: dict, report_obj: dict, conf: dict, variant: str,
                  counts["remove"], counts["failed"], task_id)
         return task
     except Exception as e:
+        tb = traceback.format_exc()
         task.update({"status": "fail", "endTime": time.strftime("%Y-%m-%d %H:%M:%S"),
                      "errorMsg": str(e)[:500]})
         try:
             upsert_task(task)
         except Exception:
             pass
-        LOG.error("[report] %s 失败: %s", object_id, e)
+        LOG.error("[report] %s 失败: %s\n%s", object_id, e, tb)
         raise
 
 
@@ -689,7 +697,7 @@ def cmd_report(scope: str, full: bool) -> int:
         try:
             report_one_model(rule, report_obj, conf, variant, full)
         except Exception as e:
-            LOG.error("[report] %s 任务失败: %s", oid, e)
+            LOG.error("[report] %s 任务失败: %s\n%s", oid, e, traceback.format_exc())
             rc = 1
     return rc
 
@@ -732,7 +740,7 @@ def cmd_rollback(task_id: str) -> int:
             cmdb_import(OBJ_ROLLBACK, ["rollbackId"], [rec])
         except Exception:
             pass
-        LOG.error("[rollback] 失败: %s", e)
+        LOG.error("[rollback] 失败: %s\n%s", e, traceback.format_exc())
         return 1
 
 
