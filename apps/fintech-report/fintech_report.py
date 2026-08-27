@@ -38,20 +38,13 @@ import os
 import re
 import sys
 import time
-import urllib.error
 import urllib.parse
-import urllib.request
 import uuid
-import ssl
 import traceback
+
+import requests
 from pathlib import Path
 from typing import Any
-
-# 内网部署常自签证书——人行 FICS 与 CMDB 网关 https 不校验
-_SSL_CTX = ssl.create_default_context()
-_SSL_CTX.check_hostname = False
-_SSL_CTX.verify_mode = ssl.CERT_NONE
-
 
 def _maybe_json(v: Any) -> Any:
     """v 是字符串(含 py2 unicode)则 JSON parse；解析失败/非字符串原样返回。"""
@@ -124,37 +117,33 @@ LOG = logging.getLogger("fintech-report")
 # 通用层: HTTP / CMDB 客户端
 # ============================================================================
 
+_SESSION = requests.Session()
+_SESSION.verify = False   # 内网自签证书
+try:
+    requests.packages.urllib3.disable_warnings(requests.packages.urllib3.exceptions.InsecureRequestWarning)
+except Exception:
+    pass
+
+
 def _http_json(method: str, url: str, body: Any = None, headers: dict | None = None,
               timeout: int = 30, retry: int = 3, retry_wait: int = 2) -> Any:
-    """JSON HTTP 带重试；连接超时快速失败；DEBUG 打印摘要。"""
-    data = json.dumps(body).encode("utf-8") if body is not None else None
+    """requests 实现 JSON HTTP 带重试。"""
     last_err = None
     for attempt in range(1, retry + 1):
-        req = urllib.request.Request(url, data=data, method=method)
-        req.add_header("Content-Type", "application/json")
-        for k, v in (headers or {}).items():
-            req.add_header(k, v)
         if DEBUG:
-            LOG.debug("[http] %s %s body=%s", method, url, (data or b"")[:500])
+            LOG.debug("[http] %s %s body=%s", method, url, str(body)[:500])
         try:
-            with urllib.request.urlopen(req, timeout=timeout) as resp:
-                raw = resp.read().decode("utf-8")
+            resp = _SESSION.request(method, url, json=body, headers=headers, timeout=timeout)
             if DEBUG:
-                LOG.debug("[http] ← %s", raw[:500])
-            return json.loads(raw) if raw.strip() else {}
-        except urllib.error.HTTPError as e:
-            detail = ""
-            try:
-                detail = e.read().decode("utf-8", "ignore")[:300]
-            except Exception:
-                pass
-            last_err = RuntimeError(f"HTTP {e.code}: {detail or e.reason}")
-            if 400 <= e.code < 500 and e.code not in (408, 429):
-                break
-        except (urllib.error.URLError, TimeoutError, OSError, json.JSONDecodeError) as e:
-            reason = getattr(e, "reason", None)
-            if isinstance(reason, OSError) and "timed out" in str(reason).lower():
-                raise RuntimeError(f"对端不可达（连接超时）: {url}") from e
+                LOG.debug("[http] ← %s", resp.text[:500])
+            if resp.status_code >= 400:
+                raise RuntimeError(f"HTTP {resp.status_code}: {resp.text[:300]}")
+            return resp.json() if resp.text.strip() else {}
+        except RuntimeError as e:
+            if "HTTP 4" in str(e) and "HTTP 408" not in str(e) and "HTTP 429" not in str(e):
+                raise   # 4xx 不重试
+            last_err = e
+        except (requests.RequestException, ValueError) as e:
             last_err = RuntimeError(f"网络/解析错误: {e}")
         if attempt < retry:
             time.sleep(retry_wait)
@@ -205,14 +194,14 @@ def cmdb_delete(object_id: str, instance_ids: list[str]) -> list[str]:
     if not instance_ids:
         return []
     ids_str = ";".join(instance_ids)
-    req = urllib.request.Request(
-        f"{CMDB_API['base_url']}/object/{urllib.parse.quote(object_id, safe='@')}/instance_batch"
-        f"?instanceIds={urllib.parse.quote(ids_str)}",
-        method="DELETE")
-    req.add_header("org", CMDB_API["org"])
-    req.add_header("user", CMDB_API["user"])
-    with urllib.request.urlopen(req, timeout=CMDB_API["timeout"]) as resp:
-        d = json.loads(resp.read())
+    url = (f"{CMDB_API['base_url']}/object/{urllib.parse.quote(object_id, safe='@')}/instance_batch"
+           f"?instanceIds={urllib.parse.quote(ids_str)}")
+    resp = _SESSION.delete(url, headers={"org": CMDB_API["org"], "user": CMDB_API["user"]},
+                           timeout=CMDB_API["timeout"])
+    if resp.status_code >= 400:
+        LOG.warning("[cmdb] delete fail: HTTP %s %s", resp.status_code, resp.text[:200])
+        return instance_ids
+    d = resp.json() if resp.text.strip() else {}
     return [str(x) for x in (d.get("data", {}) or {}).get("deleteFailedInstances", [])]
 
 
@@ -416,15 +405,14 @@ class ReportCenter:
         if self._token and time.time() < self._token_exp - 10:
             return self._token
         url = self._url(self.conf.get("tokenUri") or "webproxy/fig2fics/oauth2/v1/pshare/oauth/token")
-        qs = urllib.parse.urlencode({
+        resp = _SESSION.post(url, params={
             "client_id": self.conf.get("clientId", ""),
             "client_secret": self.conf.get("clientSecret", ""),
-            "grant_type": "client_credentials"})
-        req = urllib.request.Request(f"{url}?{qs}", method="POST")
-        req.add_header("Content-Type", "application/json")
-        _opener = urllib.request.build_opener(urllib.request.HTTPSHandler(context=_SSL_CTX))
-        with _opener.open(req, timeout=30) as resp:
-            d = json.loads(resp.read())
+            "grant_type": "client_credentials"},
+            headers={"Content-Type": "application/json"}, timeout=30)
+        if resp.status_code >= 400:
+            raise RuntimeError(f"获取 token 失败 (url={url}): HTTP {resp.status_code} {resp.text[:200]}")
+        d = resp.json() if resp.text.strip() else {}
         if not d.get("access_token"):
             raise RuntimeError(f"获取 token 失败: {json.dumps(d, ensure_ascii=False)[:200]}")
         self._token = d["access_token"]
@@ -439,16 +427,16 @@ class ReportCenter:
 
     def _post(self, uri: str, payload: dict) -> dict:
         full_url = self._url(uri)
-        req = urllib.request.Request(full_url,
-                                     data=json.dumps(payload, ensure_ascii=False).encode("utf-8"), method="POST")
-        req.add_header("Content-Type", "application/json")
-        req.add_header("Charset", "UTF-8")
+        headers = {"Content-Type": "application/json", "Charset": "UTF-8"}
         if self.variant == "pboc":
-            req.add_header("X-Access-Token", self._get_token())
+            headers["X-Access-Token"] = self._get_token()
         try:
-            _opener = urllib.request.build_opener(urllib.request.HTTPSHandler(context=_SSL_CTX))
-            with _opener.open(req, timeout=60) as resp:
-                return json.loads(resp.read())
+            resp = _SESSION.post(full_url, json=payload, headers=headers, timeout=60)
+            if resp.status_code >= 400:
+                raise RuntimeError(f"report post fail (url={full_url}): HTTP {resp.status_code} {resp.text[:200]}")
+            return resp.json() if resp.text.strip() else {}
+        except RuntimeError:
+            raise
         except Exception as e:
             raise RuntimeError(f"report post fail (url={full_url}): {e}")
 
