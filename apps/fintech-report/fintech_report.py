@@ -397,7 +397,8 @@ class ReportCenter:
     def _base(self) -> str:
         ip = self.conf.get("ip") or "127.0.0.1"
         port = self.conf.get("port") or 18002
-        return f"https://{ip}:{port}"
+        schema = self.conf.get("schema") or "https"
+        return f"{schema}://{ip}:{port}"
 
     def _url(self, uri: str) -> str:
         return f"{self._base()}/{uri}"
@@ -405,7 +406,7 @@ class ReportCenter:
     def _get_token(self) -> str:
         if self._token and time.time() < self._token_exp - 10:
             return self._token
-        url = self._url("webproxy/fig2fics/conn/oauth2/v1/pshare/oauth/token")
+        url = self._url(self.conf.get("tokenUri") or "webproxy/fig2fics/conn/oauth2/v1/pshare/oauth/token")
         qs = urllib.parse.urlencode({
             "client_id": self.conf.get("clientId", ""),
             "client_secret": self.conf.get("clientSecret", ""),
@@ -426,14 +427,18 @@ class ReportCenter:
         return base64.b64encode(gzip.compress(raw)).decode("ascii")
 
     def _post(self, uri: str, payload: dict) -> dict:
-        req = urllib.request.Request(self._url(uri),
-                                     data=json.dumps(payload).encode("utf-8"), method="POST")
+        full_url = self._url(uri)
+        req = urllib.request.Request(full_url,
+                                     data=json.dumps(payload, ensure_ascii=False).encode("utf-8"), method="POST")
         req.add_header("Content-Type", "application/json")
         req.add_header("Charset", "UTF-8")
         if self.variant == "pboc":
             req.add_header("X-Access-Token", self._get_token())
-        with urllib.request.urlopen(req, timeout=60, context=_SSL_CTX) as resp:
-            return json.loads(resp.read())
+        try:
+            with urllib.request.urlopen(req, timeout=60, context=_SSL_CTX) as resp:
+                return json.loads(resp.read())
+        except Exception as e:
+            raise RuntimeError(f"report post fail (url={full_url}): {e}")
 
     def report_data(self, branch_id: str, data: list[dict]) -> dict:
         """上报数据（一批次）。返回 {branchId, code, msg}。"""
@@ -447,7 +452,8 @@ class ReportCenter:
                     "code": "WL-10000" if ok else str(resp.get("code", "fail")),
                     "msg": str(resp.get("msg", resp.get("message", "")))[:500]}
         resp = self._post(
-            "webproxy/fig2fics/conn/pshare/api/prod/FICS/api/fics/dataElementInstance/reportData", {
+            self.conf.get("reportDataUri")
+            or "webproxy/fig2fics/conn/pshare/api/prod/FICS/api/fics/dataElementInstance/reportData", {
                 "branchId": branch_id,
                 "facilityOwnerAgency": self.conf.get("facilityOwnerAgency", ""),
                 "data": self._compress(data)})
