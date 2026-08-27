@@ -74,6 +74,11 @@
 * 调 CLI 验证：`uv run --project projects/<name> <cli> ...`。
 * golang project：`cd projects/<name> && go run ./cmd/<name>` 调 CLI、`go test ./...` 跑测试（详见 §3.2）。
 * **改完立即手动 `git commit`**：工作空间有自动 `chore(ai):` 提交机制，会扫描工作区未提交改动并打包成 message 不准的 commit（还可能混入并发变更）。别留未提交改动去跑长任务。
+* **日志规范（错误必须可定位，fintech-report 实战教训）**：
+  - **所有 `except` 分支的 error 日志必须带 `traceback.format_exc()`**——只打 `str(e)` 的话（如 `'unicode' object has no attribute 'get'`）完全无法定位是哪行/哪个函数炸的。
+  - **error 消息前缀带函数标记**（如 `[report_one_model]`、`[do_rollback]`）——EasyOps 工具脚本等注入 header 的执行环境里** traceback 行号有偏差**（平台在脚本前注入内置方法/变量），函数名链路比行号更能定位。
+  - **写 CMDB/DB 的错误字段**（如 errorMsg）也拼 traceback 尾行（`"| %s" % tb[-2]`）——事后从数据侧排障时没有控制台日志可看。
+  - **py2 兼容代码的类型判断用 `(str, bytes)` 元组**：`isinstance(v, str)` 在 py2 不匹配 `unicode`（py2 的 str=bytes、unicode=文本是两个类型），CMDB 返回的 JSON 字符串是 unicode → 判断漏掉 → 原样透传下游 `.get()` 炸（fintech-report `'unicode' object has no attribute 'get'` 的根因）。
 
 ## 5. skill 与 project 的边界
 
