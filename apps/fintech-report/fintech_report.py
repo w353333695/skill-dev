@@ -660,13 +660,24 @@ def _last_success_data(object_id: str) -> tuple[dict, dict | None]:
             continue
         try:
             data = load_report_data(f)
-        except (OSError, ValueError):
+        except Exception:
+            # 旧版/损坏原文（IO 错、JSON 坏、结构异）——跳过不让单个文件炸整个上报
+            LOG.warning("[report] %s 历史原文读取失败，跳过: %s", object_id, f)
+            continue
+        if not isinstance(data, dict):
             continue
         if prev_meta is None:
             prev_meta = data
         # 合并该任务里 confirmed 的实例（旧任务先放、新任务覆盖 → 取最新 hash）
-        for desc, inst in (data.get("instances") or {}).items():
-            if inst.get("_confirmed"):
+        # 防御: 历史原文结构可能异常（旧版本落盘/损坏）——instances 非 dict 或
+        # 实例 value 非 dict 的条目跳过，不让单个坏文件炸整个上报
+        instances = data.get("instances") if isinstance(data, dict) else None
+        if not isinstance(instances, dict):
+            LOG.warning("[report] %s 历史原文结构异常（instances 非 dict），跳过该文件: %s",
+                        object_id, f)
+            continue
+        for desc, inst in instances.items():
+            if isinstance(inst, dict) and inst.get("_confirmed"):
                 confirmed[desc] = inst
     return confirmed, prev_meta
 
