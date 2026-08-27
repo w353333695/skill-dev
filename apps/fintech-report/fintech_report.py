@@ -406,14 +406,15 @@ class ReportCenter:
     def _get_token(self) -> str:
         if self._token and time.time() < self._token_exp - 10:
             return self._token
-        url = self._url(self.conf.get("tokenUri") or "webproxy/fig2fics/conn/oauth2/v1/pshare/oauth/token")
+        url = self._url(self.conf.get("tokenUri") or "webproxy/fig2fics/oauth2/v1/pshare/oauth/token")
         qs = urllib.parse.urlencode({
             "client_id": self.conf.get("clientId", ""),
             "client_secret": self.conf.get("clientSecret", ""),
             "grant_type": "client_credentials"})
         req = urllib.request.Request(f"{url}?{qs}", method="POST")
         req.add_header("Content-Type", "application/json")
-        with urllib.request.urlopen(req, timeout=30, context=_SSL_CTX) as resp:
+        _opener = urllib.request.build_opener(urllib.request.HTTPSHandler(context=_SSL_CTX))
+        with _opener.open(req, timeout=30) as resp:
             d = json.loads(resp.read())
         if not d.get("access_token"):
             raise RuntimeError(f"获取 token 失败: {json.dumps(d, ensure_ascii=False)[:200]}")
@@ -435,7 +436,8 @@ class ReportCenter:
         if self.variant == "pboc":
             req.add_header("X-Access-Token", self._get_token())
         try:
-            with urllib.request.urlopen(req, timeout=60, context=_SSL_CTX) as resp:
+            _opener = urllib.request.build_opener(urllib.request.HTTPSHandler(context=_SSL_CTX))
+            with _opener.open(req, timeout=60) as resp:
                 return json.loads(resp.read())
         except Exception as e:
             raise RuntimeError(f"report post fail (url={full_url}): {e}")
@@ -453,7 +455,7 @@ class ReportCenter:
                     "msg": str(resp.get("msg", resp.get("message", "")))[:500]}
         resp = self._post(
             self.conf.get("reportDataUri")
-            or "webproxy/fig2fics/conn/pshare/api/prod/FICS/api/fics/dataElementInstance/reportData", {
+            or "webproxy/fig2fics/pshare/api/prod/FICS/api/fics/dataElementInstance/reportData", {
                 "branchId": branch_id,
                 "facilityOwnerAgency": self.conf.get("facilityOwnerAgency", ""),
                 "data": self._compress(data)})
@@ -465,7 +467,8 @@ class ReportCenter:
         if self.variant == "zhongxin":
             return {"code": CODE_HANDLE_SUCCESS, "msg": "中信变体无结果查询", "data": []}
         resp = self._post(
-            "webproxy/fig2fics/conn/pshare/api/prod/FICS/api/fics/dataElementInstance/selectUploadData", {
+            self.conf.get("checkResultUri")
+            or "webproxy/fig2fics/pshare/api/prod/FICS/api/fics/dataElementInstance/selectUploadData", {
                 "branchId": branch_id,
                 "facilityOwnerAgency": self.conf.get("facilityOwnerAgency", "")})
         if not resp.get("branchId") or not resp.get("code"):
