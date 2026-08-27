@@ -388,15 +388,20 @@ class Converter:
 class ReportCenter:
     """人行 FICS HTTP 对接。variant: 'pboc'(默认 OAuth+gzip) | 'zhongxin'(免token)"""
 
-    def __init__(self, conf: dict, variant: str = "pboc", fallback_agency: str = ""):
+    def __init__(self, conf: dict, variant: str = "pboc"):
         self.conf = conf
-        # 机构号兜底: CONFIG 未填时用实例数据里的 facilityOwnershipAgency
-        if not str(self.conf.get("facilityOwnerAgency", "") or "").strip() and fallback_agency:
-            LOG.warning("[report] CONFIG 的 facilityOwnerAgency 未配置，用实例数据兜底: %s", fallback_agency)
-        self.fallback_agency = fallback_agency
         self.variant = variant
         self._token: str = ""
         self._token_exp: int = 0
+
+    def _agency(self) -> str:
+        """机构号——唯一来源 FINTECH_REPORT_CONFIG.facilityOwnerAgency，未配置直接报错。"""
+        agency = str(self.conf.get("facilityOwnerAgency", "") or "").strip()
+        if not agency:
+            raise RuntimeError(
+                "金融机构编码未配置：请在 CMDB FINTECH_REPORT_CONFIG 实例填写 "
+                "facilityOwnerAgency（人行机构号，如 A1000141000266）")
+        return agency
 
     def _base(self) -> str:
         ip = self.conf.get("ip") or "127.0.0.1"
@@ -452,7 +457,7 @@ class ReportCenter:
         if self.variant == "zhongxin":
             resp = self._post("itsm/httpclient/reportData.action", {
                 "branchId": branch_id,
-                "facilityOwnerAgency": self.conf.get("facilityOwnerAgency", "") or self.fallback_agency,
+                "facilityOwnerAgency": self._agency(),
                 "data": self._compress(data)})
             ok = str(resp.get("code", resp.get("status", ""))) == "1"
             return {"branchId": branch_id,
@@ -462,7 +467,7 @@ class ReportCenter:
             self.conf.get("reportDataUri")
             or "webproxy/fig2fics/pshare/api/prod/FICS/api/fics/dataElementInstance/reportData", {
                 "branchId": branch_id,
-                "facilityOwnerAgency": self.conf.get("facilityOwnerAgency", "") or self.fallback_agency,
+                "facilityOwnerAgency": self._agency(),
                 "data": self._compress(data)})
         return {"branchId": resp.get("branchId", branch_id),
                 "code": str(resp.get("code", "")), "msg": str(resp.get("msg", ""))[:500]}
@@ -475,7 +480,7 @@ class ReportCenter:
             self.conf.get("checkResultUri")
             or "webproxy/fig2fics/pshare/api/prod/FICS/api/fics/dataElementInstance/selectUploadData", {
                 "branchId": branch_id,
-                "facilityOwnerAgency": self.conf.get("facilityOwnerAgency", "") or self.fallback_agency})
+                "facilityOwnerAgency": self._agency()})
         if not resp.get("branchId") or not resp.get("code"):
             raise RuntimeError(f"查询上报结果响应无效: {json.dumps(resp, ensure_ascii=False)[:300]}")
         return resp
@@ -587,12 +592,7 @@ def report_one_model(rule: dict, report_obj: dict, conf: dict, variant: str,
                    "instances": payload_instances}
         task["dataFile"] = save_report_data(task_id, payload)
         # 3.2) 分批上报（new/update 各自成批；delete 一批）——批次成功即标记实例 confirmed
-        _agency = ""
-        for _d in converted.values():
-            _agency = str(_d.get("facilityOwnershipAgency", "") or "")
-            if _agency:
-                break
-        center = ReportCenter(conf, variant, fallback_agency=_agency)
+        center = ReportCenter(conf, variant)
         branch_ids = []
         counts = {"insert": 0, "update": 0, "remove": 0, "failed": 0}
         type_count_key = {"new": "insert", "update": "update", "delete": "remove"}
