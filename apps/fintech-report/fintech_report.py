@@ -105,8 +105,12 @@ REPORT_TYPE_NEW, REPORT_TYPE_UPDATE, REPORT_TYPE_DELETE = "new", "update", "dele
 
 # 人行状态码（Go report_center/types.go 全量）
 CODE_REPORT_SUCCESS = "WL-10000"
-CODE_HANDLE_SUCCESS = "WL-10009"
-CODE_HANDLE_WITH_WARN = "WL-10013"
+CODE_SAVE_SUCCESS = "WL-10005"      # 已保存（处理中，继续轮询）
+CODE_HANDLING = "WL-10006"           # 处理中（继续轮询）
+CODE_HANDLE_SUCCESS = "WL-10009"    # 处理成功（终态：成功）
+CODE_HANDLE_WITH_WARN = "WL-10013"  # 处理成功有警告（终态：成功）
+CHECK_POLL_INTERVAL = 10
+CHECK_POLL_MAX = 5
 CODE_DATA_VALID = "WL-20000"
 CODE_DATA_VALID_WITH_WARNING = "WL-20003"
 
@@ -461,16 +465,25 @@ class ReportCenter:
                 "code": str(resp.get("code", "")), "msg": str(resp.get("msg", ""))[:500]}
 
     def check_result(self, branch_id: str) -> dict:
-        """查询人行侧批次处理结果（check_job 用；本脚本 report 完成后自动查一次）。"""
+        """查批次处理结果；处理中(WL-10005/WL-10006)轮询直到终态或超时(标 pendingCheck 由调用方处理)。"""
         if self.variant == "zhongxin":
             return {"code": CODE_HANDLE_SUCCESS, "msg": "中信变体无结果查询", "data": []}
-        resp = self._post(
-            self.conf.get("checkResultUri")
-            or "webproxy/fig2fics/pshare/api/prod/FICS/api/fics/dataElementInstance/selectUploadData", {
+        uri = (self.conf.get("checkResultUri")
+               or "webproxy/fig2fics/pshare/api/prod/FICS/api/fics/dataElementInstance/selectUploadData")
+        resp = {}
+        for _ in range(CHECK_POLL_MAX):
+            resp = self._post(uri, {
                 "branchId": branch_id,
                 "facilityOwnerAgency": self._agency()})
-        if not resp.get("branchId") or not resp.get("code"):
-            raise RuntimeError(f"查询上报结果响应无效: {json.dumps(resp, ensure_ascii=False)[:300]}")
+            if not resp.get("branchId") or not resp.get("code"):
+                raise RuntimeError(f"查询上报结果响应无效: {json.dumps(resp, ensure_ascii=False)[:300]}")
+            code = str(resp.get("code", ""))
+            if code in (CODE_SAVE_SUCCESS, CODE_HANDLING):
+                LOG.info("[report] 批次 %s 处理中(%s)，等待重查...", branch_id[:12], code)
+                time.sleep(CHECK_POLL_INTERVAL)
+                continue
+            return resp   # 终态
+        LOG.warning("[report] 批次 %s 检核轮询超时(%s次)", branch_id[:12], CHECK_POLL_MAX)
         return resp
 
 
@@ -603,22 +616,16 @@ def report_one_model(rule: dict, report_obj: dict, conf: dict, variant: str,
                         desc = item.get(converter.key_desc)
                         if desc and desc in payload_instances:
                             payload_instances[desc]["_confirmed"] = True
-        # 3.3) 查人行处理结果（首批）
-        check_code, check_msg = "", ""
-        if branch_ids:
-            try:
-                chk = center.check_result(branch_ids[0])
-                check_code, check_msg = str(chk.get("code", "")), str(chk.get("msg", ""))[:200]
-            except Exception as e:
-                check_code, check_msg = "", f"结果查询失败: {e}"
-        task.update({"status": "success" if counts["failed"] == 0 else
-                     ("fail" if counts["insert"] + counts["update"] + counts["remove"] == 0
-                      else "partialSuccess"),
+        # check 已在批次循环内完成（轮询终态）
+        task.update({"status": (task.get("status") if task.get("status") == "pendingCheck"
+                                else ("success" if counts["failed"] == 0
+                                      else ("fail" if counts["insert"] + counts["update"] + counts["remove"] == 0
+                                            else "partialSuccess"))),
                      "endTime": time.strftime("%Y-%m-%d %H:%M:%S"),
                      "branchId": ",".join(branch_ids),
                      "insertCount": counts["insert"], "updateCount": counts["update"],
                      "removeCount": counts["remove"], "failedCount": counts["failed"],
-                     "checkCode": check_code, "checkMsg": check_msg,
+                     "checkCode": "", "checkMsg": "",
                      "errorMsg": "" if counts["failed"] == 0 else f"{counts['failed']} 条失败"})
         if not new_items and not update_items and not delete_items:
             task["status"] = "noReport"
