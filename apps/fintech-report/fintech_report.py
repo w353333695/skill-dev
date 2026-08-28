@@ -785,8 +785,13 @@ def cmd_cleanup(dry_run: bool = False) -> int:
         max_count = int(rule.get("maxCount") or 0)
         max_age = int(rule.get("maxAgeDays") or 0)
         scope = (rule.get("scope") or "").strip()
-        if max_count <= 0 or max_age <= 0:
-            LOG.warning("[cleanup] 规则 %s 的 maxCount/maxAgeDays 未配置完整，跳过", name)
+        if max_count == 0 and max_age == 0:
+            # 双 0 = 全清模式：删除 scope 内全部任务（含回滚记录与原文文件）
+            LOG.warning("[cleanup] 规则 %s 为全清模式（maxCount=0 且 maxAgeDays=0），"
+                        "将删除%s全部任务记录", name, f"【{scope}】" if scope else "所有模型")
+        elif max_count <= 0 or max_age <= 0:
+            LOG.warning("[cleanup] 规则 %s 的 maxCount/maxAgeDays 未配置完整（需双正数=AND保留，"
+                        "或双0=全清），跳过", name)
             continue
         # 目标模型集合
         if scope:
@@ -802,9 +807,13 @@ def cmd_cleanup(dry_run: bool = False) -> int:
             by_obj.setdefault(t.get("objectId", ""), []).append(t)
         to_delete: list[dict] = []
         cutoff = time.time() - max_age * 86400
+        purge_all = (max_count == 0 and max_age == 0)
         for oid, lst in by_obj.items():
             lst.sort(key=lambda t: str(t.get("startTime", "")), reverse=True)
             for idx, t in enumerate(lst):
+                if purge_all:
+                    to_delete.append(t)   # 全清模式
+                    continue
                 if idx < max_count:
                     continue  # 还在最近 N 条内 → 保留
                 st = t.get("startTime", "")
@@ -821,10 +830,13 @@ def cmd_cleanup(dry_run: bool = False) -> int:
                 LOG.info("  将删: %s %s %s", t.get("taskId", "")[:12], t.get("objectId"), t.get("startTime"))
             continue
         # 删 CMDB 任务 + 数据文件 + 级联回滚记录
+        # 回滚记录一次全查建索引（避免每任务一次 CMDB 搜索的 N+1 慢查询）
+        rb_index: dict[str, list[str]] = {}
+        for r in cmdb_search_all(OBJ_ROLLBACK, fields=["taskId", "instanceId"]):
+            rb_index.setdefault(str(r.get("taskId", "")), []).append(r["instanceId"])
         for t in to_delete:
             tid = t.get("taskId", "")
-            rb_ids = [r.get("instanceId") for r in cmdb_search_all(
-                OBJ_ROLLBACK, expr=f'taskId = "{tid}"') if r.get("instanceId")]
+            rb_ids = [i for i in rb_index.get(tid, []) if i]
             if rb_ids:
                 cmdb_delete(OBJ_ROLLBACK, rb_ids)
             if t.get("instanceId"):
