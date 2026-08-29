@@ -25,7 +25,7 @@
 | `platforms/` | 跨 skill 共享的平台产物（API 契约、模型等） |
 | `tmp/` | 临时产物；按 scope 分子目录，不长期沉淀 |
 
-* **命名与识别**：project 名 = 能力名 = dist 名（连字符，如 `browser-recorder`）。**识别 project 类型**：有 `go.mod` → golang，有 `pyproject.toml` → Python。Python 包目录用下划线（`browser_recorder`），golang 包目录随 module 名。
+* **命名与识别**：project 名 = 能力名 = dist 名（连字符，如 `doc-converter`）。**识别 project 类型**：有 `go.mod` → golang，有 `pyproject.toml` → Python。Python 包目录用下划线（`doc_converter`），golang 包目录随 module 名。
 * skill 产物默认放 `tmp/`，不写进 plugin/skill 目录（除非固化）。
 * **golang project**（有 `go.mod`，如 `projects/api-cli/`）与 Python project **平行支持，不再算"例外"**：
   - 打包：`scripts/pack-go.sh`（多平台交叉编译二进制 + zip 大礼包 + checksums，CGO=0 纯静态），**不走** whl / `pack-dist.sh`。
@@ -39,7 +39,7 @@
 * **Python 版本基线（强制）**：每个 Python project 的开发 venv **钉到 `requires-python` 的下限版本**（当前基线 **3.9**），用 `.python-version` 固化并提交。
   - **原因**：`requires-python` 只是**安装时**校验的元数据，**不验证代码兼容性**；uv 按 `.python-version` 只在**一个**版本上开发/构建/跑测试，不会自动测下限。钉到下限 = 开发即验证下限：写了 `X | None`（无 future）/`match`/`zip(strict=True)` 等 3.10+ 语法，保存跑一下就当场炸，强制兑现 `>=3.9` 契约（doc-converter 曾因 `X | None` 在 3.9 炸，见 commit 4c61f0c）。
   - **落地**：`.python-version` 写下限版本（如 `3.9`）；切换时 `rm -rf .venv uv.lock && UV_INDEX_URL=https://pypi.tuna.tsinghua.edu.cn/simple uv sync` 重建（镜像见 §3.1）。类型注解用 `X | None` 时配合 `from __future__ import annotations`（注解惰性化为字符串，3.9 运行时不再求值）。
-  - **依赖侧也要卡下限**：不止自己的代码语法，**第三方依赖的新版本也可能抬高 python 要求**。典型：playwright **1.61+ 要求 py≥3.10**，支持 3.9 的最后版本是 1.60（对应 chromium-1223）；click **8.2+ 要求 py≥3.10**。凡要兼容 3.9 的 project，这类依赖必须钉上限（如 `playwright>=1.56,<1.61`、`click<8.2`），否则 uv 在 3.9 环境会解析失败或装上跑不动。browser-recorder 实测：3.9.25 + playwright 1.60 全测试通过，业务代码零改动（全靠 future annotations）。
+  - **依赖侧也要卡下限**：不止自己的代码语法，**第三方依赖的新版本也可能抬高 python 要求**。典型：playwright **1.61+ 要求 py≥3.10**，支持 3.9 的最后版本是 1.60（对应 chromium-1223）；click **8.2+ 要求 py≥3.10**。凡要兼容 3.9 的 project，这类依赖必须钉上限（如 `playwright>=1.56,<1.61`、`click<8.2`），否则 uv 在 3.9 环境会解析失败或装上跑不动。
   - **新建 Python project**：直接 `echo 3.9 > .python-version` + 建 3.9 venv 起步，别从 3.12 建再降级（降级时会撞语法雷）。
   - **不再需要老版本**时：**优先提高 `requires-python` 下限**（如 `>=3.11`）并同步 `.python-version`，而不是留在 3.9 靠 future import 硬撑。
   - whl 是 `py3-none-any`，build 用的版本**不影响**产物的兼容性标记；但仍建议偶尔在高版本（如 3.12）跑次测试防反向不兼容。
@@ -105,7 +105,7 @@
 * **`skills/<skill>/manifest.sh`**：声明 skill 依赖的 project（bash 数组，不用 yaml——`setup.sh` 在用户环境跑，不能依赖 pyyaml 解析）：
   ```bash
   SKILL_NAME="<skill>"; SKILL_VERSION="<ver>"
-  PROJECTS=("api-cli=api-cli" "browser-recorder=browser-recorder")  # project名=cli名
+  PROJECTS=("api-cli=api-cli" "doc-converter=doc-converter")  # project名=cli名
   ```
 * **`skills/<skill>/scripts/setup.sh`**（分发态，每 skill 复制一份通用脚本）：读 manifest，对每个 project 幂等装好 CLI（vendor whl 优先离线，否则 PyPI 名；工具 uv>pipx>pip；pip 模式查 Python>=3.9）。部署阶段跑一次。
 * **`skills/<skill>/scripts/run.sh`**（仅开发态，**不进分发包**）：`run.sh <cli> [args]` → `uv run --project projects/<对应project> <cli> [args]`，方便开发时直接测 skill。分发态裸调 CLI，不用本壳。

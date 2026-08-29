@@ -28,7 +28,6 @@
 | 能力 | 语言/CLI | 说明 |
 |---|---|---|
 | [api-cli](projects/api-cli) | Go `api-cli` | 声明式 API CLI：YAML 清单 → 分层命令树 + MCP tools，鉴权/分页可拔插 |
-| [browser-recorder](projects/browser-recorder) | Python `browser-recorder` | 跨平台浏览器操作录制/回放/导出 CLI |
 | [doc-converter](projects/doc-converter) | Python `doc-converter` | 文档格式转换（MD/PDF/Word/图片/Excel 互转）CLI |
 
 ### skills/
@@ -36,7 +35,6 @@
 | Skill | 编排的 project | 说明 |
 |---|---|---|
 | [api-orchestrator](skills/api-orchestrator) | api-cli | 通用 API 编排：自然语言 → 跨系统调用编排（onboarding 接入新能力域 + orchestration 编排执行） |
-| [browser-manual](skills/browser-manual) | browser-recorder | 录制系统操作流程出操作手册 + 按主题精筛接口清单 |
 | [doc-converter](skills/doc-converter) | doc-converter | 文档格式转换 |
 | [easyops_skills](skills/easyops_skills) | — | EasyOps 业务 skill 集（monitor-kit / resource-collector-kit / sso-provider / alarm-access 等） |
 
@@ -65,11 +63,11 @@ go run ./projects/api-cli/cmd/api-cli --help
 skills/api-orchestrator/scripts/run.sh --spec projects/api-cli/examples/easyops-cmdb.yaml object_instance search FLOW_BUILDER_API_CONTRACT@EASYOPS --print-curl
 
 # Python project：用对应 venv 跑 CLI（editable，改完即生效）
-uv run --project projects/browser-recorder browser-recorder --help
+uv run --project projects/doc-converter doc-converter --help
 
 # 跑某 project 的测试
 cd projects/api-cli && go test ./...
-cd projects/browser-recorder && uv run pytest
+cd projects/doc-converter && uv run pytest
 ```
 
 ### 分发打包

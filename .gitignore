@@ -30,8 +30,7 @@ __pycache__/
 tmp/
 workspace-all.zip
 
-# Runtime artifacts（工具运行产物：录制/导出结果等，按工具追加）
-.browser-recorder/
+# Runtime artifacts（工具运行产物：截图/导出结果等，按工具追加）
 .screenshot-images/
 
 # api-orchestrator 本地状态（运行态缓存/会话产物，不入库）
