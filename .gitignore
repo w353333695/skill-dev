@@ -47,6 +47,9 @@ platforms/*/sources/raw/
 data/
 resources/
 
+# fintech-sync：本地工具（含平台模型导出/数据转储，不入库）
+apps/fintech-sync/
+
 # SDD scratch
 .superpowers/
 
