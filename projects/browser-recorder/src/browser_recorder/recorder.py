@@ -10,6 +10,7 @@ import base64
 import json
 import logging
 import pathlib
+import shutil
 import socket
 import subprocess
 import sys
@@ -253,6 +254,20 @@ async def record(
         await action_q.put(None)
         actions.cancel()
         writer.emit("session_end", {"abnormal": abnormal, "stop_reason": stop_reason})
+
+        # PROMPT.md 模板随 session 落盘（供后续 Claude Code 会话生成 guide.md）
+        # 查找顺序：①开发态（src 布局：recorder.py 在 src/browser_recorder/ 下，
+        # templates/ 在 src 的上一级即项目根）②wheel 安装态（shared-data 落
+        # sys.prefix/browser_recorder/templates/，实测 pip/uv 安装均在此）
+        here = pathlib.Path(__file__).resolve().parent
+        for tmpl in (
+            here.parent.parent / "templates" / "PROMPT.md.tmpl",
+            pathlib.Path(sys.prefix) / "browser_recorder" / "templates" / "PROMPT.md.tmpl",
+        ):
+            if tmpl.exists():
+                shutil.copy(tmpl, out_dir / "PROMPT.md")
+                break
+
         return {"events": writer._seq, "out_dir": str(out_dir), "abnormal": abnormal,
                 "stop_reason": stop_reason}
     finally:

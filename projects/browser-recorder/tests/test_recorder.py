@@ -151,6 +151,9 @@ def test_record_session_flow(local_site, chrome_path, tmp_path):
     # Browser.close 优雅停止：非 abnormal
     assert result["stop_reason"] == "browser_closed"
     assert result["abnormal"] is False
+    # PROMPT.md 模板随 session 落盘
+    assert (out / "PROMPT.md").exists()
+    assert "操作指引" in (out / "PROMPT.md").read_text(encoding="utf-8")
 
 
 def test_record_hotkey_stop(local_site, chrome_path, tmp_path):
