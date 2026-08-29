@@ -58,7 +58,10 @@
       id: el.id || null,
       classes: classes_of(el),
       text: trunc_text(
-        el.textContent || el.value || el.getAttribute && el.getAttribute("aria-label") || ""
+        el.textContent ||
+          (el.type === "password" ? "" : el.value) ||
+          (el.getAttribute && el.getAttribute("aria-label")) ||
+          ""
       ),
       dom_path: dom_path(el),
     };
@@ -96,7 +99,7 @@
       if (t && t.closest) {
         return t.closest("a,button,input,select,textarea,[onclick]") || t;
       }
-      return t || (e.currentTarget && e.currentTarget.ownerDocument ? e.currentTarget.ownerDocument.body : t);
+      return t;
     }
 
     // 动作：capture 阶段，document 级
