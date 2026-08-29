@@ -101,6 +101,7 @@ async def record(
     chrome: subprocess.Popen | None = None  # Popen 失败（chrome_path 无效）也要走 finally 关 writer
     client: CDPClient | None = None
     actions: asyncio.Task | None = None
+    finished = False  # 正常收尾（session_end 已 emit）标记；finally 据此补中断收尾
     try:
         chrome = subprocess.Popen(args, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
         if not await _wait_devtools(port):
@@ -124,9 +125,11 @@ async def record(
         def on_req(p):
             if "redirectResponse" in p:
                 # 重定向跳复用同一 requestId 且无对应 responseReceived，
-                # 再计 in-flight 会永久 +1 → wait_stable 必走满 timeout
-                return
-            state.net_open(p["requestId"], p.get("request", {}).get("url", ""))
+                # 再计 in-flight 会永久 +1 → wait_stable 必走满 timeout。
+                # 只跳过记账，request 事件仍落盘（重定向 hop 不丢）。
+                pass
+            else:
+                state.net_open(p["requestId"], p.get("request", {}).get("url", ""))
             writer.emit("request", {
                 "request_id": p["requestId"], "method": p.get("request", {}).get("method"),
                 "url": p.get("request", {}).get("url"), "headers": p.get("request", {}).get("headers"),
@@ -221,6 +224,9 @@ async def record(
                 writer.emit("screenshot", {"action_seq": seq, "phase": "after",
                                            "file": f"{seq:04d}-after.png",
                                            "status": after_status})
+                # 落盘 IO 致命（磁盘满/目录被删）：升级为停止，不再白录
+                if writer.fatal:
+                    stop_evt.set()
 
         actions = asyncio.create_task(action_loop())
 
@@ -249,28 +255,41 @@ async def record(
                 pass
             abnormal = chrome.poll() not in (None, 0)
 
+        # 落盘 IO 致命升级为停止原因（action_loop 每轮 + 停止等待完成后双检）
+        io_error = None
+        if writer.fatal:
+            stop_reason = "io_error"
+            io_error = "session.jsonl 写入失败（磁盘满/目录被删？），录制中止"
+
         for t in body_tasks:
             t.cancel()
         await action_q.put(None)
         actions.cancel()
-        writer.emit("session_end", {"abnormal": abnormal, "stop_reason": stop_reason})
+        end_payload = {"abnormal": abnormal, "stop_reason": stop_reason}
+        if io_error:
+            end_payload["error"] = io_error
+        writer.emit("session_end", end_payload)
+        _copy_prompt(out_dir)
+        finished = True
 
-        # PROMPT.md 模板随 session 落盘（供后续 Claude Code 会话生成 guide.md）
-        # 查找顺序：①开发态（src 布局：recorder.py 在 src/browser_recorder/ 下，
-        # templates/ 在 src 的上一级即项目根）②wheel 安装态（shared-data 落
-        # sys.prefix/browser_recorder/templates/，实测 pip/uv 安装均在此）
-        here = pathlib.Path(__file__).resolve().parent
-        for tmpl in (
-            here.parent.parent / "templates" / "PROMPT.md.tmpl",
-            pathlib.Path(sys.prefix) / "browser_recorder" / "templates" / "PROMPT.md.tmpl",
-        ):
-            if tmpl.exists():
-                shutil.copy(tmpl, out_dir / "PROMPT.md")
-                break
-
-        return {"events": writer._seq, "out_dir": str(out_dir), "abnormal": abnormal,
-                "stop_reason": stop_reason}
+        return {"events": writer.events, "out_dir": str(out_dir), "abnormal": abnormal,
+                "stop_reason": stop_reason, "io_error": io_error}
     finally:
+        # Ctrl-C 优雅收尾：asyncio.run 收到 SIGINT 会 cancel 主协程（以
+        # CancelledError 形态冒泡，except KeyboardInterrupt 在协程内不命中），
+        # 故收尾统一放 finally——正常路径由 finished 标记跳过，中断/异常路径
+        # 在此补 session_end(interrupt) + PROMPT.md（emit 亦 try 包住防二次异常）。
+        if not finished:
+            for t in body_tasks:
+                t.cancel()
+            if actions is not None:
+                actions.cancel()
+            try:
+                writer.emit("session_end",
+                            {"abnormal": True, "stop_reason": "interrupt"})
+            except Exception:
+                pass
+            _copy_prompt(out_dir)
         if client is not None:
             try:
                 await client.close()
@@ -283,6 +302,26 @@ async def record(
                 chrome.wait(timeout=5)
             except subprocess.TimeoutExpired:
                 chrome.kill()
+
+
+def _copy_prompt(out_dir: pathlib.Path) -> bool:
+    """PROMPT.md 模板随 session 落盘（供后续 Claude Code 会话生成 guide.md）。
+
+    查找顺序：①开发态（src 布局：recorder.py 在 src/browser_recorder/ 下，
+    templates/ 在 src 的上一级即项目根）②wheel 安装态（shared-data 落
+    sys.prefix/browser_recorder/templates/，实测 pip/uv 安装均在此）。
+    两候选全 miss 时 warning（PROMPT.md 缺失只降级文档生成，不 fatal）。
+    """
+    here = pathlib.Path(__file__).resolve().parent
+    for tmpl in (
+        here.parent.parent / "templates" / "PROMPT.md.tmpl",
+        pathlib.Path(sys.prefix) / "browser_recorder" / "templates" / "PROMPT.md.tmpl",
+    ):
+        if tmpl.exists():
+            shutil.copy(tmpl, out_dir / "PROMPT.md")
+            return True
+    log.warning("PROMPT.md template not found")
+    return False
 
 
 async def _wait_devtools(port: int, tries: int = 50, interval: float = 0.1) -> bool:

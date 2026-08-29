@@ -43,10 +43,18 @@ def record_cmd(start_url, out_root, settle_timeout, port, headless, no_sandbox):
     chrome = DEFAULT_CHROME
     if not chrome.exists():
         raise click.ClickException(f"chrome 未找到: {chrome}（可用 BR_CHROME 环境变量指定）")
-    result = asyncio.run(record(out_dir, start_url, chrome,
-                                settle_timeout=settle_timeout, port=port,
-                                headless=headless,
-                                extra_chrome_args=["--no-sandbox"] if no_sandbox else None))
+    try:
+        result = asyncio.run(record(out_dir, start_url, chrome,
+                                    settle_timeout=settle_timeout, port=port,
+                                    headless=headless,
+                                    extra_chrome_args=["--no-sandbox"] if no_sandbox else None))
+    except KeyboardInterrupt:
+        # Ctrl-C：record() 内部已完成 session_end(interrupt) + PROMPT.md 收尾
+        click.echo("已中断，已录事件已落盘")
+        raise SystemExit(130)
+    if result.get("io_error"):
+        click.echo(f"完成：{result['events']} 事件，abnormal={result['abnormal']}")
+        raise click.ClickException(result["io_error"])
     click.echo(f"完成：{result['events']} 事件，abnormal={result['abnormal']}")
     raise SystemExit(2 if result["abnormal"] else 0)
 

@@ -24,7 +24,7 @@ uv run browser-recorder record https://example.com
 uv run browser-recorder export sessions/20260829-153000   # 导出 zip
 ```
 
-浏览器二进制默认找 Playwright 缓存的 Chromium（见下 `BR_CHROME`）；退出码 0=正常停止，2=异常（崩溃/被杀）。
+浏览器二进制默认找 Playwright 缓存的 Chromium（见下 `BR_CHROME`）；退出码 0=正常停止，2=异常（崩溃/被杀），130=Ctrl-C 中断（已录事件已落盘）。
 
 ## CLI 旗子
 
@@ -56,15 +56,15 @@ session 目录下启动 Claude Code，直接说"按 PROMPT.md 执行"，产出 `
 
 | kind | 触发 | payload 关键字段 |
 |---|---|---|
-| `session_start` / `session_end` | 录制起止 | url、ts、chrome 路径、pid；end 带 `abnormal`、`stop_reason`（hotkey/browser_closed/terminal_q） |
+| `session_start` / `session_end` | 录制起止 | url、ts、chrome 路径、pid；end 带 `abnormal`、`stop_reason`（hotkey/browser_closed/terminal_q/io_error/interrupt），io_error 时附 `error` |
 | `nav` | 主 frame 导航 | url, title |
 | `action` | 注入脚本上报 click/input/submit | type, element{rect, viewport, descriptor}, value, html_type |
 | `request` / `response` / `response_body` | CDP Network 域 | request: method/url/headers/post_body/initiator；response: status/mime/headers/size；body: 全量不截断，取不到记 `error: "evicted"` |
 | `dom_mutations` | MutationObserver 150ms 聚合 | count |
-| `screenshot` | 每动作双截图完成 | action_seq, phase(before/after), file, status(ok/raced/timeout/failed) |
+| `screenshot` | 每动作双截图完成 | action_seq, phase(before/after), file, status（before: ok/raced；after: stable/timeout；截取失败: failed） |
 | `control_stop` | 页面内 Ctrl+Shift+F9 | — |
 
-**硬脱敏**（写死在 `writer.py`，不可配置）：`Authorization`/`Cookie`/`Set-Cookie`/token 类 header 只记键名不记值；`type=password` input 值恒 `***`；URL 中 `token`/`password`/`secret` 类参数值打码为 `***`。body 不截断。
+**硬脱敏**（写死在 `writer.py`，不可配置）：`Authorization`/`Cookie`/`Set-Cookie`/token 类 header 只记键名不记值；`type=password` input 值恒 `***`；URL（nav/session_start/request/response）中 `token`/`password`/`secret` 类参数值打码为 `***`；`post_body` JSON 顶层敏感键值与 form 形态敏感参数值打码。body 不截断。
 
 ## 已知限制（spec §4）
 
@@ -78,7 +78,7 @@ session 目录下启动 Claude Code，直接说"按 PROMPT.md 执行"，产出 `
 ```bash
 cd projects/browser-recorder
 uv sync
-uv run pytest tests/ -v   # 13 个测试（writer 脱敏 / cdp / inject / recorder 流程 / annotator）
+uv run pytest tests/ -v   # 16 个测试（writer 脱敏 / cdp / inject / recorder 流程 / annotator）
 ```
 
 设计文档：`docs/2026-08-29-browser-recorder-design.md`（实现计划：`docs/2026-08-29-browser-recorder-plan.md`）
