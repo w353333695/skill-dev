@@ -3,8 +3,11 @@
 用法：
     client = await CDPClient.connect(port)          # 真浏览器
     client = await CDPClient.connect(0, ws_url=...)  # 测试直连 ws
-    client.on("Network.*", cb)                       # cb(params: dict) 同步
+    client.on("Network.requestWillBeSent", cb)       # 具名事件：cb(params: dict) 单参
+    client.on("*", cb)                               # 全部事件：cb(method, params) 两参
     r = await client.send("Page.navigate", {"url": ...})
+
+注：不支持 "Network.*" 之类前缀通配，只认精确事件名或 "*"。
 """
 from __future__ import annotations
 
@@ -31,8 +34,7 @@ class CDPClient:
         self._ws = ws
         self._id = itertools.count(1)
         self._pending: dict[int, asyncio.Future] = {}
-        self._handlers: dict[str, list] = []  # 占位，下一行真正初始化
-        self._handlers = {}
+        self._handlers: dict[str, list] = {}
         self._reader: asyncio.Task | None = None
         self.closed = False
 
