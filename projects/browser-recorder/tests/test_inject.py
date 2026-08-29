@@ -37,3 +37,51 @@ console.log(JSON.stringify([
     sel, text = json.loads(_run_node(script))
     assert sel == "#btn"
     assert len(text) == 40
+
+
+def test_install_survives_early_document():
+    """回归：新文档极早期（documentElement 尚为 null）install 不得夭折。
+
+    Page.addScriptToEvaluateOnNewDocument 的脚本在 documentElement 创建前运行，
+    旧实现 observe(null) 抛 TypeError → MutationObserver 永远挂不上（动作
+    监听器先注册所以还活着，症状是 dom_mutations 事件全丢、settle 只能靠
+    网络空闲）。node 手搓最小 document 桩验证：install 全程不抛、监听器
+    齐全、根元素出现后 observer 补挂、热键上报可用。
+    """
+    script = """
+const m = require('%s');
+const reports = [];
+const listeners = {};
+const fakeDoc = {
+  documentElement: null,                      // 新文档极早期
+  addEventListener: (t, cb) => { (listeners[t] = listeners[t] || []).push(cb); },
+};
+let observed = null;
+global.MutationObserver = class {             // observe(null) 像真浏览器一样抛
+  observe(t) { if (!t) throw new TypeError('observe null'); observed = t; }
+  disconnect() {}
+};
+const win = { document: fakeDoc, __brEvent: (s) => reports.push(JSON.parse(s)) };
+m.install(win);                               // 不得抛
+setTimeout(() => {
+  fakeDoc.documentElement = { tag: 'html' };  // 根元素出现
+  setTimeout(() => {                          // 轮询周期 10ms，100ms 足够
+    listeners.keydown.forEach(cb => cb({
+      ctrlKey: true, shiftKey: true, key: 'F9', keyCode: 120,
+      preventDefault() {}, stopPropagation() {},
+    }));
+    console.log(JSON.stringify({
+      installed: !!win.__brInstalled,
+      kinds: Object.keys(listeners).sort(),
+      observed: !!observed,
+      stop: reports.some(r => r.type === 'control_stop'),
+    }));
+    process.exit(0);
+  }, 100);
+}, 50);
+""" % INJECT
+    r = json.loads(_run_node(script))
+    assert r["installed"]
+    assert r["kinds"] == ["click", "input", "keydown", "submit"]
+    assert r["observed"]          # 根元素可用后 MutationObserver 补挂
+    assert r["stop"]              # install 全程跑完：热键上报可用

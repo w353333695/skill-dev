@@ -129,10 +129,14 @@
       }
     }, true);
 
-    // DOM 突变聚合：150ms 静默窗口
+    // DOM 突变聚合：150ms 静默窗口。
+    // 注入可能发生在新文档极早期（Page.addScriptToEvaluateOnNewDocument 在
+    // documentElement 创建前运行），此时 observe(null) 会抛 TypeError 导致
+    // install 半途夭折—— MutationObserver 是 install 最后一步，动作监听器
+    // 已先挂上，症状是"动作有、dom_mutations 永远没有"。故延迟到根元素可用。
     var pending = 0;
     var timer = null;
-    new MutationObserver(function (muts) {
+    var obs = new MutationObserver(function (muts) {
       pending += muts.length;
       clearTimeout(timer);
       timer = setTimeout(function () {
@@ -140,9 +144,20 @@
         pending = 0;
         try { B(JSON.stringify({ type: "dom_mutations", count: n })); } catch (e) { /* ignore */ }
       }, MUTATION_WINDOW_MS);
-    }).observe(win.document.documentElement, {
-      subtree: true, childList: true, attributes: true, characterData: true,
     });
+    function startObserver() {
+      try {
+        obs.observe(win.document.documentElement, {
+          subtree: true, childList: true, attributes: true, characterData: true,
+        });
+        return true;
+      } catch (e) { return false; }
+    }
+    if (!startObserver()) {
+      var pollT = setInterval(function () {
+        if (win.document.documentElement && startObserver()) clearInterval(pollT);
+      }, 10);
+    }
   }
 
   return {

@@ -69,11 +69,13 @@ async def record(
     settle_timeout: float = 30.0,
     port: int | None = None,
     headless: bool = False,
+    extra_chrome_args: list[str] | None = None,
 ) -> dict:
     """完成一次录制到停止。返回 {"events", "out_dir", "abnormal", "stop_reason"}。
 
     stop_reason ∈ {"hotkey", "browser_closed", "terminal_q"}；
     abnormal 仅在 browser_closed 且退出码非 0（崩溃/被杀）时为 True。
+    extra_chrome_args：追加的浏览器启动参数（容器/受限环境传 ["--no-sandbox"]）。
     """
     out_dir = pathlib.Path(out_dir)
     writer = SessionWriter(out_dir)
@@ -93,6 +95,7 @@ async def record(
     ]
     if headless:
         args.append("--headless=new")
+    args.extend(extra_chrome_args or [])
     chrome: subprocess.Popen | None = None  # Popen 失败（chrome_path 无效）也要走 finally 关 writer
     client: CDPClient | None = None
     actions: asyncio.Task | None = None
@@ -272,8 +275,13 @@ async def _wait_devtools(port: int, tries: int = 50, interval: float = 0.1) -> b
 
 
 async def _wait_browser_closed(client: CDPClient) -> None:
-    """ws reader 结束（浏览器关闭/崩溃/被杀）即返回。"""
-    await client.wait_closed()
+    """ws reader 结束（浏览器关闭/崩溃/被杀）即返回。
+
+    直接 await reader task 会把它变成共享 awaitable：本任务被 cancel 时取消
+    会传播进 reader 本体，之后 record() 收尾的 client.close() await 已取消的
+    reader 必抛 CancelledError。shield 隔离（hotkey/terminal_q 停止路径）。
+    """
+    await asyncio.shield(client.wait_closed())
 
 
 async def _wait_terminal_q() -> str:
