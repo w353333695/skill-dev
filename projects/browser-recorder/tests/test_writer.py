@@ -80,6 +80,12 @@ def test_mask_post_body_other_untouched():
     assert mask_post_body("") == ""
 
 
+def test_mask_post_body_non_dict_json_untouched():
+    """合法 JSON 但非 dict（数组/字符串）→ 原样返回，不落 form 分支改写。"""
+    assert mask_post_body('["password=hunter2"]') == '["password=hunter2"]'
+    assert mask_post_body('"password=hunter2"') == '"password=hunter2"'
+
+
 def test_emit_masks_request_post_body(tmp_path):
     w = SessionWriter(tmp_path)
     w.emit("request", {"request_id": "1", "method": "POST",

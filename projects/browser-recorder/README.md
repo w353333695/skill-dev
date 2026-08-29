@@ -78,7 +78,7 @@ session 目录下启动 Claude Code，直接说"按 PROMPT.md 执行"，产出 `
 ```bash
 cd projects/browser-recorder
 uv sync
-uv run pytest tests/ -v   # 16 个测试（writer 脱敏 / cdp / inject / recorder 流程 / annotator）
+uv run pytest tests/ -v   # 19 个测试（writer 脱敏 / cdp / inject / recorder 流程 / annotator）
 ```
 
 设计文档：`docs/2026-08-29-browser-recorder-design.md`（实现计划：`docs/2026-08-29-browser-recorder-plan.md`）

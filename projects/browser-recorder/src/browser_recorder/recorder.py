@@ -268,8 +268,19 @@ async def record(
         end_payload = {"abnormal": abnormal, "stop_reason": stop_reason}
         if io_error:
             end_payload["error"] = io_error
-        writer.emit("session_end", end_payload)
-        _copy_prompt(out_dir)
+        try:
+            writer.emit("session_end", end_payload)
+        except (OSError, ValueError):
+            # 收尾 emit 也可能撞 IO 致命（文件已关/磁盘满）。不置 finished，
+            # 但把停止原因改 io_error 后走 return——CLI 侧据 io_error 字段
+            # 走 ClickException 分支提示用户，胜过裸异常冒泡。
+            stop_reason = "io_error"
+            io_error = io_error or "session.jsonl 写入失败（磁盘满/目录被删？），录制中止"
+            _copy_prompt_safe(out_dir)
+            finished = True
+            return {"events": writer.events, "out_dir": str(out_dir), "abnormal": abnormal,
+                    "stop_reason": stop_reason, "io_error": io_error}
+        _copy_prompt_safe(out_dir)
         finished = True
 
         return {"events": writer.events, "out_dir": str(out_dir), "abnormal": abnormal,
@@ -289,7 +300,7 @@ async def record(
                             {"abnormal": True, "stop_reason": "interrupt"})
             except Exception:
                 pass
-            _copy_prompt(out_dir)
+            _copy_prompt_safe(out_dir)
         if client is not None:
             try:
                 await client.close()
@@ -302,6 +313,15 @@ async def record(
                 chrome.wait(timeout=5)
             except subprocess.TimeoutExpired:
                 chrome.kill()
+
+
+def _copy_prompt_safe(out_dir: pathlib.Path) -> None:
+    """_copy_prompt 的容错包装：任何异常吞掉（含 KeyboardInterrupt 场景下
+    shutil 内部可能的 OSError），不让模板复制失败顶掉/掩盖原始停止路径。"""
+    try:
+        _copy_prompt(out_dir)
+    except Exception:
+        pass
 
 
 def _copy_prompt(out_dir: pathlib.Path) -> bool:

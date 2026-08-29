@@ -50,11 +50,16 @@ def mask_post_body(body):
     """
     if body is None or not isinstance(body, str) or not body.strip():
         return body
-    # JSON：parse 得通且顶层是 dict 才处理（数组/标量 JSON 结构不明，原样）
+    # JSON：parse 得通且顶层是 dict 才处理；合法 JSON 但非 dict（数组/字符串/
+    # 数字）结构不明，立即原样返回——不落 form 分支（'["password=x"]' 会被
+    # 当 form 逐参数打码，破坏 JSON 保真）
     try:
         obj = json.loads(body)
     except (json.JSONDecodeError, ValueError):
         obj = None
+    else:
+        if not isinstance(obj, dict):
+            return body
     if isinstance(obj, dict):
         for k in list(obj):
             if any(s in k.lower() for s in SENSITIVE_URL_KEYS):
