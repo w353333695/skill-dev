@@ -17,6 +17,7 @@ import threading
 import time
 import urllib.request
 
+from .annotator import annotate
 from .cdp import CDPClient
 from .writer import SessionWriter
 
@@ -204,6 +205,15 @@ async def record(
                     _save_shot(out_dir, seq, "after", shot["data"])
                 except Exception:
                     after_status = "failed"
+                # 红框标注：rect × dpr 画框 + 序号，原地覆写双截图
+                vp = payload.get("viewport") or {}
+                dpr = vp.get("dpr") or 1.0
+                rt = (payload.get("rect") or {})
+                if rt.get("w"):
+                    for ph in ("before", "after"):
+                        f = out_dir / "screenshots" / f"{seq:04d}-{ph}.png"
+                        if f.exists():
+                            annotate(f, rt, dpr=dpr, seq=seq)
                 writer.emit("screenshot", {"action_seq": seq, "phase": "before",
                                            "file": f"{seq:04d}-before.png",
                                            "status": before_status})
