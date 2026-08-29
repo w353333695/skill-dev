@@ -29,6 +29,7 @@
 |---|---|---|
 | [api-cli](projects/api-cli) | Go `api-cli` | 声明式 API CLI：YAML 清单 → 分层命令树 + MCP tools，鉴权/分页可拔插 |
 | [doc-converter](projects/doc-converter) | Python `doc-converter` | 文档格式转换（MD/PDF/Word/图片/Excel 互转）CLI |
+| [browser-recorder](projects/browser-recorder) | Python `browser-recorder` | 浏览器操作录制：裸 CDP 直连 → session.jsonl + 双截图 + 文档生成模板 |
 
 ### skills/
 
