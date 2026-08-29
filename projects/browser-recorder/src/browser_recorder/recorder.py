@@ -93,11 +93,11 @@ async def record(
     ]
     if headless:
         args.append("--headless=new")
-    chrome = subprocess.Popen(args, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-
+    chrome: subprocess.Popen | None = None  # Popen 失败（chrome_path 无效）也要走 finally 关 writer
     client: CDPClient | None = None
     actions: asyncio.Task | None = None
     try:
+        chrome = subprocess.Popen(args, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
         if not await _wait_devtools(port):
             raise RuntimeError(
                 "浏览器 devtools 端口未就绪（检查 DISPLAY/端口占用，可用 port= 换端口）")
@@ -117,6 +117,10 @@ async def record(
 
         # ---- CDP 事件处理 ----
         def on_req(p):
+            if "redirectResponse" in p:
+                # 重定向跳复用同一 requestId 且无对应 responseReceived，
+                # 再计 in-flight 会永久 +1 → wait_stable 必走满 timeout
+                return
             state.net_open(p["requestId"], p.get("request", {}).get("url", ""))
             writer.emit("request", {
                 "request_id": p["requestId"], "method": p.get("request", {}).get("method"),
@@ -245,7 +249,7 @@ async def record(
             except Exception:
                 pass
         writer.close()
-        if chrome.poll() is None:
+        if chrome is not None and chrome.poll() is None:
             chrome.terminate()
             try:
                 chrome.wait(timeout=5)
