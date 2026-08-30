@@ -300,7 +300,26 @@ async def record(
         await client.send("Target.setAutoAttach", {
             "autoAttach": True, "waitForDebuggerOnStart": True, "flatten": True})
 
-        # ---- 动作处理协程：双截图（按动作所属 tab 的 session 截图） ----
+        # ---- 动作处理协程：before 即拍（队列不积压）+ after 异步补拍 ----
+        # 旧实现：before→settle→after 串行阻塞队列——用户连续操作时截图滞后
+        # 数秒（真机实测 1.3~5.3s），页面早变样，图全错位。新结构：
+        #   action_loop 只做 emit + before（毫秒级），after 交给独立任务等稳再拍。
+        async def after_shot(seq: int, tid, rt, dpr, payload_snapshot: dict):
+            sid = next((t.sid for t in tabs.values() if t.tid == tid), None)
+            how = await wait_stable(state, settle_timeout)
+            try:
+                shot = await client.send("Page.captureScreenshot", {"format": "png"},
+                                         session_id=sid)
+                _save_shot(out_dir, seq, "after", shot["data"])
+                _annotate_safe(out_dir, seq, "after", rt, dpr)
+                writer.emit("screenshot", {"action_seq": seq, "phase": "after",
+                                           "file": f"{seq:04d}-after.png",
+                                           "status": how, "target_id": tid})
+            except Exception:
+                writer.emit("screenshot", {"action_seq": seq, "phase": "after",
+                                           "file": f"{seq:04d}-after.png",
+                                           "status": "failed", "target_id": tid})
+
         async def action_loop():
             while True:
                 payload = await action_q.get()
@@ -317,7 +336,7 @@ async def record(
                     "target_id": tid,
                     "before_shot": None, "after_shot": None,
                 })
-                # before（尽力而为，跳转竞态时标 raced）
+                # before：立即截（此刻页面=动作刚发生的现场）
                 before_status = "ok"
                 try:
                     shot = await client.send("Page.captureScreenshot", {"format": "png"},
@@ -325,32 +344,20 @@ async def record(
                     _save_shot(out_dir, seq, "before", shot["data"])
                 except Exception:
                     before_status = "raced"
-                # after（等稳定再截；StableState 全局 → 所有 tab 都静下来才截）
-                how = await wait_stable(state, settle_timeout)
-                after_status = how
-                try:
-                    shot = await client.send("Page.captureScreenshot", {"format": "png"},
-                                             session_id=sid)
-                    _save_shot(out_dir, seq, "after", shot["data"])
-                except Exception:
-                    after_status = "failed"
-                # 红框标注：rect × dpr 画框 + 序号，原地覆写双截图。
-                # 零宽/零高 rect（动画中下拉、未布局元素）画框必出界——跳过标注，
-                # descriptor 文字兜底描述位置。
+                # 红框标注（零尺寸跳过，descriptor 文字兜底）
                 vp = payload.get("viewport") or {}
                 dpr = vp.get("dpr") or 1.0
                 rt = (payload.get("rect") or {})
-                if rt.get("w") and rt.get("h"):
-                    for ph in ("before", "after"):
-                        f = out_dir / "screenshots" / f"{seq:04d}-{ph}.png"
-                        if f.exists():
-                            annotate(f, rt, dpr=dpr, seq=seq)
+                if rt.get("w") and rt.get("h") and before_status == "ok":
+                    _annotate_safe(out_dir, seq, "before", rt, dpr)
                 writer.emit("screenshot", {"action_seq": seq, "phase": "before",
                                            "file": f"{seq:04d}-before.png",
                                            "status": before_status, "target_id": tid})
-                writer.emit("screenshot", {"action_seq": seq, "phase": "after",
-                                           "file": f"{seq:04d}-after.png",
-                                           "status": after_status, "target_id": tid})
+                # after：独立任务等稳再拍——不阻塞下一个动作的 before
+                t_after = asyncio.get_running_loop().create_task(
+                    after_shot(seq, tid, rt, dpr, payload))
+                body_tasks.add(t_after)
+                t_after.add_done_callback(body_tasks.discard)
                 # 落盘 IO 致命（磁盘满/目录被删）：升级为停止，不再白录
                 if writer.fatal:
                     stop_evt.set()
@@ -591,3 +598,14 @@ async def _fetch_body(client: CDPClient, writer: SessionWriter, request_id: str,
 
 def _save_shot(out_dir: pathlib.Path, seq: int, phase: str, b64: str) -> None:
     (out_dir / "screenshots" / f"{seq:04d}-{phase}.png").write_bytes(base64.b64decode(b64))
+
+
+def _annotate_safe(out_dir: pathlib.Path, seq: int, phase: str,
+                   rt: dict, dpr: float) -> None:
+    """红框标注（容错）：文件不存在/画框异常都吞掉——标注失败只降级观感，不致命。"""
+    try:
+        f = out_dir / "screenshots" / f"{seq:04d}-{phase}.png"
+        if f.exists() and rt.get("w") and rt.get("h"):
+            annotate(f, rt, dpr=dpr, seq=seq)
+    except Exception:
+        pass
