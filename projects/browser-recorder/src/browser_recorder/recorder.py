@@ -425,14 +425,20 @@ async def record(
                 pass
             _copy_prompt_safe(out_dir)
         if client is not None:
+            # 优雅关闭：CDP Browser.close 走 Chrome 完整 shutdown——session
+            # cookie（无过期时间的登录态）只在完整退出时落盘。SIGTERM 是立即
+            # 死，session cookie 全丢（持久 profile 免登录失效的根因）。
+            try:
+                await client.send("Browser.close", timeout=5)
+            except Exception:
+                pass
             try:
                 await client.close()
             except Exception:
                 pass
         writer.close()
         if chrome is not None and chrome.poll() is None:
-            # SIGTERM 让 Chrome 正常落盘（持久 profile 的 cookie/锁文件干净；
-            # 一次性 profile 也无妨），超时才升级 kill
+            # Browser.close 未及生效（连接已断/超时）时兜底 terminate → kill
             chrome.terminate()
             try:
                 chrome.wait(timeout=8)
