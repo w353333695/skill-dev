@@ -106,7 +106,9 @@ def test_record_session_flow(local_site, chrome_path, tmp_path):
             await asyncio.sleep(0.8)
             await c.send("Runtime.evaluate", {"expression":
                 "const p=document.querySelector('input[name=pass]');"
-                "p.value='hunter2'; p.dispatchEvent(new Event('input',{bubbles:true}));"})
+                "p.value='hunter2'; p.dispatchEvent(new Event('input',{bubbles:true}));"
+                # 换框失焦触发 change（真实输入的收尾事件，冲刷聚合中的输入）
+                "setTimeout(()=>p.dispatchEvent(new Event('change',{bubbles:true})),100);"})
             await asyncio.sleep(0.8)
             # 停止：优雅关浏览器（退出码 0 → abnormal False）
             await c.send("Browser.close")

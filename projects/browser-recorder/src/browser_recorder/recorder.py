@@ -107,6 +107,9 @@ async def record(
         "--user-data-dir=%s" % (out_dir / "chrome-profile"),
         "--no-first-run", "--no-default-browser-check",
         "--window-size=1280,900",
+        # headless 下动画/transform 进场的弹层可能停在 0×0（渲染依赖合成器），
+        # 声明 reduced-motion 让组件直接落在终态；录制截图也更干净
+        "--force-prefers-reduced-motion",
         "about:blank",
     ]
     if headless:
@@ -299,11 +302,13 @@ async def record(
                     _save_shot(out_dir, seq, "after", shot["data"])
                 except Exception:
                     after_status = "failed"
-                # 红框标注：rect × dpr 画框 + 序号，原地覆写双截图
+                # 红框标注：rect × dpr 画框 + 序号，原地覆写双截图。
+                # 零宽/零高 rect（动画中下拉、未布局元素）画框必出界——跳过标注，
+                # descriptor 文字兜底描述位置。
                 vp = payload.get("viewport") or {}
                 dpr = vp.get("dpr") or 1.0
                 rt = (payload.get("rect") or {})
-                if rt.get("w"):
+                if rt.get("w") and rt.get("h"):
                     for ph in ("before", "after"):
                         f = out_dir / "screenshots" / f"{seq:04d}-{ph}.png"
                         if f.exists():
@@ -361,6 +366,16 @@ async def record(
 
         for t in body_tasks:
             t.cancel()
+        # 冲刷各 tab 挂起中的输入聚合（Browser.close 不走页面 unload，
+        # 未满 1.2s 聚合窗的最后一段输入会丢）
+        for tab in list(tabs.values()):
+            try:
+                await client.send("Runtime.evaluate",
+                                  {"expression": "window.__brFlush && window.__brFlush()"},
+                                  session_id=tab.sid)
+            except Exception:
+                pass  # tab 已关/导航中：beforeunload 已兜底或输入本就已落
+        await asyncio.sleep(0.15)  # 给 binding 上报回程留窗口
         await action_q.put(None)
         actions.cancel()
         end_payload = {"abnormal": abnormal, "stop_reason": stop_reason,

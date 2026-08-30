@@ -82,6 +82,6 @@ setTimeout(() => {
 """ % INJECT
     r = json.loads(_run_node(script))
     assert r["installed"]
-    assert r["kinds"] == ["click", "input", "keydown", "submit"]
+    assert r["kinds"] == ["beforeunload", "change", "click", "input", "keydown", "submit"]
     assert r["observed"]          # 根元素可用后 MutationObserver 补挂
     assert r["stop"]              # install 全程跑完：热键上报可用

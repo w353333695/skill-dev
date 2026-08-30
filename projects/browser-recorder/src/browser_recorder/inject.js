@@ -95,17 +95,50 @@
     }
 
     function target_of(e) {
-      var t = e.target;
-      if (t && t.closest) {
-        return t.closest("a,button,input,select,textarea,[onclick]") || t;
+      // composedPath 穿透 shadow：open shadow 内的事件 target 在主文档侧
+      // 表现为 shadow host（如 EO-LAUNCHPAD-BUTTON-V2），真实交互元素只在
+      // composedPath 里可见。取路径上第一个可交互元素。
+      var path = e.composedPath ? e.composedPath() : [e.target];
+      var interact = "a,button,input,select,textarea,[onclick],[role=button],[contenteditable]";
+      for (var i = 0; i < path.length; i++) {
+        var node = path[i];
+        if (node && node.closest) {
+          var hit = node.closest ? (node.closest(interact) || null) : null;
+          if (hit) return hit;
+          if (node.matches && node.matches(interact)) return node;
+        }
       }
+      var t = e.target;
+      if (t && t.closest) return t.closest(interact) || t;
       return t;
     }
 
-    // 动作：capture 阶段，document 级
-    ["click", "submit"].forEach(function (t) {
+    // input 击键聚合：同一输入框的连续击键（<1.2s 间隔）不逐键上报——上报
+    // 会逐键截图 + 逐键落 action（用户录 easyops 六个字符产生 8 个动作噪声）。
+    // 收尾（blur/换目标/超时）时 flush 最终值。
+    var lastInput = null; // {el, timer}
+    var INPUT_FLUSH_MS = 1200;
+    function flushInput() {
+      if (!lastInput) return;
+      var li = lastInput; lastInput = null;
+      clearTimeout(li.timer);
+      try {
+        var type = li.el.type || "text";
+        report("input", li.el, {
+          value: type === "password" ? "***" : String(li.el.value == null ? "" : li.el.value).slice(0, VALUE_MAX),
+          html_type: type,
+          composed: true,
+        });
+      } catch (e) { /* ignore */ }
+    }
+
+    // 动作：capture 阶段，document 级。click/submit/change 都冲刷在途输入
+    // 聚合（真实操作里输入总是被下一步动作或 change 收尾）。
+    ["click", "submit", "change"].forEach(function (t) {
       win.document.addEventListener(t, function (e) {
+        if (t !== "submit" || e.target && e.target.form !== undefined) flushInput();
         var el = t === "submit" ? e.target : target_of(e);
+        if (t === "change") return; // change 只用于冲刷，不产生动作事件
         if (el) report(t, el, {});
       }, true);
     });
@@ -113,12 +146,20 @@
     win.document.addEventListener("input", function (e) {
       var el = e.target;
       if (!el) return;
-      var type = el.type || "text";
-      report("input", el, {
-        value: type === "password" ? "***" : String(el.value == null ? "" : el.value).slice(0, VALUE_MAX),
-        html_type: type,
-      });
+      if (lastInput && lastInput.el === el) {
+        // 同一输入框：重置计时（击键间隔刷新），不立即上报
+        clearTimeout(lastInput.timer);
+        lastInput.timer = setTimeout(flushInput, INPUT_FLUSH_MS);
+        return;
+      }
+      flushInput(); // 换了输入框，先结上一个
+      lastInput = { el: el, timer: setTimeout(flushInput, INPUT_FLUSH_MS) };
     }, true);
+
+    win.document.addEventListener("beforeunload", function () { flushInput(); }, true);
+    // 录制器停止前主动调用（Browser.close 不走页面 unload，挂起中的输入
+    // 事件会随进程消亡丢失）：window.__brFlush()
+    win.__brFlush = flushInput;
 
     // 停止热键：Ctrl+Shift+F9（key 或 keyCode 120），覆盖所有 frame 的注入实例
     win.document.addEventListener("keydown", function (e) {
