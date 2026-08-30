@@ -187,3 +187,55 @@ def test_record_hotkey_stop(local_site, chrome_path, tmp_path):
     result = asyncio.run(_run())
     assert result["stop_reason"] == "hotkey"
     assert result["abnormal"] is False
+
+
+def test_record_new_tab_follow(local_site, chrome_path, tmp_path):
+    """多 tab 跟随：window.open 开新 tab，新 tab 的导航/请求带独立 target_id。"""
+
+    async def _run():
+        port = _free_port()
+        extra = ["--no-sandbox"] if _chrome_needs_no_sandbox(chrome_path) else []
+
+        async def drive():
+            c = await _connect_with_retry(port)
+            await _wait_page_ready(c)
+            await asyncio.sleep(0.3)
+            # 开新 tab 到 page2（easyops 第 7 步"点击跳转新 tab"的等价形态）。
+            # browser 级 createTarget 等价于用户开新标签页；recorder 侧
+            # autoAttach 会自动附加并跟随。
+            b = await CDPClient.connect_browser(port)
+            await b.send("Target.createTarget", {"url": local_site + "/page2.html"})
+            await asyncio.sleep(2.0)  # 等 autoAttach 挂域 + 新 tab 加载
+            try:
+                await b.send("Browser.close")  # 优雅停止（abnormal=False）
+                await c.close()
+                await b.close()
+            except Exception:
+                pass
+
+        dt = asyncio.create_task(drive())
+        result = await asyncio.wait_for(
+            record(tmp_path / "sess3", local_site + "/index.html", chrome_path,
+                   settle_timeout=5.0, port=port, headless=True,
+                   extra_chrome_args=extra),
+            timeout=120,
+        )
+        await dt
+        return result
+
+    result = asyncio.run(_run())
+    assert result["stop_reason"] == "browser_closed"
+    out = tmp_path / "sess3"
+    lines = [json.loads(l) for l in (out / "session.jsonl").read_text().splitlines()]
+    # 启动 tab 的 target_id
+    t0 = [l for l in lines if l["kind"] == "nav"][0]["target_id"]
+    # 新 tab 的导航被记录且 target_id 区分于启动 tab（挂域前加载的页面经
+    # 导航历史回填，标 recovered=True——首个文档请求可能错过，属已知边界）
+    navs = [l for l in lines if l["kind"] == "nav"]
+    new_tab_navs = [n for n in navs if n["target_id"] != t0 and "page2.html" in n["url"]]
+    assert new_tab_navs, f"新 tab 导航未跟随: {navs}"
+    # 新 tab 内后续触发的请求可录（favicon 与页面加载同时，不作为断言对象；
+    # 直接在断言里允许空——核心验证点是新 tab 存在 + nav 跟随 + tabs 汇总）
+    # session_end 汇总 tabs
+    end = [l for l in lines if l["kind"] == "session_end"][0]
+    assert len(end.get("tabs", [])) >= 2, f"tabs 汇总缺失: {end}"
