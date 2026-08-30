@@ -152,6 +152,16 @@ async def record(
             tid = f"t{len(tabs)}"
             tab = _TabSession(sid, tid, target_info.get("url", ""))
             tabs[sid] = tab
+            # 放行必须最先：waitForDebuggerOnStart 冻结的 target 上，域启用类
+            # 命令（Network.enable 等）会阻塞不返回——先挂域再放行 = 死锁
+            # （popup 冻在 about:blank 永不加载；真机有头则表现为注入时机全乱、
+            # 新 tab 有请求无动作）。放行后再挂域，代价只是新 tab 最初
+            # 数百毫秒的请求可能漏录，远优于死锁。
+            try:
+                await client.send("Runtime.runIfWaitingForDebugger",
+                                  session_id=sid, timeout=3)
+            except Exception:
+                pass  # 未冻结的 target 会报错——无害，继续挂域
             await client.send("Network.enable", session_id=sid)
             await client.send("Page.enable", session_id=sid)
             await client.send("Runtime.enable", session_id=sid)
@@ -159,8 +169,6 @@ async def record(
             await client.send("Page.addScriptToEvaluateOnNewDocument",
                               {"source": INJECT_JS}, session_id=sid)
             await client.send("Runtime.evaluate", {"expression": INJECT_JS}, session_id=sid)
-            # waitForDebuggerOnStart 冻结的 target 在此放行（挂完域再加载，请求不丢）
-            await client.send("Runtime.runIfWaitingForDebugger", session_id=sid)
             # 新 tab 若在挂域前已加载（浏览器未按 waitForDebugger 冻结），nav 事件
             # 已错过——用导航历史回填，保证事件流可见该 tab 的当前页面。
             # 首个 tab 不回填（起点 about:blank 无信息量，导航由下方 Page.navigate
