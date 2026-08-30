@@ -84,6 +84,7 @@ async def record(
     port: int | None = None,
     headless: bool = False,
     extra_chrome_args: list[str] | None = None,
+    profile: str | None = None,
 ) -> dict:
     """完成一次录制到停止。返回 {"events", "out_dir", "abnormal", "stop_reason"}。
 
@@ -91,6 +92,8 @@ async def record(
     abnormal 仅在 browser_closed 且退出码非 0（崩溃/被杀）时为 True。
     extra_chrome_args：追加的浏览器启动参数（容器/受限环境传 ["--no-sandbox"]）。
     多 tab：新开的 page target 自动跟随（事件带 target_id 区分来源 tab）。
+    profile：命名持久 profile（~/.browser-recorder/profiles/<名字>）——登录态
+    （cookie/localStorage）跨录制存活，免去反复登录。None=一次性（默认）。
     """
     out_dir = pathlib.Path(out_dir)
     writer = SessionWriter(out_dir)
@@ -101,10 +104,16 @@ async def record(
     tabs: dict[str, _TabSession] = {}          # sessionId -> tab（emit 侧查 tid）
     port = port or _free_port()
 
+    if profile:
+        user_data = pathlib.Path.home() / ".browser-recorder" / "profiles" / profile
+        user_data.mkdir(parents=True, exist_ok=True)
+    else:
+        user_data = out_dir / "chrome-profile"  # 一次性，随 session 目录走
+
     args = [
         str(chrome_path),
         f"--remote-debugging-port={port}",
-        "--user-data-dir=%s" % (out_dir / "chrome-profile"),
+        f"--user-data-dir={user_data}",
         "--no-first-run", "--no-default-browser-check",
         "--window-size=1280,900",
         # headless 下动画/transform 进场的弹层可能停在 0×0（渲染依赖合成器），
@@ -422,9 +431,11 @@ async def record(
                 pass
         writer.close()
         if chrome is not None and chrome.poll() is None:
+            # SIGTERM 让 Chrome 正常落盘（持久 profile 的 cookie/锁文件干净；
+            # 一次性 profile 也无妨），超时才升级 kill
             chrome.terminate()
             try:
-                chrome.wait(timeout=5)
+                chrome.wait(timeout=8)
             except subprocess.TimeoutExpired:
                 chrome.kill()
 
