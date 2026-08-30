@@ -32,17 +32,24 @@ def main():
               help="无头模式（默认有头；CI/无 DISPLAY 用 --headless）")
 @click.option("--no-sandbox", is_flag=True, default=False,
               help="透传 --no-sandbox 给 chrome（容器/AppArmor 环境必需；桌面环境默认不降安全边界）")
-@click.option("--profile", "-p", default=None, metavar="NAME",
-              help="持久登录态 profile 名（~/.browser-recorder/profiles/NAME）——cookie/登录跨录制存活，免反复登录。默认一次性")
-def record_cmd(start_url, out_root, settle_timeout, port, headless, no_sandbox, profile):
+@click.option("--profile", "-p", default="default", metavar="NAME",
+              help="持久登录态 profile 名（~/.browser-recorder/profiles/NAME），默认 default——cookie/登录跨录制存活，免反复登录；多系统隔离用不同名")
+@click.option("--incognito", is_flag=True, default=False,
+              help="一次性 profile（不落 ~/.browser-recorder，录完即弃，不留登录态——敏感账号场景）")
+def record_cmd(start_url, out_root, settle_timeout, port, headless, no_sandbox,
+               profile, incognito):
     """录制：拉起 Chromium，开始记录操作与网络请求。
 
     停止：页面内 Ctrl+Shift+F9 / 关闭浏览器窗口 / 终端输 q+回车
     """
+    if incognito:
+        profile = None
     out_dir = pathlib.Path(out_root) / datetime.now().strftime("%Y%m%d-%H%M%S")
     click.echo(f"session 目录: {out_dir}")
     if profile:
-        click.echo(f"持久 profile: {profile}（登录态将保留，下次免登录）")
+        click.echo(f"profile: {profile}（登录态保留，下次免登录）")
+    else:
+        click.echo("profile: 一次性（不留登录态）")
     click.echo("停止方式：页面内 Ctrl+Shift+F9 ｜ 关闭浏览器窗口 ｜ 终端 q+回车")
     chrome = DEFAULT_CHROME
     if not chrome.exists():

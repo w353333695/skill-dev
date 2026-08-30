@@ -32,11 +32,15 @@ uv run browser-recorder export sessions/20260829-153000   # 导出 zip
 
 | 旗子 | 默认 | 说明 |
 |---|---|---|
+| `-p, --profile <name>` | `default` | 持久登录态 profile（`~/.browser-recorder/profiles/<name>`）——cookie/登录跨录制存活，**免反复登录**。多系统隔离用不同名（如 `-p easyops` / `-p oa`） |
+| `--incognito` | 关 | 一次性 profile：不落 `~/.browser-recorder`，录完即弃不留登录态（敏感账号场景） |
 | `-o, --out <dir>` | `sessions/` | session 输出根目录，自动建时间戳子目录 |
 | `--settle-timeout <sec>` | `30` | after 截图稳定等待兜底（网络空闲 ∧ DOM 静默 500ms 即稳，超时走满此值；网络差可调大） |
 | `--port <n>` | 随机 | CDP 调试端口（端口占用时换） |
 | `--headless / --no-headless` | 有头 | 无 DISPLAY/CI 环境用 `--headless` |
 | `--no-sandbox` | 不加 | 透传 `--no-sandbox` 给 chrome。**容器/AppArmor/无 user namespace 环境必需**（否则 chrome 起不来）；桌面环境默认不加——该旗子会关闭浏览器沙箱安全边界，仅在受控隔离环境使用 |
+
+> 登录态存储提示：profile 目录是本机明文（与日常浏览器记住密码等同风险）。清掉：`rm -rf ~/.browser-recorder/profiles/<name>`。
 
 `browser-recorder export <SESSION_DIR>`：session 目录 → 同名 zip（自动排除 `chrome-profile/`）。
 

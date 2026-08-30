@@ -121,7 +121,8 @@ def test_record_session_flow(local_site, chrome_path, tmp_path):
         result = await asyncio.wait_for(
             record(tmp_path / "sess", local_site + "/index.html", chrome_path,
                    settle_timeout=5.0, port=port, headless=True,
-                   extra_chrome_args=extra),
+                   extra_chrome_args=extra,
+                   profile=None),  # 显式一次性：库默认即 None，防未来默认值漂移污染 ~/.browser-recorder
             timeout=120,
         )
         await dt
@@ -180,7 +181,8 @@ def test_record_hotkey_stop(local_site, chrome_path, tmp_path):
         dt = asyncio.create_task(drive())
         result = await asyncio.wait_for(
             record(tmp_path / "sess2", local_site + "/index.html", chrome_path,
-                   port=port, headless=True, extra_chrome_args=extra),
+                   port=port, headless=True, extra_chrome_args=extra,
+                   profile=None),  # 同上：显式一次性
             timeout=60,
         )
         await dt
@@ -219,7 +221,7 @@ def test_record_new_tab_follow(local_site, chrome_path, tmp_path):
         result = await asyncio.wait_for(
             record(tmp_path / "sess3", local_site + "/index.html", chrome_path,
                    settle_timeout=5.0, port=port, headless=True,
-                   extra_chrome_args=extra),
+                   extra_chrome_args=extra, profile=None),  # 同上：显式一次性
             timeout=120,
         )
         await dt
