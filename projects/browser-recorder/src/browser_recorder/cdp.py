@@ -61,7 +61,10 @@ class CDPClient:
 
     @classmethod
     async def _from_ws_url(cls, ws_url: str):
-        ws = await websockets.connect(ws_url, max_size=256 * 1024 * 1024)
+        # 连本机浏览器调试端口，显式禁代理：用户系统代理（ALL_PROXY=socks5://…
+        # Clash/V2Ray 等）会被 websockets 自动识别并要求 python-socks，本地
+        # 回环连接本就不该走代理
+        ws = await websockets.connect(ws_url, max_size=256 * 1024 * 1024, proxy=None)
         self = cls(ws)
         self._reader = asyncio.create_task(self._pump())
         return self
