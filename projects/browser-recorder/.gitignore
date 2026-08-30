@@ -4,3 +4,4 @@ __pycache__/
 sessions/
 dist/
 .pytest_cache/
+recon*
