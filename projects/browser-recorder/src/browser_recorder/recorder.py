@@ -220,6 +220,21 @@ async def record(
                 if p.get("frame", {}).get("parentId") is None:  # 主 frame
                     writer.emit("nav", {"url": p.get("frame", {}).get("url", ""), "title": "",
                                         "target_id": tid_of(_sid)})
+                    # 补注：新 tab 的注入常错过文档创建期（autoAttach 的
+                    # waitForDebuggerOnStart 不被 window.open 场景遵守，页面在
+                    # attach_tab 挂 addScriptToEvaluateOnNewDocument 前已开始
+                    # 加载——attach 时 evaluate 跑在旧文档，导航后监听器全丢，
+                    # 症状：新 tab 只有 request/nav、无 action/dom_mutations）。
+                    # 每次主 frame 导航后重 evaluate（注入有 __brInstalled 哨兵，
+                    # 重复执行无害），双保险。
+                    async def _reinject():
+                        await asyncio.sleep(0.3)  # 等新文档执行上下文就绪
+                        try:
+                            await client.send("Runtime.evaluate",
+                                              {"expression": INJECT_JS}, session_id=_sid)
+                        except Exception:
+                            pass
+                    asyncio.get_running_loop().create_task(_reinject())
             client.on("Page.frameNavigated", on_nav, session_id=sid)
 
             def on_binding(p, _sid=sid):

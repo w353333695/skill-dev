@@ -210,6 +210,31 @@ def test_record_new_tab_follow(local_site, chrome_path, tmp_path):
             b = await CDPClient.connect_browser(port)
             await b.send("Target.createTarget", {"url": local_site + "/page2.html"})
             await asyncio.sleep(2.0)  # 等 autoAttach 挂域 + 新 tab 加载
+            # 新 tab 内驱动一次真实点击——验证注入监听在新 tab 生效
+            # （真机缺陷：注入错过文档创建期 → 新 tab 只有 request/nav 无 action）
+            r = await b.send("Target.getTargets")
+            newp = [t for t in r.get("targetInfos", [])
+                    if t.get("type") == "page" and "page2.html" in t.get("url", "")]
+            if newp:
+                r2 = await b.send("Target.attachToTarget",
+                                  {"targetId": newp[0]["targetId"], "flatten": True})
+                nsid = r2["sessionId"]
+                for _ in range(20):  # 等 recorder 补注生效（h1 可点）
+                    try:
+                        await b.send("Runtime.evaluate",
+                                     {"expression":
+                                      "document.querySelector('h1') ? 'y' : 'n'",
+                                      "returnByValue": True}, session_id=nsid)
+                        rr = await b.send("Runtime.evaluate",
+                                          {"expression":
+                                           "document.querySelector('h1').click(); 'ok'",
+                                           "returnByValue": True}, session_id=nsid)
+                        if rr.get("result", {}).get("value") == "ok":
+                            break
+                    except Exception:
+                        pass
+                    await asyncio.sleep(0.3)
+                await asyncio.sleep(1.5)  # 等双截图
             try:
                 await b.send("Browser.close")  # 优雅停止（abnormal=False）
                 await c.close()
@@ -238,8 +263,10 @@ def test_record_new_tab_follow(local_site, chrome_path, tmp_path):
     navs = [l for l in lines if l["kind"] == "nav"]
     new_tab_navs = [n for n in navs if n["target_id"] != t0 and "page2.html" in n["url"]]
     assert new_tab_navs, f"新 tab 导航未跟随: {navs}"
-    # 新 tab 内后续触发的请求可录（favicon 与页面加载同时，不作为断言对象；
-    # 直接在断言里允许空——核心验证点是新 tab 存在 + nav 跟随 + tabs 汇总）
+    # 新 tab 内的动作被录到（注入监听在导航后经补注生效——真机 easyops 缺陷
+    # 的回归测试：新 tab 曾只有 request/nav 无 action/dom_mutations）
+    t1_acts = [l for l in lines if l["kind"] == "action" and l.get("target_id") != t0]
+    assert t1_acts, f"新 tab 动作未录到（注入未生效）: {[ (l['kind']) for l in lines]}"
     # session_end 汇总 tabs
     end = [l for l in lines if l["kind"] == "session_end"][0]
     assert len(end.get("tabs", [])) >= 2, f"tabs 汇总缺失: {end}"
