@@ -29,6 +29,7 @@
 |---|---|---|
 | [api-cli](projects/api-cli) | Go `api-cli` | 声明式 API CLI：YAML 清单 → 分层命令树 + MCP tools，鉴权/分页可拔插 |
 | [doc-converter](projects/doc-converter) | Python `doc-converter` | 文档格式转换（MD/PDF/Word/图片/Excel 互转）CLI |
+| [browser-recorder](projects/browser-recorder) | Python `browser-recorder` | 浏览器操作录制：裸 CDP 直连 → session.jsonl + 双截图 + 文档生成模板 |
 
 ### skills/
 
@@ -36,6 +37,7 @@
 |---|---|---|
 | [api-orchestrator](skills/api-orchestrator) | api-cli | 通用 API 编排：自然语言 → 跨系统调用编排（onboarding 接入新能力域 + orchestration 编排执行） |
 | [doc-converter](skills/doc-converter) | doc-converter | 文档格式转换 |
+| [browser-manual](skills/browser-manual) | browser-recorder（session 产物） | 录制 session → 图文操作指引 guide.md（+可选 API 分析报告 api-report.md / api-calls.json） |
 | [easyops_skills](skills/easyops_skills) | — | EasyOps 业务 skill 集（monitor-kit / resource-collector-kit / sso-provider / alarm-access 等） |
 
 ### platforms/
