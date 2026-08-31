@@ -605,6 +605,10 @@ def report_one_model(rule: dict, report_obj: dict, conf: dict, variant: str,
             for i in range(0, len(items), batch_num):
                 batch = items[i:i + batch_num]
                 branch_id = uuid.uuid4().hex[:16]
+                # 行内 reportDataType 必填（Go 版 ReportInstance bson tag；人行检核
+                # "数据元传输标识"即此字段——漏送报 WL-20001 数据元传输标识错误）
+                for item in batch:
+                    item["reportDataType"] = rtype
                 resp = center.report_data(branch_id, [{"dataType": rtype, "dataList": batch}])
                 real_bid = resp["branchId"]      # 人行真批次号（BA开头）——check 用它
                 branch_ids.append(real_bid)
