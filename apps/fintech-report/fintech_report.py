@@ -461,7 +461,9 @@ class ReportCenter:
                 "branchId": branch_id,
                 "facilityOwnerAgency": self._agency(),
                 "data": self._compress(data)})
-        return {"branchId": resp.get("branchId", branch_id),
+        real_bid = str(resp.get("branchId", "") or "") or branch_id
+        return {"branchId": real_bid,          # 人行真批次号（BA开头）——check 必须用它
+                "localBranchId": branch_id,
                 "code": str(resp.get("code", "")), "msg": str(resp.get("msg", ""))[:500]}
 
     def check_result(self, branch_id: str) -> dict:
@@ -604,18 +606,36 @@ def report_one_model(rule: dict, report_obj: dict, conf: dict, variant: str,
                 batch = items[i:i + batch_num]
                 branch_id = uuid.uuid4().hex[:16]
                 resp = center.report_data(branch_id, [{"dataType": rtype, "dataList": batch}])
-                branch_ids.append(branch_id)
+                real_bid = resp["branchId"]      # 人行真批次号（BA开头）——check 用它
+                branch_ids.append(real_bid)
+                # WL-10000 只表受理——查 check_result 终态才 confirmed
                 if resp["code"] != CODE_REPORT_SUCCESS:
                     counts["failed"] += len(batch)
-                    LOG.warning("[report] %s %s 批次失败: %s %s",
+                    LOG.warning("[report] %s %s 上报未受理: %s %s",
                                 object_id, rtype, resp["code"], resp["msg"][:100])
-                else:
+                    continue
+                try:
+                    chk = center.check_result(real_bid)
+                except Exception as ce:
+                    LOG.warning("[report] %s %s check 异常: %s → 本批不入 confirmed（下次重报）",
+                                object_id, rtype, ce)
+                    continue
+                chk_code = str(chk.get("code", ""))
+                if chk_code in (CODE_HANDLE_SUCCESS, CODE_HANDLE_WITH_WARN):
                     counts[type_count_key[rtype]] += len(batch)
-                    # 批次确认 → 原文里对应实例标 confirmed（new/update 按主键；delete 标记待剔除）
                     for item in batch:
                         desc = item.get(converter.key_desc)
                         if desc and desc in payload_instances:
                             payload_instances[desc]["_confirmed"] = True
+                elif chk_code in (CODE_SAVE_SUCCESS, CODE_HANDLING, CODE_BRANCH_ID_NOT_EXIST):
+                    # 10005/10006=处理中；10004=刚受理尚未可查——均未到终态
+                    LOG.info("[report] %s %s 批次 %s 未到终态(%s) → pendingCheck",
+                             object_id, rtype, real_bid[:20], chk_code)
+                    task["status"] = "pendingCheck"
+                else:
+                    counts["failed"] += len(batch)
+                    LOG.warning("[report] %s %s 处理失败: %s %s",
+                                object_id, rtype, chk_code, str(chk.get("msg", ""))[:100])
         # check 已在批次循环内完成（轮询终态）
         task.update({"status": (task.get("status") if task.get("status") == "pendingCheck"
                                 else ("success" if counts["failed"] == 0

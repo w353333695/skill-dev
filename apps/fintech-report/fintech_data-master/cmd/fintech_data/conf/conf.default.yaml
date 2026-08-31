@@ -1,0 +1,149 @@
+# 本配置文件中的相对路径都是相对于部署路径，
+# 如 /usr/local/easyops/fintech_data
+
+service:
+  ip: "0.0.0.0"   # 监听ip
+  port: 8203      # 监听port, 逻辑组件监听端口应该在8001~8099之间，新组件需要找平台组同学分配端口号。
+  mode: release     # "debug" "release" "test"
+
+log:
+  level: debug
+  logfile:
+    filename: "log/fintech_data.log"
+    maxsize: 50     # MB
+    maxage: 30      # days
+    maxbackups: 5
+  # 定时器日志配置
+  report_task_logfile:
+    filename: "log/report_task.log"
+    maxsize: 50     # MB
+    maxage: 30      # days
+    maxbackups: 20
+  check_task_logfile:
+    filename: "log/check_task.log"
+    maxsize: 50     # MB
+    maxage: 30      # days
+    maxbackups: 20
+  record_task_logfile:
+    filename: "log/record_task.log"
+    maxsize: 50     # MB
+    maxage: 30      # days
+    maxbackups: 20
+  round_tripper_logfile:
+    filename: "log/round_tripper.log"
+    maxsize: 50     # MB
+    maxage: 30      # days
+    maxbackups: 20
+
+accesslog:
+  filename: "log/fintech_data_access.log"
+  maxsize: 50     # MB
+  maxage: 30      # days
+  maxbackups: 5
+
+# 分布式追踪配置
+tracing:
+  enable: true                    # 是否启用分布式追踪
+  service_name: "logic.fintech_data"     # 自身的服务名称
+  report_log:
+    log_file: "/usr/local/easyops/ens_client/log/trace_log/fintech_data.log"  # 分布式追踪信息的存储目录
+    log_size: 50                 #最大日志文件长度，单位M
+    log_count: 2                #最大日志文件数量
+
+report_center:
+  host: 127.0.0.1
+  port: 18002
+  facilityOwnerAgency: ""
+  with_ssl: true
+  #    max_tls_version: 1.2 #最大tls版本 1.1,1.2,1.3
+  #    min_tls_version: 1.1
+  proxy: ""
+
+cmdb_service:
+  service_name: "logic.cmdb.service"
+
+user_service:
+  service_name: "logic.user_service"
+
+monthly_collection_service:
+  service_name: "logic.monthly_collection_service"
+
+collector_center:
+  service_name: "logic.collector_center"
+
+data_exchange:
+  service_name: "logic.data_exchange"
+
+notify:
+  service_name: "logic.notify"
+
+timer_config:
+  # redis锁超时（s）
+  lock_expiration: 180
+  # 上报任务运行间隔（s）
+  report_job_interval: 60
+  # 结果检查任务运行间隔（s）
+  check_job_interval: 60
+  # 统计上报实例任务运行间隔（s）
+  record_job_interval: 3600
+
+report_conf:
+  # 查询变更实例单批次最大数量
+  search_batch: 300
+  # 查询历史数据最大时间，单位天
+  time_limit: 720
+  # 强制重试所有失败实例
+  force_retry: true
+  # 上报数据唯一键转换
+  pk_translate:
+    - object_id: basedSoftware@FINTECHDATA
+      facilityDescriptor: softwareDescriptor
+      facilityCategory: softwareCategory
+    - object_id: application@FINTECHDATA
+      facilityDescriptor: applySystemIdentifiers
+      facilityCategory: softwareCategory
+    - object_id: dataCenterSpacing@FINTECHDATA
+      facilityDescriptor: relationalIdentifier
+      facilityCategory: facilityCategory
+    - object_id: powerSupplyRelation@FINTECHDATA
+      facilityDescriptor: relationalIdentifier
+      facilityCategory: facilityCategory
+    - object_id: applicationRelation@FINTECHDATA
+      facilityDescriptor: relationalIdentifier
+      facilityCategory: facilityCategory
+    - object_id: networkRelation@FINTECHDATA
+      facilityDescriptor: relationalIdentifier
+      facilityCategory: facilityCategory
+    - object_id: softwareRelation@FINTECHDATA
+      facilityDescriptor: relationalIdentifier
+      facilityCategory: facilityCategory
+  ignore_conf:
+    instance_ignore_attr: ignoreReport # 实例忽略上报的属性id，当实例这个属性值为true时忽略上报
+    attr_ignore_category: [ "辅助信息", "ignoreReport" ]  # 属性级别的忽略上报配置，填写要屏蔽属性的资源分类
+  omitempty_fields: [ "%_operationsManagement" ]
+  float_prec_rule:
+    - object_id: videoMonitoring@FINTECHDATA
+      rule:
+        dataSavePeriod: 3
+    - object_id: entranceGuard@FINTECHDATA
+      rule:
+        dataSaveCycle: 3
+
+redis:
+  service_name: "data.redis"
+  sentinel_service_name: "data.redis.sentinel"
+  master_name: "redismaster"
+  sentinel: false
+
+# mongodb 数据库配置
+mongodb:
+  service_name: "data.mongodb"   # 服务名称
+  username: "easyops"            # mongodb用户名
+  database: "easyops_[org]"      # 数据库
+  replica_set_name: "easyops"    # 副本集名称
+
+fill_instance:
+  queue_active_time: 60     # 队列最长等待时间，这段时间内再无收到实例变更即触发实例填充 单位秒
+  subscriber_proc_num: 1    # 订阅者进程数，这里指notify的subscriber的proc_num字段 默认为1
+  instance_fill_conf_file: "instance_fill.rules*.yaml"
+  relation_fill_conf_file: "relation_fill.rules*.yaml"

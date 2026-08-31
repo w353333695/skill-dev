@@ -1,0 +1,27 @@
+[
+  {
+    "_impl_from": [],
+    "_members": [
+      {
+        "instanceId": "65340454b245d",
+        "name": "100003"
+      },
+      {
+        "instanceId": "65340454b24c1",
+        "name": "100004"
+      }
+    ],
+    "_object_id": "USER_GROUP",
+    "_object_version": 4,
+    "_ts": 1781079303,
+    "_version": 1,
+    "creator": "easyops",
+    "ctime": "2026-06-10 16:15:03",
+    "deleteAuthorizers": [],
+    "instanceId": "653e1d72e67c1",
+    "name": "ttttt",
+    "org": 8888,
+    "readAuthorizers": [],
+    "updateAuthorizers": []
+  }
+]

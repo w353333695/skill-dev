@@ -1,0 +1,290 @@
+# =============================================================================
+# formats/collector-kit/sampler-types.yaml
+# 采集套件两种 samplerType 的输出协议 + 采集脚本 Python2 规范。
+#
+# 职责：让套件开发能力据此写出「平台能正确解析」的采集脚本。
+# samplerType 决定 collector_service 路由到哪个 Collector，进而决定脚本必须输出
+# 什么格式（metric 直接 JSON 数组 / process 用 GATHERING DATA 标记包裹）。
+#
+# ⚠️ Python 版本（用户确认，2026-08-13）：agent 运行时默认 Python2.7。
+#    现代 easyops-monitor 文档（plugin-config.md/simple-script-guide.md）写的是 py3，
+#    但实际 agent 是 py2，**以运行时为准**。py2 规范见下方 python2_rules。
+#
+# 权威源：
+#   A. collector_service 路由源码：tmp/源代码/collector_service/agent_job/collector/
+#   B. cmdb_path_helper 参数注入：tmp/源代码/collector_service/agent_job/cmdb_path_helper/
+#   C. easyops-monitor 文档（py3，需按 py2 修正）：.../kits-develop/simple-script-guide.md
+#   D. 用户口述运行时约束（py2.7/requests/print语句/__future__不可用）
+# =============================================================================
+
+# -----------------------------------------------------------------------------
+# samplerType 路由表（collector_service 消费 plugin.yaml 时的分发）
+# source: collector.go:21-43 NewCollector；sampler.go:18-22 NewSamplerType（空值默认 metric_sampler）
+# -----------------------------------------------------------------------------
+sampler_types:
+  metric_sampler:
+    value: "metric_sampler"
+    description: "指标采样器。采集监控指标（时序数据），脚本输出 dims/vals JSON。simple-script/metricbeat/exporter/prometheus 套件用此。"
+    collector: "NewMetricCollector（metric_collector.go:14-22）"
+    sub_route_by_agentType:
+      prometheus: "PrometheusCollector（metric_collector.go:101-210，从 params.{host,port,protocol,uri} 构造，必填 host/port/protocol/uri）"
+      metricbeat: "从 plugin.Template + params 渲染 metricbeat 配置（metric_collector.go:81-99）"
+      easyops: "EasyopsAgentCollector（metric_collector.go，用 plugin.{PackageId,PackageVersionId,InstallPath,Processors}）"
+      sql: "CollectorCustomSourceConfig（metric_collector.go:273-325，dataSource.type 仅 mysql/oracle）"
+    output_protocol: metric_output
+    source: "collector.go:21-43; metric_collector.go"
+
+  process_sampler:
+    value: "process_sampler"
+    description: "进程/资源采样器。采集 CMDB 配置信息（写入 CMDB 实例），脚本输出 GATHERING DATA 标记包裹的 JSON。CMDB 采集套件用此。"
+    collector: "NewProcessCollector（process_collector.go:43-58）"
+    sub_route_by_agentType:
+      process: "ServiceNodeCollector（service_node_collector.go，输出 {strategies,mode,processBlacklist}）"
+      easyops: "EasyopsAgentScanCollector（用 plugin.{PackageId,PackageVersionId,InstallPath}+params）"
+      cmdbCollect: "CmdbCollectCollector（用 params）"
+      default: "通用 ProcessCollector（用 plugin.Template+params 渲染，Template 渲染失败报错）"
+    output_protocol: process_output
+    source: "collector.go:34; process_collector.go:43-58"
+
+  # 其余 samplerType（监控套件开发较少直接用，列全枚举）
+  event_sampler: { value: "event_sampler", description: "事件采样（通用 Template 渲染）", collector: "NewEventCollector" }
+  trace_sampler: { value: "trace_sampler", description: "调用链采样", collector: "NewTraceCollector" }
+  log_sampler: { value: "log_sampler", description: "日志采样（仅 filebeat，paths/ignore_older/include_lines/exclude_lines/multiline/message_max_bytes 必填）", collector: "NewLogCollector" }
+  detect_sampler: { value: "detect_sampler", description: "拨测采样（仅 NewCollectorFromAgentType 支持，主路径不支持）" }
+  pipeline_sampler: { value: "pipeline_sampler", description: "日志流水线（log_plugin 类型，processSteps 链）", collector: "NewPipelineCollector" }
+
+# -----------------------------------------------------------------------------
+# 输出协议 1：metric_sampler（监控指标）
+# 脚本 stdout 直接输出 JSON 数组，【不需要】GATHERING DATA 标记。
+# source: simple-script-guide.md:61,183-193
+# -----------------------------------------------------------------------------
+output_protocols:
+  metric_output:
+    applies_to: "metric_sampler"
+    format: "JSON 数组，直接 print 到 stdout"
+    no_markers: true   # 【关键区别】监控套件不需要 BEGIN/END GATHERING DATA
+    schema_example: |
+      [
+        {"dims": {"hostname": "www.baidu.com", "port": 443}, "vals": {"left_days": 103.0}},
+        {"dims": {"db": "testdb"}, "vals": {"query_time": 12.5, "rows": 1000}, "time": 1739797799}
+      ]
+    fields:
+      dims:
+        type: object
+        required: true
+        desc: "维度标签（定位指标位置）。值为字符串/数字。键名推荐 snake_case。"
+      vals:
+        type: object
+        required: true
+        desc: "指标值映射。⚠️所有值必须数值型（int/float），不能是字符串。"
+      time:
+        type: integer
+        required: false
+        desc: "Unix 时间戳（秒），不提供则用采集执行时间。"
+    rules:
+      - "必须是 JSON 数组 [{...},...]，不是单对象 {...}"
+      - "每条记录必须含 dims 和 vals"
+      - "vals 值必须数值型（绘图/告警需要）"
+      - "错误信息输出 stderr（print >> sys.stderr, ...），不污染 stdout"
+      - "异常时输出空数组 [] 确保 stdout 始终合法 JSON"
+    source: "simple-script-guide.md:146-181,401-421"
+
+  # -------------------------------------------------------------------------
+  # 输出协议 2：process_sampler（CMDB 采集）
+  # 脚本 stdout 用 BEGIN/END GATHERING DATA 标记包裹 JSON。
+  # source: simple-script-guide.md:61,188（对比表）；cmdb-kits 文档 plan.md:431,445
+  # ⚠️ GAP：GATHERING DATA 的【解析逻辑不在 collector_service】（grep 零命中），
+  #    在 collector_proxy_server / agent 端。此处的协议格式来自 easyops-monitor
+  #    文档对比表 + 旧 cmdb-kits 文档，未在后端源码逐字实锤解析细节。
+  #    真调时若发现标记格式不符，回流修正本字段。
+  # -------------------------------------------------------------------------
+  process_output:
+    applies_to: "process_sampler"
+    format: "stdout 用标记包裹 JSON 数组"
+    markers_required: true   # 【关键区别】CMDB 采集套件需要 BEGIN/END GATHERING DATA
+    markers:
+      begin: "-----BEGIN GATHERING DATA-----"
+      end: "-----END GATHERING DATA-----"
+    schema_example: |
+      print "-----BEGIN GATHERING DATA-----"
+      print json.dumps([
+        {
+          "dims": {"object_id": "HOST", "pks": ["instanceId"], "upsert": true},
+          "vals": {"instanceId": "...", "name": "...", "其他字段": "..."}
+        }
+      ], ensure_ascii=False)
+      print "-----END GATHERING DATA-----"
+    fields:
+      dims:
+        type: object
+        required: true
+        desc: "CMDB 实例定位信息。"
+        sub_fields:
+          object_id: { type: string, required: true, desc: "目标 CMDB 模型 ID（如 HOST）" }
+          pks:
+            type: array
+            items: string
+            required: true
+            desc: "主键字段名。采集对象（主模型）用 [\"instanceId\"]（平台按 instanceId 定位更新，避免 name 变更产生重复实例）；子模型用业务主键（如 wwpn/name）"
+          upsert: { type: bool, required: true, desc: "是否 upsert（true=存在则更新不存在则新建）" }
+      vals:
+        type: object
+        required: true
+        desc: "CMDB 实例属性值。主模型写 instanceId（$.instanceId 填充）+ 其他字段；子模型写业务主键 + 关系字段。"
+    relations: |
+      多模型关系写在子模型 vals 里：键=子模型 relation_list 中指向父模型的 left_id，
+      值=[{"_object_id":"父模型ID","instanceId":"<父instanceId>"}]（数组）。
+      父实例 instanceId 通常通过 $.instanceId 入参传入。
+      ⚠️不要用 dims.set_relation_ids（旧用法，方向易错）。
+    human_managed_fields: |
+      CMDB 资产字段（brand/mdl/sn 等）人工录入，采集脚本不应覆盖。约定：
+      采集字段用 c* 前缀（cBrand/cMdl/cSn），资产字段无前缀（brand/mdl/sn）。
+      脚本输出前过滤：维护 HUMAN_MANAGED_FIELDS 集合，剔除这些字段。
+    protocol_parsing_location: |
+      ✅ 协议解析位置确认（2026-08-13 探索 collector_proxy_server Rust 源码）：
+      collector_proxy_server 是【纯字节转发网关】（反向隧道），对 GATHERING DATA 标记/dims.vals/object_id/pks/upsert
+      完全不解析——它把脚本 stdout 原样经 easy_tunnel 隧道透传给调用方。
+      解析 GATHERING DATA + 写回 CMDB 的逻辑在【agent 端 sampler runtime】（easy_tunnel 客户端，
+      源码不在本地仓库）。proxy 只搬运字节，不动 body（plugin.rs:84/88-93 仅改 URL+header）。
+      含义：开发套件时协议契约的对手方是 agent runtime，不是 proxy——脚本只要按本标记格式 print 到 stdout，
+      proxy 不会破坏它。
+    source: "simple-script-guide.md:61,183-193（标记格式）; docs/archive/legacy-features/cmdb-kits-develop-skill/plan.md:431,445（标记）; collector_proxy_server 源码确认纯转发(data/sources/backend/HyperInsight/collector_proxy_server/packages/reverse_server/src/plugin.rs:84,88-93)"
+
+# -----------------------------------------------------------------------------
+# 采集脚本 Python2 规范（用户确认，2026-08-13，agent 默认 py2.7）
+# ⚠️ 与 easyops-monitor 文档（py3）的差异点已按运行时修正。
+# -----------------------------------------------------------------------------
+python2_rules:
+  runtime: "Python 2.7（agent 默认解释器 /usr/local/easyops/python/bin/python）"
+  vs_modern_doc: "easyops-monitor simple-script-guide.md 写的是 py3，但 agent 实际 py2，以运行时为准。下列规则覆盖文档的 py3 写法。"
+
+  print_statement:
+    rule: "用 py2 print 语句（print x），不用 print() 函数形式"
+    why: "不能用 __future__ print_function —— 它必须放文件最顶部，但 agent 运行时会在脚本顶部注入内容，导致 __future__ 不在顶部而报错。所以只能用 py2 语句。"
+    correct_examples:
+      stdout: "print json.dumps(result, ensure_ascii=False)        # 输出到 stdout（指标数据）"
+      stderr: "import sys; print >> sys.stderr, 'error: ' + str(e)  # 错误输出 stderr"
+    wrong_examples:
+      - "from __future__ import print_function   # ❌ 运行时注入破坏顶部 __future__，报错"
+      - "print(x)                                # ❌ py2 里这是 print 语句带括号表达式，单参数侥幸可用但多参数 print(a, b) 会输出元组 (a, b)"
+
+  http_requests:
+    rule: "网络请求用 requests 库（py2 运行环境已安装），不用 urllib2/urllib3"
+    why: "用户确认 agent py2 环境有 requests。比 urllib2 简洁，超时/会话/JSON 处理更可靠。"
+    correct_example: |
+      import requests
+      try:
+          resp = requests.get(url, timeout=10)
+          data = resp.json()
+      except requests.RequestException as e:
+          print >> sys.stderr, 'request failed: ' + str(e)
+    note: "勿照搬 easyops-monitor 文档的『避免 requests 用 urllib』（那是 py3 通用建议，不适用此 py2 环境）"
+
+  subprocess:
+    rule: "subprocess.Popen.communicate() 不传 timeout 参数，不捕获 subprocess.TimeoutExpired"
+    why: "timeout 参数和 TimeoutExpired 是 py3.3+ 才有，py2.7 不支持。"
+    correct_example: |
+      import subprocess
+      proc = subprocess.Popen(['cmd'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+      out, err = proc.communicate()   # 不传 timeout
+    note: "如需超时控制，用 signal.alarm（py2）或脚本内部逻辑自行计时"
+
+  class_and_format:
+    rules:
+      - "新式类：class Foo(object): （不是 class Foo:）"
+      - "字符串格式化用 .format() 或 %，不用 f-string（py3.6+）"
+      - "首行加编码声明 # -*- coding: utf-8 -*-（py2 默认 ASCII，含中文必须声明）"
+      - "异常用 except Exception as e:（py2 也支持，不用 except Exception, e: 旧语法）"
+
+  json_output:
+    rule: "输出 JSON 时用 ensure_ascii=False 保留中文"
+    correct_example: "print json.dumps(result, ensure_ascii=False)"
+    note: "py2 的 json.dumps 默认 ensure_ascii=True 会转义中文为 \\uXXXX，监控数据需保留中文维度时设 False"
+
+  env_var:
+    rule: "参数经环境变量 EASYOPS_COLLECTOR_<paramName> 传递，大小写敏感"
+    correct_example: |
+      import os
+      ip = os.environ.get('EASYOPS_COLLECTOR_ip', '')
+      port = int(os.environ.get('EASYOPS_COLLECTOR_port', '0'))   # 环境变量都是字符串，数值需转换
+    note: "struct 参数（如 auth）经环境变量传 JSON 字符串，脚本需 json.loads 解析（见 param-mechanism.yaml）"
+
+# -----------------------------------------------------------------------------
+# 脚本模板（simple-script + metric_sampler，py2）
+# 套件开发能力的参考骨架
+# -----------------------------------------------------------------------------
+script_templates:
+  metric_sampler_py2: |
+    # -*- coding: utf-8 -*-
+    import os
+    import sys
+    import json
+    import traceback
+    import requests   # py2 环境已装
+
+    def get_params():
+        return {
+            'ip': os.environ.get('EASYOPS_COLLECTOR_ip', ''),
+            'port': int(os.environ.get('EASYOPS_COLLECTOR_port', '0')),
+        }
+
+    def collect_data(params):
+        result = []
+        # ====== 采集逻辑（示例：HTTP 接口监控）======
+        try:
+            url = 'http://%s:%d/status' % (params['ip'], params['port'])
+            resp = requests.get(url, timeout=10)
+            value = float(resp.json().get('active', 0))
+            result.append({
+                'dims': {'hostname': params['ip'], 'port': params['port']},
+                'vals': {'active_count': value},
+            })
+        except Exception as e:
+            print >> sys.stderr, 'collect failed: ' + str(e)
+        return result
+
+    def main():
+        try:
+            params = get_params()
+            data = collect_data(params)
+            print json.dumps(data, ensure_ascii=False)   # py2 print 语句
+        except Exception:
+            traceback.print_exc(file=sys.stderr)
+            print '[]'   # 异常输出空数组保 stdout 合法
+
+    if __name__ == '__main__':
+        main()
+
+  process_sampler_py2: |
+    # -*- coding: utf-8 -*-
+    # CMDB 采集套件（process_sampler）：输出 GATHERING DATA 标记包裹的 JSON
+    import os, sys, json, traceback, requests
+
+    HUMAN_MANAGED_FIELDS = {'brand', 'mdl', 'sn'}   # 按模型实际调整
+
+    def get_params():
+        return {
+            'instanceId': os.environ.get('EASYOPS_COLLECTOR_instanceId', ''),
+            'ip': os.environ.get('EASYOPS_COLLECTOR_ip', ''),
+        }
+
+    def collect_data(params):
+        # ====== 采集逻辑：把数据写回 CMDB HOST 实例 ======
+        vals = {'instanceId': params['instanceId'], 'hostname': params['ip']}
+        vals = {k: v for k, v in vals.items() if k not in HUMAN_MANAGED_FIELDS}
+        return [{
+            'dims': {'object_id': 'HOST', 'pks': ['instanceId'], 'upsert': True},
+            'vals': vals,
+        }]
+
+    def main():
+        try:
+            data = collect_data(get_params())
+            print '-----BEGIN GATHERING DATA-----'
+            print json.dumps(data, ensure_ascii=False)
+            print '-----END GATHERING DATA-----'
+        except Exception:
+            traceback.print_exc(file=sys.stderr)
+
+    if __name__ == '__main__':
+        main()

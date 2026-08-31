@@ -1,0 +1,46 @@
+module go.easyops.local/fintech_data
+
+go 1.16
+
+require (
+	github.com/360EntSecGroup-Skylar/excelize v1.4.1
+	github.com/PaesslerAG/jsonpath v0.1.1
+	github.com/asaskevich/govalidator v0.0.0-20200907205600-7a23bdc65eef
+	github.com/easyops-cn/giraffe-micro v0.7.1
+	github.com/easyops-cn/mongo-driver-helper v0.0.0-20220606025337-da5174d8ebaf
+	github.com/gin-gonic/gin v1.6.3
+	github.com/globalsign/mgo v0.0.0-20181015135952-eeefdecb41b8
+	github.com/go-redis/redis/v8 v8.11.4
+	github.com/go-test/deep v1.0.7
+	github.com/gogo/protobuf v1.3.2
+	github.com/golang/mock v1.6.0
+	github.com/gorhill/cronexpr v0.0.0-20180427100037-88b0669f7d75
+	github.com/oklog/run v1.1.0
+	github.com/openzipkin/zipkin-go v0.2.5
+	github.com/segmentio/ksuid v1.0.3
+	github.com/smartystreets/goconvey v1.6.4
+	github.com/spf13/cast v1.3.1
+	github.com/thoas/go-funk v0.7.0
+	go.easyops.local/agollo v1.0.8
+	go.easyops.local/api v0.3.20
+	go.easyops.local/contracts/protorepo-cmdb v0.0.0-20220711081630-93f277bfa707
+	go.easyops.local/contracts/protorepo-collector_center v0.0.0-20210305103849-04b52a65cfba
+	go.easyops.local/contracts/protorepo-data_exchange v0.0.0-20210205093601-75eb765c2d18
+	go.easyops.local/contracts/protorepo-fintech_data v0.0.0-20241218032519-7cba46f3203c
+	go.easyops.local/contracts/protorepo-models v0.0.0-20241217084554-e099cb878715
+	go.easyops.local/contracts/protorepo-monthly_collection_service v0.0.0-20220510090515-0cc769ffa4cd
+	go.easyops.local/contracts/protorepo-notify v0.0.0-20201110041357-2a09b4427f65
+	go.easyops.local/contracts/protorepo-user_service v0.0.0-20210113073241-ebc9b2b16122
+	go.easyops.local/gin-giraffe v0.0.0-20201216133347-45d7d47d1ec6
+	go.easyops.local/giraffe v1.6.9
+	go.easyops.local/giraffe-micro v0.5.4
+	go.easyops.local/gogoprotobuf v0.0.0-20201123035642-68312f36fd60
+	go.easyops.local/kit v0.0.0-20220830061203-e062c9c0734f
+	go.easyops.local/mongo-helper v0.0.0-20220929095808-bc85ee271255
+	go.easyops.local/nameservice v1.2.6
+	go.easyops.local/redis-helper/v8 v8.0.0-20220929072934-fdf3ab4c4823
+	go.easyops.local/slog v0.0.0-20200606093636-10c7c4d910a3
+	go.mongodb.org/mongo-driver v1.7.6
+	go.uber.org/zap v1.15.0
+	gopkg.in/natefinch/lumberjack.v2 v2.0.0
+)

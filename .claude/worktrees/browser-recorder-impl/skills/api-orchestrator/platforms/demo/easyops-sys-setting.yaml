@@ -1,0 +1,182 @@
+# =============================================================================
+# EasyOps 系统设置（sys_setting 微服务）—— api-cli 清单
+# -----------------------------------------------------------------------------
+# 当前覆盖：工作日历（work_calendar）。sys_setting 还含 organization/announce/
+# comment/site_msg/traffic_limit/workbench 等域，未来按需并入本清单。
+#
+# 数据来源：
+#   • 契约  data/api-doc/itsm-work_calendar.xlsx（4 EAML：work_calendar CRUD）
+#   • 后端  data/sources/backend/platform/sys_setting/work_calendar/
+#        - route.go:9-24                          （18 条路由，契约 4 条为子集）
+#        - controller.go / service.go             （CRUD handler + 服务接口）
+#        - validators/api_validator.go            （必填校验）
+#   • 真实样例 work_calendar 63a285ca7ea068c42a26ee26（list 实测捕获，config 结构）
+#
+# 接入面：
+#   • backend —— 直连 sys_setting :8271（HTTP，无 path 前缀）。所有 verb 路径带
+#     /api/sys_setting/v1 前缀，故 resource.path 留空，每 operation 持完整路径。
+#   • 无 frontend 网关接入（CLI 直连 backend）。
+#
+# 鉴权：auth: easyops-cookie（与 itsm/cmdb/autoops 同一 cookie）。
+#   ⚠️ 与 flowable_service 一样，直连后端还要 org+user header（orguser 中间件）。
+#      见 endpoint.headers。
+#
+# ⚠️ 为何独立 spec（不在 easyops-itsm.yaml）：api-cli 的 endpoint 是 service 级 + 运行时
+#   flag，不支持 per-resource/per-operation 绑定不同端口（见 api-cli schema.go:28-46，
+#   Resource/Operation 无 Endpoint 字段；resolve.go:10-20 SelectEndpoint 单值）。
+#   sys_setting 监听 8271 ≠ flowable_service 8134，故必须另起 spec + 在 systems.yaml
+#   注册独立 system。CLI 经 --spec 切，MCP 经 system 名找 spec。
+# =============================================================================
+spec: api-cli/v1
+service:
+  name: easyops-sys-setting
+  version: "1.0"
+  default_endpoint: backend
+  endpoints:
+    backend:
+      base_url: ${EASYOPS_SYS_SETTING_BACKEND_URL}   # 值在部署根 env.d/demo.env（含 IP+端口）；端口事实见 systems.yaml runtime.ports.sys_setting_backend
+      host: admin.easyops.local                       # IP 直连，Host 由 endpoint.Host 注入
+      path_prefix: ""                                 # 路由挂在 /api/sys_setting/...（每 op 持完整路径）
+      auth: none                                      # 直连后端：auth=none 跳过 cookie 加载（engine/execute.go:135）。org/user 由 endpoint.headers 注入，独立于 auth（engine/request.go:40-43）。实测 sys-setting:8271 无 cookie work_calendar list 直 200。
+      headers:                                        # endpoint 级固定 header（orguser 中间件必需）
+        org: ${EASYOPS_ORG}                           # EasyOps 租户 org（系统自带 0/1/2 禁动）；值在部署根 env.d/demo.env
+        user: ${EASYOPS_USER}                         # EasyOps 用户；值在部署根 env.d/demo.env
+
+# -----------------------------------------------------------------------------
+# 资源：work_calendar —— 工作日历（营业时间）。
+# sys_setting :8271，前缀 /api/sys_setting/v1/work/calendar。
+# id 是 24 hex（MongoDB ObjectId），与 flowable_service 的 13 hex 不同——这印证它属
+# 不同存储。delete 路径 :ids（分号分隔批量）。
+# 被 sla.slaConfig[].levelConfig[].workingCalendarId 引用（跨资源依赖）。
+# -----------------------------------------------------------------------------
+resources:
+  work_calendar:
+    description: 系统设置·工作日历（营业时间）——定义工作日/休息日/工作时段，供 SLA 计算达成时长时剔除非工作时间。config 含 mode + workDayList（每 weekday 的 hours）。name + config 必填。被 SLA 规则的 levelConfig.workingCalendarId 引用。系统自带日历（builtin，如「国家法定节假日」）勿动。
+    path: ""
+
+    operations:
+      list:
+        description: 工作日历列表（分页）。返回 data.list[]，每条含 id/name/config/creator。id 是 24 hex。
+        method: GET
+        path: /api/sys_setting/v1/work/calendar
+        params:
+          page:     { in: query, type: integer, description: "页码，默认 1" }
+          pageSize: { in: query, type: integer, description: "每页条数" }
+          name:     { in: query, type: string, description: "名称过滤" }
+        response:
+          type: object
+          description: "{ code, data: { page, page_size, total, list[] } }"
+          properties:
+            code: { type: integer }
+            data:
+              type: object
+              properties:
+                total: { type: integer }
+                list:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      id:      { type: string, description: "日历 id（24 hex MongoDB ObjectId）" }
+                      name:    { type: string }
+                      memo:    { type: string }
+                      builtin: { type: boolean, description: "系统自带勿动" }
+                      status:  { type: string }
+                      creator: { type: string }
+                      config:
+                        type: object
+                        description: "日历配置（结构据真实实例 63a285ca7ea068c42a26ee26）"
+                        properties:
+                          mode: { type: string }
+                          workDayList:
+                            type: array
+                            description: "工作日时段列表"
+                            items:
+                              type: object
+                              properties:
+                                weekday: { type: integer, description: "星期几，1=周一…7=周日" }
+                                hours:   { type: string, description: "时段，如 08:30~12:00,14:00~18:00" }
+        pagination:
+          type: offset
+          page_in: query
+          items_path: data.list
+          page_param: page
+          size_param: pageSize
+          size: 10
+
+      get:
+        description: 工作日历配置详情（含完整 config）。year 可选指定年份。
+        method: GET
+        path: /api/sys_setting/v1/work/calendar/{id}
+        params:
+          id:   { in: path, type: string, required: true, description: "日历 id（24 hex）" }
+          year: { in: query, type: string, description: "年份" }
+
+      create:
+        description: 新建工作日历。name + config 必填。config={mode, workDayList:[{weekday, hours}]}（结构据真实实例 63a285ca7ea068c42a26ee26）。创建后 PUT 编辑会重新生成日历。
+        method: POST
+        path: /api/sys_setting/v1/work/calendar
+        body:
+          type: object
+          required: [name, config]
+          description: "新建工作日历。name + config 必填。"
+          properties:
+            name:   { type: string, description: "日历名" }
+            config:
+              type: object
+              description: "日历配置 {mode, workDayList:[{weekday, hours}]}"
+              properties:
+                mode: { type: string, description: "模式（如自定义/法定）" }
+                workDayList:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      weekday: { type: integer, description: "星期几 1-7" }
+                      hours:   { type: string, description: "时段，如 08:30~12:00,14:00~18:00" }
+            memo:   { type: string }
+            key:    { type: string, description: "日历 key（内置日历标识）" }
+            builtin: { type: boolean, description: "是否内置（新建通常 false）" }
+            status: { type: string }
+            year:   { type: string, description: "年份" }
+        response:
+          type: object
+          description: "{ code, data: { id, ... } }"
+          properties:
+            code: { type: integer }
+            data: { type: object, additional_properties: true }
+
+      update:
+        description: 修改日历配置（重新生成日历）。name + config 必填。字段同 create。
+        method: PUT
+        path: /api/sys_setting/v1/work/calendar/{id}
+        params:
+          id: { in: path, type: string, required: true, description: "日历 id（24 hex）" }
+        body:
+          type: object
+          required: [name, config]
+          description: "修改日历配置（全量，触发重新生成）。"
+          properties:
+            name:   { type: string }
+            config:
+              type: object
+              description: "日历配置（结构同 create.config）"
+              properties:
+                mode: { type: string }
+                workDayList:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      weekday: { type: integer }
+                      hours:   { type: string }
+            memo:   { type: string }
+            status: { type: string }
+            year:   { type: string }
+
+      delete:
+        description: 删除工作日历（批量）。ids 走 path 分号分隔。系统自带（builtin）日历勿删。
+        method: DELETE
+        path: /api/sys_setting/v1/work/calendar/{ids}
+        params:
+          ids: { in: path, type: string, required: true, description: "日历 id，分号分隔（24 hex）" }

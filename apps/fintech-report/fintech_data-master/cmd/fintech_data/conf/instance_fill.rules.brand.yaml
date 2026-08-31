@@ -1,0 +1,205 @@
+instance_rules:
+    - object_id_list: ["uninterrupted@FINTECHDATA", "transformer@FINTECHDATA", "generator@FINTECHDATA", "highVoltage@FINTECHDATA", "precisionPower@FINTECHDATA", "lowVoltage@FINTECHDATA"]
+      attr_id: brandLand
+      attr_source:
+          - key: assetBrand
+            path: $.assetBrand
+            source: instance
+          - key: brandLand
+            path: $.brandLand
+            source: instance
+            ignore_fail: true
+      case:
+          - rel: and
+            condition:
+                - key: assetBrand
+                  opr: in
+                  value: ["科士达", "钱江电气", "四川电器", "中变", "先控捷联", "白云电器", "旭明", "中电", "云南巨力", "江苏天灵", "云南格威", "山崎电气", "威而信伯琼斯", "盛英", "德开电气", "欧伏电气", "北京潞电", "上海柘中", "科泰", "金盘", "锦州锦开", "鑫龙电器", "亿诺尔", "赛瓦特", "顺特电气", "伊蒙妮莎", "云南电力", "众业达", "大全高压", "香江科技", "乐清耀隆", "通变", "恒泰辰", "云南博创", "亚豪", "上海天灵", "海南金盘电气", "深圳华力特", "新疆特变电", "上海塔汇", "葛洲坝", "博耳", "华自科技", "宜昌洛克菲勒", "杭州中高", "金誉电气", "北京供电福斯特", "超能", "华达", "泰豪", "华为", "科华", "云南聚控电气", "四川中高", "龙源", "康明斯", "金曼克", "武汉长兴", "浙江西门", "昆明开关厂", "江苏华朋", "云南通变", "郎程电力", "台达", "中达电通", "菱江电器", "香江云动力", "湖北长江电气", "天宇电气"]
+            value:
+                type: const
+                const: 00-国内
+          - rel: and
+            condition:
+                - key: assetBrand
+                  opr: in
+                  value: ["韦伯", "科勒", "美国电力转换公司", "三菱", "克劳瑞德", "伊顿", "西门子", "梅兰日兰", "利莱森玛", "维谛", "安特优", "艾默生", "施耐德电气", "卡特彼勒", "卡特莱特", "ABB", "阿斯卡", "沃尔沃"]
+            value:
+                type: const
+                const: 01-国外
+          - rel: and
+            condition:
+                - key: brandLand
+                  opr: isNull
+            value:
+                type: const
+                const: 99-其它
+    - object_id_list: ["shieldedCabinet@FINTECHDATA", "commonCabinet@FINTECHDATA", "integratedCabinet@FINTECHDATA"]
+      attr_id: brandLand
+      attr_source:
+          - key: assetBrand
+            path: $.assetBrand
+            source: instance
+          - key: brandLand
+            path: $.brandLand
+            source: instance
+            ignore_fail: true
+      case:
+          - rel: and
+            condition:
+                - key: assetBrand
+                  opr: in
+                  value: ["奔泰", "华安保", "普瑞芝", "奇华", "曙光", "海德森", "博尔斯达", "华三", "图腾", "依米康", "神州云科", "卫士通", "浪潮", "联想", "光波通信", "迅诚", "恒立", "中天科技", "新海宜", "香江科技", "精致", "安赛", "博信", "天大清源", "华为", "科华"]
+            value:
+                type: const
+                const: 00-国内
+          - rel: and
+            condition:
+                - key: assetBrand
+                  opr: in
+                  value: ["威图", "甲骨文", "国际商业机器", "美国电力转换公司", "普利驰", "西匹埃", "思科", "惠普", "日东", "施耐德电气", "易安信", "昆腾"]
+            value:
+                type: const
+                const: 01-国外
+          - rel: and
+            condition:
+                - key: brandLand
+                  opr: isNull
+            value:
+                type: const
+                const: 99-其它
+    - object_id_list: ["fireProtection@FINTECHDATA"]
+      attr_id: brandLand
+      attr_source:
+          - key: assetBrand
+            path: $.assetBrand
+            source: instance
+          - key: brandLand
+            path: $.brandLand
+            source: instance
+            ignore_fail: true
+      case:
+          - rel: and
+            condition:
+                - key: assetBrand
+                  opr: in
+                  value: ["虹源", "青浦金鑫", "新通一", "华魏光纤", "信达可恩", "亿利达", "海湾", "泛海三江", "山鹰", "世纪凯旋", "松江", "狮岛", "旭安", "晨鑫", "赋安", "金海安", "金盾", "赛龙", "正天气", "防威", "福尔盾", "东方泵业", "浦江", "瑞港", "泰和安", "利达", "河马", "姚江", "赛福", "环宇", "凯泉", "金枪鱼"]
+            value:
+                type: const
+                const: 00-国内
+          - rel: and
+            condition:
+                - key: assetBrand
+                  opr: in
+                  value: ["威士达", "能美西科姆", "格兰富", "特灵", "安素", "艾默生", "凯德", "爱德华", "诺帝菲尔", "江森", "西门子"]
+            value:
+                type: const
+                const: 01-国外
+          - rel: and
+            condition:
+                - key: brandLand
+                  opr: isNull
+            value:
+                type: const
+                const: 99-其它
+    - object_id_list: ["precisionAirCondition@FINTECHDATA", "freshAir@FINTECHDATA", "centralAirCondition@FINTECHDATA", "commonAirCondition@FINTECHDATA", "humidification@FINTECHDATA"]
+      attr_id: brandLand
+      attr_source:
+          - key: assetBrand
+            path: $.assetBrand
+            source: instance
+          - key: brandLand
+            path: $.brandLand
+            source: instance
+            ignore_fail: true
+      case:
+          - rel: and
+            condition:
+                - key: assetBrand
+                  opr: in
+                  value: ["科士达", "阿尔西", "开拓者", "卡乐电子", "亚都", "英维克", "天方", "艾特网能", "依米康", "德业电器", "思探得科技", "宝钢空调", "海信", "冰山", "美的", "易龙", "格力", "佳力图", "北京永健", "科华", "联信能源"]
+            value:
+                type: const
+                const: 00-国内
+          - rel: and
+            condition:
+                - key: assetBrand
+                  opr: in
+                  value: ["约克", "优力电器", "特灵", "维谛", "麦克维尔", "艾默生", "开利", "易能韦尔", "海洛斯", "施耐德电气", "梅兰日兰", "世图兹", "大金", "美国通用家电", "克莱门特"]
+            value:
+                type: const
+                const: 01-国外
+          - rel: and
+            condition:
+                - key: brandLand
+                  opr: isNull
+            value:
+                type: const
+                const: 99-其它
+    - object_id_list: ["entranceGuard@FINTECHDATA", "videoMonitoring@FINTECHDATA", "intrusionAlarm@FINTECHDATA"]
+      attr_id: brandLand
+      attr_source:
+          - key: assetBrand
+            path: $.assetBrand
+            source: instance
+          - key: brandLand
+            path: $.brandLand
+            source: instance
+            ignore_fail: true
+      case:
+          - rel: and
+            condition:
+                - key: assetBrand
+                  opr: in
+                  value: ["达实", "宝顿", "柯泰", "广拓", "金凯", "中翔恒威", "讯美", "百胜", "披克", "恒通思维", "中控智慧", "艾博世", "海尔", "宏泰", "英安特", "科华", "臻顺智能", "金三立", "宇视", "安云", "贺氏安全", "海康威视", "三菱重工海尔", "世纪环宇", "清华同方", "格力", "大华", "科松", "上扬科技", "捷顺", "微耕"]
+            value:
+                type: const
+                const: 00-国内
+          - rel: and
+            condition:
+                - key: assetBrand
+                  opr: in
+                  value: ["DDS", "维谛", "派尔高", "博世", "枫叶", "Lenel", "凯拔", "索尼", "英格索兰", "HID", "Fadini", "三星", "巴可", "霍尼韦尔", "国际商业机器", "EDS", "Axis"]
+            value:
+                type: const
+                const: 01-国外
+          - rel: and
+            condition:
+                - key: brandLand
+                  opr: isNull
+            value:
+                type: const
+                const: 99-其它
+    - object_id_list: ["gap@FINTECHDATA", "firewall@FINTECHDATA", "digitalSignature@FINTECHDATA", "encryption@FINTECHDATA", "wdm@FINTECHDATA", "accessControl@FINTECHDATA", "switches@FINTECHDATA", "holeScanner@FINTECHDATA", "ads@FINTECHDATA", "securityGateway@FINTECHDATA", "mailFiltering@FINTECHDATA", "ave@FINTECHDATA", "safetyPlatform@FINTECHDATA", "opsAudit@FINTECHDATA", "networkDataPrevention@FINTECHDATA", "vpn@FINTECHDATA", "bvs@FINTECHDATA", "databaseDesensitization@FINTECHDATA", "loadBalancing@FINTECHDATA", "tapeLibrary@FINTECHDATA", "router@FINTECHDATA", "waf@FINTECHDATA", "logCollectionAnalysis@FINTECHDATA", "onlineBehavior@FINTECHDATA", "fiberSwitch@FINTECHDATA", "flowAnalysis@FINTECHDATA", "diskArray@FINTECHDATA","mainFrame@FINTECHDATA", "miniServer@FINTECHDATA", "rackServer@FINTECHDATA", "bladeServer@FINTECHDATA", "towerServer@FINTECHDATA", "integratedServer@FINTECHDATA"]
+      attr_id: brandLand
+      attr_source:
+          - key: assetBrand
+            path: $.assetBrand
+            source: instance
+          - key: brandLand
+            path: $.brandLand
+            source: instance
+            ignore_fail: true
+      case:
+          - rel: and
+            condition:
+                - key: assetBrand
+                  opr: in
+                  value: ["中创腾锐", "朗阁信息", "北京兆日", "华睿泰", "瞻博网络", "百望", "中盾安全", "浪潮", "北信源", "卫士通", "迪普科技", "江苏国光", "研华科技", "神码云科", "锐捷", "泰福特", "信雅达", "联想凌拓", "紫光西数", "信安世纪", "宏杉", "默安科技", "科来软件", "珠海汇金科技", "神州云科", "兴唐通信", "智华天成", "江南科友", "盛邦安全", "曙光", "北京数字认证", "吉大正元", "同方", "新云东方", "深信服", "上海信天", "联想", "中创信测", "齐治科技", "启明星辰", "东软", "北京数盾", "意达康", "网康科技", "浪商科技", "北京青云", "青藤", "中数信", "长亭科技", "中国金融", "中兴", "思杰信息", "奇安信", "瑞斯康达", "中电长城", "百望股份", "江南天安", "微森信息", "山石网科", "思博伦", "华为", "科华", "公安部一所", "奇虎科技", "华三", "中安网脉", "鲲泰", "瑞数", "海康威视", "天融信", "安恒信息", "江南歌盟", "安赛", "迈普", "紫光", "山东得安", "国盾量子", "绿盟", "北京国泰"]
+            value:
+                type: const
+                const: 00-国内
+          - rel: and
+            condition:
+                - key: assetBrand
+                  opr: in
+                  value: ["宝利通", "趋势科技", "英普华", "Bluecoat", "HDS", "昆腾国际", "易安信", "赛门铁克", "维尔软件", "戴尔", "日立", "美商天睿", "飞康", "国际商业 机器", "亚美亚", "Netscout", "博科通讯", "UNIFY", "阿尔卡特", "思科", "派拓网络", "Gigamon", "赛孚耐", "飞塔", "F5", "讯远通信", "慧与", "迈克菲", "惠普", "美国网域"]
+            value:
+                type: const
+                const: 01-国外
+          - rel: and
+            condition:
+                - key: brandLand
+                  opr: isNull
+            value:
+                type: const
+                const: 99-其它

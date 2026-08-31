@@ -1,0 +1,844 @@
+# =============================================================================
+# platforms/demo/systems.yaml
+# deployment=demo 下接入的系统清单 + 各自 api-cli spec 路径 + 接入面 + 鉴权。
+# 编排挡（orchestration.md）查本文件获知「有哪些系统可用」与「spec 在哪」。
+#
+# 资料分工（唯一真相来源，换环境/换 LLM 从此读，勿依赖记忆）：
+#   systems.yaml(本文件) = 接入(鉴权/端口/org/user)；objects.yaml = 模型结构+副作用规则；
+#   entities.yaml = 字段锚+转换；flows/ = e2e 流程模板；easyops-cmdb.yaml = api-cli 清单。
+#   README.md 仅作索引导航。
+# =============================================================================
+deployment: demo
+
+# =============================================================================
+# 平台级公约（deployment 级，跨所有系统）
+# 凡 platforms 涉及「产出代码」（EasyOps agent 工具脚本、编排挡交付的示例/封装等），默认守此公约；
+# 某领域确需例外时，在 exceptions 里声明（例外只对声明领域生效，不泛化）。
+# =============================================================================
+platform_conventions:
+  code:
+    rule: |
+      平台涉及代码开发的产物，默认必须满足：
+        ① 独立运行——单文件即可跑，不得 import 项目内其他 .py（agent 无 pip / 无项目目录）；
+        ② 默认 Python2——运行环境 /usr/local/easyops/python/bin/python（py2）；
+           需调 cmdb/easyops 用 py2 标准库（urllib2/httplib + EASYOPS_* 环境变量），不依赖第三方包；
+        ③ py2/3 兼容写法（运行时判断 PY2、不用 f-string、logging 不直接 print、raise 不带 from）。
+      适用对象：EasyOps agent 工具脚本（.tar.gz 里的 script）、编排挡交付给用户的示例/封装代码。
+    exceptions:
+      - domain: "编排侧 api-cli 缺口补丁（sdk/easyops_client.py）"
+        why: "api-cli 不支持 multipart/binary（tool_package 导入导出真调）与 openapi AK/SK 签名编排侧调用；该 SDK 仅在编排侧/开发机运行，【不进 agent、不作为工具脚本依赖】。"
+        scope: "编排挡做 tool_package export/import、openapi 模式调用时用；产出的 agent 工具脚本仍须自包含，不得 import 它。"
+  auth: |
+    平台级鉴权公约（跨 cmdb/autoops/itsm/sys-setting 四系统，2026-08-12 实测归纳）：
+    直连后端（backend endpoint）【免 cookie】——org + user + Host 三件 header 即够，全部 backend
+    spec 的 endpoint.auth 已设 none（api-cli 不会再因找不到 cookie 配置而 auth_load 退出）。
+    机制锚点：engine/execute.go:135（auth=none 跳过 auth.Apply）+ engine/request.go:40-43
+    （endpoint.headers 的 org/user 在 resolve 阶段独立注入，不依赖 auth provider）。
+    各系统的实测佐证见各自 runtime.cookie_optional_direct。
+    ── 关于「登录换 cookie」（重要反向结论，勿重复踩）──
+    不要为直连去探测/记录登录 API 端点：本部署前端是 SPA（/next/auth/login），登录 API 经
+    nginx 网关按方法放行（实测 /next/auth/api/login POST 直接 405，且 bundle 里 /auth/login 是
+    前端路由非 API 端点）。账密换 PHPSESSID 在网关面是死路；而直连面根本不需要 cookie。
+    故：① 直连编排 → 不碰 cookie，三件 header 即可；② 网关面（frontend/openapi endpoint）
+    真要 cookie 时，从已登录浏览器复制 PHPSESSID，不要试图程序化登录。
+
+systems:
+  easyops-cmdb:
+    description: |
+      EasyOps CMDB（配置管理数据库）—— 三层体系：
+      ① 模型 object（object_model）：定义「有什么资源类」，含属性 attrList / 关系 relation_list / 关系分组 relation_groups / 索引 indexList / 视图 view；
+      ② 关系 relation（object_relation）：模型间的关联（细粒度 CRUD）；
+      ③ 实例 instance（object_instance）：模型下的具体数据记录。
+      核心范式：模型通过「声明式导入 import」一次性定义/更新（upsert），而非逐属性 CRUD。
+
+    spec: easyops-cmdb.yaml              # api-cli 清单，相对本目录
+    default_endpoint: backend            # 默认直连 cmdb_service :8079（object 域全 verb 干净命中）
+
+    endpoints:
+      backend:                           # 直连后端（HTTP，无网关前缀，object 域全 verb 通用）
+        base_url: ${EASYOPS_CMDB_BACKEND_URL}
+        host: admin.easyops.local        # IP 直连，网关按 Host 路由
+      frontend:                          # 前端网关（HTTPS）—— 注意：网关 per-API 路由，仅 instance.search 通用
+        base_url: ${EASYOPS_CMDB_FRONTEND_URL}
+        host: admin.easyops.local
+      openapi:                           # openapi 网关（外网/非内网；AK/SK 签名）—— base_url=内网IP + path_prefix=/cmdbservice + auth=easyops-openapi。详见 easyops-cmdb.yaml endpoints.openapi + runtime.openapi_gateway_config
+        base_url: ${EASYOPS_OPENAPI_GATEWAY_URL}   # 内网网关 IP（连接地址）；值在部署根 env.d/demo.env
+        path_prefix: /cmdbservice
+        auth: easyops-openapi
+
+    auth: easyops-cookie                 # 部署根 auth.d/easyops-cookie.yaml（API_CLI_AUTH_D 指向；原 home 目录位置已废弃）：provider=cookie，持 PHPSESSID
+
+    env:                                 # 环境变量契约（仅声明需要哪些变量 + 用途；【值在部署根 env.d/<dep>.env，勿从此处取】）
+      EASYOPS_CMDB_BACKEND_URL: ""       # cmdb_service 后端完整 URL（含 IP+端口）；端口事实见 runtime.ports.cmdb_backend
+      EASYOPS_CMDB_FRONTEND_URL: ""      # 前端页面/网关完整 URL
+      EASYOPS_USER_SERVICE_URL: ""       # user_service（org 查询）完整 URL；端口见 runtime.ports.user_service
+      EASYOPS_OPENAPI_GATEWAY_URL: ""    # openapi 网关内网 IP（仅用 openapi endpoint 时）；勿直连公网 openapi.easyops-only.com
+
+    # 能力清单（resource.verb）—— 编排挡据此判断意图可达性
+    capabilities:
+      object_model:
+        list:         "查询模型基本信息列表（关键词 q / 分类 category / ID objectIds，分页）"
+        detail:       "读取单个模型完整详情（attrList/relation_list/indexList/view）"
+        import:       "声明式建/改模型（upsert）—— 一次定义属性+关系+视图+索引"
+        import_check: "导入预检（dry-run，不落库）"
+        export:       "按 ID 批量导出完整模型定义"
+        delete:       "删除模型（protected 模型不可删；forceDelete 强删）"
+      object_attr:
+        create: "给模型新增属性"
+        read:   "读取模型单个属性"
+        update: "更新模型单个属性"
+        delete: "删除模型单个属性"
+      object_relation:
+        list:   "列出所有关系"
+        create: "新建关系（连两个模型 left/right）"
+        read:   "读取单条关系"
+        update: "更新关系"
+        delete: "删除关系"
+        related_key: "发现两模型间的关系路径（reverseQueryKey/正向键，配合 search 多层 jsonPath 穿越链路）"
+      object_instance:
+        search: "按 MongoDB 风格 query 搜索实例（fields 必填，分页；总数读 data.total）"
+        import: "批量建/改实例（upsert，keys+datas）—— 新建 + 改的统一入口（C+U）"
+        delete: "批量删除实例（instanceIds 分号分隔；路径 instance_batch）"
+      dashboard:
+        create: "建仪表盘（_DASHBOARD 实例，POST /v2/object/_DASHBOARD/instance，镜像前端 v2 保存）——配置结构见 formats/dashboard-kit/"
+        update: "改仪表盘（PUT 全量覆盖——先 search 取现配再改再 PUT）"
+        delete: "删单个仪表盘（DELETE /object/_DASHBOARD/instance/:id）"
+        search: "查仪表盘 → 用 object_instance.search（object_id=_DASHBOARD）；配置结构/建盘流程见 flows/build-dashboard.yaml"
+
+    # 常用模型速查表（本 deployment 的 CMDB 高频资源「自然语言→objectId」映射）
+    # 编排直通挡/计数场景优先匹配此处 → 直出 objectId，省 object_model.list 搜索；
+    # alias 未命中或资源不在表内时，退回 object_model.list --q。
+    common_models:
+      description: |
+        EasyOps CMDB 常用模型速查。编排场景提到这些实体时直接取 objectId，
+        省去 object_model.list 按 name/别名 搜索的步骤。按分类组织。
+        查找：匹配自然语言关键词 → 直出 objectId → 喂 object_instance.search 的 path {object_id}。
+      categories:
+        组织信息:
+          - { name: 用户, aliases: [账号, 人员, 用户账号], objectId: USER }
+          - { name: 用户组, aliases: [用户分组, 群组, 组, Team], objectId: USER_GROUP }
+        应用资源.应用系统:
+          - { name: 系统, aliases: [应用系统, 业务系统], objectId: APP_SYSTEM@ONEMODEL }
+          - { name: 服务集, aliases: [集群, 环境], objectId: SERVICE_SET@ONEMODEL }
+          - { name: 应用, aliases: [应用模块, 模块], objectId: APPLICATION@ONEMODEL }
+        基础设施.计算资源:
+          - { name: 主机, aliases: [操作系统], objectId: HOST }
+          - { name: 物理服务器, aliases: [服务器, 物理机], objectId: PHYSICAL_SERVER@ONEMODEL }
+        基础设施.数据中心:
+          - { name: 机房信息, aliases: [机房, IDC], objectId: IDC@ONEMODEL }
+          - { name: 机柜信息, aliases: [机柜, 机架], objectId: RACK@ONEMODEL }
+          - { name: 数据中心, aliases: [DC, 机房园区], objectId: DATA_CENTER@ONEMODEL }
+        基础设施.网络资源:
+          - { name: 交换机, aliases: [Switch, 网络交换机], objectId: SWITCH@ONEMODEL }
+          - { name: 路由器, aliases: [Router, 网关设备], objectId: ROUTER@ONEMODEL }
+          - { name: 负载均衡器, aliases: [LB, 负载均衡, SLB], objectId: LOADBALANCER@ONEMODEL }
+        基础设施.存储资源:
+          - { name: 存储设备, aliases: [存储阵列, 磁盘阵列, SAN], objectId: STORAGE@ONEMODEL }
+        基础设施.安全资源:
+          - { name: 防火墙, aliases: [FW, 防火墙设备], objectId: FIREWALL@ONEMODEL }
+      usage: |
+        场景："查主机的实例" → common_models 匹配 "主机" → objectId=HOST
+        → scripts/run.sh --spec easyops-cmdb.yaml object_instance search HOST ...
+        省去：object_model.list --q 主机 → 解析 → 拿 objectId → 再 search。
+      count_recipe: |
+        计数（"有几个/多少"）→ object_instance.search + 读 stderr 的 _meta.total（新版 binary）：
+          scripts/run.sh --spec easyops-cmdb.yaml object_instance search <objectId> \
+            --body '{"fields":["instanceId"],"page":1,"page_size":1,"ignore_missing_field_error":true}'
+          → stderr {"_meta":{"total":N}} 即实例总数（fields 最小化只取数，不拉数据）。
+        边界：空结果（total=0）时 stderr 无 total、stdout 也空——exit 0 即代表 0 条
+          （新版错误可读到 stderr 且 exit≠0，故 exit0+空输出可放心判 0，无需 raw 兜底）。
+
+    # 运维知识（实测，真相来源）—— 完整叙述见 README「接入真相」「调用踩坑录」
+    runtime:
+      admin_user: easyops              # 模型系统管理员（ObjectImport/删除权限）；读模型元数据任意非空 user 可，写必须 easyops
+      env_required:                    # 调用前 export（仅列变量名；值在部署根 env.d/<dep>.env）
+        - "EASYOPS_CMDB_BACKEND_URL"   # 完整 URL（含 IP+端口）；端口事实见本 system runtime.ports.cmdb_backend
+        - "EASYOPS_ORG"                # EasyOps 租户 org（系统自带 0/1/2 禁动）
+        - "EASYOPS_USER"               # 用户标识（模型系统管理员=easyops）
+      ports: { cmdb_backend: 8079, user_service: 8111, frontend: 80 }
+      host_header: admin.easyops.local # IP 直连须带 Host 头
+      auth: "直连 backend（endpoint.auth=none）只需 org+user header——缺任一报 empty org/user (100003)。源码 cmdb_service/main.go:549,691（orguser 中间件读 header）。cookie 仅 frontend/openapi 网关面需要，见 cookie_optional_direct"
+      cookie_optional_direct: "实测（2026-08-12，api-cli auth=none 经 run.sh 验证）：直连 cmdb:8079 时 cookie 非必需——org+user+Host 三件 header 直接 200（USER search total=2）。与 autoops:8181 历史实测一致。机制：engine/execute.go:135 auth=none 跳过 auth.Apply；org/user 由 endpoint.headers 在 resolve 阶段独立注入（engine/request.go:40-43），不依赖 auth provider。故 backend spec auth 已改 none——cookie 配置缺失不再阻断直连调用。网关面（frontend endpoint，auth=easyops-cookie）仍需 cookie"
+      org_query: "user_service GET ${EASYOPS_USER_SERVICE_URL}/api/v1/org/list（Cookie + Host）"
+      default_org_chain: "user_service: agollo common.org > $COMMON_ORG > yaml default_org；validator gte:1（org=0 报 Can not find 0 database）"
+      protected_orgs: [0, 1, 2]        # 系统自带禁动（0 无库、1 主业务 22 模型、2 名字服务 9 模型）
+      test_org: 18832008               # 非系统测试 org（2026-07-31 建），写验证用
+      list_pagination: "流式 NDJSON——每行一个完整对象，非 {data:{list:[...]}} 包装；逐行 json.loads"
+      instance_search_fields_required: true   # object_instance.search body 必带 fields（属性 id 列表），否则 100000
+      instance_search_total: "object_instance.search 响应 data.total=实例总数（场景『有几个』读 total，非 count；契约 response 明列 total）"
+      instance_import_semantics: "实例 _import=批量 upsert：keys(仅普通属性 id)组 query 判增改，命中→update 否则→insert；datas 字段名=模型属性 id；关系字段名=该关系 view 的 Out.Id，值可传对端 instanceId 字符串/对象/数组，传完整对象触发嵌套创建对端实例(disableNestedCreateInstance=true 禁止)；datas 可带 instanceId 指定主键，否则后端按微秒时间戳 hex 自动生成"
+      instance_id_format: "13 位 [0-9a-z]（微秒时间戳 hex）；新建可不带，后端自动生成；指定须匹配 ^[0-9a-z]{13}$"
+      instance_batch_delete: "DELETE /object/{object_id}/instance_batch?instanceIds=a;b;c —— ⚠️契约笔误写成 /instance/_batch，后端实际无斜杠 instance_batch（instance_extend/route.go:11）；照契约写必 404。无单删/按条件删的独立 verb：单删传一个 id，按条件删先 search 取 instanceIds 再 delete"
+      import_semantics: "声明式 upsert（is_create 区分建/改）；新增属性 id 加 _ 前缀；关系对端须存在或同批导入（ignore_dst_relation:true 跳过校验）"
+      delete_constraint: "模型有关系定义时 delete 报 133129；forceDelete=true 强删（连关系），或先 object_relation delete；protected 模型不可删"
+      openapi_gateway_config: |
+        ⚠️ openapi 模式（sdk/easyops_client.py mode='openapi' AK/SK）调用前，必须先在后端 api_gateway/conf/openapi.yaml 配 app_route 放行对应 uri，否则 nginx 直接 405 Not Allowed（实测）。每个要 openapi 调的 uri 都要列（frequency=限频次/分）。cmdb 实例搜索放行示例：
+          app_route:
+            - app_name: cmdbservice
+              service_name: logic.cmdb.service
+              api_list:
+                - frequency: 120
+                  method: POST
+                  uri: /v3/object/{objectId}/instance/_search
+                - frequency: 120
+                  method: POST
+                  uri: /v2/object/{objectId}/instance/_search
+        URL 格式：openapi 网关按 /<app_name>/<uri> 路由——cmdb 的 app_name=cmdbservice，故 search 实际 URL=/cmdbservice/v3/object/{objectId}/instance/_search（SDK 便捷方法的 app 参数自动加前缀；internal 模式不加，直连后端原 path）。
+        入口地址：用【内网网关 IP】连 + Host 头 openapi.easyops-only.com（网关按 Host 路由）——实测 http://172.30.0.232 + Host=openapi.easyops-only.com 通；⚠️不要直连公网 openapi.easyops-only.com（解析到 121.12.124.232），那个入口 nginx 没放行该 API 会 405。
+        AK/SK 权限：openapi AK/SK 对应的主体须对目标模型实例有读权限，否则 130600 permission denied（与 internal 模式的 easyops 用户权限独立——internal 能读的 openapi AK/SK 未必能读，要在 easyops 后台给 AK/SK 主体授权）。
+        配置文件：api_gateway/conf/openapi.yaml；改完按网关重启/生效流程。SDK openapi 调用见 sdk/easyops_client.py（HMAC-SHA1 签名移植自 api-cli easyops_openapi.go）。
+
+    # e2e 验收 URL（前端）—— 模型类操作后在此可视化校验
+    acceptance_urls:
+      model_list:   "${EASYOPS_CMDB_FRONTEND_URL}/next/cmdb-model-management?hidden=true&page=1&q=测试&pageSize=20&category=应用资源"
+      model_detail: "${EASYOPS_CMDB_FRONTEND_URL}/next/cmdb-model-management/object/{objectId}/detail"   # objectId 形如 OCEANBASE@EASYOPS
+      # 实例类验收（cmdb-instance 场景）。OBJECT_ID=模型 id（如 TESTWWH@EASYOPS）；list 的 aq 是 urlencoded 查询 JSON。
+      instance_list:   "${EASYOPS_CMDB_FRONTEND_URL}/next/next-cmdb-instance-management/next/{OBJECT_ID}/list?aq={urlencoded-query-json}"
+      instance_detail: "${EASYOPS_CMDB_FRONTEND_URL}/next/next-cmdb-instance-management/next/{OBJECT_ID}/instance/{instanceId}"
+
+  # ============================================================================
+  # EasyOps AutoOps 工具管理（tool_service）—— 第二个接入的系统。
+  # 与 cmdb 同属 EasyOps 平台：同 cookie 鉴权、同 org+user header、同测试 org。
+  # 命令树/字段 schema 见 easyops-autoops.yaml；对象结构/内置变量/工具包格式见 objects.yaml。
+  # ============================================================================
+  easyops-autoops:
+    description: |
+      EasyOps AutoOps 工具管理（tool_service）—— 三层体系（+ 执行/导入导出两配套层）：
+      ① tool 工具（tool）：定义「自动化脚本」，含配置(ToolConfig: name/category/权限/通知)
+         + 版本(ToolVersion: 脚本类型/内容、输入参数 inputs、输出 outputDefs+tableDefs、绑定库 toolLibs)；
+      ② tool_version 版本（tool_version）：工具版本，无独立写端点
+         （新建版本 = tool.update 改 version 字段触发派生，返回新 vId）；
+      ③ tool_lib 工具库（tool_lib）：可被多工具引用的 python 动态库（仅 python 脚本类型）。
+      配套层：tool_execution 执行（run_cmd 类工具异步执行+轮询）；tool_package 导入导出（.tar.gz 工具包）。
+      核心范式：工具=配置+版本聚合；新建版本走 update；删除软删；执行异步。
+
+    spec: easyops-autoops.yaml              # api-cli 清单，相对本目录
+    default_endpoint: backend               # 默认直连 tool_service :8181（无网关前缀，rewrite 复数 path 直连命中）
+
+    endpoints:
+      backend:                              # 直连后端（HTTP，无网关前缀；tool 域全 verb 通用）
+        base_url: ${EASYOPS_AUTOOPS_BACKEND_URL}
+        host: admin.easyops.local           # IP 直连，网关按 Host 路由
+      frontend:                             # 前端网关（HTTPS）——网关 per-API 路由，多 verb 不通用，仅备选
+        base_url: ${EASYOPS_AUTOOPS_FRONTEND_URL}
+        host: admin.easyops.local
+
+    auth: easyops-cookie                    # 与 cmdb 同一 cookie（部署根 auth.d/easyops-cookie.yaml，API_CLI_AUTH_D；原 home 目录位置已废弃）
+
+    env:                                    # 环境变量契约（值在部署根 env.d/<dep>.env，勿从此处取）
+      EASYOPS_AUTOOPS_BACKEND_URL: ""   # tool_service 后端完整 URL；端口见 runtime.ports.autoops_backend
+      EASYOPS_AUTOOPS_FRONTEND_URL: ""  # 前端页面/网关完整 URL
+
+    # 能力清单（resource.verb）—— 编排挡据此判意图可达性
+    capabilities:
+      tool:
+        list:   "工具列表（name 模糊匹配 name+memo，前端 q 是其别名；category 含子类展开；type 过滤；分页）"
+        get:    "工具详情（vId 支持 $latest_version/$latest_development/$latest_production，不填=最新生产版）"
+        create: "新建工具（同时建首个版本；必填 name/type/category/content）"
+        update: "改工具；改 version 字段（inputs/content/outputDefs/tableDefs/toolLibs）派生新版本（场景3 加版本）"
+        delete: "删工具（软删；force 绕 ReadOnly；versionId 不填删整个/填删单版本）"
+      tool_version:
+        list: "列工具的所有版本（校验/审计）"
+      tool_lib:
+        create: "新建工具库（python 动态库）"
+        update: "改工具库"
+        delete: "删工具库"
+      tool_execution:
+        run:        "异步执行工具（返 execId；目标主机 agents 或 inputs.@agents；默认 vId=$latest_production）"
+        get_result: "取执行完整结果（每主机 outputs/status/exitStatus）"
+        get_table:  "取执行表格结果（工具声明 tableDefs 时；查主机内存等多行数据走这）"
+        get_status: "取执行状态（轮询用，轻量）"
+      tool_package:
+        export_check: "导出前检查（绑定的 lib 制品是否在；JSON，api-cli 可调）"
+        export:       "导出工具为 tar.gz（GET + versionId；⚠️二进制流，真调走 Python SDK export_tool）"
+        import:       "导入工具包（multipart，upsert；⚠️真调走 Python SDK import_tool）"
+
+    # 运维知识（实测，真相来源）—— 完整工具包格式/内置变量见 objects.yaml
+    runtime:
+      admin_user: easyops              # 写操作用户（与 cmdb 同）
+      env_required:                    # 调用前 export（值在部署根 env.d/<dep>.env）
+        - "EASYOPS_AUTOOPS_BACKEND_URL"   # 完整 URL；端口见 runtime.ports.autoops_backend
+        - "EASYOPS_ORG"                   # 与 cmdb 共用
+        - "EASYOPS_USER"                  # 与 cmdb 共用
+      ports: { autoops_backend: 8181, frontend: 80 }
+      host_header: admin.easyops.local
+      auth: "直连 backend（endpoint.auth=none）只需 org+user header——缺任一报 empty org/user。orguser 中间件 cmd/tool_service/main.go:624"
+      rewrite_paths: "后端原始注册单数 /tool/:toolId，rewrite 中间件改写复数 /tools/:toolId——直连后端用复数即可命中（两边都挂 rewrite）。list/execution/lib 等本就是复数"
+      create_version: "新建版本无独立端点：PUT /tools/:toolId 改 version 字段即派生新版本。⚠️(1) body **flat**（不要套 {tool:{}}）；(2) 派生版 envType=development、vName 默认=vId；(3) 响应只返 {toolId}（无新 vId）——须 tool_version.list 复查。场景3：get 当前 → flat body 改 inputs/content → update → version.list 复查"
+      delete_semantics: "删除软删（置 delete_me=true，非物理删）。force=true（query 字符串 \"true\"）仅绕 ReadOnly。versionId 不填=删整个工具，填=只删该版本。'有实例不删模型'那层在被清理的 CMDB 侧，不在 tool_service"
+      run_cmd_is_tool: "run_cmd 是预置工具非端点（toolId=e292a31864662200d85a6a72ec89854a，type=python，content=os.system(cmd)）。场景4 = tool.list 找 run_cmd 的 toolId → tool_execution.run（⚠️inputs 是 map；vId 用具体——run_cmd 只有 development 版本，$latest_production 报『工具版本不存在 100005』）→ 轮询 get_table/get_status。依赖：run_cmd 存在 + 目标主机 agent 在线 + easy_command（实测 172.30.0.232 agent 响应 success；outputs 空是 run_cmd 用 os.system 不回吐 stdout，非接入问题）"
+      export_trap: "导出是 GET /tools/:toolId/export?versionId=<32hex>（⚠️GET 非 POST；参数名 versionId 非 vId，正则 ^[a-fA-F0-9]{32}$）。返回 tar.gz 二进制流——api-cli 无法存文件，走 Python SDK export_tool 流式下载"
+      import_upsert: "导入是 upsert（toolId 存在→更新即加新版本；不存在→新建）。multipart——api-cli 不支持 formData，走 Python SDK import_tool 或 curl -F"
+      builtin_vars_source: "工具脚本运行时用 EASYOPS_* 环境变量（EASYOPS_LOCAL_IP/EASYOPS_ORG/EASYOPS_USER/EASYOPS_AUTHORIZATION_TOKEN/EASYOPS_CMDB_HOST...）；⚠️不存在 __instance__/${cmdb.xxx}。完整清单见 objects.yaml#autoops_tool.api_behavior.builtin_vars"
+      python_runtime: "agent 默认 /usr/local/easyops/python/bin/python（py2）。工具脚本须【自包含】调 cmdb/easyops（py2 stdlib urllib2 + EASYOPS_* 环境变量），不得 import 外部 .py——见顶层 platform_conventions.code"
+      openapi_requirement: "⚠️ openapi 模式调用 tool_service 需后端 api_gateway/conf/openapi.yaml 配 app_route 放行（app_name/service_name 对应 tool_service，uri 列 tool 域端点如 /tools、/tools/{toolId} 等），否则 nginx 405。配置机制 + 示例见 easyops-cmdb.runtime.openapi_gateway_config（cmdb 段）"
+      wrapper: "标准响应 {code, codeExplain, error, data}；code=0 成功（与 cmdb 的 {code,message,error,data} 略不同——autoops 多 codeExplain）。tool.list 后端响应 {code,data:{list,total}} wrapper（取 data.list；api-cli 流式输出 NDJSON 每行一个 Tool，是 api-cli 分页输出特性非后端格式）；tool_version.list 同 wrapper"
+      cookie_optional_direct: "实测（含 2026-08-12 复核 + api-cli auth=none 经 run.sh 验证）：直连 autoops:8181 时 cookie 非必需——org+user+Host 三件 header 直接 200（历史 SDK 无 cookie 导出仍成功 + 本轮 api-cli auth=none 复现）。机制：engine/execute.go:135 auth=none 跳过 auth.Apply；org/user 由 endpoint.headers 独立注入（engine/request.go:40-43）。故 backend spec auth 已改 none——cookie 配置缺失不再阻断直连调用。cookie 主要在网关层校验；网关面（frontend endpoint）仍需 cookie"
+      e2e_findings: "e2e 实测坑汇总（2026-08-10，org 18832008，6 场景全通）：① tool.list 后端响应是 {data:{list}} wrapper（api-cli 流式 NDJSON 是其分页输出特性非后端格式；SDK 取 data.list）；② tool.update body flat（非 {tool:{}}，否则 updateFields=[tool] 假成功）；③ tool_execution.run inputs 是 map（非 [{name,value}] 数组）；④ run vId 默认 $latest_production 对 development 工具报 100005（用具体 vId 或 $latest_development）；⑤ update 响应只返 {toolId}（派生须 tool_version.list 复查）；⑥ 直连后端 cookie 非必需（org+user 够）。各坑详见 objects.yaml api_behavior + 对应 flow 的 key_rule"
+
+    # e2e 验收 URL（前端）—— 工具类操作后在此可视化校验
+    acceptance_urls:
+      tool_list:   "${EASYOPS_AUTOOPS_FRONTEND_URL}/next/tool/management?page=1&category=ITSM&display=card&pageSize=50&type=&q=cmdb"   # q 是后端 name 的别名（模糊匹配 name+memo）；category 含子类
+      tool_detail: "${EASYOPS_AUTOOPS_FRONTEND_URL}/next/tool/management/{toolId}/detail?vId={vId}"   # toolId=32hex（≠CMDB instanceId）；vId 不填=最新版本
+
+  # ============================================================================
+  # EasyOps ITSM 表单管理（flowable_service）—— 第三个接入的系统。
+  # 与 cmdb/autoops 同属 EasyOps 平台：同 cookie 鉴权、同 org+user header、同测试 org。
+  # 命令树/字段 schema 见 easyops-itsm.yaml；表单内容模型（容器/控件/脚本/继承）见 objects.yaml。
+  # ============================================================================
+  easyops-itsm:
+    description: |
+      EasyOps ITSM（flowable_service）—— 当前覆盖【表单管理】（form/form_version）；未来 ITSM 其它域（流程 process 等）统一并入本系统。表单三层体系：
+      ① form 表单层（form）：表单元信息（FormSchema: name/category/creator/memo）+ 多版本；
+         list 看有哪些表单，save 新建（永远建 form+首版本），delete 删表单（须先清版本）。
+      ② form_version 表单版本层（form_version）：一个表单的多个版本（FormSchemaVersion），
+         同时仅一版 isMain=true（主版本=对外生效/流程默认引用）。状态机两态：unfinished(草稿)/done(完成)。
+         list/get/update/delete/set_main；update 非对称（done 版→派生新草稿，unfinished→就地改）。
+      ③ formDefinition 内容层：版本的 formDefinition（JSON 字符串 = []Container 容器平铺列表），
+         容器（row/tabs/table/business_table）内放控件（23 种）。含条件显示/数据继承/5 生命周期脚本。
+         非独立端点，作为 save/update 的 body 字段。
+      核心范式：表单=元信息+版本；版本内容=formDefinition JSON 字符串（后端透传，前端解释）。
+
+    spec: easyops-itsm.yaml             # api-cli 清单，相对本目录
+    default_endpoint: backend                # 直连 flowable_service :8134（无网关，路径带 /api/flowable_service/...）
+
+    endpoints:
+      backend:                               # 直连后端（HTTP，无 path 前缀；全 verb 通用）
+        base_url: ${EASYOPS_ITSM_BACKEND_URL}
+        host: admin.easyops.local            # IP 直连，网关按 Host 路由
+
+    auth: easyops-cookie                     # 与 cmdb/autoops 同一 cookie（部署根 auth.d/easyops-cookie.yaml，API_CLI_AUTH_D；原 home 目录位置已废弃）
+
+    env:                                     # 环境变量契约（值在部署根 env.d/<dep>.env，勿从此处取）
+      EASYOPS_ITSM_BACKEND_URL: ""          # flowable_service 后端完整 URL；端口见 runtime.ports.itsm_backend
+      EASYOPS_CMDB_FRONTEND_URL: ""         # 前端页面（表单列表/详情）完整 URL
+
+    # 能力清单（resource.verb）—— 编排挡据此判意图可达性
+    capabilities:
+      form:
+        list:   "表单列表（name/category/creator/state/Q 过滤；state 过滤版本状态；isMain 只取主版本）"
+        save:   "新建表单（永远建 form+首版本 isMain=true；非 upsert）—— 含 formDefinition 内容"
+        delete: "删表单（有版本拒绝；须先清版本；幂等）"
+      form_version:
+        list:     "列某表单所有版本（name 实为 versionName 精确匹配；total=版本数）"
+        get:      "版本详情 V2（含 formDefinition/businessRules/domainModel[]/formDataSources[]）"
+        update:   "改版本（upsert 非对称：done→派生新草稿/unfinished→就地改；同时改 form 元信息）—— 加版本走这"
+        delete:   "删版本（路径 versionIds 复数；只删第一个；被流程引用拒绝；末版本级联删 form）"
+        set_main: "设主版本（=发布；须 done；旧主降级；触发流程换绑）"
+      process_definition:
+        list:   "流程定义列表（name/category/creator/Q 模糊；isMain 只列有主版本；不返 bpmnXML/processSetting）"
+        create: "新建流程定义（只建元信息；versionId CMDB 生成；建完用 process_version.create 建版本）"
+        edit:   "编辑定义元信息（非 upsert；须传已存在 definitionId；name 防重）"
+        delete: "删流程定义（有版本拒绝；须先清版本；末版本级联删 def）"
+      process_version:
+        list:     "列流程版本（versionId 支持 'lastest' 别名取最新；不返 bpmnXML/processSetting）"
+        get:      "版本详情 V2（bpmnXML + taskInfo 节点设置 + lineSettings + stageSetting）"
+        create:   "建流程版本（bpmnXML+processSetting+versionName+state 必填；baseVersionId 克隆表单关系+阶段；不部署 Flowable）"
+        edit:     "改版本（仅 unfinished 可改；done 拒绝编辑）"
+        delete:   "删版本（versionIds 复数但只删第一个；约束：绑表单/关联工单/主版本+服务/被引用 任一拒）"
+        set_main: "设主版本（=部署到 Flowable 引擎生效；须 done；旧主降级；运行中工单不受影响）"
+      process_form:
+        set: "节点绑/解/换表单（userTaskId 绑到节点；formRelationInstanceId+formId 组合决定 绑/解/换；默认取表单主版本）"
+      service_instance:
+        list:   "服务列表（catalogID 过滤目录；Q 模糊搜索名；hideDisabled 隐藏禁用）"
+        create: "建服务（name/category/associatedProcess 必填；catalogId 目录；owner 负责人）"
+        get:    "服务详情（含关联流程/负责人/SLA）"
+        edit:   "改服务（全量覆盖元信息）"
+        delete: "删服务（有工单流转拒；builtIn 不可删）"
+        sort:   "服务排序（serviceIdList+sortList）"
+        export: "导出服务实例（instanceIds 逗号分隔，返回文件流）"
+        import: "导入服务实例（multipart 上传到目录，onlyCheck 仅校验）"
+        get_sla_config: "查服务绑的 SLA 配置（scope+slaConfig[].slaId）。⚠️别看 service_instance.get 的 slaRuleId（恒 null）"
+        set_sla_config: "⚠️绑/解 SLA 到服务的正确端点（非 edit）。scope=inst 只许1个；空数组=解绑"
+      ticket:
+        list:         "工单搜索（V4 POST 高级过滤；Q/status/creator/serviceId/ctime；token 翻页）"
+        delete:       "删工单（仅作废的；instanceIds 分号）"
+        set_state:    "改工单状态（suspend仅running/activate仅suspended/cancel仅running；分号批量）"
+        export_excel: "导出工单 Excel（ticketIds 数组；fields 空用服务默认配置）"
+      service_catalog:
+        list:            "列子目录（parentId 过滤；category/ignoreEmpty）"
+        list_tree:       "列完整目录树（递归嵌套）"
+        create:          "建目录（name/parentID/description/url）"
+        edit:            "改目录"
+        delete:          "删目录（builtIn 不可删；有服务实例不可删）"
+        set_permission:  "设目录权限（read/modify 用户列表）"
+      common_service:
+        list:         "列默认常用服务（分页）"
+        create:       "建常用服务（name/priority/userGroups）"
+        update:       "改常用服务"
+        delete:       "删常用服务"
+        set_services: "关联服务实例到常用服务（commonServices id 列表）"
+      # ---- 触发器/通知/SLA/值班组（8134 flowable_service，2026-08-11 接入）----
+      trigger:
+        list:   "触发器列表（Q 模糊名；scope/domainModelId/instanceId 过滤）"
+        get:    "触发器详情（config.actionList 含 notifyPolicyId→notify_policy）"
+        create: "建触发器（name/scope/status/event/config 必填；config.actionList[].args.notifyPolicyId 引用 notify_policy）"
+        update: "改触发器（全量覆盖）"
+        delete: "删触发器（path triggerIds 分号批量）"
+      notify_policy:
+        list:   "通知策略列表（Q 模糊；notifyType/triggerSignal/notifyRange/notifyMode/creator/st/et 高级过滤）"
+        get:    "策略详情（content 模板含 ${process_instance_id} 等变量）"
+        create: "建策略（name/notifyType/triggerSignal/notifyRange/notifyMode/content 必填）"
+        update: "改策略（全量）"
+        delete: "删策略（⚠️instanceIds 走 query 非 path；分号批量）"
+      sla:
+        list:   "SLA 规则搜索（⚠️POST _search 非 GET list；Q/serviceName/ownerName/priorityId/instanceIds 过滤）"
+        get:    "规则详情（slaConfig[].levelConfig[].workingCalendarId→work_calendar）"
+        create: "建规则（basicInfo+slaConfig 必填；levelConfig.workingCalendarId 引用 work_calendar@sys-setting）"
+        update: "改规则（全量）"
+        delete: "删规则（path ruleIds 分号批量）"
+      duty_group:
+        list:   "值班组列表（Q 模糊；name/dutyCycle/dutyShiftName/st/et 过滤）"
+        get:    "组详情（dutyShift 班次数组）"
+        create: "建组（name/dutyCycle/status/dutyShift 必填）"
+        update: "改组（全量）"
+        delete: "删组（path groupIds 分号批量）"
+      # ---- sso-adapter provider 交付（知识型，非 REST——不调 run.sh）----
+      # sso-adapter 服务 logic.sso-adapter:8211（py2），归属 itsm 能力域。交付 SSO provider 是本地代码工程
+      # （写 py + 配 PLUGIN_CONFIG + 打包），不是调远端 API，故无 resource.verb。
+      # 知识在 objects.yaml#sso_provider / sso_provider_config；交付流程在 flows/build-sso-provider.yaml。
+      # 触发词："接入客户SSO/对接OAuth2/CAS/私有协议登录/交付单点登录插件" -> 走 build-sso-provider flow。
+
+    # 运维知识（实测，真相来源）—— 表单内容模型/坑见 objects.yaml#itsm_form_definition
+    runtime:
+      admin_user: easyops              # 写操作用户（与 cmdb/autoops 同；具备 itsc:form_management_* 4 权限）
+      env_required:                    # 调用前 export（值在部署根 env.d/<dep>.env）
+        - "EASYOPS_ITSM_BACKEND_URL"   # 完整 URL；端口见 runtime.ports.itsm_backend
+        - "EASYOPS_ORG"                # 与 cmdb 共用
+        - "EASYOPS_USER"               # 与 cmdb 共用
+      ports: { itsm_backend: 8134, frontend: 80 }
+      host_header: admin.easyops.local # IP 直连须带 Host 头
+      auth: "直连 backend（endpoint.auth=none）只需 org+user header（orguser 中间件 cmd/flowable_service/.../main_start.go:336-344；缺一报『org、user获取失败』）+ 额外 itsc:form_management_{access,create,update,delete} 4 权限（service.go:31-34，缺报 403）。cookie 仅网关面需要，见 cookie_optional_direct"
+      save_not_upsert: "POST /v2/form 永远新建 form + 首个 isMain=true 版本；formId/versionId 不可指定（CMDB 生成返回）。要『改』走 form_version.update。无单 form 详情端点（GET /form/:formId 不存在）"
+      cookie_optional_direct: "实测（2026-08-12，api-cli auth=none 经 run.sh 验证）：直连 itsm:8134 时 cookie 非必需——org+user+Host 三件直接 200（form list total=2）。机制同 cmdb：execute.go:135 auth=none 跳过 auth.Apply；headers 独立注入（request.go:40-43）。backend spec auth 已改 none。网关面仍需 cookie"
+      update_asymmetric: "PUT /v2/.../version/:versionId 是 upsert 但非对称：当前版 state==done → 新建 isMain=false 草稿（场景④加版本）；unfinished → 就地改。同时改 form.name/category/memo。versionName 唯一（重复报『重复的表单版本号』）"
+      delete_constraints: "删 form 须先清所有版本（有版本报『表单存在版本,无法删除』）。删版本路径参数是 versionIds（复数分号，契约误写单数 versionId）；代码只用第一个（批量是壳）。删版本被流程引用拒绝『表单已绑定节点』。⚠️删最后一个版本隐式级联删 form"
+      set_main: "POST .../version/:versionId 设主版本=发布；目标须 state==done（unfinished 报错）；旧主自动降级；旧主被流程绑定时触发 ITSC_PROCESS_FORM_RELATION 换绑（业务连续）；已主版本幂等"
+      form_definition_string: "formDefinition/businessRules 在 wire 层是 JSON 字符串（CMDB 存 string）。save/update 传 JSON.stringify([]Container)；get 返回需二次 parse。深层结构（5 容器/23 控件/5 脚本/条件显示/继承）见 objects.yaml#itsm_form_definition，后端透传前端解释"
+      version_state: "状态机两态：unfinished(草稿)/done(完成)；无 draft/published 叫法。done=可被引用/可设主版本。list 的 lastestMainVersion/lastestVersion 字段拼写少 t（API 如此）"
+      process_integration_todo: "displayUserTaskId（监听节点）只在【跨节点条件显示】填（displayCondition 引用别的流程节点表单的控件时，指明从哪个 activity id 取值）；引用本节点控件【不填】（留空，误填反不生效）。流程接口已接入（见下 process_*），displayUserTaskId↔节点联动机制见 objects.yaml#itsm_process_form_flow"
+      # ---- 流程定义（process）运维知识 ----
+      process_bpmn: "bpmnXML 是标准 BPMN 2.0 XML（bpmn2:命名空间 + flowable:扩展属性挂 userTask）。节点拓扑靠 incoming/outgoing；分支条件在 <sequenceFlow><conditionExpression>${pass==1}</conditionExpression>；会签 multiInstanceLoopCharacteristics。userTaskId=BPMN<userTask id>=nodeSettings[].userTaskId（join 锚）。校验 11 项（validator.go）。完整见 objects.yaml#itsm_process_bpmn"
+      process_save_version: "process_version.create 必填 bpmnXML/versionName/state/processSetting。baseVersionId 克隆【表单关系+阶段】不克隆 bpmnXML/processSetting。⚠️建版本不部署 Flowable——须再 set_main 才生效（部署到 Flowable 引擎，回填 deploymentId）。done 版本不可编辑（要改须 create+baseVersionId 派生）"
+      process_delete_constraints: "删流程定义须先清所有版本（『存在流程定义版本，不允许删除』）。删版本路径 versionIds(复数分号)但只删第一个——批量是壳。约束任一即拒(HTTP412)：绑表单/关联工单/主版本+绑服务/被引用。删末版本隐式级联删 def"
+      process_form_flow: "表单决定流转三层：①sequenceFlow conditionExpression ${pass==1} ②userTask isFormDecision=1+formExpressionName(变量映射DSL '变量名:userTaskId.containId.index.componentId') ③后端 govaluate 求值。⚠️和表单 displayCondition #{容器.控件}【不同套】（流转后端求值决定走线/displayCondition前端求值决定显隐）。完整见 objects.yaml#itsm_process_form_flow"
+      process_form_binding: "表单绑到【节点】(userTaskId)非版本（ITSC_PROCESS_FORM_RELATION 每节点一条）。process_form.set 按 formRelationInstanceId+formId 组合 绑/解/换（4动作）。useFormBuilder=false 时后端默认取表单主版本绑"
+      # ---- 触发器/通知/SLA/值班组（2026-08-11 接入）运维知识 ----
+      notify_policy_delete_via_query: "⚠️notify_policy.delete 无 path param，instanceIds 走 query（validator ctx.BindQuery 证实，route.go:8）——与 trigger/sla/duty_group 的 path 分号批量不同，易错"
+      notify_policy_prefix: "⚠️notify_policy 前缀是 /api/itsc_trigger/v1（≠ 其它 flowable_service 前缀），但仍在 8134 端口（route.go 同在 flowable_service）"
+      sla_list_post_search: "⚠️SLA list 是 POST /sla/rule/_search（非 GET list，GET 返 404）；分页参数也在 body"
+      trigger_notify_dependency: "trigger.config.actionList[].args.notifyPolicyId 引用 notify_policy 实例（13hex）——建触发器前通常先有 notify_policy"
+      sla_work_calendar_dependency: "sla.slaConfig[].levelConfig[].workingCalendarId 引用 work_calendar 实例（24hex）——⚠️work_calendar 在【独立微服务 sys_setting:8271】（见 easyops-sys-setting system），非 8134；建 SLA 前通常先有 work_calendar"
+      duty_group_id_format: "duty_group/trigger/notify_policy/sla 的 instanceId 均为 13hex（flowable_service 微秒时间戳）；delete path 参数均分号批量"
+
+    # e2e 验收 URL（前端）—— 表单类操作后在此可视化校验
+    acceptance_urls:
+      form_list:   "${EASYOPS_CMDB_FRONTEND_URL}/next/itsc-form-management/form-list?visible=true&page=1&pageSize=20&name=&creator=&category=&state="   # query 可选过滤 name/creator/category/state
+      form_detail: "${EASYOPS_CMDB_FRONTEND_URL}/next/itsc-form-management/form-list/{formId}/{versionId}"   # formId=表单实例id（13hex）；versionId=版本实例id（13hex）
+      process_list:   "${EASYOPS_CMDB_FRONTEND_URL}/next/itsc-process-manage/process-list?visible=true&page=1&pageSize=20&name=&creator=&category="   # 流程列表，query 可选过滤 name/creator/category
+      process_detail: "${EASYOPS_CMDB_FRONTEND_URL}/next/itsc-process-manage/{definitionId}/versionCreate-v2/{versionId}?activeTab=0"   # definitionId=流程定义id；versionId=版本id
+      service_list:   "${EASYOPS_CMDB_FRONTEND_URL}/next/itsc-service-management/setting-list?page=1&pageSize=10&catalog={catalogName}&catalogId={catalogId}&builtIn=true"   # catalog/catalogId/builtIn 必填（前端默认不渲染否则）
+      service_detail: "${EASYOPS_CMDB_FRONTEND_URL}/next/itsc-service-management/setting-list/{instanceId}"   # 服务实例 id（13hex）
+      # ---- 触发器/通知/SLA/值班组验收 URL（2026-08-11，据 scenarios/itsm-other.md）----
+      trigger_list:    "${EASYOPS_CMDB_FRONTEND_URL}/next/itsc-advanced-settings/trigger-manage?page=1&q={name}"   # q 模糊搜名
+      trigger_detail:  "${EASYOPS_CMDB_FRONTEND_URL}/next/itsc-advanced-settings/trigger-manage/update/{instanceId}"   # 触发器 id（13hex）
+      notify_list:     "${EASYOPS_CMDB_FRONTEND_URL}/next/itsc-advanced-settings/notify-config?visible=true&page=1&q={name}&triggerSignal={signal}&creator={creator}"   # q/name/triggerSignal/creator/st/et 可选
+      notify_create:   "${EASYOPS_CMDB_FRONTEND_URL}/next/itsc-advanced-settings/notify-config/create?instanceId={instanceId}"   # 通知策略 id（13hex）
+      sla_list:        "${EASYOPS_CMDB_FRONTEND_URL}/next/itsc-advanced-settings/service-agreement-list?visible=true&page=1&name={name}&ownerName={owner}"   # name/ownerName 可选
+      sla_detail:      "${EASYOPS_CMDB_FRONTEND_URL}/next/itsc-advanced-settings/service-agreement-list/service-agreement-detail?instanceId={instanceId}"   # SLA 规则 id（13hex）
+      duty_group_list: "${EASYOPS_CMDB_FRONTEND_URL}/next/itsc-operation-management/duty-configuration?visible=true&page=1&pageSize=10&q={name}&name={name}&creator={creator}&dutyShiftName={shift}"   # q/name/creator/dutyShiftName 可选
+      duty_group_create: "${EASYOPS_CMDB_FRONTEND_URL}/next/itsc-operation-management/duty-configuration/create/duty-basic-info?instanceId={instanceId}"   # 值班组 id（13hex）
+
+  # ===========================================================================
+  # 系统设置（sys_setting 微服务）—— 工作日历等平台级配置域
+  # ===========================================================================
+  easyops-sys-setting:
+    description: |
+      EasyOps 系统设置（sys_setting 微服务，监听 :8271）—— 当前覆盖【工作日历】
+      （work_calendar）。sys_setting 还含 organization/announce/comment/site_msg/
+      traffic_limit/workbench 等域，未来按需并入。
+      核心对象：work_calendar——工作日历（营业时间），定义工作日/休息日/工作时段，供
+      ITSM SLA 计算达成时长时剔除非工作时间。被 sla.slaConfig[].levelConfig[].
+      workingCalendarId 引用（24hex id，跨 system 接力）。
+      ⚠️为何独立 system（不在 easyops-itsm）：api-cli endpoint 是 service 级+运行时 flag，
+      不支持 per-resource 绑不同端口（api-cli schema.go:28-46）。sys_setting:8271 ≠
+      flowable_service:8134，故 work_calendar 必须另起 spec+独立 system。CLI 经 --spec
+      切，MCP 经 system 名找 spec。
+
+    spec: easyops-sys-setting.yaml          # api-cli 清单，相对本目录
+    default_endpoint: backend               # 直连 sys_setting :8271（路径带 /api/sys_setting/...）
+
+    endpoints:
+      backend:                              # 直连后端（HTTP，无 path 前缀；全 verb 通用）
+        base_url: ${EASYOPS_SYS_SETTING_BACKEND_URL}
+
+    auth: easyops-cookie                    # 与 cmdb/autoops/itsm 同一 cookie
+
+    env:                                    # 环境变量契约（值在部署根 env.d/<dep>.env，勿从此处取）
+      EASYOPS_SYS_SETTING_BACKEND_URL: ""  # sys_setting 后端完整 URL；端口见 runtime.ports.sys_setting_backend
+      EASYOPS_CMDB_FRONTEND_URL: ""        # 前端页面完整 URL
+
+    capabilities:
+      work_calendar:
+        list:   "工作日历列表（page/pageSize/name 过滤；返 24hex id）"
+        get:    "日历配置详情（含 config.workDayList）"
+        create: "建日历（name+config 必填；config={mode,workDayList:[{weekday,hours}]}）"
+        update: "改日历（全量；触发重新生成）"
+        delete: "删日历（path ids 分号批量；24hex；builtin 勿删）"
+
+    runtime:
+      admin_user: easyops
+      env_required:                    # 调用前 export（值在部署根 env.d/<dep>.env）
+        - "EASYOPS_SYS_SETTING_BACKEND_URL"   # 完整 URL；端口见 runtime.ports.sys_setting_backend
+        - "EASYOPS_ORG"                       # 与 itsm 共用
+        - "EASYOPS_USER"                      # 与 itsm 共用
+      ports: { sys_setting_backend: 8271, frontend: 80 }
+      host_header: admin.easyops.local      # IP 直连须带 Host 头
+      auth: "直连 backend（endpoint.auth=none）只需 org+user header（orguser 中间件）。cookie 仅网关面需要，见 cookie_optional_direct"
+      cookie_optional_direct: "实测（2026-08-12，api-cli auth=none 经 run.sh 验证）：直连 sys-setting:8271 时 cookie 非必需——org+user+Host 三件直接 200（work_calendar list total=1）。机制同 cmdb：execute.go:135 auth=none 跳过 auth.Apply；headers 独立注入（request.go:40-43）。backend spec auth 已改 none。网关面仍需 cookie"
+      id_format: "⚠️work_calendar id 是 24hex MongoDB ObjectId（≠ flowable_service 的 13hex 微秒时间戳）——印证它属不同存储/微服务"
+      cross_system_ref: "work_calendar 被 ITSM 的 sla.slaConfig[].levelConfig[].workingCalendarId 引用——建 SLA 规则前通常先在【本 system】建工作日历拿 24hex id，再填入 sla body（跨 system 接力，见 entities.yaml）"
+      why_separate_system: "sys_setting:8271 与 flowable_service:8134 不同端口；api-cli 不支持 per-resource endpoint 覆盖（schema.go 无 Endpoint 字段），故 work_calendar 必须独立 spec+system，CLI --spec 切换"
+
+    acceptance_urls:
+      work_calendar_list:   "${EASYOPS_CMDB_FRONTEND_URL}/next/work-calendar/list?page=1&q={name}"   # q 模糊搜名
+      work_calendar_detail: "${EASYOPS_CMDB_FRONTEND_URL}/next/work-calendar/detail/{id}"   # 日历 id（24hex）
+  collector_plugin_service:
+    description: |
+      EasyOps 采集套件管理（collector_plugin_service:8151）—— 4 能力域 23 端点：
+      ① plugin 套件 CRUD（10）：3 类型（simple-script/metricbeat/exporter）各有 create/update；
+      ② plugin_package 导出/导入/升级（3）：zip 流 / multipart；
+      ③ log_plugin 日志套件 CRUD（4）：processSteps 链；
+      ④ metric_management 指标导入（6）：4 adapter（prometheus/zabbix/easyagent/metricbeat）。
+      ⚠️本服务无启用/禁用/激活端点——激活在 collector_service.kit（见下）。
+      核心范式：套件=类型+关联CMDB模型+采集参数(paramDefine)+指标定义；3 类型由端点隐式区分（无单 type 字段）。
+
+    spec: easyops-collector-plugin.yaml          # api-cli 清单，相对本目录
+    default_endpoint: backend                    # 直连 :8151（套件 CRUD + 指标导入全 verb 干净命中）
+
+    endpoints:
+      backend:                                   # 直连后端（HTTP，无 path 前缀，全 verb 通用）
+        base_url: ${EASYOPS_COLLECTOR_PLUGIN_BACKEND_URL}
+        host: admin.easyops.local
+      frontend:                                  # 前端网关（HTTPS :232，per-API 路由，仅备选）
+        base_url: ${EASYOPS_COLLECTOR_FRONTEND_URL}
+        host: admin.easyops.local
+
+    auth: collector-cookie                       # auth.d/collector-cookie.yaml（仅网关面用；直连 auth=none）
+
+    env:                                         # 环境变量契约（值在 env.d/collector.env）
+      EASYOPS_COLLECTOR_PLUGIN_BACKEND_URL: ""   # :8151 完整 URL；端口见 runtime.ports.collector_plugin_backend
+      EASYOPS_COLLECTOR_FRONTEND_URL: ""         # 前端页面/网关完整 URL
+
+    # 能力清单（resource.verb）—— 编排挡据此判意图可达性
+    capabilities:
+      plugin:
+        create_with_script:   "创建脚本型套件（simple-script/agentType=easyops）。必填 name/agentType"
+        create_with_metricbeat: "创建 metricbeat 型套件（noPackage=true）。必填 name/agentType"
+        create_with_package:  "创建带程序包套件（exporter 等）。必填 name/agentType/packageId/packageVersionId"
+        list:                 "分页列套件（精简字段，不含 content/template/readme/pluginYaml）"
+        detail:               "套件完整详情（含 pluginYaml/params/processors 全字段+只读字段）"
+        delete:               "删套件（前置：未被采集任务引用；级联清指标；物理删）"
+        update_with_script:   "更新脚本型（processors空切片重建，ExtInfo用请求值）"
+        update_with_metricbeat: "更新 metricbeat 型（processors继承追加，ExtInfo保留旧值）"
+        update_with_package:  "更新 package 型（packageId校验被注释，与Create不一致）"
+        metricbeat_list:      "列内置 metricbeat 模块模板（moduleCache，读 conf.module.yaml）"
+      plugin_package:
+        export:        "导出套件为 zip 流（⚠️multipart/binary，api-cli仅预览，真调走SDK）"
+        import:        "导入套件 zip（multipart，同名冲突 upsert=true 覆盖）"
+        import_update: "升级套件（multipart，agentType不可变，version唯一）"
+      log_plugin:
+        create: "创建日志套件（processSteps 链，每个 step 必须有 action）"
+        delete: "删日志套件（前置：未被 COLLECTOR_LOG_JOB 引用）"
+        get:    "日志套件详情"
+        update: "更新日志套件"
+      metric_management:
+        import_alias_metric_check: "导入别名指标前校验（按 pluginId）"
+        import_metric_list:        "导入指标列表（按 pluginId）"
+        import_metrics:            "导入指标（按 plugin_id ⚠️下划线非驼峰，走 4 adapter）"
+        import_plugin_alias_metrics: "导入套件别名指标"
+        list_plugin_metrics:       "列套件所有指标"
+        import_metric_check:       "导入指标前校验"
+
+    # 运维知识（实测，真相来源）
+    runtime:
+      admin_user: easyops                # 写操作用户
+      env_required:                      # 调用前 export（值在 env.d/collector.env）
+        - "EASYOPS_COLLECTOR_PLUGIN_BACKEND_URL"
+        - "EASYOPS_ORG"
+        - "EASYOPS_USER"
+      ports: { collector_plugin_backend: 8151, frontend: 80 }
+      host_header: admin.easyops.local
+      auth: "直连 backend（endpoint.auth=none）只需 org+user header——实测 8151 直 200（plugin list total=198）。cookie 仅网关面需要"
+      list_total_in_body: "⚠️plugin.list 响应 total 在 data.total（body 内），不是 api-cli stderr 的 _meta.total。计数场景读 data.total（jq .data.total）。空结果时 data.total=0"
+      response_wrapper: "标准响应 {code,codeExplain,error,data}；code=0 成功。与 cmdb 的 {code,message,error,data} 略不同（多 codeExplain 少 message）"
+      create_returns_instanceid: "3 个 create 端点响应 data:{instanceId}（13hex），用于后续 detail/delete/activate"
+      delete_precondition: "删除前置：套件不能被 _COLLECTOR_JOB 引用（SearchTotal.Data!=0 报『此套件关联有采集任务不允许删除』）；删除级联清空 MetricObjectId 下所有 collectorPlugin.instanceId==id 的指标实例"
+      update_agenttype_immutable: "import_update 升级时 agentType 不可变（报『更新套件时不允许变更套件类型』）；version 必须唯一（重复报『已存在同名版本』）"
+      no_enable_endpoint: "⚠️本服务无 enable/disable/activate 端点（全包搜 enable/disable 0 命中）。激活在 collector_service.kit.activate（见下）"
+      multipart_uses_sdk: "plugin_package.export/import/import_update 是 multipart/binary 流，api-cli 无法真调（params.in 无 formData）。真调走 Python SDK（sdk/easyops_client.py 扩展）或 curl -F。详见 formats/collector-kit/package-format.yaml"
+      py2_runtime: "采集脚本默认 Python2.7（agent 运行时），py2 规范见 formats/collector-kit/sampler-types.yaml python2_rules（print语句/requests/subprocess无timeout）"
+      sampler_type_decides_output: "samplerType 决定脚本输出协议：metric_sampler→直接[{dims,vals}]JSON（监控）；process_sampler→BEGIN/END GATHERING DATA标记包裹（CMDB采集）。详见 formats/collector-kit/sampler-types.yaml"
+
+    # e2e 验收 URL（前端）
+    acceptance_urls:
+      kit_list: "${EASYOPS_COLLECTOR_FRONTEND_URL}/next/collect-platform/kit-repo/list?page=1&q={keyword}"   # 用户前端实测(2026-08-13)
+      kit_detail: "${EASYOPS_COLLECTOR_FRONTEND_URL}/next/monitor-kit/kit/easyops/{instanceId}/detail"   # 用户前端实测(2026-08-13)
+
+# =============================================================================
+# e2e 真调验证状态（2026-08-13，org 8888，172.30.0.90）
+# =============================================================================
+
+
+  # ===========================================================================
+  # collector_service —— 采集服务（套件激活 / 采集任务管理）
+  # ===========================================================================
+  collector_service:
+    description: |
+      EasyOps 采集服务（collector_service）—— 当前覆盖【套件激活面 kit】。
+      ⚠️真调环境拓扑（2026-08-13 实测，172.30.0.90）：
+      • :8125 是 collector_service 旧版——collector_job 端点在（/api/v1/collector_job HTTP400=参数错），
+        但 kit 端点（activate/info/list）全 404（缺 kit 模块，源码 tmp/源代码/collector_service 印证）。
+      • :12000 才是 kit activate/info/list 端点所在，需 giraffe-contract-name header 路由。
+      故本 system 的 spec default_endpoint 指 :12000（env EASYOPS_COLLECTOR_SERVICE_BACKEND_URL 指 12000）。
+      命令树见 easyops-collector-service.yaml；激活机制/拓扑见本 system runtime。
+
+    spec: easyops-collector-service.yaml         # api-cli 清单（kit activate/update/list）
+    default_endpoint: backend                    # :12000（kit 端点实测在此）
+
+    endpoints:
+      backend:
+        base_url: ${EASYOPS_COLLECTOR_SERVICE_BACKEND_URL}   # 指 http://172.30.0.90:12000
+        host: admin.easyops.local
+
+    auth: collector-cookie
+
+    env:
+      EASYOPS_COLLECTOR_SERVICE_BACKEND_URL: ""  # :12000 完整 URL；端口见 runtime.ports.collector_service_kit
+      EASYOPS_COLLECTOR_SERVICE_LEGACY_URL: ""   # :8125 完整 URL（collector_metric/collector_job 端点所在，e2e 实测 2026-08-14）
+
+    capabilities:
+      kit:
+        activate: "激活套件（把定义变成运行中采集任务）。必填 instanceId；可选 objectId/params/hostIds/collectAgent"
+        update:   "更新套件同步到任务（复用 activate 端点，body 加 syncToJobs/dashboards/dashboardStrategy）"
+        list:     "列套件含运行态（status/params/metricSets），双源合并 collector_service + cmdb"
+      collector_metric:
+        list: "指标元数据检索（v2 分页：metricNames 精确/objectId 过滤/metricName 模糊）——dashboard 指标查证权威源（2026-08-14 接入，metric/route.go:21）"
+        get:  "单指标详情（objectId+metricName）——dims/unit/来源插件"
+
+    runtime:
+      admin_user: easyops
+      env_required:
+        - "EASYOPS_COLLECTOR_SERVICE_BACKEND_URL"
+        - "EASYOPS_ORG"
+        - "EASYOPS_USER"
+      ports: { collector_service_legacy: 8125, collector_service_kit: 12000, frontend: 80 }
+      host_header: admin.easyops.local
+      auth: "直连 backend（endpoint.auth=none）只需 org+user header"
+
+      # ---- 真调环境拓扑（关键，实测 2026-08-13）----
+      topology: |
+        .90 环境实测拓扑：
+          :8125  collector_service 旧版——collector_job 端点在（/api/v1/collector_job 返 400 参数错=端点存在），
+                 /v1/agent-job/cmdb-change-callback 返 500=端点存在；但 kit 端点（activate/info/list）全 404（缺 kit 模块）。
+          :12000 kit activate/info/list 端点【实际在此】，需 giraffe-contract-name header 路由。
+        ⚠️不可凭 tmp/源代码/collector_service（旧版 Go 源码）说「kit 端点不存在」——该源码落后于实际部署。
+
+      giraffe_contract_routing: |
+        :12000 的每个端点必须带 header `giraffe-contract-name: <proto服务名>@<版本>` 才能路由：
+          • 缺 header → 'get giraffe-contract-name none'（HTTP 400）
+          • 带 header 但版本不对 → 'contract <name>@<版本> not found'（HTTP 404）
+        kits.go 用的 contract 名：ActivateCollectorKit@1.0.19 / ListCollectorKitInfo@1.0.5，
+        但 .90 实测这两个版本都 not found——实际版本号待 e2e 探测（可能环境是别的版本）。
+        ⚠️api-cli endpoint.headers 是固定 header（每请求注入），但 contract-name 因 operation 而异
+        （activate≠list），无法用 endpoint.headers 统一设——真调用 --header per-op 传，或走 SDK call 时注入。
+
+      contract_version_gap: |
+        GAP：.90 环境的 kit 端点 contract 实际版本号未确定（kits.go 的 @1.0.19/@1.0.5 实测 not found）。
+        e2e 激活环节先探测真实 contract 名（尝试常见版本/查服务 contract 列表），确定后回流本字段 + spec。
+        探测方法：① 查 12000 是否有 contract 列举端点；② 试不同版本号；③ 从前端抓包看实际 header。
+
+      activation_mechanism: |
+        activate 端点不直接建采集任务，而是触发 collector_service 的 AssignJobs（assign_job.go:28）：
+          1. activate 写/改 _COLLECTOR_EASYOPS_PLUGIN 或 _COLLECTOR_JOB 状态
+          2. CMDB 发 instance 事件 → /v1/agent-job/cmdb-change-callback（8125）→ OnCmdbObjectChange → AssignJobs
+          3. AssignJobs 前置：EnableAgentJob=true、Plugins 非空、Enabled=true（任一不满足静默失败）
+          4. 生成采集任务下发给 collector_proxy_server + 刷新 kit 统计
+          兜底：HyperInsightJobRefreshTask 每 PollInterval（默认 600s）refresh 全量任务。
+        成功判定：HTTP 200 且响应 totalStatus != "fail"（kits.go:134）。
+
+      activate_response_success: "成功判定：HTTP 200 且 data.totalStatus != 'fail'（fail 报 KITS_005 套件激活失败）"
+      update_reuses_activate: "kit.update 复用 activate 端点（同 URL），body 不同（syncToJobs/dashboards/dashboardStrategy，dashboardStrategy 仅 overwrite|rename）"
+
+      collector_job_association: "_COLLECTOR_JOB.plugins 字段存 pluginInstanceId 列表；AssignJobs 取 Plugins[0].InstanceId 作 kitId（assign_job.go:34）"
+      sync_to_bypass_timer: "activate 后想立即生效不等 600s：调 collector_service:8125 POST /api/v1/sync-job-config（config/route.go:11）主动同步"
+
+    acceptance_urls:
+      kit_list: "${EASYOPS_COLLECTOR_FRONTEND_URL}/next/collect-platform/kit-repo/list?page=1&q={keyword}"   # 用户前端实测(2026-08-13)
+      kit_detail: "${EASYOPS_COLLECTOR_FRONTEND_URL}/next/monitor-kit/kit/easyops/{instanceId}/detail"   # 用户前端实测(2026-08-13)
+
+  # ===========================================================================
+  # inspection —— 巡检服务（套件开发/管理/执行/历史）
+  # ===========================================================================
+  inspection:
+    description: |
+      EasyOps 巡检服务（logic.inspection:8103）—— v1 体系（INSPECTION_INFO）。
+      巡检套件 = 4 对象组装（INSPECTION_INFO 元信息 + INSPECTION_COLLECTOR 脚本 + INSPECTION_METRIC_GROUP 指标组
+      + INSPECTION_REPORT_TEMPLATE 报告模板），pluginId 串联。
+      e2e 链路：建套件(4对象)→建任务(task)→调度执行产生 jobId→history 查结果/报告。
+      ⚠️实测定调（2026-08-13）：.90 平台当前用 v1（INSPECTION_INFO 20套件）；v2（INSP_SUITE 0套件）未启用，仅录兼容索引。
+      脚本协议/阈值/包格式见 formats/inspection-kit/。
+      与采集套件（collector-kit）完全不同：包 tar.gz(非zip)、参数注入脚本头(非环境变量)、输出 start/end标记(非[{dims,vals}])。
+
+    spec: easyops-inspection.yaml
+    default_endpoint: backend                # 直连 :8103（全 verb 通用）
+
+    endpoints:
+      backend:                               # 直连后端（HTTP，无 path 前缀）
+        base_url: ${EASYOPS_INSPECTION_BACKEND_URL}
+        host: admin.easyops.local
+      frontend:
+        base_url: ${EASYOPS_CMDB_FRONTEND_URL}
+        host: admin.easyops.local
+
+    auth: easyops-cookie
+
+    env:
+      EASYOPS_INSPECTION_BACKEND_URL: ""     # :8103 完整 URL
+
+    capabilities:
+      insp_info:           { create: "建套件元信息", list: "套件列表", get: "套件详情", update: "改套件", delete: "删套件", clone: "克隆套件" }
+      insp_metric_group:   { create: "建指标组", list: "指标组列表", get: "组详情", update: "改组(含阈值)", delete: "删组(级联)" }
+      insp_collector:      { create: "建脚本(py2+args)", list: "脚本列表", get: "脚本详情", update: "改脚本", delete: "删脚本", debug: "在线试跑脚本" }
+      insp_template:       { create: "建报告模板", list: "模板列表", update: "改模板", delete: "删模板(前置查任务)" }
+      insp_task:           { create: "建任务(触发调度)", list: "任务列表", get: "任务详情", update: "改任务", delete: "删任务" }
+      insp_history:        { list: "执行历史", get: "执行详情(评分)", statistics: "执行统计", abnormal_metrics: "异常指标", export_excel: "导Excel", export_word: "导Word" }
+      insp_execution:      { terminate: "终止执行" }
+      insp_statistics:     { overview: "巡检总览", abnormal_metric_group: "异常指标组下钻" }
+      insp_package:        { export: "导出套件tar.gz(走SDK)", import: "导入套件(multipart走SDK)" }
+
+    runtime:
+      admin_user: easyops
+      env_required:
+        - "EASYOPS_INSPECTION_BACKEND_URL"
+        - "EASYOPS_ORG"
+        - "EASYOPS_USER"
+      ports: { inspection_backend: 8103, frontend: 80 }
+      host_header: admin.easyops.local
+      auth: "直连 backend（endpoint.auth=none）只需 org+user header。实测 8103 直 200（info/metric-groups/collector/history/overview 全通）"
+      suite_is_4_objects: |
+        ⚠️巡检套件=4对象组装（区别采集套件单模型）：INFO(元信息)+COLLECTOR(脚本)+METRIC_GROUP(指标组)+REPORT_TEMPLATE(模板)，
+        pluginId 串联。开发套件要建全 4 对象，或用导入导出（tar.gz 包含全部）。
+        各 CMDB objectId：INSPECTION_INFO@EASYOPS / INSPECTION_COLLECTOR@EASYOPS / INSPECTION_METRIC_GROUP@EASYOPS / INSPECTION_REPORT_TEMPLATE@EASYOPS。
+      v1_vs_v2: |
+        ⚠️两套体系：v1（INSPECTION_INFO，.90 当前 20套件，本服务主线）vs v2（INSP_SUITE，0套件未启用）。
+        v1 包=tar.gz(5文件：info.yaml/metrics.yaml/collectors/script.py[内容是YAML!]/reports_temp/detail.yaml/models.json)；
+        v2 包=suite.json+tools/*.tar.gz（单文件组合式，未来方向但当前无数据）。
+        详见 formats/inspection-kit/suite-package.yaml。
+      plugin_id_linkage: "所有对象 pluginId 必须相同=info.id（导入强校验，不一致报『套件信息中,pluginId存在不同值』）"
+      package_not_idempotent: "⚠️导入不幂等：重复 pluginId 直接报错（mongo 重复键 E11000）。需先删旧套件或改 id"
+      script_protocol_differs: |
+        ⚠️巡检脚本协议与采集套件完全不同（formats/inspection-kit/script-protocol.yaml）：
+        - 参数：注入脚本头部变量赋值（非环境变量）；EASYOPS_前缀=instanceId/唯一键/CMDB属性，无前缀=自定义参数
+        - 输出：必须两组标记——INSTANCE ID START/END（结果归属）+ start/end（指标组数组JSON，id↔metrics.yaml精确对应）
+        - 阈值：平台判（脚本只出原始值），按 conditions 的 comparator/level 判分
+        - py2.7（/usr/local/easyops/python/bin/python）
+      metric_category_two_level: "metric_group 的 category 必须两级点分（如 整体状态.连接数，正好1个点，否则报『分类格式错误』）"
+      metric_threshold: "阈值 comparator/level/评分规则见 formats/inspection-kit/metric-threshold.yaml（level 仅 0/5/10=notice/warn/emergency，对应 80/50/20分）"
+      no_builtin_cron: "任务定时委托外部 scheduler 服务（taskType=once绝对时间/crontab cron表达式），inspection 不内置 cron"
+      import_rollback: "导入顺序：模型→套件→指标组→采集器→模板；metric失败回退删套件，collector失败回退删套件+指标组，model/template失败不回退"
+      multipart_uses_sdk: "import(multipart file)/export/excel/word(二进制流) api-cli 仅 --print-curl，真调走 curl -F / SDK"
+
+    acceptance_urls:
+      suite_list: "${EASYOPS_CMDB_FRONTEND_URL}/next/automatic-inspection/suite"   # 待前端实测确认精确路径
+      history_detail: "${EASYOPS_CMDB_FRONTEND_URL}/next/automatic-inspection/inspection/{{plugin_id}}/history/{{job_id}}/summary-report"   # 源码 config.go:126 模板
+
+  # ===========================================================================
+  # msgsender —— 通知管理（通知方式 CRUD/发送/调试/告警接入）
+  # ===========================================================================
+  msgsender:
+    description: |
+      EasyOps 通知服务（logic.msgsender:8095，Python/Tornado）。
+      通知方式 = CMDB 实例(_MSGSENDER_NOTIFY_CONFIG@EASYOPS) + notify_scripts/<plugin>.py 脚本。
+      内置 4 类（email/wework/dingding_robot/dingding_easyops）；三方脚本走 msgType=custom + scriptContent 动态加载。
+      e2e 链路：建 config → debug 调试 → send_message 发送（receivers[].method=config.name）。
+      ⚠️config 读写走 v2（v1 明文密码，实测）；单条 GET/DELETE 仅 v1 有路由；写操作须系统管理员。
+      脚本契约/敏感字段协议/三方开发流程见 formats/notify-kit/notify-script-protocol.yaml。
+
+    spec: easyops-msgsender.yaml
+    default_endpoint: backend                # 直连 :8095
+
+    endpoints:
+      backend:
+        base_url: ${EASYOPS_MSGSENDER_BACKEND_URL}
+        host: admin.easyops.local
+
+    auth: easyops-cookie
+
+    env:
+      EASYOPS_MSGSENDER_BACKEND_URL: ""      # :8095 完整 URL
+
+    capabilities:
+      notify_method:  { list: "启用中的通知方式（send 可用 method 值域）" }
+      notify_config:  { list: "配置列表(v2脱敏)", create: "建通知方式(admin)", get: "单条详情(v1)", update: "改配置(v2,敏感base64)", delete: "删配置(admin)" }
+      notify_message: { send: "发通知(receivers+msg_data)", debug: "调试发送(免建config,msg内容被覆盖)" }
+      notify_alert:   { receive: "告警源接入(alert_receivers 分发)" }
+
+    runtime:
+      ports: { backend: "8095" }
+
+  # ===========================================================================
+  # data_exchange —— 数据交换服务（监控指标 OLAP 查询 / 历史数据统计）
+  # ===========================================================================
+  data_exchange:
+    description: |
+      EasyOps 数据交换服务（data_exchange）—— dashboard 数据源的执行后端：
+      cmdb-olap（监控指标）→ /api/v1/data_exchange/olap；cmdb-columndb（历史数据统计）
+      → /api/v1/data_exchange/tsdb_column/aggregate（前端 getUrlOfProvider.yaml:31-45 铁证）。
+      v3 查询按 series 分组，图表最合用；select_raw_data 原始点试查（指标活性验证）。
+      ⚠️指标元数据不在本服务（tags-list 是空桩 olap_service.go:91-93）——查指标用
+      collector_service.collector_metric。
+      源码：07-source-repos/data_exchange/（路由 olap/route.go:7-14、database_proxy/route.go:7-21）。
+
+    spec: easyops-data-exchange.yaml
+    default_endpoint: backend
+
+    endpoints:
+      backend:
+        base_url: ${EASYOPS_DATA_EXCHANGE_BACKEND_URL}   # 指 http://172.30.0.90:8152（e2e 实测 2026-08-14）
+        host: admin.easyops.local
+
+    auth: easyops-cookie                       # 直连 auth=none（同 cmdb 惯例；:8152 实测免 cookie）
+
+    env:
+      EASYOPS_DATA_EXCHANGE_BACKEND_URL: ""    # 完整 URL；端口待 e2e 探测
+
+    capabilities:
+      olap_metric:
+        query_v3: "监控指标聚合查询 v3（series 分组，图表合用）——dims/measures/filters DSL；兼指标活性试查"
+        select_raw: "原始时序点直查（分页）——指标是否有数据的权威试查"
+      column_history:
+        aggregate: "历史数据统计聚合（18 张 @EASYOPS 历史表：告警/CMDB变更/工具/CI/ITSM 等）"
+
+    runtime:
+      admin_user: easyops
+      env_required:
+        - "EASYOPS_DATA_EXCHANGE_BACKEND_URL"
+        - "EASYOPS_ORG"
+        - "EASYOPS_USER"
+      ports: { data_exchange: 8152, frontend: 80 }
+      host_header: admin.easyops.local
+      e2e_20260814: |
+        e2e 实测（2026-08-14 org 8888）：
+        • :8152 直连全通（olap v1/v3 + select_raw_data + tsdb_column/aggregate），org+user+Host 免 cookie。
+        • 🔴measures[].function JSON 字段名是 expression（传 Go struct 名 operator 报 not valid measure operator）。
+        • 🔴columndb filter 直调传对象（args YAML 里的 JSON 字符串是前端序列化格式）。
+        • dims 前端真实写法 time(auto)（现有盘 args 实测），API 直调 time 亦可。
+        • 网关面 /next/api/gateway/logic.data_exchange/* 需有效会话 cookie（过期报 ERR_UNAUTHENTICATED）——编排走 :8152 直连。
+        • 试查现状：.90 org 8888 的 HOST/KAFKA/PHYSICAL_SERVER 指标近期均无数据（采集未跑），
+          端点行为正确（code=0 + total=0）——试查空≠端点错，是环境数据事实。
+      org_isolation: "db 名=org 号，SQL 层自动 org 过滤（pkg/sqlclient/parse.go:168-171）——跨 org 不可见属预期"
+      operators: "聚合算子 internal/types/operators.go:13-27（count/min/max/sum/avg/topK/last/divide/increase/rate/irate/quantile）；过滤算子 :84-98（== != <= < >= > =~ !~ in has nin and like nlike exists）；时间过滤 name=time 支持 now-1h 相对时间"
+
+    acceptance_urls:
+      dashboard_view: "${EASYOPS_CMDB_FRONTEND_URL}/next/dashboard/dashboard/v2/<instanceId>?from=<timerange>&_namespace_=<namespace>"   # 仪表盘验收 URL（dashboard CRUD 在 easyops-cmdb，此处关联验收）

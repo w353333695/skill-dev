@@ -1,0 +1,110 @@
+# 流程模板：老平台 ITSM 流程整体迁移（modelInfo.txt → 表单+子流程+主流程一键迁移）。
+name: migrate-legacy-process
+intent: 老平台（ncb_* 系列）导出的流程包（modelInfo.txt + 文档 md）整体迁移到 EasyOps——表单、占位子流程、主流程一次建齐
+trigger: ["迁移流程", "老平台流程迁过来", "导入旧ITSM流程", "modelInfo 迁移"]
+guard: 规划挡（写 ITSM 多对象）—— 须展示迁移映射决策表（加签/子流程/处理人/分支四类映射）并确认
+
+prerequisites:
+  env: [EASYOPS_ORG, EASYOPS_USER, EASYOPS_ITSM_BACKEND_URL]
+  input: "老平台导出包：modelInfo.txt（结构化 JSON——一切转换的数据源）+ 流程 md（字段变量名/迁移设计参考）"
+  tools: "formats/bpmn-kit/relayout.py（布局）+ check_compliance.py（29 规则合规门）——建流程链 = 生成→布局→检测→落库"
+  naming: "⚠️def 名全局防重：process_definition.create 撞名报 409（如 .90 已有『事件管理流程』）——迁移版加后缀（-NCB迁移）区分"
+
+key_rule: |
+  迁移映射决策表（四类，逐项确认）：
+  ① 加签回路（独立加签节点+回环边）→ 剔除节点，父节点 nodeSettings.allowedOps 含 'add'
+  ② 子流程（type=2）→ 先建占位子流程 def（start→userTask→end 最小版）再 callActivity 引用（calledElement=ITSC+defId）
+  ③ 处理人：静态部门/角色 → 'easyops' 占位（前端可改）；userSelectType=3 表单动态 →
+     flowable:assignee="{{.formValue}}" + assigneeValue=表单字段；取发起人 → "{{.loginUser}}"
+  ④ 条件自动路由：sequenceRule{conditionFilter all/any, subItems[keyField eq/ne valueCode]}
+     → 上游决策节点 isFormDecision=1 + formExpressionName + 网关出边 ${变量=='值'}
+     （变量名必须 = 决策节点声明变量——合规检测 form-decision-vars-consistent 规则会查）
+  ⑤ 网关直连网关（老平台常见）→ 合并消除：GW_a-[cond_a]->GW_b 的边删掉，对 GW_b 每条出边
+     在 GW_a 复制 (cond_a && cond_b) 合并边；合并引入的变量补进上游决策节点声明
+  ⑥ 节点名繁体 → 简体（显示层）
+  ⑦ 🔴表单按阶段拆分绑定（2026-08-15 用户更正：老平台一张大表单绑全部节点 = 设计不合理——
+     第一个节点不单反馈问题，还要处理、分析、改善，显然不对。实际流转中表单是每个阶段对应
+     一张，只含该阶段要填写的内容）：
+     · 拆分边界 = 老表单的 row/分组结构（事件管理实例：6 row = 发现并提交/事件解决/用户验证/
+       根因分析与改善措施/改善措施完成情况确认/隐藏；隐藏字段按语义归属打散进各阶段）
+     · 每张阶段表单独立 form.save→update(done)→set_main，再 process_form.set 绑到对应节点
+     · 字段一一对应零丢失（拆分前后 modelField 计数核对）
+     · ⚠️枚举类控件数据源路径按类型区分（RADIO/CASCADER/MODALSELECT→extraProps.options，
+       SELECT/MULTIPLESELECT/CHECKBOX→items——form-kit E-P4，老 radio 映射时极易错位）
+
+steps:
+  - n: 1
+    desc: |
+      解析 modelInfo.txt：workflowModelNodeList（type: 2子流程/3网关/4审批 + userSelectType/distributeType/处理人）、
+      workflowModelSequenceList（sourceNodeCode/targetNodeCode/name/sequenceRule 条件）、
+      formInfos[0].configs（表单控件树）。start/end 是边里的虚拟 code（节点表里没有）。
+    expect: "节点/边/条件/表单结构清单"
+
+  - n: 2
+    op: form.save
+    desc: |
+      表单生成（老 widget → EasyOps type 映射 + 归一化）：
+      input→INPUT/textarea→TEXTAREA/radio→RADIO/checkboxes→CHECKBOX/select→SELECT(静态枚举)或
+      CMDBINSTANCESELECT(CMDB)/date→DATE/dateRange→DATERANGE/uploadComponent→UPLOAD/
+      multiSelect→SELECT(多选)；html/button/placeHolder 跳过。
+      🔴字段名保真：modelField 用 configs.dataSource.methods 里 children[].ctrid↔ctrCode 映射
+      （流程 formExpressionName 引用它，不可重造）；映射缺失用 md 变量名列回退。
+      🔴控件 options 权威字段（缺了前端 t.map 渲染崩，见 objects.yaml#itsm_form_definition 头部）：
+      SELECT/RADIO dataIndex='label'；UPLOAD dataType='filearray'+defaultValue=[]+dataIndex='fileName'+
+      extraProps 按钮配置；CHECKBOX defaultValue=[]；全部 extraProps.fieldAttr=[]。
+      🔴form.save 必填 name/category/formDefinition/state（unfinished）+versionName。
+    expect: "code=0 → formId + 首版本 versionId"
+
+  - n: 3
+    op: form_version.update
+    desc: |
+      发布表单（🔴连环坑，完整链不可省步）：
+      ①update 全量覆盖——必带完整 formDefinition + name/category + versionName（done 版上更新版本号
+      要 +1 如 1.0.0→1.0.1，否则『重复的表单版本号』；缺 name 报误导性『必填key name 不存在』）
+      ②state='done' → set_main（指向新派生的 versionId——update 对 done 版会派生新草稿，须
+      form_version.list 找到新 versionId 再 set_main）
+      ③验证：form list 看 lastestMainVersion.formDefinition 非空（空=白屏/t.map 崩）
+    expect: "主版本 formDefinition 非空 ✅"
+
+  - n: 4
+    op: process_definition.create
+    desc: 占位子流程（每 type=2 节点一个）：最小语义 BPMN（start→userTask→end）→ relayout.py 布局
+      → process_version.create（state=unfinished）→ 记下 defId 供 callActivity。
+    expect: "子流程 defId 清单"
+
+  - n: 5
+    op: process_definition.create
+    desc: |
+      主流程 def（⚠️先 list 查名防 409 撞名）。BPMN 生成按 key_rule 四类映射；纯语义 XML
+      （七要素无 DI）→ relayout.py 布局 → check_compliance.py 检测（0 error 才继续——
+      网关直连/变量一致性/必经元素等都拦）→ process_version.create（nodeSettings 按节点配：
+      加签父节点 allowedOps+add）→ process_form.set 绑表单。
+    expect: "code=0 → versionId；合规 0 error"
+    on_fail: |
+      409 撞名 → 换名加后缀（如 -NCB迁移）重建 def；140501 表达式错误 → 检查 ${} 包裹
+      （变量+==+值全在 ${} 内）；140200 部署失败 → 检查七要素（targetNamespace/isExecutable/
+      V2属性精简）/ 网关直连未消除；140500（set_main 阶段偶发）→ 重试即好
+
+  - n: 6
+    desc: |
+      验收 URL（用户前端看图+表单渲染）：
+      流程图 ${EASYOPS_CMDB_FRONTEND_URL}/next/itsc-process-manage/<defId>/versionCreate-v2/<versionId>?activeTab=0
+      表单 ${EASYOPS_CMDB_FRONTEND_URL}/next/itsc-form-management/form/<formId>
+      用户确认后：process_version.edit(state=done) → set_main 发布（子流程占位也应 set_main，
+      否则主流程 callActivity 部署可能解析失败）。set_main 须 state==done；偶发 140500 重试。
+    expect: "用户确认流程图/表单渲染正常"
+    on_fail: "140500 偶发瞬时错 → 重试即好（完整语义见 objects.yaml#itsm_process_version.side_effects set_main rule）；仍败核对 state==done / 子流程占位是否 set_main"
+
+side_effects: objects.yaml#itsm_process_version + #itsm_form_version（全量覆盖连环坑见那里）
+acceptance: "流程图布局合规（0 error）+ 表单渲染正常 + set_main 部署成功"
+rollback: "草稿直接 process_version.delete / form_version.delete（末版本级联删）；已发布的 set_main 回滚旧版"
+note: |
+  实战两例（2026-08-15，.90）：
+  · 业务修数变更流程（ncb_upd_data_change v36）：32节点94字段——条件路由型（6网关12条件+
+    6决策节点+8表单动态处理人），网关直连消除+变量补声明后合规 0 error。
+  · 事件管理流程（ncb_issue_prod v23）：7节点76字段——验证人=loginUser，事件转问题 callActivity。
+    迁移后用户设计更正（已修复）：74字段大表单按 key_rule⑦ 拆 5 张阶段表单绑各节点——
+    其中暴露 label≤20、RADIO 数据源路径两个前端设计器校验（form-kit E 类已全量复刻，
+    落库前先过 check-controls）。
+  老平台数据规律：ctrid↔ctrCode 字段映射在 formInfos[0].configs.dataSource.methods 主表 children；
+  start/end 是序列表虚拟 code；处理人 processorName 在 workflowModelNodeProcessorList。

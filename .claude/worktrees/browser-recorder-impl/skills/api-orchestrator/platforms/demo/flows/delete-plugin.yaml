@@ -1,0 +1,39 @@
+# 流程模板：删除套件（含前置检查）。确认挡（写，有前置约束）。
+name: delete-plugin
+intent: 删除采集套件（前置：未被采集任务引用；级联清指标）
+trigger: ["删除套件", "删套件", "清理套件"]
+guard: 确认挡（写，危险操作）
+
+key_rule: |
+  ⚠️删除前置（约束全文 + 报错原文 + 级联清指标行为见 objects.yaml#collector_plugin.side_effects 的 plugin.delete rule）：未被采集任务引用 / 级联清指标 / 物理删。
+  本文件不复述规则全文，只列【操作顺序】：detail 确认非 protected → plugin.delete → cmdb 确认已删。
+
+prerequisites:
+  env: [EASYOPS_COLLECTOR_PLUGIN_BACKEND_URL, EASYOPS_ORG, EASYOPS_USER]
+  payload: "目标 instanceId"
+
+steps:
+  - n: 1
+    op: plugin.detail
+    args: ["<instanceId>"]
+    desc: "确认套件存在 + 是非 protected（内置套件谨慎删）"
+    expect: "code:0；status=available 可删，status=enabled 内置套件确认后再删"
+  - n: 2
+    op: plugin.delete
+    args: ["<instanceId>", "--yes"]
+    desc: "删除套件（api-cli delete --yes 跳确认；或 curl DELETE）"
+    dataflow: |
+      api-cli: scripts/run.sh --spec easyops-collector-plugin.yaml plugin delete <instanceId> --yes
+      curl:    curl -X DELETE http://<8151>/api/v1/plugin/<instanceId>
+    expect: "code:0，data.instanceId 回显。若被引用则报删除前置约束错（报错原文 + 解约束见 objects.yaml#collector_plugin.side_effects 的 plugin.delete rule）"
+  - n: 3
+    desc: "cmdb 查 _COLLECTOR_EASYOPS_PLUGIN by instanceId 确认已删"
+    expect: "total=0"
+
+note: |
+  api-cli delete 触发确认门（写保护），--yes 跳过（global flag，位置在 verb 后也可）。
+  若被采集任务引用拒删（报错原文见 objects.yaml#collector_plugin.side_effects 的 plugin.delete rule）：操作解法=先到 collector_service 删引用此套件的 _COLLECTOR_JOB（collector_job delete）。
+
+side_effects: "见 objects.yaml#collector_plugin.side_effects plugin.delete（前置检查+级联清指标+物理删）"
+rollback: "删除不可逆。误删需重新 import 套件包（若有 zip 备份）"
+acceptance: "cmdb _COLLECTOR_EASYOPS_PLUGIN by instanceId total=0"

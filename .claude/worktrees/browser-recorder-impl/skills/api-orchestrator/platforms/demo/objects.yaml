@@ -1,0 +1,1794 @@
+# =============================================================================
+# platforms/demo/objects.yaml
+# EasyOps CMDB 的对象模型 + 关系 + 副作用规则（知识主体，非 README）。
+# 对应 SKILL.md 设计：objects.yaml — 对象关系 + 副作用规则。
+# 大型系统知识庞杂，按对象组织，可扩展；README 只做索引，不承载这些。
+# 数据来源：后端 message.Response（=CmdbObject）+ object/route.go + 实测。
+# =============================================================================
+objects:
+  # ---------- 模型（object）本身 ----------
+  cmdb_object:
+    description: CMDB 模型（object）—— 一个资源类的完整定义。
+    source: data/sources/backend/CMDB/cmdb_service/object/message/response.pb.go
+    api: object_model
+    fields:
+      objectId:        { type: string, required: true, anchor: true, desc: "模型 ID，约定 NAME@NAMESPACE。无正则，仅非空（@NAMESPACE 运行时处理）" }
+      name:            { type: string, required: true, desc: "模型名（同命名空间不可重复）" }
+      icon:            { type: string, desc: "图标 class，如 fa fa-database" }
+      category:        { type: string, desc: "分类，点分多级，如 应用资源.数据库" }
+      memo:            { type: string }
+      protected:       { type: bool, desc: "受保护(核心)模型，true 不可删" }
+      system:          { type: string, desc: "所属子产品" }
+      view:            { type: object, ref: view, desc: "视图/布局配置" }
+      attrList:        { type: array, required: true, min_items: 1, items: cmdb_attr, desc: "属性列表，≥1" }
+      relation_list:   { type: array, items: cmdb_relation, desc: "关系定义" }
+      relation_groups: { type: array, items: cmdb_relation_group }
+      indexList:       { type: array, items: cmdb_index, desc: "索引定义" }
+      updateAuthorizers: { type: array, items: string, desc: "编辑权限白名单" }
+      deleteAuthorizers: { type: array, items: string }
+      readAuthorizers:   { type: array, items: string }
+      isAbstract:      { type: bool, desc: "抽象(父)模型" }
+      parentObjectIds: { type: array, items: string, desc: "父模型列表（nil=不更新继承）" }
+    relations:
+      - { to: cmdb_attr,          type: composition, cardinality: "1:N", via: attrList }
+      - { to: cmdb_relation,      type: composition, cardinality: "1:N", via: relation_list }
+      - { to: cmdb_relation_group,type: composition, cardinality: "1:N", via: relation_groups }
+      - { to: cmdb_index,         type: composition, cardinality: "1:N", via: indexList }
+    side_effects:   # 操作该对象时的行为规则（实测踩坑，真相来源）
+      - op: object_model.import
+        rule: "声明式 upsert——存在则更新、不存在则建。返回 is_create=true/false 区分。建/改/加属性都用它。"
+      - op: object_model.import（新增属性）
+        rule: "给已存在模型加新属性时，属性 id 须加 _ 前缀（如 _regulatory_level）才识别为新增（返回「创建成功」）；不加前缀的已有 id 会「更新成功」。约定，非正则。"
+      - op: object_model.import（关系）
+        rule: "relation_list 的 left/right_object_id 须已存在或同批导入。ignore_dst_relation=true 跳过校验（对端不存在的关系「模型不存在,忽略创建」，不报错但不落库）；默认校验，找不到对端报 Can not find X object（外层 133116）。"
+      - op: object_model.import_check
+        rule: "真预检（不落库），返回逐项校验。会查关系对端存在性——预检通过 ≠ 关系都能建成。"
+      - op: object_model.delete
+        rule: "模型含 relation_list 时报 133129「请先删除已有关系」。解法：forceDelete=true 强删（连关系），或先 object_relation delete 逐条删。protected=true 不可删。"
+      - op: object_model.list
+        rule: "返回 ObjectBasicInfo（轻量，无 attrList/relation）。分页流式 NDJSON——见 api_behavior.pagination。"
+
+  # ---------- 属性 ----------
+  cmdb_attr:
+    description: 模型属性（字段）。
+    source: data/sources/backend/CMDB/cmdb_service/object/（object_service.go 属性 CRUD + 校验；导入/删除约束见 systems.yaml#easyops-cmdb.runtime.import_semantics / delete_constraint）
+    api: object_attr
+    fields:
+      id:          { type: string, required: true, desc: "属性 ID；新增时加 _ 前缀" }
+      name:        { type: string, required: true, desc: "属性中文名" }
+      value:       { type: object, required: true, ref: cmdb_attr_value, desc: "值定义（类型/约束/默认）" }
+      unique:      { type: string, enum: ["true","false"], default: "false", desc: "字符串布尔" }
+      readonly:    { type: string, enum: ["true","false"], default: "false" }
+      required:    { type: string, enum: ["true","false"], default: "false" }
+      tag:         { type: array, items: string, desc: "分组(分类)标签，如 [基本信息]" }
+      protected:   { type: bool, desc: "受保护属性，不可删/不可改约束" }
+      description: { type: string }
+      tips:        { type: string }
+
+  cmdb_attr_value:
+    description: 属性值定义。type 决定 regex/default 的语义。
+    fields:
+      type:        { type: string, required: true, enum: [int, enum, str, arr, date, datetime, struct, structs, ip, bool, float, json, enums, attachment], desc: "enum=单选, enums=多选, FK/FKs 已弃用" }
+      regex:       { type: any, desc: "enum/enums ⇒ 枚举值数组(如 [一级,二级])；json ⇒ JSON schema；struct/structs ⇒ 不设；其余 ⇒ 正则字符串" }
+      default_type: { type: string, enum: [value, function, auto-increment-id, series-number] }
+      default:     { type: any }
+      mode:        { type: string, desc: "字符串模式，如 multiple-lines/default" }
+      prefix:      { type: string, desc: "default_type=series-number/auto-increment-id 时必填" }
+      start_value: { type: integer, desc: "自增/流水号起始" }
+      series_number_length: { type: integer }
+      struct_define: { type: array, items: cmdb_struct_define, desc: "type=struct/structs 时必填" }
+
+  cmdb_struct_define:
+    description: struct/structs 类型的子字段。
+    fields:
+      id: { type: string }
+      name: { type: string }
+      type: { type: string, enum: [int, enum, str, arr, date, datetime, ip, bool, float, json, enums], desc: "无 struct/structs/FK" }
+      regex: { type: any, desc: "enum 时为枚举值数组" }
+
+  # ---------- 关系 ----------
+  cmdb_relation:
+    description: 模型间关系。一条关系连两端模型，各持对端 id 与基数。
+    source: data/sources/backend/CMDB/cmdb_service/object/object_relation_service.go（关系 CRUD + 校验；删除约束见 systems.yaml#easyops-cmdb.runtime.delete_constraint）
+    api: object_relation
+    fields:
+      relation_id: { type: string, desc: "关系 ID，不填自动生成" }
+      name: { type: string }
+      left_object_id:    { type: string, required: true, desc: "左端模型 ID" }
+      left_id:           { type: string, required: true, pattern: '^[0-9a-zA-Z_]{1,32}$', desc: "左端对端角色 ID；≠ right_id" }
+      left_description:  { type: string, required: true, desc: "左端描述，如 运维负责人" }
+      left_min:          { type: integer, default: 0, gte: 0 }
+      left_max:          { type: integer, default: -1, desc: "-1=无限" }
+      right_object_id:   { type: string, required: true }
+      right_id:          { type: string, required: true, pattern: '^[0-9a-zA-Z_]{1,32}$', desc: "≠ left_id" }
+      right_description: { type: string, required: true }
+      right_min:         { type: integer, default: 0 }
+      right_max:         { type: integer, default: -1, desc: "1=一对一，-1=一对多" }
+    constraints:
+      - "left_id ≠ right_id（否则 LogicalRelationBothSidesIdDuplicate）"
+      - "同批 relation_id 不可重复"
+      - "同批关系名称不可重复"
+      - "left_id/right_id/relation_groups.id 正则 ^[0-9a-zA-Z_]{1,32}$"
+
+  cmdb_relation_group:
+    fields:
+      id:   { type: string, required: true, pattern: '^[0-9a-zA-Z_]{1,32}$' }
+      name: { type: string, required: true }
+      protected: { type: bool }
+
+  cmdb_index:
+    fields:
+      name:        { type: string, desc: "自动生成的唯一 id" }
+      propertyIds: { type: array, items: string, desc: "索引覆盖的属性 id" }
+      unique:      { type: bool }
+
+  view:
+    description: 模型视图/布局（google.protobuf.Struct，自由 JSON）。
+    fields:
+      attr_category_order: { type: array, items: string, desc: "属性分组展示顺序" }
+      attr_order:          { type: array, items: string, desc: "属性展示顺序（属性 id）" }
+      show_key:            { type: array, items: string, desc: "实例列表显示键" }
+      visible:             { type: bool, desc: "菜单可见" }
+
+  # ---------- 实例（instance）—— 模型下的具体数据记录 ----------
+  cmdb_instance:
+    description: CMDB 实例——某模型下的一条具体数据记录。字段名=模型属性 id；关系字段名=该关系 view 的 Out.Id（在 object_relation 定义里配）。
+    source: data/sources/backend/CMDB/cmdb_service/instance/message + instance_extend/message
+    api: object_instance
+    fields:
+      instanceId:            { type: string, anchor: true, desc: "实例主键，13 位 [0-9a-z]（微秒时间戳 hex）；新建可不带后端自动生成，指定须匹配 ^[0-9a-z]{13}$" }
+      name:                  { type: string, desc: "实例名；常用作 import 的 keys 联合唯一键" }
+      _object_id:            { type: string, ref: cmdb_object, desc: "隶属的模型 id（path 参数 {object_id}）" }
+      "<模型属性 id>":         { type: any, desc: "模型定义的各属性（ip/memo/整型示例 等），按属性 value.type 取值" }
+      "<关系 view 的 Out.Id>": { type: any, ref: cmdb_instance, desc: "关系字段：值可传对端 instanceId 字符串/对象{instanceId}/数组；传完整对象（无 instanceId）触发嵌套创建对端实例" }
+    relations:
+      - { to: cmdb_object,   type: association, cardinality: "N:1", via: _object_id, desc: "实例隶属一个模型" }
+      - { to: cmdb_instance, type: association, cardinality: "N:M", via: "<关系 view 的 Out.Id>", desc: "实例间关系（关系字段引用对端实例）" }
+    side_effects:   # 实例操作行为规则（源码实测，真相来源）
+      - op: object_instance.search
+        rule: "fields 必填（属性 id 列表），留空报 100000「fields is required but not set」。page/page_size 选填（默认 1/30，page_size 上限 3000）。实例总数在 data.total（契约 response 明列 total，非 count）。query 是 MongoDB 风格（$and/$or/$like/$regex）。"
+      - op: object_instance.import
+        rule: "批量 upsert：keys（仅普通属性 id，不支持 struct/关系字段）组 query——匹配到 update、没匹配 insert；datas 每条字段名=属性 id。建 N 实例用 keys=[name|ip]；定向改已有用 keys=[instanceId]（主键必命中→纯 update，用于场景3补属性）。"
+      - op: object_instance.import（关系字段）
+        rule: "关系字段名=该关系 view 的 Out.Id；值可传对端 instanceId 字符串/对象{instanceId}/数组；传完整对象（无 instanceId）会嵌套创建对端实例并自动关联，除非 disableNestedCreateInstance=true。append/remove 由后端 diff 当前已有 vs 请求列表决定。场景1『关联 easyops 系统』即用此字段。"
+      - op: object_instance.import（主键）
+        rule: "datas 可带 instanceId 指定主键（须 ^[0-9a-z]{13}$），不填则后端按微秒时间戳 hex 自动生成。"
+      - op: object_instance.delete
+        rule: "批量删：instanceIds 分号分隔；单个 id 即删单个。⚠️路径 /object/{id}/instance_batch（无斜杠；契约笔误 /instance/_batch，照写 404）。返回 data.deleteFailedInstances（空=全删成功）。无独立单删/按条件删 verb。【单删=传一个 id；按条件删=先 search 取 instanceIds 再 delete 的操作链 属编排知识，见 flows/delete-instances-by-range.yaml key_rule】"
+
+  # ===========================================================================
+  # EasyOps AutoOps 工具管理（tool_service）—— 第二系统。
+  # 权威结构体 data/sources/backend/AutoOps/tool_service/internal/types/tool/。
+  # 工具 = ToolConfig(配置) + ToolVersion(版本) 聚合；版本无独立写端点（走 tool.update 派生）。
+  # ===========================================================================
+  autoops_tool:
+    description: "EasyOps 工具（AutoOps）= ToolConfig（配置）+ ToolVersion（版本）聚合。一个工具定义一个自动化脚本（含输入参数/输出/绑定库），可多版本。对应 api-cli resource: tool。"
+    source: data/sources/backend/AutoOps/tool_service/internal/types/tool/{tool_config,tool_version,tool_input,tool_output}.go
+    api: tool
+    fields:
+      toolId:          { type: string, anchor: true, desc: "工具 ID（32 位 hex md5，服务端生成；≠ CMDB instanceId）。前端详情页 URL <id> 即此" }
+      name:            { type: string, required: true, desc: "工具名（同 org 内不可重复）；list 的 name 参数 $like 匹配它 + memo（前端 q 是 name 别名）" }
+      category:        { type: string, required: true, desc: "分类（如 ITSM、CMDB；点分多级）；list 的 category 含子类展开" }
+      memo:            { type: string, desc: "说明（list 的 name 也模糊匹配 memo）" }
+      type:            { type: string, required: true, enum: [shell, python, perl, powershell, batch, Ansible-PlayBook], desc: "脚本类型，决定运行时注入哪个 SDK 库 + 默认解释器" }
+      content:         { type: string, required: true, desc: "脚本正文。可调平台 SDK 函数（PutStr/PutRow/PutFormRows/AutoDiscoveryJson/DecryptString），由平台按 type 自动注入 header" }
+      vId:             { type: string, desc: "版本 ID（32 位 hex）；别名 $latest_version/$latest_development/$latest_production" }
+      vName:           { type: string, desc: "版本名" }
+      inputs:          { type: array, items: autoops_tool_input, desc: "输入参数定义（ToolInput[]）" }
+      outputDefs:      { type: array, items: autoops_output_def, desc: "标量输出定义（脚本 PutStr 回吐）" }
+      tableDefs:       { type: array, items: autoops_table_def, desc: "表格输出定义（脚本 PutRow/PutFormRows 回吐多行；查主机内存用）" }
+      toolLibs:        { type: array, items: autoops_tool_lib, desc: "绑定的动态库" }
+      timeout:         { type: integer, desc: "超时秒，默认 86400；0=不限" }
+      defaultExecUser: { type: string, desc: "默认执行用户（Linux，如 root）" }
+      disable:         { type: bool, desc: "禁用开关" }
+      listVisible:     { type: bool, desc: "列表中是否显示，默认 true" }
+      delete_me:       { type: bool, desc: "软删标记（true=已删）" }
+      "<authorizers>": { type: array, items: string, desc: "细粒度授权白名单：readAuthorizers/updateAuthorizers/deleteAuthorizers/executeAuthorizers/rootModifyAuthorizers 等" }
+    relations:
+      - { to: autoops_tool_version, type: composition, cardinality: "1:N", via: vId, desc: "一个工具有多个版本" }
+      - { to: autoops_tool_input,   type: composition, cardinality: "1:N", via: inputs }
+      - { to: autoops_tool_lib,     type: association, cardinality: "N:M", via: toolLibs, desc: "工具绑定动态库（多对多）" }
+    side_effects:
+      - op: tool.create
+        rule: "新建工具同时建首个版本。必填 name/type/category/content（giraffe ValidatePostRequiredAndSetDefault 校验，非 gin binding tag）。默认 listVisible=true/sourceFrom=default/timeout=86400。返回 toolId+vId。"
+      - op: tool.update（新建版本）
+        rule: "⚠️body 是 **flat**（顶层直接字段，不要套 {tool:{}}；实测 {tool:{}} 会让 updateFields=[tool] 命中『仅改 config』短路分支，假成功不生效）。改 ToolVersion 字段（inputs/content/outputDefs/tableDefs/vDesc/vName/type）触发派生新版本（manager.UpdateToolWithExists→CreateByExists，tool_manager.go:485-520）——派生版 envType=development，vName 不传则=vId。改 ToolConfig 字段（name/category）仅改配置不派生。⚠️响应 data 只含 {toolId}（无新 vId）。【派生成功否须 tool_version.list 复查 + 场景3『加版本』get→update→version.list 复查链 属编排知识，见 flows/add-tool-version.yaml key_rule】"
+      - op: tool.delete
+        rule: "软删（置 delete_me=true，非物理删）。force=true（query 字符串 \"true\"）仅绕 ReadOnly。versionId 不填=删整个工具（所有版本+配置）；填=只删该版本，删完若无版本才连带删配置。ReadOnly=true 不让删（除非 force）。被流程引用的防护在更上层，本服务层只认 ReadOnly。"
+
+  autoops_tool_input:
+    description: 工具输入参数（ToolInput，tool_input.go:33-61）。脚本通过保留 key/环境变量取值；cmdbInstance 类型由平台按执行目标注入实例。
+    fields:
+      name:         { type: string, required: true, desc: "参数名；脚本里 @name 或保留 key 引用" }
+      type:         { type: string, desc: "类型：string/strings/int/enum/enums/ips/encryptedString/cmdbInstance/cmdbInstances/keyManagement/secretKey/autofill/selector/customSelector 等" }
+      label:        { type: string, desc: "展示标签" }
+      required:     { type: bool, desc: "是否必填" }
+      default:      { type: any, desc: "默认值" }
+      enum:         { type: array, items: string, desc: "枚举可选值" }
+      regex:        { type: string, desc: "正则校验" }
+      multiple:     { type: bool, desc: "多选" }
+      cmdbObjectId: { type: string, desc: "type=cmdbInstance(s) 时：CMDB 模型 id（限定目标实例范围）" }
+      cmdbAttrId:   { type: string, desc: "CMDB 属性 id" }
+      secretName:   { type: string, desc: "type=secretKey 时：密钥名（运行时 DecryptSecretKey 解）" }
+      selector:     { type: string, desc: "前端选择器类型；带范围过滤的实例选择用 cmdb.range.instance.query（配 cmdbQuery），2026-08-26 fintech 工具实测" }
+      cmdbSelector: { type: string, desc: "实例选择器样式：cmdb（默认全功能）/ simple-select（简表选择）" }
+      cmdbQuery:    { type: object, desc: "实例候选过滤。⚠️格式 {defaultInstanceId: [], query: \"<JSON字符串>\"}——query 是【序列化后的 v2 search query JSON 字符串】非嵌套对象（塞嵌套 dict 前端不识别）。操作符用 $like（如 {\\\"$and\\\":[{\\\"$or\\\":[{\\\"objectId\\\":{\\\"$like\\\":\\\"%@FINTECHDATA%\\\"}}]}]}）——【$regex 不支持】（实测前端不认，2026-08-26）" }
+      cmdbOptionSetting: { type: object, desc: "simple-select 样式的列配置：{displayFields: [展示属性id...], sortFields: [排序属性id...], sort: \"asc|desc|\"}" }
+      primitive:    { type: bool, desc: "是否原始类型入参（string/enum 等为 true；cmdbInstance(s) 为 false）" }
+    constraints:
+      - "cmdbQuery.query 用 $like 做包含匹配（'%xxx%'），不支持 mongo $regex（实测静默失效）"
+      - "脚本类型标记在 ToolVersion 层 type 字段（python/shell/...，tool_version.go:108 export:\"config\"）——打包 config 漏了它平台按默认类型渲染脚本（2026-08-26 fintech 工具踩坑）"
+
+  autoops_output_def:
+    description: 标量输出定义（OutputDef，tool_output.go:24）。脚本 PutStr(id,val) 回吐。
+    fields:
+      id:   { type: string, desc: "输出参数 id（内置的如 INTERNAL_TASK_START_TIME/END_TIME/SUCCESS_LIST/FAILURE_LIST）" }
+      name: { type: string, desc: "输出参数标题" }
+
+  autoops_table_def:
+    description: 表格输出定义（TableDefs，tool_output.go:74）。脚本 PutRow/PutFormRows 回吐多行（查主机内存等多行数据）。get_table 端点取这。
+    fields:
+      id:         { type: string, desc: "表 id（脚本里 PutRow 的表名；\"table\" 自动改 \"default\"）" }
+      name:       { type: string, desc: "表名" }
+      dimensions: { type: array, items: object, desc: "维度列（每项 {id,name}）" }
+      columns:    { type: array, items: object, desc: "数据列（每项 {id,name}）" }
+
+  autoops_tool_version:
+    description: 工具版本（ToolVersion，tool_version.go:93）。版本是工具的子结构——无独立写端点，新建/改版本走 tool.update（派生）。仅 tool_version.list 读版本列表。
+    source: data/sources/backend/AutoOps/tool_service/internal/types/tool/tool_version.go
+    api: tool_version
+    fields:
+      vId:           { type: string, anchor: true, desc: "版本 ID（32 位 hex）" }
+      vName:         { type: string, desc: "版本名" }
+      vDesc:         { type: string, desc: "版本说明" }
+      relatedToolId: { type: string, ref: autoops_tool, desc: "所属工具 id" }
+      envType:       { type: string, desc: "版本类型（development/production）" }
+      versionMark:   { type: string, enum: [$latest_version, $latest_development, $latest_production], desc: "版本别名标记" }
+      checkType:     { type: string, enum: [approving, approved, rejected], desc: "审批状态" }
+      vCreateTime:   { type: string, desc: "版本创建时间" }
+    side_effects:
+      - op: tool_version.list
+        rule: "只读，列某工具所有版本。新建/改版本无独立 verb——走 tool.update。"
+
+  autoops_tool_lib:
+    description: "工具库（ToolLib，动态库）—— 可被多工具引用的 python 库（scriptType 仅 python）。对应 api-cli resource: tool_lib。无独立 list 端点（工具通过 toolLibs 字段关联）。"
+    source: data/sources/backend/AutoOps/tool_service/internal/manager/tool_lib_manager.go
+    api: tool_lib
+    fields:
+      instanceId:  { type: string, anchor: true, desc: "库实例 id" }
+      name:        { type: string, desc: "库名" }
+      packageId:   { type: string, desc: "程序包 id" }
+      versionId:   { type: string, desc: "版本 id" }
+      description: { type: string, desc: "库说明" }
+      scriptType:  { type: string, enum: [python], desc: "脚本类型，目前仅支持 python" }
+      custom:      { type: bool, desc: "是否自定义库" }
+    side_effects:
+      - op: tool_lib.create/update
+        rule: "库包上传（multipart）——api-cli 仅 --print-curl 预览，真调走 Python SDK。返回 instanceId/packageId/versionId。"
+
+  # ===========================================================================
+  # EasyOps ITSM 表单管理（flowable_service）—— 第三系统。
+  # 权威结构体 data/sources/backend/ITSM/flowable_service/internal/form/definition/
+  #   + internal/enums/{field_kind,process_script}/ + form_schema_version/。
+  # 表单 = FormSchema(表单) → FormSchemaVersion(版本, formDefinition 是 JSON 字符串)。
+  # formDefinition 解析后 = []Container（容器【平铺列表】，非深树）。
+  # ===========================================================================
+  itsm_form:
+    description: ITSM 表单（FormSchema）—— 一个表单记录（元信息 + 多版本）。表单"内容"在版本的 formDefinition 里（不在本层）。
+    source: data/sources/backend/ITSM/flowable_service/internal/cmdb_service/converter.go:99-113
+    api: form
+    fields:
+      instanceId: { type: string, anchor: true, desc: "表单 id（13 hex，CMDB 生成不可指定；formId 路径参数）" }
+      name:       { type: string, required: true, desc: "表单名" }
+      category:   { type: string, required: true, desc: "分类（自由文本，无枚举）" }
+      creator:    { type: string, desc: "创建者 user" }
+      memo:       { type: string, desc: "表单级备注" }
+      ctime:      { type: string }
+    relations:
+      - { to: itsm_form_version, type: composition, cardinality: "1:N", desc: "一个表单多版本，同时仅一个 isMain=true" }
+    side_effects:
+      - op: form.save
+        rule: "POST /v2/form 永远新建 form + 首个 isMain=true 版本（非 upsert；formId 不可指定，CMDB 生成返回）。必填 name/category/formDefinition/state。"
+      - op: form.delete
+        rule: "有版本时拒绝『表单存在版本,无法删除』——必须先删干净所有版本。form 不存在静默成功（幂等）。"
+      - op: form.list
+        rule: "无单 form 详情端点（GET /form/:formId 不存在）。state 过滤的是【版本状态】非 form；isMain=true 只取主版本。list 字段 lastestMainVersion/lastestVersion 拼写少 t（API 如此）。【取 form 元信息走 list 过滤还是 form_version.get 的子对象 属编排知识，见 flows/list-forms-and-versions.yaml】"
+
+  itsm_form_version:
+    description: ITSM 表单版本（FormSchemaVersion）—— 一个表单的一个版本，持表单内容 formDefinition。状态机两态：unfinished(草稿)/done(完成)。同时仅一版 isMain=true（主版本=对外生效，流程默认引用）。
+    source: data/sources/backend/ITSM/flowable_service/form_schema_version/form_schema_version_service.go
+    api: form_version
+    fields:
+      instanceId:     { type: string, anchor: true, desc: "版本 id（13 hex，CMDB 生成不可指定；versionId 路径参数）" }
+      versionName:    { type: string, pattern: '^\d+\.\d+\.\d+$', desc: "版本号（语义化三段式 1.0.0）" }
+      isMain:         { type: bool, desc: "是否主版本（同时仅一版 true，由 set_main 保证）" }
+      state:          { type: string, required: true, enum: [unfinished, done], desc: "unfinished=草稿 / done=完成（可被引用、可设主版本）" }
+      formDefinition: { type: string, ref: itsm_form_definition, desc: "表单定义 JSON 字符串 = []Container（见 itsm_form_definition）。后端透传不解析；前端二次 JSON.parse" }
+      businessRules:  { type: string, desc: "业务规则 JSON 字符串（前端解释，后端透传）" }
+      memo:           { type: string, desc: "版本备注（save 的 versionMemo 落这）" }
+      creator:        { type: string }
+      ctime:          { type: string }
+      standardFields: { type: array, items: string, desc: "引用的标准字段 key 列表" }
+    relations:
+      - { to: itsm_form, type: association, cardinality: "N:1", desc: "版本隶属一个表单" }
+    side_effects:
+      - op: form_version.update
+        rule: "upsert 非对称（PUT /v2/.../version/:versionId）：当前版本 state==done → 【新建一个 isMain=false 草稿】（基于已发布版派生）；state==unfinished → 就地更新。同时改 form 的 name/category/memo。versionName 唯一（done 新建/unfinished 改号都不能重，否则『重复的表单版本号』）。【场景④『加版本』=对 done 版 update 派生新草稿 的操作链 属编排知识，见 flows/add-version.yaml】"
+      - op: form_version.update（🔴全量覆盖坑 + 🔴派生版不自动切主）
+        rule: "🔴update 是【全量覆盖非 patch】——body 不带 formDefinition 会把已存的表单定义【清空为空串】且 code=0 静默成功（实测 2026-08-15：两个迁移表单发布 done 时只传 name/category/versionName/state，48K 定义被清成 0，前端表单空白）。任何 update 必须带完整 formDefinition（先 form_version.get/list 取回现定义再改）。与 process_version.edit 的 processSetting 同类坑。补救：update 带完整定义 + versionName 改新号（如 1.0.0→1.0.1 绕过『重复的表单版本号』）→ set_main
+        🔴连环坑：对 done 版 update 会【派生新草稿】（新 versionId），须把新草稿 state→done 后【显式 set_main 指向新 versionId】——否则主版本仍指旧的空版本，前端打开依旧空白/报 TypeError: t.map is not a function（空串 formDefinition 被前端 JSON.parse 成非数组再 .map）。完整补救链：update(完整定义+新版本号) → update(state=done) 或已 done → set_main(新versionId) → form list 验证 lastestMainVersion.formDefinition 非空"
+      - op: form_version.delete
+        rule: "路径参数 versionIds（复数分号，契约误写单数 versionId）；代码 strings.Split 后只用第一个——批量是壳实际删一个。被流程节点引用拒绝『表单已绑定节点，不可删除!』。⚠️隐式级联：删完若 form 已无任何版本，连带删 form。删主版本代码不拦（不建议）。"
+      - op: form_version.set_main
+        rule: "设主版本（=发布/对外生效）。目标须 state==done（unfinished 报『未完成状态不能设置为主版本』）。旧主版本自动降级 isMain=false。若旧主版本被流程绑定，触发换绑：ITSC_PROCESS_FORM_RELATION 从旧主迁到新主（业务连续）。已是主版本则幂等。"
+      - op: form.save / form_version.update（配置生效）
+        rule: "⚠️配置完版本（save 新建/update 改）后，form_version.set_main 标记为主版本才【生效】——前端默认展示主版本（isMain=true），非主版本的配置改动在前端看不到效果（固有的生效机制）。【以下属编排知识，暂存此处待建 flow：新草稿(unfinished)→先 update 转 done→再 set_main；save/update 出来的非主版本，前端验收前必须 set_main。生效机制部分见 flows/add-version.yaml key_rule】"
+      - op: form_version.list
+        rule: "name 参数实际是 versionName 精确匹配（非 form 名）。total=版本数（场景『有几个版本』读这个）。list 元素含 versionInfo（完整字段）+ processVersions（绑定流程）。"
+      - op: form_version.get
+        rule: "V2（/v2/...）比 V1 多返 businessRules + domainModel[](整列) + formDataSources[] + standardFields[] + userDisplayMap。取表单内容走 V2 get（本清单已用 V2）。"
+
+  # ---------- 表单内容模型（formDefinition = []Container）----------
+  # ⚠️控件 options 权威字段（缺了前端渲染崩 TypeError: t.map is not a function，2026-08-15 实测；
+  # 对照现网正常表单「wwh」(formId 64ccd7eacef75) 实样提炼——该表单含全部类型控件（SELECT/INPUT/
+  # LINK/UPLOAD/TEXTAREA/RICHTEXT/CMDBINSTANCESELECT+table/row 容器），是渲染权威样例库：
+  # 生成/排查 formDefinition 字段形态拿它对照）：
+  #   SELECT/RADIO: options.dataIndex='label' 必填（前端对选中值 .map 定位显示列）
+  #   UPLOAD: dataType='filearray'（非 array）、defaultValue=[]、dataIndex='fileName'、
+  #           extraProps={buttonText,max_number:5,max_size:128,isEnableFileTypeLimit:false,fieldAttr:[]}
+  #   CHECKBOX: defaultValue 必须数组 []（非空串）
+  #   所有控件: options.extraProps.fieldAttr=[] 必含（前端遍历）
+  itsm_form_definition:
+    description: |
+      表单内容定义 = JSON 字符串，解析后是 []Container（容器【平铺列表】，非深树——parser.go:21-57 直接 unmarshal 到 []Container，无递归 children）。
+      "分组"=row 容器；"标签页"=tabs 容器（tabPanes[] 一层）；"多行子表"=table 容器（每列一个控件，运行时每行一组数据）。
+      源码 internal/form/definition/{definition.go, parser.go, components/}。
+    fields:
+      containers: { type: array, items: itsm_form_container, desc: "容器平铺列表（formDefinition 解析后的 []Container）" }
+    constraints:
+      - "容器不真正嵌套——靠 row/tabs/table 类型表达分组，非 children 递归"
+      - "tabPane 内可放控件（tabPanes[].propertys[]），但 tabPane 内不能再套容器"
+      - "控件 json tag 是 propertys（拼写如此，少 y），非 properties"
+      - "e2e 实测：新建/派生版本时后端对组件结构有校验——控件须含 belongToSection（指向所属容器 key）；手写控件缺该字段会报『必填key name 不存在』(误导性，非真缺 name)。建议先 get 一个真实表单的 formDefinition 参考其完整字段集（belongToSection/layout/layoutConfig/condition 等）再改"
+      - |
+        ⚠️【前端必读字段集——缺了前端渲染崩溃】后端透传 formDefinition 不校验结构，但前端逐字段读，缺关键字段会抛 "Cannot read properties of undefined (reading '0')" 等白屏错。手写 formDefinition 须补全下列字段（实测对照正常表单「知识表单」）：
+        容器 Container 须含：condition(bool,true)、layout([x,y,w,h])、layoutConfig({layout:"vertical",columns:12})、displayCondition("")、modelField(=容器 key)、name、key、type、propertys[]
+        控件 Component 须含：belongToSection(=所属容器 key)、key、type、label、modelField、options{...}
+        options 须含全字段：layout([0,row,12,1])、layoutSpan(12)、labelCol(3)、defaultValue(""或[])、required(bool)、dataType(string/number/object/...)、pattern、placeholder、disabled(false)、enabled(true)、highLight(false)、isMore(true)、only(false)、note、question([])、displayCondition("")、remoteFunc({toolId:"",scriptInputs:[]})、rules([])、extraProps({})(SELECT/RADIO/CHECKBOX 的选项放 extraProps.items:[{key,label,value}])
+        崩点最常见：options.layout[0]（前端读栅格坐标）、options.remoteFunc.scriptInputs、belongToSection。→ 生成 formDefinition 必须用归一化器补默认值，不能只填语义字段。
+      - |
+        🔴【layout 坐标语义——y 是行号，写错全挤一行】(2026-08-17 .148「事件-发现并提交」1.0.0 实测：
+        45 控件全部 layout=[0,0,12,1]，渲染全挤一行；1.0.1 仅把 y 改为 0..44 递增即修复)。
+        语义（前端 form-renderer Lm 组件消费，源码 index.e5622707.js）：
+          layout=[x,y,w,h]：x=列偏移、y=行号、w=宽(栅格,antd Col span=2*w)、h=高
+          渲染=按 y 分组(groupBy "y")→每组一个 antd Row→组内 Col span=2*w（x 只算 offset）
+          ⇒ y 相同的控件挤同一行；y 不递增≠自动换行（前端无 compact 自动排，如实渲染坐标）
+          ⇒ 同容器内每控件 y 必须逐个递增（一行一控件 y=i；一行两控件则同 y、x 分 0/6、w=6）
+          容器自身 layout[1] 同理=容器在表单中的行序，多容器也要 y 递增（不能全 [0,*,12,1]）
+        生成纪律：构造 propertys 时 y=控件序号（enumerate），勿抄模板把 y 固定 0；
+        一行多列时 w=12/列数（两列 w=6）且 layoutSpan 与 w 一致（编辑态 w 取 layoutSpan 优先，源码 Mm 映射）。
+
+  itsm_form_container:
+    description: 容器（Container，definition.go:33-42）—— 表单内容的分组单元，type 决定形态。
+    source: data/sources/backend/ITSM/flowable_service/internal/form/definition/definition.go:33-42
+    fields:
+      key:        { type: string, desc: "容器唯一 key（前端用）" }
+      name:       { type: string, desc: "容器名（如『基础信息』）" }
+      type:       { type: string, required: true, enum: [row, tabs, table, business_table, business_cmdb_instance_change_table], desc: "row=行/分组(section) | tabs=标签页(配 tabPanes) | table=表格(动态多行,列=propertys) | business_table=CMDB实例批量写 | business_cmdb_instance_change_table=CMDB实例修改" }
+      propertys:  { type: array, items: itsm_form_component, desc: "容器内控件列表（⚠️json tag 拼写 propertys 少 y）。table 容器时每项是一列定义" }
+      tabPanes:   { type: array, items: itsm_form_tab_pane, desc: "仅 tabs 容器：标签页列表，每个 tabPane 内放控件" }
+      options:    { type: object, ref: itsm_form_container_options, desc: "容器选项（含容器级生命周期脚本配置）" }
+      extraProps: { type: object, ref: itsm_form_container_extra, desc: "table/business_table 特殊配置（CMDB 模型 id / 操作按钮）" }
+      default:    { type: object, ref: itsm_form_inherit, desc: "数据继承：从同工单指定节点的指定 section 继承数据" }
+      displayCondition: { type: string, desc: "条件显示表达式字符串（前端解释，后端透传；后端 Container 无显式字段，靠 JSON 透传）" }
+    constraints:
+      - "business_table / business_cmdb_instance_change_table 须配 extraProps.objectId（CMDB 模型 id，限定实例范围）"
+      - "table 容器的『新增/修改/删除/导入/导出』操作按钮配在 extraProps.operationsSettings[]"
+
+  itsm_form_container_options:
+    description: 容器选项（ContainerOptions，definition.go:103-112）—— 容器级生命周期脚本挂这里。
+    fields:
+      listenStart:  { type: bool, desc: "是否启动值监听" }
+      listenEvents: { type: array, items: object, desc: "监听事件列表（控件值变化 → onValueChange 脚本）" }
+      remote_func:  { type: object, desc: "容器级脚本配置 {onPageLoadId, beforeSubmitId}：onPageLoadId→afterDataLoad(加载后)，beforeSubmitId→preSubmitCheck(提交前)" }
+
+  itsm_form_container_extra:
+    description: 容器扩展配置（ContainerExtraProps，definition.go:80-85）—— table/business_table 的 CMDB 绑定。
+    fields:
+      url:                { type: string, desc: "CMDB 接口 url（业务容器用）" }
+      org:                { type: integer, desc: "CMDB org" }
+      user:               { type: string, desc: "CMDB user" }
+      objectId:           { type: string, desc: "CMDB 模型 id（business_table/business_cmdb_instance_change_table 必填，限定实例范围）" }
+      operationsSettings: { type: array, items: object, desc: "table 操作按钮 [{value:addControl|modifyControl|deleteControl|exportControl|importControl, label}]" }
+
+  itsm_form_inherit:
+    description: 数据继承（Inherit，definition.go:27-30）—— 容器数据从同工单另一节点的另一 section 继承（business_table 类用，按 uuid 对齐合并，新表单缺失的旧数据打 Deleted 软删；cmdb_instance_import/func.go:186-216）。
+    fields:
+      userTaskId: { type: string, desc: "来源流程节点 id" }
+      sectionKey: { type: string, desc: "来源容器 key（同工单指定节点的指定 section）" }
+
+  itsm_form_tab_pane:
+    description: 标签页（TabPanes，definition.go:20-24）—— tabs 容器的子页，内放控件（不能再套容器）。
+    fields:
+      key:               { type: string }
+      tab:               { type: string, desc: "标签名" }
+      propertys:         { type: array, items: itsm_form_component, desc: "该 tab 下的控件" }
+      displayCondition:  { type: string, desc: "该 tab 的显示条件表达式（前端解释）" }
+      displayUserTaskId: { type: string, desc: "限制该 tab 仅在指定流程节点显示" }
+
+  itsm_form_component:
+    description: |
+      控件（Component，component.go:13-24）—— 表单字段。type 取 field_kind 枚举（23 种，enum.go:7-34）。控件特有配置塞 options.extraProps（map）；CMDB 类控件还有 cmdbProps。
+      23 种：INPUT 单行 / TEXTAREA 多行 / RICHTEXT 富文本 / NUMBERINPUT 计数器 / RADIO 单选组 / CHECKBOX 多选组 / SELECT 下拉单选 / MULTIPLESELECT 下拉多选 / SWITCH 开关 / UPLOAD 普通附件 / LARGEFILE_UPLOAD 超大附件 / SLIDER 滑块 / TIME 时间(前端隐藏) / DATE 日期(前端隐藏) / COMMONDATE 日期时间 / TIMERANGE 时间段 / DATERANGE 日期段 / LINK 链接 / MODALSELECT 实例选择 / CASCADER 级联 / ARRATINPUT 数组输入 / CMDBINSTANCESELECT CMDB实例选择 / CMDBCASCADER CMDB级联 / USER_SELECTOR 用户 / USER_GROUP_SELECTOR 用户组 / DEPARTMENT_SELECTOR 组织。
+    source: data/sources/backend/ITSM/flowable_service/internal/form/definition/components/component.go + internal/enums/field_kind/enum.go:7-34
+    fields:
+      key:             { type: string, desc: "前端唯一 key" }
+      label:           { type: string, desc: "中文标签" }
+      type:            { type: string, required: true, desc: "控件类型枚举值（见 description 23 种）" }
+      modelField:      { type: string, desc: "表单字段 key（formData 存这个）" }
+      belongToSection: { type: string, desc: "所属容器 key" }
+      cmdbProps:       { type: object, ref: itsm_form_cmdb_props, desc: "CMDB 控件专用约束（CmdbInstanceSelect/CmdbCascader 等）" }
+      options:         { type: object, ref: itsm_form_options, desc: "控件配置（共享字段 + extraProps 特有）" }
+      isstandardfield: { type: bool, desc: "是否标准字段（json tag isstandardfield）" }
+    constraints:
+      - "无独立『关联实例』控件——用 CmdbInstanceSelect / ModalSelect / CmdbCascader"
+      - "无独立『子表』控件——多行靠 table 容器（容器实现，非控件本身）"
+      - "table 容器内的控件运行期 IsPlural=true（多值）"
+      - "⚠️ key 应 == modelField（设计器约定，真实表单两者同值）。displayCondition 的 #{容器ID.控件ID} 据此解析控件值——key≠modelField 会导致表达式取不到值（条件显示不生效）"
+
+  itsm_form_options:
+    description: 控件配置（Options，component.go:51-73）—— 所有控件共享字段 + extraProps（控件特有）。
+    fields:
+      layout:           { type: array, items: integer, desc: "栅格布局 [x,y,w,h]——🔴y=行号：同 y 挤同一行，每控件 y 须递增（全 0 → 45 控件挤一行，2026-08-17 实测）；w=宽(span=2*w)，一行两列 x=0/6 w=6。详见 itsm_form_definition constraints「layout 坐标语义」" }
+      labelCol:         { type: integer, desc: "标签列宽" }
+      defaultValue:     { type: any, desc: "静态默认值（动态默认值用 remoteFunc 脚本）" }
+      required:         { type: bool, desc: "是否必填" }
+      dataType:         { type: string, desc: "数据类型 string/number/object/objectarray/moment/filearray" }
+      pattern:          { type: string, desc: "正则校验" }
+      placeholder:      { type: string }
+      disabled:         { type: bool }
+      enabled:          { type: bool }
+      highLight:        { type: bool, desc: "高亮" }
+      note:             { type: string, desc: "字段说明" }
+      displayCondition: { type: string, desc: "【条件显示】表达式字符串（前端解释；后端透传不解析）" }
+      frontKey:         { type: any, desc: "实例选择展示字段（; 分隔）；CmdbInstanceSelect 默认 name" }
+      remoteFunc:       { type: object, ref: itsm_form_remote_func, desc: "控件级脚本/数据源（componentLoad/instSelect）" }
+      rules:            { type: array, items: any, desc: "校验规则" }
+      extraProps:       { type: object, desc: "【控件特有配置】map（按 type 取，见 itsm_form_component_extra 表）" }
+      desensitization:  { type: bool, desc: "是否数据脱敏" }
+      dataIndex:        { type: string, desc: "实例名索引（; 分隔）" }
+
+  itsm_form_component_extra:
+    description: |
+      ⚠️控件配置分散在【三处】，混淆就配不对（源码 component.go:51-73 + testdata/definition.json 真实样例 + parser.go/classify_wrapper.go 消费逻辑）：
+      ① options.extraProps（map）—— 控件【特有】动态属性（按 type）
+      ② options.<顶层强类型> —— frontKey/dataIndex/primaryKey/remoteFunc/rules/defaultValue/desensitization（通用，不在 extraProps）
+      ③ cmdbProps（Component 顶层）—— 【仅 business_table/business_cmdb_instance_change_table 容器内控件用】定义 attr/relation 写入元信息；CMDBINSTANCESELECT/CMDBCASCADER 控件【不用 cmdbProps】！
+      【options.extraProps 各控件真实字段】（testdata/definition.json ground truth）：
+      INPUT → {isPasswordInput:true}（密码框，普通则 {}）
+      TEXTAREA/SWITCH/ARRATINPUT → {}
+      NUMBERINPUT → {step:10}
+      SELECT/MULTIPLESELECT/CHECKBOX → {items:[{key,label,value}]}（候选项 key 是 items）
+      ⚠️RADIO → {options:[{key,label,value}]}（候选项 key 是 options，不是 items！与 SELECT 系不一致，坑）
+      SLIDER → {max,min,step}（数值）
+      RICHTEXT → {showOperationButton:true}
+      COMMONDATE/DATE/TIME/DATERANGE/TIMERANGE → {format:"YYYY年MM月DD日"/"HH:mm:ss"(moment串), disabledPast:false}
+      UPLOAD → {buttonText,max_number,max_size,isEnableFileTypeLimit}
+      LARGEFILE_UPLOAD → {max_number,draggerUploadHint,isEnableFileTypeLimit}（⚠️与 UPLOAD 不同：无 buttonText/max_size，多 draggerUploadHint）
+      LINK → {label,href}
+      CMDBINSTANCESELECT → {objectId:<CMDB模型id>, url:"", user:"", listMode:false}（模型 id 在 extraProps.objectId！不是 cmdbProps）
+      CMDBCASCADER → {objectIdPath:[{objectId,showKey:[...]}]}（多级，每级模型+展示字段）
+      MODALSELECT → {options:[], listMode:false}（候选用顶层 remoteFunc 拉）
+      USER_SELECTOR/USER_GROUP_SELECTOR/DEPARTMENT_SELECTOR → 无 extraProps 样例；显示字段走【顶层 frontKey】（默认 [name]）
+      【顶层字段（不在 extraProps）】CMDBINSTANCESELECT 显示字段= options.frontKey（[]string，如 ["hostname"]，须模型真实属性，查 view.show_key）；primaryKey（["instanceId"]）；dataType（CMDB 类=objectarray，defaultValue=[]）。MODALSELECT 显示字段= options.dataIndex（; 分隔）。
+      【三实例选择控件对比】CMDBINSTANCESELECT：extraProps.objectId + 顶层 frontKey，不需 remoteFunc（CMDB 接口直接按 objectId 查）；CMDBCASCADER：extraProps.objectIdPath（每级 objectId+showKey）；MODALSELECT：顶层 dataIndex + remoteFunc.toolId（必，拉候选）。
+      【后端导出读取】（classify_wrapper.go）：CMDBINSTANCESELECT 读顶层 frontKey（不读 extraProps.objectId——那给前端拉候选用）；CMDBCASCADER 读 extraProps.objectIdPath；MODALSELECT 读顶层 dataIndex；日期类读 extraProps.format；USER 类读顶层 frontKey 默认 name；INPUT 脱敏读 extraProps.isPasswordInput。
+      ground truth 源：testdata/definition.json（每控件真实样例）+ form_builder/components/*/property.go（旧体系，字段名不同仅供参考）。
+    fields:
+      "<按 type 取>": { type: any, desc: "见 description 各控件真实 extraProps 字段；items(注意 RADIO 用 options)/format/step/min/max/objectId/objectIdPath/listMode/isPasswordInput/href 等" }
+
+  itsm_form_cmdb_props:
+    description: CMDB 控件强类型约束（xcmdb.Props，components/xcmdb/props.go:8-15）—— CmdbInstanceSelect/CmdbCascader 用。
+    fields:
+      class:           { type: string, enum: [attr, relation], desc: "attr=属性 / relation=关系" }
+      type:            { type: string, desc: "CMDB 属性类型 str/array/enum/enums/date/datetime/..." }
+      regex:           { type: any, desc: "str 时正则；enum/enums 时枚举数组" }
+      max:             { type: integer, desc: "关系最大数" }
+      foreignObjectId: { type: string, desc: "CMDB 对端模型 id（关系用）" }
+      foreignMax:      { type: integer, desc: "对端实例关系最大数" }
+
+  itsm_form_remote_func:
+    description: |
+      控件级脚本/数据源（RemoteFunc，component.go:128-135）。脚本不是内联代码——引用预注册的 EasyOps【工具】（toolId，python 工具），表单 schema 只存 toolId + 入参映射。
+      服务 componentLoad（控件加载，如实例选择拉候选）+ instSelect（实例选择过滤）。
+    fields:
+      toolId:        { type: string, desc: "EasyOps 工具 id（autoops_tool.toolId）" }
+      toolVersionId: { type: string, desc: "工具版本 id" }
+      modelField:    { type: string, desc: "对应表单字段 key" }
+      scriptInputs:  { type: array, items: itsm_form_script_input, desc: "入参定义（static/currentNode/history）" }
+      scriptOutput:  { type: object, ref: itsm_form_script_output, desc: "出参定义（dataPath + showKey）" }
+
+  itsm_form_script_input:
+    description: 脚本入参（ScriptInput，component.go:110-121）—— 控件级脚本能拿：静态值 + 当前节点表单字段 + 历史节点表单字段。
+    fields:
+      name:          { type: string, desc: "入参 key" }
+      scriptType:    { type: string, enum: [static, currentNode, history], desc: "static=直传值；currentNode=当前节点表单字段；history=历史节点表单字段" }
+      scriptValue:   { type: string, desc: "static 时的值；动态留空" }
+      propertyPath:  { type: string, desc: "动态数据的属性路径 a.b.c（currentNode/history 时取哪个字段）" }
+      formVersionId: { type: string, desc: "history 时指定来源表单版本" }
+
+  itsm_form_script_output:
+    description: 脚本出参定义（ScriptOutput）—— 工具输出里取数。
+    fields:
+      dataPath: { type: string, desc: "工具输出取数路径（如 output）" }
+      showKey:  { type: array, items: string, desc: "用哪个字段展示（如 [name]）" }
+
+  itsm_lifecycle_script:
+    description: |
+      表单生命周期脚本（5 钩子；脚本=预注册 EasyOps 工具(toolId,python)，非 JS/表达式，schema 只存 toolId+映射；enums/process_script/enum.go:39-50）。
+      挂两处：容器级（container.options.remoteFunc.onPageLoadId/beforeSubmitId + listenEvents）+ 控件级（component.options.remoteFunc）。
+    fields:
+      hook:   { type: string, enum: [afterDataLoad, preSubmitCheck, onValueChange, componentLoad, instSelect], desc: "钩子名" }
+      inputs: { type: array, items: string, desc: "注入变量固定：orderInfo(工单上下文)/loginUser/eventSource(触发源)/args(自带参)/formData(整张表单 JSON)；instId/stepId 非空时 orderInfo 含工单上下文" }
+      output: { type: any, desc: "返回按事件：afterDataLoad/onValueChange→formData(改后表单)+可选 formConfig(动态改配置)/ticketName(动态标题)；preSubmitCheck→checkState|submitCheck(拦截提交)+ticketName；componentLoad→result(控件数据)" }
+    constraints:
+      - "afterDataLoad（加载后）：预填字段/动态改必填可见性(返 formConfig)/动态工单标题"
+      - "preSubmitCheck（提交前）：跨字段校验/风控拦截/二次确认（submitCheck=false 阻止提交）"
+      - "onValueChange（值变化）：字段联动（A 变重算 B/C，替代简单 displayCondition）"
+      - "componentLoad（控件加载）：实例选择/下拉的异步数据源（按当前值过滤候选）"
+      - "instSelect（实例选择）：候选项过滤/计算"
+      - "工具执行失败且输出含 raise 字段 → raise 值作为 error 抛前端（自定义报错文案）"
+
+  # ===========================================================================
+  # EasyOps ITSM 流程定义（flowable_service，第二域）—— 三层：流程定义/版本/内容。
+  # 权威源：契约 itsm-process_definition.json + 后端 process_definition_version/ +
+  #   internal/bpmn/(解析校验) + internal/process/(流转求值) + internal/process_script/(orderInfo)。
+  # 版本内容 = bpmnXML(标准 BPMN 2.0 XML) + processSetting(节点配置 JSON) + stageSetting(阶段 relation)。
+  # ⚠️ 证据纪律：以下结构均有 testdata/源码真实样例（file:line），flowConfig/ProcessStage 运行样例标"待捕获"。
+  # ===========================================================================
+  itsm_process_definition:
+    description: ITSM 流程定义（ITSC_PROCESS）—— 流程元信息 + 多版本。流程内容在版本的 bpmnXML/processSetting。
+    source: data/sources/backend/ITSM/flowable_service/process_definition_version/process_definition_version_service.go
+    api: process_definition
+    fields:
+      instanceId:  { type: string, anchor: true, desc: "流程定义 id（13 hex，CMDB 生成不可指定）" }
+      name:        { type: string, required: true, desc: "流程名（def 内唯一）" }
+      category:    { type: string, required: true, desc: "分类（自由文本）" }
+      creator:     { type: string }
+      memo:        { type: string }
+      triggerIdList: { type: array, items: string, desc: "触发器 id 列表" }
+      useFormBuilder: { type: bool, default: false, desc: "是否引入 form_builder" }
+    relations:
+      - { to: itsm_process_version, type: composition, cardinality: "1:N", desc: "一个流程定义多版本，同时仅一版 isMain（部署到 Flowable）" }
+    side_effects:
+      - op: process_definition.create
+        rule: "POST /v2/process_definition 只建 def 元信息（不含版本），防重名 CheckNameDuplicate。versionId CMDB 生成。建完须 process_version.create 建 BPMN 版本。"
+      - op: process_definition.edit
+        rule: "PUT /v2/process_definition/:definitionId 改元信息，非 upsert，须传已存在 definitionId，改 name 防重（排除自己）。"
+      - op: process_definition.delete
+        rule: "⚠️有版本拒绝『存在流程定义版本，不允许删除』。def 不存在静默成功（幂等）。删最后一个版本隐式级联删 def（见 itsm_process_version）。【删干净所有版本的清理顺序 属编排知识，见 flows/delete-process.yaml key_rule】"
+
+  itsm_process_version:
+    description: |
+      ITSM 流程版本（ITSC_PROCESS_VERSION）—— 持流程内容。状态机两态 unfinished(草稿)/done(完成)。
+      版本内容三块：bpmnXML(BPMN 2.0 XML string) + processSetting(节点配置 JSON string) + stageSetting(阶段，独立 relation)。
+      DataVersion 字段 ≥SettingSplit 走"XML+分离setting"新路径，旧版走 deprecated userTaskInfo。
+      ⚠️只有 set_main 才把 BPMN 部署到 Flowable 引擎（版本真正生效）；建/改版本只存不部署。
+    source: data/sources/backend/ITSM/flowable_service/internal/models/def_version.go:15-41
+    api: process_version
+    fields:
+      instanceId:          { type: string, anchor: true, desc: "版本 id（13 hex，CMDB 生成；list 支持 'lastest' 别名取最新）" }
+      versionName:         { type: string, required: true, desc: "版本名（def 内唯一）" }
+      state:               { type: string, required: true, enum: [unfinished, done], desc: "done 才能 set_main；done 版本不可编辑" }
+      bpmnXML:             { type: string, required: true, ref: itsm_process_bpmn, desc: "BPMN 2.0 XML（流程图）。结构+校验见 itsm_process_bpmn" }
+      processSetting:      { type: object, required: true, ref: itsm_process_node_setting, desc: "节点配置 {nodeSettings:[],lineSettings:[]}。存 JSON 字符串。见 itsm_process_node_setting" }
+      isMain:              { type: bool, desc: "是否主版本（由 MAIN_VERSION 关系标记，deprecated 字段）。set_main 触发 Flowable 部署" }
+      deploymentId:        { type: string, desc: "Flowable 部署 id（set_main 后回填；之前是 fakeId 占位）" }
+      flowableDefinitionId: { type: string, desc: "Flowable 流程定义 id（set_main 后回填）" }
+      processId:           { type: string, desc: "本地拼 'ITSC'+definitionId，BPMN 内部 process id" }
+      stageSetting:        { type: array, desc: "阶段配置（relation 存储，每项 {name,userTaskIds[]}）" }
+    relations:
+      - { to: itsm_process_definition, type: association, cardinality: "N:1", desc: "版本隶属一个流程定义" }
+      - { to: itsm_process_form, type: association, cardinality: "1:N", desc: "每节点一条表单关系 ITSC_PROCESS_FORM_RELATION" }
+    side_effects:
+      - op: process_version.create
+        rule: "POST /v2/process_definition/:definitionId 建版本（bpmnXML/versionName/state/processSetting 必填）。versionId CMDB 生成。baseVersionId 传则克隆【表单关系+阶段设置】（不克隆 bpmnXML/processSetting，仍须 request 给）。cleanSetting 清掉引用不存在节点的配置。⚠️建版本不部署 Flowable——部署走 set_main（固有的部署语义）。【完整建流程链顺序 属编排知识，见 flows/build-process.yaml key_rule】"
+      - op: process_version.edit
+        rule: "PUT /v2/.../version/:versionId 改版本。⚠️done 版本拒绝编辑『当前版本已完成，不可修改！』——只能改 unfinished。要改 done 须 create+baseVersionId 派生新版本。"
+      - op: process_version.delete
+        rule: "路径 versionIds(复数分号)但只删第一个——批量是壳（service.go:1230-1231）。约束任一即拒(HTTP 412/400 ERR_FAILED_PRECONDITION)：①绑表单『当前流程已有绑定表单，不可删除!』(view.go:80) ②关联工单『有正在流转中的工单，不可删除!』(view.go:84) ③主版本+绑服务『当前流程已绑定了服务且当前是主版本，请先删除服务或设置其它主版本!』(view.go:75) ④被父/子流程引用『当前流程被引用，不可删除!』(view.go:78)。删完若 def 无版本→隐式级联删 def。【各约束解法+清理顺序+test 实测路径 属编排知识，见 flows/delete-process.yaml key_rule】"
+      - op: process_version.set_main
+        rule: "PUT /v1/.../version/:versionId 设主版本。⚠️须 state==done。旧主自动降级（MAIN_VERSION 关系覆盖）。触发 deployProcessAndModifyCMDB：上传 BPMN 到 Flowable 引擎（替换占位符 ITSC-PROCESS-ID/NAME）+ 回填 deploymentId/flowableDefinitionId。只有 set_main 才部署。运行中工单不受影响（走旧 deploymentId）。⚠️set_main 偶发 140500『获取流程定义版本详情失败』（瞬时，重试即好）。⚠️首次 done 自动设主不可靠——实测 isMain 未自动置 true，须显式 set_main。【完整建流程链顺序 属编排知识，见 flows/build-process.yaml】"
+    api_behavior:
+      processSetting_object_not_string: "🔴create/edit 的 processSetting 请求体须传【对象】——CMDB 存储态是 JSON 字符串（search/get 取回 str），但 API 请求传字符串报 json解析失败 readObjectStart: expect { or n（实测 2026-08-15 派生 1.0.2 时踩）。从旧版本搬运时 json.loads 再传"
+      get_param_order: "process_version.get 路径参数顺序 definitionId 在前、versionId 在后（/v2/definition/:defId/version/:verId）——URL 直觉相反易搞反，反了报 300305 instance 不存在（实测）"
+      get_may_not_return_setting: "get 端点可能不返 processSetting——fallback 从 CMDB _ITSC_PROCESS_VERSION search 取原始字段（fields 含 processSetting）"
+      bpmn_prefix_rewrite_ok: "relayout 算法输出会把前缀 bpmn2: 统一重写为 bpmn:（NS 注册表所致，URI 不变 XML 等价）——前端 bpmn-js 渲染正常，非损坏（实测 2026-08-15 .90 验证）"
+
+  itsm_process_bpmn:
+    description: |
+      BPMN 2.0 XML（流程图）—— 标准 BPMN（bpmn2: 命名空间）+ EasyOps 扩展（flowable: 命名空间属性挂 userTask 上）。
+      节点拓扑靠 incoming/outgoing 引用 sequenceFlow id；分支条件挂 sequenceFlow 上；会签/串签靠 multiInstanceLoopCharacteristics。
+      真实样例：internal/bpmn/xml/parser_test.go:26-258（含表单流转的完整图）/ converter_test.go:36-90（最全 userTask 属性）。
+    source: data/sources/backend/ITSM/flowable_service/internal/bpmn/{xml/parser.go,converter.go,validator.go,constants.go}
+    fields:
+      definitions: { type: string, desc: "<bpmn2:definitions xmlns:bpmn2=... xmlns:flowable=...> 根" }
+      process:     { type: string, desc: "<bpmn2:process id=...> 聚合 startEvent/endEvent/userTask/callActivity(子流程)/sequenceFlow/exclusiveGateway(排他)/inclusiveGateway(包容)/parallelGateway(并行)" }
+      userTask:    { type: string, desc: "<bpmn2:userTask id='Activity_xxx' name='审批' flowable:assignee='...' flowable:handling='directly' ...>——节点配置全在 flowable:扩展属性。见下方属性全集" }
+      sequenceFlow: { type: string, desc: "<bpmn2:sequenceFlow sourceRef targetRef><bpmn2:conditionExpression>${pass==1}</bpmn2:conditionExpression>——分支条件" }
+      multiInstance: { type: string, desc: "<multiInstanceLoopCharacteristics isSequential='false' flowable:collection='assigneeList'><completionCondition>${nrOfCompletedInstances/nrOfInstances>=0.6}</completionCondition>——会签(false)/串签(true) + 通过比例" }
+    constraints:
+      - "userTask 全部 flowable:扩展属性（converter_test.go:64 真实样例）：isFormDecision(0/1) | strategy(emptyAssign等) | script=[JSON前后置脚本] | handling(directly/send_directly/claim_directly/send_claim_directly) | assignee(占位符或指定用户) | assigneeValue | assigneeType | assigneeList(;分隔会签) | assigneeGroup | subsequentConf=[JSON下节点审批人] | operationConf=[JSON操作候选人] | suspendConf | memoLevel(-1隐藏/0非必填/1必填) | suspendTimeLimit | triggerIdList | setAssignee(true/false) | opsAllowed(;分隔done;assignee;cc) | formExpressionName(表单决定流转变量映射) | jumpableNodes"
+      - "userTaskId = BPMN <userTask id> = processSetting.nodeSettings[].userTaskId（join 锚，def_version.go:249-268 getNodeList）"
+      - "校验 11 项（validator.go:302-314 ValidateProcessV2）：孤立节点/表达式正则/必须1个startEvent+≥1endEvent+≥1userTask/包容网关前节点须isFormDecision=1/userTaskId正则^[a-zA-Z][a-zA-Z0-9_]+$且唯一/子流程不接start网关/空跳过不接多分支网关/排他包容网关后不接endEvent/并行包容后子流程不引用同流程"
+      - "分支条件正则（validator.go:15）：ConditionExpressionRegexp=\\$\\{(.*)\\}，须形如 ${pass==1}"
+      - "表达式解析 GetProcessVariable（converter.go:17-40）：isFormDecision=0 只能 ==（拆 Name/Value）；isFormDecision=1 整表达式作 Value，支持复杂（pass>=1&&pass<=100 / (pass==-1||pass==1)&&key=='a'）"
+      - |
+        ⚠️【从零构建可部署 BPMN 的完整方法】（实测版本 2.1.0 端到端验证：5节点+网关+表单决定流转+驳回，部署成功 flowableDefinitionId=ITSC<pdid>:5:<hex>）：
+        ① <bpmn2:definitions> 含：xmlns:bpmn2/xsi/bpmndi/dc/di/flowable 命名空间 + id="sample-diagram" + 【targetNamespace="http://bpmn.io/schema/bpmn"】+ 【xsi:schemaLocation="http://www.omg.org/spec/BPMN/20100524/MODEL BPMN20.xsd"】（后两个 flowable schema 校验必需，缺则 140200）
+        ② <bpmn2:process id="ITSC-PROCESS-ID" name="ITSC-PROCESS-NAME" isExecutable="true">（占位符+isExecutable 必须有！）
+        ③ <bpmn2:userTask> V2 只保留核心 flowable:属性：assignee(+assigneeValue/assigneeType/assigneeList/assigneeGroup)+strategy+handling+isFormDecision+formExpressionName。⚠️opsAllowed/setAssignee/subsequentConf/operationConf/suspendConf/memoLevel 等 V2 全放 processSetting.nodeSettings，XML 里不写（写了被忽略，且老属性全集可能导致复杂流程部署失败）
+        ④ <bpmn2:sequenceFlow> 连接节点；分支条件用 <bpmn2:conditionExpression xsi:type="bpmn2:tFormalExpression"> 表达式 </bpmn2:conditionExpression>
+        ⑤ 条件表达式格式：整个表达式包在 ${} 内——非表单决策 `${变量==值}`（如 ${pass==1}）；表单决策(isFormDecision=1上游) `${变量=='值'}`（如 ${resourceType=='pm']}，全在${}内，字符串单引号）
+        ⑥ formExpressionName = `变量名:userTaskId.containId.index.componentId.valueField`（jsonPath 格式，如 resourceType:Task_leader.c_base.0.hostType.value）。⚠️不是 modelField 短名——后端 step/manager.go:1107-1137 按 . 拆路径解析：[0]=userTaskId [1]=containId [2]=index(跳过) [3]=componentId [4]=valueField
+        ⑦ 📌BPMNDI 不手构——LLM 只产纯语义 XML，坐标调 formats/bpmn-kit/relayout.py 的 relayout_xml() 自动算（Dagre LR：分层+重心排序+正交折线+绕行通道；语义零改动实测 .90 前端正常。生成即优化，见 flows/build-process.yaml step2 / 存量补救 flows/relayout-process-diagram.yaml）。DI 结构要求（BPMNPlane+Shape/BPMNLabel/dc:Bounds/Edge di:waypoint）由算法保证，无须记忆
+        ⑧ processSetting.nodeSettings 配 rejectNodes/allowedOps/scriptSettings 等（驳回靠 rejectNodes 不画反向 sequenceFlow）
+        ⑨ 【布局质量原则（历史手调经验，现已由 relayout 算法承接）】：横平竖直零斜线/最少转角（1-2段）/连线不穿节点不交叉/网关分支从中心辐射/主流程贯通成轴。算法未覆盖的边界形态（并行网关/子流程展开）可参照此原则手调。反例警示（v2.6.0 自动生成）：4-6 段 U 型绕路、斜线分支——视觉混乱，勿复制。
+        多个 end 可合并为一个 endEvent（多入边），贴原版拓扑且布局更整。
+        BPMN 合规要点（bpmnlint 27条精华）：节点名≤20字且不重名/必须1个startEvent+≥1endEvent+≥1userTask/节点全连通/网关不直连网关/排他包容网关后不接endEvent/userTaskId正则^[a-zA-Z][a-zA-Z0-9_]+$。V2 userTask XML 只保留 id/name/assignee(+Value/Type/List/Group)/strategy/handling/isFormDecision/formExpressionName——opsAllowed/setAssignee/subsequentConf/operationConf/suspendConf/memoLevel 全放 processSetting.nodeSettings（XML写了被忽略）。完整 nodeSettings 结构示例：{userTaskId,memoLevel(-1隐藏/0非必填/1必填),allowedOps[],rejectNodes["节点id:线名"],triggerIdList[],candidateSettings[{operation,candidates[],dataSource}],nextAssigneeSetting{enabled,nextAssignees[{userTaskId,label,candidates,dataSource}]},scriptSettings{preScript:{name,desc,scriptIdList[],operations[],isAsync},postScript:{...}},suspendSetting{isAutoActivate,activateTime(小时)}}。
+
+  itsm_process_node_setting:
+    description: |
+      节点配置 NodeSetting（processSetting.nodeSettings[]，按 userTaskId 关联 BPMN 节点）。每节点一套：审批人/审批方法/脚本/驳回/自动化/操作权限/文案。
+      真实样例：抓现成流程 taskInfo[] + internal/bpmn/converter_test.go。
+    source: data/sources/backend/ITSM/flowable_service/internal/models/def_version.go:350-364
+    fields:
+      userTaskId:        { type: string, desc: "对应 BPMN <userTask id>" }
+      assignType:        { type: string, desc: "指派类型 single(单签)/assigneeList(会签，legacy)" }
+      handling:          { type: string, enum: [directly, send_directly, claim_directly, send_claim_directly], desc: "处理方式：directly直接/send_directly先派单/claim_directly先认领/send_claim_directly派单+认领" }
+      presetAssigneeConf: { type: object, ref: itsm_process_assignee, desc: "审批人（后端按 userType 回查 name 的展示视图；真正来源在 BPMN flowable:assignee）" }
+      allowedOps:        { type: array, items: string, desc: "节点允许的操作按钮。取值：assignee(审批处理)/distribute(派单)/claim(认领)/withdraw(撤回)/cc(抄送)/SLAChange(SLA变更,首节点默认)/close(关单)/add(加签)。⚠️done(通过)+convert(工单转换)默认开启不在列表配。V2 在 nodeSettings 配（非 BPMN XML）" }
+      memoLevel:         { type: integer, enum: [-1, 0, 1], desc: "审批意见级别 -1隐藏/0非必填/1必填" }
+      rejectNodes:       { type: array, items: string, desc: "可驳回/跳回的目标节点。格式 `节点id:线名`（如 Task_apply:驳回修改）。⚠️驳回是运行时动态跳转，靠此字段声明，bpmnXML 不画反向 sequenceFlow（画了反而不对）。目标节点id须图中存在否则被 cleanSetting 清洗" }
+      scriptSettings:    { type: object, ref: itsm_process_script, desc: "前后置脚本 {PreScript,PostScript}" }
+      autoSetting:       { type: object, ref: itsm_process_auto_node, desc: "自动化节点（绑 autoops 工具）" }
+      nextAssigneeSetting: { type: object, desc: "允许本节点设下节点审批人；细粒度配在 BPMN subsequentConf" }
+      autoCCSetting:     { type: object, desc: "自动分阅设置" }
+      holidayHandleConf: { type: object, desc: "节假日处理" }
+      isFormDecision:    { type: string, enum: ["0", "1"], desc: "0否/1由表单决定多分支流转（配 formExpressionName）" }
+      formExpressionName: { type: string, ref: itsm_process_form_flow, desc: "表单决定流转的变量映射 DSL" }
+      buttonSetting:     { type: array, desc: "按钮配置" }
+      revokeRoles:       { type: array, items: string, desc: "允许撤销角色 admin/svcOwner/creator" }
+      cancelRoles:       { type: array, items: string, desc: "允许作废角色" }
+
+  itsm_process_assignee:
+    description: |
+      审批人体系。BPMN flowable:assignee 写【占位符】→ 解析映射 userType（converter.go:266-323 parseAssignee，constants.go:5-29）。
+      presetAssigneeConf 是后端按 userType 实时回查 name 拼的【展示视图】（manager.go:579-696），非输入配置——真正人员来源在 BPMN flowable:assignee*。
+      真实样例：converter_test.go:25,43,69（指定用户/会签）。
+    source: data/sources/backend/ITSM/flowable_service/internal/bpmn/converter.go:266-323
+    fields:
+      userType:        { type: string, enum: [loginUser, lastExec, lastExecLeader, historyExec, historyExecLeader, dutyGroup, dutyGroupV2, formValue, userRule, userTree, department, specifyUser], desc: "审批人类型。占位符映射：{{.loginUser}}提单人/{{.lastExec}}上一步执行人/{{.lastExecLeader}}其直属领导/{{.historyExec}}历史节点处理人/{{.historyExecLeader}}其领导/{{.dutyGroup}}老值班组/{{.dutyGroupV2}}新值班组/{{.formValue}}来源表单/{{.userRule}}人员规则/{{.userTree}}人员树/{{.department}}部门；非占位符(如easyops)=specifyUser 指定用户" }
+      assigneeValue:   { type: string, desc: "配置值：historyExec/dutyGroup=instanceId；userTree=;分隔用户名；department=部门id；userRule=规则JSON；specifyUser 不用" }
+      assignee:        { type: string, desc: "单签指定用户名（specifyUser）；会签写 ${assignee}（flowable 多实例 elementVariable）" }
+      assigneeListUser: { type: array, items: string, desc: "会签用户名列表（;分隔于 BPMN assigneeList，配 multiInstanceLoopCharacteristics）" }
+      assigneeGroups:  { type: array, items: string, desc: "用户组列表" }
+    constraints:
+      - "presetAssigneeConf 展示视图：specifyUser→{userList[{username,nickname}],userGroupList[{groupname,groupId}]}；userTree→userList；historyExec→{historyExec{userTaskId,userTaskName}}；dutyGroup/dutyGroupV2→{dutyGroup{...}}"
+
+  itsm_process_script:
+    description: |
+      节点前后置脚本（BPMN flowable:script=[JSON]，转 NodeSetting.scriptSettings）+ 表单生命周期脚本。
+      脚本=引用预注册 EasyOps 工具(toolId, python)，schema 只存 toolId+映射。ScriptType: pre=前置/rear=后置。
+      ⚠️ 注入 orderInfo（工单全上下文，JSON 字符串）+ loginUser/formData。
+      真实样例：converter_test.go:25 flowable:script=[{scriptType:'pre',...}]；orderInfo JSON 样例 process_script_service_test.go:1485。
+    source: data/sources/backend/ITSM/flowable_service/internal/process_script/process_script_service.go:360-380
+    fields:
+      hook:    { type: string, enum: [pre, rear, afterDataLoad, preSubmitCheck, onValueChange, componentLoad, instSelect], desc: "pre=节点前置(提交前)/rear=后置(完成后)；afterDataLoad/preSubmitCheck/onValueChange/componentLoad/instSelect=表单生命周期" }
+      toolIds: { type: array, items: string, desc: "EasyOps 工具 id 列表（autoops_tool.toolId）" }
+      opMode:  { type: string, enum: [sync, async], desc: "同步/异步" }
+      inputs:  { type: array, items: string, desc: "注入：节点脚本 [orderInfo,loginUser,action,scriptType]；表单脚本 [orderInfo,loginUser,eventSource,args,formData]。orderInfo 是 JSON 字符串注入（非 struct）" }
+      output:  { type: any, desc: "按事件：afterDataLoad/onValueChange→formData+可选formConfig/ticketName；preSubmitCheck→checkState|submitCheck；componentLoad→result；失败含 raise→raise 值当 error 抛" }
+    constraints:
+        orderInfo 结构（order_info.pb.go 实测归纳，全量字段）：
+        顶层：instanceId(步骤id≠工单id)/userTaskId/taskName/status/action/formData(字符串)/variables[]/processInstance{instanceId,orderNum,name,creator,category,status}/process{instanceId,name,category}/processVersion{instanceId,versionName,bpmnXML,isJumpable}/stepList[](每步简报含 formData)/nodeList[](节点定义+配置)/finishedStepList[](已完成步骤id)/userInfoMap{用户名:显示名}/stepOperationRecord[]。
+        ⚠️formData 是三重 JSON：orderInfo(字符串)→json.loads→dict→dict["formData"](字符串)→json.loads→list[{key:容器key, values:[行...]}]→行内{modelField:值}。
+        ⚠️formData 解析后是【list 按 container key 分段】不是扁平 dict：[{key:"c_base",values:[{hostType:{key,label,value},reason:"xxx"}]}]。
+        SELECT/RADIO/CHECKBOX 值是 {key,label,value} 对象取 .value；INPUT/NUMBERINPUT/SWITCH 是裸值。
+        table 容器 values 多行；row 容器 values 通常 1 行。
+        历史节点表单取数：order["stepList"] 遍历找 userTaskId+status=done→该步 formData（也是三重 JSON）。
+        首节点无 orderInfo（工单未建）；判断工单终止须同时看 status+isSuspended/isCancelled/isDelete。
+      - "场景：前置脚本(pre)=节点提交前校验/预处理（能拿本次 formData）；后置脚本(rear)=节点完成后联动（通知/自动化）"
+      - "表单实例选择控件脚本不注入 orderInfo（process_script_service.go:152）"
+      - |
+        ⚠️scriptSettings.operations 取【原始 itemID】（不是 allowedOps 重映射值）：pass(通过)/reject(退回)/withdraw(撤回)/claim(认领)/jump(直达)/assignee(转派)/distribute(派单)/cc(抄送)/add(加签)/add_reject(加签退回)。⚠️"通过时触发脚本"配 ["pass"] 不是 ["done"]（done 是 allowedOps 重映射值，不是合法 operations）。多选——脚本在勾选的任一操作时执行。
+      - "同步(isAsync=false)：线性执行，前置脚本失败阻断节点动作（关键数据写入/处理人决策用同步）；异步(isAsync=true)：忽略异常逐个触发，不阻断（通知/日志用异步）。⚠️避免前置+异步用于关键数据写入"
+      - "scriptIdList 为空=未配置（服务端 len==0 直接忽略）。多工具按顺序执行副作用（不消费返回值）"
+
+  itsm_process_form_flow:
+    description: |
+      【表单决定流转】三层机制——决定 sequenceFlow 走哪条线。⚠️和表单 displayCondition #{容器.控件}【不是同一套】（语法/求值方/对象都不同）。
+      真实样例：parser_test.go:69,76,85 conditionExpression ${pass==1}；step/manager.go:1107-1137 formExpressionName 解析。
+    source: data/sources/backend/ITSM/flowable_service/internal/process/{step/manager.go,expression/validate.go} + internal/bpmn/converter.go:17-40
+    fields:
+      conditionExpression: { type: string, desc: "BPMN <sequenceFlow><conditionExpression>${表达式}</conditionExpression>。isFormDecision=0 只能 ==（如 ${pass==1}）；isFormDecision=1 支持复杂（${pass>=1&&pass<=100}）" }
+      isFormDecision:      { type: string, enum: ["0", "1"], desc: "BPMN userTask flowable:isFormDecision。1=由表单决定多分支" }
+      formExpressionName:  { type: string, desc: "BPMN userTask flowable:formExpressionName。变量映射 DSL：'变量名:userTaskId.containId.index.componentId[.valueField]'，多变量;分隔。运行时按此从表单取控件值赋给变量名（如 pass）" }
+    constraints:
+      - "求值用 govaluate 库（expression/validate.go:87），支持自定义函数 containsAny；formatExp 去 variables: 前缀+数字去引号；variables 自动转 int/float"
+      - "分支匹配 GetMatchedNextOps（step/manager.go:567-592）：非表单决定比 name==value；表单决定对每出边 ValidateValue(expr,variables) 求值"
+      - "formExpressionName DSL 铁证（step/manager.go:1107-1137）：'pass:Activity_178mit1.h8w9ylt2i1.0.h8w9ylt2i2.value;passKey:Activity_178mit1.h8w9ylt2i1.0.h8w9ylt2i2'——按.拆 [0]userTaskId [1]containId [2]index(跳过) [3]componentId [4]valueField?；调 composer.GetFormValueByComponentId 取表单控件值"
+      - "⚠️ vs 表单 displayCondition：流转 ${...} 后端 govaluate 求值决定走哪线；displayCondition #{...} 前端求值决定控件显隐。两者独立"
+      - "LineSetting.flowConfig：后端零构造零解析纯透传（service.go:1439），真实取值【待捕获】"
+
+  itsm_process_auto_node:
+    description: 自动化节点（NodeSetting.autoSetting）—— 节点自动执行 AutoOps 工具（非人工审批）。
+    source: data/sources/backend/ITSM/flowable_service/internal/auto_node/{interfaces.go,manager.go,components.go}
+    fields:
+      enabled:        { type: bool, desc: "是否启用" }
+      actionExecutionSetting: { type: object, desc: "{actionType}：TimeTypeImmediately 立即 / 延时类 CalculateExecutionTime" }
+      toolSetting:    { type: object, desc: "{toolId(绑 autoops 工具), toolArgs[]:{key, fixedValue|formValueConfig{userTaskId,containId,componentId,field}}}" }
+      exceptionNotice: { type: object, desc: "{method[email等], subject, content, receivers{userNames[],userGroupIds[]}}——执行失败通知" }
+
+  itsm_process_form:
+    description: 流程版本↔表单绑定（ITSC_PROCESS_FORM_RELATION）—— 表单绑到【节点】(userTaskId)非版本；每节点一条关系。
+    source: data/sources/backend/ITSM/flowable_service/process_definition_version/process_definition_version_service.go:511-636
+    api: process_form
+    fields:
+      versionId:             { type: string, anchor: true, desc: "流程版本 id" }
+      userTaskId:            { type: string, required: true, desc: "BPMN 节点 id（表单绑到节点）" }
+      formId:                { type: string, ref: itsm_form, desc: "老表单 form schema id（useFormBuilder=false）" }
+      useFormBuilder:        { type: bool, desc: "true=fbFormId 体系；false=formId+formSchemaVersion" }
+      formRelationInstanceId: { type: string, desc: "关系实例 id（空=没绑/非空=已绑）" }
+    side_effects:
+      - op: process_form.set
+        rule: "按 formRelationInstanceId+formId 组合 4 动作：①都空=无操作 ②relId空+formId非空=绑定 ③relId非空+formId空=解绑 ④都非空=换绑。useFormBuilder=false 时后端默认取表单【主版本】绑（service.go:593,604）。"
+
+  # ---------- ITSM 服务实例（service_instance）----------
+  itsm_service_instance:
+    description: ITSM 服务实例（服务目录条目）—— 用户在 ITSM 前端选服务发起工单；每个服务关联一个流程定义（associatedProcess）。CRUD 全在 /v1/service_instance。
+    source: data/sources/backend/ITSM/flowable_service/service_catalog/service_catalog_service.go
+    api: service_instance
+    fields:
+      instanceId:          { type: string, anchor: true, desc: "服务实例 id（13 hex，CMDB 生成）" }
+      name:                { type: string, required: true, desc: "服务名称" }
+      category:            { type: string, required: true, desc: "分类（点分多级，如 服务请求.请求目录 / 事件管理）" }
+      associatedProcess:   { type: string, required: true, ref: itsm_process_definition, desc: "关联流程定义 instanceId（服务绑定的流程）" }
+      catalogId:           { type: string, desc: "所在目录实例 id（服务目录树的位置）" }
+      owner:               { type: string, desc: "负责人用户名" }
+      description:         { type: string, desc: "服务说明" }
+      guide:               { type: string, desc: "服务指引" }
+      status:              { type: string, enum: [enabled, disabled], desc: "是否启用" }
+      builtIn:             { type: bool, desc: "是否内置服务（不可删）" }
+      url:                 { type: string, desc: "自定义 URL" }
+      iconColor:           { type: string, desc: "图标颜色" }
+      triggerIdList:       { type: array, items: string, desc: "触发器 id 列表" }
+      slaRuleId:           { type: string, desc: "SLA 规则 id" }
+    relations:
+      - { to: itsm_process_definition, type: association, cardinality: "N:1", via: associatedProcess, desc: "服务关联一个流程定义" }
+      - { to: itsm_sla, type: association, cardinality: "N:1", via: "sla_config.slaConfig[].slaId", desc: "服务绑定的 SLA 规则（inst 模式 1 个）。⚠️绑定关系存于独立端点 sla_config（非 slaRuleId 字段），见 api_behavior.bind_sla_via_subpath" }
+    api_behavior:
+      bind_sla_via_subpath: "⚠️绑 SLA 到服务走【独立子路径端点】PUT /v1/service_instance/{instanceId}/sla_config（SetServiceSLAConfig，manager.go:559），body={scope, slaConfig:[{userTaskId, slaId}]}。**不是** service_instance.edit——edit body 不接受 slaRuleId 字段，实测传了也被静默忽略（code:0 但不落库）。源码：service_catalog/route.go 注册 PUT.../sla_config；validator api_validator.go:948 ValidateSetServiceSLAConfig。"
+      slaRuleId_field_dead: "service_instance.get 返回的 slaRuleId 字段实测【恒为 null】（CMDB 透传字段，未被 sla_config 端点填充）——查服务绑了哪个 SLA 用 get_sla_config 端点，别看 slaRuleId。"
+      inst_single_sla: "scope=inst（工单级）只允许绑 1 个 SLA（manager.go:560『服务模式下,只允许绑定一个sla协议』）；scope=step（任务节点级）可按 userTaskId 绑多个。解绑传 slaConfig:[]。e2e 实测 2026-08-12。"
+    side_effects:
+      - op: service_instance.create
+        rule: "POST /v1/service_instance。必填 name/category/associatedProcess。catalogId 指定目录位置；owner 指定负责人。instanceId CMDB 生成返回。"
+      - op: service_instance.set_sla_config
+        rule: "PUT /v1/service_instance/{instanceId}/sla_config 绑/解 SLA。body={scope(inst|step), slaConfig:[{userTaskId, slaId}]}。inst 只许 1 条；空数组=解绑。⚠️这是绑 SLA 的正确端点（非 edit，见 api_behavior.bind_sla_via_subpath）。底层 manager.go:567 写 CMDB 的 slaConfig + ITSC_SLA_RULE 两个字段。"
+      - op: service_instance.delete
+        rule: "有工单在流转时拒绝（『服务尚有工单正在流转中,不允许删除』）——须先删完该服务所有工单。内置服务（builtIn=true）不可删。源码 service_catalog_service.go:1450-1460 CheckServiceRemovable。"
+
+  # ---------- ITSM 工单实例（ticket/process_instance）----------
+  itsm_ticket:
+    description: ITSM 工单实例（运行中的流程实例）。发起工单走前端（表单渲染+生命周期脚本），API 只管 list/delete/state/export。状态三态 running/done/closed + 布尔标记 isSuspended/isCancelled。
+    source: data/sources/backend/ITSM/flowable_service/process_instance/
+    api: ticket
+    fields:
+      instanceId:    { type: string, anchor: true, desc: "工单 id（13 hex）" }
+      orderNum:      { type: string, desc: "工单号（如 ITSC-20260811-001）" }
+      name:          { type: string, desc: "工单名称" }
+      status:        { type: string, enum: [running, done, closed], desc: "工单状态" }
+      isSuspended:   { type: bool, desc: "是否挂起（仅 running 可挂起）" }
+      isCancelled:   { type: bool, desc: "是否作废（仅作废的工单可删）" }
+      creator:       { type: string, desc: "发起人" }
+      ctime:         { type: string, desc: "创建时间" }
+      serviceId:     { type: string, ref: itsm_service_instance, desc: "关联服务实例 id" }
+      serviceCategory: { type: string, desc: "服务分类 change/event/req/question/release" }
+    relations:
+      - { to: itsm_service_instance, type: association, cardinality: "N:1", via: serviceId, desc: "工单从服务发起" }
+      - { to: itsm_process_definition, type: association, cardinality: "N:1", desc: "工单走某流程定义" }
+    side_effects:
+      - op: ticket.list
+        rule: "POST /v4/process_instance_filter 高级搜索。body 含 filter(standard_fields/process_fields)+Q模糊+status/creator/serviceCategory 精确。token 翻页（nextToken）。返回 ProcessInstanceBasic[]+total。"
+      - op: ticket.set_state
+        rule: "PUT /v1/process_instance_state 批量状态变更。action=suspend(仅running)/activate(仅suspended)/cancel(仅running)。⚠️只有 running 的工单能挂起；只有作废(isCancelled)的能删除。"
+      - op: ticket.delete
+        rule: "DELETE /v1/process_instance/:instanceIds。⚠️状态机：只有作废(isCancelled)的工单才能删除（running/done/closed 拒删）。instanceIds 分号分隔。【以下属编排知识，暂存此处待建 flow：running/done/closed 须先 ticket.set_state cancel 再 delete】"
+      - op: ticket.export_excel
+        rule: "POST /v1/file/batch/ticket/excel_export。ticketIds JSON 数组；fields 空用服务默认导出配置。返回二进制 Excel 流。⚠️导出权限与工单状态/可见范围相关：done 工单可能报 permission denied（非 API 格式问题）。【以下属编排知识，暂存此处待建 flow：哪些状态/角色的工单能导出、失败后如何排查】"
+
+  # ---------- ITSM 服务目录（service_catalog）----------
+  itsm_service_catalog:
+    description: ITSM 服务目录树节点——服务实例的容器。一级目录（事件管理/服务请求/...）+ 子目录。服务实例挂在目录下。CRUD 全在 /v1/service_catalog。
+    source: data/sources/backend/ITSM/flowable_service/service_catalog/service_catalog_service.go + internal/cmdb_service/service_catalog/manager.go
+    api: service_catalog
+    fields:
+      instanceId:    { type: string, anchor: true, desc: "目录 id（13 hex）" }
+      name:          { type: string, required: true, desc: "目录名称（同父下唯一）" }
+      parentId:      { type: string, desc: "父目录 id（空=一级目录）" }
+      description:   { type: string, desc: "目录描述" }
+      builtIn:       { type: bool, desc: "是否内置目录（不可删）" }
+      url:           { type: string, desc: "自定义 URL" }
+      isTargetBlank: { type: boolean, desc: "URL 新窗口打开" }
+    relations:
+      - { to: itsm_service_catalog, type: composition, cardinality: "1:N", via: parentId, desc: "目录有子目录（递归树）" }
+      - { to: itsm_service_instance, type: composition, cardinality: "1:N", desc: "目录包含服务实例" }
+    side_effects:
+      - op: service_catalog.create
+        rule: "POST /v1/service_catalog。parentID 指定父目录（空=一级）；name 同父下唯一校验（IsDuplicated）。instanceId CMDB 生成返回。"
+      - op: service_catalog.delete
+        rule: "DELETE /v1/service_catalog/:instanceId。⚠️两层约束（manager.go:243 CheckCatalogRemovable）：①builtIn=true→『服务目录为内置，不允许删除』；②目录下有服务实例→『服务目录下存在服务实例，不允许删除』——须先迁移或删除子服务。"
+      - op: service_catalog.set_permission
+        rule: "POST /v1/set_catalog_permission。modifyUserList 自动获得 read 权限（去重合并到 readUserList）。权限沿树传播：授 read 须授所有祖先；取消 read 须取消所有子孙。"
+
+  # ---------- ITSM 默认常用服务（common_service）----------
+  itsm_common_service:
+    description: ITSM 默认常用服务——前端门户的"常用服务"快捷入口配置。每条含名称/排序/关联服务/可见用户组。
+    source: data/api-doc/itsm-service_instance.xlsx（DefaultCommonService 5 接口）
+    api: common_service
+    fields:
+      instanceId:     { type: string, anchor: true, desc: "常用服务条目 id" }
+      name:           { type: string, required: true, desc: "名称" }
+      priority:       { type: integer, desc: "排序权重，默认 0" }
+      userGroups:     { type: array, items: string, desc: "可见用户组列表" }
+      commonServices: { type: array, items: string, ref: itsm_service_instance, desc: "关联的服务实例 id 列表" }
+    relations:
+      - { to: itsm_service_instance, type: association, cardinality: "N:N", via: commonServices, desc: "常用服务关联多个服务实例" }
+
+  # ---------- ITSM 触发器（trigger）----------
+  itsm_trigger:
+    description: ITSM 触发器——绑定流程/任务事件（event）到动作列表（config.actionList）。被服务实例/流程节点引用。CRUD 在 /v1/trigger（8134 flowable_service）。⚠️event/scope/action 的完整合法值见 api_behavior.trigger_enums（来自枚举接口，非自由文本）。
+    source: data/api-doc/itsm-trigger.xlsx + trigger/validators/request_validate_trees.go:15,35 + 枚举接口 GET /api/flowable_service/v1/enums/trigger_enums（trigger_service.go:99 GetTriggerEnums）
+    api: trigger
+    fields:
+      instanceId:    { type: string, anchor: true, desc: "触发器 id（13 hex，正则 ^[0-9a-z]{13}$，validator request_validate_trees.go:35）" }
+      name:          { type: string, required: true, desc: "触发器名" }
+      scope:         { type: string, required: true, desc: "作用域=triggerEvent.kind.key。合法值见 api_behavior.trigger_enums（process_instance/process_task/service_instance/scheduler_ticket/process_instance_sla/process_task_sla）。⚠️event 必须属于该 scope（scope→event 是树结构）" }
+      status:        { type: string, required: true, enum: [enabled, disabled], desc: "启用状态" }
+      event:         { type: string, required: true, desc: "触发事件=triggerEvent.children[].key，随 scope 变化（process_task.todo/process_instance.start/service_instance.enabled 等）。完整 scope→event 映射见 api_behavior.trigger_enums" }
+      config:        { type: object, required: true, desc: "动作配置 {actionList:[{name, args, condition}]}。name 取值见 api_behavior.trigger_actions（send_message/update_process_instance_status/update_priority/update_service_status/update_process_task_status/exec_tool）。args 结构随 name 变化（send_message→{notifyPolicyId,notifyInterval,notifyTimes}；exec_tool→{toolId,...}；update_*→对应字段）。condition 用 trigger_condition_variables 的变量名组表达式（可选）" }
+      memo:          { type: string, desc: "备注" }
+      domainModelId: { type: string, desc: "关联领域模型 id（13 hex，validator request_validate_trees.go:15 正则 ^[0-9a-z]{13}$，可选）" }
+      creator:       { type: string, desc: "创建者（系统自带为 defaultUser）" }
+    relations:
+      - { to: itsm_notify_policy, type: association, cardinality: "N:N", via: "config.actionList[].args.notifyPolicyId", desc: "触发器动作引用通知策略（send_message 的 notifyPolicyId）" }
+    api_behavior:
+      trigger_enums: |
+        权威源：GET /api/flowable_service/v1/enums/trigger_enums（trigger_service.go:99）。scope→event 树（event 必须属于所选 scope）：
+        • process_instance（工单信号，11 events）: start/finish/suspend/supervise/activate/cancel/close/revoke/comment/urge/common
+        • process_task（工单任务信号，13 events）: todo/pass/reject/jump/withdraw/assign/distribute/cc/cc_read/add/add_reject/claim/common
+        • service_instance（服务信号，2 events）: enabled/disabled
+        • scheduler_ticket（定时工单信号，0 events）
+        • process_instance_sla（SLA服务协议，2 events）: warning/timeout
+        • process_task_sla（SLA服务协议，4 events）: answer_warning/answer_timeout/done_warning/done_timeout
+      trigger_actions: |
+        config.actionList[].name 合法值（6 种，枚举接口 triggerAction）：
+        • send_message（发送通知消息）→ args={notifyPolicyId(→notify_policy), notifyInterval(如5m), notifyTimes}
+        • update_process_instance_status（修改工单状态）→ args=状态相关
+        • update_priority（修改优先级）→ args=优先级相关
+        • update_service_status（修改服务状态）→ args=服务状态相关
+        • update_process_task_status（修改任务状态）→ args=任务状态相关
+        • exec_tool（执行工具）→ args={toolId(→autoops tool), ...}（跨 system→easyops-autoops）
+        ⚠️各 action 的 args 完整字段需查对应 action handler 或前端配置器；此处只确认 name 枚举 + send_message 的 args（实测样例）。
+      trigger_condition_variables: |
+        config.actionList[].condition 可用的变量（枚举接口 triggerConditionVariable，11 个）：process_instance_name/creator/urgency/influence_scope/priority/service_category/curr_assignee/status_change/priority_change/process_task_status_change/service_status_change。条件表达式语法（布尔/比较运算符细节）属前端解释型 DSL，API 透传不校验——gap：具体表达式语法需前端配置器或 designer 产物确认。
+    side_effects:
+      - op: trigger.create
+        rule: "POST /v1/trigger。name/scope/status/event/config 必填（validator request_validate_trees.go:15）。instanceId CMDB 生成返回。建触发器前通常先有 notify_policy（send_message 引用其 id）。"
+      - op: trigger.update
+        rule: "PUT /v1/trigger/:triggerId 全量覆盖。triggerId 正则 ^[0-9a-z]{13}$（validator request_validate_trees.go:35）。"
+      - op: trigger.delete
+        rule: "DELETE /v1/trigger/:triggerIds。triggerIds 走 path 分号分隔批量。系统自带（defaultUser 建）触发器勿删。"
+
+  # ---------- ITSM 通知策略（notify_policy）----------
+  itsm_notify_policy:
+    description: ITSM 通知策略——「信号(triggerSignal)→通知谁(notifyRange)→怎么发(notifyMode)→发什么(content)」。被 trigger 经 notifyPolicyId 引用。CRUD 在 /api/itsc_trigger/v1/notify_policy（⚠️前缀 itsc_trigger 非 flowable_service，但仍 8134 端口）。⚠️notifyType/triggerSignal/notifyRange/content变量 的合法值见 api_behavior（来自 fixtures rawSetting + 枚举接口，非自由文本）。
+    source: data/api-doc/itsm-notify_policy.xlsx + notify_policy/{route.go:7-14, validators/api_validator.go:75-99, fixtures/notify_setting.go:9 rawSetting（全量枚举权威源）} + 枚举接口 GET /api/itsc_trigger/v1/notify_type
+    api: notify_policy
+    fields:
+      instanceId:    { type: string, anchor: true, desc: "通知策略 id（13 hex，update 正则 ^[0-9a-z]{13}$，validator request_validate_trees.go:43）" }
+      name:          { type: string, required: true, desc: "策略名" }
+      notifyType:    { type: string, required: true, desc: "通知类型。合法值见 api_behavior.notify_enums（process_instance/process_task/service_instance/duty_shift_change）。⚠️triggerSignal/content变量 都随 notifyType 变化" }
+      triggerSignal: { type: string, required: true, desc: "触发信号。合法值随 notifyType 变化（非全局枚举），见 api_behavior.notify_enums 的 notifyType→signal 映射" }
+      notifyRange:   { type: array, items: string, required: true, desc: "通知范围。合法值随 triggerSignal 变化，见 api_behavior.notify_enums（creator/todo_user/oper_user/permission_operator/curr_operator/supervisor/custom_user/all/cc_user 等；duty_shift 专属 hand_over_*/take_over_*）" }
+      notifyMode:    { type: array, items: string, required: true, desc: "通知渠道。⚠️fixtures 未列枚举，validator 仅校验非空——实测样例 [email]。完整渠道（短信/站内信/微信/钉钉？）gap：需前端配置器或 ListAllNotifyTypeV2 接口确认" }
+      content:       { type: string, required: true, desc: "通知正文模板。支持 ${var} 变量，可用变量随 notifyType 变化，见 api_behavior.notify_enums 的 variables 清单。后端透传前端解释（API 200 ≠ 变量替换正确）" }
+      subject:       { type: string, desc: "通知主题（推断同 content 支持变量，未在 fixtures 明确）" }
+      customUserGroup: { type: array, items: string, desc: "自定义通知用户组（notifyRange 含 custom_user 时填，引用用户组 id，跨域→user 系统）" }
+      builtin:       { type: bool, desc: "是否系统自带（勿动/勿删）" }
+      domainModel:   { type: string, desc: "领域模型（语义未深挖）" }
+    relations:
+      - { to: itsm_trigger, type: association, cardinality: "N:N", desc: "被触发器经 notifyPolicyId 反向引用" }
+    api_behavior:
+      path_prefix: "⚠️前缀 /api/itsc_trigger/v1（≠ flowable_service），但同在 8134 端口（route.go 注册在 flowable_service）"
+      delete_via_query: "delete 无 path param——instanceIds 走 query（validator ctx.BindQuery 证实，route.go:8），分号分隔。与 trigger/sla/duty_group 的 path 分号批量不同，易错。"
+      content_is_template: "content 是模板字符串，后端透传不校验结构——API 200 只表存下，前端渲染/变量替换是否正确需前端验证（onboarding 证据纪律规则2）。"
+      notify_enums: |
+        权威源：notify_policy/fixtures/notify_setting.go:9 rawSetting（全量）+ 枚举接口 GET /api/itsc_trigger/v1/notify_type。notifyType→triggerSignal→notifyRange 是三层映射（非独立枚举）：
+        • process_instance（工单信号）: 16 signals（start提交/finish完成/suspend挂起/supervise督办/activate重启/cancel作废/close关单/revoke撤销/comment评价/invite_comment邀请评价/priority_change优先级变更/warning预警SLA/timeout超时SLA/common通用/urge催办/delete删除）；range 含 creator/todo_user/oper_user/permission_operator/curr_operator/supervisor/custom_user；variables 11 个（${process_instance_id/name/number/creator/ctime/status} ${supervisor} ${action} ${service_name/catalog/category}）
+        • process_task（工单任务信号）: 18 signals（todo/pass/reject/jump/withdraw/assign/distribute/cc/cc_read/add/add_reject/claim/ack/answer_warning/answer_timeout/done_warning/done_timeout/common）；range 含 creator/todo_user/permission_operator/curr_operator/extra_assignee/cc_user/cc_creator/custom_user；variables 13 个（含 ${process_instance_step_name/id/operator/status}）
+        • service_instance（服务信号）: 3 signals（enabled/disabled/common）；range 含 all/permission_operator/custom_user；variables 4 个（${service_category/name/manager} ${action}）
+        • duty_shift_change（交接班信号）: 2 signals（handOver交班/takeOver接班）；range 含 hand_over_leader/hand_over_group/take_over_leader/take_over_group/custom_user；variables 9 个（${hand_over_leader/group/user} ${take_over_leader/group/user} ${shift_change_log_url} ${shift_change_time} ${duty_group_name}）
+        变量语法统一 ${var_name}。notifyRange 含 custom_user 时，填 customUserGroup 指定具体人员。
+
+  # ---------- ITSM 服务级别协议（sla）----------
+  itsm_sla:
+    description: ITSM SLA 规则——约定工单/任务节点在各级别（plan/common/priority/emergency）的达成时长。basicInfo=协议元信息；slaConfig[]=配置数组，每条 levelConfig[] 按 4 级别设 duration，workingCalendarId 引用 work_calendar（按时长计算剔除非工作时间）。CRUD 在 /v1/sla/rule（8134）。
+    source: data/api-doc/itsm-sla.xlsx + 实测 _search 样例（sla 658c21d6beda6）
+    api: sla
+    fields:
+      instanceId:        { type: string, anchor: true, desc: "SLA 规则 id（13 hex）" }
+      name:              { type: string, required: true, desc: "SLA 名（在 basicInfo 内）" }
+      status:            { type: string, enum: [enabled, disabled], desc: "启用状态" }
+      type:              { type: string, enum: [inst, step], desc: "inst=工单级 / step=任务节点级" }
+      ownerId:           { type: string, desc: "负责人 id" }
+      ownerName:         { type: string, desc: "负责人名" }
+      serviceInstanceId: { type: string, ref: itsm_service_instance, desc: "关联服务实例 id" }
+      basicInfo:         { type: object, required: true, desc: "协议基本信息对象（name/status/type/owner*/service*/memo）" }
+      slaConfig:         { type: array, items: object, required: true, desc: "配置数组，每条 {bindID, bindName, levelConfig:[{levelName, agreementType, workingCalendarId, duration, criticalRate}], notifyPolicy:[{notifyType(warning|timeout), notifyPolicyId(→notify_policy), interval, count}]}。⚠️notifyPolicy 内嵌在 slaConfig[]（SLA 详情 get 可见），建 SLA 时可直接配预警/超时通知，无需额外建 trigger——e2e 实测 2026-08-12。" }
+    relations:
+      - { to: sys_setting_work_calendar, type: association, cardinality: "N:N", via: "slaConfig[].levelConfig[].workingCalendarId", desc: "SLA 级别配置引用工作日历（24hex，跨 system：sys_setting 微服务）" }
+      - { to: itsm_service_instance, type: association, cardinality: "1:N", via: "service_config.slaConfig[].slaId", desc: "SLA 被服务实例引用（一条 SLA 可绑多个服务）。⚠️实际绑定关系存于 service_instance 的 sla_config 子端点（见 itsm_service_instance.api_behavior.bind_sla_via_subpath），非 basicInfo.serviceInstanceId 字段——后者 list 视图展平用，详情 get 时为空" }
+      - { to: itsm_notify_policy, type: association, cardinality: "N:N", via: "slaConfig[].notifyPolicy[].notifyPolicyId", desc: "SLA 内嵌通知策略引用（warning/timeout 各一）" }
+    api_behavior:
+      list_is_post_search: "⚠️list 是 POST /sla/rule/_search（非 GET list，GET 返 404）；分页+过滤参数都在 body。返回 data.list[] 含 basicInfo 展开字段 + slaConfig[]。"
+      cross_system_dependency: "workingCalendarId 引用 work_calendar——⚠️work_calendar 在独立微服务 sys_setting:8271（见 sys_setting_work_calendar 对象 + easyops-sys-setting system），非 8134。建 SLA 前通常先在 sys-setting 建工作日历拿 24hex id。"
+      validator_truth: "create/update 仅校验 basicInfo(object)+slaConfig(SLAConfig[]) 顶层必填（validator request_validate_trees.go:14,114）；ruleId/bindingId/levelName/agreementType/duration 等内部字段均无正则/枚举校验（运行时不验，前端约束）。levelName 的 plan/common/priority/emergency、agreementType 的 done 来自实测样例非源码枚举——gap：完整值域需前端配置器确认。"
+    side_effects:
+      - op: sla.create
+        rule: "POST /v1/sla/rule。basicInfo + slaConfig 必填。建 SLA 前通常先有 work_calendar（levelConfig.workingCalendarId 引用其 24hex id）。"
+      - op: sla.delete
+        rule: "DELETE /v1/sla/rule/:ruleIds。ruleIds 走 path 分号分隔批量。"
+
+  # ---------- ITSM 值班组（duty_group）----------
+  itsm_duty_group:
+    description: ITSM 值班组——定义值班组的名/周期(dutyCycle)/班次(dutyShift[])/弹性时间(flexTime)。被 SLA/工单排班引用。CRUD 在 /v1/duty_group（8134）。duty_group_config（日历配置/导入）系列未纳入（场景不需要，按「不增噪声」原则）。
+    source: data/api-doc/itsm-duty_group.xlsx + duty_group/validators/{request_validate_trees.go:15,95, api_validator.go:58} + parse_date.go:175-187 + 实测样例（658c1d374b66b）
+    api: duty_group
+    fields:
+      instanceId:    { type: string, anchor: true, desc: "值班组 id（13 hex，update 正则 ^[0-9a-z]{13}$，validator request_validate_trees.go:95）" }
+      name:          { type: string, required: true, desc: "值班组名（validator 无正则）" }
+      dutyCycle:     { type: string, required: true, desc: "值班周期，实测 '2026-01~2026-12'。⚠️validator 无正则校验（request_validate_trees.go:15 field_type=string 无 pattern），但后端 parse_date.go 用 ParseDateFromStringOnlyMonth 解析——格式实为 YYYY-MM（起止月由前端拼 ~ 分隔）。自由度未完全确认" }
+      status:        { type: string, required: true, desc: "状态（validator 无枚举校验，实测 enabled/disabled）" }
+      dutyShift:     { type: array, items: object, required: true, desc: "班次列表 [{name(自由文本), dutyTime}]。validator 仅校验 object[] 非空，dutyTime 内部无正则——格式实测 '08:00~12:00'（跨天表示未在源码确认）" }
+      memo:          { type: string, desc: "备注" }
+      flexTime:      { type: integer, desc: "弹性时间（分钟，validator 无范围校验，实测 10）" }
+      useFormBuilder: { type: boolean, desc: "是否用表单构建器（true 时关联 form 实例，跨域→itsm form；validator 不强制）" }
+    api_behavior:
+      validator_loose: "create/update（request_validate_trees.go:15,95）仅校验 name/dutyCycle/status/dutyShift 顶层必填 + instanceId/groupId 正则；dutyCycle/dutyTime/flexTime/status 无正则/枚举校验，靠前端约束。dutyCycle 的 ~ 分隔起止月是前端拼约定非后端验。"
+    side_effects:
+      - op: duty_group.create
+        rule: "POST /v1/duty_group。name/dutyCycle/status/dutyShift 必填（validator request_validate_trees.go:15）。instanceId CMDB 生成返回。"
+      - op: duty_group.delete
+        rule: "DELETE /v1/duty_group/:groupIds。groupIds 走 path 分号分隔批量。"
+
+  # ---------- 系统设置·工作日历（work_calendar，sys_setting 微服务）----------
+  sys_setting_work_calendar:
+    description: 系统设置·工作日历（营业时间）——定义工作日/休息日/工作时段/节假日，供 SLA 计算达成时长时剔除非工作时间。被 ITSM SLA 经 workingCalendarId 引用。CRUD 在 /api/sys_setting/v1/work/calendar（⚠️独立微服务 sys_setting:8271，非 8134；id 是 24hex MongoDB ObjectId ≠ flowable_service 的 13hex）。⚠️config 完整结构见 api_behavior.config_schema（含 workDayList/holidayList/independenceDayList 三部分，validator 证实）。
+    source: data/api-doc/itsm-work_calendar.xlsx + sys_setting/work_calendar/{route.go:9-24, validators/request_validate_trees.go:23,31, internal/working_calendar/generator.go:43,81} + 实测样例（63a285ca7ea068c42a26ee26）
+    api: work_calendar
+    fields:
+      id:      { type: string, anchor: true, desc: "日历 id（24 hex MongoDB ObjectId，validator 正则 ^[0-9a-fA-F]{24}$，request_validate_trees.go:47,51,55）" }
+      name:    { type: string, required: true, desc: "日历名（validator 无正则/长度校验）" }
+      config:  { type: object, required: true, desc: "日历配置，含 workDayList（每周工作日时段）+ holidayList（节假日）+ independenceDayList（独立放假日）。完整结构 + hours 正则见 api_behavior.config_schema" }
+      memo:    { type: string, desc: "备注" }
+      builtin: { type: bool, desc: "是否系统自带（勿删）" }
+      status:  { type: string, desc: "状态（validator 未校验枚举）" }
+      key:     { type: string, desc: "日历 key（内置日历标识，自定义通常不填）" }
+      year:    { type: string, desc: "年份（日历按年生成，create 可选）" }
+      creator: { type: string, desc: "创建者" }
+    relations:
+      - { to: itsm_sla, type: association, cardinality: "1:N", desc: "被 SLA 规则经 workingCalendarId 反向引用（一个日历可被多个 SLA 级别引用）" }
+    api_behavior:
+      separate_microservice: "⚠️work_calendar 在 sys_setting:8271（独立微服务 logic.sys_setting），非 flowable_service:8134。源码 data/sources/backend/platform/sys_setting/work_calendar/。"
+      why_separate_spec: "api-cli endpoint 是 service 级，不支持 per-resource 绑不同端口（schema.go 无 Endpoint 字段），故 work_calendar 在独立 spec easyops-sys-setting.yaml + 独立 system。CLI --spec 切。"
+      id_format: "id 是 24hex MongoDB ObjectId（≠ flowable_service 13hex 微秒时间戳）——印证不同存储。delete path ids 分号批量，值是 24hex。"
+      config_schema: |
+        config 完整结构（validator request_validate_trees.go:23 CreateWorkCalendarValidateTree 证实，三层）：
+        • workDayList: [{ weekday(int 1-7 周一到周日), hours }]
+        • holidayList: [{ from(YYYY-MM-DD), to(YYYY-MM-DD), hours }]  —— 节假日范围，可覆盖工作日变休息日
+        • independenceDayList: [{ date(YYYY-MM-DD), hours }]  —— 独立放假日
+        hours 正则（validator 证实）：^([01]\d|2[0-3]):[0-5]\d~([01]\d|2[0-3]):[0-5]\d
+        即【单时段】 HH:MM~HH:MM（⚠️非逗号多时段——实测样例见的 "08:30~12:00,14:00~18:00" 是前端展示拼接，存盘是单时段或多条记录）。
+        休息日表示：不在 workDayList 的 weekday 默认全天休息（OffHours=00:00~24:00，generator.go:81）；holidayList 命中日 = 休息。
+        config.mode：validator 未校验枚举（实测值 ""/custom）——gap：mode 完整值域 + 不同 mode 下结构差异需前端配置器确认。
+        PUT v1（EditWorkCalendarConfig）与 POST v2（EditWorkCalendarConfigV2）：validator 树相同（request_validate_trees.go:31 vs 35），v2 是新版前端用，差异在内部生成逻辑非 wire 层。
+    side_effects:
+      - op: work_calendar.create
+        rule: "POST /v1/work/calendar。name + config 必填（validator request_validate_trees.go:23）。返回新日历 id（24hex）。建 SLA 前常先建工作日历拿此 id。"
+      - op: work_calendar.update
+        rule: "PUT /v1/work/calendar/:id 全量覆盖 config——触发重新生成日历（generator.go 按 workDayList/holidayList/independenceDayList 生成全年每日 WorkingHours/OffHours）。"
+      - op: work_calendar.delete
+        rule: "DELETE /v1/work/calendar/:ids。ids 走 path 分号分隔批量（24hex）。系统自带（builtin，如「国家法定节假日」）勿删。"
+
+# =============================================================================
+# 接口级行为（跨对象，编排时必须知道）
+# =============================================================================
+  # ===========================================================================
+  # collector 域对象（采集套件）—— 原 collector deployment 合并，2026-08-13
+  # ===========================================================================
+  # ===========================================================================
+  # collector_plugin —— 采集套件（核心对象，对应 api-cli resource: plugin）
+  # ===========================================================================
+  collector_plugin:
+    description: |
+      EasyOps 采集套件。一个套件 = 类型(simple-script/metricbeat/exporter/prometheus) + 关联CMDB模型(relateObjectId)
+      + 采集参数(paramDefine) + 指标定义(origin_metric/alias_metric/metric_set) + 可选(dashboard/alertRule)。
+      3 类型各有独立 create/update 端点（字段集不同），无单 type 字段做联合判别（由端点隐式区分）。
+      字段结构权威源：plugin.detail 真调（2026-08-13）+ easyops_plugin_service.go 响应映射:572-677。
+    source: data/sources/backend/HyperInsight/collector_plugin_service/easyops_plugin/easyops_plugin_service.go:572-677（GetPlugin/ListPlugin 响应映射）
+    api: plugin
+    fields:
+      # —— 主键 / 锚 ——
+      instanceId:
+        type: string
+        anchor: true
+        pattern: '^[0-9a-z]{13}$'
+        desc: "套件实例ID（13hex 微秒时间戳）。create 返回；detail/delete/update path 参数。CMDB 模型 _COLLECTOR_EASYOPS_PLUGIN 的主键"
+      name:
+        type: string
+        required: true
+        desc: "套件名（中文）。⚠️zip顶层目录名/上传name参数/import_update 隐式必须与此一致。命名建议『XXX监控套件』（监控）/『XXX信息采集』（CMDB采集）"
+      agentType:
+        type: string
+        required: true
+        enum: [easyops, metricbeat, prometheus, log, zabbix-agent, sql, filebeat, cloudScript, eventScan, detect, process, cloudSdk, remoteScan, localScan, eBPFCollect]
+        desc: "采集器类型（运行态身份）。simple-script=easyops, metricbeat=metricbeat, exporter/prometheus=prometheus。⚠️升级不可变。真调见 eventScan 等更多值"
+      samplerType:
+        type: string
+        default: metric_sampler
+        enum: [metric_sampler, process_sampler, event_sampler, trace_sampler, log_sampler, detect_sampler, pipeline_sampler]
+        desc: "采样器，决定 collector_service 路由+脚本输出协议。metric_sampler(监控)/process_sampler(CMDB采集)。详见 formats/collector-kit/sampler-types.yaml"
+      type:
+        type: string
+        desc: "套件包类型（plugin.yaml.type）：simple-script/metricbeat/exporter。由 agentType 映射（imexport_service.go:85-90），非独立字段"
+      relateObjectId:
+        type: string
+        pattern: '^[a-zA-Z_][0-9a-zA-Z_]{0,46}(@[A-Z]{1,16})?$'
+        desc: "关联CMDB模型ID（采集数据归属）。如 HOST@ONEMODEL。$.attr 引用字段须属此模型"
+
+      # —— 版本 / 包 ——
+      packageId: { type: string, pattern: '^[a-fA-F0-9-]+$', desc: "程序包ID（UUID），package 型套件用" }
+      packageVersionId: { type: string, desc: "程序包版本ID。⚠️create_with_package 服务层强校验非空（validator树未覆盖）" }
+      packageVersion: { type: string, desc: "程序包版本号" }
+      packageUrl: { type: string, desc: "脚本包URL（script 型）" }
+      installPath: { type: string, desc: "安装路径（无空格标识符），create 时默认=name" }
+      installInfo: { type: "object|null", desc: "安装信息" }
+
+      # —— 脚本（simple-script）——
+      scriptType: { type: string, enum: [python, shell, json], desc: "脚本类型（仅 simple-script）。⚠️Python2.7 运行时" }
+      interpreter: { type: string, desc: "解释器路径（空=内置py2.7）" }
+      content: { type: string, desc: "脚本内容/配置内容（log_plugin 存 processSteps 序列化JSON）" }
+      encodeType: { type: string, desc: "编码类型（metricbeat）" }
+      template: { type: string, desc: "metricbeat 配置模板（Go template）" }
+      metricbeatName: { type: string, desc: "metricbeat 模块名（redis/mysql/nginx，对应 conf.module.yaml）" }
+
+      # —— 参数 / 处理 ——
+      params: { type: array, items: collector_param, desc: "采集参数定义列表（paramDefine）。机制见 formats/collector-kit/param-mechanism.yaml" }
+      processors: { type: array, items: object, desc: "后处理函数链 {name,action{func,param},output,parents}。metricbeat 几乎必用，simple-script 通常空" }
+      extInfo: { type: "object|null", desc: "扩展信息" }
+      collectAgent: { type: string, desc: "采集Agent取值，常用 $.ip（从CMDB实例动态取）" }
+      collectType: { type: array, items: string, desc: "采集类型列表" }
+      jobFilter: { type: "null", desc: "采集范围过滤，通常null" }
+
+      # —— 元信息 ——
+      category: { type: string, desc: "分类（计算资源/网络资源/数据库/中间件/自定义，点分多级）" }
+      memo: { type: string, desc: "备注" }
+      icon: { type: "object|null", desc: "图标{Icon,Lib,Category,Prefix,Color}" }
+      image: { type: string, desc: "套件图标URL" }
+      picURLs: { type: array, items: string, desc: "截图URL列表" }
+      readme: { type: string, desc: "文档" }
+
+      # —— 指标（关联，套件激活后才有数据）——
+      aliasMetrics: { type: array, items: collector_alias_metric, desc: "别名指标（告警指标）列表" }
+      metricSets: { type: array, items: object, desc: "指标集列表" }
+      metricThresholdRules: { type: array, items: object, desc: "指标阈值规则" }
+      dashboards: { type: array, items: object, desc: "仪表盘列表" }
+      alertRules: { type: array, items: object, desc: "告警规则列表" }
+
+      # —— plugin.yaml 元信息（导出/详情含）——
+      pluginYaml: { type: object, desc: "plugin.yaml 元信息 {Version,Name,Type,Command}" }
+
+      # —— 只读审计字段（真调实锤）——
+      status: { type: string, enum: [enabled, available], desc: "套件状态。enabled=内置(protected禁覆盖)/available=自定义(可覆盖)。⚠️赋值在外部域服务，本服务只读回显" }
+      creator: { type: string, desc: "创建人（真调见 defaultUser/easyops）" }
+      ctime: { type: string, desc: "创建时间（YYYY-MM-DD HH:MM:SS）" }
+      modifier: { type: string, desc: "修改人" }
+      mtime: { type: string, desc: "修改时间" }
+      protected: { type: bool, desc: "是否内置受保护。true 禁止覆盖上传（需改名）" }
+
+    relations:
+      - { to: collector_alias_metric, type: composition, cardinality: "1:N", via: aliasMetrics, desc: "一个套件定义多个别名指标" }
+      - { to: cmdb_model, type: reference, cardinality: "N:1", via: relateObjectId, desc: "套件关联CMDB模型（采集数据归属）" }
+      - { to: collector_job, type: association, cardinality: "1:N", via: plugins.instanceId, desc: "套件被采集任务引用（_COLLECTOR_JOB.plugins）" }
+
+    constraints:
+      - "3 类型各有独立 create/update 端点（无单 type 字段联合判别，由端点隐式区分）"
+      - "升级（import_update）时 agentType 不可变（报『更新套件时不允许变更套件类型』）"
+      - "升级时 version 必须唯一（重复报『已存在同名版本』）"
+      - "删除前置：未被 _COLLECTOR_JOB 引用"
+      - "$.attr 参数引用的字段必须属于 relateObjectId 模型（含继承链）真实属性"
+
+    side_effects:
+      - op: plugin.delete
+        rule: "删除前置：查 _COLLECTOR_JOB by plugins.instanceId，有引用报『此套件关联有采集任务不允许删除』。删除级联清空 MetricObjectId 下所有 collectorPlugin.instanceId==id 的指标实例（分页500批量删）。非软删（物理删 domainService.Delete）"
+        source: "easyops_plugin_service.go:461-476,483-531"
+      - op: plugin.create_with_script
+        rule: "任一 param isFromSecret=true 且无 secretName 参数→自动注入 secretName 参数（display=false，use 继承首个secret参数）。调 domainService.Create"
+        source: "easyops_plugin_service.go:138-165"
+      - op: plugin.update_with_script
+        rule: "对已存在参数强制保留旧 isEncrypt/isFromSecret（不可改）。Processors 用空切片重建（非追加）。ExtInfo 直接用请求值（不保留旧）。包版本变更→UpdateInstance 标记 _COLLECTOR_EASYOPS_PLUGIN modification.modified=true"
+        source: "easyops_plugin_service.go:715-718,737,752,780-798"
+      - op: plugin.update_with_metricbeat
+        rule: "⚠️与 script update 行为相反：Processors 继承旧值再 append；ExtInfo 保留旧值仅 request 非空时覆盖"
+        source: "easyops_plugin_service.go:221-239"
+      - op: plugin.update_with_package
+        rule: "packageId/packageVersionId 必填校验【被注释掉】（与 create_with_package 强校验不一致）。其余同 script update"
+        source: "easyops_plugin_service.go:806-808"
+      - op: plugin_package.import
+        rule: "同名冲突默认报错，upsert=true 覆盖。importOther 导入附属资源（metric/关联模型/dashboard/alertRule/自动发现策略/资源发现配置/版本关系）+ PostEvent 发『安装套件』事件"
+        source: "imexport_service.go:369-376,473-500,754-817"
+      - op: plugin_package.import_update
+        rule: "升级：取旧实例→版本冲突校验→解压→agentType不可变校验→参数加密位继承（唯一迁移）→UpsertPlugin→importOther。无显式回滚（UpsertPlugin 成功但 importOther 失败=部分失败无补偿）"
+        source: "imexport_service.go:555-670"
+      - op: plugin_package.export
+        rule: "导出 zip 含：套件包本体（存储后端tar.gz重组为zip）+重写plugin.yaml+可选dashboard+关联metric+关联资源+readme。流式20KB chunk返回，写完异步删临时文件"
+        source: "imexport_service.go:191-322"
+
+    api_behavior:
+      list_pagination: "plugin.list 响应是 {code,data:{list,total,page,page_size}}，total 在 data.total（body内），非 api-cli stderr _meta.total。计数读 data.total"
+      response_wrapper: "标准响应 {code,codeExplain,error,data}；code=0 成功。error 字段含可读错误（如『此套件关联有采集任务不允许删除』）"
+      create_response: "3 个 create 端点响应 data:{instanceId}（13hex），用于后续 detail/delete/activate"
+      detail_full_fields: "plugin.detail 返回全字段（含只读审计字段+pluginYaml），list 是精简版（不含 content/template/readme/pluginYaml/creator/ctime/mtime）"
+
+  # ===========================================================================
+  # collector_param —— 采集参数（paramDefine 元素）
+  # ===========================================================================
+  collector_param:
+    description: "采集参数定义（paramDefine 元素）。运行时注入环境变量 EASYOPS_COLLECTOR_<name>。详细机制见 formats/collector-kit/param-mechanism.yaml"
+    source: data/sources/backend/HyperInsight/collector_plugin_service/easyops_plugin/easyops_plugin_service.go:45-63
+    fields:
+      name: { type: string, required: true, desc: "参数名。环境变量 EASYOPS_COLLECTOR_<name>（大小写敏感）" }
+      valueType: { type: string, required: true, enum: [string, int, boolean, password], desc: "值类型。password 配合 isEncrypt" }
+      defaultValue: { type: string, desc: "默认值。$.开头=动态参数(paramType=cmdb)；非空非$=普通参数(const)；空串=必填用户填" }
+      display: { type: bool, default: true, desc: "是否界面展示。secretName 等隐藏参数 display=false" }
+      displayName: { type: string, desc: "界面显示名（中文）" }
+      description: { type: string, desc: "参数描述" }
+      use: { type: string, required: true, enum: [collectorParams, instanceMapping], desc: "用途。collectorParams=连接参数，instanceMapping=实例映射" }
+      optional: { type: bool, desc: "是否可选。false=必填" }
+      isEncrypt: { type: bool, desc: "是否加密存储。Update 时对已存在参数强制保留旧值（不可改）" }
+      isFromSecret: { type: bool, desc: "是否从密钥管理获取。Update 时强制保留旧值。任一 true 且无 secretName→自动注入 secretName" }
+      secretName: { type: string, desc: "密钥实例名（isFromSecret=true 时平台填充）" }
+      extraArgs: { type: "object|null", desc: "额外参数{isSingleChoice,srcObjectId,isDisplayLink,linkText,query}" }
+
+  # ===========================================================================
+  # collector_alias_metric —— 别名指标（告警指标）
+  # ===========================================================================
+  collector_alias_metric:
+    description: "别名指标（告警指标）。基于 origin_metric 派生，用于 dashboard/alertRule 引用。存 CMDB CollectorAliasMetric 模型"
+    source: data/sources/backend/HyperInsight/collector_plugin_service/internal/plugin_package/types.go:29-46
+    fields:
+      name: { type: string, anchor: true, desc: "别名指标名（dashboard/alertRule 引用此）。⚠️不能与 CMDB 模型属性ID/关系ID 同名，否则激活失败。建议加前缀 m_/mon_/metric_" }
+      displayName: { type: string, desc: "显示名" }
+      objectId: { type: string, desc: "所属CMDB模型（同套件 relateObjectId）" }
+      dataType: { type: string, enum: [double, string, long], desc: "数据类型" }
+      type: { type: string, desc: "指标类型" }
+      dims: { type: array, items: object, desc: "维度定义[{dimName,originDimName,isArray,dimDisplayName}]" }
+      metricSet: { type: string, desc: "所属指标集（默认『默认指标集』）" }
+      originalMetrics: { type: array, desc: "关联原始指标（origin_metric 的 key）" }
+      unit: { type: string, desc: "单位" }
+      expression: { type: string, desc: "计算表达式（PromQL 风格）" }
+    constraints:
+      - "displayName 在同 objectId 内不能重复（pluginutil.go:390-393）"
+      - "name 不能与 CMDB 模型属性ID/关系ID 同名（否则激活失败）"
+
+  # ===========================================================================
+  # collector_job —— 采集任务（_COLLECTOR_JOB 模型，激活产物）
+  # ===========================================================================
+  collector_job:
+    description: |
+      采集任务（_COLLECTOR_JOB CMDB 模型）。激活套件（kit.activate）触发 AssignJobs 生成的运行态任务。
+      关联套件方式：plugins 字段存 pluginInstanceId 列表。生命周期在 collector_service:8125（旧版有 collector_job CRUD 端点）。
+    source: tmp/源代码/collector_service/cmd/collector_service/conf/contract/easyops/model/collector_service/CollectorJob.yaml
+    api: collector_job   # 注：collector_job 端点在 collector_service:8125，本 deployment 暂未录其 spec（kit 能力优先）
+    fields:
+      instanceId: { type: string, anchor: true, pattern: '^[0-9a-z]{13}$', desc: "任务实例ID" }
+      objectId: { type: string, desc: "监控目标模型ID" }
+      jobName: { type: string, desc: "任务名" }
+      filter: { type: string, desc: "采集范围过滤" }
+      enabled: { type: bool, desc: "是否启用。AssignJobs 前置：enabled=true 才下发，false 则 RemoveJobs" }
+      interval: { type: integer, desc: "采集间隔（秒）" }
+      timeout: { type: integer, desc: "超时（秒）" }
+      agentType: { type: string, enum: [zabbix-agent, prometheus, easyops, custom, detect, log, snmp], desc: "采集器类型" }
+      plugins: { type: array, items: object, desc: "关联套件[{instanceId,...}]。AssignJobs 取 Plugins[0].InstanceId 作 kitId" }
+      collectorParams: { type: array, items: object, desc: "采集器参数[{key,value,paramType:const|cmdb}]" }
+      params: { type: array, items: object, desc: "采集参数[{key,value,paramType}]" }
+    constraints:
+      - "AssignJobs 前置三件：EnableAgentJob=true、Plugins 非空、Enabled=true（任一不满足静默失败）"
+      - "paramType 铁律：value 以 $. 开头必须 paramType=cmdb，否则 const（详见 formats/collector-kit/param-mechanism.yaml）"
+    side_effects:
+      - op: kit.activate
+        rule: "激活触发 AssignJobs（assign_job.go:28）：CMDB事件驱动→OnCmdbObjectChange→AssignJobs→生成任务下发 collector_proxy_server + 刷新 kit 统计。兜底 HyperInsightJobRefreshTask 每 600s refresh 全量"
+        source: "tmp/源代码/collector_service/agent_job/assign_job.go:28-115"
+
+  # ===========================================================================
+  # log_plugin —— 日志套件
+  # ===========================================================================
+  log_plugin:
+    description: "日志采集套件（log_plugin）。与监控套件区别：用 processSteps 链式处理（非脚本），samplerType=pipeline_sampler，scriptType 固定 json。每个 step 必须有 action"
+    source: data/sources/backend/HyperInsight/collector_plugin_service/log_plugin/log_plugin_service.go
+    api: log_plugin
+    fields:
+      instanceId: { type: string, anchor: true, pattern: '^[0-9a-z]{13}$' }
+      name: { type: string, required: true, desc: "套件名" }
+      relateObjectId: { type: string, pattern: '^[a-zA-Z_][0-9a-zA-Z_]{0,46}(@[A-Z]{1,16})?$' }
+      content: { type: string, desc: "processSteps 序列化的 JSON" }
+      processSteps: { type: array, items: object, desc: "处理流程链[{name,parents,output,action{func,param}}]，action 必填" }
+    side_effects:
+      - op: log_plugin.delete
+        rule: "删除前置：不能被日志采集任务引用（COLLECTOR_LOG_JOB@EASYOPS），否则拒删"
+        source: "log_plugin_service.go:50-62"
+
+
+  # ===========================================================================
+  # 巡检域对象（v1 体系 INSPECTION_INFO）—— 2026-08-13 接入
+  # ===========================================================================
+
+  insp_info:
+    description: |
+      巡检套件元信息（INSPECTION_INFO@EASYOPS，v1体系）。一个巡检套件=info+collector+metric_group+template四对象组装，pluginId=info.id串联。
+      ⚠️isSystem=true是内置套件（禁改，需克隆）；开发新套件 isSystem=false。
+    source: data/sources/backend/AutoOps/inspection/internal/database/cmdb/info/message.go:10-54; 真调实测 weblogic(6350f72ef0491)/mssql
+    api: insp_info
+    fields:
+      instanceId: { type: string, anchor: true, pattern: '^[0-9a-z]{13}$', desc: "套件实例ID（13hex，平台生成）" }
+      id: { type: string, anchor: true, required: true, pattern: '^[a-zA-Z_][0-9a-zA-Z_]{0,31}$', desc: "⚠️pluginId，套件唯一标识（英文如 mysql/redis）。包根目录名/所有对象pluginId 必须一致于此。≠instanceId" }
+      name: { type: string, required: true, desc: "套件显示名（中文），如 MySQL巡检" }
+      objectId: { type: string, required: true, desc: "巡检目标 CMDB 模型 id（如 MYSQL@ONEMODEL）。开发前必须确认模型存在（flow step 1-3 门禁）" }
+      objectName: { type: string, desc: "目标对象显示名" }
+      method: { type: string, desc: "巡检方式（agent=远程主机执行，默认）" }
+      keys: { type: array, items: string, desc: "唯一键列表（CMDB属性id，定位巡检实例）。DB类常用 [serverName]" }
+      isSystem: { type: bool, desc: "⚠️true=内置套件（禁改）；开发新套件 false" }
+      isApp: { type: bool, desc: "是否应用类" }
+      counterSideId: { type: string, desc: "关联主机的对端模型（DB/中间件类常用 host）。⚠️create-only：API create/update 写不进，只有 import 包导入能写入。机制见 formats/inspection-kit/suite-package.yaml#import_only_caveat" }
+      relationId: { type: string, desc: "与对端模型的关系id（如 artifactInsts，可空）。三者组合决定『目标实例→执行主机』关联，见 suite-package.yaml#host_relation_patterns" }
+      relationIdWithHost: { type: string, desc: "与HOST的关系id三段式，格式见 suite-package.yaml#host_relation_patterns" }
+      status: { type: string, desc: "状态（ok/object_deleted/keys_deleted/...，平台维护，只读）" }
+      subPlugins: { type: array, desc: "子插件（组合套件用）" }
+      memo: { type: string, desc: "备注" }
+      creator: { type: string, desc: "创建人（平台填，只读）" }
+      ctime: { type: string, desc: "创建时间（只读）" }
+    relations:
+      - { to: insp_collector, type: composition, cardinality: "1:N", via: pluginId, desc: "套件挂多个采集脚本（通常1个）" }
+      - { to: insp_metric_group, type: composition, cardinality: "1:N", via: pluginId, desc: "套件挂多个指标组" }
+      - { to: insp_template, type: composition, cardinality: "1:N", via: pluginId, desc: "套件挂多个报告模板（可选）" }
+      - { to: cmdb_model, type: reference, cardinality: "N:1", via: objectId, desc: "套件关联巡检目标 CMDB 模型" }
+    constraints:
+      - "id（pluginId）全局唯一；所有对象 pluginId 必须一致（导入强校验）"
+      - "isSystem=true 内置套件禁改，需 clone 后改 pluginId"
+
+  insp_collector:
+    description: "巡检采集脚本（INSPECTION_COLLECTOR）。py2 脚本+args 参数定义。⚠️脚本协议见 formats/inspection-kit/script-protocol.yaml（与采集套件完全不同）"
+    source: data/sources/backend/AutoOps/inspection/internal/database/cmdb/collector/message.go:9-46; 真调实测 weblogic/mssql/oracle
+    api: insp_collector
+    fields:
+      instanceId: { type: string, anchor: true, pattern: '^[0-9a-z]{13}$' }
+      pluginId: { type: string, required: true, desc: "所属套件 id（=insp_info.id）" }
+      name: { type: string, desc: "脚本名（通常 script）" }
+      script: { type: string, enum: [python, shell], desc: "脚本类型（python=py2.7默认）" }
+      args: { type: array, items: insp_arg, desc: "参数定义数组（key/alias/type/require/source/default）。详见 formats/inspection-kit/args-design.yaml，含password类型规范" }
+      content: { type: string, desc: "Python/Shell 源码（py2 语法，协议见 script-protocol.yaml：参数注入头+start/end标记+instanceId标记）" }
+    side_effects:
+      - op: insp_collector.debug
+        rule: "在线试跑脚本（开发调试用），不持久化。可验证脚本输出是否符合 start/end 标记协议"
+
+  insp_arg:
+    description: "巡检脚本参数定义（insp_collector.args 元素）。运行时按 source/type 决定取值与注入方式"
+    source: data/sources/backend/AutoOps/inspection/internal/database/cmdb/collector/message.go:21-46
+    fields:
+      key: { type: string, required: true, desc: "参数键名。custom注入为无前缀变量；attr_id注入为 EASYOPS_<key>" }
+      alias: { type: string, required: true, desc: "参数显示名（中文）" }
+      type: { type: string, required: true, enum: [text, password], desc: "⚠️text=普通；password=密码（加密存储）。密码类即使手填也必须password，禁止text明文" }
+      require: { type: bool, desc: "是否必填" }
+      source: { type: string, required: true, enum: [custom, attr_id], desc: "custom=用户填写；attr_id=从CMDB实例属性取" }
+      default: { type: string, desc: "默认值（custom适用）" }
+
+  insp_metric_group:
+    description: "巡检指标组（INSPECTION_METRIC_GROUP）。含子指标 vals（阈值 conditions）+维度 dims。⚠️阈值平台判分（脚本只出原始值）"
+    source: data/sources/backend/AutoOps/inspection/internal/database/cmdb/metrics/message.go:13-89; 真调实测 weblogic(8组)
+    api: insp_metric_group
+    fields:
+      instanceId: { type: string, anchor: true, pattern: '^[0-9a-z]{13}$' }
+      id: { type: string, required: true, desc: "指标组业务id（套件内唯一）。⚠️脚本输出 payload[].id 必须对应此" }
+      pluginId: { type: string, required: true, desc: "所属套件 id（与insp_info.id一致）" }
+      name: { type: string, desc: "指标组显示名" }
+      category: { type: string, required: true, pattern: '^([^.]*\.)*[^.]*$', desc: "⚠️两级分类点分（如 整体状态.连接数，正好1个点，否则报分类格式错误）" }
+      dims: { type: array, items: object, desc: "维度列[{id,name}]" }
+      vals: { type: array, items: insp_val, desc: "指标值列表（至少1个）。每项id必须与脚本输出 vals[].id 对应" }
+    side_effects:
+      - op: insp_metric_group.update
+        rule: "Update 时 vals 必填（至少1个）。删掉的 val 级联删 task 和 report_template 中的引用"
+        source: "metric_group_service.go:164,182-194"
+      - op: insp_metric_group.delete
+        rule: "删组级联删 report_template 和 task 中的引用"
+
+  insp_val:
+    description: "巡检指标（insp_metric_group.vals 元素）。含阈值 conditions，平台执行后判分"
+    source: data/sources/backend/AutoOps/inspection/internal/database/cmdb/metrics/message.go:80-89; internal/database/cmdb/task/message.go:130-151
+    fields:
+      id: { type: string, required: true, desc: "指标id（套件内唯一）。⚠️脚本输出 vals[].id 必须对应此" }
+      name: { type: string, desc: "指标显示名" }
+      type: { type: string, required: true, enum: [string, num], desc: "⚠️实际值是 string|num（真调实测，非源码注释的 int）。决定 conditions 可用 comparator" }
+      unit: { type: string, desc: "单位" }
+      weight: { type: integer, desc: "权重0-100，影响评分" }
+      conditions: { type: array, items: insp_condition, desc: "阈值条件数组。【可空！真实套件多留空[]】，套件定义时不强制配，通常任务里覆盖（task.vals）。非空时按 type 校验（详见 formats/inspection-kit/metric-threshold.yaml）" }
+
+  insp_condition:
+    description: "阈值条件（insp_val.conditions 元素）"
+    source: data/sources/backend/AutoOps/inspection/internal/database/cmdb/task/message.go:135-151
+    fields:
+      comparators: { type: string, enum: [between, gt, lt, eq, neq, in, nin], desc: "比较器。int用between/gt/lt/eq/neq；string用in/nin/eq/neq" }
+      level: { type: integer, enum: [0, 5, 10], desc: "⚠️仅0/5/10=notice/warn/emergency（对应80/50/20分）" }
+      value: { type: string, desc: "阈值串（type=string 时用：in/nin包含串、eq/neq比较串）" }
+      maxValue: { type: number, desc: "区间上限（type=int 的 between）" }
+      minValue: { type: number, desc: "区间下限（type=int 的 between/gt触发下限）" }
+
+  insp_template:
+    description: "巡检报告模板（INSPECTION_REPORT_TEMPLATE）。详情模板(metricgroups)+总览模板(summarytemplates)。结构+是否必建+import/API 两种建法，见 formats/inspection-kit/suite-package.yaml#report_template_schema"
+    source: data/sources/backend/AutoOps/inspection/internal/database/cmdb/report_template/message.go:10-84
+    api: insp_template
+    fields:
+      instanceId: { type: string, anchor: true, pattern: '^[0-9a-z]{13}$' }
+      name: { type: string, required: true, desc: "模板名" }
+      pluginId: { type: string, desc: "所属套件 id" }
+      metricgroups: { type: array, desc: "详情模板（displaytype: LineChart/BarChart/Form/CycleChart）" }
+      summarytemplates: { type: object, desc: "总览模板（displaytype: Form/LineChart/BarChart/DoughnutChart/Card）" }
+    side_effects:
+      - op: insp_template.delete
+        rule: "⚠️前置：模板被巡检任务引用拒删（『已关联巡检任务，不可删除』）"
+        source: "template_service.go:182-205"
+
+  insp_task:
+    description: "巡检任务（v1主线，关联套件+巡检目标+调度+通知）。e2e: create建任务→调度触发产生jobId→history查结果"
+    source: data/sources/backend/AutoOps/inspection/internal/database/cmdb/task/message.go:22-60
+    api: insp_task
+    fields:
+      instanceId: { type: string, anchor: true, pattern: '^[0-9a-z]{13}$', desc: "任务实例id（=inspectionTaskId，13hex）" }
+      inspectionTaskId: { type: string, desc: "任务id（同instanceId）" }
+      pluginId: { type: string, required: true, desc: "关联套件id（=insp_info.id）" }
+      name: { type: string, required: true, desc: "任务名" }
+      targets: { type: array, items: object, desc: "巡检目标实例[{instanceId(必填)}]。" }
+      taskType: { type: string, enum: [once, crontab], desc: "调度类型（once=单次绝对时间/crontab=cron表达式）" }
+      taskScheduler: { type: string, desc: "once=2006-01-02 15:04:05；crontab=cron" }
+      taskSchedulerId: { type: string, desc: "外部scheduler返回的定时任务id（只读）" }
+      args: { type: array, items: object, desc: "连接参数[{key,value}]（username/password/db_name等，对应脚本args定义）" }
+      vals: { type: array, items: object, desc: "阈值覆盖（valSet=false用自定义conditions，否则套件默认）" }
+      isAllNotify: { type: bool, desc: "是否全量通知" }
+      notifyMethod: { type: string, desc: "通知方式（email）" }
+      notifyUser: { type: array, desc: "通知人" }
+      creator: { type: string, desc: "创建人（只读）" }
+    side_effects:
+      - op: insp_task.create
+        rule: "创建后注册外部 scheduler（once到点/crontab周期回调 inspection 执行）。无内置cron，定时委托外部scheduler服务"
+      - op: insp_task.delete
+        rule: "删任务同步删外部 scheduler 注册"
+
+  insp_history:
+    description: "巡检执行历史与结果（v1，按jobId查）。执行产生jobId→list看历史→get看详情（评分/达标）→abnormal下钻"
+    source: data/sources/backend/AutoOps/inspection/internal/database/tsdb/job_history/api.go:8-42; job_result/api.go:11-37
+    fields:
+      jobId: { type: string, anchor: true, desc: "执行id（历史主键）" }
+      pluginId: { type: string, desc: "套件id" }
+      inspectionTaskId: { type: string, desc: "任务id" }
+      targets: { type: array, items: object, desc: "每目标结果[{instanceId,status,score,ip,hostname}]（status:normal/abnormal/failed）" }
+      status: { type: string, enum: [run, ok, failed], desc: "执行状态（ok=至少1目标正常执行）" }
+      passingRate: { type: number, desc: "通过率=passingCount(normal+abnormal)/totalTargets" }
+      score: { type: number, desc: "总评分（加权，详见 formats/inspection-kit/metric-threshold.yaml score_algorithm）" }
+      startTime: { type: string, desc: "开始时间" }
+      endTime: { type: string, desc: "结束时间" }
+    constraints:
+      - "评分公式：v1 加权扣分（MaxScore100，level对应80/50/20，见 metric-threshold.yaml）"
+      - "状态：脚本失败→failed(0分)；成功有异常→abnormal；成功无异常→normal"
+  # ===========================================================================
+  # EasyOps 通知管理（msgsender）—— msg_config 通知方式配置。
+  # 权威源 data/sources/backend/platform/msgsender/{custom_sender/message_handler,mail_config/config_handler,lib/sensitive_fields_handler}.py
+  # 通知方式 = CMDB 实例(_MSGSENDER_NOTIFY_CONFIG@EASYOPS) + notify_scripts/<pluginName>.py 脚本。
+  # 脚本契约/三方开发/敏感协议 全文见 formats/notify-kit/notify-script-protocol.yaml（本文件不复述）。
+  # ===========================================================================
+  msg_config:
+    description: "通知方式配置（msgsender，CMDB _MSGSENDER_NOTIFY_CONFIG@EASYOPS 实例的 CRUD 代理）。一个通知方式 = config（name/msgType/scriptContent/serverConfig/configFields...）+ 脚本（内置4类/custom 动态加载）。脚本契约+三方开发流程见 formats/notify-kit/notify-script-protocol.yaml。"
+    source: "platform/msgsender/mail_config/config_handler.py:22-371；脚本协议 formats/notify-kit/notify-script-protocol.yaml"
+    api: notify_config
+    fields:
+      instanceId: { type: string, anchor: true, desc: "CMDB 实例主键（路由 {instanceId}）" }
+      name: { type: string, required: true, desc: "通知方式名（=inform_type=send 的 method）。唯一，409 冲突报『通知方式名称重复』" }
+      msgType: { type: string, required: true, enum: [email, wework, dingding, dingding_robot, custom], desc: "custom=三方脚本（pluginName强制=name）；其余内置（pluginName 由映射定）" }
+      pluginName: { type: string, desc: "脚本模块名。内置=映射；custom=name（服务端 create/update 覆写，勿手填错）" }
+      scriptContent: { type: string, desc: "custom 脚本源码（def run(msg_data, users, cmdb_object_key, server_config={}, **kwargs)，py2）。内置留空" }
+      enable: { type: boolean, desc: "false 时 send 返回 disable 且 method 不列出" }
+      serverConfig: { type: object, additionalProperties: true, desc: "脚本服务端配置（smtp/corpid/api_key...）。敏感字段 v2 出站 ******** / 入站 base64" }
+      configFields: { type: array, items: { type: object, additionalProperties: true }, desc: "[{name,type}]，serverConfig 字段元数据；type=password 走敏感协议（全文见 formats#sensitive_protocol）" }
+      cmdbUserObjectColName: { type: string, desc: "CMDB USER 模型取值字段（mail→user_email/wework→wework_userid/dingding*→dingding_userid；custom 自定须 USER 模型有此属性）" }
+      description: { type: string, desc: "描述" }
+    relations:
+      - { to: cmdb_instance, type: association, cardinality: "1:1", via: instanceId, desc: "config 是 _MSGSENDER_NOTIFY_CONFIG 模型的实例" }
+    side_effects:
+      - op: notify_config.create
+        rule: "须系统管理员（permission 服务校验 user 有『系统管理员』角色，否则 PermissionExcept『非系统管理员，无权限新增数据』）。msgType=custom 时 pluginName 服务端强制=name。409=CMDB name 冲突。敏感字段（configFields.type=password）值须 base64。v2 create 解码后存、返回脱敏；v1 不解码不脱敏。"
+      - op: notify_config.update
+        rule: "须系统管理员。v2 PUT 解码敏感字段（值=******** 表示未改→用 CMDB 原值；非 ********→base64 解码，失败报错）。msgType=custom 时同步 pluginName=name。v1 PUT 无敏感处理。"
+      - op: notify_config.delete
+        rule: "须系统管理员。仅 v1 路由（/api/v1/message_sender/configs/{id}），v2 无 DELETE。响应已脱敏。"
+      - op: notify_config.list
+        rule: "⚠️必须走 v2（/api/v2/...）—— v1 GET list 明文返回 serverConfig 密码（实测 .90：email.login_password 明文）。v2 对每项 mask_sensitive_fields。无鉴权（任意 org 请求可列）。内部固定 page_size=300，config 超限丢（get_plugin_configs）。"
+      - op: notify_config.get
+        rule: "仅 v1 路由（v2 无单条 GET）。⚠️明文返回 serverConfig 敏感值，仅排查用；常规读走 v2 list。无鉴权。"
+      - op: notify_message.send
+        rule: "无鉴权（任意带 org/user header 可发）。body {topic?, data:{receivers:[{user|user_group|email_addr, method}], msg_data:{content,...}}}。method=config.name。按 method 分桶查 CMDB USER/USER_GROUP，state!=valid 静默跳过。脚本异常该 method 置 'error'（整体仍200）。响应 data={method: 脚本返回值|'not support'|'disable'|'error'}。"
+      - op: notify_message.debug
+        rule: "无鉴权。不需先建 config——body 即 config 字段+receivers 原地试跑。一次一种方式；receivers[].method 必须=msgType。⚠️msg_data 内容被固定覆盖为测试文本（只验证脚本可执行+receiver 可解析，不验证业务渲染）。custom 临时脚本 finally 删（脚本 crash 可能留垃圾）。v2 debug 解码敏感字段。"
+      - op: notify_alert.receive
+        rule: "无鉴权。data.alert_receivers=[{name(用户名),method}]，整个 data 作为 msg_data 透传脚本。仅支持 cmdbUserObjectColName 非空的通知方式。"
+    source: "platform/msgsender/{mail_config/config_handler.py:62-371, custom_sender/message_handler.py:362-998}；实测 .90:8095 v1明文/v2脱敏对照"
+
+api_behavior:
+  pagination:
+    rule: "list/search 分页时 api-cli 以流式 NDJSON 输出——每行一个完整对象，非 {data:{list:[...]}} 包装。解析须逐行 json.loads。单对象接口（detail）才是 {code,data:{...}}。"
+  instance_search_fields_required:
+    rule: "object_instance.search 的 body 必带 fields（返回属性 id 列表），否则 100000 参数错误 / fields is required but not set。"
+  instance_count_field:
+    rule: "object_instance.search 的实例总数在 data.total（契约 response 明列 total，不是 count）。场景『有几个实例』读 total，或对 data.list 计数。"
+  instance_batch_delete_path:
+    rule: "批量删真实路径 DELETE /object/{object_id}/instance_batch（契约误写 /instance/_batch，差一个斜杠，照契约写必 404）。源码 instance_extend/route.go:11 为准。"
+  instance_search_name_field:
+    rule: "search 的 fields 含 `name` 时依赖模型的『name relation』配置；模型若缺该配置（创建缺陷）报 133116「Can not find name relation of <OBJECT>」。规避：fields 不带 name，用 instanceId/ip 等字段（实例 name 仍存在，只是不能经此字段取）。e2e 实测 TESTWWH 即此坑。"
+  relation_data_probe:
+    rule: |
+      探测「实例的关系字段有没有数据」🔴禁用 query {"<关系名>":{"$exists":true}}——对关系字段语义不可靠
+      （实测 2026-08-14 .90：HOST 3 台实际关联了 serviceSets，$exists 却返回 0；属假阴性）。
+      正确方法（取值法）：fields 直接带关系名（如 ["hostname","serviceSets"]）+ relation_limit，
+      对返回值判非空数组。多跳取值（如 serviceSets.system.name）同理按返回值判断。
+      另：fields 带模型不存在的关系字段会整请求报 133116（Can not find xxx relation），
+      探测前先用 object_model.detail 的 relation_list（right_id=出边路径名）核对该关系存在。
+  instance_relation_chain:
+    rule: |
+      多层关系链路（A→B→C→…）沿链取字段/过滤——两套机制（V3 专属 ProcessTransHierRelation；源码 instance_search_service.go:286-309）：
+      ① 直接点分路径（递归展开，实测 3 层通，契约对 fields 仅承诺 2 级但代码支持 N 层）：
+         - 取终端字段：fields:["HOST.serviceSets.name"]（TESTWWH→HOST→服务集 取服务集名）
+         - 按终端属性过滤【根实例】：query:{"HOST.serviceSets.name":{"$eq":"dev"}}（命中其 HOST 关联了 dev 服务集的实例；实测 7 条）
+      ② 命名跨级关系 rel_xxx：对象视图预定义的 TransHierRelation（持 QueryPath 如 HOST.SERVICE_SET.SYSTEM），用 rel_xxx 或 rel_xxx.attr 引用，后端重写成完整路径（rel_/_rel_ 前缀识别，constant/other.go:48-58）。
+      query（过滤根实例）vs fields_relation_filter（过滤返回的对端列表，key=关系 out_id 支持多层/边属性 .@）：职责正交。
+      limitations[].field 支持多级（如 owner.app，search_limit.pb.go:22）；cmdb_service 自动生成仅第 1 层，多级需调用方自给。
+      ⚠️ 注意：filter_relation 不在 search（在 GroupInstanceV3 聚合接口）。
+  relation_path_discovery:
+    rule: |
+      多模型关系链路【发现】用 object_relation.related_key（GET /object_relation_related_key，源码 object_path/）：
+      给定 src/dst 模型，返回所有可达路径（实测最多 100 条），每条 {label, reverseQueryKey, path}。
+      - reverseQueryKey（接口直给，点分 Out.Id 链）= dst→src 反向键，直接喂【dst 模型】search 的 fields/query。
+      - 正向键（src→dst）= 从 path[].relation_side_id 序列按序拼接，喂【src 模型】search。
+      e2e 实测（org 18832008）：related_key(HOST, APP_SYSTEM@ONEMODEL) →
+        reverseQueryKey=serviceSets.hosts（APP_SYSTEM→HOST：APP_SYSTEM search fields=["serviceSets.hosts.ip"] 取到 HOST ip 172.30.0.232）；
+        正向键=serviceSets.system（HOST→APP_SYSTEM：HOST search fields=["serviceSets.system.name"] 取到系统名 "Easyops"）。
+      工作流：related_key 发现链路键 → object_instance.search 用该键多层 jsonPath 穿越取终端字段/按终端属性过滤根实例。
+  wrapper:
+    rule: "标准响应 {code, message, error, data}；code=0 成功。业务错误码形如 133xxx。"
+
+  # ===========================================================================
+  # AutoOps 接口级行为（tool_service）—— 编排时必须知道
+  # ===========================================================================
+  autoops_wrapper:
+    rule: "标准响应 {code, codeExplain, error, data}（比 cmdb 多 codeExplain）；code=0 成功。业务错误码形如 1xxxxx。导出端点是 .tar.gz 二进制流（不走 JSON wrapper）。"
+  autoops_list_format:
+    rule: "tool.list **后端响应**是 {code,data:{list,total}} wrapper（取 data.list）；**api-cli** 调本端点流式输出 NDJSON（每行一个 Tool，是 api-cli 的分页输出特性，非后端响应格式）；SDK（sdk/easyops_client.py list_tools）取 data.list 返回 [...]. 前端列表页 ?category=&q= 映射：category 直传（含子类展开），q 是后端 name 的别名（$like 匹配 name+memo）。"
+  run_inputs_map:
+    rule: "tool_execution.run 的 body.inputs 是 **map**（proto map<string,Value>，key=参数名 value=值，如 {\"cmd\":\"free -m\"}），不是 [{name,value}] 数组——数组会报 json 解析失败 100000。目标主机走 agents（IP 数组，重写成 inputs.@agents）。"
+  run_vid_default:
+    rule: "tool_execution.run 的 vId 默认 $latest_production；若工具只有 development 版本（如 run_cmd），$latest_production 报『工具版本不存在 100005』——用具体 vId（从 tool.get 拿）或 $latest_development。"
+  update_response_only_toolid:
+    rule: "tool.update 响应 data 只含 {toolId}（无 vId/vName，源码 basic_service.go:322）——无法从响应判断是否派生新版本，必须 tool_version.list 复查。"
+  tool_script_no_future:
+    rule: |
+      ⚠️ 工具脚本（.tar.gz 里的 script）【不要】用 `from __future__ import ...`。
+      EasyOps 平台下发执行时会在脚本开头注入内部方法/变量（EASYOPS_* 注入），使 __future__ 不在文件首行，触发 SyntaxError: from __future__ imports must occur at the beginning of the file（实测坑）。
+      py2/3 兼容改用：运行时判断 PY2 = sys.version_info[0]==2、text = unicode(py2)/str(py3)、用 logging（不直接 print）、不用 f-string、raise 不带 from。
+      ⚠️工具脚本须【自包含】（不得 import 外部 .py；调 cmdb/easyops 用 py2 stdlib urllib2 + EASYOPS_*）——见 systems.yaml 顶层 platform_conventions.code。
+  builtin_vars:
+    rule: |
+      工具脚本运行时的内置变量（agent 侧环境变量；源码 internal/execution/param/param.go:64-96 + cmd/tool_service/conf/internal.param.default.yaml）。
+      ⚠️ 纠偏：场景文件提到的 __instance__/__host__/${cmdb.xxx} 在 tool_service 源码里【不存在】；真实机制是下面这些 EASYOPS_* 环境变量 + cmdbInstance 类型输入参数（按执行目标注入实例）。
+      基础（必注入）：EASYOPS_SCRIPT_TYPE / EASYOPS_PARSER / EASYOPS_EXEC_USER / EASYOPS_TOOL_ID / EASYOPS_TOOL_NAME / EASYOPS_NEED_NOTIFY / EASYOPS_ORG / EASYOPS_USER / EASYOPS_AUTHORIZATION_TOKEN / EASYOPS_FLOW_TASK_ID（流程触发时）/ EASYOPS_AGENTS（feature flag）。
+      服务发现（脚本反查平台服务）：EASYOPS_CMDB_HOST / EASYOPS_CMDB_SERVICE_HOST / EASYOPS_TOOLS_HOST / EASYOPS_OPEN_API_HOST / EASYOPS_SECRET_HOST / EASYOPS_COMMAND_HOST / EASYOPS_NOTIFY_HOST / EASYOPS_DEPLOY_HOST / EASYOPS_EASYFLOW_HOST / EASYOPS_APPCONFIG_HOST / EASYOPS_CONSOLE_URL 等。
+      条件注入：EASYOPS_ENCRYPT_KEY/IV（仅当工具有 encryptedString 输入；脚本 DecryptString 用）/ EASYOPS_SCHEDULER_ID+TRIGGER（仅定时调度触发）。
+      agent 自取：EASYOPS_LOCAL_IP（本机 IP，从 sysconf.ini）/ EASYOPS_BASE_PATH（默认 /usr/local/easyops）。
+      实操：拿本机 IP 用 $EASYOPS_LOCAL_IP；拿 org/user/token 用 $EASYOPS_ORG/$EASYOPS_USER/$EASYOPS_AUTHORIZATION_TOKEN；要 CMDB 实例作输入就在 inputs 定义 type:cmdbInstance 参数（平台按目标注入），别在脚本写 ${cmdb.xxx}。
+  tool_param_injection:
+    rule: |
+      ⚠️变量注入形态纠偏（2026-08-26 fintech 工具平台真跑实测，关键）：
+      EASYOPS_* 内置变量与工具 inputs 都【不是进程环境变量】（shell env 里看不到），而是执行器
+      把它们拼成【同名 python 变量赋值】注入脚本 header（源码 execution/script/creator.go:125-131
+      + param/format.go AssembleParams → python 形如 NAME="""值"""，拼在用户 content 之前）。
+      脚本取值正确姿势：globals().get("EASYOPS_ORG") / 直接引用同名变量；os.environ 取不到。
+      优先级：inputs > globalVars > toolEnv > flowEnv（creator.go:126 注释）。
+      CMDB 地址注意：EASYOPS_CMDB_SERVICE_HOST 注入的是【集群真实地址】（如 172.30.0.234:8079），
+      不一定是 agent 本机——别假设回环可用；脚本解析顺序建议 globals 变量 > env 同名 > 回环兜底。
+      EASYOPS_ORG 注入为 int 型。
+  tool_output_protocol:
+    rule: |
+      平台 SDK 输出协议（static/tool_lib/main.py 源码，随 header 注入）：
+      · PutStr(paramName, paramVal)——paramVal 收 str（None 跳过值段）；输出 ##PARAMETER_<name>## 标记段。
+      · PutRow(tableName, rowVal)——⚠️rowVal 收【"k=v&k=v" URL编码字符串】非 dict（源码 rowVal + "&_E_TS=..."
+        直接字符串拼接，传 dict 报 TypeError）。tableName=="table" 自动改 "default"。要输出结构化行
+        需自适配：dict → urllib.quote_plus 拼串（bool 转 true/false 小写）。
+      · PutFormRows(tableName, rowsVal)——多行表单形态，同为字符串拼接协议。
+  tool_py2_pitfalls:
+    rule: |
+      agent python 为 2.7（/usr/local/easyops/python/bin/python）——本地 py3 验证过了平台上仍可能炸，
+      py2 缺失函数清单（fintech 实战踩全）：
+      · re.fullmatch 无 → 封装 _fullmatch = re.match("(?:%s)\\Z" % pat, s)
+      · gzip.compress 无（py3 才有）→ gzip.GzipFile(fileobj=StringIO(), mode="wb").write()
+      · open("w").write(bytes) 在 py3 又炸 → 写文件用 "wb"+encode 或按 PY2 分支
+      · py2 兼容代码里的前向引用：模块顶部配置段若调用后文才定义的 helper（如 _text）会 NameError
+      本地调试兜底：脚本可加 EASYOPS_TOOL_INPUT(JSON)/argv k=v 双兜底，与平台变量注入共存。
+  package_format:
+    rule: |
+      工具包（导入导出的 .tar.gz）文件结构（源码 import_export/export.go + import_tool/import.go）：
+        <toolName>.tool.tar.gz
+        └── <toolName>/
+            ├── ._easyPackageConfig.dat   # 包元信息 JSON（packageId=toolId/type/platform/version 块）
+            ├── config                    # 工具配置 JSON（Tool 的 export:"config" 字段：inputs/outputDefs/tableDefs/toolLibs/执行参数）
+            ├── script                    # 脚本正文（原样）
+            └── libs/<libName>.tar.gz     # 可选：依赖工具库（解压得 <libName>.json 元信息 + <libName>_repo.tar.gz）
+      字段序列化靠 Go struct 的 export tag 分流（export:"dat"→dat 文件，export:"config"→config 文件）。导入是 upsert（toolId 锚定）。
+      无编译步骤——工具定义 ↔ tar.gz 是纯序列化往返；运行时执行器把 SDK 库（按 type 选 main.sh/main.py/...）+ EASYOPS_* header + 用户 content 拼成脚本下发 agent。
+      开发新工具包（承接工具包开发需求）：产出 dat+config+script 三件套（+ 可选 libs）打成 tar.gz；script 须【自包含】（py2，不 import 外部 .py，见 platform_conventions.code），用 PutStr/PutRow 回吐输出。
+      ── dat/config 实操细节（2026-08-26 fintech 工具包开发实测）──
+      · dat.package.type 写死 "3"（export.go:236 硬编码，与脚本语言无关，别动）；脚本语言标记在【config 的顶层 type 字段】（"python"/"shell"/...，ToolVersion 层 tool_version.go:108 export:"config"）——config 漏 type 平台按默认类型渲染脚本。
+      · dat 结构 {package: {...}, version: {versionId, name, packageId...}}；顶层目录名=工具中文名。
+      · config 需完整 ToolConfig 骨架（batchStrategy/containerSandbox/execPreAuth/blackList/whiteList/toolLibs 等空值也要给），inputs/outputDefs/tableDefs 按需——骨架缺字段导入可过但前端渲染异常。
+      · cmdbInstance(s) 入参的候选过滤 cmdbQuery 见 autoops_tool_input 字段说明（$like 支持、$regex 不支持、query 是序列化 JSON 字符串）。
+      · 实例选择器增强字段：selector=cmdb.range.instance.query（带查询过滤）/ cmdbSelector=simple-select+cmdbOptionSetting{displayFields,sortFields}（简表选择自定义列）。
+      · 导入通道：SDK easyops_client.import_tool（multipart，api-cli 不支持）；upsert 同 packageId 更新并派生新版本，get_tool data 复核 type/cmdbQuery 生效。
+
+  # ===========================================================================
+  # ITSM 表单接口级行为（flowable_service）—— 编排时必须知道
+  # ===========================================================================
+  itsm_wrapper:
+    rule: "标准响应 {code, error, message, data}（同 cmdb 风格）；code=0 成功。list 返 {data:{page,pageSize,total,list}} 标准 JSON（非流式 NDJSON）。"
+  itsm_auth:
+    rule: "三件套（cookie+org+user，同 cmdb）+ 额外 4 个 itsc:form_management_{access,create,update,delete} 权限（form_schema_version_service.go:31-34）。缺权限报 403『鉴权失败，该用户没有权限』。实测 easyops 具备。"
+  itsm_form_definition_string:
+    rule: "formDefinition / businessRules 在 wire 层都是【JSON 字符串】（CMDB 存 string，converter.go:115-133）。save/update body 传 JSON.stringify([]Container)；get 返回字符串需二次 JSON.parse。深层结构（容器/控件/脚本）见 objects.yaml#itsm_form_definition——后端透传不解析，结构由前端解释。"
+  itsm_conditional_display:
+    rule: |
+      条件显示 = displayCondition 字符串表达式（前端求值，后端透传不校验）。表达式 DSL：
+      用 `#{容器ID.控件ID}` 引用某控件的值，配 JS 风格操作符（比较用 `==` 非 `=`）。按【触发控件类型】选模板：
+      ┌──────────────────────────┬───────────────────────────────────────────────┬──────────────────┐
+      │ 触发控件类型              │ 表达式（容器ID.控件ID 换成实际值）              │ 含义             │
+      ├──────────────────────────┼───────────────────────────────────────────────┼──────────────────┤
+      │ INPUT/TEXTAREA/NUMBERINPUT/SLIDER │ #{c.field} == "1"                     │ 值等于"1"时显示  │
+      │ ARRATINPUT（数组输入）    │ #{c.field}.includes("1")                      │ 值包含"1"时显示  │
+      │ SELECT(单选)/RADIO(单选组)│ #{c.field}.value == "1"                       │ 选中"1"时显示    │
+      │ MULTIPLESELECT/CHECKBOX   │ #{c.field}.some(item => item.value == "1")    │ 值含"1"时显示    │
+      │ CASCADER（级联）          │ #{c.field}.some(item => ["1-1"].includes(item.value)) │ 选中"1/1-1"时显示 │
+      │ SWITCH（开关）            │ #{c.field}.toString() == "true"               │ 开关开启时显示   │
+      └──────────────────────────┴───────────────────────────────────────────────┴──────────────────┘
+      可配三处：组件 options.displayCondition / 容器 displayCondition / tabPane.displayCondition（+ displayUserTaskId 仅跨节点填）。
+      容器ID/控件ID = formDefinition 里的 key（container.key / component.key），不是 modelField。
+      示例：场景『选虚拟机显虚拟机 table』——触发是 SELECT(单选) 申请主机类型(key=hostType，容器 key=c_base)，
+      虚拟机 table 的 displayCondition = `#{c_base.hostType}.value == "vm"`；物理机 table = `#{c_base.hostType}.value == "pm"`（实测 == 生效，单 = 不生效）。
+      ⚠️控件 id 用 component.key，且 key 须 == modelField（见 itsm_form_component constraints），否则表达式取不到值。
+      ⚠️displayUserTaskId（监听节点，容器/tabPane，string）—— 只在【跨节点条件显示】时填：displayCondition 引用的是【别的流程节点】表单里的控件时，用 displayUserTaskId 指明从哪个节点（BPMN activity id，如 Activity_0fvwq8a）取该控件值。引用【本节点】（同表单内）控件的条件显示【不填】（留空）——误填会让前端按跨节点取值、本节点条件反而不生效。
+      节点 id 来自流程定义（flowable_service 的 process API）。TODO：未来补流程接口后回流跨节点联动的完整机制。
+      businessRules（form 级 JSON 字符串）是独立业务规则载体，后端透传不解析。
+  itsm_data_inheritance:
+    rule: |
+      数据继承三层（无『继承整张父表单』的声明式配置）：
+      ① container.default{userTaskId,sectionKey}=同工单指定节点指定 section 继承（business_table 类用，按 uuid 对齐合并，新表单缺失的旧数据打 Deleted 软删）；
+      ② 脚本 history/currentNode 入参=跨节点取表单字段值回填（非 schema 配置，见 itsm_form_script_input）；
+      ③ options.defaultValue=静态默认值（动态默认值用 remoteFunc 脚本）。
+  itsm_value_bind:
+    rule: |
+      控件值/选项来源 5 种：
+      ① 静态枚举 options.extraProps.items / .options（SELECT/RADIO/CHECKBOX 的 [{key,label,value}]）；
+      ② 工具脚本 options.remoteFunc（toolId 调 EasyOps 工具拿数；出参 dataPath+showKey；见 itsm_form_remote_func）；
+      ③ 表单级数据源 FormDataSource（独立 CMDB 实体 _ITSC_FORM_DATA_SOURCE，Config 不透明 JSON；版本经 dataSourceIdList 反向关联多数据源）；
+      ④ CMDB 模型实例（CmdbInstanceSelect/CmdbCascader/business_table 绑 objectId；级联用 objectIdPath）；
+      ⑤ 静态 options.defaultValue。
+
+  # ============================================================================
+  # sso-adapter provider 交付（知识型对象，无 api 字段——非 REST，本地代码工程）
+  # 服务：logic.sso-adapter:8211（py2）。归属 easyops-itsm 能力域（前台业务服务）。
+  # 交付流程见 flows/build-sso-provider.yaml。
+  # ============================================================================
+  sso_provider:
+    description: |
+      EasyOps SSO 适配器（logic.sso-adapter:8211）的登录插件 provider。插件制——每个 provider 对接一个客户
+      SSO 协议（OAuth2/CAS/私有），实现 Provider 基类约定方法即可接入，无需改 api_gateway / brick_next。
+      【知识型对象，非 REST 资源】——交付 provider 是本地代码工程（写 py + 配 PLUGIN_CONFIG + 打包），
+      不调远端 API。此对象沉淀"怎么造 provider"的契约知识，LLM/人据它 + flows/build-sso-provider.yaml
+      按客户协议交付可解压部署的 provider 包。
+    source: 本对象契约/约束自包含（fields/api_behavior 内联）。标准协议 provider 的【实物范本】在 formats/sso-provider/（oauth2/ + cas/，随 skill 包分发，直接仿写，勿探测 sso-adapter 源码）。开发方 onboarding 溯源：sso-adapter handlers/providers/base_provider.py + oauth2/ + cas/ + settings/setting.py + provider_cache/cache.py + utils/import_util.py + .pkgbuild/PKGBUILD。
+    fields:
+      name:              { type: string, required: true, desc: "provider 标识。⚠️【四位一体约定】：目录名=文件名=类名=PLUGIN_CONFIG 的 key，全相同（如 oauth2 → handlers/providers/oauth2/oauth2.py 的 class oauth2 → PLUGIN_CONFIG.oauth2）" }
+      pre_signin:        { type: method, required: true, desc: "登录前：返回统一认证服务器登录地址（带参数）。入参 params（dict，URL query）。返回 str（登录 URL）或 PreSignInRequest 对象（含 login_url/method/request_args）。handlers.py PreSignIn 调用" }
+      signin:            { type: method, required: true, desc: "登录回调：用 code/ticket 换凭证。入参 params（dict，含 code/ticket 等）。返回 authorization_info（dict，协议特定：oauth2={access_token,refresh_token,token_type,expires_in}；cas={ticket}）。handlers.py SignIn/SignAuth 调用" }
+      user_info:         { type: method, required: true, desc: "取用户信息：从 authorization_info 拿 (login_key, login_value)。⚠️login_value 必须是 cmdb 唯一用户凭证（如 name/sub）。handlers.py SignIn 调用，返回值用于登录 brick next" }
+      sign_out:          { type: method, required: true, desc: "登出：返回登出 URL。入参 params。返回 str（logout URL）或 SignOutRequest 对象。handlers.py SignOut 调用" }
+      authorize_post_deal: { type: method, required: false, desc: "授权后处理（可选，默认空 return）。入参 query dict。handlers.py AuthorizePostDeal 调用" }
+      custom_auth:       { type: method, required: false, desc: "自定义密码校验（可选）。入参 params。返回 bool（False→AuthenticationExcept 账号密码错误）。handlers.py CustomAuth 调用" }
+      sso_global_sign_out: { type: method, required: false, desc: "全局登出回调解析（可选）。入参 params（含 logoutRequest）。返回 ticket。handlers.py SSOGlobalSigOut 调用" }
+    relations:
+      - { to: sso_provider_config, type: composition, cardinality: "1:1", via: PLUGIN_CONFIG.<name>, desc: "每个 provider 对应 PLUGIN_CONFIG 里一个同名 key 的配置 dict" }
+    api_behavior:
+      runtime_env: |
+        ⚠️Python 2 运行时（shebang /usr/local/easyops/python/bin/python）。provider 代码必须 py2 兼容：
+        urllib/urllib2/urlparse（非 urllib.parse）、print x（非 print(x) 必须）、except Exception, e（非 as）、
+        unicode 类型判定、dict.iteritems()。依赖：requests、jsonschema（第三方，已装）。
+      config_injection: |
+        所有参数走 PLUGIN_CONFIG，不硬编码。provider __init__ 里 self._config = PLUGIN_CONFIG.get("<name>")，
+        拿不到 raise；jsonschema validate self._config（必填项缺失 raise）。
+        PLUGIN_CONFIG 顶层在 settings/setting.py，但【setting_custom.py 优先级最高】——
+        easy_tornado SettingCombiner._dict_merge 深度合并覆盖（setting_custom.py 的同名 key 递归覆盖 setting.py）。
+        → 交付 provider 时，参数片段写进 setting_custom.py 的 PLUGIN_CONFIG（不动 setting.py）。
+      plugin_registration: |
+        注册由 provider_cache/cache.py load_plugins() 启动时完成：遍历 PLUGIN_CONFIG keys →
+        dynamic_imp_class('handlers:providers:<name>:<name>') 动态导入目录下 .py → 找 class <name> → 实例化缓存。
+        运行时 handlers.py 按 URL /api/v1/signin/<pk> 的 pk（=protocol 名=provider 名）取 provider。
+        ⚠️PLUGIN_CONFIG 必须有 "default" key 指向某 provider，否则启动 raise。
+      four_in_one_convention: |
+        ⚠️【四位一体】强制约定，违反则 dynamic_imp_class 找不到类：
+        目录名 = 文件名 = 类名 = PLUGIN_CONFIG key。
+        例：oauth2 → handlers/providers/oauth2/oauth2.py 里 `class oauth2(Provider)` → PLUGIN_CONFIG.oauth2。
+        类名小写（与现 cas/oauth2/easy_work 一致，非 PascalCase）。
+      pkgbuild_whitelist: |
+        ⚠️【打包白名单坑】.pkgbuild/sso_adapter/PKGBUILD 的 package() 里有硬编码 pluginList：
+          pluginList=("cas" "demo" "easy_work" "eiac" "oauth2")
+        只有白名单里的 provider 才 cp 进包。新交付 provider 打整包部署时，【必须】加进此 pluginList，
+        否则 PKGBUILD 不打包它（解压目录里没该 provider，服务加载不到）。
+        独立 provider 包（解压到已部署 sso-adapter 目录）不受此限——直接 cp 到 handlers/providers/ 即可。
+      two_paradigms: |
+        交付新 provider 选范式（按客户协议接近哪个）。【实物范本在 formats/sso-provider/——oauth2/(范式①) + cas/(范式②)，直接复制改名仿写，勿探测 sso-adapter 源码】。两范式 __init__ 都做 jsonschema 校验 self._config。
+        ①【模板方法范式】（适合准 OAuth2/OIDC 协议，多数情况只改配置不写代码）：
+          基类把登录流程拆成大量小 hook，非标协议只重写个别 hook 即可适配。完整 hook 清单（按登录阶段）：
+          · pre_signin 阶段：pre_signin_required_params（必填参数 response_type/client_id/redirect_uri/access_type）、
+            pre_signin_scope（scope 可选）、pre_signin_state（state 生成，默认 uuid）。
+          · signin 阶段：signin_state（解析 state）、signin_authorization_params（code 换 token 的请求参数：
+            grant_type/client_id/client_secret/redirect_uri）、signin_authorization_method（默认 POST）、
+            signin_authorization_headers（默认 form-urlencoded）、signin_authorization_body（默认 None）、
+            signin_parse_response（默认 resp.json()）。
+          · user_info 阶段（access_type=online 直接用 access_token；offline 先 refresh）：
+            user_info_validate（校验 authorization_info schema）、user_info_refresh（refresh_token 换 access_token，
+            子 hook _method/_params/_headers/_body/_parse_response）、user_info_endpoint（带 Authorization 头取用户信息）、
+            user_info_endpoint_response（默认 resp.json()）、parse_user_info（⚠️从 user_info 取 login_key/login_value，
+            默认 ("name", user_info["sub"])——客户协议用户字段不是 sub 时【必须重写这里】）。
+          · sign_out 默认返回空串（access_token/refresh_token 不特殊处理）。
+        ②【直白范式】（适合私有协议/集成平台跳转，自己管 client 类，4 必填方法直写）：
+          参考 cas 的实现要点：pre_signin 返回 client.get_login_url(service_url)；signin 把 ticket 包成
+          authorization_info={ticket}；user_info 调 client.perform_service_validate(ticket) 拿 user，返回
+          (login_name 配置项的值, user)；sign_out 返回 client.get_logout_url(service_url)。
+          CAS client 核心是 service validate（ticket→user），私有协议等价于"凭证→用户"的交换逻辑自己写。
+      delivery_artifact: |
+        交付物 = 解压即部署包，含：① provider 代码（handlers/providers/<name>/）；
+        ② setting_custom.py 配置片段（PLUGIN_CONFIG.<name> 的参数 + 改 default 指向）；
+        ③ 安装说明（解压目录、PKGBUILD 白名单是否需改、重启 sso-adapter、验收方法）。
+        两种部署形态：整包（改 PKGBUILD pluginList 重打 sso-adapter 包）/ 独立包（cp 到已部署目录）。
+        详见 flows/build-sso-provider.yaml。
+
+  sso_provider_config:
+    description: |
+      provider 的 PLUGIN_CONFIG 配置项（每个 provider 自定义，无统一 schema）。oauth2/cas 的配置项作参考。
+      【知识型对象，非 REST 资源】。setting_custom.py 里的 PLUGIN_CONFIG.<name> 即此实例。
+    source: sso-adapter settings/setting.py + setting.sample.py（开发方 onboarding 提炼；【源码不进包、运行时不依赖】）。配置项清单已内联在 fields.config_items，自包含。
+    fields:
+      provider_name:   { type: string, desc: "PLUGIN_CONFIG 的 key，与 provider 类名一致（四位一体）" }
+      config_items:    { type: dict, desc: "该 provider 的配置项（协议特定）。oauth2: login_url/authorization_url/refresh_url/user_info_url/client_id/client_secret/redirect_uri/response_type/access_type/scope/grant_type；cas: login_url/redirect_uri/auth_prefix/login_name；easy_work: login_token_key/access_key/secret_key/easy_work_ip/login_key/redirect_url_key" }
+      default:         { type: string, required: true, desc: "PLUGIN_CONFIG.default 指向默认 provider 名（启动校验非空，缺失 raise）" }
+    api_behavior:
+      merge_priority: |
+        配置合并优先级（setting_util.py SettingCombiner）：setting_custom.py 深度覆盖 setting.py。
+        交付 provider 时把配置写进 setting_custom.py 的 PLUGIN_CONFIG（覆盖默认占位 __XXX__）。
+        ⚠️setting_custom.py 是 Python（dict 字面量），不是 yaml/json——部署人员改它要懂点 Python。
+      validation: |
+        provider __init__ 用 jsonschema validate self._config（必填项缺失 raise）。
+        交付时配置项 schema 要在 provider 代码里声明（jsonschema config_schema，仿 two_paradigms 范式①的 hook 契约），缺必填启动即报清晰错。
+  # ---- collector api_behavior（原 collector deployment）----
+  kit_status_meaning:
+    rule: "kit.list 的 status 字段：enabled=平台内置套件（protected=true，禁覆盖）；available=用户自定义套件（protected=false，可覆盖）"
+    source: "tmp/easyops-cli/.../kits-develop/upload.md:206-209"
+  multipart_bypass_api_cli:
+    rule: "plugin_package 的 export/import/import_update 是 multipart/binary 流。api-cli 的 params.in 无 formData、response 无 --output 存文件。真调走 Python SDK（sdk/easyops_client.py 扩展 collector_plugin 方法）或 curl -F"
+    source: "formats/collector-kit/package-format.yaml api_cli_limitation"
+  protected_three_branch:
+    rule: "上传前校验同名套件 protected：不存在→新建(upsert=false)；存在且protected=false→覆盖(upsert=true)；存在且protected=true→禁覆盖需改名"
+    source: "formats/collector-kit/package-format.yaml protected_check"
+
+  # ============================================================================
+  # dashboard 域（2026-08-14 二次接入，源码 07-source-repos 前端仓+data_exchange）
+  # 前端：next-apps-hyper-insign-v2/apps/dashboard（v2 唯一在用 app）
+  # ============================================================================
+  dashboard_instance:
+    description: |
+      仪表盘（CMDB _DASHBOARD 模型实例）。CRUD 走 easyops-cmdb.yaml#dashboard
+      （create=POST /v2/object/_DASHBOARD/instance、update=PUT .../instance/:id 全量覆盖、
+      delete=DELETE /object/.../instance/:id——镜像前端 CreateAndEditDashboardV2/route.yaml:402-530）。
+      配置主体 = panels(构件)+context(8种数据源)+variables(变量)。
+      配置结构/构件选型/变量全文见 formats/dashboard-kit/dashboard-config.yaml；
+      数据源类型与 args DSL/指标查证见 formats/dashboard-kit/providers-context.yaml。
+      自然语言建盘流程见 flows/build-dashboard.yaml。
+    source: "07-source-repos/next-apps-hyper-insign-v2/apps/dashboard/src/Pages/Dashboard/CreateAndEditDashboardV2/route.yaml:402-530 + contracts.yaml:3206-3262,5424-5425,6268-6272"
+    api: easyops-cmdb.yaml#dashboard
+    fields:
+      instanceId: { type: string, anchor: true, desc: "CMDB 实例主键（13 位 [0-9a-z]）；前端 URL /dashboard/v2/<instanceId> 用它" }
+      name:       { type: string, required: true, desc: "仪表盘名（create 必填）" }
+      category:   { type: string, required: true, desc: "分类（create 必填，route.yaml:462）" }
+      dashboardVersion: { type: string, desc: "固定 v2（route.yaml:407）" }
+      template:   { type: string, enum: [normal, bigScreen], desc: "normal 网格布局 / bigScreen 大屏（默认 1920x1080+黑底）" }
+      timerange:  { type: string, desc: "默认时间范围（now-1h 等），注入 QUERY.from/to" }
+      namespace:  { type: string, desc: "命名空间（新建默认 dashboard；实例监控页用 模块.objectId 格式）" }
+      panels:     { type: array, required: true, desc: "构件数组。brickConf 落库前 JSON.stringify（route.yaml:425-437）。结构见 formats/dashboard-kit/dashboard-config.yaml#panel_schema" }
+      context:    { type: array, required: true, desc: "数据源数组（8 种内置类型）。args DSL 见 formats/dashboard-kit/providers-context.yaml#context_types" }
+      variables:  { type: array, desc: "变量数组（QUERY.{id} 引用，5 种类型）见 formats/dashboard-kit/dashboard-config.yaml#variable_schema" }
+      type:       { type: string, desc: "前端固定注入 builtIn（route.yaml:441）——API 直建保持一致" }
+    relations:
+      - { to: cmdb_instance, type: association, cardinality: "1:1", via: instanceId, desc: "_DASHBOARD 模型实例（object_instance search 可查）" }
+      - { to: collector_metric, type: reference, cardinality: "N:1", via: "context[cmdb-olap].args.measures[].function.args[0]", desc: "cmdb-olap 数据源引用指标元数据（metricName 查证 collector_metric.list）" }
+    side_effects:
+      - op: dashboard.create
+        rule: "前端保存新建走 POST /v2/object/_DASHBOARD/instance（非 import upsert——import 仅本地 JSON 导入页且按 instanceId 匹配，Import/route.yaml:85-89）。🔴body 平铺无 instance 包装（e2e 实测 2026-08-14：包了 code=0 但字段静默丢失——后端 validator msg.Body=req 直接吃整个 body，create_v2_validator.go:110-124）。前端固定注入 type=builtIn。返回 instanceId。"
+      - op: dashboard.update
+        rule: "PUT 全量覆盖非 patch——漏传字段被清掉。迭代姿势：先 object_instance search 取完整现配 → 本地改 → PUT 回（e2e 实测 _version+1 全字段生效）。body 同 create 平铺。"
+      - op: dashboard.delete
+        rule: "单删 DELETE /object/_DASHBOARD/instance/:id（e2e 实测 code=0 即删）。系统内置盘（默认 AGENT/Cmdb 统计等）删前确认；protected 实例禁删。"
+      - op: object_instance.import (_DASHBOARD)
+        rule: "API 侧仍可用（upsert by keys），但非前端路径、且与前端 create 注入的 type=builtIn 等默认字段有差异——幂等批量迁移可用，常规建改走 dashboard.create/update。"
+    api_behavior:
+      silent_config_errors: "配置 JSON 里指标名/objectId 错误后端不报错——图表静默空白。指标名必查证（collector_metric.list）、objectId 必查证（object_model.list），试查用 olap_metric.query_v3（详见 providers-context.yaml#context_types.cmdb_olap.metric_verification）"
+      search_fields_guard: "🔴search 的 fields 只能带模型真实字段——带模型没有的字段（如 title）整请求报 133116 Can not find title relation（e2e 实测 2026-08-14）"
+      frontend_verify: "brickConf/context 属「前端解释型内容」——API 落库 code=0 不代表前端渲染正确，须用户开 URL 验收（getDashboardDefaultUrl 的格式：/dashboard/v2/<instanceId>?from=<timerange>&_namespace_=<namespace>）"
+
+  dashboard_metric_query:
+    description: |
+      【知识型对象】cmdb-olap 指标查询的 DSL 与试查方法（dashboard 图表数据核心链路）。
+      链路：dashboard context[cmdb-olap] → 网关 logic.data_exchange → data_exchange
+      POST /api/v1/data_exchange/olap（前端 getUrlOfProvider.yaml:43 铁证）。
+      api-cli 面：easyops-data-exchange.yaml#olap_metric（query_v3 图表合用 + select_raw 试查）。
+    source: "07-source-repos/data_exchange/olap/olap_service.go:95-153,305-410,955-961 + internal/types/operators.go:13-27,84-98 + 前端 getUrlOfProvider.yaml:31-45"
+    api: easyops-data-exchange.yaml#olap_metric
+    fields:
+      model:     { type: string, desc: "数据源.表。前端写 easyops.<objectId>；SplitN 两段解析（olap_service.go:955-961）" }
+      dims:      { type: array, desc: "分组维度；time=时间维度" }
+      measures:  { type: array, desc: "{name, function:{expression:算子, args:[指标名]}}。算子全集：count/min/max/sum/avg/topK/last/divide/increase/rate/irate/quantile" }
+      filters:   { type: array, desc: "{name, operator, value}；时间 name=time 值支持 now-1h 相对时间" }
+    api_behavior:
+      v3_for_charts: "v3 按 series 分组返回 List[]{name,dims,values[]{value,time}}——图表接入首选（v1/v2 平铺行）"
+      data_probe: "试查指标活性：query_v3 dims=[\"time\"]+time>=now-1h+limit 1；或 select_raw page_size 5+最近窗。list 空=无数据（勿建图）"
+      org_isolation: "db 名=org 号，SQL 层自动 org 过滤（pkg/sqlclient/parse.go:168-171）——跨 org 数据不可见，属预期"
+
+  collector_metric:
+    description: |
+      【知识型对象】采集指标元数据（CollectorAliasMetric 目录）——「dashboard 有哪些指标可用」的
+      权威查询途径。data_exchange 的 tags-list 是空实现桩（olap_service.go:91-93）勿用。
+      api-cli 面：easyops-collector-service.yaml#collector_metric（list v2 分页 + get 详情）。
+    source: "07-source-repos/collector_service/metric/route.go:20-21,38 + request_validate_trees.go:67,71 + metric_service.go:756,835 + metric_service_test.go:4128-4177"
+    api: easyops-collector-service.yaml#collector_metric
+    fields:
+      metricName:  { type: string, anchor: true, desc: "指标名（snake_case，如 host_cpu_used_total）——cmdb-olap measures[].function.args 用它" }
+      objectId:    { type: string, desc: "所属模型（如 HOST）——按模型查指标用" }
+      displayName: { type: string, desc: "显示名（如 CPU使用率）" }
+      unit:        { type: string, desc: "单位（如 percent(1)）——图表 axis.unit 用" }
+      dims:        { type: array, desc: "维度列表" }
+      isKeyMetric: { type: boolean, desc: "关键指标（优先选）" }
+    api_behavior:
+      list_response: "wrapper {code, data:{list,total}}（kitweb JSONPb gogo 序列化）；list 元素见 fields（实测还返回 dataType/type/expression/disabled/alertRuleBound/jobList 等扩展字段，total=200 for HOST）"
+      port_resolved: "✅已定案（e2e 2026-08-14）：metric 端点在 legacy 进程 :8125（EASYOPS_COLLECTOR_SERVICE_LEGACY_URL），直 200 免 contract header；:12000 报 giraffe-contract-name 错。调用加 --endpoint backend_legacy"

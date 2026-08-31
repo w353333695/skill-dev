@@ -1,0 +1,10 @@
+appId: fintech_data
+
+exampleFile: examples/default.properties
+
+namespace: []
+
+relatedNamespaces:
+  - redis-auth
+  - mongodb-auth
+  - feature-switch

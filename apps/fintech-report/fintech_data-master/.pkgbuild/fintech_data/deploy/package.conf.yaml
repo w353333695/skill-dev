@@ -1,0 +1,35 @@
+service_list:
+  - name: logic.fintech_data
+    port: 8203
+    host: ~
+dependencies:
+  - name: monthly_collection_service
+    version: ^1.2.2
+    editions: ["enterprise"]
+  - name: cmdb_service
+    version: ^2.48.1
+    editions: ["enterprise"]
+  - name: data_exchange
+    version: ^1.7.8
+    editions: ["enterprise"]
+start_dependencies: []
+proc_list:
+    - proc_name: fintech_data
+      proc_num_min: ~
+      proc_num_max: ~
+      pid_file: ~
+port_list:
+    - port: 8203
+      type: tcp
+start_script: ""
+stop_script: ""
+restart_script: ""
+install_prescript: ""
+install_postscript: ""
+update_prescript: ""
+update_postscript: ""
+rollback_prescript: ""
+rollback_postscript: ""
+proc_guard: stopStart
+port_guard: stopStart
+user: easyops:easyops

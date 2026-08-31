@@ -1,0 +1,165 @@
+# =============================================================================
+# formats/dashboard-kit/dashboard-config.yaml
+# EasyOps 仪表盘 v2 配置结构 —— 自然语言 → _DASHBOARD 实例配置 JSON。
+#
+# 核心事实：仪表盘 = CMDB _DASHBOARD 模型实例。CRUD 走 easyops-cmdb.yaml#dashboard
+# （create/update 镜像前端 v2 编辑器行为）+ object_instance search 查。
+#
+# 权威源（全部 file:line 可溯源，源码仓 07-source-repos/）：
+#   前端仓 next-apps-hyper-insign-v2/apps/dashboard/src/（v2 唯一在用 dashboard app）：
+#     · 保存组装（create/update body 字段全集）CreateAndEditDashboardV2/route.yaml:405-470
+#     · 新建默认值（_new_ 哨兵+模板初值）CreateAndEditDashboardV2/route.yaml:1746-1781
+#     · Panel 权威 interface  Functions/renderDefaultArgsOfPanel.yaml:68-110
+#                          + Functions/transformPanelData.yaml:46-63
+#     · 构件清单+默认配置    Functions/getDefaultBrickList.yaml（brickId: 行号见 brick_catalog）
+#     · 变量结构            Components/TplVarSelectorModal.yaml:672-705
+#     · 数据源类型/DSL      见同目录 providers-context.yaml
+#
+# 相关文件（本 kit 内）：
+#   providers-context.yaml —— 8 种数据源类型 + args DSL + 试查方法
+# =============================================================================
+
+# -----------------------------------------------------------------------------
+# 一、_DASHBOARD 实例骨架（dashboard.create/update 的 instance 字段）
+# -----------------------------------------------------------------------------
+dashboard_schema:
+  crud_note: |
+    建改查删 = easyops-cmdb.yaml#dashboard：create（POST /v2/object/_DASHBOARD/instance）/
+    update（PUT .../instance/:id，全量覆盖）/ delete + object_instance search。
+    ⚠️前端不用 import upsert——import 仅本地 JSON 导入页（按 instanceId 匹配）。
+  required_core: [name, category, panels, context]   # 最小可建（+默认 dashboardVersion/template）
+  fields:
+    name: "仪表盘名（必填，弹窗表单）"
+    category: "分类（必填，弹窗表单，route.yaml:462）"
+    dashboardVersion: "固定 \"v2\"（route.yaml:407）"
+    template: "normal（普通网格）/ bigScreen（大屏；新建默认 size 1920x1080+黑底，route.yaml:1750-1756）"
+    timerange: "默认时间范围（now-1h 等，route.yaml:408；注入 QUERY.from/to）"
+    namespace: "命名空间（新建默认 QUERY._namespace_ ?? \"dashboard\"，route.yaml:409-414）"
+    adaptive: "bool 自适应（bigScreen 默认 false，其余 true）"
+    context: "数据源数组（见 providers-context.yaml#context_schema；保存时 omit dataSource/formData.dataSource/formData.data 三调试字段，route.yaml:416-424）"
+    panels: "构件数组（见 panel_schema；brickConf 落库前 JSON.stringify，route.yaml:425-437）"
+    variables: "变量数组（见 variable_schema，route.yaml:406）"
+    hiddenTimeRange: "bool 隐藏时间选择器（route.yaml:438）"
+    messages: "消息订阅（route.yaml:439，通常 []）"
+    type: "前端固定注入 \"builtIn\"（route.yaml:441）——API 直建保持一致传 builtIn"
+    background: "{backgroundColor, backgroundImage: images[]}（route.yaml:442-445，bigScreen 用）"
+    size: "{width,height,gap}（大屏画布，route.yaml:461）"
+    readAuthorizers/updateAuthorizers/deleteAuthorizers: "权限数组（:446-471；user 前缀 :group 开头的是 userGroup）"
+  new_page_note: |
+    前端新建 URL /next/dashboard/dashboard/v2/_new_/edit?_template_=normal：
+    _new_ 是纯前端哨兵（不调创建 API，route.yaml:1663-1671），首次点保存才 create。
+    _template_=normal 无特殊分支（仅 bigScreen 有默认面板/尺寸），原样存入 template 字段。
+  source: "CreateAndEditDashboardV2/route.yaml:405-470,1746-1781（保存组装+新建默认值）"
+
+# -----------------------------------------------------------------------------
+# 二、panel（构件实例）结构 —— 权威 interface 摘要
+# -----------------------------------------------------------------------------
+panel_schema:
+  fields:
+    brickId: "构件 ID（chart-v2.line-chart 等，见 brick_catalog）"
+    brickConf: '⚠️JSON 字符串（落库前 JSON.stringify，route.yaml:425-437）：{brick:"构件运行时名", properties:{...含 data 数据绑定}, slots:{}}。编辑器读回时 JSON.parse（:1753）'
+    x/y/width/height: "网格坐标（前端内存态是 grid:{x,y,width,height}，保存时展开到顶层，route.yaml:425-437；24 列网格，宽常用 8/12/24）"
+    formData: "表单结构化镜像（编辑器 UI 用；column=grid.width/row=grid.height/yamlProperties/title/links，transformPanelData.yaml:7-40）"
+    source: "固定 \"brick\"（route.yaml:435）"
+    mode: "default | yaml（yaml=直接写 brickConf.properties）"
+    wrapped: "bool 白卡片容器"
+    wrappedConf: "卡片样式（背景/边框/内边距，renderDefaultArgsOfPanel.yaml:91-110）"
+    title: "面板标题；titleStyle: {color,fontSize}"
+    toolbarConf: "工具栏配置（有则 JSON.stringify，route.yaml:431-432）"
+    tools: "工具配置（route.yaml:436）"
+  data_binding: |
+    构件绑数据源唯一方式：brickConf.properties.data = "<% CTX.DS.<context项name> %>"
+    （getDefaultBrickList.yaml:97 等大量实例）。表格类是对象形式：
+    dataSource: {list: "<% CTX.DS.<context名> %>", pageSize: 10}（:825-828）。
+  brick_conf_example: |
+    {"brick":"chart-v2.line-chart",
+     "properties":{"xField":"time","yField":"host_cpu_used_total",
+       "data":"<% CTX.DS.时间序列数据Demo %>",
+       "axis":{"yAxis":{"unit":"percent(100)"}},
+       "showPoint":false,"legends":false,"style":{"height":"100%"}},
+     "slots":{}}
+  source: "renderDefaultArgsOfPanel.yaml:68-110 + transformPanelData.yaml:46-63 + getDefaultBrickList.yaml:92-107"
+
+# -----------------------------------------------------------------------------
+# 三、构件选型（catalog 内联——源码 getDefaultBrickList.yaml 的 brickId 清单）
+# -----------------------------------------------------------------------------
+brick_selection:
+  decision_tree: |
+    数据形态 → 构件：
+    ├─ 趋势/时序     → chart-v2.time-series-chart:766（时序专用 xRange/brush）/ line-chart:135 / area-chart:213
+    ├─ 当前值统计卡  → general-charts.statistic-card:291 / statistic-item:1001
+    │                 大屏指标卡：dashboard-v2.horizontal-indicator-card:4008 / vertical-indicator-card:4452 / tech-style-indicator-card-with-base:4055
+    ├─ 对比          → chart-v2.bar-chart:384 / horizontal-bar-chart:1373
+    ├─ 占比/分布     → chart-v2.pie-chart:473 / donut-chart:555 / treemap-chart:2043
+    ├─ 仪表/雷达     → chart-v2.gauge-chart:675 / radar-chart:1288
+    ├─ 表格          → presentational-bricks.brick-table:900（columns/dataSource.list 绑定）
+    │                 大屏滚动表：dashboard-v2.scroll-table:4120 / modern-scroll-table:4157
+    ├─ 文本/说明     → presentational-bricks.markdown-display:1064 / code-display:1133
+    └─ 其他          → funnel-chart:2448 / scatter-chart:3726 / bubble-chart:2898 / word-cloud:1873
+                       chinese-map-chart:2125 / data-view.china-map:2145 / divider:1202 / general-iframe:5051
+    （「:数字」= getDefaultBrickList.yaml 行号，完整默认配置查源码该行附近）
+  nl_to_brick: |
+    「趋势/随时间」→ time-series-chart｜「当前使用率/状态值」→ statistic-card 或 gauge-chart
+    「列表/明细」→ brick-table｜「占比/分布」→ pie/donut-chart｜「对比」→ bar-chart
+  statistic_card_gotcha: |
+    🔴统计卡 value 必须单值——用表达式从数据源提取，禁止直接绑整个数据源（绑数组 → 显示 NaN%）。
+    🔴🔴先确认数据源结构再写取值表达式（取决于 olap 版本，实测踩坑 2026-08-14 盘 658fed519b211
+    ——表达式假设错结构则卡片恒 0，且不报错）：
+    · 前端 cmdb-olap context 实际走 v1 端点 → transform 后是【平铺点数组】
+      [{time, <measure名>: 值}, ...]，取当前值 = 末位点的 measure 字段：
+      "value": "<% CTX.DS.cpuTrend?.length ? (CTX.DS.cpuTrend[CTX.DS.cpuTrend.length-1]?.[\"CPU使用率\"] ?? 0) : 0 %>"
+      （measure 名做 key，中文/含数字须用 [\"...\"] 下标语法，不能点语法）
+    · 仅当数据源是 v3 series 结构（[{name,dims,values:[{value,time}]}]）才用：
+      "value": "<% CTX.DS.cpuTrend[CTX.DS.cpuTrend.length-1]?.values?.[...]?.value ?? 0 %>"
+    · 数据源出单值时直接： "value": "<% CTX.DS.系统数量[\"data\"] %>"
+    format: {precision:1, unit:"percent(1)"}；icon: {category,icon,lib:"easyops"}；iconPosition:"right"; showCard:false
+    趋势图无此问题（xField/yField 按字段消费数组）。⚠️值太小+precision:0 会显示 0%（数据真实非 bug）。
+  source: "getDefaultBrickList.yaml brickId 清单（行号内联如上）+ 前次接入实测坑"
+
+# -----------------------------------------------------------------------------
+# 四、变量（variables）结构
+# -----------------------------------------------------------------------------
+variable_schema:
+  desc: "dashboard 级 URL query 参数声明 + 选择器。值经 QUERY.{id} 被 context/panel 表达式引用（i18n.yaml:1051 权威说明）"
+  type_enum: "constant（自定义列表）/ cmdb-model（从模型选）/ cmdb（从模型实例选）/ custom（自定义数据源）/ comparator（比较器）——TplVarSelectorModal.yaml:365-382"
+  fields:
+    id: "变量 ID（=URL query 参数名，被 QUERY.{id} 引用）"
+    name: "显示名"
+    multiSelect: "bool 多选（默认 false；QUERY 值为逗号分隔串，消费端 .split(',')+$in）"
+    showSelector: "bool 显示选择器 UI（默认 true）"
+    showFullScreenSelector: "bool（默认 true，编辑态自动补 route.yaml:1896-1905）"
+    selectorObjectId: "CMDB 模型 ID（type=cmdb）"
+    selectorQuery: "选择器过滤——🔴必须是【纯 JSON 字符串】（前端 JSON.parse 它），级联引用用 ${QUERY.<其他变量id>|string} 占位符嵌在 JSON 值里；🔴禁用 <% %> 表达式（整段表达式会 JSON.parse 崩 SyntaxError: Unexpected token '<'，实测踩坑 2026-08-14 盘 658fed519b211）。现网证据（一体化应用监控）：{\"appId.instanceId\": \"${QUERY.instanceId|string}\"}"
+    selectorBrick: "选择器构件（默认 forms.general-select，:747）"
+    selectorDefaultValue: "默认值（保存后 URL 自动带上，getDashboardDefaultUrl.yaml:5-22）"
+    fieldsLabel: "选项显示字段（🔴object_model 查证真实属性；HOST 无 name 是 hostname/ip）"
+    fieldsValue: "选项值字段（不配=默认 instanceId。🔴监控指标过滤必用 instanceId——OLAP 数据一定有 instanceId 不一定有 ip/hostname）"
+    placeholder: "占位文案"
+  builtin_vars: "QUERY.from/to（timerange 注入）/ QUERY.instanceId / QUERY.sort|order|page（表格）"
+  source: "TplVarSelectorModal.yaml:365-382,672-705,747 + i18n.yaml:1051 + getDashboardDefaultUrl.yaml:5-22"
+
+# -----------------------------------------------------------------------------
+# 五、表达式框架（<% %> 单表达式，跨文件通用）
+# -----------------------------------------------------------------------------
+expression_framework:
+  syntax: '"<% " + 单个JS表达式 + " %>"（求值）。⚠️与 ${QUERY.x|string} 占位符是【两套语法】——适用字段不同，用错即崩/失效：'
+  syntax_by_field: |
+    📌 <% %> 表达式（JS 求值）：brickConf.properties 值、context.transform、
+       cmdb-olap args 内的 query/filters value、http formData —— 这些是表达式求值上下文。
+    📌 ${QUERY.x|string} 占位符（JSON 内插值）：variables[].selectorQuery —— 该字段被前端
+       JSON.parse，只能是纯 JSON + 值内占位符；整段 <% %> 会崩（实测 SyntaxError 踩坑）。
+  builtin_objects:
+    QUERY: "URL query 参数（变量/timerange 注入：QUERY.instanceId / QUERY.from）"
+    CTX: "上下文——数据源专用 CTX.DS.{context名}"
+    DATA: "转换用原始数据（context.transform：DATA?.list ?? []）"
+    SYS: "系统（cmdb-columndb args 用 SYS.org 拼 database）"
+    PIPES: "管道字典（PIPES.parseTimeRange/ yamlStringify/ yaml）"
+    _: "Lodash（_.map/_.orderBy）"
+    moment: "Moment 时间库"
+  js_subset: "✅箭头函数/三元/?./??/模板字符串/展开；❌if 语句/var/赋值/类（必须单表达式）；对象 key 是中文/数字开头须用 [\"...\"] 下标语法（.点语法取不到）"
+  common_patterns: |
+    取列表空兜底   ： <% DATA?.list ?? [] %>
+    带默认值取参   ： <% QUERY.from ?? "now-1h" %>
+    条件注入过滤   ： <% { ...(QUERY.ns ? {"ns": {"$in": QUERY.ns.split(",")}} : {}) } %>
+                      （仅限表达式上下文：cmdb-olap query/transform 等；selectorQuery 禁用，见 syntax_by_field）
+  source: "getOlapFiltersArg.yaml + getDefaultArgsOfDataType.yaml 表达式实例 + 现网盘实测（selectorQuery/统计卡踩坑 2026-08-14）"

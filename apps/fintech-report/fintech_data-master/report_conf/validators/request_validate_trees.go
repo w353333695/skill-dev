@@ -1,0 +1,41 @@
+package validators
+
+import (
+	"bytes"
+	"encoding/json"
+
+	"go.easyops.local/giraffe/pkg/validators"
+)
+
+var _ = bytes.Split
+var _ = json.Unmarshal
+
+var EmptyTree validators.ValidateTree
+
+const UpdateMappingRuleValidateTreeStr = `{"roots":[{"field":"instanceId","field_type":"string","children":null,"validate_method":{"pattern":"^[0-9a-z]{13}$"},"required":true},{"field":"objectId","field_type":"string","children":null,"validate_method":{"pattern":"^[a-zA-Z_][0-9a-zA-Z_]{0,46}(@[A-Z]{1,16})?$"},"required":false},{"field":"source","field_type":"string","children":null,"validate_method":null,"required":true},{"field":"mappingObjectId","field_type":"string","children":null,"validate_method":{"pattern":"^[a-zA-Z_][0-9a-zA-Z_]{0,46}(@[A-Z]{1,16})?$"},"required":false},{"field":"objectDefine","field_type":"","children":[{"field":"attrList","field_type":"","children":[{"field":"id","field_type":"string","children":null,"validate_method":{"pattern":"^[a-zA-Z_][0-9a-zA-Z_@]{0,63}$"},"required":false},{"field":"name","field_type":"string","children":null,"validate_method":{"gte":1},"required":false},{"field":"inheritObjectId","field_type":"string","children":null,"validate_method":{"pattern":"^[a-zA-Z_][0-9a-zA-Z_]{0,46}(@[A-Z]{1,16})?$"},"required":false}],"validate_method":null,"required":false},{"field":"relation_list","field_type":"","children":[{"field":"relation_id","field_type":"string","children":null,"validate_method":{"pattern":"^[a-zA-Z_][0-9a-zA-Z_@]*$"},"required":false},{"field":"right_id","field_type":"string","children":null,"validate_method":{"pattern":"^[a-zA-Z_][0-9a-zA-Z_@]{0,63}$"},"required":false},{"field":"left_id","field_type":"string","children":null,"validate_method":{"pattern":"^[a-zA-Z_][0-9a-zA-Z_@]{0,63}$"},"required":false},{"field":"creator","field_type":"string","children":null,"validate_method":{"pattern":"^[a-zA-Z0-9][.a-zA-Z0-9_-]{0,31}$"},"required":false},{"field":"ctime","field_type":"string","children":null,"validate_method":{"pattern":"^((?:[1-9][0-9]*)?[0-9]{4})-(1[0-2]|0[1-9])-(3[0-1]|0[1-9]|[1-2][0-9])[T ](2[0-3]|[0-1][0-9]):([0-5][0-9]):[0-5][0-9](\\.[0-9]+)?(Z|[+-](?:2[0-3]|[0-1][0-9]):[0-5][0-9])?$"},"required":false}],"validate_method":null,"required":false},{"field":"relation_groups","field_type":"","children":[{"field":"id","field_type":"string","children":null,"validate_method":{"gte":1},"required":false},{"field":"name","field_type":"string","children":null,"validate_method":{"gte":1},"required":false}],"validate_method":null,"required":false},{"field":"name","field_type":"string","children":null,"validate_method":{"gte":1},"required":false},{"field":"objectId","field_type":"string","children":null,"validate_method":{"pattern":"^[a-zA-Z_][0-9a-zA-Z_]{0,46}(@[A-Z]{1,16})?$"},"required":false},{"field":"ctime","field_type":"string","children":null,"validate_method":{"pattern":"^((?:[1-9][0-9]*)?[0-9]{4})-(1[0-2]|0[1-9])-(3[0-1]|0[1-9]|[1-2][0-9])[T ](2[0-3]|[0-1][0-9]):([0-5][0-9]):[0-5][0-9](\\.[0-9]+)?(Z|[+-](?:2[0-3]|[0-1][0-9]):[0-5][0-9])?$"},"required":false},{"field":"mtime","field_type":"string","children":null,"validate_method":{"pattern":"^((?:[1-9][0-9]*)?[0-9]{4})-(1[0-2]|0[1-9])-(3[0-1]|0[1-9]|[1-2][0-9])[T ](2[0-3]|[0-1][0-9]):([0-5][0-9]):[0-5][0-9](\\.[0-9]+)?(Z|[+-](?:2[0-3]|[0-1][0-9]):[0-5][0-9])?$"},"required":false},{"field":"creator","field_type":"string","children":null,"validate_method":{"pattern":"^[a-zA-Z0-9][.a-zA-Z0-9_-]{0,31}$"},"required":false},{"field":"modifier","field_type":"string","children":null,"validate_method":{"pattern":"^[a-zA-Z0-9][.a-zA-Z0-9_-]{0,31}$"},"required":false},{"field":"parentObjectIds","field_type":"string[]","children":null,"validate_method":{"pattern":"^[a-zA-Z_][0-9a-zA-Z_]{0,46}(@[A-Z]{1,16})?$"},"required":false}],"validate_method":null,"required":false}]}`
+
+var UpdateMappingRuleValidateTree *validators.ValidateTree
+
+const UpdateReportConfValidateTreeStr = `{"roots":[{"field":"instanceId","field_type":"string","children":null,"validate_method":{"pattern":"^[0-9a-z]{13}$"},"required":true},{"field":"objectId","field_type":"string","children":null,"validate_method":{"pattern":"^[a-zA-Z_][0-9a-zA-Z_]{0,46}(@[A-Z]{1,16})?$"},"required":false},{"field":"mappingObjectId","field_type":"string","children":null,"validate_method":{"pattern":"^[a-zA-Z_][0-9a-zA-Z_]{0,46}(@[A-Z]{1,16})?$"},"required":false},{"field":"objectDefine","field_type":"","children":[{"field":"attrList","field_type":"","children":[{"field":"id","field_type":"string","children":null,"validate_method":{"pattern":"^[a-zA-Z_][0-9a-zA-Z_@]{0,63}$"},"required":false},{"field":"name","field_type":"string","children":null,"validate_method":{"gte":1},"required":false},{"field":"inheritObjectId","field_type":"string","children":null,"validate_method":{"pattern":"^[a-zA-Z_][0-9a-zA-Z_]{0,46}(@[A-Z]{1,16})?$"},"required":false}],"validate_method":null,"required":false},{"field":"relation_list","field_type":"","children":[{"field":"relation_id","field_type":"string","children":null,"validate_method":{"pattern":"^[a-zA-Z_][0-9a-zA-Z_@]*$"},"required":false},{"field":"right_id","field_type":"string","children":null,"validate_method":{"pattern":"^[a-zA-Z_][0-9a-zA-Z_@]{0,63}$"},"required":false},{"field":"left_id","field_type":"string","children":null,"validate_method":{"pattern":"^[a-zA-Z_][0-9a-zA-Z_@]{0,63}$"},"required":false},{"field":"creator","field_type":"string","children":null,"validate_method":{"pattern":"^[a-zA-Z0-9][.a-zA-Z0-9_-]{0,31}$"},"required":false},{"field":"ctime","field_type":"string","children":null,"validate_method":{"pattern":"^((?:[1-9][0-9]*)?[0-9]{4})-(1[0-2]|0[1-9])-(3[0-1]|0[1-9]|[1-2][0-9])[T ](2[0-3]|[0-1][0-9]):([0-5][0-9]):[0-5][0-9](\\.[0-9]+)?(Z|[+-](?:2[0-3]|[0-1][0-9]):[0-5][0-9])?$"},"required":false}],"validate_method":null,"required":false},{"field":"relation_groups","field_type":"","children":[{"field":"id","field_type":"string","children":null,"validate_method":{"gte":1},"required":false},{"field":"name","field_type":"string","children":null,"validate_method":{"gte":1},"required":false}],"validate_method":null,"required":false},{"field":"name","field_type":"string","children":null,"validate_method":{"gte":1},"required":false},{"field":"objectId","field_type":"string","children":null,"validate_method":{"pattern":"^[a-zA-Z_][0-9a-zA-Z_]{0,46}(@[A-Z]{1,16})?$"},"required":false},{"field":"ctime","field_type":"string","children":null,"validate_method":{"pattern":"^((?:[1-9][0-9]*)?[0-9]{4})-(1[0-2]|0[1-9])-(3[0-1]|0[1-9]|[1-2][0-9])[T ](2[0-3]|[0-1][0-9]):([0-5][0-9]):[0-5][0-9](\\.[0-9]+)?(Z|[+-](?:2[0-3]|[0-1][0-9]):[0-5][0-9])?$"},"required":false},{"field":"mtime","field_type":"string","children":null,"validate_method":{"pattern":"^((?:[1-9][0-9]*)?[0-9]{4})-(1[0-2]|0[1-9])-(3[0-1]|0[1-9]|[1-2][0-9])[T ](2[0-3]|[0-1][0-9]):([0-5][0-9]):[0-5][0-9](\\.[0-9]+)?(Z|[+-](?:2[0-3]|[0-1][0-9]):[0-5][0-9])?$"},"required":false},{"field":"creator","field_type":"string","children":null,"validate_method":{"pattern":"^[a-zA-Z0-9][.a-zA-Z0-9_-]{0,31}$"},"required":false},{"field":"modifier","field_type":"string","children":null,"validate_method":{"pattern":"^[a-zA-Z0-9][.a-zA-Z0-9_-]{0,31}$"},"required":false},{"field":"parentObjectIds","field_type":"string[]","children":null,"validate_method":{"pattern":"^[a-zA-Z_][0-9a-zA-Z_]{0,46}(@[A-Z]{1,16})?$"},"required":false}],"validate_method":null,"required":false},{"field":"enable","field_type":"bool","children":null,"validate_method":null,"required":true},{"field":"crontab","field_type":"string","children":null,"validate_method":null,"required":true},{"field":"batchNum","field_type":"int","children":null,"validate_method":null,"required":true}]}`
+
+var UpdateReportConfValidateTree *validators.ValidateTree
+
+func init() {
+	var err error
+	_ = err
+
+	UpdateMappingRuleValidateTree = &validators.ValidateTree{}
+	err = json.Unmarshal([]byte(UpdateMappingRuleValidateTreeStr), UpdateMappingRuleValidateTree)
+	panicIfErr(err)
+
+	UpdateReportConfValidateTree = &validators.ValidateTree{}
+	err = json.Unmarshal([]byte(UpdateReportConfValidateTreeStr), UpdateReportConfValidateTree)
+	panicIfErr(err)
+
+}
+
+func panicIfErr(err error) {
+	if err != nil {
+		panic(err)
+	}
+}

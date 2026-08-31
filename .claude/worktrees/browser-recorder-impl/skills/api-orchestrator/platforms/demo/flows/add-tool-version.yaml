@@ -1,0 +1,25 @@
+# 流程模板：给已有工具新增版本（场景③）。确认挡（写，1-2 步）。
+name: add-tool-version
+intent: 给已有工具新增版本（如支持删除多个 + 增加是否强制删除入参）
+trigger: ["给X工具新增版本", "加版本", "让工具支持Y", "给工具加个入参"]
+guard: 确认挡（写，1-2 步）—— 展示将改的字段确认
+key_rule: "新建版本 = tool.update 改 ToolVersion 字段（inputs/content）触发派生（无独立 create-version 端点）。⚠️(1) body 是 **flat**（不要套 {tool:{}}，否则 updateFields=[tool] 假成功不生效）；(2) 派生版 envType=development、vName 默认=vId；(3) 响应只返 {toolId}，须 tool_version.list 复查新版本；(4)『强制删除』是工具脚本自己的 input（force 入参），不是工具层的 force（见 delete-tool）。"
+steps:
+  - n: 1
+    op: tool.get
+    args: ["<toolId>", --insecure]
+    desc: 取当前工具完整定义（拿现有 inputs/content/vId）
+    dataflow: "data → step2 改 inputs（加 force 入参/改多选）+ 改 content（脚本支持批量+条件删）"
+  - n: 2
+    op: tool.update
+    args: ["<toolId>", --body-file, "<flat-body.json>", --insecure, --yes]
+    desc: "flat body 改 version 字段（inputs/content）派生新 development 版本（⚠️不要套 {tool:{}}，否则假成功）"
+    expect: "code=0（响应 data 只含 toolId，无新 vId——派生成功否看 step3）"
+  - n: 3
+    op: tool_version.list
+    args: ["<toolId>", --insecure]
+    desc: 校验新版本在列
+    expect: "data[] 含新 vId"
+alternative: "无独立 create-version 端点——只能 update 派生"
+rollback: "tool.delete <toolId> --versionId <新vId>（删错版本）"
+acceptance: "前端 tool_detail?vId=<新vId> 可见新版本"

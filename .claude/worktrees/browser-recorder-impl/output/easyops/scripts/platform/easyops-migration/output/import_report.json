@@ -1,0 +1,23 @@
+{
+  "import_time": "2026-06-10T16:21:22",
+  "target": {
+    "host": "172.30.0.90",
+    "org": "8888",
+    "user": "defaultUser"
+  },
+  "elapsed_seconds": 0.57,
+  "results": [
+    {
+      "success": 1,
+      "failed": 0,
+      "details": [
+        {
+          "model_id": "USER_GROUP",
+          "count": 1,
+          "status": "success"
+        }
+      ],
+      "type": "cmdb_instance"
+    }
+  ]
+}

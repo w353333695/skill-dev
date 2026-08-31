@@ -1,0 +1,49 @@
+pkgname=fintech_data
+pkgver=VERSION  # placeholder
+pkgver() {
+    # 工具名: 打包-基础包
+    # http://admin.easyops.local/tool/19398c5d3c4df767914d654b83206ec4
+    echo $_easyopsver | tr -cd '[[:alnum:]]._-'
+}
+pkgrel=1
+arch=('x86_64')
+options=('!strip')
+source=()
+
+_goversion=1.12.4
+_go_proj_domain="go.easyops.local"
+_go_proj_path="$_go_proj_domain/fintech_data"
+_go_main_pkgs="$_go_proj_path/cmd/fintech_data"
+
+prepare() {
+    export _projdir=$(readlink -f "$startdir/../..")
+    mkdir -p "$startdir/gopath/src/$_go_proj_domain"
+    ln -snf "$_projdir" "$startdir/gopath/src/$_go_proj_path"
+
+    eval "$(GIMME_GO_VERSION=$_goversion gimme)"
+    unset GOPATH
+
+    go env
+}
+
+build() {
+    mkdir $startdir/bin
+    go build -o $startdir/bin/${pkgname} $_go_main_pkgs
+    ls -l $startdir/bin
+}
+
+package() {
+    install -d "$pkgdir/bin"
+    install -m755 "$startdir/bin/"* "$pkgdir/bin"
+
+    install -d "$pkgdir/conf"
+    install -m755 "${_projdir}/cmd/fintech_data/conf/"* "$pkgdir/conf"
+
+    cp -rf "${_projdir}/cmd/${pkgname}/conf" "$pkgdir/"
+    install -d "$pkgdir/deploy"
+    install -m755 "$startdir/deploy/"* "$pkgdir/deploy"
+    install -m755 "${_projdir}/.docker/${pkgname}/entrypoint.sh" "$pkgdir/deploy"
+
+    install -d "$pkgdir/scripts"
+    cp -rf "${_projdir}/scripts/"* "$pkgdir/scripts"
+}

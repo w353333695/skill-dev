@@ -1,0 +1,473 @@
+entities:
+  object_id:
+    description: 模型（object）主键锚。实例、关系、属性都通过它挂到模型。
+    format: "NAME@NAMESPACE（如 OCEANBASE@EASYOPS）"
+    namespaces: [EASYOPS, ONEMODEL]   # 实测见到的命名空间；ONEMODEL 多为系统/权限模型
+    rules:
+      - "无正则强制，仅非空；@NAMESPACE 在运行时解析"
+      - "同命名空间内 objectId / name 不可重复"
+    used_by:
+      - object_model（path/查询主键）
+      - object_instance.search（path 参数 /v3/object/{object_id}/instance/_search）
+      - cmdb_relation.left_object_id / right_object_id（锚到模型）
+      - object_attr / object_relation（path 含 object_id）
+
+  instance_id:
+    description: 实例主键锚。
+    format: "13 位 [0-9a-z]（微秒时间戳 hex，如 5cf1da055c315）；新建可不带，后端自动生成"
+    pattern: '^[0-9a-z]{13}$'
+    used_by:
+      - object_instance.search（fields 返回 / query 过滤）
+      - object_instance.import（datas 带上则定向改；keys=[instanceId] 则纯 update）
+      - object_instance.delete（instanceIds 分号串）
+      - 关系字段值（关联对端实例 instanceId）
+
+  relation_id:
+    description: 关系主键锚。object_relation 细粒度 CRUD 用它做 path 参数。
+    format: "导入时不填则自动生成；约定可形如 <LEFT_OBJECT>_<RIGHT_ROLE>"
+
+  attr_id:
+    description: 属性主键锚（模型内唯一）。
+    convention: "给已存在模型新增属性时，id 加 _ 前缀（如 _regulatory_level）标识新增。详见 objects.yaml cmdb_object.side_effects。"
+
+  org:
+    description: 租户锚（请求头 org）。每个 org 一个独立数据库/命名空间。
+    type: integer
+    rules: ["gte:1（org=0 无库）", "系统自带 0/1/2 禁动；测试 18832008"]
+    # 接入侧（怎么取 org）见 systems.yaml runtime
+
+  user:
+    description: 用户锚（请求头 user）。模型系统管理员=easyops。
+    # 权限差异见 systems.yaml runtime
+
+  # ===========================================================================
+  # AutoOps 工具管理锚（tool_service）
+  # ===========================================================================
+  tool_id:
+    description: 工具主键锚（tool_service）。前端详情页 URL 的 <id> 即此；≠ CMDB instanceId。
+    format: "32 位 hex md5（服务端生成，如 e292a31864662200d85a6a72ec89854a）"
+    pattern: '^[a-fA-F0-9]{32}$'
+    used_by:
+      - tool.get / tool.update / tool.delete / tool_package.export / tool_package.export_check（path 参数 {toolId}）
+      - tool_execution.run（body.toolId）
+      - tool_version.list（path 参数 {toolId}）
+
+  tool_vId:
+    description: 工具版本主键锚。支持别名 $latest_version/$latest_development/$latest_production（get/run 默认 $latest_production）。
+    format: "32 位 hex；或别名 $latest_version/$latest_development/$latest_production"
+    used_by:
+      - tool.get（query vId）、tool_execution.run（body vId）
+      - tool.update 派生新版本后返回新 vId
+
+  tool_version_id:
+    description: 导出/删除专用的版本 ID 锚。⚠️参数名是 versionId 不是 vId，与 get/run 的 vId 不一致——同名概念两种参数名，易混。
+    format: "32 位 hex"
+    pattern: '^[a-fA-F0-9]{32}$'
+    used_by:
+      - tool_package.export（query versionId，必填；场景5）
+      - tool.delete（query versionId，可选，按版本删）
+    trap: "导出/删除用 versionId；get/run 用 vId。从 get 拿到 vId 喂 export 时要改名（值相同，参数名不同）。"
+
+  exec_id:
+    description: 工具执行句柄锚（异步）。tool_execution.run 返回，轮询取结果用。
+    used_by:
+      - tool_execution.run 返回 execId
+      - tool_execution.get_result / get_table / get_status（path 参数 {execId}）
+
+  # ===========================================================================
+  # ITSM 表单管理锚（flowable_service）
+  # ===========================================================================
+  form_id:
+    description: 表单主键锚（flowable_service）。form 资源 path 参数 {formId}；form_version 资源 path 参数 {formId}。
+    format: "13 位 hex（CMDB 生成，不可在 body 指定；save 返回 data.instanceId）"
+    pattern: '^[0-9a-z]{13}$'
+    used_by:
+      - form.delete（path {formId}）
+      - form_version.list / get / update / delete / set_main（path {formId}）
+
+  form_version_id:
+    description: 表单版本主键锚。form_version 资源 path 参数。
+    format: "13 位 hex（CMDB 生成，不可在 body 指定；save 返回 data.lastestVersion.instanceId；update 对 done 版派生新草稿返回新 versionId）"
+    pattern: '^[0-9a-z]{13}$'
+    used_by:
+      - form_version.get / update / set_main（path {versionId}）
+      - form_version.delete（path {versionIds}，复数分号，⚠️参数名不同：versionIds 非 versionId）
+    trap: "delete 路径参数是 versionIds（复数，分号分隔）；其余是 versionId（单数）。值同 13hex，参数名不同。"
+    state_machine: "版本状态两态：unfinished(草稿)/done(完成)。set_main 须 done。无 draft/published 叫法。"
+
+  # ===========================================================================
+  # ITSM 流程定义锚（flowable_service）
+  # ===========================================================================
+  process_definition_id:
+    description: 流程定义主键锚（flowable_service）。process_definition path 参数 {definitionId}；process_version path 参数 {definitionId}。
+    format: "13 位 hex（CMDB 生成，不可在 body 指定；create 返回 data.instanceId）"
+    pattern: '^[0-9a-z]{13}$'
+    used_by:
+      - process_definition.edit / delete（path {definitionId}）
+      - process_version.list / get / create / edit / delete / set_main（path {definitionId}）
+
+  process_version_id:
+    description: 流程版本主键锚。process_version path 参数。list 支持 'lastest' 别名。
+    format: "13 位 hex（CMDB 生成；create 返回 versionId）"
+    pattern: '^[0-9a-z]{13}$'
+    used_by:
+      - process_version.get / edit / set_main（path {versionId}）
+      - process_version.delete（path {versionIds} 复数分号，⚠️参数名 versionIds）
+      - process_form.set（path {versionId}）
+    trap: "delete 参数名是 versionIds（复数）；其余 versionId。批量是壳只删第一个。"
+    state_machine: "两态 unfinished/done。done 才能设主版本+部署 Flowable；done 不可编辑。"
+
+  service_instance_id:
+    description: 服务实例主键锚（flowable_service）。service_instance resource path 参数 {instanceId}。
+    format: "13 位 hex（CMDB 生成，不可在 body 指定；create 返回 data.instanceId）"
+    pattern: '^[0-9a-z]{13}$'
+    used_by:
+      - service_instance.get / edit / delete（path {instanceId}）
+
+  # ---------- ITSM 触发器/通知/SLA/值班组 id（2026-08-11，均 8134 flowable_service）----------
+  trigger_id:
+    description: 触发器主键锚。trigger resource path 参数 triggerId / triggerIds。
+    format: "13 位 hex（^[0-9a-z]{13}$，validator 证实）；delete 用 triggerIds 分号批量（path）"
+    used_by:
+      - trigger.get / update（path triggerId）
+      - trigger.delete（path triggerIds 分号）
+  notify_policy_id:
+    description: 通知策略主键锚。notify_policy resource。
+    format: "13 位 hex；⚠️delete 用 instanceIds 但走 query（非 path）—— DELETE /notify_policy?instanceIds=a;b"
+    used_by:
+      - notify_policy.get / update（path instanceId）
+      - notify_policy.delete（query instanceIds 分号）
+  sla_rule_id:
+    description: SLA 规则主键锚。sla resource path 参数 ruleId / ruleIds。
+    format: "13 位 hex；delete 用 ruleIds 分号批量（path）"
+    used_by:
+      - sla.get / update（path ruleId）
+      - sla.delete（path ruleIds 分号）
+  duty_group_id:
+    description: 值班组主键锚。duty_group resource path 参数 groupId / groupIds。
+    format: "13 位 hex；delete 用 groupIds 分号批量（path）"
+    used_by:
+      - duty_group.get / update（path groupId）
+      - duty_group.delete（path groupIds 分号）
+
+  # ---------- 工作日历 id（跨 system：sys_setting 微服务，⚠️24hex ≠ 13hex）----------
+  work_calendar_id:
+    description: |
+      工作日历主键锚（sys_setting 微服务 :8271，独立 system easyops-sys-setting）。
+      ⚠️格式 24 位 hex MongoDB ObjectId（≠ flowable_service 的 13hex 微秒时间戳）——
+      印证 work_calendar 属不同存储/微服务。被 ITSM SLA 经
+      sla.slaConfig[].levelConfig[].workingCalendarId 引用（跨 system 接力）。
+    format: "24 位 hex MongoDB ObjectId"
+    used_by:
+      - work_calendar.get / update / delete（path id / ids 分号批量，均在 sys-setting system 的 spec）
+      - sla.create/update 的 body slaConfig[].levelConfig[].workingCalendarId（跨 system：先在 sys-setting 建日历拿 id，再填入 itsm 的 sla body）
+
+# =============================================================================
+# 跨实体转换（编排挡 step 间接力时怎么传字段）
+# =============================================================================
+  # ---- collector 域锚（原 collector deployment 合并）----
+  # —— 主键锚 ——
+  plugin_instance_id:
+    description: "采集套件实例ID（_COLLECTOR_EASYOPS_PLUGIN 模型主键）。贯穿 collector_plugin_service.plugin + collector_service.kit + collector_job.plugins"
+    format: "13 位 [0-9a-z]（微秒时间戳 hex）"
+    anchor: true
+    pattern: '^[0-9a-z]{13}$'
+    rules:
+      - "create_with_script/metricbeat/package 返回（CMDB 生成，不可指定）"
+      - "detail/delete/update_with_*/export/import_update 的 path 参数"
+      - "kit.activate 的 body.instanceId"
+      - "真调示例：6054d815e3fd9"
+    used_by: [plugin.create_with_script, plugin.create_with_metricbeat, plugin.create_with_package, plugin.detail, plugin.delete, plugin.update_with_script, plugin.update_with_metricbeat, plugin.update_with_package, plugin_package.export, plugin_package.import_update, kit.activate, kit.update]
+
+  log_plugin_instance_id:
+    description: "日志套件实例ID。⚠️log_plugin 的 delete/get/update 用 query/body 传（非 path），与 plugin 不同"
+    format: "13 位 [0-9a-z]"
+    anchor: true
+    pattern: '^[0-9a-z]{13}$'
+    used_by: [log_plugin.create, log_plugin.delete, log_plugin.get, log_plugin.update]
+
+  package_version_id:
+    description: "程序包版本ID（32hex）。package 型套件用。升级时新旧 VersionId 比较决定是否触发 modification.modified 标记"
+    format: "32 位 hex"
+    used_by: [plugin.create_with_package, plugin.update_with_package]
+
+  package_id:
+    description: "程序包ID（UUID）。package 型套件 create 强校验非空，update 校验被注释"
+    format: "UUID（8-4-4-4-12 hex，连字符可选）"
+    pattern: '^[a-fA-F0-9]{8}-?[a-fA-F0-9]{4}-?[a-fA-F0-9]{4}-?[a-fA-F0-9]{4}-?[a-fA-F0-9]{4}-?[a-fA-F0-9]{12}$'
+    used_by: [plugin.create_with_package, plugin.update_with_package]
+
+  alias_metric_name:
+    description: "别名指标名（dashboard/alertRule 引用此）。⚠️不能与 CMDB 模型属性ID/关系ID 同名（激活失败）。建议加前缀 m_/mon_/metric_"
+    format: "字符串，建议加前缀"
+    rules:
+      - "displayName 在同 objectId 内唯一"
+      - "name 不能与 relateObjectId 模型属性/关系ID 同名"
+    used_by: [metric_management.import_plugin_alias_metrics, metric_management.import_alias_metric_check]
+
+  # —— 环境锚（复用 demo 同 EasyOps 平台）——
+  org:
+    description: "EasyOps 租户 org。collector deployment=8888（env.d/collector.env）"
+    format: "整数"
+    used_by: [所有端点 endpoint.headers.org]
+
+  user:
+    description: "EasyOps 用户标识。写操作用 easyops"
+    format: "字符串"
+    used_by: [所有端点 endpoint.headers.user]
+
+# =============================================================================
+# transitions —— 跨实体/跨 service/跨 step 字段接力（e2e dataflow 用）
+# =============================================================================
+
+  # ---- 巡检域锚（inspection，2026-08-13 接入）----
+  insp_plugin_id:
+    description: "巡检套件id（INSPECTION_INFO.id，即 pluginId）。⚠️英文标识（如 mysql/weblogic），非13hex instanceId。所有套件对象（collector/metric_group/template/task）用此串联"
+    format: "英文标识符 ^[a-zA-Z_][0-9a-zA-Z_]{0,31}$"
+    anchor: true
+    pattern: '^[a-zA-Z_][0-9a-zA-Z_]{0,31}$'
+    used_by: [insp_info.create, insp_info.get, insp_metric_group.list, insp_collector.list, insp_template.list, insp_task.create, insp_history.list, insp_package.export]
+  insp_task_id:
+    description: "巡检任务id（inspectionTaskId，13hex，=instanceId）"
+    format: "13位 [0-9a-z]"
+    anchor: true
+    pattern: '^[0-9a-z]{13}$'
+    used_by: [insp_task.get, insp_task.update, insp_task.delete]
+  insp_job_id:
+    description: "巡检执行id（jobId）。一次执行的主键，history 查询用"
+    anchor: true
+    used_by: [insp_history.get, insp_history.statistics, insp_history.abnormal_metrics, insp_history.export_excel, insp_execution.terminate]
+
+  # ---- msgsender 通知管理锚（2026-08-14 接入）----
+  notify_method_name:
+    description: "通知方式名（msg_config.name，=inform_type=send/alert 的 method）。send_message 的 receivers[].method 必须等于某 config.name。自定义方式 pluginName 也=name"
+    format: "通知方式名（实测：email/qywx/wechat_robot/dx/test111 等，无强制正则）"
+    anchor: true
+    used_by: [notify_method.list, notify_config.list, notify_config.create, notify_config.get, notify_config.update, notify_config.delete, notify_message.send, notify_message.debug, notify_alert.receive]
+  notify_config_instanceId:
+    description: "通知配置 CMDB 实例 id（_MSGSENDER_NOTIFY_CONFIG 的 instanceId，13hex）。config 单条 get/update/delete 的 path 参数"
+    anchor: true
+    used_by: [notify_config.get, notify_config.update, notify_config.delete]
+
+  # ---- dashboard 域锚（2026-08-14 二次接入）----
+  dashboard_id:
+    description: "仪表盘实例 id（_DASHBOARD.instanceId，13hex）"
+    format: "13位 [0-9a-z]"
+    anchor: true
+    pattern: '^[0-9a-z]{13}$'
+    used_by: [dashboard.update, dashboard.delete, object_instance.search(_DASHBOARD), 前端URL /dashboard/v2/<id>]
+  metric_name:
+    description: "采集指标名（CollectorAliasMetric.name，snake_case 如 host_cpu_used_total）。⚠️勿从自然语言编造——collector_metric.list 查证后才可用"
+    format: "snake_case 字符串"
+    anchor: true
+    used_by: [collector_metric.list/get, olap_metric.query_v3/select_raw, "dashboard context[cmdb-olap].measures[].function.args"]
+  columndb_table:
+    description: "历史数据统计表（cmdb-columndb 的 object_ids，18 个 @EASYOPS 历史库之一，如 monitor_event@EASYOPS）"
+    format: "<表名>@EASYOPS"
+    anchor: true
+    used_by: [column_history.aggregate, "dashboard context[cmdb-columndb].args[0].object_ids"]
+
+transitions:
+  - from: object_model.list
+    pick: objectId
+    to: [object_model.detail, object_model.delete, object_model.export, object_instance.search]
+    how: "list 返回的 objectId（NDJSON 每行一个）→ 作为 path 参数 {object_id} 喂下游"
+  - from: object_model.export
+    pick: data[].attrList[].id
+    to: object_model.import
+    how: "导出完整模型 → 改 attrList（新属性加 _ 前缀）→ import 回写（upsert）"
+  - from: object_instance.search
+    pick: data.list[].instanceId
+    to: [object_instance.delete]
+    how: "search 的 data.list[].instanceId → jq 拼成分号串喂 delete 的 instanceIds query（场景4 按 ip 范围删）"
+  - from: object_instance.search
+    pick: data.list[].instanceId（+ 既有属性值）
+    to: [object_instance.import]
+    how: "search 取目标 instanceId → 作为 import 的 keys=[instanceId] + datas（每条带 instanceId + 新属性值）做定向 update（场景3 批量补属性）"
+
+  # ---- AutoOps 转换（编排挡 step 间接力）----
+  - from: tool.list
+    pick: toolId
+    to: [tool.get, tool.update, tool.delete, tool_package.export, tool_package.export_check, tool_execution.run, tool_version.list]
+    how: "list 返回 data.list[].toolId → 作为 path 参数 {toolId} 喂下游（场景1查到 → 场景2/3/5/6 操作同一工具）"
+  - from: tool.create
+    pick: data.toolId + data.vId
+    to: [tool.get, tool.update, tool_execution.run, tool_package.export]
+    how: "create 返回新 toolId + vId → 喂后续操作（场景2 建工具后拿 toolId 走场景3/5/6）"
+  - from: tool.update
+    pick: data.vId（新版本，update 派生时）
+    to: [tool.get, tool_execution.run, tool_package.export]
+    how: "update 派生新版本返回新 vId → 喂 get（确认新版本）/ run（执行新版本）/ export（导出新版本，注意 export 的 query 参数是 versionId 不是 vId）"
+  - from: tool_execution.run
+    pick: data.execId
+    to: [tool_execution.get_result, tool_execution.get_table, tool_execution.get_status]
+    how: "run 异步返回 execId → 轮询：先 get_status 确认完成，再 get_table（表格结果，查内存）/ get_result（每主机 stdout）。场景4。"
+  - from: tool.get
+    pick: data.vId（当前版本）
+    to: [tool_package.export]
+    how: "get 拿当前版本 vId → 导出时改名填进 export 的 versionId query（值相同，参数名不同，详见 tool_version_id.trap）"
+  # ---------- ITSM 表单 ----------
+  - from: form.list
+    pick: data.list[].instanceId（formId）
+    to: [form.delete, form_version.list, form_version.get, form_version.update, form_version.set_main]
+    how: "list 返回的表单 instanceId → 作为 {formId} path 喂下游。场景②『test 几个版本』=list 找 test 的 formId → form_version.list 数 total"
+  - from: form.save
+    pick: data.instanceId（formId）+ data.lastestVersion.instanceId（versionId）
+    to: [form_version.get, form_version.update, form.delete]
+    how: "save 返回 formId + 首版本 versionId → get 校验内容 / update（done 版派生新版本=场景④）/ delete（先清版本再删 form=场景⑤）"
+  - from: form_version.list
+    pick: data.list[].versionInfo.instanceId（versionId）
+    to: [form_version.get, form_version.update, form_version.delete]
+    how: "list 返回版本 instanceId → 作为 {versionId} 喂 get/update/delete。注意 delete 的参数名是 versionIds（复数）"
+  # ---------- ITSM 流程定义 ----------
+  - from: process_definition.list
+    pick: data.list[].instanceId（definitionId）
+    to: [process_definition.edit, process_definition.delete, process_version.list, process_version.create]
+    how: "list 返回流程定义 instanceId → 作为 {definitionId} 喂下游。场景①看有哪些流程 / 场景②建版本须先有 definitionId"
+  - from: process_definition.create
+    pick: data.instanceId（definitionId）
+    to: [process_version.create, process_definition.edit, process_definition.delete]
+    how: "create 返回 definitionId → process_version.create 建版本（场景②建流程后建 BPMN 版本）"
+  - from: process_version.create
+    pick: data.versionId
+    to: [process_version.get, process_version.edit, process_version.set_main, process_form.set]
+    how: "create 返回 versionId → get 校验 / edit 改 / set_main 部署生效 / process_form.set 绑表单。⚠️建版本不部署，set_main 才生效"
+  - from: process_version.list
+    pick: data.list[].vInstanceId（versionId）
+    to: [process_version.get, process_version.edit, process_version.delete, process_version.set_main, process_form.set]
+    how: "list 返回版本 id → 喂下游。delete 参数名 versionIds（复数）"
+  # ---------- ITSM 触发器/通知/SLA/值班组（2026-08-11）----------
+  - from: trigger.list
+    pick: data.list[].instanceId（triggerId）
+    to: [trigger.get, trigger.update, trigger.delete]
+    how: "list 返回触发器 instanceId → 作为 {triggerId} 喂 get/update；delete 拼 ;-串喂 {triggerIds}"
+  - from: notify_policy.list
+    pick: data.list[].instanceId
+    to: [notify_policy.get, notify_policy.update, notify_policy.delete]
+    how: "list 返回策略 instanceId → 作为 {instanceId} 喂 get/update；delete 拼 ;-串喂 query instanceIds（⚠️非 path）"
+  - from: sla.list
+    pick: data.list[].instanceId（ruleId）
+    to: [sla.get, sla.update, sla.delete]
+    how: "list（POST _search）返回规则 instanceId → 作为 {ruleId} 喂 get/update；delete 拼 ;-串喂 {ruleIds}"
+  - from: duty_group.list
+    pick: data.list[].instanceId（groupId）
+    to: [duty_group.get, duty_group.update, duty_group.delete]
+    how: "list 返回值班组 instanceId → 作为 {groupId} 喂 get/update；delete 拼 ;-串喂 {groupIds}"
+  # ---------- 工作日历（sys-setting system）+ 跨 system 接力到 SLA（itsm system）----------
+  - from: work_calendar.list
+    pick: data.list[].id（24hex）
+    to: [work_calendar.get, work_calendar.update, work_calendar.delete]
+    how: "list 返回日历 id（24hex）→ 作为 {id} 喂 get/update；delete 拼 ;-串喂 {ids}。⚠️均在 sys-setting system 的 spec（--spec easyops-sys-setting.yaml）"
+  - from: work_calendar.create
+    pick: data.id（24hex）
+    to: [sla.create, sla.update]
+    how: "跨 system 接力：sys-setting 的 work_calendar.create 返回 24hex id → 填入 itsm 的 sla body 的 slaConfig[].levelConfig[].workingCalendarId（场景：建 SLA 前先建工作日历）"
+  # ---- collector 域 transitions（原 collector deployment）----
+  # —— 开发→导入→激活 完整接力（metric_sampler 监控套件 e2e）——
+  - name: develop_import_activate_metric
+    desc: "监控套件 e2e：开发套件包→导入→拿 instanceId→激活"
+    steps:
+      - from: "(套件开发)"
+        produce: "zip 包（plugin.yaml + src/*.py + origin_metric.json + alias_metric.json）"
+        note: "按 formats/collector-kit/ 打包，py2 脚本，metric_sampler 输出 [{dims,vals}]"
+      - from: plugin_package.import
+        pick: data.instanceId
+        to: [plugin.detail, kit.activate]
+        how: "import 返回 data.instanceId（13hex），存为变量 PLUGIN_ID 喂下一步"
+      - from: kit.activate
+        pick: data.totalStatus
+        to: []
+        how: "body.instanceId=${PLUGIN_ID}；成功判定 totalStatus!=fail"
+
+  # —— CMDB 采集套件 e2e（process_sampler）——
+  - name: develop_import_activate_process
+    desc: "CMDB采集套件 e2e：开发→导入→激活（脚本输出 GATHERING DATA 标记）"
+    steps:
+      - from: "(套件开发)"
+        produce: "zip 包（plugin.yaml samplerType=process_sampler + src/*.py 输出 BEGIN/END GATHERING DATA + relateObjectId模型.json）"
+      - from: plugin_package.import
+        pick: data.instanceId
+        to: [kit.activate]
+        how: "同 metric，PLUGIN_ID 接力"
+
+  # —— 升级 e2e ——
+  - name: upgrade_plugin
+    desc: "升级套件：detail 拿现状→改包→import_update"
+    steps:
+      - from: plugin.detail
+        pick: data.instanceId
+        to: [plugin_package.import_update]
+        how: "detail path 用 instanceId；import_update path 用同一 instanceId"
+      - from: plugin_package.import_update
+        pick: data.instanceId
+        to: []
+        how: "version 必填且唯一；agentType 不可变"
+
+  # —— 删除 e2e（含前置检查）——
+  - name: delete_plugin
+    desc: "删除套件：detail 确认→delete（前置：无采集任务引用）"
+    steps:
+      - from: plugin.detail
+        pick: data.instanceId
+        to: [plugin.delete]
+        how: "delete path 用 instanceId；若被 _COLLECTOR_JOB 引用会报错『此套件关联有采集任务不允许删除』"
+
+  # —— 跨 service 接力（collector_plugin_service → collector_service）——
+  - name: cross_service_plugin_to_kit
+    desc: "套件定义（8151）→ 激活（12000）跨 service 接力"
+    steps:
+      - from: plugin_package.import   # collector_plugin_service:8151
+        pick: data.instanceId
+        to: [kit.activate]            # collector_service:12000
+        how: "import 返回 instanceId → kit.activate body.instanceId。⚠️跨端口跨 spec，CLI 用 --spec 切换（easyops-collector-plugin.yaml → easyops-collector-service.yaml），且 kit.activate 需带 giraffe-contract-name header"
+  # ---- 巡检域 transitions（inspection e2e 接力）----
+  - name: insp_develop_import_e2e
+    desc: "巡检套件 e2e：开发套件包(tar.gz)→导入→验证→建任务→执行→查结果"
+    steps:
+      - from: "(套件开发)"
+        produce: "tar.gz 包（info.yaml+metrics.yaml+collectors/script.py[+reports_temp/detail.yaml]），pluginId=info.id"
+        note: "按 formats/inspection-kit/ 开发，py2 脚本守 script-protocol.yaml 协议"
+      - from: insp_package.import
+        pick: code
+        to: [insp_info.get]
+        how: "导入成功(code=0)后，用 pluginId get 验证套件+4对象都建成"
+      - from: insp_task.create
+        pick: data.inspectionTaskId
+        to: [insp_task.get]
+        how: "建任务返回 inspectionTaskId（13hex），存 TASK_ID"
+      - from: insp_history.list
+        pick: "data.list[].jobId"
+        to: [insp_history.get, insp_history.abnormal_metrics, insp_history.export_excel]
+        how: "list 拿最新 jobId，喂 get（评分详情）/abnormal（异常下钻）/export（报告）"
+  - name: insp_cross_cmdb_e2e
+    desc: "巡检 e2e 跨 service 接力：CMDB查模型→套件开发→巡检目标实例"
+    steps:
+      - from: object_model.list
+        pick: "data.list[].objectId"
+        to: ["(套件开发 info.yaml 的 objectid)"]
+        how: "巡检目标模型确认（flow step 2 门禁）——objectId 填进 info.yaml"
+      - from: object_instance.search
+        pick: "data.list[].instanceId"
+        to: ["(insp_task.create 的 targets[].instanceId)"]
+        how: "巡检目标实例 id 喂建任务的 targets"
+
+  # ---- dashboard 域 transitions ----
+  - name: dashboard_build_e2e
+    desc: "建仪表盘 e2e 跨 service 接力：查模型→查指标→试查数据→建盘→验收"
+    steps:
+      - from: object_model.list
+        pick: "data.list[].objectId"
+        to: [collector_metric.list(objectId), dashboard.create(context/objectId)]
+        how: "objectId 查证（HOST 等）——cmdb-olap model=easyops.<objectId>、cmdb 系 formData.objectId"
+      - from: collector_metric.list
+        pick: "data.list[].metricName"
+        to: ["olap_metric.query_v3 measures[].function.args", collector_metric.get]
+        how: "指标名查证——勿编；unit 同取（图表 axis 用）"
+      - from: olap_metric.query_v3
+        pick: "data.list[0].values"
+        to: ["(决定是否建图——空则换指标或弃图)"]
+        how: "指标活性试查：有数据点才建图，空则图表静默空白"
+      - from: dashboard.create
+        pick: "data.instanceId"
+        to: [dashboard.update, dashboard.delete, 前端URL]
+        how: "建盘返回 instanceId——迭代改盘 update 用、验收 URL 用、清理 delete 用"

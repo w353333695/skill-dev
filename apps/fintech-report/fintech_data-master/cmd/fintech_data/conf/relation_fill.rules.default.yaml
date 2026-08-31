@@ -1,0 +1,942 @@
+relation_rules:
+    # 供配电
+    - object_id: lowVoltage@FINTECHDATA
+      source_field: lowVoltage_deployment.deployDb
+      related_instance:
+          object_id: dataCenter@FINTECHDATA
+          related_field: facilityName
+      mapping:
+          - attr_id: deployDb
+            mapping_key: facilityDescriptor
+    - object_id: precisionPower@FINTECHDATA
+      source_field: precisionPower_deployment.deployDb
+      related_instance:
+          object_id: dataCenter@FINTECHDATA
+          related_field: facilityName
+      mapping:
+          - attr_id: deployDb
+            mapping_key: facilityDescriptor
+    - object_id: transformer@FINTECHDATA
+      source_field: transformer_deployment.deployDb
+      related_instance:
+          object_id: dataCenter@FINTECHDATA
+          related_field: facilityName
+      mapping:
+          - attr_id: deployDb
+            mapping_key: facilityDescriptor
+    - object_id: uninterrupted@FINTECHDATA
+      source_field: uninterrupted_deployment.deployDb
+      related_instance:
+          object_id: dataCenter@FINTECHDATA
+          related_field: facilityName
+      mapping:
+          - attr_id: deployDb
+            mapping_key: facilityDescriptor
+    - object_id: generator@FINTECHDATA
+      source_field: generator_deployment.deployDb
+      related_instance:
+          object_id: dataCenter@FINTECHDATA
+          related_field: facilityName
+      mapping:
+          - attr_id: deployDb
+            mapping_key: facilityDescriptor
+    - object_id: highVoltage@FINTECHDATA
+      source_field: highVoltage_deployment.deployDb
+      related_instance:
+          object_id: dataCenter@FINTECHDATA
+          related_field: facilityName
+      mapping:
+          - attr_id: deployDb
+            mapping_key: facilityDescriptor
+
+    # 供电关联关系
+    - object_id: powerSupplyRelation@FINTECHDATA
+      source_field: powerUsedAsset
+      related_instance:
+          object_id: powerUsedAsset@FINTECHDATA
+          related_field: facilityName
+      mapping:
+          - attr_id: powerUsedAsset
+            mapping_key: facilityDescriptor
+          - attr_id: powerUsedAssetCategory
+            mapping_key: facilityCategory
+    - object_id: powerSupplyRelation@FINTECHDATA
+      source_field: powerSupplyAsset
+      related_instance:
+          object_id: powerSupplyAsset@FINTECHDATA
+          related_field: facilityName
+      mapping:
+          - attr_id: powerSupplyAsset
+            mapping_key: facilityDescriptor
+          - attr_id: powerSupplyAssetCategory
+            mapping_key: facilityCategory
+    - object_id: powerSupplyRelation@FINTECHDATA
+      source_field: powerSupplyAsset
+      related_instance:
+          object_id: powerUsedAsset@FINTECHDATA # 由于存在 服务器-机柜-发电机 这样的关系，所以用电设施也可以作为供电设施
+          related_field: facilityName
+      mapping:
+          - attr_id: powerSupplyAsset
+            mapping_key: facilityDescriptor
+          - attr_id: powerSupplyAssetCategory
+            mapping_key: facilityCategory
+
+    # 基础软件
+    - object_id: softwareRelation@FINTECHDATA
+      source_field: SoftwareDescriptor
+      related_instance:
+          object_id: basedSoftware@FINTECHDATA
+          related_field: softwareName
+      mapping:
+          - attr_id: SoftwareDescriptor
+            mapping_key: softwareDescriptor
+    - object_id: softwareRelation@FINTECHDATA
+      source_field: FacilityDescriptor
+      related_instance:
+          object_id: serverAsset@FINTECHDATA
+          related_field: facilityName
+      mapping:
+          - attr_id: FacilityDescriptor
+            mapping_key: facilityDescriptor
+
+    - object_id: applicationSoftRelation@FINTECHDATA
+      source_field: softwareDescriptor
+      related_instance:
+        object_id: basedSoftware@FINTECHDATA
+        related_field: softwareName
+      mapping:
+        - attr_id: softwareDescriptor
+          mapping_key: softwareDescriptor
+    - object_id: applicationSoftRelation@FINTECHDATA
+      source_field: applicationIdentifier
+      related_instance:
+        object_id: application@FINTECHDATA
+        related_field: softwareName
+      mapping:
+        - attr_id: applicationIdentifier
+          mapping_key: applySystemIdentifiers
+
+    # 应用系统
+    - object_id: applicationRelation@FINTECHDATA
+      source_field: applicationIdentifier
+      related_instance:
+          object_id: application@FINTECHDATA
+          related_field: softwareName
+      mapping:
+          - attr_id: applicationIdentifier
+            mapping_key: applySystemIdentifiers
+    - object_id: applicationRelation@FINTECHDATA
+      source_field: applicationSystemAssociatedServer
+      related_instance:
+          object_id: serverAsset@FINTECHDATA
+          related_field: facilityName
+      mapping:
+          - attr_id: applicationSystemAssociatedServer
+            mapping_key: facilityDescriptor
+    - object_id: applicationRelation@FINTECHDATA
+      source_field: applicationSystemAssociatedStorage
+      related_instance:
+          object_id: storageAsset@FINTECHDATA
+          related_field: facilityName
+      mapping:
+          - attr_id: applicationSystemAssociatedStorage
+            mapping_key: facilityDescriptor
+
+    # 存储设备
+    - object_id: diskArray@FINTECHDATA
+      source_field: diskArray_deployment.deployDb
+      related_instance:
+          object_id: dataCenter@FINTECHDATA
+          related_field: facilityName
+      mapping:
+          - attr_id: deployDb
+            mapping_key: facilityDescriptor
+    - object_id: diskArray@FINTECHDATA
+      source_field: diskArray_installationPosition.belongCabinet
+      related_instance:
+          object_id: cabinetAsset@FINTECHDATA
+          related_field: facilityName
+      mapping:
+          - attr_id: belongCabinet
+            mapping_key: facilityDescriptor
+    - object_id: tapeLibrary@FINTECHDATA
+      source_field: tapeLibrary_deployment.deployDb
+      related_instance:
+          object_id: dataCenter@FINTECHDATA
+          related_field: facilityName
+      mapping:
+          - attr_id: deployDb
+            mapping_key: facilityDescriptor
+    - object_id: tapeLibrary@FINTECHDATA
+      source_field: tapeLibrary_installationPosition.belongCabinet
+      related_instance:
+          object_id: cabinetAsset@FINTECHDATA
+          related_field: facilityName
+      mapping:
+          - attr_id: belongCabinet
+            mapping_key: facilityDescriptor
+
+    # 安全管理
+    - object_id: securityGateway@FINTECHDATA
+      source_field: securityGateway_deployment.deployDb
+      related_instance:
+          object_id: dataCenter@FINTECHDATA
+          related_field: facilityName
+      mapping:
+          - attr_id: deployDb
+            mapping_key: facilityDescriptor
+    - object_id: securityGateway@FINTECHDATA
+      source_field: securityGateway_installationPosition.belongCabinet
+      related_instance:
+          object_id: cabinetAsset@FINTECHDATA
+          related_field: facilityName
+      mapping:
+          - attr_id: belongCabinet
+            mapping_key: facilityDescriptor
+
+    - object_id: encryption@FINTECHDATA
+      source_field: encryption_deployment.deployDb
+      related_instance:
+          object_id: dataCenter@FINTECHDATA
+          related_field: facilityName
+      mapping:
+          - attr_id: deployDb
+            mapping_key: facilityDescriptor
+    - object_id: encryption@FINTECHDATA
+      source_field: encryption_installationPosition.belongCabinet
+      related_instance:
+          object_id: cabinetAsset@FINTECHDATA
+          related_field: facilityName
+      mapping:
+          - attr_id: belongCabinet
+            mapping_key: facilityDescriptor
+
+    - object_id: vpn@FINTECHDATA
+      source_field: vpn_deployment.deployDb
+      related_instance:
+          object_id: dataCenter@FINTECHDATA
+          related_field: facilityName
+      mapping:
+          - attr_id: deployDb
+            mapping_key: facilityDescriptor
+    - object_id: vpn@FINTECHDATA
+      source_field: vpn_installationPosition.belongCabinet
+      related_instance:
+          object_id: cabinetAsset@FINTECHDATA
+          related_field: facilityName
+      mapping:
+          - attr_id: belongCabinet
+            mapping_key: facilityDescriptor
+
+    - object_id: bvs@FINTECHDATA
+      source_field: bvs_deployment.deployDb
+      related_instance:
+          object_id: dataCenter@FINTECHDATA
+          related_field: facilityName
+      mapping:
+          - attr_id: deployDb
+            mapping_key: facilityDescriptor
+    - object_id: bvs@FINTECHDATA
+      source_field: bvs_installationPosition.belongCabinet
+      related_instance:
+          object_id: cabinetAsset@FINTECHDATA
+          related_field: facilityName
+      mapping:
+          - attr_id: belongCabinet
+            mapping_key: facilityDescriptor
+
+    - object_id: networkDataPrevention@FINTECHDATA
+      source_field: networkDataPrevention_deployment.deployDb
+      related_instance:
+          object_id: dataCenter@FINTECHDATA
+          related_field: facilityName
+      mapping:
+          - attr_id: deployDb
+            mapping_key: facilityDescriptor
+    - object_id: networkDataPrevention@FINTECHDATA
+      source_field: networkDataPrevention_installationPosition.belongCabinet
+      related_instance:
+          object_id: cabinetAsset@FINTECHDATA
+          related_field: facilityName
+      mapping:
+          - attr_id: belongCabinet
+            mapping_key: facilityDescriptor
+
+    - object_id: flowAnalysis@FINTECHDATA
+      source_field: flowAnalysis_deployment.deployDb
+      related_instance:
+          object_id: dataCenter@FINTECHDATA
+          related_field: facilityName
+      mapping:
+          - attr_id: deployDb
+            mapping_key: facilityDescriptor
+    - object_id: flowAnalysis@FINTECHDATA
+      source_field: flowAnalysis_installationPosition.belongCabinet
+      related_instance:
+          object_id: cabinetAsset@FINTECHDATA
+          related_field: facilityName
+      mapping:
+          - attr_id: belongCabinet
+            mapping_key: facilityDescriptor
+
+    - object_id: idsIps@FINTECHDATA
+      source_field: idsIps_deployment.deployDb
+      related_instance:
+          object_id: dataCenter@FINTECHDATA
+          related_field: facilityName
+      mapping:
+          - attr_id: deployDb
+            mapping_key: facilityDescriptor
+    - object_id: idsIps@FINTECHDATA
+      source_field: idsIps_installationPosition.belongCabinet
+      related_instance:
+          object_id: cabinetAsset@FINTECHDATA
+          related_field: facilityName
+      mapping:
+          - attr_id: belongCabinet
+            mapping_key: facilityDescriptor
+
+    - object_id: intrusionAlarm@FINTECHDATA
+      source_field: intrusionAlarm_deployment.deployDb
+      related_instance:
+          object_id: dataCenter@FINTECHDATA
+          related_field: facilityName
+      mapping:
+          - attr_id: deployDb
+            mapping_key: facilityDescriptor
+
+    - object_id: ave@FINTECHDATA
+      source_field: ave_deployment.deployDb
+      related_instance:
+          object_id: dataCenter@FINTECHDATA
+          related_field: facilityName
+      mapping:
+          - attr_id: deployDb
+            mapping_key: facilityDescriptor
+    - object_id: ave@FINTECHDATA
+      source_field: ave_installationPosition.belongCabinet
+      related_instance:
+          object_id: cabinetAsset@FINTECHDATA
+          related_field: facilityName
+      mapping:
+          - attr_id: belongCabinet
+            mapping_key: facilityDescriptor
+
+    - object_id: mailFiltering@FINTECHDATA
+      source_field: mailFiltering_deployment.deployDb
+      related_instance:
+          object_id: dataCenter@FINTECHDATA
+          related_field: facilityName
+      mapping:
+          - attr_id: deployDb
+            mapping_key: facilityDescriptor
+    - object_id: mailFiltering@FINTECHDATA
+      source_field: mailFiltering_installationPosition.belongCabinet
+      related_instance:
+          object_id: cabinetAsset@FINTECHDATA
+          related_field: facilityName
+      mapping:
+          - attr_id: belongCabinet
+            mapping_key: facilityDescriptor
+
+    - object_id: waf@FINTECHDATA
+      source_field: waf_deployment.deployDb
+      related_instance:
+          object_id: dataCenter@FINTECHDATA
+          related_field: facilityName
+      mapping:
+          - attr_id: deployDb
+            mapping_key: facilityDescriptor
+    - object_id: waf@FINTECHDATA
+      source_field: waf_installationPosition.belongCabinet
+      related_instance:
+          object_id: cabinetAsset@FINTECHDATA
+          related_field: facilityName
+      mapping:
+          - attr_id: belongCabinet
+            mapping_key: facilityDescriptor
+
+    - object_id: accessControl@FINTECHDATA
+      source_field: accessControl_deployment.deployDb
+      related_instance:
+          object_id: dataCenter@FINTECHDATA
+          related_field: facilityName
+      mapping:
+          - attr_id: deployDb
+            mapping_key: facilityDescriptor
+    - object_id: accessControl@FINTECHDATA
+      source_field: accessControl_installationPosition.belongCabinet
+      related_instance:
+          object_id: cabinetAsset@FINTECHDATA
+          related_field: facilityName
+      mapping:
+          - attr_id: belongCabinet
+            mapping_key: facilityDescriptor
+
+    - object_id: databaseDesensitization@FINTECHDATA
+      source_field: databaseDesensitization_deployment.deployDb
+      related_instance:
+          object_id: dataCenter@FINTECHDATA
+          related_field: facilityName
+      mapping:
+          - attr_id: deployDb
+            mapping_key: facilityDescriptor
+    - object_id: databaseDesensitization@FINTECHDATA
+      source_field: databaseDesensitization_installationPosition.belongCabinet
+      related_instance:
+          object_id: cabinetAsset@FINTECHDATA
+          related_field: facilityName
+      mapping:
+          - attr_id: belongCabinet
+            mapping_key: facilityDescriptor
+
+    - object_id: gap@FINTECHDATA
+      source_field: gap_deployment.deployDb
+      related_instance:
+          object_id: dataCenter@FINTECHDATA
+          related_field: facilityName
+      mapping:
+          - attr_id: deployDb
+            mapping_key: facilityDescriptor
+    - object_id: gap@FINTECHDATA
+      source_field: gap_installationPosition.belongCabinet
+      related_instance:
+          object_id: cabinetAsset@FINTECHDATA
+          related_field: facilityName
+      mapping:
+          - attr_id: belongCabinet
+            mapping_key: facilityDescriptor
+
+    - object_id: ads@FINTECHDATA
+      source_field: ads_deployment.deployDb
+      related_instance:
+          object_id: dataCenter@FINTECHDATA
+          related_field: facilityName
+      mapping:
+          - attr_id: deployDb
+            mapping_key: facilityDescriptor
+    - object_id: ads@FINTECHDATA
+      source_field: ads_installationPosition.belongCabinet
+      related_instance:
+          object_id: cabinetAsset@FINTECHDATA
+          related_field: facilityName
+      mapping:
+          - attr_id: belongCabinet
+            mapping_key: facilityDescriptor
+
+    - object_id: entranceGuard@FINTECHDATA
+      source_field: entranceGuard_deployment.deployDb
+      related_instance:
+          object_id: dataCenter@FINTECHDATA
+          related_field: facilityName
+      mapping:
+          - attr_id: deployDb
+            mapping_key: facilityDescriptor
+    - object_id: entranceGuard@FINTECHDATA
+      source_field: entranceGuard_installationPosition.belongCabinet
+      related_instance:
+          object_id: cabinetAsset@FINTECHDATA
+          related_field: facilityName
+      mapping:
+          - attr_id: belongCabinet
+            mapping_key: facilityDescriptor
+
+    - object_id: onlineBehavior@FINTECHDATA
+      source_field: onlineBehavior_deployment.deployDb
+      related_instance:
+          object_id: dataCenter@FINTECHDATA
+          related_field: facilityName
+      mapping:
+          - attr_id: deployDb
+            mapping_key: facilityDescriptor
+    - object_id: onlineBehavior@FINTECHDATA
+      source_field: onlineBehavior_installationPosition.belongCabinet
+      related_instance:
+          object_id: cabinetAsset@FINTECHDATA
+          related_field: facilityName
+      mapping:
+          - attr_id: belongCabinet
+            mapping_key: facilityDescriptor
+
+    - object_id: opsAudit@FINTECHDATA
+      source_field: opsAudit_deployment.deployDb
+      related_instance:
+          object_id: dataCenter@FINTECHDATA
+          related_field: facilityName
+      mapping:
+          - attr_id: deployDb
+            mapping_key: facilityDescriptor
+    - object_id: opsAudit@FINTECHDATA
+      source_field: opsAudit_installationPosition.belongCabinet
+      related_instance:
+          object_id: cabinetAsset@FINTECHDATA
+          related_field: facilityName
+      mapping:
+          - attr_id: belongCabinet
+            mapping_key: facilityDescriptor
+
+    - object_id: opsAudit@FINTECHDATA
+      source_field: opsAudit_deployment.deployDb
+      related_instance:
+          object_id: dataCenter@FINTECHDATA
+          related_field: facilityName
+      mapping:
+          - attr_id: deployDb
+            mapping_key: facilityDescriptor
+    - object_id: opsAudit@FINTECHDATA
+      source_field: opsAudit_installationPosition.belongCabinet
+      related_instance:
+          object_id: cabinetAsset@FINTECHDATA
+          related_field: facilityName
+      mapping:
+          - attr_id: belongCabinet
+            mapping_key: facilityDescriptor
+
+    - object_id: digitalSignature@FINTECHDATA
+      source_field: digitalSignature_deployment.deployDb
+      related_instance:
+          object_id: dataCenter@FINTECHDATA
+          related_field: facilityName
+      mapping:
+          - attr_id: deployDb
+            mapping_key: facilityDescriptor
+    - object_id: digitalSignature@FINTECHDATA
+      source_field: digitalSignature_installationPosition.belongCabinet
+      related_instance:
+          object_id: cabinetAsset@FINTECHDATA
+          related_field: facilityName
+      mapping:
+          - attr_id: belongCabinet
+            mapping_key: facilityDescriptor
+
+    - object_id: holeScanner@FINTECHDATA
+      source_field: holeScanner_deployment.deployDb
+      related_instance:
+          object_id: dataCenter@FINTECHDATA
+          related_field: facilityName
+      mapping:
+          - attr_id: deployDb
+            mapping_key: facilityDescriptor
+    - object_id: holeScanner@FINTECHDATA
+      source_field: holeScanner_installationPosition.belongCabinet
+      related_instance:
+          object_id: cabinetAsset@FINTECHDATA
+          related_field: facilityName
+      mapping:
+          - attr_id: belongCabinet
+            mapping_key: facilityDescriptor
+
+    - object_id: logCollectionAnalysis@FINTECHDATA
+      source_field: logCollectionAnalysis_deployment.deployDb
+      related_instance:
+          object_id: dataCenter@FINTECHDATA
+          related_field: facilityName
+      mapping:
+          - attr_id: deployDb
+            mapping_key: facilityDescriptor
+    - object_id: logCollectionAnalysis@FINTECHDATA
+      source_field: logCollectionAnalysis_installationPosition.belongCabinet
+      related_instance:
+          object_id: cabinetAsset@FINTECHDATA
+          related_field: facilityName
+      mapping:
+          - attr_id: belongCabinet
+            mapping_key: facilityDescriptor
+
+    - object_id: safetyPlatform@FINTECHDATA
+      source_field: safetyPlatform_deployment.deployDb
+      related_instance:
+          object_id: dataCenter@FINTECHDATA
+          related_field: facilityName
+      mapping:
+          - attr_id: deployDb
+            mapping_key: facilityDescriptor
+    - object_id: safetyPlatform@FINTECHDATA
+      source_field: safetyPlatform_installationPosition.belongCabinet
+      related_instance:
+          object_id: cabinetAsset@FINTECHDATA
+          related_field: facilityName
+      mapping:
+          - attr_id: belongCabinet
+            mapping_key: facilityDescriptor
+
+    # 数据中心
+    - object_id: dataCenterSpacing@FINTECHDATA
+      source_field: localDb
+      related_instance:
+          object_id: dataCenter@FINTECHDATA
+          related_field: facilityName
+      mapping:
+          - attr_id: localDb
+            mapping_key: facilityDescriptor
+    - object_id: dataCenterSpacing@FINTECHDATA
+      source_field: oppositeDb
+      related_instance:
+          object_id: dataCenter@FINTECHDATA
+          related_field: facilityName
+      mapping:
+          - attr_id: oppositeDb
+            mapping_key: facilityDescriptor
+
+    - object_id: commonCabinet@FINTECHDATA
+      source_field: commonCabinet_deployment.deployDb
+      related_instance:
+          object_id: dataCenter@FINTECHDATA
+          related_field: facilityName
+      mapping:
+          - attr_id: deployDb
+            mapping_key: facilityDescriptor
+
+    - object_id: integratedCabinet@FINTECHDATA
+      source_field: integratedCabinet_deployment.deployDb
+      related_instance:
+          object_id: dataCenter@FINTECHDATA
+          related_field: facilityName
+      mapping:
+          - attr_id: deployDb
+            mapping_key: facilityDescriptor
+
+    - object_id: shieldedCabinet@FINTECHDATA
+      source_field: shieldedCabinet_deployment.deployDb
+      related_instance:
+          object_id: dataCenter@FINTECHDATA
+          related_field: facilityName
+      mapping:
+          - attr_id: deployDb
+            mapping_key: facilityDescriptor
+
+    # 服务器
+    - object_id: server@FINTECHDATA
+      source_field: server_deployment.deployDb
+      related_instance:
+          object_id: dataCenter@FINTECHDATA
+          related_field: facilityName
+      mapping:
+          - attr_id: deployDb
+            mapping_key: facilityDescriptor
+    - object_id: server@FINTECHDATA
+      source_field: server_installationPosition.belongCabinet
+      related_instance:
+          object_id: cabinetAsset@FINTECHDATA
+          related_field: facilityName
+      mapping:
+          - attr_id: belongCabinet
+            mapping_key: facilityDescriptor
+
+    # 刀片服务器
+    - object_id: bladeServer@FINTECHDATA
+      source_field: bladeServer_deployment.deployDb
+      related_instance:
+        object_id: dataCenter@FINTECHDATA
+        related_field: facilityName
+      mapping:
+        - attr_id: deployDb
+          mapping_key: facilityDescriptor
+    - object_id: bladeServer@FINTECHDATA
+      source_field: bladeServer_installationPosition.belongCabinet
+      related_instance:
+        object_id: cabinetAsset@FINTECHDATA
+        related_field: facilityName
+      mapping:
+        - attr_id: belongCabinet
+          mapping_key: facilityDescriptor
+
+    # 一体机服务器
+    - object_id: integratedServer@FINTECHDATA
+      source_field: integratedServer_deployment.deployDb
+      related_instance:
+        object_id: dataCenter@FINTECHDATA
+        related_field: facilityName
+      mapping:
+        - attr_id: deployDb
+          mapping_key: facilityDescriptor
+    - object_id: integratedServer@FINTECHDATA
+      source_field: integratedServer_installationPosition.belongCabinet
+      related_instance:
+        object_id: cabinetAsset@FINTECHDATA
+        related_field: facilityName
+      mapping:
+        - attr_id: belongCabinet
+          mapping_key: facilityDescriptor
+
+    # 大型机
+    - object_id: mainFrame@FINTECHDATA
+      source_field: mainFrame_deployment.deployDb
+      related_instance:
+        object_id: dataCenter@FINTECHDATA
+        related_field: facilityName
+      mapping:
+        - attr_id: deployDb
+          mapping_key: facilityDescriptor
+    - object_id: mainFrame@FINTECHDATA
+      source_field: mainFrame_installationPosition.belongCabinet
+      related_instance:
+        object_id: cabinetAsset@FINTECHDATA
+        related_field: facilityName
+      mapping:
+        - attr_id: belongCabinet
+          mapping_key: facilityDescriptor
+
+    # 小型机
+    - object_id: miniFrame@FINTECHDATA
+      source_field: miniFrame_deployment.deployDb
+      related_instance:
+        object_id: dataCenter@FINTECHDATA
+        related_field: facilityName
+      mapping:
+        - attr_id: deployDb
+          mapping_key: facilityDescriptor
+    - object_id: miniFrame@FINTECHDATA
+      source_field: miniFrame_installationPosition.belongCabinet
+      related_instance:
+        object_id: cabinetAsset@FINTECHDATA
+        related_field: facilityName
+      mapping:
+        - attr_id: belongCabinet
+          mapping_key: facilityDescriptor
+
+    # 机架式服务器
+    - object_id: rackServer@FINTECHDATA
+      source_field: rackServer_deployment.deployDb
+      related_instance:
+        object_id: dataCenter@FINTECHDATA
+        related_field: facilityName
+      mapping:
+        - attr_id: deployDb
+          mapping_key: facilityDescriptor
+    - object_id: rackServer@FINTECHDATA
+      source_field: rackServer_installationPosition.belongCabinet
+      related_instance:
+        object_id: cabinetAsset@FINTECHDATA
+        related_field: facilityName
+      mapping:
+        - attr_id: belongCabinet
+          mapping_key: facilityDescriptor
+
+    # 塔式服务器
+    - object_id: towerServer@FINTECHDATA
+      source_field: towerServer_deployment.deployDb
+      related_instance:
+        object_id: dataCenter@FINTECHDATA
+        related_field: facilityName
+      mapping:
+        - attr_id: deployDb
+          mapping_key: facilityDescriptor
+    - object_id: towerServer@FINTECHDATA
+      source_field: towerServer_installationPosition.belongCabinet
+      related_instance:
+        object_id: cabinetAsset@FINTECHDATA
+        related_field: facilityName
+      mapping:
+        - attr_id: belongCabinet
+          mapping_key: facilityDescriptor
+
+    - object_id: virtualMachine@FINTECHDATA
+      source_field: belongsServer
+      related_instance:
+          object_id: server@FINTECHDATA
+          related_field: facilityName
+      mapping:
+          - attr_id: belongsServer
+            mapping_key: facilityDescriptor
+
+    # 环境监控
+    - object_id: commonAirCondition@FINTECHDATA
+      source_field: commonAirCondition_deployment.deployDb
+      related_instance:
+          object_id: dataCenter@FINTECHDATA
+          related_field: facilityName
+      mapping:
+          - attr_id: deployDb
+            mapping_key: facilityDescriptor
+
+    - object_id: environmentalMonitoring@FINTECHDATA
+      source_field: environmentalMonitoring_deployment.deployDb
+      related_instance:
+          object_id: dataCenter@FINTECHDATA
+          related_field: facilityName
+      mapping:
+          - attr_id: deployDb
+            mapping_key: facilityDescriptor
+
+    - object_id: freshAir@FINTECHDATA
+      source_field: freshAir_deployment.deployDb
+      related_instance:
+          object_id: dataCenter@FINTECHDATA
+          related_field: facilityName
+      mapping:
+          - attr_id: deployDb
+            mapping_key: facilityDescriptor
+
+    - object_id: freshAir@FINTECHDATA
+      source_field: freshAir_deployment.deployDb
+      related_instance:
+          object_id: dataCenter@FINTECHDATA
+          related_field: facilityName
+      mapping:
+          - attr_id: deployDb
+            mapping_key: facilityDescriptor
+
+    - object_id: centralAirCondition@FINTECHDATA
+      source_field: centralAirCondition_deployment.deployDb
+      related_instance:
+          object_id: dataCenter@FINTECHDATA
+          related_field: facilityName
+      mapping:
+          - attr_id: deployDb
+            mapping_key: facilityDescriptor
+
+    - object_id: fireProtection@FINTECHDATA
+      source_field: fireProtection_deployment.deployDb
+      related_instance:
+          object_id: dataCenter@FINTECHDATA
+          related_field: facilityName
+      mapping:
+          - attr_id: deployDb
+            mapping_key: facilityDescriptor
+
+    - object_id: humidification@FINTECHDATA
+      source_field: humidification_deployment.deployDb
+      related_instance:
+          object_id: dataCenter@FINTECHDATA
+          related_field: facilityName
+      mapping:
+          - attr_id: deployDb
+            mapping_key: facilityDescriptor
+
+    - object_id: precisionAirCondition@FINTECHDATA
+      source_field: precisionAirCondition_deployment.deployDb
+      related_instance:
+          object_id: dataCenter@FINTECHDATA
+          related_field: facilityName
+      mapping:
+          - attr_id: deployDb
+            mapping_key: facilityDescriptor
+
+    - object_id: videoMonitoring@FINTECHDATA
+      source_field: videoMonitoring_deployment.deployDb
+      related_instance:
+          object_id: dataCenter@FINTECHDATA
+          related_field: facilityName
+      mapping:
+          - attr_id: deployDb
+            mapping_key: facilityDescriptor
+
+    # 网络设备
+    - object_id: fiberSwitch@FINTECHDATA
+      source_field: fiberSwitch_deployment.deployDb
+      related_instance:
+          object_id: dataCenter@FINTECHDATA
+          related_field: facilityName
+      mapping:
+          - attr_id: deployDb
+            mapping_key: facilityDescriptor
+    - object_id: fiberSwitch@FINTECHDATA
+      source_field: fiberSwitch_installationPosition.belongCabinet
+      related_instance:
+          object_id: cabinetAsset@FINTECHDATA
+          related_field: facilityName
+      mapping:
+          - attr_id: belongCabinet
+            mapping_key: facilityDescriptor
+
+    - object_id: firewall@FINTECHDATA
+      source_field: firewall_deployment.deployDb
+      related_instance:
+          object_id: dataCenter@FINTECHDATA
+          related_field: facilityName
+      mapping:
+          - attr_id: deployDb
+            mapping_key: facilityDescriptor
+    - object_id: firewall@FINTECHDATA
+      source_field: firewall_installationPosition.belongCabinet
+      related_instance:
+          object_id: cabinetAsset@FINTECHDATA
+          related_field: facilityName
+      mapping:
+          - attr_id: belongCabinet
+            mapping_key: facilityDescriptor
+
+    - object_id: loadBalancing@FINTECHDATA
+      source_field: loadBalancing_deployment.deployDb
+      related_instance:
+          object_id: dataCenter@FINTECHDATA
+          related_field: facilityName
+      mapping:
+          - attr_id: deployDb
+            mapping_key: facilityDescriptor
+    - object_id: loadBalancing@FINTECHDATA
+      source_field: loadBalancing_installationPosition.belongCabinet
+      related_instance:
+          object_id: cabinetAsset@FINTECHDATA
+          related_field: facilityName
+      mapping:
+          - attr_id: belongCabinet
+            mapping_key: facilityDescriptor
+
+    - object_id: wdm@FINTECHDATA
+      source_field: wdm_deployment.deployDb
+      related_instance:
+          object_id: dataCenter@FINTECHDATA
+          related_field: facilityName
+      mapping:
+          - attr_id: deployDb
+            mapping_key: facilityDescriptor
+    - object_id: wdm@FINTECHDATA
+      source_field: wdm_installationPosition.belongCabinet
+      related_instance:
+          object_id: cabinetAsset@FINTECHDATA
+          related_field: facilityName
+      mapping:
+          - attr_id: belongCabinet
+            mapping_key: facilityDescriptor
+
+    - object_id: router@FINTECHDATA
+      source_field: router_deployment.deployDb
+      related_instance:
+          object_id: dataCenter@FINTECHDATA
+          related_field: facilityName
+      mapping:
+          - attr_id: deployDb
+            mapping_key: facilityDescriptor
+    - object_id: router@FINTECHDATA
+      source_field: router_installationPosition.belongCabinet
+      related_instance:
+          object_id: cabinetAsset@FINTECHDATA
+          related_field: facilityName
+      mapping:
+          - attr_id: belongCabinet
+            mapping_key: facilityDescriptor
+
+    - object_id: switches@FINTECHDATA
+      source_field: switches_deployment.deployDb
+      related_instance:
+          object_id: dataCenter@FINTECHDATA
+          related_field: facilityName
+      mapping:
+          - attr_id: deployDb
+            mapping_key: facilityDescriptor
+    - object_id: switches@FINTECHDATA
+      source_field: switches_installationPosition.belongCabinet
+      related_instance:
+          object_id: cabinetAsset@FINTECHDATA
+          related_field: facilityName
+      mapping:
+          - attr_id: belongCabinet
+            mapping_key: facilityDescriptor
+    - object_id: networkRelation@FINTECHDATA
+      source_field: directConnectionNetAsset
+      related_instance:
+          object_id: netAsset@FINTECHDATA
+          related_field: facilityName
+      mapping:
+          - attr_id: directConnectionNetAsset
+            mapping_key: facilityDescriptor
+    - object_id: networkRelation@FINTECHDATA
+      source_field: localItAsset
+      related_instance:
+          object_id: netAsset@FINTECHDATA
+          related_field: facilityName
+      mapping:
+          - attr_id: localItAsset
+            mapping_key: facilityDescriptor

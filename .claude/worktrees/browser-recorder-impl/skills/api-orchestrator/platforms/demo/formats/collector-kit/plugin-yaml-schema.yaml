@@ -1,0 +1,343 @@
+# =============================================================================
+# formats/collector-kit/plugin-yaml-schema.yaml
+# 采集套件 plugin.yaml 配置字典（套件包主定义文件的权威 schema）。
+#
+# 职责：让编排挡/套件开发能力据此「根据需求生成 plugin.yaml + 打包成 zip」。
+# 这是套件包的核心，决定套件类型、采集行为、参数、关联模型。
+#
+# 权威源（双源交叉验证，每个字段标 source）：
+#   A. collector_plugin_service 后端源码（实体/服务/validator）—— 结构体字段、校验规则
+#      data/sources/backend/HyperInsight/collector_plugin_service/
+#   B. easyops-monitor 权威开发文档（现代，Python3 体系）—— 字段语义、类型示例
+#      tmp/easyops-cli/content-packages/easyops-platform/package/skills/easyops-monitor/guides/kits-develop/plugin-config.md
+#   ⚠️ A 与 B 冲突时以 A（后端实际处理）为准；B 是 py3 文档，采集脚本 py2 规范见
+#      sampler-types.yaml（用户确认 agent 默认 py2.7）。
+#
+# 相关文件（本格式包内）：
+#   sampler-types.yaml    — metric_sampler vs process_sampler 输出协议 + py2 脚本规范
+#   param-mechanism.yaml  — $.attr 动态取参机制 + paramType 规则
+#   package-format.yaml   — zip 包结构 + 打包坑 + 导入导出升级契约
+# =============================================================================
+
+# -----------------------------------------------------------------------------
+# 套件包类型：4 种（plugin.yaml 顶层 type 字段取值）
+# 决定采集器实现与 plugin.yaml 必填字段集。source: imexport_service.go:85-90
+# (agentType → type 映射 getTypeFromAgentType) + plugin-config.md:5-16
+# -----------------------------------------------------------------------------
+kit_types:
+  simple-script:
+    type_value: "simple-script"
+    agent_type: easyops
+    sampler_type: metric_sampler   # 监控指标；CMDB 采集变体用 process_sampler，见 sampler-types.yaml
+    description: "脚本类套件，最灵活。自定义采集逻辑（Python2/Shell 脚本直接产出 dims/vals JSON）。约平台 40% 占比。"
+    required_fields: [type, name, version, agentType, samplerType, relateObjectId, scriptType, command.collect.scriptPath, paramDefine]
+    has_script: true
+    has_package_binary: false
+    needs_config_template: false
+    source: "plugin-config.md:185-215（simple-script 示例）; imexport_service.go:86（agentType=easyops→type=simple-script）"
+
+  metricbeat:
+    type_value: "metricbeat"
+    agent_type: metricbeat
+    sampler_type: metric_sampler
+    description: "基于 metricbeat 模块的套件。复用 metricbeat 内置模块（redis/mysql/nginx/system 等），配 config.template.yaml 模板 + processors 后处理。"
+    required_fields: [type, name, version, agentType, samplerType, relateObjectId, noPackage, metricbeatName, processors]
+    has_script: false
+    has_package_binary: false
+    needs_config_template: true    # config.template.yaml 必填（Go template 语法）
+    special:
+      noPackage: true              # metricbeat 固定 noPackage=true
+    metricbeat_modules: "预置模块表来源 collector_plugin_service/cmd/collector_plugin_service/conf/conf.module.yaml（aerospike/apache/beat/ceph/docker/kafka/mysql/nginx/redis/system/...），GET /api/v1/metricbeat_info/list 列举（easyops_plugin_service.go:124-136，返回 moduleCache）"
+    source: "plugin-config.md:117-183（metricbeat 示例）; imexport_service.go:89（agentType=metricbeat→type=metricbeat）"
+
+  exporter:
+    type_value: "exporter"
+    agent_type: prometheus
+    sampler_type: metric_sampler
+    description: "自带二进制的 exporter 套件（如 ClickHouse Exporter）。agent 拉起第三方 exporter 进程，抓 /metrics。需 deploy/ + bin/ 目录。"
+    required_fields: [type, name, version, agentType, samplerType, relateObjectId, paramDefine]
+    has_script: false
+    has_package_binary: true       # bin/ 含 exporter 二进制
+    needs_config_template: false
+    special:
+      needs_deploy_dir: true       # deploy/（start_script.sh/stop_script.sh/monitor_script.sh/package.conf.yaml）
+    source: "plugin-config.md:217-283（exporter 示例）; imexport_service.go:87（agentType=prometheus→type=exporter）"
+
+  prometheus:
+    type_value: "exporter"         # ⚠️prometheus 直接抓取复用 exporter 类型，type 仍填 exporter
+    agent_type: prometheus
+    sampler_type: metric_sampler
+    description: "直接抓取已有 Prometheus /metrics 端点的套件（如 Nacos）。无独立二进制，noPackage=true，靠 uri 参数指定端点。"
+    required_fields: [type, name, version, agentType, samplerType, relateObjectId, noPackage, paramDefine]
+    has_script: false
+    has_package_binary: false
+    needs_config_template: false
+    special:
+      noPackage: true              # prometheus 变体 noPackage=true
+      needs_deploy_dir: false      # 不需要 deploy/bin/src，靠 uri 参数
+    note: "type 填 exporter（不是 prometheus），靠 agentType=prometheus + noPackage=true 区分。uri 参数用 {{ip}}/{{port}} 占位符动态拼接。source: plugin-config.md:285-334"
+    source: "plugin-config.md:285-334; imexport_service.go:87"
+
+# -----------------------------------------------------------------------------
+# plugin.yaml 顶层字段字典
+# source 优先级：collector_plugin_service 源码（实体构造/响应映射）> plugin-config.md
+# -----------------------------------------------------------------------------
+top_level_fields:
+  type:
+    type: string
+    required: conditional          # 4 类型必填（见 kit_types）
+    enum: [simple-script, metricbeat, exporter]
+    desc: "套件包类型。prometheus 直接抓取也填 exporter（靠 agentType=prometheus+noPackage=true 区分）。"
+    source: "imexport_service.go:85-90"
+
+  name:
+    type: string
+    required: true
+    desc: "套件名称（中文）。⚠️zip 顶层目录名、上传 API name 参数必须与此完全一致，否则上传失败。命名建议「XXX监控套件」（监控）/「XXX信息采集」（CMDB 采集）。"
+    source: "easyops_plugin_service.go:97（Create 构造）; upload.md:24"
+
+  version:
+    type: string
+    required: true
+    desc: "版本号。⚠️上传 API version 参数必须与此一致；升级（import_update）时版本号必须唯一，重复报『已存在同名版本』。导入时若空则用 time.Now().Unix() 字符串。"
+    source: "easyops_plugin_service.go:102; imexport_service.go:403-408,565-570"
+
+  agentType:
+    type: string
+    required: true
+    enum: [easyops, metricbeat, prometheus, log, zabbix-agent, sql, filebeat, cloudScript, detect, process, cloudSdk, remoteScan, kubernetesClusterAgent, ipCollect, kubernetesScan, localScan, eBPFCollect]
+    desc: "采集器类型（运行态身份）。simple-script=easyops, metricbeat=metricbeat, exporter/prometheus=prometheus。⚠️升级时不允许变更（报『更新套件时不允许变更套件类型』）。完整枚举见 collector_service/internal/constant/constant.go:19-37。"
+    source: "imexport_service.go:85-90; constant.go:19-37; imexport_service.go:590-592（不可变）"
+
+  samplerType:
+    type: string
+    required: true
+    enum: [metric_sampler, process_sampler, event_sampler, trace_sampler, log_sampler, detect_sampler, pipeline_sampler]
+    desc: "采样器类型，决定 collector_service 路由到哪个 Collector。监控套件固定 metric_sampler（脚本输出 dims/vals JSON）；CMDB 采集套件用 process_sampler（脚本输出 GATHERING DATA 标记包裹的 JSON）。默认 metric_sampler（空值按 metric_sampler 处理）。详见 sampler-types.yaml。"
+    source: "easyops_plugin_service.go:58（默认 metric_sampler）; collector.go:21-43（路由）; sampler.go:18-22（空值默认）"
+
+  relateObjectId:
+    type: string
+    required: true
+    pattern: '^[a-zA-Z_][0-9a-zA-Z_]{0,46}(@[A-Z]{1,16})?$'
+    desc: "关联 CMDB 模型 ID（决定采集数据归属）。如 HOST@ONEMODEL、REDIS@ONEMODEL。⚠️$.attr 引用的字段必须属于此模型（含继承链）的真实属性，否则导入报错。⚠️开发套件前必须先在 CMDB 确认此模型存在（object_model.list/detail 查），不存在则设计新模型并向客户确认后 object_model.import 建（见 flows/develop-and-import-kit.yaml step 1-3 硬前置门禁）。"
+    source: "easyops_plugin/validators/request_validate_trees.go:15"
+
+  category:
+    type: string
+    required: false
+    desc: "套件分类（界面分组）。常用：计算资源/网络资源/存储资源/数据库/中间件/自定义。点分多级如「平台资源.应用容器」。"
+    source: "plugin-config.md:32"
+
+  scriptType:
+    type: string
+    required: conditional          # 仅 simple-script 必填
+    enum: [python, shell, json]    # json 是 log_plugin 用
+    desc: "脚本类型，仅 simple-script 需要。⚠️采集脚本用 Python2.7（agent 默认，非 py3），py2 规范见 sampler-types.yaml。"
+    source: "plugin-config.md:33; easyops_plugin_service.go:347"
+
+  samplerInterval:
+    type: integer
+    required: false
+    desc: "采集间隔（秒），覆盖平台默认采集周期。如 30/60/3600。"
+    source: "plugin-config.md:34"
+
+  memo:
+    type: string
+    required: false
+    desc: "套件说明备注。"
+    source: "easyops_plugin_service.go:101"
+
+  icon:
+    type: "object|null"
+    required: false
+    default: null
+    desc: "图标 {prefix,icon,lib,category,color}。通常 null。"
+    source: "easyops_plugin_service.go:69-77; formatIcon imexport_service.go:178-189"
+
+  noPackage:
+    type: bool
+    required: false
+    default: false
+    desc: "是否无独立程序包。metricbeat 固定 true，prometheus 变体 true。simple-script/exporter（自带二进制）false。无程序包的纯元数据套件导入时 pkgInfo.NoPackage=true。"
+    source: "plugin-config.md:37; imexport_service.go:241,262"
+
+  metricbeatName:
+    type: string
+    required: conditional          # 仅 metricbeat 类型且非默认 module 时
+    desc: "Metricbeat 模块名（如 redis/mysql/nginx）。仅 metricbeat 类型需要。对应 conf.module.yaml 的 key，可 GET /api/v1/metricbeat_info/list 列举。"
+    source: "plugin-config.md:38; easyops_plugin_service.go:102,124-136"
+
+  processors:
+    type: array
+    required: false
+    default: []
+    desc: "后处理函数数组（指标转换管道）。metricbeat 几乎必用（0~26 个），simple-script 通常不需要（脚本直接产出最终指标）。元素结构 {name,action{func,param},output,parents}。详见 easyops-monitor processors.md。"
+    source: "plugin-config.md:39; easyops_plugin_service.go:80-93; imexport_service.go:215"
+
+  installPath:
+    type: string
+    required: false
+    desc: "安装路径（无空格标识符）。Create 时服务端默认用 name 赋值。"
+    source: "plugin-config.md:40; easyops_plugin_service.go:100"
+
+  jobFilter:
+    type: "null"
+    required: false
+    default: null
+    desc: "采集范围过滤，通常 null。"
+    source: "plugin-config.md:41"
+
+  protected:
+    type: bool
+    required: false
+    default: false
+    desc: "是否受保护（内置套件 true，自定义 false）。⚠️protected=true 的套件禁止覆盖上传（需改名）。导入时由 PostForm protected=true 控制。"
+    source: "plugin-config.md:42; imexport_service.go:464-466; upload.md:94-100"
+
+  rating:
+    type: integer
+    required: false
+    default: 0
+    desc: "评分。"
+    source: "plugin-config.md:43"
+
+  extInfo:
+    type: "object|null"
+    required: false
+    default: null
+    desc: "扩展信息。"
+    source: "plugin-config.md:44; easyops_plugin_service.go:216"
+
+  collectAgent:
+    type: string
+    required: false
+    desc: "执行采集的 Agent 取值，通常用动态参数从 CMDB 实例获取 IP。常用值「$.ip」。"
+    source: "plugin-config.md:50"
+
+  group:
+    type: array
+    items: string
+    required: false
+    default: []
+    desc: "分组标签（界面筛选）。导入时按 4 类白名单拆解重组：collectMethod(localScan/remoteScan/cloudSdk)、cloudType(cloudTypePrivateCloud/cloudTypeTencentCloud/...)、collectContent(collectContentResourceInfo/...)、其他。"
+    source: "plugin-config.md:51; imexport_service.go:59-83,414-446"
+
+  params:
+    type: array
+    items: string
+    required: true
+    desc: "参数名列表（与 paramDefine.name 一一对应）。"
+    source: "easyops_plugin_service.go:97; plugin-config.md:204"
+
+# -----------------------------------------------------------------------------
+# command.collect 结构（仅 simple-script 类型使用，其他类型为 null）
+# -----------------------------------------------------------------------------
+command_collect_fields:
+  interpreter:
+    type: string
+    required: false
+    default: '""'
+    desc: "脚本解释器路径。为空时用平台内置 Python（py2.7）。若需指定，填绝对路径。"
+    source: "plugin-config.md:61"
+
+  scriptPath:
+    type: array
+    items: string
+    required: true
+    desc: "脚本路径（相对套件根目录），列表第一个=目录，第二个=脚本文件名。如 [src, tomcat_monitor.py]。⚠️zip 内路径必须与此匹配（UTF-8 flag 打包坑见 package-format.yaml）。"
+    source: "plugin-config.md:62; imexport_service_test.go:1000"
+
+  type:
+    type: string
+    required: true
+    enum: [python, shell]
+    desc: "命令类型，必须与 scriptType 一致。"
+    source: "plugin-config.md:63"
+
+  user:
+    type: string
+    required: false
+    default: '""'
+    desc: "执行用户，通常为空。"
+    source: "plugin-config.md:64"
+
+# -----------------------------------------------------------------------------
+# paramDefine 字段（采集参数定义，每元素一个参数）
+# 详细机制（$.attr/paramType/secret）见 param-mechanism.yaml
+# -----------------------------------------------------------------------------
+param_define_fields:
+  name:
+    type: string
+    required: true
+    desc: "参数名。运行时注入环境变量 EASYOPS_COLLECTOR_<name>（大小写敏感）。与 params 列表对应。"
+    source: "plugin-config.md:76; simple-script-guide.md:201-218"
+
+  valueType:
+    type: string
+    required: true
+    enum: [string, int, boolean, password]
+    desc: "数据类型。password 用于敏感字段（配合 isEncrypt）。"
+    source: "plugin-config.md:77"
+
+  defaultValue:
+    type: string
+    required: false
+    desc: "默认值。三种语义：①以 $. 开头=动态参数（平台从 CMDB 实例自动注入，paramType=cmdb）；②非空非 $.=普通参数（界面展示用户确认，paramType=const）；③空串=必填参数（用户启用时填）。详见 param-mechanism.yaml。"
+    source: "plugin-config.md:78"
+
+  display:
+    type: bool
+    required: false
+    default: true
+    desc: "是否在平台界面展示。secretName 等隐藏参数 display=false。"
+    source: "plugin-config.md:79"
+
+  displayName:
+    type: string
+    required: false
+    desc: "界面显示名称（中文）。"
+    source: "plugin-config.md:80"
+
+  description:
+    type: string
+    required: false
+    desc: "参数描述。"
+    source: "plugin-config.md:81"
+
+  use:
+    type: string
+    required: true
+    enum: [collectorParams, instanceMapping]
+    desc: "参数用途。collectorParams=连接参数（IP/端口/密码），instanceMapping=实例映射参数（关联采集目标）。"
+    source: "plugin-config.md:82"
+
+  optional:
+    type: bool
+    required: false
+    desc: "是否可选。false=必填。"
+    source: "plugin-config.md:83"
+
+  isEncrypt:
+    type: bool
+    required: false
+    desc: "是否加密存储。密码/凭证类字段必须 true（即使 isFromSecret:false 用户自己手填，也必须 isEncrypt:true，禁止明文 string——否则 detail 回显/任务参数/日志会泄漏密码）。⚠️Update 时对已存在参数强制保留旧值（不可修改）。"
+    source: "plugin-config.md:84; easyops_plugin_service.go:199-202,715-718"
+
+  isFromSecret:
+    type: bool
+    required: false
+    desc: "是否从密钥管理获取。true 时平台从密钥库引用。⚠️Update 时强制保留旧值。任一 param isFromSecret=true 且无 secretName 参数时，平台自动注入 secretName（见 param-mechanism.yaml）。"
+    source: "plugin-config.md:85; easyops_plugin_service.go:138-165"
+
+  secretName:
+    type: string
+    required: false
+    desc: "密钥实例名称（isFromSecret=true 时由平台填充）。"
+    source: "plugin-config.md:86"
+
+  extraArgs:
+    type: "object|null"
+    required: false
+    desc: "额外参数 {isSingleChoice,srcObjectId,isDisplayLink,linkText,query}（如单选/联动）。"
+    source: "imexport_service.go:1042-1048; easyops_plugin_service.go:55-63"
