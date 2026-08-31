@@ -18,26 +18,20 @@ for action in actions:
     api_after     = 后随业务请求非空
     same_form     = 同表单前驱
 
-    # ---- 状态呈现类：页面没变（能看到原页面），但 before 看不出动作结果 ----
-    # 勾选/单选/下拉选中/tab 切换：before 里选项还没选中；输入：before 里框是空的。
-    # after 图里原页面仍在、且选中态/已输入内容可见——选 after 才能回答"选对了吗"。
     if action.type == "input":
-        选 after                       # 已输入内容可见（值同时写在说明文字里）
-    elif action.type == "click" and 元素是 单选/复选/下拉选项 (input[type=radio|checkbox] 或 其容器/li/option):
-        选 after                       # 选中态可见
-    # ---- 页面改变类：before 才有动作现场（after 页面已变，红框会指空） ----
-    elif action.type == "submit" or (action.type=="click" and 元素文本含 提交/保存/确定/登录/删除):
-        选 after                       # 展示提交/操作结果页
+        选 before                      # 值在事件里，图只标位置
+        if 同表单的最后一个 input:
+            可加 after（展示表单填完态）——可选
+    elif action.type == "submit" or (action.type=="click" and 元素文本含 提交/保存/确定/登录):
+        选 after                       # 展示提交结果
         若 after.status != ok/stable/timeout: 退回 before + 文字说明结果
     elif action.type == "click" and nav_after:
-        选 before                      # 跳转类：before=动作瞬间现场，红框在被点元素上
+        选 before                      # 跳转类：before=最后现场
     elif action.type == "click" and api_after and not nav_after:
         选 before + after 连排          # 局部刷新：点哪/变成什么
     else:
         选 before                      # 默认
 ```
-
-**判定优先级说明**：状态呈现类（input/勾选）判定在**前**——因为这类动作"无跳转无弹窗、原页面可见"的形态，正是最容易被误配 before 的；页面改变类在后兜底。拿不准某动作属于哪类时，问自己：**after 图里还能看到红框标的位置吗？** 能看到且结果可见 → after；看不到（页面已换）→ before。
 
 ## status 过滤与零尺寸处理
 
@@ -51,7 +45,7 @@ for action in actions:
 ![<与### 小节标题相同的动词短语>](screenshots/<seq>-<phase>.png)
 ```
 
-连排两张时（仅"局部刷新"类）：
+连排两张时：
 
 ```markdown
 ![<短语>-点击处](screenshots/<seq>-before.png)
