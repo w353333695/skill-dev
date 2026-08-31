@@ -216,10 +216,6 @@ step1_iptables() {
     log_warn "[$node] iptables-save 快照失败, 为安全起见跳过本节点 iptables 步骤"; return 3
   fi
 
-  # SSH 来源 IP 兜底放行(防止规则应用瞬间断连, 本地执行时为空)
-  local src_ip; src_ip=$(rn "$node" 'echo ${SSH_CONNECTION%% *}' 2>/dev/null | tr -d '\r')
-  [ -n "$src_ip" ] && log_info "[$node] 检测到 SSH 来源 IP: $src_ip (自动加入放行)"
-
   # 8823: 默认按节点是否监听自动判断, 可用 --with-8823 强制
   local ports="$BASE_OPEN_PORTS"
   if $FORCE_8823; then
@@ -233,11 +229,11 @@ step1_iptables() {
   # 去重端口
   ports=$(echo "$ports" | tr ',' '\n' | awk 'NF' | sort -u | paste -sd, -)
 
-  # 全放行源: 集群 IP + 额外 IP + SSH 来源
+  # 全放行源: 集群 IP + 额外 IP (SSH 来源不豁免, 仅经 22 端口规则访问)
   local -A _seen_ip=()
   local -a allow_ips=()
   local ip
-  for ip in "${NODES[@]}" $(echo "$EXTRA_ALLOW_IPS" | tr ',' ' ') $src_ip; do
+  for ip in "${NODES[@]}" $(echo "$EXTRA_ALLOW_IPS" | tr ',' ' '); do
     [ -z "$ip" ] && continue
     [ -n "${_seen_ip[$ip]:-}" ] && continue
     _seen_ip[$ip]=1; allow_ips+=("$ip")
