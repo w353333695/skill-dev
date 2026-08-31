@@ -1,0 +1,20 @@
+# 流程模板：导出工具为 tar.gz（场景⑤）。确认挡。
+name: export-tool
+intent: 导出工具为 .tar.gz 工具包
+trigger: ["导出X工具", "下载工具包", "导出工具"]
+guard: 确认挡（导出是只读下载，但产物落盘）
+key_rule: "⚠️导出是 GET /tools/:toolId/export?versionId=<32hex>（GET 非 POST；参数 versionId 非 vId，从 get 的 vId 改名填入）。返回 tar.gz 二进制流——api-cli 无法存盘，走 Python SDK export_tool(toolId,versionId,save_to) 或 --print-curl + curl。"
+steps:
+  - n: 1
+    op: tool_package.export_check
+    args: ["<toolId>", --body-file, '{"versionId":"<vId>"}', --insecure]
+    desc: 导出前检查（绑定的 lib 制品是否完整）
+    expect: "code=0；toolLibExportCheckResults 全 success（libNotFound 则先补 lib）"
+  - n: 2
+    op: tool_package.export
+    args: ["<toolId>", --versionId, "<vId>", --print-curl, --insecure]
+    desc: "api-cli 仅能 --print-curl 预览（无法存 tar.gz 二进制流）；拿 curl 手动下载，或走 Python SDK client.export_tool(toolId, versionId, save_to='tool.tar.gz') 流式下载"
+    expect: "打印等价 curl；执行后 tool.tar.gz 落盘，解压含 dat/config/script"
+alternative: "api-cli --print-curl tool_package export <toolId> --versionId <vId> → 拿 curl 手动下载"
+rollback: "导出只读，删落盘文件即可"
+acceptance: "tar -tzf tool.tar.gz 含 <toolName>/{._easyPackageConfig.dat,config,script}"

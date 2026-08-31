@@ -1,0 +1,29 @@
+# 流程模板：按条件批量删除实例（cmdb-instance 场景④）。change 挡，破坏性。
+# 场景：删除 ip 范围 192.168.1.3-6 的实例。
+# delete 的路径/分号/契约笔误/无按条件删 verb 等行为见 objects.yaml#cmdb_instance.side_effects（object_instance.delete rule）。本文件不复述规则全文。
+name: delete-instances-by-range
+intent: 按某条件（ip 范围/网段/属性）删一批实例——search 取 instanceIds → delete 批量删
+trigger: ["删除 ip 范围 X 的实例", "按条件批量删实例", "清掉某网段的主机", "删掉符合条件的实例"]
+guard: 规划挡（写、破坏性批量）—— 必须展示「将删哪些实例（instanceId+name+ip）」并明确确认
+prerequisites:
+  env: [EASYOPS_ORG, EASYOPS_USER=easyops, EASYOPS_CMDB_BACKEND_URL]
+  confirm: "已向用户展示命中实例清单并获确认；删错不可逆"
+steps:
+  - n: 1
+    op: object_instance.search
+    args: ["<OBJECT_ID>", --body-file, "<find.json>", --all, --insecure]
+    desc: 取命中条件的实例 instanceId（场景4：ip ∈ 192.168.1.3~6）
+    body_hint: '{ fields: ["instanceId","name","ip"], page:1, page_size:3000, query: {"$or":[{"ip":{"$eq":"192.168.1.3"}},{"ip":{"$eq":"192.168.1.4"}},{"ip":{"$eq":"192.168.1.5"}},{"ip":{"$eq":"192.168.1.6"}}]} }'
+    dataflow: "data.list[].instanceId → step2 拼分号串"
+    expect: "data.total=预期删除数；向用户展示 list（name+ip）确认"
+  - n: 2
+    op: object_instance.delete
+    args: ["<OBJECT_ID>", --instanceIds, "<id1;id2;...>", --insecure, --yes]
+    desc: 批量删（⚠️真实路径见 objects.yaml#cmdb_instance.side_effects 的 object_instance.delete rule）
+    expect: "code=0；data.deleteFailedInstances=[]（空=全删成功，含义见权威源）"
+    on_fail: "deleteFailedInstances 非空 → 看每项 {instanceId,_object_id,name} 的失败原因（权限/protected/已不存在）"
+key_rule: |
+  本文件只列【操作顺序】（怎么做）：search 取 instanceIds → delete 批量删（先条件查询再删，无独立按条件删 verb）。
+  delete 的路径笔误坑 + instanceIds 分号语义 + 返回字段含义见 objects.yaml#cmdb_instance.side_effects（object_instance.delete rule）。
+side_effects: objects.yaml#cmdb_instance.side_effects
+acceptance: "object_instance search 同条件 → data.total=0（删干净）；前端 list 页该范围无实例"

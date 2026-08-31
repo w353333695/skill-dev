@@ -1,0 +1,174 @@
+# =============================================================================
+# formats/inspection-kit/args-design.yaml
+# 巡检脚本参数设计（args 字段）—— 含 password 类型规范。
+#
+# 参数定义在 collectors/script.py 的 args 字段（YAML 数组）。
+# 运行时按 source/type 决定参数如何取值、如何注入脚本。
+#
+# ⚠️密码安全规范（与采集套件一致）：密码/凭证类入参即使是用户手填，
+#   也必须 type:password（加密存储），禁止当 text 明文。
+#
+# 权威源：
+#   A. internal/database/cmdb/collector/message.go:9-46（Collector.args + Arg 结构）
+#   B. internal/script_operator/python_operator.go（注入逻辑）
+#   C. 真调实测：weblogic/mssql/oracle/redis 的 args
+# =============================================================================
+
+# -----------------------------------------------------------------------------
+# 一、args 字段定义（每个参数对象）
+# source: collector/message.go:21-46
+# -----------------------------------------------------------------------------
+arg_fields:
+  key: { type: string, required: true, desc: "参数键名。注入为脚本变量名（source:custom 时直接用 key 作变量；source:attr_id 时注入 EASYOPS_<key>）" }
+  alias: { type: string, required: true, desc: "参数显示名（中文，如『用户名』『密码』）" }
+  type: { type: string, required: true, enum: [text, password], desc: "参数类型。text=普通文本；password=密码（加密存储，⚠️密码类必须用 password 禁止 text）" }
+  require: { type: bool, required: false, default: false, desc: "是否必填" }
+  source: { type: string, required: true, enum: [custom, attr_id], desc: "参数来源。custom=用户填写；attr_id=从CMDB实例属性自动取" }
+  default: { type: string, required: false, desc: "默认值。custom 类型适用；attr_id 类型忽略" }
+  memo: { type: string, required: false, desc: "参数说明" }
+  source_ref: "collector/message.go:21-46（Arg struct）"
+
+# -----------------------------------------------------------------------------
+# 二、source 取值规则（参数从哪来）
+# source: python_operator.go:41-57（KeyTypeCustom|KeyTypeCMDB|KeyTypeInstanceId|KeyTypeUnique）
+# -----------------------------------------------------------------------------
+source_rules:
+  custom:
+    desc: "用户填写（界面录入，存任务参数）。注入为无前缀变量 key=value，空转 None"
+    example_key: "username / password / port / db_name"
+    injection: "username='root'（直接 key 作变量名）"
+    use_when: "连接参数（用户名/密码/端口/库名）等用户每次巡检可能不同的值"
+    real_examples:
+      weblogic: "{key:username, alias:Weblogic用户名, type:text, source:custom}"
+      oracle: "{key:password, alias:密码, type:password, source:custom}（⚠️密码用 password 类型）"
+      mssql: "{key:db_name, alias:db_name, type:text, source:custom, default:tempdb}"
+    source: "python_operator.go:52-53（KeyTypeCustom 无前缀注入）"
+
+  attr_id:
+    desc: "从 CMDB 实例属性自动取（需巡检对象模型有该属性）。注入为 EASYOPS_<key> 前缀变量"
+    example_key: "ip / hostname / connectInfo / homePath"
+    injection: "EASYOPS_ip='172.16.1.1'（加 EASYOPS_ 前缀）"
+    use_when: "设备自身属性（IP/主机名/连接信息串），从巡检对象 CMDB 实例取，避免重复配置"
+    ⚠️script_read_rule: |
+      ⚠️脚本里读 attr_id 参数必须用 EASYOPS_<key>，不是 key！
+      错（取不到值，None）：host = globals().get("ip")           # ← ip 是 attr_id，注入的是 EASYOPS_ip
+      对                          ：host = globals().get("EASYOPS_ip")
+      对照表（按 source 决定脚本变量名）：
+        source:attr_id  → globals().get("EASYOPS_" + key)   # ip/hostname 等 CMDB 属性
+        source:custom   → globals().get(key)                # username/password/port/db_name 等
+        内置             → globals().get("EASYOPS_instanceId")
+      来源：python_operator.go:46-57（KeyTypeCMDB 走 EASYOPS_ 前缀分支）
+    real_examples:
+      mssql: "{key:connectInfo, alias:连接信息, type:text, source:attr_id}（struct，含 manageHost/managePort/account/password，脚本 EASYOPS_connectInfo.get(...) 取嵌套字段）"
+      oracle: "{key:homePath, alias:home目录, type:text, source:attr_id}"
+      mysql_installPath: "{key:installPath, alias:安装路径, type:text, source:attr_id}（拼客户端命令路径，不硬编码。脚本 EASYOPS_installPath→os.path.join(install_path,'bin',cmd)）"
+    instance_driven_design: |
+      【设计原则】能用 CMDB 实例属性的尽量用 attr_id，减少用户每次填参负担：
+      - 连接地址/IP/端口 → attr_id（ip/ports/connectInfo）
+      - 安装路径/home目录 → attr_id（installPath/homePath），用于定位客户端命令（不硬编码）
+      - 凭证（用户名/密码）→ 视情况：实例 connectInfo 里有就 attr_id；否则 custom + type:password
+      - 业务参数（库名/实例名）→ custom
+      开发前先 object_model.detail 看目标模型有哪些属性可用（见 MYSQL@ONEMODEL: ip/installPath/ports/connectInfo/users/...）
+    constraint: "attr_id 的 key 必须 info.objectid 指向的 CMDB 模型有此属性，否则取不到值（None）"
+    source: "python_operator.go:48-50（KeyTypeCMDB/Unique/InstanceId 加 EASYOPS_ 前缀）"
+
+# -----------------------------------------------------------------------------
+# 三、type 类型规则（含 password 安全规范）
+# -----------------------------------------------------------------------------
+type_rules:
+  text:
+    desc: "普通文本参数。明文存储与传输"
+    use_for: "用户名/端口/库名/路径等非敏感参数"
+  password:
+    desc: "密码参数。加密存储，运行时解密后注入脚本（脚本侧用 key 取值，无感知加密）"
+    use_for: "密码/凭证/token 等敏感参数"
+    security_rule: |
+      ⚠️密码安全规范（开发套件必守）：
+      密码/凭证类入参【即使是用户自己手填】（source:custom），也必须 type:password，
+      禁止当 text 明文存储——明文密码会在 detail 回显/任务参数/日志中泄漏。
+      判定：参数值是凭证内容（password/secret/token/passphrase）→ type:password，
+      无论 source 是 custom 还是 attr_id。
+    real_examples:
+      weblogic: "{key:password, alias:Weblogic密码, type:password, source:custom, require:true}"
+      oracle: "{key:password, alias:密码, type:password, source:custom}"
+    runtime: "平台解密后注入 password='<明文>'，脚本直接用 password 变量，无感知"
+
+# -----------------------------------------------------------------------------
+# 四、MySQL 巡检套件 args 设计范例（入参丰富，本次 e2e 用）
+# 参考 mssql/oracle/redis 真实套件，设计 MySQL 巡检的 args
+# -----------------------------------------------------------------------------
+mysql_args_example:
+  description: "MySQL 巡检套件的参数设计（入参丰富范例，本次 e2e 开发用）"
+  design: |
+    # collectors/script.py 的 args 字段（YAML 数组）
+    args:
+      # —— 设备属性（从 CMDB 巡检对象实例取）——
+      - key: ip
+        alias: IP地址
+        type: text
+        require: true
+        source: attr_id              # 从巡检对象模型取 ip 属性
+        default: ""
+        memo: MySQL服务器IP（从CMDB取）
+      # —— 连接参数（用户填写）——
+      - key: port
+        alias: 端口
+        type: text
+        require: false
+        source: custom
+        default: "3306"              # 默认 MySQL 端口
+        memo: MySQL端口，默认3306
+      - key: username
+        alias: 用户名
+        type: text
+        require: true
+        source: custom
+        default: ""
+        memo: MySQL连接用户名（如 root/monitor）
+      - key: password
+        alias: 密码
+        type: password               # ⚠️密码类型（加密存储，手填也要用 password）
+        require: true
+        source: custom
+        default: ""
+        memo: MySQL连接密码
+      - key: db_name
+        alias: 数据库名
+        type: text
+        require: false
+        source: custom
+        default: "mysql"             # 默认连 mysql 库取状态
+        memo: 数据库名，默认 mysql
+      - key: charset
+        alias: 字符集
+        type: text
+        require: false
+        source: custom
+        default: "utf8mb4"
+        memo: 连接字符集
+      # —— 巡检选项 ——
+      - key: slow_query_threshold
+        alias: 慢查询阈值(秒)
+        type: text
+        require: false
+        source: custom
+        default: "2"
+        memo: 慢查询判定阈值（秒），超过算异常
+  design_principles:
+    - "设备属性（ip）用 source:attr_id 从 CMDB 取，避免重复配置"
+    - "连接参数（port/username/password/db_name/charset）用 source:custom，用户填"
+    - "密码必须 type:password（安全规范）"
+    - "可选项（charset/threshold）给合理 default，降低用户配置成本"
+    - "key 用英文，alias 中文（界面显示）"
+
+# -----------------------------------------------------------------------------
+# 五、脚本侧取参方式（与参数定义呼应）
+# 参数注入为脚本头部变量，脚本直接引用变量名
+# -----------------------------------------------------------------------------
+script_usage:
+  custom_param: "直接用 key 作变量名：username / password / port（脚本头部注入 username='root' 等）"
+  attr_id_param: "用 EASYOPS_<key>：EASYOPS_ip（注入 EASYOPS_ip='172.16.1.1'）"
+  example: |
+    # 脚本里直接用注入的变量（不需要 os.environ.get）
+    conn_str = 'mysql -h%s -P%s -u%s -p%s' % (EASYOPS_ip, port, username, password)
+    # 注意：ip 是 attr_id → EASYOPS_ip；port/username/password 是 custom → 直接 port/username/password

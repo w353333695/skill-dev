@@ -1,0 +1,26 @@
+spec: api-cli/v1
+service:
+  name: cmdb
+  version: "1.0"
+  default_endpoint: backend
+  endpoints:
+    backend:
+      base_url: http://localhost:9000
+      auth: backend-sign
+      path_prefix: /api/v1
+resources:
+  inst:
+    path: /instances
+    singular: instance
+    operations:
+      create: { method: POST, path: "" }
+      read: { path: "/{id}", params: { id: { type: string, required: true } } }
+      delete: { path: "/{id}" }
+      search:
+        method: POST
+        path: /search
+        pagination:
+          type: cursor
+          items_path: data.list
+          next_token_path: data.next
+          has_more_path: data.next

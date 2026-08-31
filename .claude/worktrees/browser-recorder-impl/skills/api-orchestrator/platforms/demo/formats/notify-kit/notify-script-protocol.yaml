@@ -1,0 +1,139 @@
+# =============================================================================
+# formats/notify-kit/notify-script-protocol.yaml
+# msgsender 通知脚本协议 —— 三方告警通知脚本怎么写、config 怎么配、消息怎么发。
+#
+# 服务：msgsender（Python/Tornado，:8095）。通知方式 = CMDB 实例（_MSGSENDER_NOTIFY_CONFIG@EASYOPS）
+#       + notify_scripts/<plugin>.py 脚本（内置 4 个 git 预置，custom 由 scriptContent 动态落盘加载）。
+#
+# 权威源：
+#   A. data/sources/backend/platform/msgsender/custom_sender/message_handler.py（加载+发送+调试+告警）
+#   B. data/sources/backend/platform/msgsender/mail_config/config_handler.py（config CRUD）
+#   C. data/sources/backend/platform/msgsender/lib/sensitive_fields_handler.py（敏感字段协议）
+#   D. 真调实测（2026-08-14 .90:8095/org8888）：8 个 config（4 内置 + 4 custom），v1 明文/v2 脱敏实锤
+#
+# 相关文件（本格式包内）：
+#   （暂单文件；config 字段字典/发送流程都在此，避免碎片化）
+# =============================================================================
+
+# -----------------------------------------------------------------------------
+# 一、核心模型：通知方式（config）= CMDB 实例 + 脚本
+# -----------------------------------------------------------------------------
+notify_model:
+  description: |
+    一个「通知方式」（如 email/wework/自建短信）由两部分组成：
+      1. config 实例（CMDB _MSGSENDER_NOTIFY_CONFIG@EASYOPS）：name/msgType/pluginName/
+         scriptContent/enable/serverConfig/configFields/cmdbUserObjectColName
+      2. 脚本 notify_scripts/<pluginName>.py：实现 run(msg_data, users, ...) 函数
+    msgsender 是 CMDB 的 CRUD 代理 + 脚本加载器（本身无独立数据库）。
+    发送时按 receiver.method（=config.name）分桶 → 查 CMDB USER/USER_GROUP → 调对应脚本。
+  builtin_vs_custom:
+    builtin: |
+      msgType ∈ {email, wework, dingding, dingding_robot}（inner_msgtype，config_handler.py:23-26）
+      pluginName 由映射决定：email→mail / wework→wework / dingding→dingding_easyops / dingding_robot→dingding_robot
+      脚本是 git 预置的 notify_scripts/*.py，不落盘、不需要 scriptContent。
+    custom: |
+      msgType=custom（或任何非内置值）→ pluginName 强制 = name（config_handler.py:186-187,249-250）
+      脚本来自 config.scriptContent，加载时写到 notify_scripts/<name>.py 再动态 import
+      （load_plugins message_handler.py:39-81；按 mtime 判断是否重载，缓存 key 是 pluginName）。
+  builtin_scripts_reference:
+    mail.py: "SMTP。serverConfig: smtp_server/smtp_port/encrypt_type(ssl|tsl|plain)/login_user/login_password/msg_from/from_name"
+    wework.py: "企业微信应用。serverConfig: corpid/corpsecret/agentid"
+    dingding_robot.py: "钉钉群机器人 webhook。users 按 cmdb_object_key(默认 dingding_userid) 取 access_token"
+    dingding_easyops.py: "钉钉企业内部应用。serverConfig: agentid/appkey/appsecret"
+
+# -----------------------------------------------------------------------------
+# 二、脚本契约（三方告警通知脚本开发 —— 核心协议）
+# -----------------------------------------------------------------------------
+script_contract:
+  signature: "def run(msg_data, users, cmdb_object_key='user_email', server_config={}, **kwargs)"
+  params:
+    msg_data: "dict。send_message 时=请求里的 data.msg_data（自由 dict，脚本自解读，常含 content/subject）；alert_adapter 时=整个告警 payload"
+    users: "dict {username: user_obj}。user_obj 是 CMDB USER 实例；用 user_obj[cmdb_object_key] 取该通知方式要的字段值（如手机号/robot token）"
+    cmdb_object_key: "str。= config.cmdbUserObjectColName；为空串时（send_message 分支）不传此参，脚本收不到位置参数"
+    server_config: "dict。= config.serverConfig（脚本自己的服务端配置，如 api_key/url）"
+    kwargs: "平台附加：topic（send_message 的顶层 topic）、logger（logging 模块）"
+  return: "建议 list（成功送达的标识列表，如 mail 返回 to_addrs、wework 返回 userids）。返回值进 API 响应 data"
+  runtime: "python2（.iteritems() 语法），可用 requests。⚠️run 函数体含中文（注释/字符串）必须首行 # -*- coding: utf-8 -*-（实测：缺则 debug 报 SyntaxError Non-ASCII character，脚本含中文时是必踩坑，2026-08-14 e2e 实锤）"
+  dev_redlines: |
+    三方脚本开发红线（e2e 实测，2026-08-14）：
+    1. 🔴编码声明：脚本含任何非 ASCII（中文注释/字符串）必须首行 `# -*- coding: utf-8 -*-`，否则 py2 加载报 SyntaxError。
+    2. run 必须模块级可调用（def run(...)，非类方法），平台 dynamic_imp_fun('<module>:run') 取函数。
+    3. users 是 {username: user_obj}；user_obj[cmdb_object_key] 取值，缺字段用 .get 跳过（勿直接索引报 KeyError）。
+    4. server_config 的敏感字段（type=password）已由平台解码（base64→明文），脚本直接用，无需自己解。
+    5. 异常处理：脚本内 try/except + log，未捕获异常 → send 时该 method 置 'error'（整体仍 200），debug 时整体 500 'debug send msg plugin error: <异常>'。
+    6. cmdb_object_key 为空串时（send_message 的空 key 分支）run 收不到此位置参——若依赖它取值，config.cmdbUserObjectColName 必须非空。
+  examples:
+    minimal_robot: |
+      # notify_scripts/dingding_robot.py 精简版（完整见源码）
+      def run(msg_data, users, cmdb_object_key='dingding_userid', **kwargs):
+          userids = [info[cmdb_object_key] for info in users.values() if cmdb_object_key in info]
+          for userid in userids:
+              requests.post(WEBHOOK.format(access_token=userid),
+                  json={"msgtype": "markdown", "markdown": {"title": msg_data.get('subject', u'通知'), "text": msg_data['content']}},
+                  timeout=(10, 60))
+          return userids
+    full_reference: "mail.py:111-127 / wework.py:102-112 / dingding_robot.py:16-41"
+  error_handling: "脚本内抛异常 → send 时该 method 置 'error'（整体仍 200）；debug 时整体 500 'debug send msg plugin error'"
+
+# -----------------------------------------------------------------------------
+# 三、config 字段字典（CMDB _MSGSENDER_NOTIFY_CONFIG@EASYOPS）
+# -----------------------------------------------------------------------------
+config_fields:
+  name: "通知方式名（=inform_type=发送时的 method）。唯一，409 冲突报『通知方式名称重复』"
+  msgType: "email / wework / dingding / dingding_robot / custom（三方脚本用 custom）"
+  pluginName: "脚本模块名。内置=映射；custom 强制=name（勿手填错，post 时服务端会覆写）"
+  scriptContent: "custom 类型的脚本源码字符串（内置留空）"
+  enable: "bool。false 时发送返回 'disable' 且 /method 不列出"
+  serverConfig: "dict，脚本的服务端配置（smtp/corpid/api_key...）。敏感字段值须 base64 传输（见 sensitive_protocol）"
+  configFields: "[{name, type}]，serverConfig 的字段元数据；type=password 的字段走脱敏/base64 协议"
+  cmdbUserObjectColName: "CMDB USER 模型（objectId=裸 USER，无@后缀，实测 /object/USER 200、USER@EASYOPS 404）上的取值字段名。内置约定：mail→user_email / wework→wework_userid / dingding*→dingding_userid（migrate_handler.py:42-60 + cmdb_sdk.py:360）。custom 自定，必须 USER 模型有此属性（实测可用字段：user_tel 手机号/user_email/dingding_userid/wework_userid/name；⚠️无 telephone 字段）"
+  description: "描述"
+  instanceId_ctime_mtime_org: "CMDB 注入。mtime 被 load_plugins 用于判断脚本是否重载"
+  source: "实测 .90 configs list（8 个实例字段全集）+ config_handler.py:100-113"
+
+# -----------------------------------------------------------------------------
+# 四、敏感字段协议（v2 专属，重要）
+# -----------------------------------------------------------------------------
+sensitive_protocol:
+  rule: |
+    configFields 中 type=password 的 serverConfig 字段：
+      出站（v2 GET list / POST/PUT 响应）：值强制替换 '********'（mask_sensitive_fields）
+      入站（v2 POST/PUT/debug）：值='********' 表示未改（服务端用 CMDB 原值替换）；
+      值非 '********' → 当作 base64 解码（失败报『敏感字段 %s base64解码失败』）
+    即：新建/改密码字段必须 base64 编码传输；表单回显 ******** 不改就原样回传。
+  v1_vs_v2:
+    v1: "GET list/detail 明文返回密码（实测 .90：email 的 login_password 明文）——禁止用 v1 读 config"
+    v2: "GET list / POST/PUT / debug 全走脱敏+解码。v2 无单条 GET/DELETE 路由，这两个退回 v1（DELETE 也脱敏；单条 GET 避免读敏感值）"
+  source: "sensitive_fields_handler.py:35-138；实测 v1/v2 list 对比（2026-08-14）"
+
+# -----------------------------------------------------------------------------
+# 五、API 面（v2 主线 + v1 补充）与端点语义
+# -----------------------------------------------------------------------------
+api_surface:
+  base: "http://<host>:8095，header org/user（默认 header 模式；CHECK_AUTH_TOKEN_ENABLE=true 时走 Bearer JWT）"
+  endpoints:
+    method: "GET /api/v1/message_sender/method —— 当前 enable 的通知方式列表（snake_case 字段：inform_type/plugin_name/col_of_cmdb_user_object...，serverConfig/scriptContent 已剥离）。≠内置类型清单，是动态 config 列表"
+    send_message: "POST /api/v1/message_sender/send_message —— 正式发。body {topic?, data:{receivers:[{user|user_group|email_addr, method}], msg_data:{content,...}}}。method=config.name。响应 {code:0, data:{method: 脚本返回值|'not support'|'disable'|'error'}}"
+    send_message_debug: "POST /api/v2/message_sender/send_message_debug（v1 同路径也行）—— 调试。body 直接是 config 字段（msgType/scriptContent/serverConfig/cmdbUserObjectColName）+ receivers。不需先建 config；一次一种方式；msg_data 内容被固定覆盖为测试文本（只验证脚本可执行+receiver 可解析，不验证业务渲染）；receivers[].method 必须=msgType"
+    alert_receive: "POST /api/v1/alert_adapter/receive —— 告警源接入。data.alert_receivers=[{name(用户名), method}]，整个 data 作为 msg_data 透传脚本"
+    configs_v2: "POST/GET /api/v2/message_sender/configs（list 脱敏）；PUT /api/v2/message_sender/configs/{id}（解码+脱敏）"
+    configs_v1: "GET/DELETE /api/v1/message_sender/configs/{id}（v2 无此二路由；GET 明文敏感值慎用，DELETE 脱敏）"
+    mail_with_appendix: "POST /api/v1/message_sender/mail_with_appendix —— 带附件邮件"
+  permission_matrix: |
+    需系统管理员（validate_is_admin，header user 必须有『系统管理员』角色）：config 的 POST/PUT/DELETE
+    无鉴权：GET method/configs、send_message、debug、alert_adapter（勿当受保护接口）
+  pagination_caveat: "内部 get_plugin_configs 固定 page_size=300（message_handler.py:89），config 超 300 会丢"
+
+# -----------------------------------------------------------------------------
+# 六、三方告警通知脚本开发流程（端到端）
+# -----------------------------------------------------------------------------
+custom_notify_flow:
+  e2e_verified: "2026-08-14 .90 实测全链路通：create config(custom+scriptContent) → instanceId 658fb0301e7a1 → send_message method=config.name → data={config.name:[送达用户]}; debug 原地试跑 custom 脚本 → data=[用户]。测完已删 config 恢复 8 原始方式。"
+  steps:
+    - "1. 写脚本：首行 # -*- coding: utf-8 -*-（含中文必填）+ def run(msg_data, users, cmdb_object_key, server_config={}, **kwargs)，py2。确定 cmdbUserObjectColName（USER 模型真实字段：user_tel/user_email/dingding_userid/wework_userid/name，⚠️无 telephone）"
+    - "2. 设计 serverConfig + configFields：普通字段 type=text；密码/密钥 type=password（值 base64 传输，脚本侧拿到的是已解码明文）"
+    - "3. POST /api/v2/message_sender/configs（admin user header，api-cli 加 --yes 跳确认挡）建 config：{name, msgType:'custom', scriptContent, serverConfig, configFields, cmdbUserObjectColName, enable:true}。pluginName 服务端强制=name"
+    - "4. POST /api/v2/message_sender/send_message_debug 调试（scriptContent+serverConfig+receivers 原地试跑，msg 内容被覆盖为测试文本——只验脚本可执行+receiver 解析）"
+    - "5. POST /api/v1/message_sender/send_message 正式发：receivers=[{user, method:<config.name>}]，msg_data={content,...}"
+  verification: "/api/v1/message_sender/method 应列出新建方式（enable=true 时）；send 响应 data[method]=脚返回的 list 而非 'not support'/'disable'/'error'"
+  source: "config_handler.py:224-266（v2 create）+ message_handler.py:558-690（debug）+ 482-555（send）"

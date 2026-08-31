@@ -1,0 +1,98 @@
+# 流程模板：自然语言 → 构建仪表盘（dashboard v2）。
+name: build-dashboard
+intent: 根据自然语言需求（如「看某主机的CPU使用率趋势」「各模型实例数量统计」「告警历史趋势大屏」），构建仪表盘（_DASHBOARD 实例）
+trigger: ["建仪表盘", "做个dashboard", "构建监控大盘", "看XX趋势的仪表盘", "XX统计大屏", "可视化XX", "告警历史统计", "变更历史趋势"]
+guard: 规划挡（写 CMDB）—— 必须确认仪表盘名 + 展示意图后出配置草案，用户确认再建
+
+prerequisites:
+  env: [EASYOPS_CMDB_BACKEND_URL, EASYOPS_COLLECTOR_SERVICE_BACKEND_URL, EASYOPS_DATA_EXCHANGE_BACKEND_URL, EASYOPS_ORG, EASYOPS_USER]
+  payload: "自然语言需求（看什么数据/什么形态/给谁看）"
+  format_knowledge: "读 formats/dashboard-kit/{dashboard-config,providers-context}.yaml（配置结构+数据源 DSL 全文在此）"
+  crud_note: "仪表盘 CRUD = easyops-cmdb.yaml#dashboard（create/update 镜像前端 v2 行为）+ object_instance search 查。⚠️不用 import upsert（那是本地 JSON 导入页路径）"
+
+key_rule: |
+  仪表盘 = _DASHBOARD 实例：panels(构件)+context(数据源)+variables(变量)+顶层字段。
+  数据源 8 种内置类型（CMDB 实例列表/详情/单模型总数/多模型总数/聚合/监控指标/历史数据统计/http），
+  不只监控——按需求选型（详见 providers-context.yaml#context_types 官方语义）。
+  🔴证据纪律：指标名（collector_metric.list 查证）和 objectId（object_model.list 查证）勿编造
+  ——错了后端不报错、图表静默空白。数据绑定 <% CTX.DS.<context名> %>。
+
+steps:
+  - n: 1
+    desc: |
+      解析需求 → 拆图表清单。每图确定：
+      数据类型（8 种 context 类型之一，按 providers-context.yaml#context_types.official 对号）
+      + 展示形态（趋势/卡片/表格/饼图，查 dashboard-config.yaml#brick_selection.nl_to_brick）。
+      输出配置草案（图清单+数据源清单）给用户确认。
+    expect: "图表清单（每项：意图/context类型/构件）+ 用户确认"
+  - n: 2
+    op: object_model.list
+    args: ["--q <目标对象关键词>"]
+    desc: |
+      查证 objectId（如 HOST/IOT_DEVICE@ONEMODEL）——🔴勿从自然语言猜。
+      同时看模型字段（context filters/表格列/变量 fieldsLabel 要用真实属性）。
+    expect: "确认 objectId + 可用字段清单"
+  - n: 3
+    op: collector_metric.list
+    desc: |
+      查证指标名（仅当数据源是 cmdb-olap 监控指标）：POST /api/v2/collector-metric-names
+      body {page:1, pageSize:100, objectId:<objectId>} → data.list[].metricName/unit/dims。
+      🔴指标名错则图静默空白；unit 记下（图表 axis.unit 用）。
+      （非指标类数据源跳过本步：cmdb 系走 step2 的字段、columndb 走 providers-context 表清单）
+    expect: "真实指标名 + 单位 + 维度（cmdb-olap 时）"
+  - n: 4
+    op: olap_metric.query_v3
+    desc: |
+      指标活性试查（仅 cmdb-olap）：model=easyops.<objectId> + dims=["time"] + filters[{name:time,operator:>=,value:now-1h}]
+      + measures[{name:v, function:{expression:avg, args:[指标名]}}]（🔴function 字段名是 expression 非 operator）
+      + limit{limit:1} + withEmptyData:false——list 空=该指标近期无数据，换指标或弃图（与用户确认）。
+      data_exchange 直连 :8152（EASYOPS_DATA_EXCHANGE_BACKEND_URL）。
+      注意：①试查空 ≠ 端点错（采集可能未跑）；②v3 与前端实际用的 v1 行为可能有差异
+      （实测 v3 某 30d total=0 而 v1 now-1h 有数据）——存疑时 v1 同参数复核。
+    expect: "指标有数据点（或已换指标/弃图）"
+  - n: 5
+    desc: |
+      组装配置 JSON（本地）：
+      ① context：每图一个数据源项（模板见 providers-context.yaml#context_types——
+        指标 cmdb-olap / 实例列表 cmdb-list / 分组统计 cmdb-group / 多模型总数 cmdb-count-multi /
+        历史趋势 cmdb-columndb（18 张历史表）/ 自定义接口 http）
+      ② variables：单实例场景加 instanceId 变量（type=cmdb, fieldsValue 默认 instanceId——
+        🔴监控指标过滤必用 instanceId，OLAP 数据不一定有 ip/hostname）
+      ③ panels：每图一个 panel（brickConf.properties.data="<% CTX.DS.<context名> %>" + 24 列网格布局；
+        🔴brickConf 须 JSON.stringify 成字符串；统计卡 value 须单值表达式（坑见 dashboard-config.yaml#brick_selection.statistic_card_gotcha））
+      ④ 顶层：name/category(必填)+dashboardVersion(v2)+template(normal|bigScreen)+timerange(now-1h)+namespace(dashboard)+type(builtIn)
+    expect: "完整配置 JSON 草案（对照 dashboard-config.yaml#dashboard_schema 字段全集）"
+  - n: 6
+    op: dashboard.create
+    args: ["_DASHBOARD"]
+    desc: |
+      建仪表盘：POST /v2/object/_DASHBOARD/instance，body = 🔴平铺配置字段（勿包 instance 包装！
+      包了 code=0 但字段静默丢失——e2e 实测坑，后端 validator 直接吃整个 body）。
+      返回 instanceId。⚠️不用 import（非前端路径，且缺前端注入的 type=builtIn 等默认字段）。
+    expect: "code=0 + instanceId + data.name 等字段回显正确"
+  - n: 7
+    desc: |
+      验收 URL（用户开页面确认）：
+      ${EASYOPS_CMDB_FRONTEND_URL}/next/dashboard/dashboard/v2/<instanceId>?from=<timerange>&_namespace_=<namespace>
+      例：http://172.30.0.90/next/dashboard/dashboard/v2/658fc463b98e5?from=now-1h&_namespace_=dashboard
+      🔴API 落库 code=0 ≠ 前端渲染正确（前端解释型内容）——须用户确认图表渲染/数据/变量选择器。
+    expect: "用户确认图表正常显示"
+  - n: 8
+    desc: |
+      迭代：改配置 → dashboard.update（PUT 全量覆盖！先 object_instance search 取完整现配 →
+      本地改 → PUT 回，漏传字段会被清掉）。浏览器刷新即见。
+    expect: "迭代至满意"
+  - n: 9
+    op: dashboard.delete
+    desc: "(不满意/清理)删盘：DELETE /object/_DASHBOARD/instance/<instanceId>（单删）。⚠️删前确认非系统内置盘"
+    expect: "code=0"
+
+side_effects: objects.yaml#dashboard_instance.side_effects
+acceptance: "前端打开仪表盘 URL，各 panel 渲染且数据正确；object_instance search _DASHBOARD 可查到该实例"
+rollback: "dashboard.delete（_DASHBOARD, instanceId）"
+note: |
+  大屏（bigScreen）：template=bigScreen + size{width:1920,height:1080} + background，新建自带
+  page-title/date-indicator 默认面板（getBigScreenDefaultPanels.yaml）。
+  cmdb-columndb（历史数据统计）：database=<% String(SYS.org) %>，表选 18 张 @EASYOPS 历史库
+  （告警 monitor_event/变更 cmdb_change_history/工具 tool_oplog/CI pipeline_build/ITSM itsm_ticket...全清单
+  providers-context.yaml#context_types.cmdb_columndb.tables）。

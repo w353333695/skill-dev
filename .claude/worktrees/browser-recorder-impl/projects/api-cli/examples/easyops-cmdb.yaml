@@ -1,0 +1,70 @@
+# EasyOps CMDB - object instance search 清单
+# 由真实 curl 请求推断（前端走网关 + 后端直连双 endpoint）。
+# 资源定义一份；endpoint 差异在 base_url(端口) + path_prefix(网关前缀) + auth。
+spec: api-cli/v1
+service:
+  name: easyops-cmdb
+  version: "1.0"
+  default_endpoint: frontend          # 用户 curl 是前端，先默认前端调通
+  endpoints:
+    frontend:                         # 浏览器/前端：走网关 + cookie（IP 直连 + Host header）
+      base_url: https://172.30.0.232
+      host: admin.easyops.local       # IP 直连，Host 由 endpoint.Host 注入（网关按 host 路由）
+      path_prefix: /next/api/gateway/cmdb.instance.PostSearchV3
+      auth: easyops-cookie
+    backend:                          # 直连后端 :8079（HTTP）
+      base_url: http://172.30.0.232:8079
+      host: admin.easyops.local
+      path_prefix: ""
+      auth: easyops-cookie
+
+resources:
+  object_instance:
+    description: CMDB 对象实例
+    path: /v3/object/{object_id}/instance     # object_id 路径参数（如 FLOW_BUILDER_API_CONTRACT@EASYOPS）
+    operations:
+      search:                                  # 对应 PostSearchV3
+        description: 按条件搜索实例（MongoDB 风格 query）
+        method: POST
+        path: /_search
+        params:
+          object_id: { in: path, type: string, required: true, description: 对象模型 ID（如 FLOW_BUILDER_API_CONTRACT@EASYOPS） }
+        body:
+          type: object
+          required: [page, page_size]
+          description: CMDB 实例搜索请求
+          properties:
+            fields:         { type: array, items: { type: string }, description: 返回字段 }
+            page:           { type: integer, description: 页码（从1起） }
+            page_size:      { type: integer, description: 每页条数 }
+            sort:           { type: array, description: 排序，order=-1降序, items: { type: object, properties: { key: { type: string }, order: { type: integer } } } }
+            query:
+              type: object
+              description: 查询条件，MongoDB 风格（$and/$or 组合，字段名做 key，操作符 $like/$eq 等）
+              additional_properties: true
+              example: { "$and": [{ "$or": [{ "namespaceId": { "$like": "%easyops.%" } }] }] }
+            relation_limit: { type: integer }
+        response:
+          type: object
+          properties:
+            data:
+              type: object
+              description: 响应数据
+              properties:
+                list:
+                  type: array
+                  description: 实例列表
+                  items:
+                    type: object
+                    properties:
+                      instanceId: { type: string, description: 实例ID }
+                      name:       { type: string, description: 名称 }
+                      namespaceId: { type: string, description: 命名空间ID }
+                total: { type: integer, description: 总条数 }
+        pagination:
+          type: offset
+          page_in: body                      # EasyOps PostSearchV3 翻页号在 body（非 query）
+          items_path: data.list
+          page_param: page
+          size_param: page_size
+          size: 20
