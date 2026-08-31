@@ -54,5 +54,8 @@ apps/fintech-sync/
 
 .claude/settings.json
 
+# git worktree 本地目录（实现工作区，绝不入库——曾发生过嵌套快照误提交）
+.claude/worktrees/
+
 # 项目内临时区（AGENTS.md 约定：本地凭证/中间产物，不入库）
 .local/
