@@ -1,0 +1,68 @@
+instance_rules:
+    - object_id: fireProtection@FINTECHDATA
+      attr_id: facilityCategory
+      attr_source:
+          - key: fireAlarm
+            path: $.fireProtection_fireProtection[0].fireAlarmSystem
+            source: instance
+            ignore_fail: true
+          - key: gasExhaust
+            path: $.fireProtection_fireProtection[0].gasExhaustSystem
+            source: instance
+            ignore_fail: true
+          - key: waterExhaust
+            path: $.fireProtection_fireProtection[0].waterExhaustSystem
+            source: instance
+            ignore_fail: true
+          - key: sprinkler
+            path: $.fireProtection_fireProtection[0].sprinklerSystem
+            source: instance
+            ignore_fail: true
+          - key: fireExhaust
+            path: $.fireProtection_fireProtection[0].fireExhaustSystem
+            source: instance
+            ignore_fail: true
+      case:
+          - rel: and
+            condition:
+                - key: fireAlarm
+                  opr: ==
+                  value: 00-是
+            value:
+                type: const
+                const: FAXFBJS000
+          - rel: and
+            condition:
+                - key: gasExhaust
+                  opr: ==
+                  value: 00-是
+            value:
+                type: const
+                const: FAXFMHSQTX
+          - rel: and
+            condition:
+                - key: waterExhaust
+                  opr: ==
+                  value: 00-是
+            value:
+                type: const
+                const: FAXFMHSSWX
+          - rel: and
+            condition:
+                - key: sprinkler
+                  opr: ==
+                  value: 00-是
+            value:
+                type: const
+                const: FAXFMHSZDX
+          - rel: and
+            condition:
+                - key: fireExhaust
+                  opr: ==
+                  value: 00-是
+            value:
+                type: const
+                const: FAXFPYS000
+      default:
+          type: const
+          const: FAXF000000
