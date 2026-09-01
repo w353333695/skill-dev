@@ -94,6 +94,24 @@ PK_TRANSLATE = {
     "networkRelation@FINTECHDATA": ("relationalIdentifier", "facilityCategory"),
     "softwareRelation@FINTECHDATA": ("relationalIdentifier", "facilityCategory"),
 }
+# 字段编码翻译: CMDB 存中文名/明文，人行要标准编码
+# nationalArea: 3位国家码(GB/T 2659)；administrativeArea: 6位行政区划码(GB/T 2260)
+NATIONAL_AREA_CODES = {
+    "中国": "156", "中国台湾": "158", "中国香港": "344", "中国澳门": "446",
+    "日本": "392", "韩国": "410", "美国": "840", "英国": "826", "法国": "250",
+    "德国": "276", "新加坡": "702", "其它": "999",
+}
+ADMIN_AREA_CODES = {
+    "北京市": "110000", "天津市": "120000", "河北省": "130000", "山西省": "140000",
+    "内蒙古自治区": "150000", "辽宁省": "210000", "吉林省": "220000", "黑龙江省": "230000",
+    "上海市": "310000", "江苏省": "320000", "浙江省": "330000", "安徽省": "340000",
+    "福建省": "350000", "江西省": "360000", "山东省": "370000", "河南省": "410000",
+    "湖北省": "420000", "湖南省": "430000", "广东省": "440000", "广西壮族自治区": "450000",
+    "海南省": "460000", "重庆市": "500000", "四川省": "510000", "贵州省": "520000",
+    "云南省": "530000", "西藏自治区": "540000", "陕西省": "610000", "甘肃省": "620000",
+    "青海省": "630000", "宁夏回族自治区": "640000", "新疆维吾尔自治区": "650000",
+    "台湾省": "710000", "香港特别行政区": "810000", "澳门特别行政区": "820000",
+}
 IGNORE_INST_ATTR = "ignoreReport"           # 实例该属性为 true 时跳过上报
 IGNORE_ATTR_CATEGORY = ["辅助信息", "ignoreReport"]   # 属性 tag 命中则不上报该属性
 OMITEMPTY_FIELDS = ["%_operationsManagement"]        # 为空则整段省略（模糊匹配）
@@ -317,7 +335,13 @@ class Converter:
 
     def _transform(self, attr_id: str, atype: str, value: Any, attr: dict) -> Any:
         if atype == "str":
-            return str(value)
+            s = str(value)
+            # 编码翻译: 人行要求标准编码的三个字段（CMDB 常存中文名）
+            if attr_id == "nationalArea" and s in NATIONAL_AREA_CODES:
+                return NATIONAL_AREA_CODES[s]
+            if attr_id == "administrativeArea" and s in ADMIN_AREA_CODES:
+                return ADMIN_AREA_CODES[s]
+            return s
         if atype == "bool":
             return "True" if value else "False"
         if atype == "int":
