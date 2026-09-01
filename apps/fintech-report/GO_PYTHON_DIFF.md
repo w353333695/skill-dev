@@ -72,15 +72,17 @@
 3. 批次号用人行真号（v1.0.12）
 4. nationalArea/administrativeArea 编码（v1.0.14）— 真实规则但非根因
 
-### 未对齐遗漏（按影响排序，需修）
-| 优先级 | 项 | 影响 |
-|---|---|---|
-| **P0** | #14/15 struct/structs 空值→全空结构 | 其他模型有空 struct 时整字段缺失，完整性校验挂 |
-| **P0** | #19 instance_rules 字段推导 | facilityCategory 等推导字段，CMDB 未预填时送空 |
-| **P1** | #12 datetime 去秒 | 含 datetime 字段的模型格式不符 |
-| **P1** | #25 Audit 审核流程 | autoRequestCheck 开启时缺审核环节 |
-| **P2** | #20 relation_rules / #17 RecoverValueChange | relation 类模型名称→hex 映射，CMDB 已存 hex 则影响小 |
-| **P2** | #11 date [:10] 截断 | CMDB 存纯日期则等价，存带时间则差异 |
+### 未对齐遗漏处置（v1.0.16 全量修复完成，spec 见 docs/spec-align-go.md）
+
+| 优先级 | 项 | 处置 | 自检 |
+|---|---|---|---|
+| **P0** | #14/15 struct/structs 空值 | ✅ v1.0.16 修（空→全空结构/单元素数组） | 9/9 pass |
+| **P0** | #19 instance_rules | ✅ 不修——实测 CMDB 数据已填充（Go 在变更时旁路写库，上报只读现值） | 数据实测 |
+| **P1** | #12 datetime 去秒 | ✅ v1.0.16 修（rsplit 等价 Go Split+去尾，含边界语义） | 9/9 pass |
+| **P1** | #25 Audit 审核流程 | ✅ 不修引擎——实测 0 规则开启 autoRequestCheck（Go 同跳过），代码留 TODO 注明触发条件 | 配置实测 |
+| **P2** | #17 RecoverValueChange | ✅ v1.0.16 修（str 全量正则还原，零误伤） | 9/9 pass |
+| **P2** | #20 relation_rules | ✅ 不修——实测 localDb/deployDb 已是 32 位 hex | 数据实测 |
+| **P2** | #11 date [:10] 截断 | ✅ v1.0.16 修（原样透传） | 9/9 pass |
 
 ### 当前 dataCenter 上报失败的真因判断
 v1.0.14 日志仍报"传输标识错误"且 19/19 全挂 → **外层 dataType 仍是 `new`（v1.0.14 未含此修复，v1.0.15b 才修）**。用 v1.0.15b 跑应能过协议层进入字段级检核。之后的失败会由 data[] 给出具体字段错误。

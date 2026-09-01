@@ -130,6 +130,9 @@ CODE_HANDLE_WITH_WARN = "WL-10013"  # 处理成功有警告（终态：成功）
 CHECK_POLL_INTERVAL = 10
 CHECK_POLL_MAX = 5
 CODE_DATA_VALID = "WL-20000"
+# TODO Audit 审核流程（Go CreateAuditTask）: 规则实例 autoRequestCheck=true 时，上报成功后
+# 应 POST requestCheck（gzip branchIdList）触发人行审核、得 groupId（G 系列批次组）。
+# 当前环境 0 规则开启该开关（Go 侧同跳过），故未实现；开启前需补此环节。
 CODE_DATA_VALID_WITH_WARNING = "WL-20003"
 
 LOG = logging.getLogger("fintech-report")
@@ -319,13 +322,18 @@ class Converter:
             src_id = self.mapping.get(aid) or aid
             value = inst.get(src_id)
             atype = (attr.get("value") or {}).get("type", "str")
-            # 人行要求空值传 ""（复合类型除外）
             if self._is_empty(value):
                 if self._omitempty(aid):
                     continue  # 为空且 omitempty → 整个属性省略
-                if atype in ("struct", "structs"):
-                    continue  # 复合为空不上报
-                out[aid] = ""
+                if atype == "struct":
+                    # Go transformStructValue: 空 struct → 全子字段空串（字段必须出现）
+                    out[aid] = self._empty_struct_obj(attr)
+                    continue
+                if atype == "structs":
+                    # Go transformStructs: 空 structs → 单元素数组（全空子字段），非空数组
+                    out[aid] = [self._empty_struct_obj(attr)]
+                    continue
+                out[aid] = ""   # 人行要求空值传空字符串
                 continue
             out[aid] = self._transform(aid, atype, value, attr)
         return out
@@ -333,10 +341,17 @@ class Converter:
     def _is_empty(self, v: Any) -> bool:
         return v is None or v == "" or v == [] or v == {}
 
+    # Go IDFormatRegex: ".+?\[[0-9a-zA-Z_-]{32}\]" —— relation fill 的 name[hex] 残留形态
+    _ID_FMT_RE = re.compile(r".+?\[[0-9a-zA-Z_-]{32}\]")
+
     def _transform(self, attr_id: str, atype: str, value: Any, attr: dict) -> Any:
         if atype == "str":
             s = str(value)
-            # 编码翻译: 人行要求标准编码的三个字段（CMDB 常存中文名）
+            # Go RecoverValueChange: relation fill 写入的 "name[32hex]" 还原为 "32hex"
+            # （Go 限定 selfEffectedIds；Python 读 CMDB 现值防御性全量处理，正则零误伤）
+            if self._ID_FMT_RE.fullmatch(s):
+                s = s.split("[", 1)[1].replace("]", "")
+            # 编码翻译: 人行要求标准编码的字段（CMDB 常存中文名）
             if attr_id == "nationalArea" and s in NATIONAL_AREA_CODES:
                 return NATIONAL_AREA_CODES[s]
             if attr_id == "administrativeArea" and s in ADMIN_AREA_CODES:
@@ -350,10 +365,13 @@ class Converter:
             prec = self.prec.get(attr_id, 2)
             return f"{float(value):.{prec}f}"
         if atype == "date":
-            return str(value)[:10]
+            # Go transformDateValue: 非空原样返回（无截断）
+            return str(value)
         if atype == "datetime":
+            # Go transformTimeValue: Split(":") 去掉最后一段（秒）
+            # "2021-03-15 10:33:00" → "2021-03-15 10:33"；无冒号原样
             s = str(value)
-            return s[:19]  # Go: 去秒（Split(":") 去最后一段）——保 19 位标准形态
+            return s.rsplit(":", 1)[0] if ":" in s else s
         if atype == "enum":
             return self._enum_code(value)
         if atype == "enums":
@@ -370,6 +388,20 @@ class Converter:
             return [self._struct_obj(subs, v) for v in items if isinstance(v, dict)]
         return value
 
+    def _empty_struct_obj(self, attr: dict) -> dict:
+        """空 struct → 全子字段空串（Go transformStructValue 空值分支）。"""
+        subs = (attr.get("value") or {}).get("struct_define") or []
+        # 子字段里嵌套 struct/structs 类型时 Go 走 transformAttrValue → 其空值分支递归全空；
+        # FINTECHDATA 模型实际无二层嵌套，这里覆盖一层 + 嵌套层递归
+        out = {}
+        for s in subs:
+            st = s.get("type", "str")
+            if st in ("struct", "structs"):
+                out[s.get("id", "")] = "" if st == "struct" else [self._empty_struct_obj({"value": {"struct_define": []}})]
+            else:
+                out[s.get("id", "")] = ""
+        return out
+
     def _struct_obj(self, subs: list, data: dict) -> dict:
         out = {}
         for s in subs:
@@ -378,8 +410,10 @@ class Converter:
             st = s.get("type", "str")
             if self._is_empty(v):
                 if st in ("struct", "structs"):
-                    continue
-                out[sid] = ""
+                    # Go: 子复合空值同样生成全空结构（递归 transformAttrValue 空值分支）
+                    out[sid] = "" if st == "struct" else [self._empty_struct_obj({"id": sid, "value": s})]
+                else:
+                    out[sid] = ""
                 continue
             out[sid] = self._transform(sid, st, v, {"id": sid, "value": s})
         return out
