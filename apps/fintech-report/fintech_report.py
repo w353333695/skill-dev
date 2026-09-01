@@ -551,6 +551,14 @@ def find_task(task_id: str) -> dict | None:
 # report: 单模型上报管线
 # ============================================================================
 
+def _data_type(object_id: str) -> str:
+    """外层 dataType = 数据元类型标识 = 模型 id 去掉 @命名空间（Go getReportDataType）。
+
+    ⚠️ 与外层 dataType 区分: 行内 reportDataType 才是传输标识(new/update/delete)。
+    """
+    return object_id.split("@")[0]
+
+
 def _inst_content_hash(converted: dict) -> str:
     return hashlib.md5(json.dumps(converted, ensure_ascii=False, sort_keys=True).encode()).hexdigest()
 
@@ -629,11 +637,11 @@ def report_one_model(rule: dict, report_obj: dict, conf: dict, variant: str,
             for i in range(0, len(items), batch_num):
                 batch = items[i:i + batch_num]
                 branch_id = uuid.uuid4().hex[:16]
-                # 行内 reportDataType 必填（Go 版 ReportInstance bson tag；人行检核
-                # "数据元传输标识"即此字段——漏送报 WL-20001 数据元传输标识错误）
+                # 外层 dataType = 数据元类型标识(模型名去命名空间)；
+                # 行内 reportDataType = 传输标识(new/update/delete)
                 for item in batch:
                     item["reportDataType"] = rtype
-                resp = center.report_data(branch_id, [{"dataType": rtype, "dataList": batch}])
+                resp = center.report_data(branch_id, [{"dataType": _data_type(object_id), "dataList": batch}])
                 real_bid = resp["branchId"]      # 人行真批次号（BA开头）——check 用它
                 branch_ids.append(real_bid)
                 # WL-10000 只表受理——查 check_result 终态才 confirmed
