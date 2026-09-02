@@ -112,6 +112,28 @@ ADMIN_AREA_CODES = {
     "青海省": "630000", "宁夏回族自治区": "640000", "新疆维吾尔自治区": "650000",
     "台湾省": "710000", "香港特别行政区": "810000", "澳门特别行政区": "820000",
 }
+# 数值语义字段（校验规则表 DC/GXDC 等"报送数据类型必须为整数型"全集）:
+# CMDB 模型多为 str 定义，但人行检核 JSON 值类型——这些字段必须输出 JSON number（非字符串）。
+# 含 struct 子字段（按字段名匹配，跨模型通用）。
+NUMERIC_FIELDS = {
+    "administrativeArea", "nationalArea", "slotNo", "numberOfCards", "designCabinetNumber",
+    "usedCabinetNumber", "buildingBearingCapacity", "disasterStatisticsInThePastFiveYears",
+    "electricalEquipmentOpsPersonnel", "hvacOpsPersonnel", "itEquipmentOpsPersonnel",
+    "networkOpsPersonnel", "operationNumbers", "otherSupportingOpsPersonnel",
+    "outsourcedNumber", "networkOperatorNumber", "deviceHeight", "dataSavePeriod",
+    "dataSaveCycle", "storagePeriod", "maximumVolume", "numberOfSoftwareInstance",
+    "numberOfSoftwareLicenses", "numberOfBatteries", "numberOfCoresPerCpu",
+    "numberOfDisks", "numberOfOpticalFiberPorts", "numberOfTapeDrives", "numberOfTunnels",
+    "maximumConnections", "maximumNewConnectionRate", "maximumNumberOfConcurrentConnections",
+    "handlingCapacity", "dataExchangeRate", "hardwareSwitchingTime", "hddCapability",
+    "memoryCapacity", "nominalCapacity", "ratedAlternatingFrequency", "ratedInputCurrent",
+    "ratedInputPower", "ratedInputVoltage", "ratedOutputCurrent", "ratedOutputPower",
+    "ratedOutputVoltage", "refrigeratingCapacity", "classificationOfAirRefrigerationVolume",
+    "backupPowerSupply", "freshAirRate", "surveillanceNumber", "totalNumberOfCpu",
+    "totalNumberOfCpuNuclear", "totalStorageCapacity", "rpo", "rto", "number",
+    "virtualMachineCpuInformation", "virtualMachineHarddiskSize", "virtualMachineMemorySize",
+    "purchaseNumber", "cameraNumber",
+}
 IGNORE_INST_ATTR = "ignoreReport"           # 实例该属性为 true 时跳过上报
 IGNORE_ATTR_CATEGORY = ["辅助信息", "ignoreReport"]   # 属性 tag 命中则不上报该属性
 OMITEMPTY_FIELDS = ["%_operationsManagement"]        # 为空则整段省略（模糊匹配）
@@ -337,6 +359,11 @@ class Converter:
                 out[aid] = ""   # 人行要求空值传空字符串
                 continue
             out[aid] = self._transform(aid, atype, value, attr)
+            # 数值语义字段: 人行检核 JSON 值类型，str 定义的字段也要输出 JSON number
+            if aid in NUMERIC_FIELDS and isinstance(out[aid], str):
+                s = out[aid].strip()
+                if s.isdigit() or (s.startswith("-") and s[1:].isdigit()):
+                    out[aid] = int(s)
         return out
 
     def _is_empty(self, v: Any) -> bool:
@@ -417,6 +444,10 @@ class Converter:
                     out[sid] = ""
                 continue
             out[sid] = self._transform(sid, st, v, {"id": sid, "value": s})
+            if sid in NUMERIC_FIELDS and isinstance(out[sid], str):
+                s2 = out[sid].strip()
+                if s2.isdigit() or (s2.startswith("-") and s2[1:].isdigit()):
+                    out[sid] = int(s2)
         return out
 
     @staticmethod
