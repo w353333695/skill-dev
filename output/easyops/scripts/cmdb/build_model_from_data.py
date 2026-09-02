@@ -39,8 +39,10 @@ build_model_from_data.py —— 从 list[dict] 数据反推 CMDB 模型设计并
        加入 enum_exempt 例外名单。
     2. 日期/时间识别基于固定格式清单（DATE_FORMATS/DATETIME_FORMATS/TIME_FORMATS），
        无法识别 "2026年9月1日"、"Sep 1st 2026"、毫秒时间戳数字等——会退化成
-       str/int。CMDB 无独立 time 类型，HH:MM[:SS] 单点时刻归 datetime（会留
-       "time-only" 推断备注在日志里）。"02:00:00-06:00:00" 这类区间串不识别。
+       str/int。CMDB 无独立 time 类型：纯时刻（HH:MM[:SS]）默认判 str（TYPE_CONFIG.time
+       ="str"，值原样可写回）；设为 "datetime" 强归 datetime 时，纯时刻值写实例
+       会被后端拒绝（实测 133503）；设为 "off" 则按通用规则落到 enum/str。
+       "02:00:00-06:00:00" 这类区间串不识别为时间。
     3. int/float 判定只认 Python 原生数值类型；"01"、"1.5" 这类数字样式字符串
        一律保真判 str（避免前导零丢失/隐式转换语义错位），不猜强转。
     4. struct/structs 要求所有 dict 的 key 集合完全一致，不一致退化为 json/arr；
@@ -51,6 +53,10 @@ build_model_from_data.py —— 从 list[dict] 数据反推 CMDB 模型设计并
     7. 不建关系（relation_list）：平铺 dict 推不出模型间关联，关系需人工设计。
     8. 字段名须自身合法（字母数字下划线）；含特殊字符的字段请先在数据侧改名为
        snake_case 再喂给本脚本（CMDB 属性 id 惯例如此）。
+    9. 【实测】属性类型落库后不可变更（133113 cannot change property`s type）：
+       重复跑本脚本且推断类型与已固化模型不一致时，import 对该属性报错、
+       实例写入也失败。处置：确认新推断正确后删模型重建（forceDelete=true），
+       或把 TYPE_CONFIG 调回与线上一致的推断再跑。
 """
 import json
 import logging
@@ -123,7 +129,13 @@ TYPE_CONFIG = {
     "ip": True,            # IPv4 字符串 → type=ip
     "date": True,          # YYYY-MM-DD 等 → type=date
     "datetime": True,      # YYYY-MM-DD HH:MM:SS（含 ISO8601/T 分隔）→ type=datetime
-    "time": True,          # HH:MM[:SS] 单点时刻 → 归 datetime（CMDB 无独立 time 类型）
+    # time（HH:MM[:SS] 纯时刻）三态开关——CMDB 无独立 time 类型，且实测后端
+    # datetime 字段拒绝纯时刻值（133503 属性值不符合定义）：
+    #   "off"       不特殊处理，落到 enum/str 按通用规则判
+    #   "str"       【默认】判 str：值原样可写回（保真、自洽）
+    #   "datetime"  强归 datetime：仅当你的数据后续都会补全成完整日期时间才用，
+    #               纯时刻值写实例时会被后端拒绝
+    "time": "str",
     "enum": True,          # 低基数字符串 → type=enum（单选）
     "enums": True,         # 低基数同质文本列表 → type=enums（多选）
     "struct": True,        # key 集合一致的 dict → type=struct（单结构体）
@@ -262,9 +274,10 @@ def infer_field_type(field, values, cfg):
                 return {'type': 'datetime'}
             if cfg.get('date') and _all_of(sv, lambda x: _try_strptime(x, DATE_FORMATS)):
                 return {'type': 'date'}
-            if cfg.get('time') and _all_of(sv, lambda x: _try_strptime(x, TIME_FORMATS)):
-                # CMDB 无独立 time 类型：单点时刻归 datetime（局限性 2）
-                return {'type': 'datetime', '_note': 'time-only'}
+            time_cfg = cfg.get('time', 'str')
+            if time_cfg == 'datetime' and _all_of(sv, lambda x: _try_strptime(x, TIME_FORMATS)):
+                # 强归 datetime：纯时刻值写实例会被后端拒（实测 133503），慎用
+                return {'type': 'datetime', '_note': 'time-only（注意：纯时刻值写实例会被后端拒绝）'}
             if cfg.get('enum') and field not in cfg.get('enum_exempt', []):
                 uniq = _unique_ordered(sv)
                 if 2 <= len(uniq) <= cfg.get('enum_threshold', 8):
