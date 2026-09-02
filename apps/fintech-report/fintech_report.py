@@ -123,6 +123,7 @@ REPORT_TYPE_NEW, REPORT_TYPE_UPDATE, REPORT_TYPE_DELETE = "new", "update", "dele
 
 # 人行状态码（Go report_center/types.go 全量）
 CODE_REPORT_SUCCESS = "WL-10000"
+CODE_BRANCH_ID_NOT_EXIST = "WL-10004"  # 批次不存在(受理后异步落库延迟，需轮询)
 CODE_SAVE_SUCCESS = "WL-10005"      # 已保存（处理中，继续轮询）
 CODE_HANDLING = "WL-10006"           # 处理中（继续轮询）
 CODE_HANDLE_SUCCESS = "WL-10009"    # 处理成功（终态：成功）
@@ -524,6 +525,38 @@ class ReportCenter:
                 "localBranchId": branch_id,
                 "code": str(resp.get("code", "")), "msg": str(resp.get("msg", ""))[:500]}
 
+    def request_check(self, branch_ids: list[str]) -> dict:
+        """5.2.3 数据元检核请求（时序③）: 触发人行逻辑检核，返回 {groupId, code, msg}。
+
+        参数（规范表7）: facilityOwnerAgency + branchNumber(批次总数) +
+        branchIdList(批次号列表 GZIP 压缩串)。返回 groupId 为 G 系列批次组号。
+        """
+        uri = (self.conf.get("requestCheckUri")
+               or "webproxy/fig2fics/pshare/api/prod/FICS/api/fics/dataElementInstance/requestCheck")
+        payload = {
+            "facilityOwnerAgency": self._agency(),
+            "branchNumber": len(branch_ids),
+            "branchIdList": self._compress(branch_ids),   # 规范: List 压缩后传串
+        }
+        resp = self._post(uri, payload)
+        if not resp.get("groupId") or not resp.get("code"):
+            raise RuntimeError(f"检核请求响应无效: {json.dumps(resp, ensure_ascii=False)[:200]}")
+        LOG.info("[report] 检核请求已受理: groupId=%s code=%s",
+                 resp.get("groupId", "")[:24], resp.get("code", ""))
+        return resp
+
+    def group_status(self, group_id: str) -> dict:
+        """5.2.5 查询批次组处理状态: 返回 {groupId, code, msg, data:[异常批次明细]}。
+
+        处理中时 data 为空；完成时 data 只含异常批次（branchId/code/msg）。
+        """
+        uri = (self.conf.get("groupStatusUri")
+               or "webproxy/fig2fics/pshare/api/prod/FICS/api/fics/dataElementInstance/getGroupStatus")
+        resp = self._post(uri, {"groupId": group_id, "facilityOwnerAgency": self._agency()})
+        if not resp.get("groupId") or not resp.get("code"):
+            raise RuntimeError(f"批次组状态响应无效: {json.dumps(resp, ensure_ascii=False)[:200]}")
+        return resp
+
     def check_result(self, branch_id: str) -> dict:
         """查批次处理结果；处理中(WL-10005/WL-10006)轮询直到终态或超时(标 pendingCheck 由调用方处理)。"""
         if self.variant == "zhongxin":
@@ -538,8 +571,10 @@ class ReportCenter:
             if not resp.get("branchId") or not resp.get("code"):
                 raise RuntimeError(f"查询上报结果响应无效: {json.dumps(resp, ensure_ascii=False)[:300]}")
             code = str(resp.get("code", ""))
-            if code in (CODE_SAVE_SUCCESS, CODE_HANDLING):
-                LOG.info("[report] 批次 %s 处理中(%s)，等待重查...", branch_id[:12], code)
+            # 处理中(10005/06) 或 批次尚未可查(10004——受理后异步落库有延迟) → 继续轮询
+            if code in (CODE_SAVE_SUCCESS, CODE_HANDLING, CODE_BRANCH_ID_NOT_EXIST):
+                LOG.info("[report] 批次 %s 未就绪(%s)，%ss 后重查...",
+                         branch_id[:12], code, CHECK_POLL_INTERVAL)
                 time.sleep(CHECK_POLL_INTERVAL)
                 continue
             return resp   # 终态
@@ -707,6 +742,26 @@ def report_one_model(rule: dict, report_obj: dict, conf: dict, variant: str,
                     LOG.warning("[report] %s %s 处理失败: %s %s",
                                 object_id, rtype, chk_code, str(chk.get("msg", ""))[:100])
         # check 已在批次循环内完成（轮询终态）
+
+        # 5.2.3 检核请求（时序③）: 规则实例 autoRequestCheck=true 且有已受理批次时触发，
+        # 得 G 系列批次组号记入任务；随后查批次组状态辅助判定
+        group_id = ""
+        group_code, group_msg = "", ""
+        if str(rule.get("autoRequestCheck", False)) in ("True", "true", True) and branch_ids:
+            try:
+                audit_resp = center.request_check(branch_ids)
+                group_id = audit_resp.get("groupId", "")
+                task["groupId"] = group_id
+                # 5.2.5 批次组状态（处理中 data 为空；完成 data 只含异常批次）
+                gs = center.group_status(group_id)
+                group_code, group_msg = str(gs.get("code", "")), str(gs.get("msg", ""))[:200]
+                for bad in gs.get("data") or []:
+                    LOG.warning("[report] %s 批次组异常批次: %s %s %s", object_id,
+                                str(bad.get("branchId", ""))[:24], bad.get("code", ""),
+                                str(bad.get("msg", ""))[:100])
+            except Exception as e:
+                group_msg = f"检核请求失败: {e}"
+                LOG.warning("[report] %s 检核请求异常: %s", object_id, e)
         task.update({"status": (task.get("status") if task.get("status") == "pendingCheck"
                                 else ("success" if counts["failed"] == 0
                                       else ("fail" if counts["insert"] + counts["update"] + counts["remove"] == 0
@@ -715,7 +770,7 @@ def report_one_model(rule: dict, report_obj: dict, conf: dict, variant: str,
                      "branchId": ",".join(branch_ids),
                      "insertCount": counts["insert"], "updateCount": counts["update"],
                      "removeCount": counts["remove"], "failedCount": counts["failed"],
-                     "checkCode": "", "checkMsg": "",
+                     "checkCode": group_code, "checkMsg": group_msg,
                      "errorMsg": "" if counts["failed"] == 0 else f"{counts['failed']} 条失败"})
         if not new_items and not update_items and not delete_items:
             task["status"] = "noReport"
