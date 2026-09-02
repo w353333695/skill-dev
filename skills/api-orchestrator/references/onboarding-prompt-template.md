@@ -35,6 +35,8 @@
 - 找权威契约源（OpenAPI/官方 CLI contracts/源码路由表），区分源码版本 vs 实际部署（源码可能落后）
 - 双源交叉验证：过时文档 vs 源码冲突时，以实际运行时为准；查不到的标 gap，不编
 - 每个结论带 file:line 引证
+- **探索完成度标尺**：四个知识维度（①端点面 ②字段结构 ③值域 ④行为/副作用）逐项扫过，每项状态落在「已覆盖 / gap / 漏查」三态之一，禁止「静默未提」；证据来源随输入形态选（有源码走路由/struct/枚举源/校验逻辑；只有契约/文档则走契约 schema/文档/实测，契约没写的标 gap，别假设有源码可查）
+- **探索汇报强制三档**：Explore agent 返回 `findings`（每结论标 `verdict: 实锤|推测|未查` + `evidence: file:line 或契约字段`）+ `uncovered`（没覆盖到的清单）。采纳纪律：实锤才可写 platforms；推测回炉查/改判 gap；未查统一判「回炉 or 标 gap」，不许静默溜进 platforms
 
 ### 规划阶段
 - 探索完成后先列分阶段规划给我确认，不直接开干
@@ -44,6 +46,7 @@
 - 套用 api-orchestrator 的 onboarding 流程（references/onboarding.md + onboarding-playbook.md）
 - api-cli 清单：body schema 内联无 $ref；required 双义（params.bool / schema.父级[]string，不在 property 写 required:true）；property 用 description 非 desc；multipart 端点标「走 SDK」
 - 每对象/字段/副作用带 source:file:line（lint source 证据门禁）
+- **值域断言可溯源**：enum/pattern/ref/非平凡 default 必须有证据或标 gap，不凭字段名猜；值域来源与 object 不同时在 field 上补 source（覆盖 object 级）
 - 知识自包含：不引用 tmp/ 或 platforms 外文件；source 仅溯源非知识依赖
 
 ### 业务前置门禁（生成产物类流程必加，易漏）
@@ -58,6 +61,7 @@
 ### 汇报阶段
 - 每阶段 checkpoint 汇报进度
 - gap 如实标注（查不到标「未知-待捕获」，不硬填）
+- **探索完成度清单**：汇报四个知识维度（端点面/字段结构/值域/行为副作用）各状态 + 漏查/推测项的去向（回炉 or 标 gap），证明无「静默未提」
 - 最终交付：lint 0 ERR + 真调回归通过 + gap 清单 + 遗留风险
 
 ## 验证门禁（交付前必过）

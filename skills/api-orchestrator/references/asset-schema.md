@@ -86,6 +86,7 @@ objects:
         enum: [a, b]
         pattern: '<regex>'
         default: <value>
+        source: <溯源 file:line/枚举接口/真实样例>   # 可选——仅当该 field 的值域来源与 object 级 source 不同时写（覆盖 object 级，非重复）
         desc: "..."
     relations:
       - to: <other-object>
@@ -157,3 +158,4 @@ acceptance: "..."                        # 验收方式
 - **新系统**：新 `<deployment>/` 目录，或同 deployment 的 `systems.yaml` 加一个 `<system>` + 对应 api-cli 清单。
 - **新接入知识（坑）**：归位到对应文件——接入/鉴权→`systems.yaml.runtime`，对象行为/副作用→`objects.yaml.side_effects`/`api_behavior`，字段格式→`entities.yaml`，端到端步骤→`flows/`。**不写进 README，不写进记忆**。
 - **schema 字段自由扩展**：各文件的 `<key>` 可按系统需要追加（如 `runtime.<任意key>`），上面只规定最小骨架。
+- **field 级 `source`（值域溯源）**：object 级 `source` 覆盖整个对象；当某个 field 的值域（`enum`/`pattern`/`ref`/`default`）来源与 object 级不同——典型是枚举来自 fixture 文件、而对象结构来自 struct——在该 field 上写 `source` 覆盖 object 级（**覆盖，不重复**，遵循设计原则④单一真相源）。值域断言（enum/pattern/ref/default）必须可溯源：有 file:line/真实样例/实测证据，否则标 gap「未知—待捕获」，禁止凭字段名猜（见 onboarding.md 证据纪律）。

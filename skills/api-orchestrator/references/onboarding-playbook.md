@@ -47,6 +47,8 @@ platforms/<deployment>/
 - [ ] **agent 结论不可全信** → load-bearing 事实（端点存在性/端口/字段）自己 grep 实锤。反例：agent 说 activate 端点不存在，实测在另一端口存在（源码是旧版）
 - [ ] **过时资料会误导** → 双源交叉验证；过时文档 vs 源码冲突时，以**实际运行时**为准（如 py2 vs py3 文档）
 - [ ] **找权威契约源** → 优先 OpenAPI/官方 CLI contracts/源码路由表，不全信 agent 的源码副本（可能是旧版）
+- [ ] **探索汇报三档表** → agent 返回 `findings`（每结论标 `verdict: 实锤|推测|未查` + `evidence`）+ `uncovered` 清单；推测/未查禁止写进 platforms（回炉 or 标 gap）
+- [ ] **探索完成度标尺** → 四知识维度（端点面/字段结构/值域/行为副作用）逐项落「已覆盖 / gap / 漏查」，无静默未提；漏查不许进产出；证据来源随输入形态选，不假设一定有 Go 源码
 
 ### 部署根/deployment
 - [ ] **步0 门禁**：部署根 + env.d/<dep>.env + auth.d/<name>.yaml 三件，缺即停问用户
