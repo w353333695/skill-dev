@@ -111,6 +111,13 @@ ADMIN_AREA_CODES = {
     "云南省": "530000", "西藏自治区": "540000", "陕西省": "610000", "甘肃省": "620000",
     "青海省": "630000", "宁夏回族自治区": "640000", "新疆维吾尔自治区": "650000",
     "台湾省": "710000", "香港特别行政区": "810000", "澳门特别行政区": "820000",
+    # 市级（河南省——CMDB administrativeArea 存市级名，规则要求 6 位整数码）
+    "郑州市": "410100", "开封市": "410200", "洛阳市": "410300",
+    "平顶山市": "410400", "安阳市": "410500", "鹤壁市": "410600",
+    "新乡市": "410700", "焦作市": "410800", "濮阳市": "410900",
+    "许昌市": "411000", "漯河市": "411100", "三门峡市": "411200",
+    "南阳市": "411300", "商丘市": "411400", "信阳市": "411500",
+    "周口市": "411600", "驻马店市": "411700", "济源市": "419001",
 }
 # 数值语义字段（校验规则表 DC/GXDC 等"报送数据类型必须为整数型"全集）:
 # CMDB 模型多为 str 定义，但人行检核 JSON 值类型——这些字段必须输出 JSON number（非字符串）。
@@ -451,9 +458,21 @@ class Converter:
         return out
 
     @staticmethod
+    def _norm_enum_src(value: Any) -> str:
+        """枚举源形态归一: JSON 数组 → py2 _text(list) 变 repr 串 "[u'00-xx']"，还原首元素。"""
+        if isinstance(value, list):
+            return str(value[0]) if value else ""
+        s = str(value)
+        if s.startswith("[") and s.endswith("]") and "'" in s:
+            m = re.search(r"'([^']*)'", s)
+            if m:
+                return m.group(1)
+        return s
+
+    @staticmethod
     def _enum_code(value: Any) -> str:
         """'00-在用'/'00：在用'/'00:在用' → '00'；纯码原样。"""
-        s = str(value)
+        s = Converter._norm_enum_src(value)
         for p in ("-", ":", "："):
             if re.fullmatch(rf"\d+{re.escape(p)}.*", s):
                 return s.split(p, 1)[0]
