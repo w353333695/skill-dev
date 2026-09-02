@@ -141,6 +141,28 @@ NUMERIC_FIELDS = {
     "virtualMachineCpuInformation", "virtualMachineHarddiskSize", "virtualMachineMemorySize",
     "purchaseNumber", "cameraNumber",
 }
+# 地级市→属地行政区号（人行机构表"XX市分行"属地精确码，如 漯河市→411103 而非
+# 行政区划标准 411100——人行按其机构属地口径校验）。郑州=省分行属地 410105。
+ADMIN_CITY_AREA_CODES = {
+    "三门峡市": "411202",
+    "信阳市": "411502",
+    "南阳市": "411303",
+    "周口市": "411602",
+    "商丘市": "411403",
+    "安阳市": "410502",
+    "平顶山市": "410411",
+    "开封市": "410202",
+    "新乡市": "410702",
+    "洛阳市": "410303",
+    "济源市": "419001",
+    "漯河市": "411103",
+    "濮阳市": "410902",
+    "焦作市": "410811",
+    "许昌市": "411002",
+    "郑州市": "410105",
+    "驻马店市": "411702",
+    "鹤壁市": "410611",
+}
 IGNORE_INST_ATTR = "ignoreReport"           # 实例该属性为 true 时跳过上报
 IGNORE_ATTR_CATEGORY = ["辅助信息", "ignoreReport"]   # 属性 tag 命中则不上报该属性
 OMITEMPTY_FIELDS = ["%_operationsManagement"]        # 为空则整段省略（模糊匹配）
@@ -159,6 +181,7 @@ CODE_HANDLE_SUCCESS = "WL-10009"    # 处理成功（终态：成功）
 CODE_HANDLE_WITH_WARN = "WL-10013"  # 处理成功有警告（终态：成功）
 CHECK_POLL_INTERVAL = 10
 CHECK_POLL_MAX = 5
+GROUP_POLL_MAX = 30   # 批次组轮询（逻辑检核+入库较慢，30x10s=5min）
 CODE_DATA_VALID = "WL-20000"
 # TODO Audit 审核流程（Go CreateAuditTask）: 规则实例 autoRequestCheck=true 时，上报成功后
 # 应 POST requestCheck（gzip branchIdList）触发人行审核、得 groupId（G 系列批次组）。
@@ -389,8 +412,11 @@ class Converter:
             # 编码翻译: 人行要求标准编码的字段（CMDB 常存中文名）
             if attr_id == "nationalArea" and s in NATIONAL_AREA_CODES:
                 return NATIONAL_AREA_CODES[s]
-            if attr_id == "administrativeArea" and s in ADMIN_AREA_CODES:
-                return ADMIN_AREA_CODES[s]
+            if attr_id == "administrativeArea":
+                if s in ADMIN_CITY_AREA_CODES:
+                    return ADMIN_CITY_AREA_CODES[s]
+                if s in ADMIN_AREA_CODES:
+                    return ADMIN_AREA_CODES[s]
             return s
         if atype == "bool":
             return "True" if value else "False"
@@ -595,16 +621,29 @@ class ReportCenter:
                  resp.get("groupId", "")[:24], resp.get("code", ""))
         return resp
 
-    def group_status(self, group_id: str) -> dict:
-        """5.2.5 查询批次组处理状态: 返回 {groupId, code, msg, data:[异常批次明细]}。
+    _GROUP_PENDING = ("WL-40000", "WL-10005", "WL-10006", "WL-20004")
 
-        处理中时 data 为空；完成时 data 只含异常批次（branchId/code/msg）。
+    def group_status(self, group_id: str, wait_terminal: bool = True) -> dict:
+        """5.2.5 查询批次组处理状态。
+
+        wait_terminal=True 轮询直到终态（入库成功/失败，不停在 WL-40000）：
+        非终态码每 CHECK_POLL_INTERVAL 重查，最多 GROUP_POLL_MAX 次；超时返回
+        最后响应（调用方按 pendingCheck 处理）。
         """
         uri = (self.conf.get("groupStatusUri")
                or "webproxy/fig2fics/pshare/api/prod/FICS/api/fics/dataElementInstance/getGroupStatus")
-        resp = self._post(uri, {"groupId": group_id, "facilityOwnerAgency": self._agency()})
-        if not resp.get("groupId") or not resp.get("code"):
-            raise RuntimeError(f"批次组状态响应无效: {json.dumps(resp, ensure_ascii=False)[:200]}")
+        resp = {}
+        for _ in range(GROUP_POLL_MAX):
+            resp = self._post(uri, {"groupId": group_id, "facilityOwnerAgency": self._agency()})
+            if not resp.get("groupId") or not resp.get("code"):
+                raise RuntimeError(f"批次组状态响应无效: {json.dumps(resp, ensure_ascii=False)[:200]}")
+            code = str(resp.get("code", ""))
+            LOG.debug("[report] group poll %s code=%s", group_id[:20], code)
+            if not wait_terminal or code not in self._GROUP_PENDING:
+                return resp
+            time.sleep(CHECK_POLL_INTERVAL)
+        LOG.warning("[report] 批次组 %s 轮询 %s 次未到终态 code=%s",
+                    group_id[:20], GROUP_POLL_MAX, resp.get("code", ""))
         return resp
 
     def check_result(self, branch_id: str) -> dict:
@@ -803,12 +842,21 @@ def report_one_model(rule: dict, report_obj: dict, conf: dict, variant: str,
                 group_id = audit_resp.get("groupId", "")
                 task["groupId"] = group_id
                 # 5.2.5 批次组状态（处理中 data 为空；完成 data 只含异常批次）
-                gs = center.group_status(group_id)
+                gs = center.group_status(group_id, wait_terminal=True)
                 group_code, group_msg = str(gs.get("code", "")), str(gs.get("msg", ""))[:200]
                 for bad in gs.get("data") or []:
                     LOG.warning("[report] %s 批次组异常批次: %s %s %s", object_id,
                                 str(bad.get("branchId", ""))[:24], bad.get("code", ""),
                                 str(bad.get("msg", ""))[:100])
+                # 批次组终态且无异常批次 → 全部 confirmed（入库成功）
+                if group_code not in ReportCenter._GROUP_PENDING and not (gs.get("data") or []):
+                    for item in new_items + update_items:
+                        desc = item.get(converter.key_desc)
+                        if desc and desc in payload_instances:
+                            payload_instances[desc]["_confirmed"] = True
+                    LOG.info("[report] %s 批次组 %s 终态成功 → confirmed %d 实例",
+                             object_id, group_id[:20],
+                             sum(1 for v in payload_instances.values() if v.get("_confirmed")))
             except Exception as e:
                 group_msg = f"检核请求失败: {e}"
                 LOG.warning("[report] %s 检核请求异常: %s", object_id, e)
