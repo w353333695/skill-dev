@@ -234,6 +234,30 @@ def cmdb_post(path: str, body: dict) -> dict:
                       CMDB_API["timeout"], CMDB_API["retry"], CMDB_API["retry_wait"])
 
 
+def cmdb_search_task_v2(object_id_query: str, statuses: list[str] | None = None) -> list[dict]:
+    """FINTECH_REPORT_TASK 精确过滤查询（v2 _search query）。
+
+    ⚠️ v3 retrieve.expression 在本 CMDB 实测不生效（任何 expr 都返回全量），
+    任务/台账查询必须走 v2 query（$and + 精确值，实测正确过滤）。
+    """
+    conds = [{"objectId": object_id_query}]
+    if statuses:
+        conds.append({"status": {"$in": statuses}})
+    conds.append({"rolledBack": False})
+    out, page = [], 1
+    while True:
+        body = {"query": {"$and": conds},
+                "fields": {"taskId": True, "dataFile": True, "startTime": True,
+                           "status": True, "objectId": True, "instanceId": True},
+                "page": page, "pageSize": CMDB_API["search_page_size"]}
+        d = cmdb_post(f"/v2/object/{urllib.parse.quote(OBJ_TASK, safe='@')}/instance/_search", body)
+        data = d.get("data") or {}
+        out.extend(data.get("list") or [])
+        if len(out) >= (data.get("total") or len(out)):
+            return out
+        page += 1
+
+
 def cmdb_search_all(object_id: str, fields: list[str] | None = None,
                     expr: str | None = None) -> list[dict]:
     """v3 实例搜索全量分页。fields 为空时用 ['*']（该端点要求 fields 必填）。"""
@@ -386,7 +410,12 @@ class Converter:
                     # Go transformStructs: 空 structs → 单元素数组（全空子字段），非空数组
                     out[aid] = [self._empty_struct_obj(attr)]
                     continue
-                out[aid] = ""   # 人行要求空值传空字符串
+                # facilityUpdateDate 空值兜底当天（人行"属性值不能为空"拒绝空串；
+                # 语义=信息更新时间，同步当天合理，同 Go utime 处理）
+                if aid == "facilityUpdateDate":
+                    out[aid] = time.strftime("%Y-%m-%d")
+                else:
+                    out[aid] = ""   # 人行要求空值传空字符串
                 continue
             out[aid] = self._transform(aid, atype, value, attr)
             # 数值语义字段: 人行检核 JSON 值类型，str 定义的字段也要输出 JSON number
@@ -709,6 +738,25 @@ def find_task(task_id: str) -> dict | None:
 # report: 单模型上报管线
 # ============================================================================
 
+def _fail_summary(n_failed: int, details: list[dict]) -> str:
+    """T6: 错误摘要——'N 条失败: 前3条 descriptor→msg'（完整明细在 INSTANCE 表）。"""
+    if n_failed == 0 and not details:
+        return ""
+    parts = [f"{d['facilityDescriptor'][:12]}→{d['msg'][:40]}" for d in details[:3]]
+    head = f"{max(n_failed, len(details))} 条失败"
+    return head + (": " + "; ".join(parts) if parts else "")
+
+
+def save_fail_details(details: list[dict]) -> int:
+    """T5: 失败明细逐条落 FINTECH_REPORT_INSTANCE（detailId 唯一，幂等覆盖）。"""
+    if not details:
+        return 0
+    import uuid as _uuid
+    datas = [dict(d, detailId=_uuid.uuid4().hex) for d in details]
+    r = cmdb_import("FINTECH_REPORT_INSTANCE@EASYOPS", ["detailId"], datas)
+    return r.get("insert", 0) + r.get("update", 0)
+
+
 def _data_type(object_id: str) -> str:
     """外层 dataType = 数据元类型标识 = 模型 id 去掉 @命名空间（Go getReportDataType）。
 
@@ -770,12 +818,23 @@ def report_one_model(rule: dict, report_obj: dict, conf: dict, variant: str,
                 # 否则一致 → 不报（已确认且无变化）
             for desc, old in confirmed.items():
                 if desc not in converted:
-                    delete_items.append({converter.key_desc: desc,
-                                         converter.key_cate: old.get("_cate", "")})
+                    # Go convertDeleteData: 从该实例上次成功快照取完整字段（人行对
+                    # delete 行也校验归属机构等）；快照缺失退两键（Go RecoverReportInst）
+                    snap = old.get("_snapshot") or {}
+                    if snap:
+                        row = dict(snap)
+                        row[converter.key_desc] = desc
+                        row[converter.key_cate] = old.get("_cate", "")
+                    else:
+                        row = {converter.key_desc: desc,
+                               converter.key_cate: old.get("_cate", "")}
+                    row.pop("_hash", None)
+                    delete_items.append(row)
         # 3.1) 原文落盘（diff 基石）：本次实例先标 _confirmed=False，
         #      批次回执成功后置 True（见下方批次循环）；未变且历史已 confirmed 的直接继承
         payload_instances = {
-            d: {**v, "_hash": _inst_content_hash(v), "_cate": pk_set[d], "_confirmed": False}
+            d: {**v, "_hash": _inst_content_hash(v), "_cate": pk_set[d], "_confirmed": False,
+                "_snapshot": v}   # _snapshot: 转换数据原文（delete 行复用完整字段）
             for d, v in converted.items()}
         for desc in set(confirmed.keys()) & converted.keys():
             old = confirmed[desc]
@@ -787,6 +846,8 @@ def report_one_model(rule: dict, report_obj: dict, conf: dict, variant: str,
         # 3.2) 分批上报（new/update 各自成批；delete 一批）——批次成功即标记实例 confirmed
         center = ReportCenter(conf, variant)
         branch_ids = []
+        branch_meta: list[dict] = []   # T4: 每批次 {branchId,type,count,status,code,msg}
+        fail_details: list[dict] = []  # T5: 失败数据明细（人行 data[] 逐条）
         counts = {"insert": 0, "update": 0, "remove": 0, "failed": 0}
         type_count_key = {"new": "insert", "update": "update", "delete": "remove"}
         for rtype, items in ((REPORT_TYPE_NEW, new_items),
@@ -815,21 +876,39 @@ def report_one_model(rule: dict, report_obj: dict, conf: dict, variant: str,
                                 object_id, rtype, ce)
                     continue
                 chk_code = str(chk.get("code", ""))
+                # T5: 人行单条失败明细（data[]: descriptor+code+msg）
+                for bad in chk.get("data") or []:
+                    if str(bad.get("code", "")) not in ("WL-20000", "WL-20003"):
+                        fail_details.append({
+                            "objectId": object_id, "taskId": task_id,
+                            "facilityDescriptor": str(bad.get("facilityDescriptor", "")),
+                            "facilityCategory": str(bad.get("facilityCategory", "")),
+                            "branchId": real_bid, "code": str(bad.get("code", "")),
+                            "msg": str(bad.get("msg", ""))[:500]})
                 if chk_code in (CODE_HANDLE_SUCCESS, CODE_HANDLE_WITH_WARN):
                     counts[type_count_key[rtype]] += len(batch)
                     for item in batch:
                         desc = item.get(converter.key_desc)
                         if desc and desc in payload_instances:
                             payload_instances[desc]["_confirmed"] = True
+                    branch_meta.append({"branchId": real_bid, "type": rtype,
+                                       "count": len(batch), "status": "success",
+                                       "code": chk_code})
                 elif chk_code in (CODE_SAVE_SUCCESS, CODE_HANDLING, CODE_BRANCH_ID_NOT_EXIST):
                     # 10005/10006=处理中；10004=刚受理尚未可查——均未到终态
                     LOG.info("[report] %s %s 批次 %s 未到终态(%s) → pendingCheck",
                              object_id, rtype, real_bid[:20], chk_code)
                     task["status"] = "pendingCheck"
+                    branch_meta.append({"branchId": real_bid, "type": rtype,
+                                       "count": len(batch), "status": "pending",
+                                       "code": chk_code})
                 else:
                     counts["failed"] += len(batch)
                     LOG.warning("[report] %s %s 处理失败: %s %s",
                                 object_id, rtype, chk_code, str(chk.get("msg", ""))[:100])
+                    branch_meta.append({"branchId": real_bid, "type": rtype,
+                                       "count": len(batch), "status": "fail",
+                                       "code": chk_code, "msg": str(chk.get("msg", ""))[:200]})
         # check 已在批次循环内完成（轮询终态）
 
         # 5.2.3 检核请求（时序③）: 规则实例 autoRequestCheck=true 且有已受理批次时触发，
@@ -848,6 +927,23 @@ def report_one_model(rule: dict, report_obj: dict, conf: dict, variant: str,
                     LOG.warning("[report] %s 批次组异常批次: %s %s %s", object_id,
                                 str(bad.get("branchId", ""))[:24], bad.get("code", ""),
                                 str(bad.get("msg", ""))[:100])
+                # T5: 组异常批次逐个查 selectUploadData 拿数据级失败原因
+                for bad_branch in gs.get("data") or []:
+                    bad_bid = str(bad_branch.get("branchId", ""))
+                    if not bad_bid or str(bad_branch.get("code", "")) in ("WL-10006",):
+                        continue   # 处理中的不算
+                    try:
+                        bd = center.check_result(bad_bid)
+                        for bad in bd.get("data") or []:
+                            if str(bad.get("code", "")) not in ("WL-20000", "WL-20003"):
+                                fail_details.append({
+                                    "objectId": object_id, "taskId": task_id,
+                                    "facilityDescriptor": str(bad.get("facilityDescriptor", "")),
+                                    "facilityCategory": str(bad.get("facilityCategory", "")),
+                                    "branchId": bad_bid, "code": str(bad.get("code", "")),
+                                    "msg": str(bad.get("msg", ""))[:500]})
+                    except Exception as ce:
+                        LOG.warning("[report] 异常批次 %s 明细查询失败: %s", bad_bid[:20], ce)
                 # 批次组终态且无异常批次 → 全部 confirmed（入库成功）
                 if group_code not in ReportCenter._GROUP_PENDING and not (gs.get("data") or []):
                     for item in new_items + update_items:
@@ -869,11 +965,15 @@ def report_one_model(rule: dict, report_obj: dict, conf: dict, variant: str,
                      "insertCount": counts["insert"], "updateCount": counts["update"],
                      "removeCount": counts["remove"], "failedCount": counts["failed"],
                      "checkCode": group_code, "checkMsg": group_msg,
-                     "errorMsg": "" if counts["failed"] == 0 else f"{counts['failed']} 条失败"})
+                     "branchList": branch_meta,
+                     "errorMsg": _fail_summary(counts["failed"], fail_details)})
         if not new_items and not update_items and not delete_items:
             task["status"] = "noReport"
         # 回写原文（批次 confirmed 标记已更新，落盘供下次 diff 用）
         save_report_data(task_id, payload)
+        n_detail = save_fail_details(fail_details)
+        if n_detail:
+            LOG.info("[report] %s 失败明细落库 %d 条（FINTECH_REPORT_INSTANCE）", object_id, n_detail)
         upsert_task(task)
         LOG.info("[report] %s: %d 实例（忽略 %d）→ new %d / update %d / delete %d，失败 %d，任务 %s",
                  object_id, len(converted), ignored, counts["insert"], counts["update"],
@@ -905,10 +1005,7 @@ def _last_success_data(object_id: str) -> tuple[dict, dict | None]:
       partialSuccess 的成功批次也计入 confirmed，不再整任务丢弃。
     """
     confirmed: dict[str, dict] = {}
-    rows = cmdb_search_all(
-        OBJ_TASK, fields=["taskId", "dataFile", "rolledBack", "startTime", "status"],
-        expr=f'objectId = "{object_id}" AND status in ["success","partialSuccess"] '
-             f'AND rolledBack = false')
+    rows = cmdb_search_task_v2(object_id, statuses=["success", "partialSuccess"])
     rows.sort(key=lambda r: str(r.get("startTime", "")), reverse=True)
     prev_meta: dict | None = None
     for r in rows:
