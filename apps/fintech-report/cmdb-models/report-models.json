@@ -1,0 +1,2496 @@
+[
+ {
+  "objectId": "FINTECH_REPORT_CONFIG@EASYOPS",
+  "name": "人行数据上报配置",
+  "icon": "fa fa-cube",
+  "category": "金融元数据.上报管理",
+  "memo": "",
+  "protected": false,
+  "system": "",
+  "notifyDenied": false,
+  "view": {
+   "attr_authorizers": null,
+   "attr_category_order": [
+    "基本信息"
+   ],
+   "attr_order": [
+    "name",
+    "clientId",
+    "clientSecret",
+    "ip",
+    "port"
+   ],
+   "hide_columns": [],
+   "icon": null,
+   "image": "",
+   "inherit_attr_category_map": null,
+   "relation_default_attr": null,
+   "relation_group_order": [],
+   "relation_order": [],
+   "show_key": [
+    "name"
+   ],
+   "trans_hier_relation_list": null,
+   "visible": true
+  },
+  "attrList": [
+   {
+    "id": "name",
+    "name": "名称",
+    "protected": false,
+    "custom": "true",
+    "unique": "true",
+    "readonly": "false",
+    "required": "true",
+    "tag": [
+     "基本信息"
+    ],
+    "description": "",
+    "tips": "",
+    "value": {
+     "type": "str",
+     "regex": null,
+     "default_type": "value",
+     "default": null,
+     "struct_define": [],
+     "mode": "default",
+     "prefix": "",
+     "start_value": 0,
+     "series_number_length": 0
+    },
+    "wordIndexDenied": false,
+    "isInherit": false,
+    "notifyDenied": false,
+    "inheritObjectId": "",
+    "isMetadata": false
+   },
+   {
+    "id": "clientId",
+    "name": "客户端ID",
+    "protected": false,
+    "custom": "true",
+    "unique": "false",
+    "readonly": "false",
+    "required": "true",
+    "tag": [
+     "基本信息"
+    ],
+    "description": "",
+    "tips": "",
+    "value": {
+     "type": "str",
+     "regex": null,
+     "default_type": "value",
+     "default": null,
+     "struct_define": [],
+     "mode": "default",
+     "prefix": "",
+     "start_value": 0,
+     "series_number_length": 0
+    },
+    "wordIndexDenied": false,
+    "isInherit": false,
+    "notifyDenied": false,
+    "inheritObjectId": "",
+    "isMetadata": false
+   },
+   {
+    "id": "clientSecret",
+    "name": "客户端密钥",
+    "protected": false,
+    "custom": "true",
+    "unique": "false",
+    "readonly": "false",
+    "required": "true",
+    "tag": [
+     "基本信息"
+    ],
+    "description": "",
+    "tips": "",
+    "value": {
+     "type": "str",
+     "regex": null,
+     "default_type": "value",
+     "default": null,
+     "struct_define": [],
+     "mode": "default",
+     "prefix": "",
+     "start_value": 0,
+     "series_number_length": 0
+    },
+    "wordIndexDenied": false,
+    "isInherit": false,
+    "notifyDenied": false,
+    "inheritObjectId": "",
+    "isMetadata": false
+   },
+   {
+    "id": "ip",
+    "name": "金融数据平台ip",
+    "protected": false,
+    "custom": "true",
+    "unique": "false",
+    "readonly": "false",
+    "required": "false",
+    "tag": [
+     "基本信息"
+    ],
+    "description": "",
+    "tips": "",
+    "value": {
+     "type": "ip",
+     "regex": "((^\\s*((([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5]))\\s*$)|(^\\s*((([0-9A-Fa-f]{1,4}:){7}([0-9A-Fa-f]{1,4}|:))|(([0-9A-Fa-f]{1,4}:){6}(:[0-9A-Fa-f]{1,4}|((25[0-5]|2[0-4]\\d|1\\d\\d|[1-9]?\\d)(\\.(25[0-5]|2[0-4]\\d|1\\d\\d|[1-9]?\\d)){3})|:))|(([0-9A-Fa-f]{1,4}:){5}(((:[0-9A-Fa-f]{1,4}){1,2})|:((25[0-5]|2[0-4]\\d|1\\d\\d|[1-9]?\\d)(\\.(25[0-5]|2[0-4]\\d|1\\d\\d|[1-9]?\\d)){3})|:))|(([0-9A-Fa-f]{1,4}:){4}(((:[0-9A-Fa-f]{1,4}){1,3})|((:[0-9A-Fa-f]{1,4})?:((25[0-5]|2[0-4]\\d|1\\d\\d|[1-9]?\\d)(\\.(25[0-5]|2[0-4]\\d|1\\d\\d|[1-9]?\\d)){3}))|:))|(([0-9A-Fa-f]{1,4}:){3}(((:[0-9A-Fa-f]{1,4}){1,4})|((:[0-9A-Fa-f]{1,4}){0,2}:((25[0-5]|2[0-4]\\d|1\\d\\d|[1-9]?\\d)(\\.(25[0-5]|2[0-4]\\d|1\\d\\d|[1-9]?\\d)){3}))|:))|(([0-9A-Fa-f]{1,4}:){2}(((:[0-9A-Fa-f]{1,4}){1,5})|((:[0-9A-Fa-f]{1,4}){0,3}:((25[0-5]|2[0-4]\\d|1\\d\\d|[1-9]?\\d)(\\.(25[0-5]|2[0-4]\\d|1\\d\\d|[1-9]?\\d)){3}))|:))|(([0-9A-Fa-f]{1,4}:){1}(((:[0-9A-Fa-f]{1,4}){1,6})|((:[0-9A-Fa-f]{1,4}){0,4}:((25[0-5]|2[0-4]\\d|1\\d\\d|[1-9]?\\d)(\\.(25[0-5]|2[0-4]\\d|1\\d\\d|[1-9]?\\d)){3}))|:))|(:(((:[0-9A-Fa-f]{1,4}){1,7})|((:[0-9A-Fa-f]{1,4}){0,5}:((25[0-5]|2[0-4]\\d|1\\d\\d|[1-9]?\\d)(\\.(25[0-5]|2[0-4]\\d|1\\d\\d|[1-9]?\\d)){3}))|:)))(%.+)?\\s*$))",
+     "default_type": "",
+     "default": null,
+     "struct_define": [],
+     "mode": "",
+     "prefix": "",
+     "start_value": 0,
+     "series_number_length": 0
+    },
+    "wordIndexDenied": false,
+    "isInherit": false,
+    "notifyDenied": false,
+    "inheritObjectId": "",
+    "isMetadata": false
+   },
+   {
+    "id": "port",
+    "name": "端口",
+    "protected": false,
+    "custom": "true",
+    "unique": "false",
+    "readonly": "false",
+    "required": "false",
+    "tag": [
+     "基本信息"
+    ],
+    "description": "",
+    "tips": "",
+    "value": {
+     "type": "int",
+     "regex": null,
+     "default_type": "value",
+     "default": null,
+     "struct_define": [],
+     "mode": "",
+     "prefix": "",
+     "start_value": 0,
+     "series_number_length": 0
+    },
+    "wordIndexDenied": false,
+    "isInherit": false,
+    "notifyDenied": false,
+    "inheritObjectId": "",
+    "isMetadata": false
+   },
+   {
+    "id": "facilityOwnerAgency",
+    "name": "金融机构编码",
+    "protected": false,
+    "custom": "true",
+    "unique": "false",
+    "readonly": "false",
+    "required": "false",
+    "tag": [
+     "基本信息"
+    ],
+    "description": "",
+    "tips": "",
+    "value": {
+     "type": "str",
+     "regex": null,
+     "default_type": "value",
+     "default": null,
+     "struct_define": [],
+     "mode": "default",
+     "prefix": "",
+     "start_value": 0,
+     "series_number_length": 0
+    },
+    "wordIndexDenied": false,
+    "isInherit": false,
+    "notifyDenied": false,
+    "inheritObjectId": "",
+    "isMetadata": false
+   },
+   {
+    "id": "memo",
+    "name": "备注",
+    "protected": false,
+    "custom": "true",
+    "unique": "false",
+    "readonly": "false",
+    "required": "false",
+    "tag": [
+     "基本信息"
+    ],
+    "description": "",
+    "tips": "",
+    "value": {
+     "type": "str",
+     "regex": null,
+     "default_type": "value",
+     "default": null,
+     "struct_define": [],
+     "mode": "default",
+     "prefix": "",
+     "start_value": 0,
+     "series_number_length": 0
+    },
+    "wordIndexDenied": false,
+    "isInherit": false,
+    "notifyDenied": false,
+    "inheritObjectId": "",
+    "isMetadata": false
+   },
+   {
+    "id": "reportDataUri",
+    "name": "上报路径",
+    "protected": false,
+    "custom": "true",
+    "unique": "false",
+    "readonly": "false",
+    "required": "false",
+    "tag": [
+     "基本信息"
+    ],
+    "description": "留空用默认 webproxy/.../dataElementInstance/reportData",
+    "tips": "",
+    "value": {
+     "type": "str",
+     "regex": null,
+     "default_type": "value",
+     "default": null,
+     "struct_define": [],
+     "mode": "default",
+     "prefix": "",
+     "start_value": 0,
+     "series_number_length": 0
+    },
+    "wordIndexDenied": false,
+    "isInherit": false,
+    "notifyDenied": false,
+    "inheritObjectId": "",
+    "isMetadata": false
+   },
+   {
+    "id": "schema",
+    "name": "协议",
+    "protected": false,
+    "custom": "true",
+    "unique": "false",
+    "readonly": "false",
+    "required": "false",
+    "tag": [
+     "基本信息"
+    ],
+    "description": "http 或 https，默认 https",
+    "tips": "",
+    "value": {
+     "type": "enum",
+     "regex": [
+      "http",
+      "https"
+     ],
+     "default_type": "",
+     "default": null,
+     "struct_define": [],
+     "mode": "default",
+     "prefix": "",
+     "start_value": 0,
+     "series_number_length": 0
+    },
+    "wordIndexDenied": false,
+    "isInherit": false,
+    "notifyDenied": false,
+    "inheritObjectId": "",
+    "isMetadata": false
+   },
+   {
+    "id": "tokenUri",
+    "name": "token路径",
+    "protected": false,
+    "custom": "true",
+    "unique": "false",
+    "readonly": "false",
+    "required": "false",
+    "tag": [
+     "基本信息"
+    ],
+    "description": "留空用默认 webproxy/fig2fics/conn/oauth2/v1/pshare/oauth/token",
+    "tips": "",
+    "value": {
+     "type": "str",
+     "regex": null,
+     "default_type": "value",
+     "default": null,
+     "struct_define": [],
+     "mode": "default",
+     "prefix": "",
+     "start_value": 0,
+     "series_number_length": 0
+    },
+    "wordIndexDenied": false,
+    "isInherit": false,
+    "notifyDenied": false,
+    "inheritObjectId": "",
+    "isMetadata": false
+   }
+  ],
+  "relation_groups": [],
+  "relation_list": [],
+  "indexList": [
+   {
+    "name": "u&name",
+    "propertyIds": [
+     "name"
+    ],
+    "unique": true
+   }
+  ],
+  "updateAuthorizers": [],
+  "deleteAuthorizers": [],
+  "readAuthorizers": [],
+  "wordIndexDenied": false,
+  "_version": 19,
+  "creator": "easyops",
+  "modifier": "easyops",
+  "isAbstract": false,
+  "parentObjectId": "",
+  "permissionDenied": false,
+  "parentObjectIds": []
+ },
+ {
+  "objectId": "FINTECH_REPORT_OBJ@EASYOPS",
+  "name": "人行数据上报模型信息",
+  "icon": "fa fa-cog",
+  "category": "金融元数据.上报管理",
+  "memo": "",
+  "protected": false,
+  "system": "",
+  "notifyDenied": false,
+  "view": {
+   "attr_authorizers": null,
+   "attr_category_order": [
+    "基本信息"
+   ],
+   "attr_order": [
+    "objectId",
+    "name",
+    "category",
+    "mappingObjectId",
+    "mappingObjectName",
+    "source",
+    "objectDefine",
+    "mappingRule"
+   ],
+   "hide_columns": [],
+   "icon": null,
+   "image": "",
+   "inherit_attr_category_map": null,
+   "relation_default_attr": null,
+   "relation_group_order": null,
+   "relation_order": null,
+   "show_key": [
+    "name",
+    "objectId"
+   ],
+   "trans_hier_relation_list": null,
+   "visible": true
+  },
+  "attrList": [
+   {
+    "id": "objectId",
+    "name": "模型id",
+    "protected": false,
+    "custom": "true",
+    "unique": "true",
+    "readonly": "false",
+    "required": "true",
+    "tag": [
+     "基本信息"
+    ],
+    "description": "",
+    "tips": "",
+    "value": {
+     "type": "str",
+     "regex": null,
+     "default_type": "value",
+     "default": null,
+     "struct_define": [],
+     "mode": "default",
+     "prefix": "",
+     "start_value": 0,
+     "series_number_length": 0
+    },
+    "wordIndexDenied": false,
+    "isInherit": false,
+    "notifyDenied": false,
+    "inheritObjectId": "",
+    "isMetadata": false
+   },
+   {
+    "id": "name",
+    "name": "模型名称",
+    "protected": false,
+    "custom": "true",
+    "unique": "true",
+    "readonly": "false",
+    "required": "true",
+    "tag": [
+     "基本信息"
+    ],
+    "description": "",
+    "tips": "",
+    "value": {
+     "type": "str",
+     "regex": null,
+     "default_type": "value",
+     "default": null,
+     "struct_define": [],
+     "mode": "default",
+     "prefix": "",
+     "start_value": 0,
+     "series_number_length": 0
+    },
+    "wordIndexDenied": false,
+    "isInherit": false,
+    "notifyDenied": false,
+    "inheritObjectId": "",
+    "isMetadata": false
+   },
+   {
+    "id": "category",
+    "name": "二级分类",
+    "protected": false,
+    "custom": "true",
+    "unique": "false",
+    "readonly": "false",
+    "required": "false",
+    "tag": [
+     "基本信息"
+    ],
+    "description": "",
+    "tips": "",
+    "value": {
+     "type": "str",
+     "regex": null,
+     "default_type": "value",
+     "default": null,
+     "struct_define": [],
+     "mode": "default",
+     "prefix": "",
+     "start_value": 0,
+     "series_number_length": 0
+    },
+    "wordIndexDenied": false,
+    "isInherit": false,
+    "notifyDenied": false,
+    "inheritObjectId": "",
+    "isMetadata": false
+   },
+   {
+    "id": "mappingObjectId",
+    "name": "映射模型id",
+    "protected": false,
+    "custom": "true",
+    "unique": "false",
+    "readonly": "false",
+    "required": "false",
+    "tag": [
+     "基本信息"
+    ],
+    "description": "",
+    "tips": "",
+    "value": {
+     "type": "str",
+     "regex": null,
+     "default_type": "value",
+     "default": null,
+     "struct_define": [],
+     "mode": "default",
+     "prefix": "",
+     "start_value": 0,
+     "series_number_length": 0
+    },
+    "wordIndexDenied": false,
+    "isInherit": false,
+    "notifyDenied": false,
+    "inheritObjectId": "",
+    "isMetadata": false
+   },
+   {
+    "id": "mappingObjectName",
+    "name": "映射模型名称",
+    "protected": false,
+    "custom": "true",
+    "unique": "false",
+    "readonly": "false",
+    "required": "false",
+    "tag": [
+     "基本信息"
+    ],
+    "description": "",
+    "tips": "",
+    "value": {
+     "type": "str",
+     "regex": null,
+     "default_type": "value",
+     "default": null,
+     "struct_define": [],
+     "mode": "default",
+     "prefix": "",
+     "start_value": 0,
+     "series_number_length": 0
+    },
+    "wordIndexDenied": false,
+    "isInherit": false,
+    "notifyDenied": false,
+    "inheritObjectId": "",
+    "isMetadata": false
+   },
+   {
+    "id": "source",
+    "name": "实例数据来源",
+    "protected": false,
+    "custom": "true",
+    "unique": "false",
+    "readonly": "false",
+    "required": "false",
+    "tag": [
+     "基本信息"
+    ],
+    "description": "",
+    "tips": "",
+    "value": {
+     "type": "enum",
+     "regex": [
+      "mapping",
+      "direct"
+     ],
+     "default_type": "",
+     "default": "direct",
+     "struct_define": [],
+     "mode": "default",
+     "prefix": "",
+     "start_value": 0,
+     "series_number_length": 0
+    },
+    "wordIndexDenied": false,
+    "isInherit": false,
+    "notifyDenied": false,
+    "inheritObjectId": "",
+    "isMetadata": false
+   },
+   {
+    "id": "objectDefine",
+    "name": "模型定义",
+    "protected": false,
+    "custom": "true",
+    "unique": "false",
+    "readonly": "false",
+    "required": "false",
+    "tag": [
+     "基本信息"
+    ],
+    "description": "",
+    "tips": "",
+    "value": {
+     "type": "json",
+     "regex": null,
+     "default_type": "",
+     "default": "",
+     "struct_define": [],
+     "mode": "",
+     "prefix": "",
+     "start_value": 0,
+     "series_number_length": 0
+    },
+    "wordIndexDenied": false,
+    "isInherit": false,
+    "notifyDenied": false,
+    "inheritObjectId": "",
+    "isMetadata": false
+   },
+   {
+    "id": "mappingRule",
+    "name": "映射规则",
+    "protected": false,
+    "custom": "true",
+    "unique": "false",
+    "readonly": "false",
+    "required": "false",
+    "tag": [
+     "基本信息"
+    ],
+    "description": "",
+    "tips": "",
+    "value": {
+     "type": "json",
+     "regex": null,
+     "default_type": "",
+     "default": "",
+     "struct_define": [],
+     "mode": "",
+     "prefix": "",
+     "start_value": 0,
+     "series_number_length": 0
+    },
+    "wordIndexDenied": false,
+    "isInherit": false,
+    "notifyDenied": false,
+    "inheritObjectId": "",
+    "isMetadata": false
+   },
+   {
+    "id": "abandon",
+    "name": "是否为废弃模型",
+    "protected": false,
+    "custom": "true",
+    "unique": "false",
+    "readonly": "false",
+    "required": "false",
+    "tag": [
+     "基本信息"
+    ],
+    "description": "",
+    "tips": "",
+    "value": {
+     "type": "bool",
+     "regex": null,
+     "default_type": "",
+     "default": false,
+     "struct_define": [],
+     "mode": "",
+     "prefix": "",
+     "start_value": 0,
+     "series_number_length": 0
+    },
+    "wordIndexDenied": false,
+    "isInherit": false,
+    "notifyDenied": false,
+    "inheritObjectId": "",
+    "isMetadata": false
+   },
+   {
+    "id": "autoRequestCheck",
+    "name": "是否启用自动发送审核请求",
+    "protected": false,
+    "custom": "true",
+    "unique": "false",
+    "readonly": "false",
+    "required": "false",
+    "tag": [
+     "基本信息"
+    ],
+    "description": "",
+    "tips": "",
+    "value": {
+     "type": "bool",
+     "regex": null,
+     "default_type": "",
+     "default": false,
+     "struct_define": [],
+     "mode": "",
+     "prefix": "",
+     "start_value": 0,
+     "series_number_length": 0
+    },
+    "wordIndexDenied": false,
+    "isInherit": false,
+    "notifyDenied": false,
+    "inheritObjectId": "",
+    "isMetadata": false
+   },
+   {
+    "id": "batchNum",
+    "name": "每批次上报最大数量",
+    "protected": false,
+    "custom": "true",
+    "unique": "false",
+    "readonly": "false",
+    "required": "false",
+    "tag": [
+     "基本信息"
+    ],
+    "description": "",
+    "tips": "",
+    "value": {
+     "type": "int",
+     "regex": null,
+     "default_type": "value",
+     "default": null,
+     "struct_define": [],
+     "mode": "",
+     "prefix": "",
+     "start_value": 0,
+     "series_number_length": 0
+    },
+    "wordIndexDenied": false,
+    "isInherit": false,
+    "notifyDenied": false,
+    "inheritObjectId": "",
+    "isMetadata": false
+   },
+   {
+    "id": "configModifier",
+    "name": "配置编辑人",
+    "protected": false,
+    "custom": "true",
+    "unique": "false",
+    "readonly": "false",
+    "required": "false",
+    "tag": [
+     "基本信息"
+    ],
+    "description": "",
+    "tips": "",
+    "value": {
+     "type": "str",
+     "regex": null,
+     "default_type": "value",
+     "default": null,
+     "struct_define": [],
+     "mode": "default",
+     "prefix": "",
+     "start_value": 0,
+     "series_number_length": 0
+    },
+    "wordIndexDenied": false,
+    "isInherit": false,
+    "notifyDenied": false,
+    "inheritObjectId": "",
+    "isMetadata": false
+   },
+   {
+    "id": "crontab",
+    "name": "定时策略",
+    "protected": false,
+    "custom": "true",
+    "unique": "false",
+    "readonly": "false",
+    "required": "false",
+    "tag": [
+     "基本信息"
+    ],
+    "description": "",
+    "tips": "",
+    "value": {
+     "type": "str",
+     "regex": null,
+     "default_type": "value",
+     "default": null,
+     "struct_define": [],
+     "mode": "default",
+     "prefix": "",
+     "start_value": 0,
+     "series_number_length": 0
+    },
+    "wordIndexDenied": false,
+    "isInherit": false,
+    "notifyDenied": false,
+    "inheritObjectId": "",
+    "isMetadata": false
+   },
+   {
+    "id": "enable",
+    "name": "是否启用",
+    "protected": false,
+    "custom": "true",
+    "unique": "false",
+    "readonly": "false",
+    "required": "false",
+    "tag": [
+     "基本信息"
+    ],
+    "description": "",
+    "tips": "",
+    "value": {
+     "type": "bool",
+     "regex": null,
+     "default_type": "",
+     "default": false,
+     "struct_define": [],
+     "mode": "",
+     "prefix": "",
+     "start_value": 0,
+     "series_number_length": 0
+    },
+    "wordIndexDenied": false,
+    "isInherit": false,
+    "notifyDenied": false,
+    "inheritObjectId": "",
+    "isMetadata": false
+   },
+   {
+    "id": "nextExecTime",
+    "name": "下次执行时间",
+    "protected": false,
+    "custom": "true",
+    "unique": "false",
+    "readonly": "false",
+    "required": "false",
+    "tag": [
+     "基本信息"
+    ],
+    "description": "",
+    "tips": "",
+    "value": {
+     "type": "datetime",
+     "regex": null,
+     "default_type": "",
+     "default": null,
+     "struct_define": [],
+     "mode": "",
+     "prefix": "",
+     "start_value": 0,
+     "series_number_length": 0
+    },
+    "wordIndexDenied": false,
+    "isInherit": false,
+    "notifyDenied": false,
+    "inheritObjectId": "",
+    "isMetadata": false
+   }
+  ],
+  "relation_groups": [],
+  "relation_list": [],
+  "indexList": [
+   {
+    "name": "u&name",
+    "propertyIds": [
+     "name"
+    ],
+    "unique": true
+   },
+   {
+    "name": "u&objectId",
+    "propertyIds": [
+     "objectId"
+    ],
+    "unique": true
+   }
+  ],
+  "updateAuthorizers": [],
+  "deleteAuthorizers": [],
+  "readAuthorizers": [],
+  "wordIndexDenied": false,
+  "_version": 17,
+  "creator": "easyops",
+  "modifier": "easyops",
+  "isAbstract": false,
+  "parentObjectId": "",
+  "permissionDenied": false,
+  "parentObjectIds": []
+ },
+ {
+  "objectId": "FINTECH_REPORT_TASK@EASYOPS",
+  "name": "人行上报任务",
+  "icon": "",
+  "category": "金融元数据.上报管理",
+  "memo": "上报任务历史（task+branch合并，源自Go版fintech_data四Mongo集合的P1替代）。单文件脚本 fintech_report.py 读写。",
+  "protected": false,
+  "system": "",
+  "notifyDenied": false,
+  "view": {
+   "attr_authorizers": null,
+   "attr_category_order": [
+    "基本信息",
+    "执行统计",
+    "结果"
+   ],
+   "attr_order": [
+    "taskId",
+    "objectId",
+    "configId",
+    "method",
+    "sponsor",
+    "status",
+    "branchId",
+    "startTime",
+    "endTime",
+    "insertCount",
+    "updateCount",
+    "removeCount",
+    "failedCount",
+    "checkCode",
+    "checkMsg",
+    "errorMsg",
+    "dataFile",
+    "rolledBack"
+   ],
+   "hide_columns": null,
+   "icon": null,
+   "image": "",
+   "inherit_attr_category_map": null,
+   "relation_default_attr": null,
+   "relation_group_order": null,
+   "relation_order": null,
+   "show_key": [
+    "taskId",
+    "objectId",
+    "status"
+   ],
+   "trans_hier_relation_list": null,
+   "visible": true
+  },
+  "attrList": [
+   {
+    "id": "taskId",
+    "name": "任务号",
+    "protected": false,
+    "custom": "true",
+    "unique": "true",
+    "readonly": "false",
+    "required": "true",
+    "tag": [
+     "基本信息"
+    ],
+    "description": "",
+    "tips": "",
+    "value": {
+     "type": "str",
+     "regex": null,
+     "default_type": "value",
+     "default": null,
+     "struct_define": [],
+     "mode": "default",
+     "prefix": "",
+     "start_value": 0,
+     "series_number_length": 0
+    },
+    "wordIndexDenied": false,
+    "isInherit": false,
+    "notifyDenied": false,
+    "inheritObjectId": "",
+    "isMetadata": false
+   },
+   {
+    "id": "objectId",
+    "name": "上报模型",
+    "protected": false,
+    "custom": "true",
+    "unique": "false",
+    "readonly": "false",
+    "required": "true",
+    "tag": [
+     "基本信息"
+    ],
+    "description": "",
+    "tips": "",
+    "value": {
+     "type": "str",
+     "regex": null,
+     "default_type": "value",
+     "default": null,
+     "struct_define": [],
+     "mode": "default",
+     "prefix": "",
+     "start_value": 0,
+     "series_number_length": 0
+    },
+    "wordIndexDenied": false,
+    "isInherit": false,
+    "notifyDenied": false,
+    "inheritObjectId": "",
+    "isMetadata": false
+   },
+   {
+    "id": "configId",
+    "name": "规则实例id",
+    "protected": false,
+    "custom": "true",
+    "unique": "false",
+    "readonly": "false",
+    "required": "false",
+    "tag": [
+     "基本信息"
+    ],
+    "description": "",
+    "tips": "",
+    "value": {
+     "type": "str",
+     "regex": null,
+     "default_type": "value",
+     "default": null,
+     "struct_define": [],
+     "mode": "default",
+     "prefix": "",
+     "start_value": 0,
+     "series_number_length": 0
+    },
+    "wordIndexDenied": false,
+    "isInherit": false,
+    "notifyDenied": false,
+    "inheritObjectId": "",
+    "isMetadata": false
+   },
+   {
+    "id": "method",
+    "name": "触发方式",
+    "protected": false,
+    "custom": "true",
+    "unique": "false",
+    "readonly": "false",
+    "required": "false",
+    "tag": [
+     "基本信息"
+    ],
+    "description": "",
+    "tips": "",
+    "value": {
+     "type": "enum",
+     "regex": [
+      "manual",
+      "timer",
+      "api"
+     ],
+     "default_type": "",
+     "default": null,
+     "struct_define": [],
+     "mode": "default",
+     "prefix": "",
+     "start_value": 0,
+     "series_number_length": 0
+    },
+    "wordIndexDenied": false,
+    "isInherit": false,
+    "notifyDenied": false,
+    "inheritObjectId": "",
+    "isMetadata": false
+   },
+   {
+    "id": "sponsor",
+    "name": "发起人",
+    "protected": false,
+    "custom": "true",
+    "unique": "false",
+    "readonly": "false",
+    "required": "false",
+    "tag": [
+     "基本信息"
+    ],
+    "description": "",
+    "tips": "",
+    "value": {
+     "type": "str",
+     "regex": null,
+     "default_type": "value",
+     "default": null,
+     "struct_define": [],
+     "mode": "default",
+     "prefix": "",
+     "start_value": 0,
+     "series_number_length": 0
+    },
+    "wordIndexDenied": false,
+    "isInherit": false,
+    "notifyDenied": false,
+    "inheritObjectId": "",
+    "isMetadata": false
+   },
+   {
+    "id": "status",
+    "name": "状态",
+    "protected": false,
+    "custom": "true",
+    "unique": "false",
+    "readonly": "false",
+    "required": "true",
+    "tag": [
+     "基本信息"
+    ],
+    "description": "",
+    "tips": "",
+    "value": {
+     "type": "enum",
+     "regex": [
+      "initial",
+      "reporting",
+      "pendingCheck",
+      "resulting",
+      "success",
+      "fail",
+      "warning",
+      "partialSuccess",
+      "conflict",
+      "noReport",
+      "rolledBack"
+     ],
+     "default_type": "",
+     "default": null,
+     "struct_define": [],
+     "mode": "default",
+     "prefix": "",
+     "start_value": 0,
+     "series_number_length": 0
+    },
+    "wordIndexDenied": false,
+    "isInherit": false,
+    "notifyDenied": false,
+    "inheritObjectId": "",
+    "isMetadata": false
+   },
+   {
+    "id": "branchId",
+    "name": "人行批次号",
+    "protected": false,
+    "custom": "true",
+    "unique": "false",
+    "readonly": "false",
+    "required": "false",
+    "tag": [
+     "基本信息"
+    ],
+    "description": "多批次逗号连接",
+    "tips": "",
+    "value": {
+     "type": "str",
+     "regex": null,
+     "default_type": "value",
+     "default": null,
+     "struct_define": [],
+     "mode": "default",
+     "prefix": "",
+     "start_value": 0,
+     "series_number_length": 0
+    },
+    "wordIndexDenied": false,
+    "isInherit": false,
+    "notifyDenied": false,
+    "inheritObjectId": "",
+    "isMetadata": false
+   },
+   {
+    "id": "startTime",
+    "name": "开始时间",
+    "protected": false,
+    "custom": "true",
+    "unique": "false",
+    "readonly": "false",
+    "required": "false",
+    "tag": [
+     "基本信息"
+    ],
+    "description": "",
+    "tips": "",
+    "value": {
+     "type": "datetime",
+     "regex": null,
+     "default_type": "",
+     "default": null,
+     "struct_define": [],
+     "mode": "",
+     "prefix": "",
+     "start_value": 0,
+     "series_number_length": 0
+    },
+    "wordIndexDenied": false,
+    "isInherit": false,
+    "notifyDenied": false,
+    "inheritObjectId": "",
+    "isMetadata": false
+   },
+   {
+    "id": "endTime",
+    "name": "结束时间",
+    "protected": false,
+    "custom": "true",
+    "unique": "false",
+    "readonly": "false",
+    "required": "false",
+    "tag": [
+     "基本信息"
+    ],
+    "description": "",
+    "tips": "",
+    "value": {
+     "type": "datetime",
+     "regex": null,
+     "default_type": "",
+     "default": null,
+     "struct_define": [],
+     "mode": "",
+     "prefix": "",
+     "start_value": 0,
+     "series_number_length": 0
+    },
+    "wordIndexDenied": false,
+    "isInherit": false,
+    "notifyDenied": false,
+    "inheritObjectId": "",
+    "isMetadata": false
+   },
+   {
+    "id": "insertCount",
+    "name": "新建数",
+    "protected": false,
+    "custom": "true",
+    "unique": "false",
+    "readonly": "false",
+    "required": "false",
+    "tag": [
+     "执行统计"
+    ],
+    "description": "",
+    "tips": "",
+    "value": {
+     "type": "int",
+     "regex": null,
+     "default_type": "value",
+     "default": null,
+     "struct_define": [],
+     "mode": "",
+     "prefix": "",
+     "start_value": 0,
+     "series_number_length": 0
+    },
+    "wordIndexDenied": false,
+    "isInherit": false,
+    "notifyDenied": false,
+    "inheritObjectId": "",
+    "isMetadata": false
+   },
+   {
+    "id": "updateCount",
+    "name": "更新数",
+    "protected": false,
+    "custom": "true",
+    "unique": "false",
+    "readonly": "false",
+    "required": "false",
+    "tag": [
+     "执行统计"
+    ],
+    "description": "",
+    "tips": "",
+    "value": {
+     "type": "int",
+     "regex": null,
+     "default_type": "value",
+     "default": null,
+     "struct_define": [],
+     "mode": "",
+     "prefix": "",
+     "start_value": 0,
+     "series_number_length": 0
+    },
+    "wordIndexDenied": false,
+    "isInherit": false,
+    "notifyDenied": false,
+    "inheritObjectId": "",
+    "isMetadata": false
+   },
+   {
+    "id": "removeCount",
+    "name": "删除数",
+    "protected": false,
+    "custom": "true",
+    "unique": "false",
+    "readonly": "false",
+    "required": "false",
+    "tag": [
+     "执行统计"
+    ],
+    "description": "",
+    "tips": "",
+    "value": {
+     "type": "int",
+     "regex": null,
+     "default_type": "value",
+     "default": null,
+     "struct_define": [],
+     "mode": "",
+     "prefix": "",
+     "start_value": 0,
+     "series_number_length": 0
+    },
+    "wordIndexDenied": false,
+    "isInherit": false,
+    "notifyDenied": false,
+    "inheritObjectId": "",
+    "isMetadata": false
+   },
+   {
+    "id": "failedCount",
+    "name": "失败数",
+    "protected": false,
+    "custom": "true",
+    "unique": "false",
+    "readonly": "false",
+    "required": "false",
+    "tag": [
+     "执行统计"
+    ],
+    "description": "",
+    "tips": "",
+    "value": {
+     "type": "int",
+     "regex": null,
+     "default_type": "value",
+     "default": null,
+     "struct_define": [],
+     "mode": "",
+     "prefix": "",
+     "start_value": 0,
+     "series_number_length": 0
+    },
+    "wordIndexDenied": false,
+    "isInherit": false,
+    "notifyDenied": false,
+    "inheritObjectId": "",
+    "isMetadata": false
+   },
+   {
+    "id": "checkCode",
+    "name": "人行回执码",
+    "protected": false,
+    "custom": "true",
+    "unique": "false",
+    "readonly": "false",
+    "required": "false",
+    "tag": [
+     "结果"
+    ],
+    "description": "WL-xxxxx",
+    "tips": "",
+    "value": {
+     "type": "str",
+     "regex": null,
+     "default_type": "value",
+     "default": null,
+     "struct_define": [],
+     "mode": "default",
+     "prefix": "",
+     "start_value": 0,
+     "series_number_length": 0
+    },
+    "wordIndexDenied": false,
+    "isInherit": false,
+    "notifyDenied": false,
+    "inheritObjectId": "",
+    "isMetadata": false
+   },
+   {
+    "id": "checkMsg",
+    "name": "人行回执消息",
+    "protected": false,
+    "custom": "true",
+    "unique": "false",
+    "readonly": "false",
+    "required": "false",
+    "tag": [
+     "结果"
+    ],
+    "description": "",
+    "tips": "",
+    "value": {
+     "type": "str",
+     "regex": null,
+     "default_type": "value",
+     "default": null,
+     "struct_define": [],
+     "mode": "default",
+     "prefix": "",
+     "start_value": 0,
+     "series_number_length": 0
+    },
+    "wordIndexDenied": false,
+    "isInherit": false,
+    "notifyDenied": false,
+    "inheritObjectId": "",
+    "isMetadata": false
+   },
+   {
+    "id": "errorMsg",
+    "name": "错误信息",
+    "protected": false,
+    "custom": "true",
+    "unique": "false",
+    "readonly": "false",
+    "required": "false",
+    "tag": [
+     "结果"
+    ],
+    "description": "",
+    "tips": "",
+    "value": {
+     "type": "str",
+     "regex": null,
+     "default_type": "value",
+     "default": null,
+     "struct_define": [],
+     "mode": "multiple-lines",
+     "prefix": "",
+     "start_value": 0,
+     "series_number_length": 0
+    },
+    "wordIndexDenied": false,
+    "isInherit": false,
+    "notifyDenied": false,
+    "inheritObjectId": "",
+    "isMetadata": false
+   },
+   {
+    "id": "dataFile",
+    "name": "数据原文路径",
+    "protected": false,
+    "custom": "true",
+    "unique": "false",
+    "readonly": "false",
+    "required": "false",
+    "tag": [
+     "结果"
+    ],
+    "description": "上报实例数据原文的磁盘文件路径（增量diff与回滚的数据源）",
+    "tips": "",
+    "value": {
+     "type": "str",
+     "regex": null,
+     "default_type": "value",
+     "default": null,
+     "struct_define": [],
+     "mode": "default",
+     "prefix": "",
+     "start_value": 0,
+     "series_number_length": 0
+    },
+    "wordIndexDenied": false,
+    "isInherit": false,
+    "notifyDenied": false,
+    "inheritObjectId": "",
+    "isMetadata": false
+   },
+   {
+    "id": "rolledBack",
+    "name": "已回滚",
+    "protected": false,
+    "custom": "true",
+    "unique": "false",
+    "readonly": "false",
+    "required": "false",
+    "tag": [
+     "结果"
+    ],
+    "description": "",
+    "tips": "",
+    "value": {
+     "type": "bool",
+     "regex": null,
+     "default_type": "",
+     "default": null,
+     "struct_define": [],
+     "mode": "",
+     "prefix": "",
+     "start_value": 0,
+     "series_number_length": 0
+    },
+    "wordIndexDenied": false,
+    "isInherit": false,
+    "notifyDenied": false,
+    "inheritObjectId": "",
+    "isMetadata": false
+   },
+   {
+    "id": "branchList",
+    "name": "批次明细",
+    "protected": false,
+    "custom": "true",
+    "unique": "false",
+    "readonly": "false",
+    "required": "false",
+    "tag": [
+     "基本信息"
+    ],
+    "description": "json数组 [{branchId,type,count,status,code,msg}]",
+    "tips": "",
+    "value": {
+     "type": "json",
+     "regex": null,
+     "default_type": "",
+     "default": null,
+     "struct_define": [],
+     "mode": "",
+     "prefix": "",
+     "start_value": 0,
+     "series_number_length": 0
+    },
+    "wordIndexDenied": false,
+    "isInherit": false,
+    "notifyDenied": false,
+    "inheritObjectId": "",
+    "isMetadata": false
+   },
+   {
+    "id": "groupId",
+    "name": "人行批次组ID",
+    "protected": false,
+    "custom": "true",
+    "unique": "false",
+    "readonly": "false",
+    "required": "false",
+    "tag": [
+     "基本信息"
+    ],
+    "description": "requestCheck 返回的 G 系列批次组号",
+    "tips": "",
+    "value": {
+     "type": "str",
+     "regex": null,
+     "default_type": "value",
+     "default": null,
+     "struct_define": [],
+     "mode": "default",
+     "prefix": "",
+     "start_value": 0,
+     "series_number_length": 0
+    },
+    "wordIndexDenied": false,
+    "isInherit": false,
+    "notifyDenied": false,
+    "inheritObjectId": "",
+    "isMetadata": false
+   }
+  ],
+  "relation_groups": [],
+  "relation_list": [],
+  "indexList": [
+   {
+    "name": "u&taskId",
+    "propertyIds": [
+     "taskId"
+    ],
+    "unique": true
+   }
+  ],
+  "updateAuthorizers": [],
+  "deleteAuthorizers": [],
+  "readAuthorizers": [],
+  "wordIndexDenied": false,
+  "_version": 59,
+  "creator": "easyops",
+  "modifier": "easyops",
+  "isAbstract": false,
+  "parentObjectId": "",
+  "permissionDenied": false,
+  "parentObjectIds": []
+ },
+ {
+  "objectId": "FINTECH_REPORT_ROLLBACK@EASYOPS",
+  "name": "人行上报回滚记录",
+  "icon": "",
+  "category": "金融元数据.上报管理",
+  "memo": "回滚执行记录。回滚=仅回滚本地状态（不动人行侧）：任务标记rolledBack，下次上报当全量new重报。",
+  "protected": false,
+  "system": "",
+  "notifyDenied": false,
+  "view": {
+   "attr_authorizers": null,
+   "attr_category_order": [
+    "基本信息",
+    "结果"
+   ],
+   "attr_order": [
+    "rollbackId",
+    "taskId",
+    "objectId",
+    "status",
+    "deleteCount",
+    "operator",
+    "rollbackTime",
+    "errorMsg"
+   ],
+   "hide_columns": null,
+   "icon": null,
+   "image": "",
+   "inherit_attr_category_map": null,
+   "relation_default_attr": null,
+   "relation_group_order": null,
+   "relation_order": null,
+   "show_key": [
+    "rollbackId",
+    "taskId",
+    "status"
+   ],
+   "trans_hier_relation_list": null,
+   "visible": true
+  },
+  "attrList": [
+   {
+    "id": "rollbackId",
+    "name": "回滚号",
+    "protected": false,
+    "custom": "true",
+    "unique": "true",
+    "readonly": "false",
+    "required": "true",
+    "tag": [
+     "基本信息"
+    ],
+    "description": "",
+    "tips": "",
+    "value": {
+     "type": "str",
+     "regex": null,
+     "default_type": "value",
+     "default": null,
+     "struct_define": [],
+     "mode": "default",
+     "prefix": "",
+     "start_value": 0,
+     "series_number_length": 0
+    },
+    "wordIndexDenied": false,
+    "isInherit": false,
+    "notifyDenied": false,
+    "inheritObjectId": "",
+    "isMetadata": false
+   },
+   {
+    "id": "taskId",
+    "name": "任务号",
+    "protected": false,
+    "custom": "true",
+    "unique": "false",
+    "readonly": "false",
+    "required": "true",
+    "tag": [
+     "基本信息"
+    ],
+    "description": "",
+    "tips": "",
+    "value": {
+     "type": "str",
+     "regex": null,
+     "default_type": "value",
+     "default": null,
+     "struct_define": [],
+     "mode": "default",
+     "prefix": "",
+     "start_value": 0,
+     "series_number_length": 0
+    },
+    "wordIndexDenied": false,
+    "isInherit": false,
+    "notifyDenied": false,
+    "inheritObjectId": "",
+    "isMetadata": false
+   },
+   {
+    "id": "objectId",
+    "name": "上报模型",
+    "protected": false,
+    "custom": "true",
+    "unique": "false",
+    "readonly": "false",
+    "required": "true",
+    "tag": [
+     "基本信息"
+    ],
+    "description": "",
+    "tips": "",
+    "value": {
+     "type": "str",
+     "regex": null,
+     "default_type": "value",
+     "default": null,
+     "struct_define": [],
+     "mode": "default",
+     "prefix": "",
+     "start_value": 0,
+     "series_number_length": 0
+    },
+    "wordIndexDenied": false,
+    "isInherit": false,
+    "notifyDenied": false,
+    "inheritObjectId": "",
+    "isMetadata": false
+   },
+   {
+    "id": "status",
+    "name": "状态",
+    "protected": false,
+    "custom": "true",
+    "unique": "false",
+    "readonly": "false",
+    "required": "false",
+    "tag": [
+     "基本信息"
+    ],
+    "description": "",
+    "tips": "",
+    "value": {
+     "type": "enum",
+     "regex": [
+      "rolling",
+      "success",
+      "fail"
+     ],
+     "default_type": "",
+     "default": null,
+     "struct_define": [],
+     "mode": "default",
+     "prefix": "",
+     "start_value": 0,
+     "series_number_length": 0
+    },
+    "wordIndexDenied": false,
+    "isInherit": false,
+    "notifyDenied": false,
+    "inheritObjectId": "",
+    "isMetadata": false
+   },
+   {
+    "id": "deleteCount",
+    "name": "清理实例数",
+    "protected": false,
+    "custom": "true",
+    "unique": "false",
+    "readonly": "false",
+    "required": "false",
+    "tag": [
+     "结果"
+    ],
+    "description": "本地移除台账的实例数",
+    "tips": "",
+    "value": {
+     "type": "int",
+     "regex": null,
+     "default_type": "value",
+     "default": null,
+     "struct_define": [],
+     "mode": "",
+     "prefix": "",
+     "start_value": 0,
+     "series_number_length": 0
+    },
+    "wordIndexDenied": false,
+    "isInherit": false,
+    "notifyDenied": false,
+    "inheritObjectId": "",
+    "isMetadata": false
+   },
+   {
+    "id": "operator",
+    "name": "操作人",
+    "protected": false,
+    "custom": "true",
+    "unique": "false",
+    "readonly": "false",
+    "required": "false",
+    "tag": [
+     "基本信息"
+    ],
+    "description": "",
+    "tips": "",
+    "value": {
+     "type": "str",
+     "regex": null,
+     "default_type": "value",
+     "default": null,
+     "struct_define": [],
+     "mode": "default",
+     "prefix": "",
+     "start_value": 0,
+     "series_number_length": 0
+    },
+    "wordIndexDenied": false,
+    "isInherit": false,
+    "notifyDenied": false,
+    "inheritObjectId": "",
+    "isMetadata": false
+   },
+   {
+    "id": "rollbackTime",
+    "name": "回滚时间",
+    "protected": false,
+    "custom": "true",
+    "unique": "false",
+    "readonly": "false",
+    "required": "false",
+    "tag": [
+     "基本信息"
+    ],
+    "description": "",
+    "tips": "",
+    "value": {
+     "type": "datetime",
+     "regex": null,
+     "default_type": "",
+     "default": null,
+     "struct_define": [],
+     "mode": "",
+     "prefix": "",
+     "start_value": 0,
+     "series_number_length": 0
+    },
+    "wordIndexDenied": false,
+    "isInherit": false,
+    "notifyDenied": false,
+    "inheritObjectId": "",
+    "isMetadata": false
+   },
+   {
+    "id": "errorMsg",
+    "name": "错误信息",
+    "protected": false,
+    "custom": "true",
+    "unique": "false",
+    "readonly": "false",
+    "required": "false",
+    "tag": [
+     "结果"
+    ],
+    "description": "",
+    "tips": "",
+    "value": {
+     "type": "str",
+     "regex": null,
+     "default_type": "value",
+     "default": null,
+     "struct_define": [],
+     "mode": "multiple-lines",
+     "prefix": "",
+     "start_value": 0,
+     "series_number_length": 0
+    },
+    "wordIndexDenied": false,
+    "isInherit": false,
+    "notifyDenied": false,
+    "inheritObjectId": "",
+    "isMetadata": false
+   }
+  ],
+  "relation_groups": [],
+  "relation_list": [],
+  "indexList": [
+   {
+    "name": "u&rollbackId",
+    "propertyIds": [
+     "rollbackId"
+    ],
+    "unique": true
+   }
+  ],
+  "updateAuthorizers": [],
+  "deleteAuthorizers": [],
+  "readAuthorizers": [],
+  "wordIndexDenied": false,
+  "_version": 10,
+  "creator": "easyops",
+  "modifier": "easyops",
+  "isAbstract": false,
+  "parentObjectId": "",
+  "permissionDenied": false,
+  "parentObjectIds": []
+ },
+ {
+  "objectId": "FINTECH_REPORT_CLEANUP@EASYOPS",
+  "name": "人行上报清理规则",
+  "icon": "",
+  "category": "金融元数据.上报管理",
+  "memo": "历史数据清理规则。AND语义：任务同时超出maxCount条数与maxAgeDays天数才清理（任务记录+数据文件+其回滚记录）。默认不清理（enabled=false）。",
+  "protected": false,
+  "system": "",
+  "notifyDenied": false,
+  "view": {
+   "attr_authorizers": null,
+   "attr_category_order": [
+    "基本信息",
+    "执行记录"
+   ],
+   "attr_order": [
+    "name",
+    "enabled",
+    "scope",
+    "maxCount",
+    "maxAgeDays",
+    "lastRunTime",
+    "lastCleanedCount",
+    "memo2"
+   ],
+   "hide_columns": null,
+   "icon": null,
+   "image": "",
+   "inherit_attr_category_map": null,
+   "relation_default_attr": null,
+   "relation_group_order": null,
+   "relation_order": null,
+   "show_key": [
+    "name",
+    "enabled"
+   ],
+   "trans_hier_relation_list": null,
+   "visible": true
+  },
+  "attrList": [
+   {
+    "id": "name",
+    "name": "规则名",
+    "protected": false,
+    "custom": "true",
+    "unique": "true",
+    "readonly": "false",
+    "required": "true",
+    "tag": [
+     "基本信息"
+    ],
+    "description": "",
+    "tips": "",
+    "value": {
+     "type": "str",
+     "regex": null,
+     "default_type": "value",
+     "default": null,
+     "struct_define": [],
+     "mode": "default",
+     "prefix": "",
+     "start_value": 0,
+     "series_number_length": 0
+    },
+    "wordIndexDenied": false,
+    "isInherit": false,
+    "notifyDenied": false,
+    "inheritObjectId": "",
+    "isMetadata": false
+   },
+   {
+    "id": "enabled",
+    "name": "启用",
+    "protected": false,
+    "custom": "true",
+    "unique": "false",
+    "readonly": "false",
+    "required": "false",
+    "tag": [
+     "基本信息"
+    ],
+    "description": "默认关闭=永不清理",
+    "tips": "",
+    "value": {
+     "type": "bool",
+     "regex": null,
+     "default_type": "",
+     "default": null,
+     "struct_define": [],
+     "mode": "",
+     "prefix": "",
+     "start_value": 0,
+     "series_number_length": 0
+    },
+    "wordIndexDenied": false,
+    "isInherit": false,
+    "notifyDenied": false,
+    "inheritObjectId": "",
+    "isMetadata": false
+   },
+   {
+    "id": "scope",
+    "name": "适用模型",
+    "protected": false,
+    "custom": "true",
+    "unique": "false",
+    "readonly": "false",
+    "required": "false",
+    "tag": [
+     "基本信息"
+    ],
+    "description": "逗号分隔objectId；留空=全部",
+    "tips": "",
+    "value": {
+     "type": "str",
+     "regex": null,
+     "default_type": "value",
+     "default": null,
+     "struct_define": [],
+     "mode": "default",
+     "prefix": "",
+     "start_value": 0,
+     "series_number_length": 0
+    },
+    "wordIndexDenied": false,
+    "isInherit": false,
+    "notifyDenied": false,
+    "inheritObjectId": "",
+    "isMetadata": false
+   },
+   {
+    "id": "maxCount",
+    "name": "保留条数",
+    "protected": false,
+    "custom": "true",
+    "unique": "false",
+    "readonly": "false",
+    "required": "false",
+    "tag": [
+     "基本信息"
+    ],
+    "description": "每模型保留最近N条任务，超出的进入清理候选",
+    "tips": "",
+    "value": {
+     "type": "int",
+     "regex": null,
+     "default_type": "value",
+     "default": null,
+     "struct_define": [],
+     "mode": "",
+     "prefix": "",
+     "start_value": 0,
+     "series_number_length": 0
+    },
+    "wordIndexDenied": false,
+    "isInherit": false,
+    "notifyDenied": false,
+    "inheritObjectId": "",
+    "isMetadata": false
+   },
+   {
+    "id": "maxAgeDays",
+    "name": "保留天数",
+    "protected": false,
+    "custom": "true",
+    "unique": "false",
+    "readonly": "false",
+    "required": "false",
+    "tag": [
+     "基本信息"
+    ],
+    "description": "保留N天内的任务，超出的进入清理候选；与条数同时超出才清理",
+    "tips": "",
+    "value": {
+     "type": "int",
+     "regex": null,
+     "default_type": "value",
+     "default": null,
+     "struct_define": [],
+     "mode": "",
+     "prefix": "",
+     "start_value": 0,
+     "series_number_length": 0
+    },
+    "wordIndexDenied": false,
+    "isInherit": false,
+    "notifyDenied": false,
+    "inheritObjectId": "",
+    "isMetadata": false
+   },
+   {
+    "id": "lastRunTime",
+    "name": "上次执行",
+    "protected": false,
+    "custom": "true",
+    "unique": "false",
+    "readonly": "false",
+    "required": "false",
+    "tag": [
+     "执行记录"
+    ],
+    "description": "",
+    "tips": "",
+    "value": {
+     "type": "datetime",
+     "regex": null,
+     "default_type": "",
+     "default": null,
+     "struct_define": [],
+     "mode": "",
+     "prefix": "",
+     "start_value": 0,
+     "series_number_length": 0
+    },
+    "wordIndexDenied": false,
+    "isInherit": false,
+    "notifyDenied": false,
+    "inheritObjectId": "",
+    "isMetadata": false
+   },
+   {
+    "id": "lastCleanedCount",
+    "name": "上次清理数",
+    "protected": false,
+    "custom": "true",
+    "unique": "false",
+    "readonly": "false",
+    "required": "false",
+    "tag": [
+     "执行记录"
+    ],
+    "description": "",
+    "tips": "",
+    "value": {
+     "type": "int",
+     "regex": null,
+     "default_type": "value",
+     "default": null,
+     "struct_define": [],
+     "mode": "",
+     "prefix": "",
+     "start_value": 0,
+     "series_number_length": 0
+    },
+    "wordIndexDenied": false,
+    "isInherit": false,
+    "notifyDenied": false,
+    "inheritObjectId": "",
+    "isMetadata": false
+   },
+   {
+    "id": "memo2",
+    "name": "备注",
+    "protected": false,
+    "custom": "true",
+    "unique": "false",
+    "readonly": "false",
+    "required": "false",
+    "tag": [
+     "基本信息"
+    ],
+    "description": "",
+    "tips": "",
+    "value": {
+     "type": "str",
+     "regex": null,
+     "default_type": "value",
+     "default": null,
+     "struct_define": [],
+     "mode": "default",
+     "prefix": "",
+     "start_value": 0,
+     "series_number_length": 0
+    },
+    "wordIndexDenied": false,
+    "isInherit": false,
+    "notifyDenied": false,
+    "inheritObjectId": "",
+    "isMetadata": false
+   }
+  ],
+  "relation_groups": [],
+  "relation_list": [],
+  "indexList": [
+   {
+    "name": "u&name",
+    "propertyIds": [
+     "name"
+    ],
+    "unique": true
+   }
+  ],
+  "updateAuthorizers": [],
+  "deleteAuthorizers": [],
+  "readAuthorizers": [],
+  "wordIndexDenied": false,
+  "_version": 10,
+  "creator": "easyops",
+  "modifier": "easyops",
+  "isAbstract": false,
+  "parentObjectId": "",
+  "permissionDenied": false,
+  "parentObjectIds": []
+ },
+ {
+  "objectId": "FINTECH_REPORT_INSTANCE@EASYOPS",
+  "name": "人行上报失败明细",
+  "icon": "",
+  "category": "金融数据上报",
+  "memo": "上报检核失败的实例级明细（selectUploadData/getGroupStatus 的 data[] 逐条落库）",
+  "protected": false,
+  "system": "",
+  "notifyDenied": false,
+  "view": {
+   "attr_authorizers": null,
+   "attr_category_order": [
+    "基本信息"
+   ],
+   "attr_order": [
+    "detailId",
+    "objectId",
+    "taskId",
+    "branchId",
+    "code",
+    "facilityCategory",
+    "facilityDescriptor",
+    "msg"
+   ],
+   "hide_columns": null,
+   "icon": null,
+   "image": "",
+   "inherit_attr_category_map": null,
+   "relation_default_attr": null,
+   "relation_group_order": null,
+   "relation_order": null,
+   "show_key": [
+    "taskId",
+    "objectId",
+    "facilityDescriptor"
+   ],
+   "trans_hier_relation_list": null,
+   "visible": true
+  },
+  "attrList": [
+   {
+    "id": "detailId",
+    "name": "明细ID",
+    "protected": false,
+    "custom": "true",
+    "unique": "true",
+    "readonly": "false",
+    "required": "true",
+    "tag": [
+     "基本信息"
+    ],
+    "description": "",
+    "tips": "",
+    "value": {
+     "type": "str",
+     "regex": null,
+     "default_type": "value",
+     "default": null,
+     "struct_define": [],
+     "mode": "default",
+     "prefix": "",
+     "start_value": 0,
+     "series_number_length": 0
+    },
+    "wordIndexDenied": false,
+    "isInherit": false,
+    "notifyDenied": false,
+    "inheritObjectId": "",
+    "isMetadata": false
+   },
+   {
+    "id": "objectId",
+    "name": "模型",
+    "protected": false,
+    "custom": "true",
+    "unique": "false",
+    "readonly": "false",
+    "required": "true",
+    "tag": [
+     "基本信息"
+    ],
+    "description": "",
+    "tips": "",
+    "value": {
+     "type": "str",
+     "regex": null,
+     "default_type": "value",
+     "default": null,
+     "struct_define": [],
+     "mode": "default",
+     "prefix": "",
+     "start_value": 0,
+     "series_number_length": 0
+    },
+    "wordIndexDenied": false,
+    "isInherit": false,
+    "notifyDenied": false,
+    "inheritObjectId": "",
+    "isMetadata": false
+   },
+   {
+    "id": "taskId",
+    "name": "任务号",
+    "protected": false,
+    "custom": "true",
+    "unique": "false",
+    "readonly": "false",
+    "required": "true",
+    "tag": [
+     "基本信息"
+    ],
+    "description": "",
+    "tips": "",
+    "value": {
+     "type": "str",
+     "regex": null,
+     "default_type": "value",
+     "default": null,
+     "struct_define": [],
+     "mode": "default",
+     "prefix": "",
+     "start_value": 0,
+     "series_number_length": 0
+    },
+    "wordIndexDenied": false,
+    "isInherit": false,
+    "notifyDenied": false,
+    "inheritObjectId": "",
+    "isMetadata": false
+   },
+   {
+    "id": "branchId",
+    "name": "批次号",
+    "protected": false,
+    "custom": "true",
+    "unique": "false",
+    "readonly": "false",
+    "required": "false",
+    "tag": [
+     "基本信息"
+    ],
+    "description": "",
+    "tips": "",
+    "value": {
+     "type": "str",
+     "regex": null,
+     "default_type": "value",
+     "default": null,
+     "struct_define": [],
+     "mode": "default",
+     "prefix": "",
+     "start_value": 0,
+     "series_number_length": 0
+    },
+    "wordIndexDenied": false,
+    "isInherit": false,
+    "notifyDenied": false,
+    "inheritObjectId": "",
+    "isMetadata": false
+   },
+   {
+    "id": "code",
+    "name": "错误码",
+    "protected": false,
+    "custom": "true",
+    "unique": "false",
+    "readonly": "false",
+    "required": "false",
+    "tag": [
+     "基本信息"
+    ],
+    "description": "",
+    "tips": "",
+    "value": {
+     "type": "str",
+     "regex": null,
+     "default_type": "value",
+     "default": null,
+     "struct_define": [],
+     "mode": "default",
+     "prefix": "",
+     "start_value": 0,
+     "series_number_length": 0
+    },
+    "wordIndexDenied": false,
+    "isInherit": false,
+    "notifyDenied": false,
+    "inheritObjectId": "",
+    "isMetadata": false
+   },
+   {
+    "id": "facilityCategory",
+    "name": "分类标识符",
+    "protected": false,
+    "custom": "true",
+    "unique": "false",
+    "readonly": "false",
+    "required": "false",
+    "tag": [
+     "基本信息"
+    ],
+    "description": "",
+    "tips": "",
+    "value": {
+     "type": "str",
+     "regex": null,
+     "default_type": "value",
+     "default": null,
+     "struct_define": [],
+     "mode": "default",
+     "prefix": "",
+     "start_value": 0,
+     "series_number_length": 0
+    },
+    "wordIndexDenied": false,
+    "isInherit": false,
+    "notifyDenied": false,
+    "inheritObjectId": "",
+    "isMetadata": false
+   },
+   {
+    "id": "facilityDescriptor",
+    "name": "设施标识符",
+    "protected": false,
+    "custom": "true",
+    "unique": "false",
+    "readonly": "false",
+    "required": "false",
+    "tag": [
+     "基本信息"
+    ],
+    "description": "",
+    "tips": "",
+    "value": {
+     "type": "str",
+     "regex": null,
+     "default_type": "value",
+     "default": null,
+     "struct_define": [],
+     "mode": "default",
+     "prefix": "",
+     "start_value": 0,
+     "series_number_length": 0
+    },
+    "wordIndexDenied": false,
+    "isInherit": false,
+    "notifyDenied": false,
+    "inheritObjectId": "",
+    "isMetadata": false
+   },
+   {
+    "id": "msg",
+    "name": "错误信息",
+    "protected": false,
+    "custom": "true",
+    "unique": "false",
+    "readonly": "false",
+    "required": "false",
+    "tag": [
+     "基本信息"
+    ],
+    "description": "",
+    "tips": "",
+    "value": {
+     "type": "str",
+     "regex": null,
+     "default_type": "value",
+     "default": null,
+     "struct_define": [],
+     "mode": "multiple-lines",
+     "prefix": "",
+     "start_value": 0,
+     "series_number_length": 0
+    },
+    "wordIndexDenied": false,
+    "isInherit": false,
+    "notifyDenied": false,
+    "inheritObjectId": "",
+    "isMetadata": false
+   }
+  ],
+  "relation_groups": [],
+  "relation_list": [],
+  "indexList": [
+   {
+    "name": "u&detailId",
+    "propertyIds": [
+     "detailId"
+    ],
+    "unique": true
+   }
+  ],
+  "updateAuthorizers": [],
+  "deleteAuthorizers": [],
+  "readAuthorizers": [],
+  "wordIndexDenied": false,
+  "_version": 9,
+  "creator": "easyops",
+  "modifier": "easyops",
+  "isAbstract": false,
+  "parentObjectId": "",
+  "permissionDenied": false,
+  "parentObjectIds": []
+ }
+]
