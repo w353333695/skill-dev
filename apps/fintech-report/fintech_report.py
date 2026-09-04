@@ -651,7 +651,12 @@ class ReportCenter:
                  resp.get("groupId", "")[:24], resp.get("code", ""))
         return resp
 
-    _GROUP_PENDING = ("WL-40000", "WL-10005", "WL-10006", "WL-20004")
+    # 批次组状态码（接入规范 5.2.5 附录四）
+    # 非终态: 40000等待逻辑检核 / 40001等待入库申请 / 40002入库处理中
+    # 终态成功: 40003入库成功 / 40004部分成功 / 40006成功带警告
+    # 终态失败: 40005 / 40007(组ID不存在)
+    _GROUP_PENDING = ("WL-40000", "WL-40001", "WL-40002", "WL-10005", "WL-10006", "WL-20004")
+    _GROUP_OK = ("WL-40003", "WL-40004", "WL-40006", "WL-10009", "WL-10013")
 
     def group_status(self, group_id: str, wait_terminal: bool = True) -> dict:
         """5.2.5 查询批次组处理状态。
@@ -1001,8 +1006,10 @@ def report_one_model(rule: dict, report_obj: dict, conf: dict, variant: str,
                                     "msg": str(bad.get("msg", ""))[:500]})
                     except Exception as ce:
                         LOG.warning("[report] 异常批次 %s 明细查询失败: %s", bad_bid[:20], ce)
-                # 批次组终态且无异常批次 → 全部 confirmed（入库成功）
-                if group_code not in ReportCenter._GROUP_PENDING and not (gs.get("data") or []):
+                # 批次组终态成功（40003/40004/40006，无异常批次）→ 全部 confirmed。
+                # 注: 40001(等待入库申请)/40002(入库中)是平台人工/后台环节——代码侧
+                # 检核已通过即为上报成功（confirmed 由批次级终态判定落），组级仅补充。
+                if group_code in ReportCenter._GROUP_OK and not (gs.get("data") or []):
                     for item in new_items + update_items:
                         desc = item.get(converter.key_desc)
                         if desc and desc in payload_instances:
@@ -1013,10 +1020,18 @@ def report_one_model(rule: dict, report_obj: dict, conf: dict, variant: str,
             except Exception as e:
                 group_msg = f"检核请求失败: {e}"
                 LOG.warning("[report] %s 检核请求异常: %s", object_id, e)
-        task.update({"status": (task.get("status") if task.get("status") == "pendingCheck"
-                                else ("success" if counts["failed"] == 0
-                                      else ("fail" if counts["insert"] + counts["update"] + counts["remove"] == 0
-                                            else "partialSuccess"))),
+        # 状态优先级: 组终态成功(batch或group任一确认) > pendingCheck > fail/partial
+        group_ok = (group_code in ReportCenter._GROUP_OK and not (gs.get("data") or [])) if group_id else False
+        any_confirmed = any(v.get("_confirmed") for v in payload_instances.values())
+        if group_ok or any_confirmed:
+            final_status = "success" if not fail_details else "partialSuccess"
+        elif task.get("status") == "pendingCheck":
+            final_status = "pendingCheck"
+        else:
+            final_status = ("success" if counts["failed"] == 0
+                            else ("fail" if counts["insert"] + counts["update"] + counts["remove"] == 0
+                                  else "partialSuccess"))
+        task.update({"status": final_status,
                      "endTime": time.strftime("%Y-%m-%d %H:%M:%S"),
                      "branchId": ",".join(branch_ids),
                      "insertCount": counts["insert"], "updateCount": counts["update"],
@@ -1024,7 +1039,9 @@ def report_one_model(rule: dict, report_obj: dict, conf: dict, variant: str,
                      "checkCode": group_code, "checkMsg": group_msg,
                      "branchList": branch_meta,
                      "errorMsg": _fail_summary(len(fail_details) or counts["failed"], fail_details)})
-        if not new_items and not update_items and not delete_items:
+        # 无上报项且无任何确认成功 → noReport；有确认（如历史批次刚转成功）保持原状态
+        if not new_items and not update_items and not delete_items and \
+                not any(v.get("_confirmed") for v in payload_instances.values()):
             task["status"] = "noReport"
         # 回写原文（批次 confirmed 标记已更新，落盘供下次 diff 用）
         save_report_data(task_id, payload)
