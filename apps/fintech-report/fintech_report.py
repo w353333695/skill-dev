@@ -766,7 +766,15 @@ def save_fail_details(details: list[dict]) -> int:
     if not details:
         return 0
     import uuid as _uuid
-    datas = [dict(d, detailId=_uuid.uuid4().hex) for d in details]
+    # detailId = <facilityDescriptor>_<branchId>：按设施标识符+批次定位——用户在
+    # INSTANCE 表按 facilityDescriptor 过滤即知哪个实例有问题、什么问题；同实例同批
+    # 次重跑幂等覆盖（刷新最新检核结果），不同批次各留一行（失败历史可追溯）
+    datas = []
+    for d in details:
+        row = dict(d)
+        row["detailId"] = "%s_%s" % (d.get("facilityDescriptor", "unknown")[:36],
+                                     d.get("branchId", "nobranch")[-16:])
+        datas.append(row)
     r = cmdb_import("FINTECH_REPORT_INSTANCE@EASYOPS", ["detailId"], datas)
     return r.get("insert", 0) + r.get("update", 0)
 
