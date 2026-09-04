@@ -82,6 +82,7 @@ OBJ_RULE = "FINTECH_REPORT_OBJ@EASYOPS"         # 上报规则
 OBJ_TASK = "FINTECH_REPORT_TASK@EASYOPS"        # 任务历史
 OBJ_ROLLBACK = "FINTECH_REPORT_ROLLBACK@EASYOPS"
 OBJ_CLEANUP = "FINTECH_REPORT_CLEANUP@EASYOPS"
+OBJ_FAIL_DETAIL = "FINTECH_REPORT_INSTANCE@EASYOPS"
 
 # ---- 内嵌上报策略（对应 Go conf.default.yaml report_conf 段；行数少，不值得外挂） ----
 # 唯一键字段翻译（模型特殊 PK → 上报口径 facilityDescriptor/facilityCategory）
@@ -775,8 +776,42 @@ def save_fail_details(details: list[dict]) -> int:
         row["detailId"] = "%s_%s" % (d.get("facilityDescriptor", "unknown")[:36],
                                      d.get("branchId", "nobranch")[-16:])
         datas.append(row)
-    r = cmdb_import("FINTECH_REPORT_INSTANCE@EASYOPS", ["detailId"], datas)
+    r = cmdb_import(OBJ_FAIL_DETAIL, ["detailId"], datas)
     return r.get("insert", 0) + r.get("update", 0)
+
+
+def clear_fail_details(object_id: str, descriptors: list[str]) -> int:
+    """实例上报成功后自动移除其失败明细（INSTANCE 表按 objectId+descriptor 匹配）。
+
+    detailId 键含批次号无法直接定位，须按字段查 v2（objectId 精确 + descriptor $in）。
+    无失败记录时静默跳过。
+    """
+    if not descriptors:
+        return 0
+    removed = 0
+    for i in range(0, len(descriptors), 50):
+        chunk = descriptors[i:i + 50]
+        conds = [{"objectId": object_id},
+                 {"facilityDescriptor": {"$in": chunk}}]
+        out, page = [], 1
+        while True:
+            body = {"query": {"$and": conds},
+                    "fields": {"instanceId": True, "detailId": True},
+                    "page": page, "pageSize": 200}
+            d = cmdb_post(f"/v2/object/{urllib.parse.quote(OBJ_FAIL_DETAIL, safe='@')}/instance/_search", body)
+            data = d.get("data") or {}
+            out.extend(data.get("list") or [])
+            if len(out) >= (data.get("total") or len(out)):
+                break
+            page += 1
+        ids = [r["instanceId"] for r in out if r.get("instanceId")]
+        if ids:
+            failed = cmdb_delete(OBJ_FAIL_DETAIL, ids)
+            n = len(ids) - len(failed)
+            removed += n
+            if n:
+                LOG.info("[report] %s 成功实例清理失败明细 %d 条", object_id, n)
+    return removed
 
 
 def _data_type(object_id: str) -> str:
@@ -996,6 +1031,10 @@ def report_one_model(rule: dict, report_obj: dict, conf: dict, variant: str,
         n_detail = save_fail_details(fail_details)
         if n_detail:
             LOG.info("[report] %s 失败明细落库 %d 条（FINTECH_REPORT_INSTANCE）", object_id, n_detail)
+        # 本轮确认成功的实例 → 自动移除其历史失败明细（修复后重报成功的闭环）
+        ok_descs = [d for d, v in payload_instances.items() if v.get("_confirmed")]
+        if ok_descs and task.get("status") in ("success", "partialSuccess", "noReport"):
+            clear_fail_details(object_id, ok_descs)
         upsert_task(task)
         LOG.info("[report] %s: %d 实例（忽略 %d）→ new %d / update %d / delete %d，失败 %d，任务 %s",
                  object_id, len(converted), ignored, counts["insert"], counts["update"],
