@@ -738,6 +738,20 @@ def find_task(task_id: str) -> dict | None:
 # report: 单模型上报管线
 # ============================================================================
 
+# 单条数据判定（Go instReportResSuccess 同款 + 非终态码扩展）
+# 成功: WL-20000(检核通过)/WL-20003(通过有警告)
+_CODE_ROW_OK = ("WL-20000", "WL-20003")
+# 非终态（处理中/等待，不算失败也不算成功——后续轮询消化）:
+#   WL-20004 等待逻辑检核 / WL-10005 已保存 / WL-10006 处理中
+#   WL-10004 批次未落查 / WL-40000 组等待逻辑检核开始
+_CODE_ROW_PENDING = ("WL-20004", "WL-10005", "WL-10006", "WL-10004", "WL-40000", "")
+
+
+def _row_failed(code: str) -> bool:
+    """人行单条状态码是否为【终态失败】——既非成功码也非处理中码才算失败。"""
+    return code not in _CODE_ROW_OK and code not in _CODE_ROW_PENDING
+
+
 def _fail_summary(n_failed: int, details: list[dict]) -> str:
     """T6: 错误摘要——'N 条失败: 前3条 descriptor→msg'（完整明细在 INSTANCE 表）。"""
     if n_failed == 0 and not details:
@@ -876,9 +890,9 @@ def report_one_model(rule: dict, report_obj: dict, conf: dict, variant: str,
                                 object_id, rtype, ce)
                     continue
                 chk_code = str(chk.get("code", ""))
-                # T5: 人行单条失败明细（data[]: descriptor+code+msg）
+                # T5: 单条失败明细——只收【终态失败】（成功/处理中/等待检核都不算，见 _row_failed）
                 for bad in chk.get("data") or []:
-                    if str(bad.get("code", "")) not in ("WL-20000", "WL-20003"):
+                    if _row_failed(str(bad.get("code", ""))):
                         fail_details.append({
                             "objectId": object_id, "taskId": task_id,
                             "facilityDescriptor": str(bad.get("facilityDescriptor", "")),
@@ -935,7 +949,7 @@ def report_one_model(rule: dict, report_obj: dict, conf: dict, variant: str,
                     try:
                         bd = center.check_result(bad_bid)
                         for bad in bd.get("data") or []:
-                            if str(bad.get("code", "")) not in ("WL-20000", "WL-20003"):
+                            if _row_failed(str(bad.get("code", ""))):
                                 fail_details.append({
                                     "objectId": object_id, "taskId": task_id,
                                     "facilityDescriptor": str(bad.get("facilityDescriptor", "")),
@@ -966,7 +980,7 @@ def report_one_model(rule: dict, report_obj: dict, conf: dict, variant: str,
                      "removeCount": counts["remove"], "failedCount": counts["failed"],
                      "checkCode": group_code, "checkMsg": group_msg,
                      "branchList": branch_meta,
-                     "errorMsg": _fail_summary(counts["failed"], fail_details)})
+                     "errorMsg": _fail_summary(len(fail_details) or counts["failed"], fail_details)})
         if not new_items and not update_items and not delete_items:
             task["status"] = "noReport"
         # 回写原文（批次 confirmed 标记已更新，落盘供下次 diff 用）
