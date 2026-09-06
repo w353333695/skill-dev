@@ -911,6 +911,7 @@ def report_one_model(rule: dict, report_obj: dict, conf: dict, variant: str,
         branch_meta: list[dict] = []   # T4: 每批次 {branchId,type,count,status,code,msg}
         fail_details: list[dict] = []  # T5: 失败数据明细（人行 data[] 逐条）
         counts = {"insert": 0, "update": 0, "remove": 0, "failed": 0}
+        counted: set = set()   # 已计数实例 (rtype, desc)——批次级与组级补计防重
         type_count_key = {"new": "insert", "update": "update", "delete": "remove"}
         for rtype, items in ((REPORT_TYPE_NEW, new_items),
                              (REPORT_TYPE_UPDATE, update_items),
@@ -951,6 +952,7 @@ def report_one_model(rule: dict, report_obj: dict, conf: dict, variant: str,
                     counts[type_count_key[rtype]] += len(batch)
                     for item in batch:
                         desc = item.get(converter.key_desc)
+                        counted.add((rtype, desc))
                         if desc and desc in payload_instances:
                             payload_instances[desc]["_confirmed"] = True
                     branch_meta.append({"branchId": real_bid, "type": rtype,
@@ -1010,10 +1012,24 @@ def report_one_model(rule: dict, report_obj: dict, conf: dict, variant: str,
                 # 注: 40001(等待入库申请)/40002(入库中)是平台人工/后台环节——代码侧
                 # 检核已通过即为上报成功（confirmed 由批次级终态判定落），组级仅补充。
                 if group_code in ReportCenter._GROUP_OK and not (gs.get("data") or []):
-                    for item in new_items + update_items:
+                    # 组终态成功: counts 补计（只补批次级轮询超时未计的，
+                    # 已计过的用 counted 防重——否则快速成功场景翻倍）
+                    for rtype, items in ((REPORT_TYPE_NEW, new_items),
+                                           (REPORT_TYPE_UPDATE, update_items)):
+                        for item in items:
+                            desc = item.get(converter.key_desc)
+                            if (rtype, desc) in counted:
+                                continue   # 批次级已计，不重复
+                            counts[type_count_key[rtype]] += 1
+                            counted.add((rtype, desc))
+                            if desc and desc in payload_instances:
+                                payload_instances[desc]["_confirmed"] = True
+                    for item in delete_items:
                         desc = item.get(converter.key_desc)
-                        if desc and desc in payload_instances:
-                            payload_instances[desc]["_confirmed"] = True
+                        if ("delete", desc) in counted:
+                            continue
+                        counts["remove"] += 1
+                        counted.add(("delete", desc))
                     LOG.info("[report] %s 批次组 %s 终态成功 → confirmed %d 实例",
                              object_id, group_id[:20],
                              sum(1 for v in payload_instances.values() if v.get("_confirmed")))
@@ -1028,9 +1044,15 @@ def report_one_model(rule: dict, report_obj: dict, conf: dict, variant: str,
         elif task.get("status") == "pendingCheck":
             final_status = "pendingCheck"
         else:
-            final_status = ("success" if counts["failed"] == 0
-                            else ("fail" if counts["insert"] + counts["update"] + counts["remove"] == 0
-                                  else "partialSuccess"))
+            # 无组信号时: 只有批次级终态计数(counts)才算数; failed==0 但
+            # counts 也全 0 且有上报动作 → 未获任何终态结论 → pendingCheck
+            if counts["failed"] == 0 and counts["insert"] + counts["update"] + counts["remove"] == 0 \
+                    and (new_items or update_items or delete_items):
+                final_status = "pendingCheck"   # 全部批次未到终态,下次续查
+            else:
+                final_status = ("success" if counts["failed"] == 0
+                                else ("fail" if counts["insert"] + counts["update"] + counts["remove"] == 0
+                                      else "partialSuccess"))
         task.update({"status": final_status,
                      "endTime": time.strftime("%Y-%m-%d %H:%M:%S"),
                      "branchId": ",".join(branch_ids),
