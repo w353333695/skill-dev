@@ -62,7 +62,7 @@ items:
     files: [inspector_bes_cache.tar.gz]
     history:
       - {date: "2026-08-29", change: 初版入库}
-    scenario: BES 缓存中间件巡检
+    scenario: 宝兰德 BES 缓存(BCS)巡检
     notes: 包名无版本语义，version 留空
     added: "2026-08-29"
   - id: bws-inspection-kit
@@ -71,7 +71,7 @@ items:
     files: [inspector_bws.tar.gz]
     history:
       - {date: "2026-08-29", change: 初版入库}
-    scenario: BWS 服务巡检
+    scenario: 宝兰德 BWS 服务巡检
     notes: 包名无版本语义，version 留空
     added: "2026-08-29"
   - id: dm-inspection-kit
@@ -137,7 +137,7 @@ items:
     files: [BCS监控套件.zip, BCS监控套件_告警规则模板.xlsx]
     history:
       - {date: "2026-08-29", change: 初版入库}
-    scenario: BCS 存储/集群监控指标采集套件+告警规则模板
+    scenario: 宝兰德 BES Cache Server(BCS) 缓存服务监控指标+告警规则模板
     notes: 包名无版本语义；告警规则模板与套件配套，不单独成商品
     added: "2026-08-29"
   - id: bws-monitor-kit
