@@ -26,8 +26,8 @@ items:
   - id: net-device-backup-pack         # 唯一 id，kebab-case
     name: 网络设备配置备份交付包
     category: packs                    # 必须是 hub/ 实际子目录（lint ERR）
-    files: [网络设备配置备份_v1.0.13.zip, 网络设备备份_操作参考.md]
-    version: "1.0.13"                  # 包内读不出则留空
+    files: [网络设备配置备份_v1.0.14.zip, 网络设备备份_操作参考.md]
+    version: "1.0.14"                  # 包内读不出则留空
     history:                           # 版本演进（回流 version 变化时必须追加一行）
       - {ver: "1.0.13", date: 2026-08-29, change: 初版入库}
       - {ver: "1.0.14", date: 2026-09-10, change: 增加国产型号适配；修复定时窗口缺陷}
@@ -89,6 +89,7 @@ scenario 非空(WARN) / 版本单份(ERR) / history 末条与 version 一致(ERR
 - **不做独立 changelog 文件**——变更历史内联在 INDEX 的 `history`（二进制包 git diff 不可读，
   INDEX 内联是唯一可读变更日志；git 历史仍可追溯旧文件字节）。
 - **不建 per-类目 README**——单一 INDEX 已够，分类目读 N 个文件费 token。
+- **不设 type/source 等字段**——category 已承载类型，YAGNI。
 
 ## 与 onboarding 锁回纪律的差异
 
