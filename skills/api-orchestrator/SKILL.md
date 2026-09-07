@@ -115,7 +115,7 @@ skill 两种模式，决定能否写 `platforms/`：
 - **onboarding 模式才写 platforms**：且必须 ① 过输入门禁（契约/文档/源码 ≥1）、② 改完跑 lint（0 ERR）。详见 `references/onboarding.md`。
 - **部署根位置明确化**：onboarding 写 platforms 前，先 echo 确认 `API_CLI_PLATFORMS_DIR` 解析到的**绝对路径**；部署根不存在则**停下打印路径问用户**（见 onboarding.md「首写门禁」），禁止隐式 mkdir 到意外 cwd。
 - **分发加固**：`pack-go.sh --skill <name> --target <os/arch> --dist` 读 manifest 编译到 bin/ + 打 tar.gz → 随 skill 分发。零 setup——Go 预编译二进制随包走，不需要安装 runtime。onboarding 改 platforms 前先 `chmod -R u+w`，改完锁回。
-- **hub 回流口径**：规划挡“开发交付场景”（产物为可导入/可部署成品）视为开发态延伸——交付时自动回流 `platforms/<dep>/hub/`（落文件 + 更新 INDEX.yaml + 立即 commit），不算违反 orchestration 只读纪律；纯查询编排仍禁写 hub。机制详见 `references/hub.md`。
+- **hub 回流口径**：规划挡"开发交付场景"（产物为可导入/可部署成品）视为开发态延伸——交付时自动回流 `platforms/<dep>/hub/`（落文件 + 更新 INDEX.yaml + 立即 commit），不算违反 orchestration 只读纪律；纯查询编排仍禁写 hub。机制详见 `references/hub.md`。
 
 ## 关键纪律
 
