@@ -788,6 +788,46 @@ def _row_failed(code: str, msg: str = "") -> bool:
     return code not in _CODE_ROW_PENDING
 
 
+def _collect_branch_row_fails(center: "ReportCenter", branch_ids: list[str],
+                              object_id: str, task_id: str,
+                              fail_details: list[dict]) -> set[str]:
+    """组终态成功后逐批次补拉行级失败明细（组 OK ≠ 行级全过）。
+
+    人行检核慢：批次级 check_result 轮询(50s)期间行级码多为 20004 处理中，
+    行级失败码（20001 检核未通过/20002 入库失败/20003 数据已存在）常在
+    轮询超时后才出现——组到 40001 等 OK 终态时必须再拉一次 selectUploadData
+    才不漏（v1.0.27 现场 switches 9 条重复异常漏记根因）。单次查询不轮询；
+    收集进 fail_details（同实例跨批次去重），返回失败实例 descriptor 集合
+    （调用方据此跳过 confirmed/计数，防 clear_fail_details 误删明细——
+    v1.0.27 现场 uninterrupted 3 条明细落库后被误删根因）。
+    """
+    failed_descs: set[str] = set()
+    for bid in branch_ids:
+        bid = str(bid).strip()
+        if not bid:
+            continue
+        try:
+            bd = center.check_result_once(bid)
+        except Exception as e:
+            LOG.warning("[report] %s 批次 %s 行级明细补拉失败（跳过该批）: %s",
+                        object_id, bid[:20], e)
+            continue
+        for bad in bd.get("data") or []:
+            bcode, bmsg = str(bad.get("code", "")), str(bad.get("msg", ""))
+            if not _row_failed(bcode, bmsg):
+                continue
+            bdesc = str(bad.get("facilityDescriptor", ""))
+            if bdesc in failed_descs:
+                continue   # 同实例跨批次去重
+            fail_details.append({
+                "objectId": object_id, "taskId": task_id,
+                "facilityDescriptor": bdesc,
+                "facilityCategory": str(bad.get("facilityCategory", "")),
+                "branchId": bid, "code": bcode, "msg": bmsg[:500]})
+            failed_descs.add(bdesc)
+    return failed_descs
+
+
 def _fail_summary(n_failed: int, details: list[dict],
                   batch_errors: list[dict] = None, group_err: str = "") -> str:
     """T6: 错误摘要——实例明细（前3条 descriptor→msg）+ 批次级错误（前3条）+ 组错误。
@@ -1100,16 +1140,36 @@ def report_one_model(rule: dict, report_obj: dict, conf: dict, variant: str,
                     batch_errors.append({"branchId": group_id, "type": "group",
                                          "count": len(branch_ids), "code": group_code,
                                          "msg": f"批次组终态失败: {group_msg}"})
-                # 批次组到成功终态（含 40001/40002 检核通过等入库）→ 全部 confirmed。
-                # 注: 40001(等待入库申请)/40002(入库中)后续是人行平台人工环节——
-                # 逻辑检核已通过即为成功结束（用户确认），代码不等入库。
+                # 批次组到成功终态（含 40001/40002 检核通过等入库）→ 先补拉行级
+                # 失败明细再 confirmed。
+                # 注1: 40001(等待入库申请)/40002(入库中)后续是人行平台人工环节——
+                #   逻辑检核已通过即为成功结束（用户确认），代码不等入库。
+                # 注2: 组 OK ≠ 行级全过——批次轮询(50s)期间人行检核未出结果的行
+                #   全在 data[] 里（如 20004 处理中），行级失败码（20001/20002/
+                #   20003 数据已存在）常在批次轮询超时后才出现；组 OK 分支若
+                #   直接全量 confirmed，会把失败实例误当成功（v1.0.27 现场：
+                #   switches 9 条产品序列号重复异常漏记、uninterrupted 3 条
+                #   明细落库后被 clear_fail_details 误删——均为此路径）。
                 if group_code in ReportCenter._GROUP_OK and not (gs.get("data") or []):
-                    # 组终态成功: counts 补计（只补批次级轮询超时未计的，
+                    # 组终态成功: 先逐批次补拉行级明细（单次不轮询），失败实例
+                    # 计入 fail_details 且不 confirmed（不进台账/clear）
+                    g_fail_descs = _collect_branch_row_fails(
+                        center, branch_ids, object_id, task_id, fail_details)
+                    if g_fail_descs:
+                        # 行级失败也留批次级错误痕迹（errorMsg 摘要可见）
+                        batch_errors.append({"branchId": group_id, "type": "group",
+                                             "count": len(g_fail_descs),
+                                             "code": "ROW-FAIL",
+                                             "msg": f"组检核通过但 {len(g_fail_descs)} 条实例行级失败"
+                                                    f"（详见失败明细）"})
+                    # counts 补计（只补批次级轮询超时未计的，
                     # 已计过的用 counted 防重——否则快速成功场景翻倍）
                     for rtype, items in ((REPORT_TYPE_NEW, new_items),
                                            (REPORT_TYPE_UPDATE, update_items)):
                         for item in items:
                             desc = item.get(converter.key_desc)
+                            if desc in g_fail_descs:
+                                continue   # 行级检核失败——不计数不确认
                             if (rtype, desc) in counted:
                                 continue   # 批次级已计，不重复
                             counts[type_count_key[rtype]] += 1
@@ -1122,9 +1182,11 @@ def report_one_model(rule: dict, report_obj: dict, conf: dict, variant: str,
                             continue
                         counts["remove"] += 1
                         counted.add(("delete", desc))
-                    LOG.info("[report] %s 批次组 %s 终态成功 → confirmed %d 实例",
+                    LOG.info("[report] %s 批次组 %s 终态成功 → confirmed %d 实例"
+                             "（行级失败 %d 条已留明细）",
                              object_id, group_id[:20],
-                             sum(1 for v in payload_instances.values() if v.get("_confirmed")))
+                             sum(1 for v in payload_instances.values() if v.get("_confirmed")),
+                             len(g_fail_descs))
             except Exception as e:
                 group_msg = f"检核请求失败: {e}"
                 LOG.warning("[report] %s 检核请求异常: %s", object_id, e)
@@ -1240,34 +1302,12 @@ def _resync_pending_group(object_id: str, conf: dict, variant: str) -> None:
     instances = payload.get("instances") if isinstance(payload, dict) else None
     if not isinstance(instances, dict):
         return
-    # 组 OK ≠ 行级全过: 逐批次补拉 selectUploadData 行级明细（单次不轮询），
-    # 收集终态失败行（含 WL-20003 数据已存在——按 msg 判别，见 _row_failed）
+    # 组 OK ≠ 行级全过: 逐批次补拉行级失败明细（公共函数，同实例跨批去重）
     task_id_str = str(prev.get("taskId", ""))
     fail_details: list[dict] = []
-    failed_descs: set[str] = set()
-    for bid in str(prev.get("branchId", "") or "").split(","):
-        bid = bid.strip()
-        if not bid:
-            continue
-        try:
-            bd = center.check_result_once(bid)
-        except Exception as e:
-            LOG.warning("[resync] %s 批次 %s 明细补拉失败（跳过该批）: %s",
-                        object_id, bid[:20], e)
-            continue
-        for bad in bd.get("data") or []:
-            bcode, bmsg = str(bad.get("code", "")), str(bad.get("msg", ""))
-            if _row_failed(bcode, bmsg):
-                bdesc = str(bad.get("facilityDescriptor", ""))
-                # 同实例跨批次去重（detailId=desc+branch 尾号会落两行）
-                if bdesc in failed_descs:
-                    continue
-                fail_details.append({
-                    "objectId": object_id, "taskId": task_id_str,
-                    "facilityDescriptor": bdesc,
-                    "facilityCategory": str(bad.get("facilityCategory", "")),
-                    "branchId": bid, "code": bcode, "msg": bmsg[:500]})
-                failed_descs.add(bdesc)
+    branch_ids_prev = [b for b in str(prev.get("branchId", "") or "").split(",") if b.strip()]
+    failed_descs = _collect_branch_row_fails(center, branch_ids_prev, object_id,
+                                             task_id_str, fail_details)
     if fail_details:
         save_fail_details(fail_details)
         # 失败实例从原文实例集剔除——不进 _confirmed 台账（下次 diff 当未入库，
