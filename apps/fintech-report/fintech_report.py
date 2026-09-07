@@ -657,7 +657,8 @@ class ReportCenter:
     #   后续入库申请/审批是人行系统上的人工操作（用户确认: 即为成功结束）
     # 入库终态成功: 40003入库成功 / 40004部分成功 / 40006成功带警告
     # 终态失败: 40005 / 40007(组ID不存在)
-    _GROUP_PENDING = ("WL-40000", "WL-10005", "WL-10006", "WL-20004")
+    # 非终态: 40000等待逻辑检核（20004 是行级码，组级响应不会返回，不列入）
+    _GROUP_PENDING = ("WL-40000", "WL-10005", "WL-10006")
     _GROUP_OK = ("WL-40001", "WL-40002", "WL-40003", "WL-40004", "WL-40006",
                  "WL-10009", "WL-10013")
 
@@ -868,6 +869,12 @@ def report_one_model(rule: dict, report_obj: dict, conf: dict, variant: str,
             "rolledBack": False}
     try:
         converter = Converter(object_id, report_obj, rule.get("mappingRule"))
+        # 0) 续查旧组: 上一次任务 pendingCheck 且带 groupId 时，先查组现状——
+        #    组已到成功终态(含 40001 检核通过) → 回写上任务 confirmed + success，
+        #    本次 diff 基准随之归零（noReport），不再全量重报。
+        #    这是 pendingCheck"下次续查"承诺的实际实现：旧版只标状态没有续查
+        #    动作，导致组停在 40000/40001 期间每次运行都全量重报（死循环残余）。
+        _resync_pending_group(object_id, conf, variant)
         # 1) 拉 CMDB 现值 + 转换 + 过滤 ignoreReport
         instances = cmdb_search_all(object_id)
         converted, pk_set = {}, {}
@@ -1159,6 +1166,70 @@ def report_one_model(rule: dict, report_obj: dict, conf: dict, variant: str,
             pass
         LOG.error("[report] %s 失败: %s\n%s", object_id, e, tb)
         raise
+
+
+def _resync_pending_group(object_id: str, conf: dict, variant: str) -> None:
+    """续查 pendingCheck 任务的批次组（"下次续查"的实际实现）。
+
+    找该 objectId 最近一条 pendingCheck 且带 groupId 的任务 → 查组状态（不轮询，
+    查一次现状）：
+      - 组到成功终态（含 40001/40002 检核通过等入库）→ 上任务原文全部实例
+        落 _confirmed、任务转 success（counts 按原文统计）、原文回写 + upsert。
+        本次运行 diff 基准（_last_success_data）随之含这些实例 → 增量归零。
+      - 组仍在等待（40000）或失败 → 不动（失败场景由原任务记录兜底，本次
+        正常增量上报，未 confirmed 的实例自动当 new/update 重报）。
+    """
+    rows = cmdb_search_task_v2(object_id, statuses=["pendingCheck"])
+    if not rows:
+        return
+    rows.sort(key=lambda r: str(r.get("startTime", "")), reverse=True)
+    prev = next((r for r in rows if r.get("groupId")), None)
+    if not prev:
+        return   # pendingCheck 但无组号（纯批次级超时）——无组可续查
+    group_id = str(prev.get("groupId", ""))
+    data_file = prev.get("dataFile")
+    if not (group_id and data_file and Path(data_file).exists()):
+        return
+    try:
+        center = ReportCenter(conf, variant)
+        gs = center.group_status(group_id, wait_terminal=False)
+    except Exception as e:
+        LOG.warning("[resync] %s 旧组 %s 状态查询失败（跳过，走正常上报）: %s",
+                    object_id, group_id[:20], e)
+        return
+    code = str(gs.get("code", ""))
+    if code not in ReportCenter._GROUP_OK or (gs.get("data") or []):
+        LOG.info("[resync] %s 旧组 %s 未到成功终态(%s)——本次正常上报",
+                 object_id, group_id[:20], code)
+        return
+    try:
+        payload = load_report_data(data_file)
+    except Exception as e:
+        LOG.warning("[resync] %s 旧任务原文读取失败: %s", object_id, e)
+        return
+    instances = payload.get("instances") if isinstance(payload, dict) else None
+    if not isinstance(instances, dict):
+        return
+    n_conf = 0
+    for desc, inst in instances.items():
+        if isinstance(inst, dict) and not inst.get("_confirmed"):
+            inst["_confirmed"] = True
+            n_conf += 1
+    save_report_data(str(prev.get("taskId", "")), payload)   # 原地回写同一文件
+    n_ins = sum(1 for i in instances.values()
+                if isinstance(i, dict) and str(i.get("_op", "new")) != "delete")
+    prev.update({"status": "success",
+                 "endTime": time.strftime("%Y-%m-%d %H:%M:%S"),
+                 "checkCode": code, "checkMsg": str(gs.get("msg", ""))[:200],
+                 "insertCount": prev.get("insertCount", 0) or n_ins,
+                 "updateCount": prev.get("updateCount", 0),
+                 "removeCount": prev.get("removeCount", 0),
+                 "failedCount": 0,
+                 "errorMsg": ""})
+    upsert_task(prev)
+    LOG.info("[resync] %s 旧组 %s 已到 %s → 上任务 %s 转 success（confirmed %d 实例），"
+             "本次 diff 将归零", object_id, group_id[:20], code,
+             str(prev.get("taskId", ""))[:12], n_conf)
 
 
 def _last_success_data(object_id: str) -> tuple[dict, dict | None]:
