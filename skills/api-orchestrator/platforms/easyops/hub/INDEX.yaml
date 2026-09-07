@@ -146,7 +146,7 @@ items:
     files: [BWS监控套件.zip, BWS监控套件_告警规则模板.xlsx]
     history:
       - {date: "2026-08-29", change: 初版入库}
-    scenario: BWS 服务监控指标采集套件+告警规则模板
+    scenario: 宝兰德 BWS(BES WEB Server) 服务监控指标采集套件+告警规则模板
     notes: 包名无版本语义；告警规则模板与套件配套，不单独成商品
     added: "2026-08-29"
   - id: svc-monitor-kit
@@ -194,10 +194,10 @@ items:
     category: scripts
     files: [cmdb/build_model_from_data.py]
     history:
-      - {date: "2026-08-29", change: 初版入库}
+      - {date: "2026-09-02", change: 初版入库}
     scenario: 从 list[dict] 存量数据反推 CMDB 模型定义（属性类型推断+导入预检+可选实例 upsert）
     notes: ""
-    added: "2026-08-29"
+    added: "2026-09-02"
   - id: import-and-register-users
     name: 用户导入注册
     category: scripts
@@ -230,10 +230,10 @@ items:
     category: scripts
     files: [iptables-set.sh]
     history:
-      - {date: "2026-08-29", change: 初版入库}
+      - {date: "2026-08-30", change: 初版入库}
     scenario: EasyOps 主机 iptables 集群 IP 互信放行脚本
     notes: ""
-    added: "2026-08-29"
+    added: "2026-08-30"
   - id: itsm-cmdb-import
     name: ITSM 导入 CMDB
     category: scripts
@@ -275,10 +275,10 @@ items:
     category: scripts
     files: [platform/easyops_hardening.sh]
     history:
-      - {date: "2026-08-29", change: 初版入库}
+      - {date: "2026-08-31", change: 初版入库}
     scenario: EasyOps 集群安全加固（iptables 端口封闭+基线，批量版）
     notes: ""
-    added: "2026-08-29"
+    added: "2026-08-31"
   - id: init-easyops-python3
     name: Python3 环境初始化
     category: scripts

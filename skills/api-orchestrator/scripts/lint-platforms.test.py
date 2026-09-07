@@ -199,9 +199,9 @@ def main():
                 name: ACME套件
                 category: kits
                 files: [acme-kit_v1.0.1.zip]
-                version: 1.0.1
+                version: "1.0.1"
                 history:
-                  - {ver: 1.0.1, date: 2026-09-07, change: 初版入库}
+                  - {ver: "1.0.1", date: 2026-09-07, change: 初版入库}
                 scenario: ACME 设备监控接入
                 notes: ""
                 added: 2026-09-07
@@ -229,7 +229,7 @@ def main():
         elif "INDEX.yaml" not in out:
             fails.append(f"[hub-noindex] 期望 WARN 提及 INDEX.yaml\n{out}")
 
-        # bad-2：七宗错集齐（category 悬空/文件不存在/未登记/id 重复/多版本/history 不一致/based_on 悬空）→ exit 1 全抓
+        # bad-2：八宗错集齐（category 悬空/缺 category/文件不存在/未登记/id 重复/多版本/history 不一致/based_on 悬空）→ exit 1 全抓
         hb2 = os.path.join(base, "test-hub-bad")
         write(os.path.join(hb2, "README.md"), "# x\n")
         write(os.path.join(hb2, "systems.yaml"), "deployment: test-hub-bad\nsystems:\n  sys:\n    spec: sys.yaml\n")
@@ -250,27 +250,32 @@ def main():
                 name: X套件
                 category: ghost-dir            # 悬空类目
                 files: [x-kit_v1.0.1.zip, missing.zip]   # missing 不存在
-                version: 1.0.1
+                version: "1.0.1"
                 history:
-                  - {ver: 1.0.0, date: 2026-09-07, change: 初版}   # 末条 1.0.0 ≠ version 1.0.1
+                  - {ver: "1.0.0", date: 2026-09-07, change: 初版}   # 末条 1.0.0 ≠ version 1.0.1
                 scenario: X 设备
                 added: 2026-09-07
               - id: x-kit                      # 重复 id
                 name: X套件2
                 category: kits
                 files: [y-kit_v1.0.1.zip, y-kit_v1.0.2.zip]   # 两版本并存
-                version: 1.0.2
+                version: "1.0.2"
                 history:
-                  - {ver: 1.0.2, date: 2026-09-07, change: v2}
+                  - {ver: "1.0.2", date: 2026-09-07, change: v2}
                 based_on: ghost-base           # 悬空谱系
                 scenario: Y 设备
+                added: 2026-09-07
+              - id: no-cat-kit                 # 缺 category
+                name: 无类目套件
+                files: [x-kit_v1.0.1.zip]
+                scenario: Z 设备
                 added: 2026-09-07
         """)
         rc, out = run(base, "test-hub-bad")
         if rc == 0:
             fails.append(f"[hub-bad] 期望 exit 1，实际 {rc}\n{out}")
         else:
-            for kw in ["ghost-dir", "missing.zip", "未登记", "id 重复", "多版本并存", "不一致", "ghost-base"]:
+            for kw in ["ghost-dir", "missing.zip", "未登记", "id 重复", "多版本并存", "不一致", "ghost-base", "缺 category"]:
                 if kw not in out:
                     fails.append(f"[hub-bad] 期望输出含「{kw}」\n{out}")
 
@@ -311,7 +316,7 @@ def main():
             for f in fails:
                 print("  -", f.replace("\n", " | "))
             sys.exit(1)
-        print("✓ lint 自测通过：good 放行（exit 0 无 ERR）/ bad 抓错（exit 1，含 README缺失 + ref未闭合 + flow op未注册）+ hub 校验（good 放行 / noindex WARN / bad 七宗错全抓）")
+        print("✓ lint 自测通过：good 放行（exit 0 无 ERR）/ bad 抓错（exit 1，含 README缺失 + ref未闭合 + flow op未注册）+ hub 校验（good 放行 / noindex WARN / bad 八宗错全抓）")
     finally:
         # 清理环境变量（异常安全——resolve_base 用例设过则必清，避免污染父进程）
         os.environ.pop("API_CLI_PLATFORMS_DIR", None)

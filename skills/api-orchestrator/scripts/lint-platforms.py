@@ -334,13 +334,15 @@ def main():
                     seen_ids[iid] = True
                     # 规则2: category 合法
                     cat = it.get("category")
-                    if cat and cat not in cats:
+                    if not cat:
+                        err(f"hub/INDEX.yaml items.{iid}: 缺 category（商品类目必填）")
+                    elif cat not in cats:
                         err(f"hub/INDEX.yaml items.{iid}.category → {cat} 不是 hub/ 下实际子目录")
                     # 规则3a: 索引文件存在（files 值为相对 category 的 posix 路径，含 / 时拼路径同样成立）
                     # 比对键统一为 "<category>/<相对路径>"，避免跨类目同名文件互相顶替
                     for fn in (it.get("files") or []):
                         rel = str(fn).replace(os.sep, "/")
-                        if cat and not os.path.isfile(os.path.join(hub_dir, str(cat), rel)):
+                        if not cat or not os.path.isfile(os.path.join(hub_dir, str(cat), rel)):
                             err(f"hub/INDEX.yaml items.{iid}.files → {fn} 文件不存在")
                         else:
                             id_by_file[f"{cat}/{rel}"] = iid
