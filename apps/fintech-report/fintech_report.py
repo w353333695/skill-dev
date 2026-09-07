@@ -652,11 +652,14 @@ class ReportCenter:
         return resp
 
     # 批次组状态码（接入规范 5.2.5 附录四）
-    # 非终态: 40000等待逻辑检核 / 40001等待入库申请 / 40002入库处理中
-    # 终态成功: 40003入库成功 / 40004部分成功 / 40006成功带警告
+    # 非终态: 40000等待逻辑检核
+    # 代码侧成功终态: 40001等待入库申请 / 40002入库处理中——逻辑检核已通过，
+    #   后续入库申请/审批是人行系统上的人工操作（用户确认: 即为成功结束）
+    # 入库终态成功: 40003入库成功 / 40004部分成功 / 40006成功带警告
     # 终态失败: 40005 / 40007(组ID不存在)
-    _GROUP_PENDING = ("WL-40000", "WL-40001", "WL-40002", "WL-10005", "WL-10006", "WL-20004")
-    _GROUP_OK = ("WL-40003", "WL-40004", "WL-40006", "WL-10009", "WL-10013")
+    _GROUP_PENDING = ("WL-40000", "WL-10005", "WL-10006", "WL-20004")
+    _GROUP_OK = ("WL-40001", "WL-40002", "WL-40003", "WL-40004", "WL-40006",
+                 "WL-10009", "WL-10013")
 
     def group_status(self, group_id: str, wait_terminal: bool = True) -> dict:
         """5.2.5 查询批次组处理状态。
@@ -758,13 +761,27 @@ def _row_failed(code: str) -> bool:
     return code not in _CODE_ROW_OK and code not in _CODE_ROW_PENDING
 
 
-def _fail_summary(n_failed: int, details: list[dict]) -> str:
-    """T6: 错误摘要——'N 条失败: 前3条 descriptor→msg'（完整明细在 INSTANCE 表）。"""
-    if n_failed == 0 and not details:
+def _fail_summary(n_failed: int, details: list[dict],
+                  batch_errors: list[dict] = None, group_err: str = "") -> str:
+    """T6: 错误摘要——实例明细（前3条 descriptor→msg）+ 批次级错误（前3条）+ 组错误。
+    完整实例明细在 INSTANCE 表；批次/组级错误只在此摘要与 branchList 留痕。
+    """
+    batch_errors = batch_errors or []
+    if n_failed == 0 and not details and not batch_errors and not group_err:
         return ""
     parts = [f"{d['facilityDescriptor'][:12]}→{d['msg'][:40]}" for d in details[:3]]
+    bparts = [f"批次{b.get('branchId', '')[-12:]}({b.get('type', '')}):"
+              f"{b.get('code', '')} {str(b.get('msg', ''))[:40]}"
+              for b in batch_errors[:3]]
     head = f"{max(n_failed, len(details))} 条失败"
-    return head + (": " + "; ".join(parts) if parts else "")
+    segs = []
+    if parts:
+        segs.append("; ".join(parts))
+    if bparts:
+        segs.append(" | 批次错误: " + "; ".join(bparts))
+    if group_err:
+        segs.append(f" | 组: {group_err[:60]}")
+    return head + (": " + "".join(segs) if segs else "")
 
 
 def save_fail_details(details: list[dict]) -> int:
@@ -912,6 +929,7 @@ def report_one_model(rule: dict, report_obj: dict, conf: dict, variant: str,
         fail_details: list[dict] = []  # T5: 失败数据明细（人行 data[] 逐条）
         counts = {"insert": 0, "update": 0, "remove": 0, "failed": 0}
         counted: set = set()   # 已计数实例 (rtype, desc)——批次级与组级补计防重
+        batch_errors: list[dict] = []   # T4b: 批次级错误留痕（未受理/check异常/检核失败）
         type_count_key = {"new": "insert", "update": "update", "delete": "remove"}
         for rtype, items in ((REPORT_TYPE_NEW, new_items),
                              (REPORT_TYPE_UPDATE, update_items),
@@ -929,6 +947,12 @@ def report_one_model(rule: dict, report_obj: dict, conf: dict, variant: str,
                 # WL-10000 只表受理——查 check_result 终态才 confirmed
                 if resp["code"] != CODE_REPORT_SUCCESS:
                     counts["failed"] += len(batch)
+                    batch_errors.append({"branchId": real_bid, "type": rtype,
+                                         "count": len(batch), "code": resp["code"],
+                                         "msg": f"上报未受理: {resp['msg'][:150]}"})
+                    branch_meta.append({"branchId": real_bid, "type": rtype,
+                                       "count": len(batch), "status": "fail",
+                                       "code": resp["code"], "msg": resp["msg"][:200]})
                     LOG.warning("[report] %s %s 上报未受理: %s %s",
                                 object_id, rtype, resp["code"], resp["msg"][:100])
                     continue
@@ -937,6 +961,14 @@ def report_one_model(rule: dict, report_obj: dict, conf: dict, variant: str,
                 except Exception as ce:
                     LOG.warning("[report] %s %s check 异常: %s → 本批不入 confirmed（下次重报）",
                                 object_id, rtype, ce)
+                    batch_errors.append({"branchId": real_bid, "type": rtype,
+                                         "count": len(batch), "code": "CHECK_ERROR",
+                                         "msg": f"结果查询异常(下次重报): {str(ce)[:150]}"})
+                    branch_meta.append({"branchId": real_bid, "type": rtype,
+                                       "count": len(batch), "status": "fail",
+                                       "code": "CHECK_ERROR",
+                                       "msg": f"结果查询异常: {str(ce)[:200]}"})
+                    task["status"] = "pendingCheck"   # 非终态——下次续查
                     continue
                 chk_code = str(chk.get("code", ""))
                 # T5: 单条失败明细——只收【终态失败】（成功/处理中/等待检核都不算，见 _row_failed）
@@ -968,6 +1000,9 @@ def report_one_model(rule: dict, report_obj: dict, conf: dict, variant: str,
                                        "code": chk_code})
                 else:
                     counts["failed"] += len(batch)
+                    batch_errors.append({"branchId": real_bid, "type": rtype,
+                                         "count": len(batch), "code": chk_code,
+                                         "msg": str(chk.get("msg", ""))[:150]})
                     LOG.warning("[report] %s %s 处理失败: %s %s",
                                 object_id, rtype, chk_code, str(chk.get("msg", ""))[:100])
                     branch_meta.append({"branchId": real_bid, "type": rtype,
@@ -991,11 +1026,28 @@ def report_one_model(rule: dict, report_obj: dict, conf: dict, variant: str,
                     LOG.warning("[report] %s 批次组异常批次: %s %s %s", object_id,
                                 str(bad.get("branchId", ""))[:24], bad.get("code", ""),
                                 str(bad.get("msg", ""))[:100])
-                # T5: 组异常批次逐个查 selectUploadData 拿数据级失败原因
+                # T5: 组异常批次逐个查 selectUploadData 拿数据级失败原因；
+                # 同时回写 branch_meta——批次级 selectUploadData 查成功 ≠ 组级
+                # 逻辑检核通过，异常批次在 branchList 里必须从 success 纠正为 fail，
+                # 否则多批次组场景任务表看到的批次状态与实际不符（错误记录不全主因）
                 for bad_branch in gs.get("data") or []:
                     bad_bid = str(bad_branch.get("branchId", ""))
                     if not bad_bid or str(bad_branch.get("code", "")) in ("WL-10006",):
                         continue   # 处理中的不算
+                    bad_code = str(bad_branch.get("code", ""))
+                    bad_msg = str(bad_branch.get("msg", ""))[:200]
+                    # 回写 branchList: 该批次组级检核失败
+                    bm = next((b for b in branch_meta if b.get("branchId") == bad_bid), None)
+                    if bm is not None:
+                        bm["status"] = "fail"
+                        bm["code"] = bad_code
+                        bm["msg"] = f"组检核失败: {bad_msg}"
+                    else:
+                        branch_meta.append({"branchId": bad_bid, "type": "?", "count": 0,
+                                           "status": "fail", "code": bad_code, "msg": bad_msg})
+                    batch_errors.append({"branchId": bad_bid, "type": (bm or {}).get("type", "?"),
+                                         "count": (bm or {}).get("count", 0),
+                                         "code": bad_code, "msg": bad_msg})
                     try:
                         bd = center.check_result(bad_bid)
                         for bad in bd.get("data") or []:
@@ -1008,9 +1060,15 @@ def report_one_model(rule: dict, report_obj: dict, conf: dict, variant: str,
                                     "msg": str(bad.get("msg", ""))[:500]})
                     except Exception as ce:
                         LOG.warning("[report] 异常批次 %s 明细查询失败: %s", bad_bid[:20], ce)
-                # 批次组终态成功（40003/40004/40006，无异常批次）→ 全部 confirmed。
-                # 注: 40001(等待入库申请)/40002(入库中)是平台人工/后台环节——代码侧
-                # 检核已通过即为上报成功（confirmed 由批次级终态判定落），组级仅补充。
+                # 组终态失败码（40005/40007 等）也留痕
+                if group_id and group_code and group_code not in ReportCenter._GROUP_OK \
+                        and group_code not in ReportCenter._GROUP_PENDING:
+                    batch_errors.append({"branchId": group_id, "type": "group",
+                                         "count": len(branch_ids), "code": group_code,
+                                         "msg": f"批次组终态失败: {group_msg}"})
+                # 批次组到成功终态（含 40001/40002 检核通过等入库）→ 全部 confirmed。
+                # 注: 40001(等待入库申请)/40002(入库中)后续是人行平台人工环节——
+                # 逻辑检核已通过即为成功结束（用户确认），代码不等入库。
                 if group_code in ReportCenter._GROUP_OK and not (gs.get("data") or []):
                     # 组终态成功: counts 补计（只补批次级轮询超时未计的，
                     # 已计过的用 counted 防重——否则快速成功场景翻倍）
@@ -1044,23 +1102,35 @@ def report_one_model(rule: dict, report_obj: dict, conf: dict, variant: str,
         elif task.get("status") == "pendingCheck":
             final_status = "pendingCheck"
         else:
-            # 无组信号时: 只有批次级终态计数(counts)才算数; failed==0 但
-            # counts 也全 0 且有上报动作 → 未获任何终态结论 → pendingCheck
-            if counts["failed"] == 0 and counts["insert"] + counts["update"] + counts["remove"] == 0 \
+            # 无组信号时: 只有批次级终态计数(counts)才算数; 无失败但也无任何
+            # 终态成功计数且有上报动作 → 未获任何终态结论 → pendingCheck
+            if not fail_details and not batch_errors \
+                    and counts["insert"] + counts["update"] + counts["remove"] == 0 \
                     and (new_items or update_items or delete_items):
                 final_status = "pendingCheck"   # 全部批次未到终态,下次续查
             else:
-                final_status = ("success" if counts["failed"] == 0
+                final_status = ("success" if not fail_details and not batch_errors
                                 else ("fail" if counts["insert"] + counts["update"] + counts["remove"] == 0
                                       else "partialSuccess"))
+        # 组错误单独判（组终态失败码且无任何实例确认 → 整体失败信号）
+        group_fail = (group_id and group_code
+                      and group_code not in ReportCenter._GROUP_OK
+                      and group_code not in ReportCenter._GROUP_PENDING
+                      and not any_confirmed)
+        if group_fail and final_status not in ("pendingCheck",):
+            final_status = "fail" if not any_confirmed else final_status
+        # errorMsg 的组错误段: 组终态失败码才带（成功/等待码不带，避免误导）
+        group_err_txt = group_msg if group_fail else ""
         task.update({"status": final_status,
                      "endTime": time.strftime("%Y-%m-%d %H:%M:%S"),
                      "branchId": ",".join(branch_ids),
                      "insertCount": counts["insert"], "updateCount": counts["update"],
-                     "removeCount": counts["remove"], "failedCount": counts["failed"],
+                     "removeCount": counts["remove"],
+                     "failedCount": len(fail_details),   # 失败数=失败明细数（实例级终态失败）
                      "checkCode": group_code, "checkMsg": group_msg,
                      "branchList": branch_meta,
-                     "errorMsg": _fail_summary(len(fail_details) or counts["failed"], fail_details)})
+                     "errorMsg": _fail_summary(len(fail_details), fail_details,
+                                               batch_errors, group_err=group_err_txt)})
         # 无上报项且无任何确认成功 → noReport；有确认（如历史批次刚转成功）保持原状态
         if not new_items and not update_items and not delete_items and \
                 not any(v.get("_confirmed") for v in payload_instances.values()):
@@ -1077,7 +1147,7 @@ def report_one_model(rule: dict, report_obj: dict, conf: dict, variant: str,
         upsert_task(task)
         LOG.info("[report] %s: %d 实例（忽略 %d）→ new %d / update %d / delete %d，失败 %d，任务 %s",
                  object_id, len(converted), ignored, counts["insert"], counts["update"],
-                 counts["remove"], counts["failed"], task_id)
+                 counts["remove"], len(fail_details), task_id)
         return task
     except Exception as e:
         tb = traceback.format_exc()
