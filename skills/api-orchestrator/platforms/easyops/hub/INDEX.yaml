@@ -1,0 +1,336 @@
+# EasyOps hub 平台商店索引 —— 查重载体 + 变更日志（机制见 skill references/hub.md）
+# 类目语义: cmdb-kits=CMDB采集套件包 inspection-kits=巡检套件包(tar.gz)
+#   monitor-kits=监控套件包+配套告警规则模板(xlsx) scripts=可交付脚本(按域分子目录)
+#   tools=autoops 工具成品 sso-adapter-providers=sso provider 成品
+#   itsm-service=ITSM 服务/流程交付包 custom-msg-sender=自定义消息发送器 other=未归类交付物
+# 收录门槛: 仅成品交付物；命名 <名称>_v<版本>.<ext>；新版回流删旧版文件
+items:
+  # ---- cmdb-kits（3 商品）----
+  - id: svc-cmdb-kit
+    name: SVC监控采集(CMDB)
+    category: cmdb-kits
+    files: [svc-cmdb-kit_v1.0.11.zip]
+    version: "1.0.11"
+    history:
+      - {ver: "1.0.11", date: "2026-08-29", change: 初版入库}
+    scenario: IBM SVC 存储设备 SNMP/REST CMDB 信息采集
+    notes: ""
+    added: "2026-08-29"
+  - id: fc-switch-cmdb-kit
+    name: 光纤交换机SNMP信息采集
+    category: cmdb-kits
+    files: [光纤交换机SNMP信息采集_v1.0.11.zip, fc_switch_snmp_mib_oid_reference.md]
+    version: "1.0.11"
+    history:
+      - {ver: "1.0.11", date: "2026-08-29", change: 初版入库}
+    scenario: 光纤交换机(Brocade/华为OEM) SNMP CMDB 配置采集，配套 MIB OID 参考文档
+    notes: MIB OID 参考与套件包配套使用，不单独成商品
+    added: "2026-08-29"
+  - id: sangfor-lb-cmdb-kit
+    name: 深信服负载均衡器SNMP信息采集
+    category: cmdb-kits
+    files: [深信服负载均衡器SNMP信息采集_v1.0.4.zip]
+    version: "1.0.4"
+    history:
+      - {ver: "1.0.4", date: "2026-08-29", change: 初版入库}
+    scenario: 深信服 AD 负载均衡器 SNMP CMDB 信息采集
+    notes: ""
+    added: "2026-08-29"
+  # ---- inspection-kits（10 商品）----
+  - id: ibmsvc-inspection-kit
+    name: IBMSVC存储设备巡检(ONEMODEL)
+    category: inspection-kits
+    files: [IBMSVC存储设备巡检(ONEMODEL)_v1.0.1.tar.gz]
+    version: "1.0.1"
+    history:
+      - {ver: "1.0.1", date: "2026-08-29", change: 初版入库}
+    scenario: IBM SVC 存储设备巡检（ONEMODEL 模型体系）
+    notes: ""
+    added: "2026-08-29"
+  - id: host-inspection-kit
+    name: 主机巡检
+    category: inspection-kits
+    files: [host.tar.gz]
+    history:
+      - {date: "2026-08-29", change: 初版入库}
+    scenario: Linux 主机巡检（HOST 模型，collectors+models.json 采集包）
+    notes: 包名/包内无版本语义，version 留空
+    added: "2026-08-29"
+  - id: bes-cache-inspection-kit
+    name: BES缓存巡检
+    category: inspection-kits
+    files: [inspector_bes_cache.tar.gz]
+    history:
+      - {date: "2026-08-29", change: 初版入库}
+    scenario: BES 缓存中间件巡检
+    notes: 包名无版本语义，version 留空
+    added: "2026-08-29"
+  - id: bws-inspection-kit
+    name: BWS巡检
+    category: inspection-kits
+    files: [inspector_bws.tar.gz]
+    history:
+      - {date: "2026-08-29", change: 初版入库}
+    scenario: BWS 服务巡检
+    notes: 包名无版本语义，version 留空
+    added: "2026-08-29"
+  - id: dm-inspection-kit
+    name: 达梦数据库巡检
+    category: inspection-kits
+    files: [inspector_dm.tar.gz]
+    history:
+      - {date: "2026-08-29", change: 初版入库}
+    scenario: 达梦 DM 数据库巡检
+    notes: 包名无版本语义，version 留空
+    added: "2026-08-29"
+  - id: mysql-inspection-kit
+    name: MySQL巡检
+    category: inspection-kits
+    files: [inspector_mysql.tar.gz]
+    history:
+      - {date: "2026-08-29", change: 初版入库}
+    scenario: MySQL 数据库巡检
+    notes: 包名无版本语义，version 留空
+    added: "2026-08-29"
+  - id: redfish-inspection-kit
+    name: Redfish硬件巡检
+    category: inspection-kits
+    files: [inspector_redfish.gz]
+    history:
+      - {date: "2026-08-29", change: 初版入库}
+    scenario: 服务器 Redfish 带外管理硬件巡检
+    notes: 包名无版本语义，version 留空
+    added: "2026-08-29"
+  - id: redis-inspection-kit
+    name: Redis巡检
+    category: inspection-kits
+    files: [inspector_redis.tar.gz]
+    history:
+      - {date: "2026-08-29", change: 初版入库}
+    scenario: Redis 缓存巡检
+    notes: 包名无版本语义，version 留空
+    added: "2026-08-29"
+  - id: switch-inspection-kit
+    name: 交换机巡检(ONEMODEL)
+    category: inspection-kits
+    files: [交换机巡检(ONEMODEL)_v1.0.4.tar.gz]
+    version: "1.0.4"
+    history:
+      - {ver: "1.0.4", date: "2026-08-29", change: 初版入库}
+    scenario: 网络交换机巡检（SNMP，ONEMODEL 模型体系）
+    notes: ""
+    added: "2026-08-29"
+  - id: sangfor-ad-inspection-kit
+    name: 深信服AD负载均衡器巡检(ONEMODEL)
+    category: inspection-kits
+    files: [深信服AD负载均衡器巡检(ONEMODEL)_v1.0.2.tar.gz]
+    version: "1.0.2"
+    history:
+      - {ver: "1.0.2", date: "2026-08-29", change: 初版入库}
+    scenario: 深信服 AD 负载均衡器巡检（ONEMODEL）
+    notes: ""
+    added: "2026-08-29"
+  # ---- monitor-kits（5 商品，套件 zip+配套告警规则 xlsx 同 files）----
+  - id: bcs-monitor-kit
+    name: BCS监控套件
+    category: monitor-kits
+    files: [BCS监控套件.zip, BCS监控套件_告警规则模板.xlsx]
+    history:
+      - {date: "2026-08-29", change: 初版入库}
+    scenario: BCS 存储/集群监控指标采集套件+告警规则模板
+    notes: 包名无版本语义；告警规则模板与套件配套，不单独成商品
+    added: "2026-08-29"
+  - id: bws-monitor-kit
+    name: BWS监控套件
+    category: monitor-kits
+    files: [BWS监控套件.zip, BWS监控套件_告警规则模板.xlsx]
+    history:
+      - {date: "2026-08-29", change: 初版入库}
+    scenario: BWS 服务监控指标采集套件+告警规则模板
+    notes: 包名无版本语义；告警规则模板与套件配套，不单独成商品
+    added: "2026-08-29"
+  - id: svc-monitor-kit
+    name: SVC监控套件
+    category: monitor-kits
+    files: [SVC监控套件_v1.0.10.zip, SVC监控套件_告警规则模板.xlsx]
+    version: "1.0.10"
+    history:
+      - {ver: "1.0.10", date: "2026-08-29", change: 初版入库}
+    scenario: IBM SVC 存储监控指标采集套件+告警规则模板
+    notes: 告警规则模板与套件配套，不单独成商品
+    added: "2026-08-29"
+  - id: fc-switch-monitor-kit
+    name: 光纤交换机监控套件
+    category: monitor-kits
+    files: [光纤交换机监控套件_v1.0.13.zip, 光纤交换机监控_告警规则模板.xlsx]
+    version: "1.0.13"
+    history:
+      - {ver: "1.0.13", date: "2026-08-29", change: 初版入库}
+    scenario: 光纤交换机(Brocade/华为OEM) SNMP 指标监控套件+告警规则模板
+    notes: 告警规则模板与套件配套，不单独成商品
+    added: "2026-08-29"
+  - id: sangfor-ad-monitor-kit
+    name: 深信服AD负载均衡器监控套件
+    category: monitor-kits
+    files: [深信服AD负载均衡器监控套件_v1.0.1.zip, 深信服AD负载均衡器监控_告警规则模板.xlsx]
+    version: "1.0.1"
+    history:
+      - {ver: "1.0.1", date: "2026-08-29", change: 初版入库}
+    scenario: 深信服 AD 负载均衡器监控指标套件+告警规则模板
+    notes: 告警规则模板与套件配套，不单独成商品
+    added: "2026-08-29"
+  # ---- scripts（16 商品）----
+  - id: baseline-checker
+    name: 配置基线管理
+    category: scripts
+    files: [baseline-managment/README.md, baseline-managment/baseline_checker.py, baseline-managment/baseline_models.json]
+    history:
+      - {date: "2026-08-29", change: 初版入库}
+    scenario: EasyOps CMDB 声明式配置基线检查引擎（BASELINE_RULE/RESULT 模型+通用检查脚本+结果落 CMDB）
+    notes: 三件配套（README/脚本/模型定义）为同一商品
+    added: "2026-08-29"
+  - id: build-model-from-data
+    name: 数据驱动建模
+    category: scripts
+    files: [cmdb/build_model_from_data.py]
+    history:
+      - {date: "2026-08-29", change: 初版入库}
+    scenario: 从 list[dict] 存量数据反推 CMDB 模型定义（属性类型推断+导入预检+可选实例 upsert）
+    notes: ""
+    added: "2026-08-29"
+  - id: import-and-register-users
+    name: 用户导入注册
+    category: scripts
+    files: [cmdb/import_and_register_users.py]
+    history:
+      - {date: "2026-08-29", change: 初版入库}
+    scenario: 读用户登记表 Excel 批量导入 CMDB 用户实例并注册 EasyOps 账号
+    notes: ""
+    added: "2026-08-29"
+  - id: delivery-summary-export
+    name: 交付清单导出
+    category: scripts
+    files: [delivery_summary_export.py]
+    history:
+      - {date: "2026-08-29", change: 初版入库}
+    scenario: 汇总 CMDB/监控/自动化/ITSM 各模块交付成果导出 CSV（内网 agent/OpenAPI AK-SK 双认证）
+    notes: ""
+    added: "2026-08-29"
+  - id: hardware-collect-readiness
+    name: 硬件采集条件统计
+    category: scripts
+    files: [easyops硬件采集条件统计.zip]
+    history:
+      - {date: "2026-08-29", change: 初版入库}
+    scenario: 主机硬件采集就绪度检查+离线依赖包（pysnmp/openpyxl 等 whl）
+    notes: ""
+    added: "2026-08-29"
+  - id: iptables-set
+    name: iptables 防火墙配置
+    category: scripts
+    files: [iptables-set.sh]
+    history:
+      - {date: "2026-08-29", change: 初版入库}
+    scenario: EasyOps 主机 iptables 集群 IP 互信放行脚本
+    notes: ""
+    added: "2026-08-29"
+  - id: itsm-cmdb-import
+    name: ITSM 导入 CMDB
+    category: scripts
+    files: [itsm/itsm-import-cmdb.py, itsm/itsm_api_client.py, itsm/itsm_process_doc.py, itsm/pillow-12.2.0-cp312-cp312-manylinux2014_aarch64.manylinux_2_17_aarch64.whl]
+    history:
+      - {date: "2026-08-29", change: 初版入库}
+    scenario: ITSM 流程说明文档生成 Excel+API 客户端+CMDB 导入（内网/OpenAPI 双认证）
+    notes: whl 为 aarch64 离线依赖，随包分发
+    added: "2026-08-29"
+  - id: easyops-migration
+    name: EasyOps 迁移工具
+    category: scripts
+    files: [platform/easyops-migration/conf.sample.yaml, platform/easyops-migration/migration_tool.py]
+    history:
+      - {date: "2026-08-29", change: 初版入库}
+    scenario: EasyOps 跨环境迁移（YAML 配置驱动 CMDB 模型/实例/用户/工具导出导入，Py2/3 兼容）
+    notes: ""
+    added: "2026-08-29"
+  - id: check-auth-token-disable
+    name: 鉴权 token 检查
+    category: scripts
+    files: [platform/check_auth_token_disable.sh]
+    history:
+      - {date: "2026-08-29", change: 初版入库}
+    scenario: config_tool 关闭 EasyOps check_auth_token 鉴权开关
+    notes: ""
+    added: "2026-08-29"
+  - id: curl-sample
+    name: curl 样例
+    category: scripts
+    files: [platform/curl_sample.sh]
+    history:
+      - {date: "2026-08-29", change: 初版入库}
+    scenario: EasyOps API curl 调用样例（org/user 头+实例 _search）
+    notes: ""
+    added: "2026-08-29"
+  - id: easyops-hardening
+    name: EasyOps 加固
+    category: scripts
+    files: [platform/easyops_hardening.sh]
+    history:
+      - {date: "2026-08-29", change: 初版入库}
+    scenario: EasyOps 集群安全加固（iptables 端口封闭+基线，批量版）
+    notes: ""
+    added: "2026-08-29"
+  - id: init-easyops-python3
+    name: Python3 环境初始化
+    category: scripts
+    files: [platform/init_easyops_python3.sh]
+    history:
+      - {date: "2026-08-29", change: 初版入库}
+    scenario: EasyOps 主机初始化内置 python3 并建 /usr/local/bin/python3 软链
+    notes: ""
+    added: "2026-08-29"
+  - id: snmpwalk-alarm-pusher
+    name: snmpwalk 告警推送
+    category: scripts
+    files: [snmpwalk_alarm_pusher.py]
+    history:
+      - {date: "2026-08-29", change: 初版入库}
+    scenario: snmpwalk 轮询共济系统告警事件表解析推送 EasyOps 三方告警（适合 cron 定时）
+    notes: ""
+    added: "2026-08-29"
+  - id: sync-instance-field
+    name: 实例字段同步
+    category: scripts
+    files: [sync_instance_field.py]
+    history:
+      - {date: "2026-08-29", change: 初版入库}
+    scenario: CMDB 实例属性/（多层）关系字段批量同步（first/join 聚合）
+    notes: ""
+    added: "2026-08-29"
+  - id: webhook
+    name: webhook 接收器
+    category: scripts
+    files: [webhook.py]
+    history:
+      - {date: "2026-08-29", change: 初版入库}
+    scenario: Flask 通用 webhook 接收器（请求落 webhook.log）
+    notes: ""
+    added: "2026-08-29"
+  - id: gongji-alarm-access
+    name: 共济告警接入
+    category: scripts
+    files: [共济告警接入.zip]
+    history:
+      - {date: "2026-08-29", change: 初版入库}
+    scenario: 共济基础设施监控告警接入（V2.23 接入标准 PDF+gongji_alarm_pusher 推送脚本）
+    notes: 与 snmpwalk-alarm-pusher 同源场景，本条为含接入标准 PDF 的打包版
+    added: "2026-08-29"
+  # ---- other（1 商品）----
+  - id: cluster-deploy-checklists
+    name: EasyOps集群部署清单-合集
+    category: other
+    files: [EasyOps集群部署清单-合集.zip]
+    history:
+      - {date: "2026-08-29", change: 初版入库}
+    scenario: EasyOps 集群 1/3/5/7 节点部署清单 md 合集
+    notes: ""
+    added: "2026-08-29"
