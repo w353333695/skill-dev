@@ -25,6 +25,7 @@
 | **easyops-{cmdb,autoops,itsm,sys-setting}.yaml** | 各系统 api-cli 清单：命令树 + body schema | 「实际调用」|
 | **sdk/** | 编排侧 Python SDK（api-cli 缺口补丁）：`easyops_client.py`（自包含 py2/3，双模式 openapi AK/SK 签名 + 内网直连，补 multipart/binary 缺口）。【编排侧 tool_package 导入导出/openapi 用；非 agent 工具脚本依赖，属 platform_conventions 例外】| 「编排侧 tool_package 导入导出」「外网 AK/SK 调用」|
 | formats/ | 跨部署复用的格式包：collector-kit（采集器插件 schema）+ sso-provider（sso-adapter 标准 provider 实物范本 oauth2/cas，交付新 provider 直接仿写） | 「格式范本」「sso provider 实物」|
+| **hub/INDEX.yaml** | 平台商店商品索引（存量成品：套件包/脚本/模板，含版本演进 history） | 「有没有现成的 XX 套件/脚本」（开发前查重） |
 
 ## 快速调用
 

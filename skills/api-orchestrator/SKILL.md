@@ -45,6 +45,7 @@ description: 通用 API 编排 skill——自然语言需求 → 跨系统调用
 │      · 读查询（单系统、单步）           → 直通挡
 │      · 写操作（单系统、1-2 步）          → 确认挡
 │      · 跨系统/多步/build/change/插件     → 规划挡
+│      · 涉及开发/交付套件/脚本/工具成品 → 规划挡 + 开工前先查 hub 商店（见 references/hub.md）
 │
 └─[3] 按挡位走（详见 references/orchestration.md）
        · 直通挡：查 systems.yaml → 调 api-cli → 后处理 → 答
@@ -114,6 +115,7 @@ skill 两种模式，决定能否写 `platforms/`：
 - **onboarding 模式才写 platforms**：且必须 ① 过输入门禁（契约/文档/源码 ≥1）、② 改完跑 lint（0 ERR）。详见 `references/onboarding.md`。
 - **部署根位置明确化**：onboarding 写 platforms 前，先 echo 确认 `API_CLI_PLATFORMS_DIR` 解析到的**绝对路径**；部署根不存在则**停下打印路径问用户**（见 onboarding.md「首写门禁」），禁止隐式 mkdir 到意外 cwd。
 - **分发加固**：`pack-go.sh --skill <name> --target <os/arch> --dist` 读 manifest 编译到 bin/ + 打 tar.gz → 随 skill 分发。零 setup——Go 预编译二进制随包走，不需要安装 runtime。onboarding 改 platforms 前先 `chmod -R u+w`，改完锁回。
+- **hub 回流口径**：规划挡“开发交付场景”（产物为可导入/可部署成品）视为开发态延伸——交付时自动回流 `platforms/<dep>/hub/`（落文件 + 更新 INDEX.yaml + 立即 commit），不算违反 orchestration 只读纪律；纯查询编排仍禁写 hub。机制详见 `references/hub.md`。
 
 ## 关键纪律
 
@@ -125,3 +127,4 @@ skill 两种模式，决定能否写 `platforms/`：
 - **platforms 只读（orchestration 模式）**：非 onboarding 不得 Write/Edit platforms 文件（防资料污染）；onboarding 改完必 lint。
 - **onboarding 输入门禁**：契约 / API 文档 / 后端源码至少一个才开工；缺则停下问用户（详见 `references/onboarding.md` 步 1）。
 - **产物用 lint 自检**：onboarding 或更新 platforms 后跑 `scripts/lint-platforms.py <deployment>`，**0 ERR 才合格**（校验 schema + 引用闭合；详见 onboarding.md 步 7）。
+- **开发前查 hub、成品回流 hub**：涉及套件/脚本/工具开发的需求，规划挡开工前先读 `hub/INDEX.yaml` 查重（命中→复用/改造，未命中→开发后回流）；成品交付时落 `hub/<category>/` + 登记 INDEX（含 history 变更行）。详见 `references/hub.md`。

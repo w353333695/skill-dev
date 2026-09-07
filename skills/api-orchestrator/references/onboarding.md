@@ -191,6 +191,7 @@ uncovered:                            # 强制输出「我覆盖到了什么 / �
 
 ### 步 7：交付 + 自检
 - **跑 lint**：`scripts/lint-platforms.py <deployment>`——校验 platforms 符合 asset-schema + 引用闭合（spec 文件存在 / api 指向 resource / ref 指向 object / flows 的 op 在 spec verbs 里）+ **source 证据门禁**（每个有 `api:` 的 object 必须有非空 `source:`，防步 3 被跳）。**0 ERR 才算产物合格**；WARN 逐条确认是否可接受。可加 `--api-cli <bin>` 额外校验 spec 能被 api-cli 解析。
+- **成品回流 hub**：本次交付若产出可导入/可部署成品（套件包/脚本/工具），按 `references/hub.md` 回流流程落 `hub/<category>/` + 登记 INDEX.yaml（新商品 history 首行“初版入库”）。
 - README 作资料地图索引（指向各文件）。
 - e2e 场景逐条标注用哪个 resource.verb（覆盖标尺）。
 - 验收 URL / 校验命令记录在 systems.yaml。
