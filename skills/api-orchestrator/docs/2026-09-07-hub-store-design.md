@@ -2,7 +2,8 @@
 
 - 日期：2026-09-07
 - 状态：已批准（方案 B：集中式 hub reference）
-- 范围：`skills/api-orchestrator/`（机制挂载）+ `platforms/easyops/hub/`（存量清理 + 索引）
+- 范围：`skills/api-orchestrator/`（机制挂载）
+- 设计文档位置说明：本设计属于 api-orchestrator skill（编排层）而非能力 project，故放 skill 自身 `docs/`（`skills/api-orchestrator/docs/`，与 platforms/references 同级），不放 `projects/<name>/docs/`
 
 ## 1. 背景与目标
 
