@@ -24,6 +24,7 @@
 | 查重载体 | hub 根下单 `INDEX.yaml`，每件商品一条记录 |
 | 存量处理 | 本次一并清理（__pycache__、运行输出）+ 全量补索引 |
 | 回流时机 | 交付时自动回流（agent 落文件 + 更新索引 + commit），用户事后审 |
+| 版本管理 | INDEX 内联 history（每版一行变更摘要）+ based_on 衍生谱系 + lint 一致性校验；不做独立 changelog |
 
 ### 架构定位
 
@@ -63,12 +64,16 @@ items:
     category: monitor-kits               # 必须是 hub/ 实际子目录（lint ERR）
     files: [光纤交换机监控套件_v1.0.13.zip, 光纤交换机监控_告警规则模板.xlsx]
     version: 1.0.13                      # 包内读不出则留空
+    history:                             # 版本演进（回流 version 变化时必须追加一行）
+      - {ver: 1.0.13, date: 2026-08-29, change: 初版入库}
+      - {ver: 1.0.14, date: 2026-09-10, change: 增加端口 CRC 错误采集；修复华为 OEM 型号 OID 偏移}
+    based_on: svc-monitor-kit            # 可选：近似命中改造出新 id 时的衍生谱系
     scenario: 光纤交换机(Brocade/华为OEM) SNMP 指标监控接入   # ★语义查重核心
     notes: 导入后需按配套 xlsx 配置告警规则
     added: 2026-08-29
 ```
 
-7 字段。`scenario` 是查重匹配的关键载体（对象 + 场景关键词）。刻意不设 type/source 等字段——category 已承载类型，YAGNI。
+9 字段。`scenario` 是查重匹配的关键载体（对象 + 场景关键词）；`history` 是二进制包唯一可读的变更日志（zip/tar.gz/xlsx 的 git diff 是乱码，看不出改了什么）；`based_on` 记录"近似命中改造"的衍生谱系。刻意不设 type/source 等字段——category 已承载类型，YAGNI。
 
 ### 2.3 存量清理清单
 
@@ -104,7 +109,10 @@ items:
 **触发条件**：规划挡任务交付，产物含可导入/可部署成品（套件包/脚本/工具/provider/服务包）。
 
 1. **归位**：成品落 `hub/<category>/`，命名 `<名称>_v<版本>.<ext>`；旧版本文件同目录删除（git rm）。
-2. **登记**：INDEX.yaml `items` 追加/更新一条（id 已存在则更新 version/files/added 保持不动）。
+2. **登记**：INDEX.yaml `items` 追加/更新一条：
+   - **新商品** → 追加一条，`history` 首行 `{ver, date, change: 初版入库}`；
+   - **既有商品升级**（不满足需求 → 加功能/修 bug 后回流）→ `version` +1、更新 `files`、**`history` 追加一行**（change 写一句话：用户需求原话或修复要点）、`added` 保持不动；
+   - **近似命中改造出新商品**（同类设备不同型号等，改出独立 id）→ 新条目 + `based_on` 指向基底 id。
 3. **commit**：回流后立即 commit（防工作区自动提交机制打包垃圾 message）。
 4. 配套文档（告警规则 xlsx、MIB 参考 md 等）跟主件同 `files` 登记，不单独成商品。
 
@@ -122,6 +130,8 @@ items:
 | id 唯一 | ERR | 重复 id |
 | scenario 非空 | WARN | 查重核心字段缺失 |
 | 版本单份 | ERR | 同 id/name 多版本文件并存（`_v1.0.1` 与 `_v1.0.2` 同存） |
+| history 一致 | ERR | `version` 与 `history` 末条 `ver` 不一致（防回流忘追加变更行） |
+| based_on 闭合 | ERR | `based_on` 指向的 id 不在 items 里 |
 
 ### 3.4 文档挂载点（改动清单）
 
@@ -136,12 +146,13 @@ items:
 
 ### 3.5 测试与验收
 
-- `scripts/lint-platforms.test.py` 补 5 用例：INDEX 缺失 / 文件双向不一致 / id 重复 / 多版本并存 / 正常通过。
+- `scripts/lint-platforms.test.py` 补 7 用例：INDEX 缺失 / 文件双向不一致 / id 重复 / 多版本并存 / history 与 version 不一致 / based_on 悬空 / 正常通过。
 - 查重/回流是 LLM 纪律，无法单测——靠 lint 兜底索引质量 + SKILL.md 挂载保证触发；验收走一次人工演练（模拟"要做 XX 监控套件"需求，验证查重命中既有商品）。
 
 ## 4. 明确不做（YAGNI）
 
 - 不做 hub 管理命令脚本（`hub.sh search/add`）——查重是语义匹配，LLM 读索引比关键词 grep 准；与"调度靠 LLM、无代码引擎"范式相悖。
+- 不做独立 changelog 目录/文件——变更历史内联在 INDEX 的 `history` 字段（二进制包 git diff 不可读，INDEX 内联是唯一可读变更日志；git 历史仍可追溯旧文件字节）。
 - 不建 per-目录 README——单一 INDEX 已够，分目录读 9 个文件费 token。
 - 存量文件不改名对齐命名规范——只管增量。
 - 不做 hub 版本历史/变更日志——git 历史即变更日志。
