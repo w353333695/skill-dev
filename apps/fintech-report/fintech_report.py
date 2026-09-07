@@ -709,6 +709,19 @@ class ReportCenter:
         LOG.warning("[report] 批次 %s 检核轮询超时(%s次)", branch_id[:12], CHECK_POLL_MAX)
         return resp
 
+    def check_result_once(self, branch_id: str) -> dict:
+        """查批次处理结果（单次，不轮询）——续查补拉行级失败明细用。
+
+        人行检核慢的批次在任务挂 pendingCheck 后行级失败码才出现在
+        selectUploadData 的 data[] 里；下次运行续查时组状态已到 40001 等
+        OK 终态，但行级明细必须再拉一次才不漏（2026-09-07 现场 switches
+        产品序列号重复异常漏记的根因）。任何异常由调用方兜底。
+        """
+        uri = (self.conf.get("checkResultUri")
+               or "webproxy/fig2fics/pshare/api/prod/FICS/api/fics/dataElementInstance/selectUploadData")
+        return self._post(uri, {
+            "branchId": branch_id, "facilityOwnerAgency": self._agency()})
+
 
 # ============================================================================
 # 数据原文持久化（磁盘）+ 任务历史（CMDB）
@@ -756,10 +769,23 @@ _CODE_ROW_OK = ("WL-20000", "WL-20003")
 #   WL-10004 批次未落查 / WL-40000 组等待逻辑检核开始
 _CODE_ROW_PENDING = ("WL-20004", "WL-10005", "WL-10006", "WL-10004", "WL-40000", "")
 
+# WL-20003 同码双义: 接入规范=「数据入库成功但存在警告」(成功侧)，但人行现场
+# 用它返回「处理失败:【数据已存在】不可重复报送」(失败侧, 2026-09-07 现场日志
+# dataCenter 19 条全为此)——按 msg 失败关键词判别，避免误当成功漏记失败明细
+_ROW_FAIL_MSG_KEYS = ("失败", "不可重复", "已存在")
 
-def _row_failed(code: str) -> bool:
-    """人行单条状态码是否为【终态失败】——既非成功码也非处理中码才算失败。"""
-    return code not in _CODE_ROW_OK and code not in _CODE_ROW_PENDING
+
+def _row_failed(code: str, msg: str = "") -> bool:
+    """人行单条状态码是否为【终态失败】——既非成功码也非处理中码才算失败。
+
+    WL-20003 特例: msg 含失败关键词(数据已存在/不可重复报送)按失败计，
+    否则按规范的「成功带警告」计。
+    """
+    if code in _CODE_ROW_OK:
+        if code == "WL-20003" and any(k in msg for k in _ROW_FAIL_MSG_KEYS):
+            return True
+        return False
+    return code not in _CODE_ROW_PENDING
 
 
 def _fail_summary(n_failed: int, details: list[dict],
@@ -978,9 +1004,10 @@ def report_one_model(rule: dict, report_obj: dict, conf: dict, variant: str,
                     task["status"] = "pendingCheck"   # 非终态——下次续查
                     continue
                 chk_code = str(chk.get("code", ""))
-                # T5: 单条失败明细——只收【终态失败】（成功/处理中/等待检核都不算，见 _row_failed）
+                # T5: 单条失败明细——只收【终态失败】（成功/处理中/等待检核都不算；
+                # WL-20003 数据已存在按失败收，见 _row_failed msg 判别）
                 for bad in chk.get("data") or []:
-                    if _row_failed(str(bad.get("code", ""))):
+                    if _row_failed(str(bad.get("code", "")), str(bad.get("msg", ""))):
                         fail_details.append({
                             "objectId": object_id, "taskId": task_id,
                             "facilityDescriptor": str(bad.get("facilityDescriptor", "")),
@@ -1058,7 +1085,7 @@ def report_one_model(rule: dict, report_obj: dict, conf: dict, variant: str,
                     try:
                         bd = center.check_result(bad_bid)
                         for bad in bd.get("data") or []:
-                            if _row_failed(str(bad.get("code", ""))):
+                            if _row_failed(str(bad.get("code", "")), str(bad.get("msg", ""))):
                                 fail_details.append({
                                     "objectId": object_id, "taskId": task_id,
                                     "facilityDescriptor": str(bad.get("facilityDescriptor", "")),
@@ -1173,8 +1200,11 @@ def _resync_pending_group(object_id: str, conf: dict, variant: str) -> None:
 
     找该 objectId 最近一条 pendingCheck 且带 groupId 的任务 → 查组状态（不轮询，
     查一次现状）：
-      - 组到成功终态（含 40001/40002 检核通过等入库）→ 上任务原文全部实例
-        落 _confirmed、任务转 success（counts 按原文统计）、原文回写 + upsert。
+      - 组到成功终态（含 40001/40002 检核通过等入库）→ 先逐批次补拉行级失败
+        明细（人行检核慢，行级失败码常在批次轮询超时后才出现——组 OK 不代表
+        行级全过，不补拉则 INSTANCE 表漏明细）；失败实例从原文实例集剔除
+        （不置 _confirmed，防进台账被误当已入库）→ 其余实例落 _confirmed、
+        任务转 success/partialSuccess（counts 按原文统计）、原文回写 + upsert。
         本次运行 diff 基准（_last_success_data）随之含这些实例 → 增量归零。
       - 组仍在等待（40000）或失败 → 不动（失败场景由原任务记录兜底，本次
         正常增量上报，未 confirmed 的实例自动当 new/update 重报）。
@@ -1210,26 +1240,67 @@ def _resync_pending_group(object_id: str, conf: dict, variant: str) -> None:
     instances = payload.get("instances") if isinstance(payload, dict) else None
     if not isinstance(instances, dict):
         return
+    # 组 OK ≠ 行级全过: 逐批次补拉 selectUploadData 行级明细（单次不轮询），
+    # 收集终态失败行（含 WL-20003 数据已存在——按 msg 判别，见 _row_failed）
+    task_id_str = str(prev.get("taskId", ""))
+    fail_details: list[dict] = []
+    failed_descs: set[str] = set()
+    for bid in str(prev.get("branchId", "") or "").split(","):
+        bid = bid.strip()
+        if not bid:
+            continue
+        try:
+            bd = center.check_result_once(bid)
+        except Exception as e:
+            LOG.warning("[resync] %s 批次 %s 明细补拉失败（跳过该批）: %s",
+                        object_id, bid[:20], e)
+            continue
+        for bad in bd.get("data") or []:
+            bcode, bmsg = str(bad.get("code", "")), str(bad.get("msg", ""))
+            if _row_failed(bcode, bmsg):
+                bdesc = str(bad.get("facilityDescriptor", ""))
+                # 同实例跨批次去重（detailId=desc+branch 尾号会落两行）
+                if bdesc in failed_descs:
+                    continue
+                fail_details.append({
+                    "objectId": object_id, "taskId": task_id_str,
+                    "facilityDescriptor": bdesc,
+                    "facilityCategory": str(bad.get("facilityCategory", "")),
+                    "branchId": bid, "code": bcode, "msg": bmsg[:500]})
+                failed_descs.add(bdesc)
+    if fail_details:
+        save_fail_details(fail_details)
+        # 失败实例从原文实例集剔除——不进 _confirmed 台账（下次 diff 当未入库，
+        # 重报或人工处理），partialSuccess 由任务状态体现
+        for desc in failed_descs:
+            instances.pop(desc, None)
+        LOG.warning("[resync] %s 旧组 OK 但补拉到 %d 条行级失败明细——任务转 "
+                    "partialSuccess，失败实例不进台账", object_id, len(fail_details))
     n_conf = 0
     for desc, inst in instances.items():
         if isinstance(inst, dict) and not inst.get("_confirmed"):
             inst["_confirmed"] = True
             n_conf += 1
-    save_report_data(str(prev.get("taskId", "")), payload)   # 原地回写同一文件
+    save_report_data(task_id_str, payload)   # 原地回写同一文件
     n_ins = sum(1 for i in instances.values()
                 if isinstance(i, dict) and str(i.get("_op", "new")) != "delete")
-    prev.update({"status": "success",
-                 "endTime": time.strftime("%Y-%m-%d %H:%M:%S"),
+    if fail_details:
+        prev.update({"status": "partialSuccess",
+                     "failedCount": len(fail_details),
+                     "errorMsg": _fail_summary(len(fail_details), fail_details)})
+    else:
+        prev.update({"status": "success",
+                     "failedCount": 0,
+                     "errorMsg": ""})
+    prev.update({"endTime": time.strftime("%Y-%m-%d %H:%M:%S"),
                  "checkCode": code, "checkMsg": str(gs.get("msg", ""))[:200],
                  "insertCount": prev.get("insertCount", 0) or n_ins,
                  "updateCount": prev.get("updateCount", 0),
-                 "removeCount": prev.get("removeCount", 0),
-                 "failedCount": 0,
-                 "errorMsg": ""})
+                 "removeCount": prev.get("removeCount", 0)})
     upsert_task(prev)
-    LOG.info("[resync] %s 旧组 %s 已到 %s → 上任务 %s 转 success（confirmed %d 实例），"
+    LOG.info("[resync] %s 旧组 %s 已到 %s → 上任务 %s 转 %s（confirmed %d 实例），"
              "本次 diff 将归零", object_id, group_id[:20], code,
-             str(prev.get("taskId", ""))[:12], n_conf)
+             task_id_str[:12], prev.get("status", ""), n_conf)
 
 
 def _last_success_data(object_id: str) -> tuple[dict, dict | None]:
