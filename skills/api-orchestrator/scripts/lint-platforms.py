@@ -304,6 +304,85 @@ def main():
                             warn(f"flows/{fn}:{li} 复述 objects.yaml side_effect 规则「{tok}…」—— 设计原则④：删全文换指针（见 objects.yaml#<object>.side_effects）。步骤值/字段名不算复述，可忽略。")
                             break  # 一行只报一次
 
+    # ---- 11. hub 商店索引校验（hub/ 存在才跑；INDEX 一致性，机制见 references/hub.md）----
+    hub_dir = os.path.join(base, "hub")
+    if os.path.isdir(hub_dir):
+        idx_path = os.path.join(hub_dir, "INDEX.yaml")
+        if not os.path.isfile(idx_path):
+            warn("hub/: 目录存在但缺 INDEX.yaml（商品索引缺失，查重不可用）")
+        else:
+            d, e = load_yaml(idx_path)
+            if e:
+                err(f"hub/INDEX.yaml: {e}")
+            else:
+                items = (d or {}).get("items") or []
+                # 类目 = hub/ 一级子目录
+                cats = {c for c in os.listdir(hub_dir)
+                        if os.path.isdir(os.path.join(hub_dir, c)) and not c.startswith(".")}
+                # 成品扩展名（配套 .gitkeep 等不算）
+                ARTIFACT_EXT = (".zip", ".tar.gz", ".gz", ".xlsx", ".whl", ".sh", ".py", ".md", ".json")
+                def is_artifact(fn):
+                    return fn.endswith(ARTIFACT_EXT) and fn != ".gitkeep"
+                seen_ids, id_by_file = {}, {}
+                for it in items:
+                    if not isinstance(it, dict):
+                        continue
+                    iid = it.get("id") or "<无id>"
+                    # 规则4: id 唯一
+                    if iid in seen_ids:
+                        err(f"hub/INDEX.yaml items id 重复: {iid}")
+                    seen_ids[iid] = True
+                    # 规则2: category 合法
+                    cat = it.get("category")
+                    if cat and cat not in cats:
+                        err(f"hub/INDEX.yaml items.{iid}.category → {cat} 不是 hub/ 下实际子目录")
+                    # 规则3a: 索引文件存在（files 值为相对 category 的 posix 路径，含 / 时拼路径同样成立）
+                    # 比对键统一为 "<category>/<相对路径>"，避免跨类目同名文件互相顶替
+                    for fn in (it.get("files") or []):
+                        rel = str(fn).replace(os.sep, "/")
+                        if cat and not os.path.isfile(os.path.join(hub_dir, str(cat), rel)):
+                            err(f"hub/INDEX.yaml items.{iid}.files → {fn} 文件不存在")
+                        else:
+                            id_by_file[f"{cat}/{rel}"] = iid
+                    # 规则5: scenario 非空
+                    if not (it.get("scenario") or "").strip():
+                        warn(f"hub/INDEX.yaml items.{iid}: 缺 scenario（语义查重核心字段）")
+                    # 规则7: version 与 history 末条一致
+                    ver, hist = it.get("version"), it.get("history") or []
+                    if ver and hist and isinstance(hist[-1], dict):
+                        hv = str(hist[-1].get("ver", ""))
+                        if hv and str(ver) != hv:
+                            err(f"hub/INDEX.yaml items.{iid}: version={ver} 与 history 末条 ver={hv} 不一致")
+                # 规则8: based_on 闭合（两遍扫描做不到前向引用，先收集，循环外补查）
+                all_ids = set(seen_ids)
+                for it in items:
+                    if isinstance(it, dict) and it.get("based_on") and it["based_on"] not in all_ids:
+                        err(f"hub/INDEX.yaml items.{it.get('id')}.based_on → {it['based_on']} 不在 items 里")
+                # 规则3b: hub 成品文件全部在索引（跳过 .gitkeep/__pycache__）
+                # 比对键 = 相对 category 的 posix 路径（子目录文件如 cmdb/x.py 也能对上 files: [cmdb/x.py]）
+                for c in sorted(cats):
+                    cdir = os.path.join(hub_dir, c)
+                    rel_files = []   # 该类目下全部成品（相对 category 的 posix 路径）
+                    for root, dirs, fns in os.walk(cdir):
+                        dirs[:] = [x for x in dirs if x != "__pycache__"]
+                        for fn in fns:
+                            if not is_artifact(fn):
+                                continue
+                            rel = os.path.relpath(os.path.join(root, fn), cdir).replace(os.sep, "/")
+                            rel_files.append(rel)
+                            if f"{c}/{rel}" not in id_by_file:
+                                err(f"hub/{c}/{rel} 未登记在 INDEX.yaml（查重不可用）")
+                    # 规则6: 同类目下同商品多版本并存（_vX.Y.Z 前缀相同；含子目录，按去版本路径分组）
+                    vers = {}
+                    for rel in rel_files:
+                        m = re.match(r"^(.+)_v(\d+\.\d+\.\d+)", rel)
+                        if m:
+                            vers.setdefault(m.group(1), []).append(rel)
+                    for base_name, vfn in vers.items():
+                        if len(vfn) > 1:
+                            err(f"hub/{c}/ 同商品多版本并存: {', '.join(sorted(vfn))}（只留最新，旧版 git rm）")
+                ok("hub INDEX 一致性校验完成")
+
     # ---- 报告 ----
     print(f"lint platforms/{args.deployment}/")
     for m in oks:
