@@ -1139,6 +1139,25 @@ def report_one_model(rule: dict, report_obj: dict, conf: dict, variant: str,
                                     "msg": str(bad.get("msg", ""))[:500]})
                     except Exception as ce:
                         LOG.warning("[report] 异常批次 %s 明细查询失败: %s", bad_bid[:20], ce)
+                # 组在途（40001/40002 检核已通过、入库申请等人工）→ 同样补拉
+                # 行级明细：40001 = 逻辑检核已完成，行级失败码（20001 重复/
+                # 20003 已存在）此刻已在 selectUploadData data[] 可查——不等
+                # 入库终态（现场组可能长期停 40001，v1.0.29 曾把补拉推迟到
+                # settle 导致 switches 9 条重复异常漏捕，2026-09-08 修正）。
+                # 失败实例不确认不计数，也不进冻结集合（settle 解冻后重报/
+                # 人工处理）；成功实例保持未 confirmed（等入库终态 settle 确认）。
+                if group_code in ReportCenter._GROUP_INFLIGHT:
+                    g_fail_descs = _collect_branch_row_fails(
+                        center, branch_ids, object_id, task_id, fail_details)
+                    if g_fail_descs:
+                        batch_errors.append({"branchId": group_id, "type": "group",
+                                             "count": len(g_fail_descs),
+                                             "code": "ROW-FAIL",
+                                             "msg": f"组检核通过但 {len(g_fail_descs)} 条实例行级失败"
+                                                    f"（详见失败明细）"})
+                    LOG.info("[report] %s 批次组 %s 在途(%s) → 任务 inFlight，"
+                             "行级失败 %d 条已留明细",
+                             object_id, group_id[:20], group_code, len(g_fail_descs))
                 # 组终态失败码（40005/40007 等）也留痕（在途码 40001/40002 不算失败）
                 if group_id and group_code and group_code in ReportCenter._GROUP_FAIL:
                     batch_errors.append({"branchId": group_id, "type": "group",
@@ -1204,7 +1223,9 @@ def report_one_model(rule: dict, report_obj: dict, conf: dict, variant: str,
         elif group_id and group_code in ReportCenter._GROUP_FAIL:
             final_status = "fail"   # 组入库终态失败（驳回等）——不等待续查
         elif group_inflight:
-            final_status = "inFlight"   # 检核已通过，入库申请等人工——下次运行结算
+            # 检核已通过，入库申请等人工——下次运行结算；行级有失败则
+            # partialSuccess 优先（失败要立刻可见，不能藏在 inFlight 里）
+            final_status = "partialSuccess" if fail_details else "inFlight"
         elif task.get("status") == "pendingCheck":
             final_status = "pendingCheck"
         else:
