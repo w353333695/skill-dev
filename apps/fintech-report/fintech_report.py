@@ -651,16 +651,16 @@ class ReportCenter:
                  resp.get("groupId", "")[:24], resp.get("code", ""))
         return resp
 
-    # 批次组状态码（接入规范 5.2.5 附录四）
-    # 非终态: 40000等待逻辑检核
-    # 代码侧成功终态: 40001等待入库申请 / 40002入库处理中——逻辑检核已通过，
-    #   后续入库申请/审批是人行系统上的人工操作（用户确认: 即为成功结束）
-    # 入库终态成功: 40003入库成功 / 40004部分成功 / 40006成功带警告
-    # 终态失败: 40005 / 40007(组ID不存在)
-    # 非终态: 40000等待逻辑检核（20004 是行级码，组级响应不会返回，不列入）
+    # 批次组状态码（接入规范 5.2.5 附录四 + v1.0.29 闭环重分类）
+    # 非终态: 40000 等待逻辑检核
+    # 在途: 40001 等待入库申请 / 40002 入库处理中——逻辑检核已通过，入库申请/
+    #   审批是人行平台人工环节；单次运行到此即返回（任务 inFlight，下次运行结算）
+    # 入库终态成功: 40003 入库成功 / 40004 部分成功 / 40006 成功带警告
+    # 入库终态失败: 40005 入库处理失败 / 40007 组ID不存在
     _GROUP_PENDING = ("WL-40000", "WL-10005", "WL-10006")
-    _GROUP_OK = ("WL-40001", "WL-40002", "WL-40003", "WL-40004", "WL-40006",
-                 "WL-10009", "WL-10013")
+    _GROUP_INFLIGHT = ("WL-40001", "WL-40002")
+    _GROUP_STORED = ("WL-40003", "WL-40004", "WL-40006", "WL-10009", "WL-10013")
+    _GROUP_FAIL = ("WL-40005", "WL-40007")
 
     def group_status(self, group_id: str, wait_terminal: bool = True) -> dict:
         """5.2.5 查询批次组处理状态。
@@ -935,12 +935,11 @@ def report_one_model(rule: dict, report_obj: dict, conf: dict, variant: str,
             "rolledBack": False}
     try:
         converter = Converter(object_id, report_obj, rule.get("mappingRule"))
-        # 0) 续查旧组: 上一次任务 pendingCheck 且带 groupId 时，先查组现状——
-        #    组已到成功终态(含 40001 检核通过) → 回写上任务 confirmed + success，
-        #    本次 diff 基准随之归零（noReport），不再全量重报。
-        #    这是 pendingCheck"下次续查"承诺的实际实现：旧版只标状态没有续查
-        #    动作，导致组停在 40000/40001 期间每次运行都全量重报（死循环残余）。
-        _resync_pending_group(object_id, conf, variant)
+        # 0) 结算在途组: pendingCheck/inFlight 且带 groupId 的任务先查组现状——
+        #    组到入库终态（40003 成功/40005 失败）→ 回写上任务结果；
+        #    组仍在途（40001/40002 等人工）→ 任务 inFlight、实例冻结（diff 跳过），
+        #    不再全量重报。状态闭环 v1.0.29。
+        _settle_inflight_groups(object_id, conf, variant)
         # 1) 拉 CMDB 现值 + 转换 + 过滤 ignoreReport
         instances = cmdb_search_all(object_id)
         converted, pk_set = {}, {}
@@ -955,13 +954,17 @@ def report_one_model(rule: dict, report_obj: dict, conf: dict, variant: str,
                 continue
             converted[desc] = data
             pk_set[desc] = cate
-        # 2) 增量 diff（对『成功实例台账』: 跨任务合并的 confirmed 实例集合）
-        confirmed, prev_meta = _last_success_data(object_id)
+        # 2) 增量 diff（对『成功实例台账』: 跨任务合并的 confirmed 实例集合；
+        #    在途冻结集合内的实例一律跳过——检核已过等人工入库，重发会制造
+        #    「数据已存在」，删除人行侧也未落地）
+        confirmed, prev_meta, inflight_descs = _last_success_data(object_id)
         new_items, update_items, delete_items = [], [], []
         if not confirmed or scope_full:
-            new_items = list(converted.values())
+            new_items = [v for d, v in converted.items() if d not in inflight_descs]
         else:
             for desc, data in converted.items():
+                if desc in inflight_descs:
+                    continue   # 在途冻结：不 new/update
                 old = confirmed.get(desc)
                 if old is None:
                     new_items.append(data)              # 台账没有 → new
@@ -969,6 +972,8 @@ def report_one_model(rule: dict, report_obj: dict, conf: dict, variant: str,
                     update_items.append(data)           # 内容变了 → update
                 # 否则一致 → 不报（已确认且无变化）
             for desc, old in confirmed.items():
+                if desc in inflight_descs:
+                    continue   # 在途冻结：不生成 delete 行
                 if desc not in converted:
                     # Go convertDeleteData: 从该实例上次成功快照取完整字段（人行对
                     # delete 行也校验归属机构等）；快照缺失退两键（Go RecoverReportInst）
@@ -1134,23 +1139,20 @@ def report_one_model(rule: dict, report_obj: dict, conf: dict, variant: str,
                                     "msg": str(bad.get("msg", ""))[:500]})
                     except Exception as ce:
                         LOG.warning("[report] 异常批次 %s 明细查询失败: %s", bad_bid[:20], ce)
-                # 组终态失败码（40005/40007 等）也留痕
-                if group_id and group_code and group_code not in ReportCenter._GROUP_OK \
-                        and group_code not in ReportCenter._GROUP_PENDING:
+                # 组终态失败码（40005/40007 等）也留痕（在途码 40001/40002 不算失败）
+                if group_id and group_code and group_code in ReportCenter._GROUP_FAIL:
                     batch_errors.append({"branchId": group_id, "type": "group",
                                          "count": len(branch_ids), "code": group_code,
                                          "msg": f"批次组终态失败: {group_msg}"})
-                # 批次组到成功终态（含 40001/40002 检核通过等入库）→ 先补拉行级
-                # 失败明细再 confirmed。
-                # 注1: 40001(等待入库申请)/40002(入库中)后续是人行平台人工环节——
-                #   逻辑检核已通过即为成功结束（用户确认），代码不等入库。
-                # 注2: 组 OK ≠ 行级全过——批次轮询(50s)期间人行检核未出结果的行
+                # 批次组到入库终态成功（40003/40004/40006）→ 先补拉行级失败
+                # 明细再 confirmed。
+                # 注: 组 STORED ≠ 行级全过——批次轮询(50s)期间人行检核未出结果的行
                 #   全在 data[] 里（如 20004 处理中），行级失败码（20001/20002/
-                #   20003 数据已存在）常在批次轮询超时后才出现；组 OK 分支若
+                #   20003 数据已存在）常在批次轮询超时后才出现；组分支若
                 #   直接全量 confirmed，会把失败实例误当成功（v1.0.27 现场：
                 #   switches 9 条产品序列号重复异常漏记、uninterrupted 3 条
                 #   明细落库后被 clear_fail_details 误删——均为此路径）。
-                if group_code in ReportCenter._GROUP_OK and not (gs.get("data") or []):
+                if group_code in ReportCenter._GROUP_STORED and not (gs.get("data") or []):
                     # 组终态成功: 先逐批次补拉行级明细（单次不轮询），失败实例
                     # 计入 fail_details 且不 confirmed（不进台账/clear）
                     g_fail_descs = _collect_branch_row_fails(
@@ -1190,11 +1192,19 @@ def report_one_model(rule: dict, report_obj: dict, conf: dict, variant: str,
             except Exception as e:
                 group_msg = f"检核请求失败: {e}"
                 LOG.warning("[report] %s 检核请求异常: %s", object_id, e)
-        # 状态优先级: 组终态成功(batch或group任一确认) > pendingCheck > fail/partial
-        group_ok = (group_code in ReportCenter._GROUP_OK and not (gs.get("data") or [])) if group_id else False
+        # 状态优先级: 组入库终态成功 > 组终态失败 > inFlight(检核通过等人工)
+        #   > pendingCheck > fail/partial
+        # 注: 组终态失败(40005)必须压过批次轮询残留的 pendingCheck——组已终态
+        # 失败，批次级"下次续查"已无意义（v1.0.29 现场 run3 实测修正）
+        group_ok = (group_code in ReportCenter._GROUP_STORED and not (gs.get("data") or [])) if group_id else False
+        group_inflight = (group_id and group_code in ReportCenter._GROUP_INFLIGHT)
         any_confirmed = any(v.get("_confirmed") for v in payload_instances.values())
         if group_ok or any_confirmed:
             final_status = "success" if not fail_details else "partialSuccess"
+        elif group_id and group_code in ReportCenter._GROUP_FAIL:
+            final_status = "fail"   # 组入库终态失败（驳回等）——不等待续查
+        elif group_inflight:
+            final_status = "inFlight"   # 检核已通过，入库申请等人工——下次运行结算
         elif task.get("status") == "pendingCheck":
             final_status = "pendingCheck"
         else:
@@ -1210,10 +1220,9 @@ def report_one_model(rule: dict, report_obj: dict, conf: dict, variant: str,
                                       else "partialSuccess"))
         # 组错误单独判（组终态失败码且无任何实例确认 → 整体失败信号）
         group_fail = (group_id and group_code
-                      and group_code not in ReportCenter._GROUP_OK
-                      and group_code not in ReportCenter._GROUP_PENDING
+                      and group_code in ReportCenter._GROUP_FAIL
                       and not any_confirmed)
-        if group_fail and final_status not in ("pendingCheck",):
+        if group_fail and final_status not in ("pendingCheck", "inFlight"):
             final_status = "fail" if not any_confirmed else final_status
         # errorMsg 的组错误段: 组终态失败码才带（成功/等待码不带，避免误导）
         group_err_txt = group_msg if group_fail else ""
@@ -1257,53 +1266,82 @@ def report_one_model(rule: dict, report_obj: dict, conf: dict, variant: str,
         raise
 
 
-def _resync_pending_group(object_id: str, conf: dict, variant: str) -> None:
-    """续查 pendingCheck 任务的批次组（"下次续查"的实际实现）。
+def _settle_inflight_groups(object_id: str, conf: dict, variant: str) -> None:
+    """结算在途任务的批次组（状态闭环的核心，"下次结算"的实现）。
 
-    找该 objectId 最近一条 pendingCheck 且带 groupId 的任务 → 查组状态（不轮询，
-    查一次现状）：
-      - 组到成功终态（含 40001/40002 检核通过等入库）→ 先逐批次补拉行级失败
-        明细（人行检核慢，行级失败码常在批次轮询超时后才出现——组 OK 不代表
-        行级全过，不补拉则 INSTANCE 表漏明细）；失败实例从原文实例集剔除
-        （不置 _confirmed，防进台账被误当已入库）→ 其余实例落 _confirmed、
-        任务转 success/partialSuccess（counts 按原文统计）、原文回写 + upsert。
-        本次运行 diff 基准（_last_success_data）随之含这些实例 → 增量归零。
-      - 组仍在等待（40000）或失败 → 不动（失败场景由原任务记录兜底，本次
-        正常增量上报，未 confirmed 的实例自动当 new/update 重报）。
+    扫该 objectId 所有 pendingCheck / inFlight 且带 groupId 的任务（时间倒序），
+    逐任务查组现状（不轮询，一次）：
+      - 组到入库终态成功（40003/40004/40006，data 无异常批次）→ 先逐批次补拉
+        行级失败明细（人行检核慢，行级失败码常在批次轮询超时后才出现——组
+        STORED 不代表行级全过，不补拉则 INSTANCE 表漏明细）；失败实例从原文
+        实例集剔除（不置 _confirmed，防进台账被误当已入库）→ 其余实例落
+        _confirmed、任务转 success/partialSuccess、原文回写 + upsert。
+        本次运行 diff 基准随之含这些实例 → 增量归零。
+      - 组到入库终态失败（40005/40007）→ 任务转 fail + errorMsg 组失败信息；
+        行级明细补拉落 INSTANCE；实例保持未 confirmed（下次自然重报，人行侧
+        若已存在会以「数据已存在」明细留痕）。
+      - 组在途（40001/40002）→ 任务标 inFlight（pendingCheck 的生命周期推进）；
+        实例不动、原文不回写——在途冻结（diff 跳过，见 _last_success_data）。
+      - 组仍在检核（40000）或查询异常 → 不动，本次正常增量上报。
     """
-    rows = cmdb_search_task_v2(object_id, statuses=["pendingCheck"])
+    rows = cmdb_search_task_v2(object_id, statuses=["pendingCheck", "inFlight"])
     if not rows:
         return
     rows.sort(key=lambda r: str(r.get("startTime", "")), reverse=True)
-    prev = next((r for r in rows if r.get("groupId")), None)
-    if not prev:
-        return   # pendingCheck 但无组号（纯批次级超时）——无组可续查
+    pending = [r for r in rows if r.get("groupId")]
+    if not pending:
+        return   # 无组号（纯批次级超时）——无组可结算
+    try:
+        center = ReportCenter(conf, variant)
+    except Exception as e:
+        LOG.warning("[settle] %s ReportCenter 构造失败（跳过结算）: %s", object_id, e)
+        return
+    for prev in pending:
+        _settle_one_group(center, prev, object_id)
+
+
+def _settle_one_group(center: "ReportCenter", prev: dict, object_id: str) -> None:
+    """结算单个在途任务的组（_settle_inflight_groups 的子步骤）。"""
     group_id = str(prev.get("groupId", ""))
     data_file = prev.get("dataFile")
+    task_id_str = str(prev.get("taskId", ""))
     if not (group_id and data_file and Path(data_file).exists()):
         return
     try:
-        center = ReportCenter(conf, variant)
         gs = center.group_status(group_id, wait_terminal=False)
     except Exception as e:
-        LOG.warning("[resync] %s 旧组 %s 状态查询失败（跳过，走正常上报）: %s",
+        LOG.warning("[settle] %s 组 %s 状态查询失败（跳过，走正常上报）: %s",
                     object_id, group_id[:20], e)
         return
     code = str(gs.get("code", ""))
-    if code not in ReportCenter._GROUP_OK or (gs.get("data") or []):
-        LOG.info("[resync] %s 旧组 %s 未到成功终态(%s)——本次正常上报",
-                 object_id, group_id[:20], code)
+    if code in ReportCenter._GROUP_INFLIGHT:
+        # 入库申请等人工——生命周期推进到 inFlight（幂等），实例冻结不动
+        if str(prev.get("status", "")) != "inFlight":
+            prev.update({"status": "inFlight",
+                         "checkCode": code, "checkMsg": str(gs.get("msg", ""))[:200],
+                         "endTime": time.strftime("%Y-%m-%d %H:%M:%S")})
+            upsert_task(prev)
+            LOG.info("[settle] %s 组 %s 在途(%s) → 任务 %s 转 inFlight（实例冻结）",
+                     object_id, group_id[:20], code, task_id_str[:12])
         return
+    if code not in ReportCenter._GROUP_STORED or (gs.get("data") or []):
+        # 仍在检核 / 组级异常批次未清 / 组终态失败——失败路径走下方统一处理；
+        # 检核中（40000 等）不动
+        if code in ReportCenter._GROUP_FAIL:
+            _settle_group_failed(center, prev, object_id, group_id, code, gs)
+        else:
+            LOG.info("[settle] %s 组 %s 未到终态(%s)——本次正常上报",
+                     object_id, group_id[:20], code)
+        return
+    # ---- 入库终态成功：行级补拉 → confirmed → 任务收尾 ----
     try:
         payload = load_report_data(data_file)
     except Exception as e:
-        LOG.warning("[resync] %s 旧任务原文读取失败: %s", object_id, e)
+        LOG.warning("[settle] %s 旧任务原文读取失败: %s", object_id, e)
         return
     instances = payload.get("instances") if isinstance(payload, dict) else None
     if not isinstance(instances, dict):
         return
-    # 组 OK ≠ 行级全过: 逐批次补拉行级失败明细（公共函数，同实例跨批去重）
-    task_id_str = str(prev.get("taskId", ""))
     fail_details: list[dict] = []
     branch_ids_prev = [b for b in str(prev.get("branchId", "") or "").split(",") if b.strip()]
     failed_descs = _collect_branch_row_fails(center, branch_ids_prev, object_id,
@@ -1314,7 +1352,7 @@ def _resync_pending_group(object_id: str, conf: dict, variant: str) -> None:
         # 重报或人工处理），partialSuccess 由任务状态体现
         for desc in failed_descs:
             instances.pop(desc, None)
-        LOG.warning("[resync] %s 旧组 OK 但补拉到 %d 条行级失败明细——任务转 "
+        LOG.warning("[settle] %s 组 STORED 但补拉到 %d 条行级失败明细——任务转 "
                     "partialSuccess，失败实例不进台账", object_id, len(fail_details))
     n_conf = 0
     for desc, inst in instances.items():
@@ -1338,13 +1376,57 @@ def _resync_pending_group(object_id: str, conf: dict, variant: str) -> None:
                  "updateCount": prev.get("updateCount", 0),
                  "removeCount": prev.get("removeCount", 0)})
     upsert_task(prev)
-    LOG.info("[resync] %s 旧组 %s 已到 %s → 上任务 %s 转 %s（confirmed %d 实例），"
+    LOG.info("[settle] %s 组 %s 已到 %s → 任务 %s 转 %s（confirmed %d 实例），"
              "本次 diff 将归零", object_id, group_id[:20], code,
              task_id_str[:12], prev.get("status", ""), n_conf)
 
 
-def _last_success_data(object_id: str) -> tuple[dict, dict | None]:
-    """该模型的『成功实例台账』: 已确认被人行接收的实例集合。
+def _settle_group_failed(center: "ReportCenter", prev: dict, object_id: str,
+                         group_id: str, code: str, gs: dict) -> None:
+    """组终态失败（40005/40007）结算：任务 fail + 行级明细补拉。
+
+    实例保持未 confirmed（不回写原文）——下次运行自然当 new 重报；人行侧若
+    数据已实际存在，重报会以「数据已存在」失败明细留痕（含 alreadyExists 语义）。
+    """
+    task_id_str = str(prev.get("taskId", ""))
+    gs_msg = str(gs.get("msg", ""))[:200]
+    fail_details: list[dict] = []
+    data_file = prev.get("dataFile")
+    if data_file and Path(data_file).exists():
+        # 组级异常批次 data[] 里的 branchId 逐个补拉行级失败原因
+        for bad_branch in gs.get("data") or []:
+            bad_bid = str(bad_branch.get("branchId", ""))
+            if not bad_bid:
+                continue
+            try:
+                bd = center.check_result_once(bad_bid)
+                for bad in bd.get("data") or []:
+                    bcode, bmsg = str(bad.get("code", "")), str(bad.get("msg", ""))
+                    if _row_failed(bcode, bmsg):
+                        fail_details.append({
+                            "objectId": object_id, "taskId": task_id_str,
+                            "facilityDescriptor": str(bad.get("facilityDescriptor", "")),
+                            "facilityCategory": str(bad.get("facilityCategory", "")),
+                            "branchId": bad_bid, "code": bcode, "msg": bmsg[:500]})
+            except Exception as e:
+                LOG.warning("[settle] %s 异常批次 %s 明细补拉失败: %s",
+                            object_id, bad_bid[:20], e)
+    if fail_details:
+        save_fail_details(fail_details)
+    prev.update({"status": "fail",
+                 "endTime": time.strftime("%Y-%m-%d %H:%M:%S"),
+                 "checkCode": code, "checkMsg": gs_msg,
+                 "failedCount": len(fail_details),
+                 "errorMsg": _fail_summary(len(fail_details), fail_details,
+                                           group_err=f"批次组终态失败({code}): {gs_msg}")})
+    upsert_task(prev)
+    LOG.warning("[settle] %s 组 %s 终态失败(%s) → 任务 %s 转 fail（%d 条行级明细），"
+                "实例下次重报", object_id, group_id[:20], code,
+                task_id_str[:12], len(fail_details))
+
+
+def _last_success_data(object_id: str) -> tuple[dict, dict | None, set[str]]:
+    """该模型的『成功实例台账』+ 在途冻结集合。
 
     台账来源：扫该 objectId 所有 success/partialSuccess 且未回滚任务（按时间倒序），
     合并各任务原文里 _confirmed=True 的实例（去重，新覆盖旧）。
@@ -1355,37 +1437,66 @@ def _last_success_data(object_id: str) -> tuple[dict, dict | None]:
       新逻辑用『实例级 confirmed 标记』，只对确认接收过的实例 diff；
       失败批次（未 confirmed）下次自动当 new 重报。
       partialSuccess 的成功批次也计入 confirmed，不再整任务丢弃。
+
+    v1.0.29 在途冻结：inFlight 任务的原文实例（检核已过、入库申请等人工）
+    一律计入 inflight_descs——diff 跳过（不 new/update/delete），防止入库
+    申请期间重复报送制造「数据已存在」；结算后按终态自然解冻。
     """
     confirmed: dict[str, dict] = {}
-    rows = cmdb_search_task_v2(object_id, statuses=["success", "partialSuccess"])
-    rows.sort(key=lambda r: str(r.get("startTime", "")), reverse=True)
-    prev_meta: dict | None = None
-    for r in rows:
+    inflight_descs: set[str] = set()
+    for want, statuses in ((0, ["success", "partialSuccess"]), (1, ["inFlight"])):
+        rows = cmdb_search_task_v2(object_id, statuses=statuses)
+        rows.sort(key=lambda r: str(r.get("startTime", "")), reverse=True)
+        for r in rows:
+            f = r.get("dataFile")
+            if not (f and Path(f).exists()):
+                continue
+            try:
+                data = load_report_data(f)
+            except Exception:
+                # 旧版/损坏原文（IO 错、JSON 坏、结构异）——跳过不让单个文件炸整个上报
+                LOG.warning("[report] %s 历史原文读取失败，跳过: %s", object_id, f)
+                continue
+            if not isinstance(data, dict):
+                continue
+            instances = data.get("instances")
+            if not isinstance(instances, dict):
+                LOG.warning("[report] %s 历史原文结构异常（instances 非 dict），跳过该文件: %s",
+                            object_id, f)
+                continue
+            if want == 0:
+                # 台账：confirmed 实例（新任务覆盖旧任务 → 取最新 hash）
+                for desc, inst in instances.items():
+                    if isinstance(inst, dict) and inst.get("_confirmed"):
+                        confirmed[desc] = inst
+    # 在途冻结集合（第二轮收集，避免与台账循环耦合）
+    for r in cmdb_search_task_v2(object_id, statuses=["inFlight"]):
         f = r.get("dataFile")
         if not (f and Path(f).exists()):
             continue
         try:
             data = load_report_data(f)
         except Exception:
-            # 旧版/损坏原文（IO 错、JSON 坏、结构异）——跳过不让单个文件炸整个上报
-            LOG.warning("[report] %s 历史原文读取失败，跳过: %s", object_id, f)
             continue
-        if not isinstance(data, dict):
-            continue
-        if prev_meta is None:
-            prev_meta = data
-        # 合并该任务里 confirmed 的实例（旧任务先放、新任务覆盖 → 取最新 hash）
-        # 防御: 历史原文结构可能异常（旧版本落盘/损坏）——instances 非 dict 或
-        # 实例 value 非 dict 的条目跳过，不让单个坏文件炸整个上报
         instances = data.get("instances") if isinstance(data, dict) else None
         if not isinstance(instances, dict):
-            LOG.warning("[report] %s 历史原文结构异常（instances 非 dict），跳过该文件: %s",
-                        object_id, f)
             continue
-        for desc, inst in instances.items():
-            if isinstance(inst, dict) and inst.get("_confirmed"):
-                confirmed[desc] = inst
-    return confirmed, prev_meta
+        for desc in instances:
+            inflight_descs.add(desc)
+    prev_meta: dict | None = None
+    rows = cmdb_search_task_v2(object_id, statuses=["success", "partialSuccess"])
+    rows.sort(key=lambda r: str(r.get("startTime", "")), reverse=True)
+    for r in rows:
+        f = r.get("dataFile")
+        if f and Path(f).exists():
+            try:
+                d = load_report_data(f)
+                if isinstance(d, dict):
+                    prev_meta = d
+                    break
+            except Exception:
+                continue
+    return confirmed, prev_meta, inflight_descs
 
 
 def _confirmed_snapshot(payload: dict) -> dict[str, dict]:
@@ -1416,6 +1527,14 @@ def cmd_report(scope: str, full: bool) -> int:
         except Exception as e:
             LOG.error("[report] %s 任务失败: %s\n%s", oid, e, traceback.format_exc())
             rc = 1
+    # 上报完成后自动清理（v1.0.29 内联）：按 FINTECH_REPORT_CLEANUP 规则执行
+    # （默认不启用=不清理）；清理失败只告警，不影响上报结果码
+    try:
+        cleaned = cleanup_after_report()
+        if cleaned:
+            LOG.info("[report] 收尾清理完成：%d 条历史任务（含级联明细）", cleaned)
+    except Exception as e:
+        LOG.warning("[report] 收尾清理失败（不影响上报结果）: %s", e)
     return rc
 
 
@@ -1502,7 +1621,17 @@ def cmd_cleanup(dry_run: bool = False) -> int:
         purge_all = (max_count == 0 and max_age == 0)
         for oid, lst in by_obj.items():
             lst.sort(key=lambda t: str(t.get("startTime", "")), reverse=True)
+            # diff 基准保护: 每模型最新一条 success/partialSuccess 任务的实例
+            # 永不删——它是 _last_success_data 的基准来源，删了会基准归零 →
+            # 下次全量重报 → 「数据已存在」风暴（v1.0.29 修复）
+            base_keep = next((t.get("instanceId") for t in lst
+                              if str(t.get("status", "")) in ("success", "partialSuccess")
+                              and t.get("instanceId")), None)
             for idx, t in enumerate(lst):
+                if t.get("instanceId") and t["instanceId"] == base_keep:
+                    continue   # 基准任务保护（全清模式同样生效）
+                if str(t.get("status", "")) in ("pendingCheck", "inFlight"):
+                    continue   # 活动任务保护：组还可能结算，dataFile 是冻结来源
                 if purge_all:
                     to_delete.append(t)   # 全清模式
                     continue
@@ -1521,6 +1650,8 @@ def cmd_cleanup(dry_run: bool = False) -> int:
             for t in to_delete:
                 LOG.info("  将删: %s %s %s", t.get("taskId", "")[:12], t.get("objectId"), t.get("startTime"))
             continue
+        # 级联删失败明细（v1.0.29）: 按被删任务 taskId 删 FINTECH_REPORT_INSTANCE
+        detail_removed = _cleanup_fail_details_of_tasks([t.get("taskId", "") for t in to_delete])
         # 删 CMDB 任务 + 数据文件 + 级联回滚记录
         # 回滚记录一次全查建索引（避免每任务一次 CMDB 搜索的 N+1 慢查询）
         rb_index: dict[str, list[str]] = {}
@@ -1537,13 +1668,53 @@ def cmd_cleanup(dry_run: bool = False) -> int:
             if f and Path(f).exists():
                 Path(f).unlink()
             total_cleaned += 1
+        if detail_removed:
+            LOG.info("[cleanup] 级联清理失败明细 %d 条（FINTECH_REPORT_INSTANCE）", detail_removed)
         # 规则执行记录回写
         cmdb_import(OBJ_CLEANUP, ["name"], [{
             **rule, "name": name,
             "lastRunTime": time.strftime("%Y-%m-%d %H:%M:%S"),
-            "lastCleanedCount": len(to_delete)}])
+            "lastCleanedCount": len(to_delete) + detail_removed}])
     LOG.info("[cleanup] 完成，共清理 %d 条任务", total_cleaned)
-    return 0
+    return total_cleaned
+
+
+def _cleanup_fail_details_of_tasks(task_ids: list[str]) -> int:
+    """级联清理：按任务号删 FINTECH_REPORT_INSTANCE 失败明细（v1.0.29）。
+
+    任务记录被清理后其明细即成孤儿（detailId 键不含 taskId，无法回查归属），
+    必须随任务一并删除。taskId 分块 $in 查 v2（复用 clear_fail_details 模式）。
+    """
+    tids = [t for t in (str(t).strip() for t in task_ids) if t]
+    if not tids:
+        return 0
+    removed = 0
+    for i in range(0, len(tids), 50):
+        chunk = tids[i:i + 50]
+        out, page = [], 1
+        while True:
+            body = {"query": {"$and": [{"taskId": {"$in": chunk}}]},
+                    "fields": {"instanceId": True, "detailId": True},
+                    "page": page, "pageSize": 200}
+            d = cmdb_post(f"/v2/object/{urllib.parse.quote(OBJ_FAIL_DETAIL, safe='@')}/instance/_search", body)
+            data = d.get("data") or {}
+            out.extend(data.get("list") or [])
+            if len(out) >= (data.get("total") or len(out)):
+                break
+            page += 1
+        ids = [r["instanceId"] for r in out if r.get("instanceId")]
+        if ids:
+            failed = cmdb_delete(OBJ_FAIL_DETAIL, ids)
+            removed += len(ids) - len(failed)
+    return removed
+
+
+def cleanup_after_report() -> int:
+    """上报完成后自动清理（v1.0.29 内联）：按启用规则执行，失败只告警不中断。
+
+    调用方（cmd_report）以 try 包裹——清理异常不影响上报结果码。
+    """
+    return cmd_cleanup(dry_run=False)
 
 
 # ============================================================================
