@@ -788,6 +788,29 @@ def _row_failed(code: str, msg: str = "") -> bool:
     return code not in _CODE_ROW_PENDING
 
 
+def _exists_unchanged(desc: str, converted_inst: dict, exists_map: dict[str, str]) -> bool:
+    """实例在已存在基准中且内容 hash 与撞墙时一致 → True（跳过上报）。
+
+    数据变了（hash 失配）→ False，恢复上报——新内容人行库没有，重报是
+    把人行侧刷成最新版本的机会。
+    """
+    h = exists_map.get(desc)
+    if not h:
+        return False
+    return h == _inst_content_hash(converted_inst)
+
+
+def _row_already_exists(code: str, msg: str) -> bool:
+    """行级回执是否为「数据已存在」类（WL-20003 + 已存在 msg）。
+
+    人行说「已存在」= 库里已有该实例——这是一次明确的对账信号：数据没变的
+    情况下重报必再撞（v1.0.30 前的缺陷：fail 实例不在比对基准里，每次运行
+    都重报都失败）。据此把实例纳入 alreadyExists 基准：内容 hash 与撞墙时
+    一致 → 下次跳过；变更 → 恢复上报（刷人行库为最新内容的机会）。
+    """
+    return code == "WL-20003" and any(k in msg for k in ("已存在", "不可重复"))
+
+
 def _collect_branch_row_fails(center: "ReportCenter", branch_ids: list[str],
                               object_id: str, task_id: str,
                               fail_details: list[dict]) -> set[str]:
@@ -802,6 +825,7 @@ def _collect_branch_row_fails(center: "ReportCenter", branch_ids: list[str],
     v1.0.27 现场 uninterrupted 3 条明细落库后被误删根因）。
     """
     failed_descs: set[str] = set()
+    exists_descs: set[str] = set()   # 「数据已存在」实例（v1.0.30 双基准）
     for bid in branch_ids:
         bid = str(bid).strip()
         if not bid:
@@ -825,7 +849,9 @@ def _collect_branch_row_fails(center: "ReportCenter", branch_ids: list[str],
                 "facilityCategory": str(bad.get("facilityCategory", "")),
                 "branchId": bid, "code": bcode, "msg": bmsg[:500]})
             failed_descs.add(bdesc)
-    return failed_descs
+            if _row_already_exists(bcode, bmsg):
+                exists_descs.add(bdesc)
+    return failed_descs, exists_descs
 
 
 def _fail_summary(n_failed: int, details: list[dict],
@@ -954,18 +980,22 @@ def report_one_model(rule: dict, report_obj: dict, conf: dict, variant: str,
                 continue
             converted[desc] = data
             pk_set[desc] = cate
-        # 2) 增量 diff（对『成功实例台账』: 跨任务合并的 confirmed 实例集合；
+        # 2) 增量 diff（对『成功实例台账』+『已存在基准』双基准；
         #    在途冻结集合内的实例一律跳过——检核已过等人工入库，重发会制造
         #    「数据已存在」，删除人行侧也未落地）
-        confirmed, prev_meta, inflight_descs = _last_success_data(object_id)
+        confirmed, prev_meta, inflight_descs, exists_map = _last_success_data(object_id)
         new_items, update_items, delete_items = [], [], []
         if not confirmed or scope_full:
-            new_items = [v for d, v in converted.items() if d not in inflight_descs]
+            new_items = [v for d, v in converted.items()
+                         if d not in inflight_descs and not _exists_unchanged(
+                             d, converted[d], exists_map)]
         else:
             for desc, data in converted.items():
                 if desc in inflight_descs:
                     continue   # 在途冻结：不 new/update
                 old = confirmed.get(desc)
+                if _exists_unchanged(desc, data, exists_map):
+                    continue   # 已存在且数据未变——重报必撞「数据已存在」，跳过
                 if old is None:
                     new_items.append(data)              # 台账没有 → new
                 elif old.get("_hash") != _inst_content_hash({k: v for k, v in data.items()}):
@@ -988,7 +1018,9 @@ def report_one_model(rule: dict, report_obj: dict, conf: dict, variant: str,
                     row.pop("_hash", None)
                     delete_items.append(row)
         # 3.1) 原文落盘（diff 基石）：本次实例先标 _confirmed=False，
-        #      批次回执成功后置 True（见下方批次循环）；未变且历史已 confirmed 的直接继承
+        #      批次回执成功后置 True（见下方批次循环）；未变且历史已 confirmed 的直接继承；
+        #      已存在基准未变（hash 一致）的继承 _alreadyExists（跳过的实例本任务
+        #      不再上报，标记延续到本任务原文，保持基准连续——v1.0.30）
         payload_instances = {
             d: {**v, "_hash": _inst_content_hash(v), "_cate": pk_set[d], "_confirmed": False,
                 "_snapshot": v}   # _snapshot: 转换数据原文（delete 行复用完整字段）
@@ -997,6 +1029,9 @@ def report_one_model(rule: dict, report_obj: dict, conf: dict, variant: str,
             old = confirmed[desc]
             if old.get("_hash") == _inst_content_hash({k: v for k, v in converted[desc].items()}):
                 payload_instances[desc]["_confirmed"] = True
+        for desc in set(exists_map.keys()) & converted.keys():
+            if _exists_unchanged(desc, converted[desc], exists_map):
+                payload_instances[desc]["_alreadyExists"] = True
         payload = {"objectId": object_id, "taskId": task_id, "exportedAt": now,
                    "instances": payload_instances}
         task["dataFile"] = save_report_data(task_id, payload)
@@ -1147,7 +1182,7 @@ def report_one_model(rule: dict, report_obj: dict, conf: dict, variant: str,
                 # 失败实例不确认不计数，也不进冻结集合（settle 解冻后重报/
                 # 人工处理）；成功实例保持未 confirmed（等入库终态 settle 确认）。
                 if group_code in ReportCenter._GROUP_INFLIGHT:
-                    g_fail_descs = _collect_branch_row_fails(
+                    g_fail_descs, g_exists_descs = _collect_branch_row_fails(
                         center, branch_ids, object_id, task_id, fail_details)
                     if g_fail_descs:
                         batch_errors.append({"branchId": group_id, "type": "group",
@@ -1155,9 +1190,15 @@ def report_one_model(rule: dict, report_obj: dict, conf: dict, variant: str,
                                              "code": "ROW-FAIL",
                                              "msg": f"组检核通过但 {len(g_fail_descs)} 条实例行级失败"
                                                     f"（详见失败明细）"})
+                    # 「数据已存在」实例打标（v1.0.30 双基准）：原文回写时置
+                    # _alreadyExists，下次 diff 数据未变则跳过重报
+                    for d in g_exists_descs:
+                        if d in payload_instances:
+                            payload_instances[d]["_alreadyExists"] = True
                     LOG.info("[report] %s 批次组 %s 在途(%s) → 任务 inFlight，"
-                             "行级失败 %d 条已留明细",
-                             object_id, group_id[:20], group_code, len(g_fail_descs))
+                             "行级失败 %d 条已留明细（其中已存在 %d 条将跳过重报）",
+                             object_id, group_id[:20], group_code,
+                             len(g_fail_descs), len(g_exists_descs))
                 # 组终态失败码（40005/40007 等）也留痕（在途码 40001/40002 不算失败）
                 if group_id and group_code and group_code in ReportCenter._GROUP_FAIL:
                     batch_errors.append({"branchId": group_id, "type": "group",
@@ -1174,8 +1215,13 @@ def report_one_model(rule: dict, report_obj: dict, conf: dict, variant: str,
                 if group_code in ReportCenter._GROUP_STORED and not (gs.get("data") or []):
                     # 组终态成功: 先逐批次补拉行级明细（单次不轮询），失败实例
                     # 计入 fail_details 且不 confirmed（不进台账/clear）
-                    g_fail_descs = _collect_branch_row_fails(
+                    g_fail_descs, g_exists_descs = _collect_branch_row_fails(
                         center, branch_ids, object_id, task_id, fail_details)
+                    # 「数据已存在」在入库终态成功语境下升级为 confirmed——
+                    # 人行正式入库，实例在库是事实（v1.0.30）
+                    for d in g_exists_descs:
+                        if d in payload_instances:
+                            payload_instances[d]["_confirmed"] = True
                     if g_fail_descs:
                         # 行级失败也留批次级错误痕迹（errorMsg 摘要可见）
                         batch_errors.append({"branchId": group_id, "type": "group",
@@ -1365,21 +1411,31 @@ def _settle_one_group(center: "ReportCenter", prev: dict, object_id: str) -> Non
         return
     fail_details: list[dict] = []
     branch_ids_prev = [b for b in str(prev.get("branchId", "") or "").split(",") if b.strip()]
-    failed_descs = _collect_branch_row_fails(center, branch_ids_prev, object_id,
-                                             task_id_str, fail_details)
+    failed_descs, exists_descs = _collect_branch_row_fails(center, branch_ids_prev, object_id,
+                                                           task_id_str, fail_details)
     if fail_details:
         save_fail_details(fail_details)
-        # 失败实例从原文实例集剔除——不进 _confirmed 台账（下次 diff 当未入库，
-        # 重报或人工处理），partialSuccess 由任务状态体现
+        # 失败实例处理: 非「已存在」的从原文剔除（下次重报）；「已存在」的
+        # 打 _alreadyExists 保留在原文（v1.0.30 双基准——数据未变跳过重报，
+        # 变更后自然恢复），partialSuccess 由任务状态体现
         for desc in failed_descs:
+            if desc in exists_descs:
+                if desc in instances and isinstance(instances[desc], dict):
+                    instances[desc]["_alreadyExists"] = True
+                continue
             instances.pop(desc, None)
         LOG.warning("[settle] %s 组 STORED 但补拉到 %d 条行级失败明细——任务转 "
-                    "partialSuccess，失败实例不进台账", object_id, len(fail_details))
+                    "partialSuccess（已存在 %d 条入基准，其余不进台账）",
+                    object_id, len(fail_details), len(exists_descs))
     n_conf = 0
     for desc, inst in instances.items():
         if isinstance(inst, dict) and not inst.get("_confirmed"):
             inst["_confirmed"] = True
             n_conf += 1
+        if isinstance(inst, dict) and inst.get("_confirmed"):
+            # 已确认（含入库终态下的已存在实例）——exists 标记使命完成清除，
+            # confirmed 台账优先（避免双基准冗余与 hash 不一致的风险）
+            inst.pop("_alreadyExists", None)
     save_report_data(task_id_str, payload)   # 原地回写同一文件
     n_ins = sum(1 for i in instances.values()
                 if isinstance(i, dict) and str(i.get("_op", "new")) != "delete")
@@ -1446,8 +1502,8 @@ def _settle_group_failed(center: "ReportCenter", prev: dict, object_id: str,
                 task_id_str[:12], len(fail_details))
 
 
-def _last_success_data(object_id: str) -> tuple[dict, dict | None, set[str]]:
-    """该模型的『成功实例台账』+ 在途冻结集合。
+def _last_success_data(object_id: str) -> tuple[dict, dict | None, set[str], dict[str, str]]:
+    """该模型的『成功实例台账』+ 在途冻结集合 + 已存在基准。
 
     台账来源：扫该 objectId 所有 success/partialSuccess 且未回滚任务（按时间倒序），
     合并各任务原文里 _confirmed=True 的实例（去重，新覆盖旧）。
@@ -1462,35 +1518,17 @@ def _last_success_data(object_id: str) -> tuple[dict, dict | None, set[str]]:
     v1.0.29 在途冻结：inFlight 任务的原文实例（检核已过、入库申请等人工）
     一律计入 inflight_descs——diff 跳过（不 new/update/delete），防止入库
     申请期间重复报送制造「数据已存在」；结算后按终态自然解冻。
+
+    v1.0.30 已存在基准（双基准防重复上报）：扫所有任务原文（不限状态，
+    时间倒序新覆盖旧）里 _alreadyExists=True 的实例 → exists_map{desc: hash}。
+    人行「数据已存在」= 库里已有该实例的对账信号——数据未变（hash 一致）
+    重报必再撞，diff 跳过；数据变更后 hash 失配 → 自然恢复上报。已存在
+    实例后续被 confirmed（组入库终态成功）时以台账优先（新覆盖）。
     """
     confirmed: dict[str, dict] = {}
     inflight_descs: set[str] = set()
-    for want, statuses in ((0, ["success", "partialSuccess"]), (1, ["inFlight"])):
-        rows = cmdb_search_task_v2(object_id, statuses=statuses)
-        rows.sort(key=lambda r: str(r.get("startTime", "")), reverse=True)
-        for r in rows:
-            f = r.get("dataFile")
-            if not (f and Path(f).exists()):
-                continue
-            try:
-                data = load_report_data(f)
-            except Exception:
-                # 旧版/损坏原文（IO 错、JSON 坏、结构异）——跳过不让单个文件炸整个上报
-                LOG.warning("[report] %s 历史原文读取失败，跳过: %s", object_id, f)
-                continue
-            if not isinstance(data, dict):
-                continue
-            instances = data.get("instances")
-            if not isinstance(instances, dict):
-                LOG.warning("[report] %s 历史原文结构异常（instances 非 dict），跳过该文件: %s",
-                            object_id, f)
-                continue
-            if want == 0:
-                # 台账：confirmed 实例（新任务覆盖旧任务 → 取最新 hash）
-                for desc, inst in instances.items():
-                    if isinstance(inst, dict) and inst.get("_confirmed"):
-                        confirmed[desc] = inst
-    # 在途冻结集合（第二轮收集，避免与台账循环耦合）
+    exists_map: dict[str, str] = {}
+    # 在途冻结集合（inFlight 任务原文的全部实例）
     for r in cmdb_search_task_v2(object_id, statuses=["inFlight"]):
         f = r.get("dataFile")
         if not (f and Path(f).exists()):
@@ -1504,20 +1542,61 @@ def _last_success_data(object_id: str) -> tuple[dict, dict | None, set[str]]:
             continue
         for desc in instances:
             inflight_descs.add(desc)
+    # 已存在基准：扫全部未回滚任务原文（新覆盖旧——最新一次的撞墙 hash 为准）
+    for r in cmdb_search_task_v2(object_id, statuses=None):
+        f = r.get("dataFile")
+        if not (f and Path(f).exists()):
+            continue
+        try:
+            data = load_report_data(f)
+        except Exception:
+            continue
+        instances = data.get("instances") if isinstance(data, dict) else None
+        if not isinstance(instances, dict):
+            continue
+        for desc, inst in instances.items():
+            if isinstance(inst, dict) and inst.get("_alreadyExists"):
+                h = str(inst.get("_hash") or "")
+                if h:
+                    exists_map[desc] = h
+    # 已存在实例后来被正式确认（confirmed）→ 从 exists 基准移除（台账优先）
+    # （先扫 success 台账，再剔除——见下方 confirmed 收集后统一处理）
     prev_meta: dict | None = None
     rows = cmdb_search_task_v2(object_id, statuses=["success", "partialSuccess"])
     rows.sort(key=lambda r: str(r.get("startTime", "")), reverse=True)
     for r in rows:
         f = r.get("dataFile")
-        if f and Path(f).exists():
-            try:
-                d = load_report_data(f)
-                if isinstance(d, dict):
-                    prev_meta = d
-                    break
-            except Exception:
-                continue
-    return confirmed, prev_meta, inflight_descs
+        if not (f and Path(f).exists()):
+            continue
+        try:
+            data = load_report_data(f)
+        except Exception:
+            # 旧版/损坏原文（IO 错、JSON 坏、结构异）——跳过不让单个文件炸整个上报
+            LOG.warning("[report] %s 历史原文读取失败，跳过: %s", object_id, f)
+            continue
+        if not isinstance(data, dict):
+            continue
+        if prev_meta is None:
+            prev_meta = data
+        # 合并该任务里 confirmed 的实例（旧任务先放、新任务覆盖 → 取最新 hash）
+        # 防御: 历史原文结构可能异常（旧版本落盘/损坏）——instances 非 dict 或
+        # 实例 value 非 dict 的条目跳过，不让单个坏文件炸整个上报
+        instances = data.get("instances") if isinstance(data, dict) else None
+        if not isinstance(instances, dict):
+            LOG.warning("[report] %s 历史原文结构异常（instances 非 dict），跳过该文件: %s",
+                        object_id, f)
+            continue
+        for desc, inst in instances.items():
+            if isinstance(inst, dict) and inst.get("_confirmed"):
+                confirmed[desc] = inst
+                exists_map.pop(desc, None)   # 已正式确认——已存在基准让位
+    _dbg_ledger(object_id, confirmed, inflight_descs, exists_map)
+    return confirmed, prev_meta, inflight_descs, exists_map
+
+
+def _dbg_ledger(object_id: str, confirmed: dict, inflight: set, exists: dict) -> None:
+    LOG.debug("[report] %s 台账: confirmed=%d inflight=%d alreadyExists=%d",
+              object_id, len(confirmed), len(inflight), len(exists))
 
 
 def _confirmed_snapshot(payload: dict) -> dict[str, dict]:
