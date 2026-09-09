@@ -1,0 +1,45 @@
+====================================================================================================
+Step 4 抽查核对（10 条）：merged 值 vs 两份 excel 原值（枚举换算后）
+====================================================================================================
+#1   PASS  facilityUseState 枚举归一
+     merged='00-设施在用'
+     report原值='00-设施在用'  mgmt原值='设施在用'
+     预期='00-设施在用'   report=00-设施在用直通 / mgmt=设施在用→ENUM_MAP
+#2   PASS  supportIpv6 枚举归一
+     merged='True'
+     report原值='1-True'  mgmt原值='是'
+     预期='True'   report=1-True / mgmt=是 → True
+#3   PASS  switches_deployment.deployArea
+     merged='01-主机房-网络区'
+     report原值='01-主机房-网络区'  mgmt原值='主机房-网络区'
+     预期='01-主机房-网络区'   report=01-直通 / mgmt=主机房-网络区→前缀归一
+#4   PASS  deployDb(mgmt hex反解/或直通)
+     merged='驻马店市中支中心机房'
+     report原值='驻马店市中支中心机房'  mgmt原值='驻马店市中支中心机房'
+     预期='驻马店市中支中心机房'   merged='驻马店市中支中心机房'
+#5   PASS  managementIp(arr)
+     merged='11.66.82.6'
+     report原值='11.66.82.6'  mgmt原值='******'
+     预期='11.66.82.6'   report 值直通
+#6   PASS  assetValue(float)
+     merged=3.11
+     report原值=3.11  mgmt原值='******'
+     预期=3.11   report 数值 / mgmt 裸名列
+#7   PASS  facilityUseDate(date)
+     merged='2018-11-02'
+     report原值='2018-11-02'  mgmt原值='2018-11-02'
+     预期='2018-11-02'   excel 日期→YYYY-MM-DD
+#8   PASS  powerUsedAsset 真差异(上报优先)
+     merged='平顶山市中支中心机房'
+     report原值='平顶山市中支中心机房'  mgmt原值='cef9b1d212644d818ae42965f7395b25'
+     预期='平顶山市中支中心机房'   mgmt=机房hex不可反解→记差异,值取上报——与 excel 原值一致
+#9   PASS  dataCenterSpacing localDb/oppositeDb 真差异
+     merged='郑州中支主中心机房'
+     report原值='郑州中支主中心机房'  mgmt原值='77e1d9d6869044889909f41f30517418'
+     预期='郑州中支主中心机房'   mgmt=机房hex→不可反解记差异,上报优先——与原值一致
+#10  PASS  防火墙仅上报实体
+     merged='漯河市中支中心机房业务网保卫专网防火墙（主）'
+     report原值='漯河市中支中心机房业务网保卫专网防火墙（主）'  mgmt原值='(mgmt无此键)'
+     预期='漯河市中支中心机房业务网保卫专网防火墙（主）'   键 d51c5c2bf116... 不在 mgmt——_dataSource=上报 正确
+====================================================================================================
+结果: 10/10 PASS
