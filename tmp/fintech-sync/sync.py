@@ -290,5 +290,67 @@ def transform(side):
     print(f'transform({side}):', json.dumps(stats, ensure_ascii=False)[:400], '... 枚举错误', len(all_errors))
     return stats
 
+# ============================== compare ==============================
+def merge_model(r_rows, m_rows, key_attr, attr_ids):
+    r = {row[key_attr]: row for row in r_rows if row.get(key_attr)}
+    m = {row[key_attr]: row for row in m_rows if row.get(key_attr)}
+    orphan = [row for row in r_rows + m_rows if not row.get(key_attr)]
+    merged, stats = [], {'both_same': 0, 'both_diff': 0, 'report_only': 0, 'mgmt_only': 0}
+    for k in sorted(set(r) | set(m), key=str):
+        if k in r and k in m:
+            row, diffs = {key_attr: k}, []
+            for a in attr_ids:
+                if a == key_attr:
+                    continue
+                rv, mv = r[k].get(a), m[k].get(a)
+                if rv is None and mv is None:
+                    continue
+                if mv is None:   row[a] = rv
+                elif rv is None: row[a] = mv
+                elif str(rv) == str(mv): row[a] = rv
+                else:
+                    row[a] = rv
+                    diffs.append({'attr': a, 'reportValue': str(rv), 'mgmtValue': str(mv)})
+            row['_dataSource'] = '双源(有差异)' if diffs else '双源'
+            row['_diffDetail'] = diffs
+            stats['both_diff' if diffs else 'both_same'] += 1
+        else:
+            src = r if k in r else m
+            row = dict(src[k]); row['_dataSource'] = '上报' if k in r else '管理'
+            row['_diffDetail'] = []
+            stats['report_only' if k in r else 'mgmt_only'] += 1
+        merged.append(row)
+    return merged, stats, orphan
+
+def compare():
+    mdir = OUT / 'merged'
+    mdir.mkdir(parents=True, exist_ok=True)
+    lines = ['# 两源差异报告', '', '| 模型 | 上报 | 管理 | 合并 | 双源一致 | 双源差异 | 仅上报 | 仅管理 | 孤儿 |',
+             '|---|---|---|---|---|---|---|---|---|']
+    orphans = {}
+    for main, cfg in sorted(MODEL_MAP.items()):
+        mid = cfg['model_id']
+        rp, mp_ = OUT / 'transformed/report' / f"{mid.split('@')[0]}.json", OUT / 'transformed/mgmt' / f"{mid.split('@')[0]}.json"
+        if not rp.exists() and not mp_.exists():
+            continue
+        r_rows = json.loads(rp.read_text()) if rp.exists() else []
+        m_rows = json.loads(mp_.read_text()) if mp_.exists() else []
+        schema = fetch_schema(mid)
+        attr_ids = [a for _, _, a in FIELD_MAP[mid]] + ['_dataSource', '_diffDetail']
+        merged, stats, orphan = merge_model(r_rows, m_rows, schema['key_attr'], attr_ids)
+        (mdir / f"{mid.split('@')[0]}.json").write_text(json.dumps(merged, ensure_ascii=False, indent=1))
+        if orphan:
+            orphans[mid] = orphan
+        lines.append(f"| {mid} | {len(r_rows)} | {len(m_rows)} | {len(merged)} | {stats['both_same']} "
+                     f"| {stats['both_diff']} | {stats['report_only']} | {stats['mgmt_only']} | {len(orphan)} |")
+        for row in merged:                                   # 明细节
+            if row.get('_diffDetail'):
+                lines.append(f"- **{row.get(schema['key_attr'])}** ({mid})")
+                for d in row['_diffDetail']:
+                    lines.append(f"  - {d['attr']}: 上报={d['reportValue']} | 管理={d['mgmtValue']}")
+    (OUT / 'orphan.json').write_text(json.dumps(orphans, ensure_ascii=False, indent=1))
+    (OUT / 'diff-report.md').write_text('\n'.join(lines))
+    print('compare 完成 →', OUT / 'diff-report.md')
+
 if __name__ == '__main__':
     print('use --stage investigate|transform|compare|import')

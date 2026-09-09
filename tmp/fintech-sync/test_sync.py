@@ -116,3 +116,19 @@ def test_normalize_row_full():
     assert out == {'facilityDescriptor': 'abc', 'ip': None}    # 脱敏→None；管理独有列报侧不取
     out2 = sync.normalize_row(raw, pairs, 'mgmt', CTX)
     assert out2['ip'] is None and out2['facilityUpdateDate'] == '2024-01-01'
+
+PAIRS = [('设施标识符', '设施标识符', 'fd'), ('管理IP地址', '管理IP地址', 'ip')]
+
+def test_merge_model_all_branches():
+    r = [{'fd': 'a', 'ip': '1.1.1.1'}, {'fd': 'b', 'ip': '2.2.2.2'},
+         {'fd': 'c', 'ip': '3.3.3.3'}, {'ip': 'no-key'}]
+    m = [{'fd': 'a', 'ip': '1.1.1.1'}, {'fd': 'b', 'ip': '******'},
+         {'fd': 'd', 'ip': '4.4.4.4'}, {'fd': 'e', 'ip': '5.5.5.5'}]
+    merged, stats, orphan = sync.merge_model(r, m, 'fd', ['fd', 'ip'])
+    by = {row['fd']: row for row in merged if row.get('fd')}
+    assert by['a']['_dataSource'] == '双源' and by['a']['_diffDetail'] == []      # 一致
+    assert by['b']['ip'] == '2.2.2.2' and by['b']['_dataSource'] == '双源(有差异)'  # 脱敏→上报覆盖
+    assert by['b']['_diffDetail'] == [{'attr': 'ip', 'reportValue': '2.2.2.2', 'mgmtValue': '******'}]
+    assert by['c']['_dataSource'] == '上报' and by['d']['_dataSource'] == '管理'
+    assert stats == {'both_same': 1, 'both_diff': 1, 'report_only': 1, 'mgmt_only': 2}
+    assert len(orphan) == 1
