@@ -1,4 +1,5 @@
 # tmp/fintech-sync/test_sync.py
+import json
 import sys
 from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent))
@@ -70,3 +71,21 @@ def test_build_custom_attrs_body_present_noop():
         {'id': '_dataSource', 'name': '数据来源', 'value': {'type': 'enum'}},
         {'id': '_diffDetail', 'name': '差异明细', 'value': {'type': 'struct'}}]}
     assert sync.build_custom_attrs_body(detail) is None
+
+def test_fetch_schema_refresh_keeps_other_models(monkeypatch, tmp_path):
+    # 缓存重定向到临时目录，避免污染真实 out/schema-cache.json
+    monkeypatch.setattr(sync, 'SCHEMA_CACHE', tmp_path / 'schema-cache.json')
+    # 预置缓存：别的模型 + 待刷新模型（refresh=True 应绕过命中重拉，但不能清掉别的模型）
+    cache = {'other@FINTECHDATA': {'attrs': {'x': {'name': 'X', 'type': 'str', 'regex': None}},
+                                   'key_attr': 'x'},
+             'switches@FINTECHDATA': {'attrs': {'stale': {'name': '旧', 'type': 'str', 'regex': None}},
+                                      'key_attr': 'stale'}}
+    sync.SCHEMA_CACHE.write_text(json.dumps(cache, ensure_ascii=False))
+    fake_detail = {'data': {'attrList': [
+        {'id': 'facilityDescriptor', 'name': '设施标识符', 'value': {'type': 'str'}}]}}
+    monkeypatch.setattr(sync, 'api_cli', lambda *a, **k: (0, json.dumps(fake_detail), ''))
+    schema = sync.fetch_schema('switches@FINTECHDATA', refresh=True)
+    assert 'facilityDescriptor' in schema['attrs']            # 确实重拉了
+    after = json.loads(sync.SCHEMA_CACHE.read_text())
+    assert 'other@FINTECHDATA' in after                       # 别的模型还在（bug 时会被清掉）
+    assert 'switches@FINTECHDATA' in after and after['switches@FINTECHDATA'] == schema

@@ -130,7 +130,7 @@ def _attr_brief(a):
 def fetch_schema(model_id, refresh=False):
     """detail → {attrs:{id:{name,type,regex}}, key_attr}；缓存到 out/schema-cache.json"""
     cache = {}
-    if SCHEMA_CACHE.exists() and not refresh:
+    if SCHEMA_CACHE.exists():
         cache = json.loads(SCHEMA_CACHE.read_text())
     if model_id in cache and not refresh:
         return cache[model_id]
@@ -195,6 +195,8 @@ def build_custom_attrs_body(detail):
 
 def ensure_custom_attrs():
     rc, out, err = api_cli('object_model', 'detail', 'CUSTOM@FINTECHDATA')
+    if rc != 0:
+        raise RuntimeError(f'detail CUSTOM@FINTECHDATA 失败: {err.strip()[:200]}')
     body = build_custom_attrs_body(json.loads(out)['data'])
     if body is None:
         return False
