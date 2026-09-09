@@ -1566,10 +1566,15 @@ DIFF_EXEMPT_ATTRS = {'facilityOwnershipAgency', 'softwareOwnershipAgency', 'soft
 # - softwareCategory: basedSoftware 已反解（路径末级对照）；application 侧 mgmt 中文细分名无编码对照表（仅 1 个编码 YYGJGXL000）
 # 豁免避免 3000+ 行全员"双源(有差异)"淹没真实数据差异。
 
+_DATE_RE = re.compile(r'^\d{4}-\d{2}-\d{2}')
+
 def _loose_eq(a, b):
-    """宽松等值：str 去 'NN-' 编码前缀与空格后比较（'02-Java'=='Java'、'99-其他'=='其他'）。"""
+    """宽松等值：str 去 'NN-' 编码前缀与空格后比较（'02-Java'=='Java'、'99-其他'=='其他'）。
+    日期守卫：完整日期形态（YYYY-MM-DD）不剥前缀（否则 2024-01-15/2023-01-15 同剥成 01-15 误等）。"""
     if not isinstance(a, str) or not isinstance(b, str):
         return str(a) == str(b)
+    if _DATE_RE.match(a) or _DATE_RE.match(b):
+        return a.replace(' ', '') == b.replace(' ', '')
     strip = lambda t: re.sub(r'^\d+-', '', t).replace(' ', '')
     return strip(a) == strip(b)
 

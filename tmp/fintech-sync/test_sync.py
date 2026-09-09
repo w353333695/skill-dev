@@ -224,6 +224,19 @@ def test_build_import_body_structs():
     assert body['datas'][0]['dep'] == [{'x': '1'}]
     assert 'dep' not in body['datas'][1] and body['datas'][1]['_diffDetail'][0]['attr'] == 'dep.x'
 
+def test_loose_eq_basic():
+    assert sync._loose_eq('02-Java', 'Java')
+    assert sync._loose_eq('99-其他', '其他')
+    assert sync._loose_eq('00-IPSec,01-MACSec', '00-IPSec,01-MACSec')
+    assert not sync._loose_eq('02-Java', '03-Python')
+
+def test_loose_eq_date_guard():
+    # 日期形态（YYYY-MM-DD）不走宽松剥前缀：2024-01-15 与 2023-01-15 剥前缀后同为 '01-15' 会误等
+    assert not sync._loose_eq('2024-01-15', '2023-01-15')
+    assert sync._loose_eq('2024-01-15', '2024-01-15')     # 同日期仍相等（严格等）
+    # 完整日期前带其他文本不属日期守卫范围（正常剥前缀语义）
+    assert sync._loose_eq('02-Java', 'Java')              # 修复不影响编码前缀宽松等
+
 def test_build_import_body():
     rows = [{'fd': 'a', 'ip': '1.1.1.1', '_dataSource': '双源', '_diffDetail': []},
             {'fd': 'b', 'ip': None, '_dataSource': '上报', '_diffDetail':
