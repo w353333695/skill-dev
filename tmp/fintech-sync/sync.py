@@ -327,7 +327,7 @@ def compare():
     mdir.mkdir(parents=True, exist_ok=True)
     lines = ['# 两源差异报告', '', '| 模型 | 上报 | 管理 | 合并 | 双源一致 | 双源差异 | 仅上报 | 仅管理 | 孤儿 |',
              '|---|---|---|---|---|---|---|---|---|']
-    orphans = {}
+    detail_lines, orphans = [], {}
     for main, cfg in sorted(MODEL_MAP.items()):
         mid = cfg['model_id']
         rp, mp_ = OUT / 'transformed/report' / f"{mid.split('@')[0]}.json", OUT / 'transformed/mgmt' / f"{mid.split('@')[0]}.json"
@@ -345,9 +345,11 @@ def compare():
                      f"| {stats['both_diff']} | {stats['report_only']} | {stats['mgmt_only']} | {len(orphan)} |")
         for row in merged:                                   # 明细节
             if row.get('_diffDetail'):
-                lines.append(f"- **{row.get(schema['key_attr'])}** ({mid})")
+                detail_lines.append(f"- **{row.get(schema['key_attr'])}** ({mid})")
                 for d in row['_diffDetail']:
-                    lines.append(f"  - {d['attr']}: 上报={d['reportValue']} | 管理={d['mgmtValue']}")
+                    detail_lines.append(f"  - {d['attr']}: 上报={d['reportValue']} | 管理={d['mgmtValue']}")
+    if detail_lines:                                         # 两遍收集：主表连续，明细节分段在后
+        lines += [''] + detail_lines
     (OUT / 'orphan.json').write_text(json.dumps(orphans, ensure_ascii=False, indent=1))
     (OUT / 'diff-report.md').write_text('\n'.join(lines))
     print('compare 完成 →', OUT / 'diff-report.md')

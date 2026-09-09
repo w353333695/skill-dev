@@ -132,3 +132,25 @@ def test_merge_model_all_branches():
     assert by['c']['_dataSource'] == '上报' and by['d']['_dataSource'] == '管理'
     assert stats == {'both_same': 1, 'both_diff': 1, 'report_only': 1, 'mgmt_only': 2}
     assert len(orphan) == 1
+
+def test_compare_report_table_not_interrupted(monkeypatch, tmp_path):
+    # 多模型差异时，主表（| 行）必须连续且不被明细节 bullet（- 行）中断（GFM 表格遇 bullet 停止渲染）
+    monkeypatch.setattr(sync, 'OUT', tmp_path)
+    monkeypatch.setattr(sync, 'FIELD_MAP', {
+        'switches@FINTECHDATA': [('设施标识符', '设施标识符', 'fd'), ('管理IP地址', '管理IP地址', 'ip')],
+        'router@FINTECHDATA':   [('设施标识符', '设施标识符', 'fd'), ('管理IP地址', '管理IP地址', 'ip')],
+    })
+    monkeypatch.setattr(sync, 'fetch_schema', lambda mid: {'attrs': {}, 'key_attr': 'fd'})
+    for name in ('switches', 'router'):                       # 两模型各 1 条差异行
+        for side, row in (('report', {'fd': 'a', 'ip': '1.1.1.1'}), ('mgmt', {'fd': 'a', 'ip': '2.2.2.2'})):
+            d = tmp_path / 'transformed' / side
+            d.mkdir(parents=True, exist_ok=True)
+            (d / f'{name}.json').write_text(json.dumps([row], ensure_ascii=False))
+    sync.compare()
+    kinds = ['T' if l.startswith('|') else ('B' if l.startswith('-') else 'O')
+             for l in (tmp_path / 'diff-report.md').read_text().splitlines()]
+    assert kinds.count('B') >= 2 and kinds.count('T') >= 4     # 两模型表行+表头都在
+    first_b = kinds.index('B')
+    tl = [i for i, k in enumerate(kinds) if k == 'T']
+    assert all(i < first_b for i in tl)                       # 全部表行在首个 bullet 之前
+    assert set(kinds[tl[0]:tl[-1] + 1]) == {'T'}              # 表行区间连续无夹断
