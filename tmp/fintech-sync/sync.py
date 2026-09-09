@@ -94,9 +94,9 @@ def find_file(side, main_name):
     return None
 
 def read_excel_rows(path):
-    """读主 sheet（第一个），表头行 1；剔除 skip_columns；返回 [{列名:值}]，空行跳过。"""
+    """读主 sheet（skip_sheets 过滤后的第一个），表头行 1；剔除 skip_columns；返回 [{列名:值}]，空行跳过。"""
     wb = openpyxl.load_workbook(path)
-    ws = wb.worksheets[0]
+    ws = next(w for w in wb.worksheets if w.title not in RULES['skip_sheets'])
     rows, header = [], None
     for i, row in enumerate(ws.iter_rows(values_only=True), 1):
         if i == 1:
@@ -323,6 +323,7 @@ def merge_model(r_rows, m_rows, key_attr, attr_ids):
     return merged, stats, orphan
 
 def compare():
+    assert FIELD_MAP, 'FIELD_MAP 为空：先跑 investigate 并把 out/config-skeleton.py 核对后粘回'
     mdir = OUT / 'merged'
     mdir.mkdir(parents=True, exist_ok=True)
     lines = ['# 两源差异报告', '', '| 模型 | 上报 | 管理 | 合并 | 双源一致 | 双源差异 | 仅上报 | 仅管理 | 孤儿 |',
