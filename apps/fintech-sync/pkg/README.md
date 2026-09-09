@@ -29,11 +29,23 @@ python3 import_all.py --host <IP> --check
 # 2) 正式导入（模型 + 全部实例，upsert 幂等可重跑）
 python3 import_all.py --host <IP>
 
-# 3) 只导某模型实例
+# 3) 冲突环境清理导入（目标环境已有旧模型/定义冲突时）
+#    删36模型全部实例 → 删36数据模型(forceDelete) → 导模型 → 导实例
+python3 import_all.py --host <IP> --clean
+
+# 4) 只导某模型实例
 python3 import_all.py --host <IP> --only switches
 ```
 
-参数：`--port 8079`（默认）、`--org 8888`、`--user easyops`、`--dry-run`。
+参数：`--port 8079`（默认）、`--org 8888`、`--user easyops`、`--clean`、`--dry-run`。
+
+## --clean 清理链语义（实测归纳）
+
+- **删实例**：逐模型 search 取 instanceId（500/页）→ `instance_batch` 删（500/批）；模型不存在视为已清空
+- **删模型**：仅 36 个数据模型，`DELETE /object/{id}?forceDelete=true`（force 连实例/关系强删）；模型不存在（133114）跳过
+- **抽象父模型（CUSTOM/cabinetAsset/netAsset/powerSupplyAsset/powerUsedAsset/serverAsset/storageAsset 共 7 个）平台禁删**（130302 Can not drop abstract object）——不删，由导入 upsert 覆盖定义
+- 顺序：清实例 → 清模型 → 导模型（父模型在列表前部）→ 导实例
+- ⚠️ `--clean` 对目标环境同名模型是**破坏性操作**（旧实例全删），确认目标环境无他人数据后再用
 
 ## 导入语义
 
@@ -44,8 +56,8 @@ python3 import_all.py --host <IP> --only switches
 ## 验证记录（源环境 172.30.0.90 已真跑）
 
 - 模型预检：43/43 成功
-- 全量 upsert：36/36 模型 update=3314 failed=0
-- 幂等回归：insert=0 update=3314 failed=0
+- 全量 upsert：36/36 模型 update=3314 failed=0；幂等回归 insert=0
+- `--clean` 全链：清实例 3314 → 清模型 36/36 → 导模型 43/43 → 导实例 insert=3314 failed=0；重建后抽查 `_dataSource`/`switches_deployment`(structs)/`networkSecurityCapability`(enums)/机构编号 全部正确
 
 ## 唯一键映射（与源环境一致）
 
