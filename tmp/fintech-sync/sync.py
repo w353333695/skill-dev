@@ -82,9 +82,10 @@ def norm_text(s):
 def find_file(side, main_name):
     """side∈{report,mgmt}；report 文件名=<主名>_YYYYMMDDHHMMSS.xlsx，mgmt=<别名>YYYYMMDDHHMMSS.xlsx"""
     alias = main_name
-    for k, cfg in MODEL_MAP.items():
-        if k == main_name and 'mgmt_alias' in cfg:
-            alias = cfg['mgmt_alias']
+    if side == 'mgmt':
+        for k, cfg in MODEL_MAP.items():
+            if k == main_name and 'mgmt_alias' in cfg:
+                alias = cfg['mgmt_alias']
     # report 侧时间戳 14 位（<主名>_YYYYMMDDHHMMSS）；mgmt 侧实测 17 位（YYYYMMDDHHMMSS+3位毫秒）
     pat = re.compile(re.escape(alias) + r'_?\d{14,17}\.xlsx$')
     for p in sorted(SIDES[side].glob('*.xlsx')):

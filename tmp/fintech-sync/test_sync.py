@@ -18,6 +18,11 @@ def test_find_file_mgmt_alias():
     p = sync.find_file('mgmt', '机柜')
     assert p is not None and p.exists() and p.name.startswith('普通机柜')
 
+def test_find_file_report_side_uses_main_name():
+    # report 侧永远用主名原名，mgmt_alias 不应影响 report 查找
+    p = sync.find_file('report', '机柜')
+    assert p is not None and p.exists() and p.name.startswith('机柜_')
+
 def test_read_excel_rows_skips():
     p = sync.find_file('report', '交换机')
     rows = sync.read_excel_rows(p)
