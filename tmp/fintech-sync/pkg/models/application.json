@@ -1,0 +1,1040 @@
+{
+ "_version": 89,
+ "attrList": [
+  {
+   "custom": "true",
+   "description": "",
+   "id": "applySystemIdentifiers",
+   "inheritObjectId": "",
+   "isInherit": false,
+   "isMetadata": false,
+   "name": "应用系统标识符",
+   "notifyDenied": false,
+   "protected": false,
+   "readonly": "false",
+   "required": "true",
+   "tag": [
+    "基本信息"
+   ],
+   "tips": "",
+   "unique": "true",
+   "value": {
+    "default": "guid()",
+    "default_type": "function",
+    "mode": "default",
+    "prefix": "",
+    "regex": null,
+    "series_number_length": 0,
+    "start_value": 0,
+    "struct_define": [],
+    "type": "str"
+   },
+   "wordIndexDenied": false
+  },
+  {
+   "custom": "true",
+   "description": "",
+   "id": "softwareOwnershipAgency",
+   "inheritObjectId": "",
+   "isInherit": false,
+   "isMetadata": false,
+   "name": "应用所属机构",
+   "notifyDenied": false,
+   "protected": false,
+   "readonly": "false",
+   "required": "true",
+   "tag": [
+    "基本信息"
+   ],
+   "tips": "",
+   "unique": "false",
+   "value": {
+    "default": null,
+    "default_type": "value",
+    "mode": "default",
+    "prefix": "",
+    "regex": null,
+    "series_number_length": 0,
+    "start_value": 0,
+    "struct_define": [],
+    "type": "str"
+   },
+   "wordIndexDenied": false
+  },
+  {
+   "custom": "true",
+   "description": "",
+   "id": "applicationProfile",
+   "inheritObjectId": "",
+   "isInherit": false,
+   "isMetadata": false,
+   "name": "应用简介",
+   "notifyDenied": false,
+   "protected": false,
+   "readonly": "false",
+   "required": "true",
+   "tag": [
+    "基本信息"
+   ],
+   "tips": "",
+   "unique": "false",
+   "value": {
+    "default": null,
+    "default_type": "value",
+    "mode": "default",
+    "prefix": "",
+    "regex": null,
+    "series_number_length": 0,
+    "start_value": 0,
+    "struct_define": [],
+    "type": "str"
+   },
+   "wordIndexDenied": false
+  },
+  {
+   "custom": "true",
+   "description": "",
+   "id": "developmentLanguage",
+   "inheritObjectId": "",
+   "isInherit": false,
+   "isMetadata": false,
+   "name": "开发语言",
+   "notifyDenied": false,
+   "protected": false,
+   "readonly": "false",
+   "required": "true",
+   "tag": [
+    "基本信息"
+   ],
+   "tips": "",
+   "unique": "false",
+   "value": {
+    "default": null,
+    "default_type": "value",
+    "mode": "default",
+    "prefix": "",
+    "regex": null,
+    "series_number_length": 0,
+    "start_value": 0,
+    "struct_define": [],
+    "type": "str"
+   },
+   "wordIndexDenied": false
+  },
+  {
+   "custom": "true",
+   "description": "",
+   "id": "domainCharacteristics",
+   "inheritObjectId": "",
+   "isInherit": false,
+   "isMetadata": false,
+   "name": "业务领域特征",
+   "notifyDenied": false,
+   "protected": false,
+   "readonly": "false",
+   "required": "true",
+   "tag": [
+    "基本信息"
+   ],
+   "tips": "",
+   "unique": "false",
+   "value": {
+    "default": null,
+    "default_type": "value",
+    "mode": "default",
+    "prefix": "",
+    "regex": null,
+    "series_number_length": 0,
+    "start_value": 0,
+    "struct_define": [],
+    "type": "str"
+   },
+   "wordIndexDenied": false
+  },
+  {
+   "custom": "true",
+   "description": "",
+   "id": "softwareCategory",
+   "inheritObjectId": "",
+   "isInherit": false,
+   "isMetadata": false,
+   "name": "分类标识符",
+   "notifyDenied": false,
+   "protected": false,
+   "readonly": "false",
+   "required": "true",
+   "tag": [
+    "基本信息"
+   ],
+   "tips": "",
+   "unique": "false",
+   "value": {
+    "default": null,
+    "default_type": "value",
+    "mode": "default",
+    "prefix": "",
+    "regex": null,
+    "series_number_length": 0,
+    "start_value": 0,
+    "struct_define": [],
+    "type": "str"
+   },
+   "wordIndexDenied": false
+  },
+  {
+   "custom": "true",
+   "description": "",
+   "id": "softwareName",
+   "inheritObjectId": "",
+   "isInherit": false,
+   "isMetadata": false,
+   "name": "应用系统名称",
+   "notifyDenied": false,
+   "protected": false,
+   "readonly": "false",
+   "required": "true",
+   "tag": [
+    "基本信息"
+   ],
+   "tips": "",
+   "unique": "false",
+   "value": {
+    "default": null,
+    "default_type": "value",
+    "mode": "default",
+    "prefix": "",
+    "regex": null,
+    "series_number_length": 0,
+    "start_value": 0,
+    "struct_define": [],
+    "type": "str"
+   },
+   "wordIndexDenied": false
+  },
+  {
+   "custom": "true",
+   "description": "",
+   "id": "servicePeriod",
+   "inheritObjectId": "",
+   "isInherit": false,
+   "isMetadata": false,
+   "name": "服务时段",
+   "notifyDenied": false,
+   "protected": false,
+   "readonly": "false",
+   "required": "true",
+   "tag": [
+    "基本信息"
+   ],
+   "tips": "",
+   "unique": "false",
+   "value": {
+    "default": null,
+    "default_type": "",
+    "mode": "default",
+    "prefix": "",
+    "regex": [
+     "00-5*8",
+     "01-5*24",
+     "02-7*8",
+     "03-7*24",
+     "99-其它"
+    ],
+    "series_number_length": 0,
+    "start_value": 0,
+    "struct_define": [],
+    "type": "enum"
+   },
+   "wordIndexDenied": false
+  },
+  {
+   "custom": "true",
+   "description": "",
+   "id": "highAvailability",
+   "inheritObjectId": "",
+   "isInherit": false,
+   "isMetadata": false,
+   "name": "高可用方式",
+   "notifyDenied": false,
+   "protected": false,
+   "readonly": "false",
+   "required": "true",
+   "tag": [
+    "基本信息"
+   ],
+   "tips": "",
+   "unique": "false",
+   "value": {
+    "default": null,
+    "default_type": "",
+    "mode": "default",
+    "prefix": "",
+    "regex": [
+     "00-虚拟化",
+     "01-集群",
+     "02-负载均衡",
+     "03-服务器双机热备",
+     "04-存储设备冗余",
+     "99-其他"
+    ],
+    "series_number_length": 0,
+    "start_value": 0,
+    "struct_define": [],
+    "type": "enum"
+   },
+   "wordIndexDenied": false
+  },
+  {
+   "custom": "true",
+   "description": "",
+   "id": "disasterRecoveryLevel",
+   "inheritObjectId": "",
+   "isInherit": false,
+   "isMetadata": false,
+   "name": "灾备等级",
+   "notifyDenied": false,
+   "protected": false,
+   "readonly": "false",
+   "required": "true",
+   "tag": [
+    "基本信息"
+   ],
+   "tips": "",
+   "unique": "false",
+   "value": {
+    "default": null,
+    "default_type": "",
+    "mode": "default",
+    "prefix": "",
+    "regex": [
+     "00-一级",
+     "01-二级",
+     "02-三级",
+     "03-四级",
+     "04-五级",
+     "05-六级",
+     "99-未定级"
+    ],
+    "series_number_length": 0,
+    "start_value": 0,
+    "struct_define": [],
+    "type": "enum"
+   },
+   "wordIndexDenied": false
+  },
+  {
+   "custom": "true",
+   "description": "",
+   "id": "internetSever",
+   "inheritObjectId": "",
+   "isInherit": false,
+   "isMetadata": false,
+   "name": "是否面向互联网服务",
+   "notifyDenied": false,
+   "protected": false,
+   "readonly": "false",
+   "required": "true",
+   "tag": [
+    "基本信息"
+   ],
+   "tips": "",
+   "unique": "false",
+   "value": {
+    "default": null,
+    "default_type": "",
+    "mode": "default",
+    "prefix": "",
+    "regex": [
+     "True",
+     "False"
+    ],
+    "series_number_length": 0,
+    "start_value": 0,
+    "struct_define": [],
+    "type": "enum"
+   },
+   "wordIndexDenied": false
+  },
+  {
+   "custom": "true",
+   "description": "",
+   "id": "levelOfProtection",
+   "inheritObjectId": "",
+   "isInherit": false,
+   "isMetadata": false,
+   "name": "等级保护级别",
+   "notifyDenied": false,
+   "protected": false,
+   "readonly": "false",
+   "required": "true",
+   "tag": [
+    "基本信息"
+   ],
+   "tips": "",
+   "unique": "false",
+   "value": {
+    "default": null,
+    "default_type": "",
+    "mode": "default",
+    "prefix": "",
+    "regex": [
+     "00-一级",
+     "01-二级",
+     "02-三级",
+     "03-四级",
+     "04-五级",
+     "99-未定级"
+    ],
+    "series_number_length": 0,
+    "start_value": 0,
+    "struct_define": [],
+    "type": "enum"
+   },
+   "wordIndexDenied": false
+  },
+  {
+   "custom": "true",
+   "description": "",
+   "id": "serviceObject",
+   "inheritObjectId": "",
+   "isInherit": false,
+   "isMetadata": false,
+   "name": "服务对象",
+   "notifyDenied": false,
+   "protected": false,
+   "readonly": "false",
+   "required": "true",
+   "tag": [
+    "基本信息"
+   ],
+   "tips": "",
+   "unique": "false",
+   "value": {
+    "default": null,
+    "default_type": "",
+    "mode": "default",
+    "prefix": "",
+    "regex": [
+     "00-仅内部用户",
+     "01-外部用户"
+    ],
+    "series_number_length": 0,
+    "start_value": 0,
+    "struct_define": [],
+    "type": "enum"
+   },
+   "wordIndexDenied": false
+  },
+  {
+   "custom": "true",
+   "description": "",
+   "id": "supportIpv6",
+   "inheritObjectId": "",
+   "isInherit": false,
+   "isMetadata": false,
+   "name": "IPV6支持",
+   "notifyDenied": false,
+   "protected": false,
+   "readonly": "false",
+   "required": "true",
+   "tag": [
+    "基本信息"
+   ],
+   "tips": "",
+   "unique": "false",
+   "value": {
+    "default": null,
+    "default_type": "",
+    "mode": "default",
+    "prefix": "",
+    "regex": [
+     "True",
+     "False"
+    ],
+    "series_number_length": 0,
+    "start_value": 0,
+    "struct_define": [],
+    "type": "enum"
+   },
+   "wordIndexDenied": false
+  },
+  {
+   "custom": "true",
+   "description": "",
+   "id": "disasterRecoveryStrategy",
+   "inheritObjectId": "",
+   "isInherit": false,
+   "isMetadata": false,
+   "name": "灾备策略",
+   "notifyDenied": false,
+   "protected": false,
+   "readonly": "false",
+   "required": "true",
+   "tag": [
+    "基本信息"
+   ],
+   "tips": "",
+   "unique": "false",
+   "value": {
+    "default": null,
+    "default_type": "",
+    "mode": "default",
+    "prefix": "",
+    "regex": [
+     "00-同城灾备",
+     "01-异地灾备",
+     "02-同城+异地",
+     "03-多活",
+     "99-无灾备"
+    ],
+    "series_number_length": 0,
+    "start_value": 0,
+    "struct_define": [],
+    "type": "enum"
+   },
+   "wordIndexDenied": false
+  },
+  {
+   "custom": "true",
+   "description": "",
+   "id": "developmentMode",
+   "inheritObjectId": "",
+   "isInherit": false,
+   "isMetadata": false,
+   "name": "开发模式",
+   "notifyDenied": false,
+   "protected": false,
+   "readonly": "false",
+   "required": "true",
+   "tag": [
+    "基本信息"
+   ],
+   "tips": "",
+   "unique": "false",
+   "value": {
+    "default": null,
+    "default_type": "",
+    "mode": "default",
+    "prefix": "",
+    "regex": [
+     "00-自主研发",
+     "01-整体外包",
+     "02-部分外包",
+     "99-其他"
+    ],
+    "series_number_length": 0,
+    "start_value": 0,
+    "struct_define": [],
+    "type": "enum"
+   },
+   "wordIndexDenied": false
+  },
+  {
+   "custom": "true",
+   "description": "",
+   "id": "developerTerritory",
+   "inheritObjectId": "",
+   "isInherit": false,
+   "isMetadata": false,
+   "name": "开发商属地",
+   "notifyDenied": false,
+   "protected": false,
+   "readonly": "false",
+   "required": "true",
+   "tag": [
+    "基本信息"
+   ],
+   "tips": "",
+   "unique": "false",
+   "value": {
+    "default": null,
+    "default_type": "",
+    "mode": "default",
+    "prefix": "",
+    "regex": [
+     "00-国内",
+     "01-国外",
+     "02-国内外合作",
+     "99-其它"
+    ],
+    "series_number_length": 0,
+    "start_value": 0,
+    "struct_define": [],
+    "type": "enum"
+   },
+   "wordIndexDenied": false
+  },
+  {
+   "custom": "true",
+   "description": "",
+   "id": "intellectualProperty",
+   "inheritObjectId": "",
+   "isInherit": false,
+   "isMetadata": false,
+   "name": "知识产权",
+   "notifyDenied": false,
+   "protected": false,
+   "readonly": "false",
+   "required": "true",
+   "tag": [
+    "基本信息"
+   ],
+   "tips": "",
+   "unique": "false",
+   "value": {
+    "default": null,
+    "default_type": "",
+    "mode": "default",
+    "prefix": "",
+    "regex": [
+     "00-自有",
+     "01-他有",
+     "02-共有"
+    ],
+    "series_number_length": 0,
+    "start_value": 0,
+    "struct_define": [],
+    "type": "enum"
+   },
+   "wordIndexDenied": false
+  },
+  {
+   "custom": "true",
+   "description": "",
+   "id": "maintenanceMode",
+   "inheritObjectId": "",
+   "isInherit": false,
+   "isMetadata": false,
+   "name": "运维模式",
+   "notifyDenied": false,
+   "protected": false,
+   "readonly": "false",
+   "required": "true",
+   "tag": [
+    "基本信息"
+   ],
+   "tips": "",
+   "unique": "false",
+   "value": {
+    "default": null,
+    "default_type": "",
+    "mode": "default",
+    "prefix": "",
+    "regex": [
+     "00-自主运维",
+     "01-整体外包",
+     "02-部分外包",
+     "99-其他"
+    ],
+    "series_number_length": 0,
+    "start_value": 0,
+    "struct_define": [],
+    "type": "enum"
+   },
+   "wordIndexDenied": false
+  },
+  {
+   "custom": "true",
+   "description": "",
+   "id": "supportDistributed",
+   "inheritObjectId": "",
+   "isInherit": false,
+   "isMetadata": false,
+   "name": "是否采用分布式技术",
+   "notifyDenied": false,
+   "protected": false,
+   "readonly": "false",
+   "required": "true",
+   "tag": [
+    "基本信息"
+   ],
+   "tips": "",
+   "unique": "false",
+   "value": {
+    "default": null,
+    "default_type": "",
+    "mode": "default",
+    "prefix": "",
+    "regex": [
+     "True",
+     "False"
+    ],
+    "series_number_length": 0,
+    "start_value": 0,
+    "struct_define": [],
+    "type": "enum"
+   },
+   "wordIndexDenied": false
+  },
+  {
+   "custom": "true",
+   "description": "",
+   "id": "emergencyPlan",
+   "inheritObjectId": "",
+   "isInherit": false,
+   "isMetadata": false,
+   "name": "应急预案",
+   "notifyDenied": false,
+   "protected": false,
+   "readonly": "false",
+   "required": "true",
+   "tag": [
+    "基本信息"
+   ],
+   "tips": "",
+   "unique": "false",
+   "value": {
+    "default": null,
+    "default_type": "",
+    "mode": "default",
+    "prefix": "",
+    "regex": [
+     "True",
+     "False"
+    ],
+    "series_number_length": 0,
+    "start_value": 0,
+    "struct_define": [],
+    "type": "enum"
+   },
+   "wordIndexDenied": false
+  },
+  {
+   "custom": "true",
+   "description": "",
+   "id": "rto",
+   "inheritObjectId": "",
+   "isInherit": false,
+   "isMetadata": false,
+   "name": "RT0（分钟）",
+   "notifyDenied": false,
+   "protected": false,
+   "readonly": "false",
+   "required": "false",
+   "tag": [
+    "基本信息"
+   ],
+   "tips": "",
+   "unique": "false",
+   "value": {
+    "default": null,
+    "default_type": "value",
+    "mode": "default",
+    "prefix": "",
+    "regex": null,
+    "series_number_length": 0,
+    "start_value": 0,
+    "struct_define": [],
+    "type": "str"
+   },
+   "wordIndexDenied": false
+  },
+  {
+   "custom": "true",
+   "description": "",
+   "id": "rpo",
+   "inheritObjectId": "",
+   "isInherit": false,
+   "isMetadata": false,
+   "name": "RP0",
+   "notifyDenied": false,
+   "protected": false,
+   "readonly": "false",
+   "required": "false",
+   "tag": [
+    "基本信息"
+   ],
+   "tips": "",
+   "unique": "false",
+   "value": {
+    "default": null,
+    "default_type": "value",
+    "mode": "default",
+    "prefix": "",
+    "regex": null,
+    "series_number_length": 0,
+    "start_value": 0,
+    "struct_define": [],
+    "type": "str"
+   },
+   "wordIndexDenied": false
+  },
+  {
+   "custom": "true",
+   "description": "",
+   "id": "note",
+   "inheritObjectId": "",
+   "isInherit": false,
+   "isMetadata": false,
+   "name": "备注信息",
+   "notifyDenied": false,
+   "protected": false,
+   "readonly": "false",
+   "required": "false",
+   "tag": [
+    "基本信息"
+   ],
+   "tips": "",
+   "unique": "false",
+   "value": {
+    "default": null,
+    "default_type": "value",
+    "mode": "default",
+    "prefix": "",
+    "regex": null,
+    "series_number_length": 0,
+    "start_value": 0,
+    "struct_define": [],
+    "type": "str"
+   },
+   "wordIndexDenied": false
+  },
+  {
+   "custom": "true",
+   "description": "",
+   "id": "softwareEnName",
+   "inheritObjectId": "",
+   "isInherit": false,
+   "isMetadata": false,
+   "name": "应用系统英文简称",
+   "notifyDenied": false,
+   "protected": false,
+   "readonly": "false",
+   "required": "false",
+   "tag": [
+    "基本信息"
+   ],
+   "tips": "",
+   "unique": "false",
+   "value": {
+    "default": null,
+    "default_type": "value",
+    "mode": "default",
+    "prefix": "",
+    "regex": null,
+    "series_number_length": 0,
+    "start_value": 0,
+    "struct_define": [],
+    "type": "str"
+   },
+   "wordIndexDenied": false
+  },
+  {
+   "custom": "true",
+   "description": "",
+   "id": "brandLand",
+   "inheritObjectId": "",
+   "isInherit": false,
+   "isMetadata": false,
+   "name": "品牌属地",
+   "notifyDenied": false,
+   "protected": false,
+   "readonly": "false",
+   "required": "false",
+   "tag": [
+    "ignoreReport"
+   ],
+   "tips": "",
+   "unique": "false",
+   "value": {
+    "default": null,
+    "default_type": "",
+    "mode": "default",
+    "prefix": "",
+    "regex": [
+     "00-国内",
+     "01-国外",
+     "99-其它"
+    ],
+    "series_number_length": 0,
+    "start_value": 0,
+    "struct_define": [],
+    "type": "enum"
+   },
+   "wordIndexDenied": false
+  },
+  {
+   "custom": "true",
+   "description": "",
+   "id": "disasterRecoveryMod",
+   "inheritObjectId": "",
+   "isInherit": false,
+   "isMetadata": false,
+   "name": "灾备方式",
+   "notifyDenied": false,
+   "protected": false,
+   "readonly": "false",
+   "required": "false",
+   "tag": [
+    "基本信息"
+   ],
+   "tips": "",
+   "unique": "false",
+   "value": {
+    "default": null,
+    "default_type": "",
+    "mode": "default",
+    "prefix": "",
+    "regex": [
+     "00-数据级",
+     "01-应用级",
+     "02-业务级"
+    ],
+    "series_number_length": 0,
+    "start_value": 0,
+    "struct_define": [],
+    "type": "enum"
+   },
+   "wordIndexDenied": false
+  },
+  {
+   "custom": "true",
+   "description": "",
+   "id": "newTechnical",
+   "inheritObjectId": "",
+   "isInherit": false,
+   "isMetadata": false,
+   "name": "新技术特征",
+   "notifyDenied": false,
+   "protected": false,
+   "readonly": "false",
+   "required": "false",
+   "tag": [
+    "基本信息"
+   ],
+   "tips": "",
+   "unique": "false",
+   "value": {
+    "default": null,
+    "default_type": "",
+    "mode": "default",
+    "prefix": "",
+    "regex": [
+     "00-5G",
+     "01-大数据",
+     "02-AI",
+     "03-区块链",
+     "04-云计算",
+     "05-物联网",
+     "99-以上都未采用"
+    ],
+    "series_number_length": 0,
+    "start_value": 0,
+    "struct_define": [],
+    "type": "enums"
+   },
+   "wordIndexDenied": false
+  },
+  {
+   "custom": "true",
+   "description": "",
+   "id": "facilityFirstUseDate",
+   "inheritObjectId": "",
+   "isInherit": false,
+   "isMetadata": false,
+   "name": "首次投产日期",
+   "notifyDenied": false,
+   "protected": false,
+   "readonly": "false",
+   "required": "false",
+   "tag": [
+    "基本信息"
+   ],
+   "tips": "",
+   "unique": "false",
+   "value": {
+    "default": null,
+    "default_type": "",
+    "mode": "",
+    "prefix": "",
+    "regex": null,
+    "series_number_length": 0,
+    "start_value": 0,
+    "struct_define": [],
+    "type": "date"
+   },
+   "wordIndexDenied": false
+  }
+ ],
+ "category": "金融元数据.应用系统",
+ "creator": "easyops",
+ "deleteAuthorizers": [],
+ "icon": "",
+ "indexList": [
+  {
+   "name": "u&applySystemIdentifiers",
+   "propertyIds": [
+    "applySystemIdentifiers"
+   ],
+   "unique": true
+  }
+ ],
+ "isAbstract": false,
+ "memo": "",
+ "modifier": "easyops",
+ "name": "应用系统",
+ "notifyDenied": false,
+ "objectId": "application@FINTECHDATA",
+ "parentObjectId": "CUSTOM@FINTECHDATA",
+ "parentObjectIds": [
+  "CUSTOM@FINTECHDATA"
+ ],
+ "permissionDenied": false,
+ "protected": false,
+ "readAuthorizers": [],
+ "relation_groups": [],
+ "relation_list": [],
+ "system": "",
+ "updateAuthorizers": [],
+ "view": {
+  "attr_authorizers": null,
+  "attr_category_order": [
+   "基本信息",
+   "ignoreReport"
+  ],
+  "attr_order": [
+   "applySystemIdentifiers",
+   "softwareOwnershipAgency",
+   "applicationProfile",
+   "developmentLanguage",
+   "domainCharacteristics",
+   "softwareCategory",
+   "softwareName",
+   "servicePeriod",
+   "highAvailability",
+   "disasterRecoveryLevel",
+   "internetSever",
+   "levelOfProtection",
+   "serviceObject",
+   "supportIpv6",
+   "disasterRecoveryStrategy",
+   "developmentMode",
+   "developerTerritory",
+   "intellectualProperty",
+   "maintenanceMode",
+   "supportDistributed",
+   "emergencyPlan",
+   "rto",
+   "rpo",
+   "note",
+   "softwareEnName",
+   "brandLand",
+   "disasterRecoveryMod",
+   "newTechnical",
+   "facilityFirstUseDate"
+  ],
+  "hide_columns": null,
+  "icon": null,
+  "image": "",
+  "inherit_attr_category_map": null,
+  "relation_default_attr": null,
+  "relation_group_order": null,
+  "relation_order": null,
+  "show_key": [
+   "applySystemIdentifiers"
+  ],
+  "trans_hier_relation_list": null,
+  "visible": true
+ },
+ "wordIndexDenied": false
+}

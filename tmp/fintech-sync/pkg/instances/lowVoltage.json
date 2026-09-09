@@ -1,0 +1,188 @@
+[
+ {
+  "assetBrand": "台达",
+  "assetSerialNumber": "65465461",
+  "brandLand": "00-国内",
+  "communicationProtocol": [
+   "02-Tcp/ip"
+  ],
+  "facilityCategory": "FAPDDPD000",
+  "facilityDescriptor": "1d591f1ca056469aa808ffd70ad637d6",
+  "facilityName": "转接中心低压配电柜1",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2007-07-01",
+  "facilityUseState": "00-设施在用",
+  "lowVoltageEquipmentControlType": "02-短路保护电器",
+  "lowVoltageEquipmentType": "03-柜式成套设备",
+  "lowVoltage_deployment": [
+   {
+    "deployArea": "01-主机房-网络区",
+    "deployComputerRoom": "转接中心机房",
+    "deployDb": "郑州中支转接中心机房",
+    "deployFloor": "二层",
+    "deployGallery": "转接中心综合楼"
+   }
+  ],
+  "lowVoltage_ratedInputParameter": [
+   {
+    "ratedInputCurrent": "50",
+    "ratedInputPower": "380",
+    "ratedInputVoltage": "380"
+   }
+  ],
+  "lowVoltage_ratedOutputParameter": [
+   {
+    "ratedOutputCurrent": "50",
+    "ratedOutputPower": "380",
+    "ratedOutputVoltage": "380"
+   }
+  ],
+  "ratedAlternatingFrequency": "50",
+  "_dataSource": "管理"
+ },
+ {
+  "assetBrand": "台达",
+  "assetSerialNumber": "54653123",
+  "brandLand": "00-国内",
+  "communicationProtocol": [
+   "02-Tcp/ip"
+  ],
+  "facilityCategory": "FAPDDPD000",
+  "facilityDescriptor": "3740f4128c3e4d23b28638215d7a6d7e",
+  "facilityName": "转接中心低压配电柜2",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2007-07-01",
+  "facilityUseState": "00-设施在用",
+  "lowVoltageEquipmentControlType": "02-短路保护电器",
+  "lowVoltageEquipmentType": "03-柜式成套设备",
+  "lowVoltage_deployment": [
+   {
+    "deployArea": "01-主机房-网络区",
+    "deployComputerRoom": "转接中心机房",
+    "deployDb": "郑州中支转接中心机房",
+    "deployFloor": "二层",
+    "deployGallery": "转接中心综合楼"
+   }
+  ],
+  "lowVoltage_ratedInputParameter": [
+   {
+    "ratedInputCurrent": "50",
+    "ratedInputPower": "380",
+    "ratedInputVoltage": "380"
+   }
+  ],
+  "lowVoltage_ratedOutputParameter": [
+   {
+    "ratedOutputCurrent": "50",
+    "ratedOutputPower": "380",
+    "ratedOutputVoltage": "380"
+   }
+  ],
+  "ratedAlternatingFrequency": "50",
+  "_dataSource": "管理"
+ },
+ {
+  "assetBrand": "台达",
+  "assetSerialNumber": "13265498",
+  "brandLand": "00-国内",
+  "communicationProtocol": [
+   "02-Tcp/ip"
+  ],
+  "facilityCategory": "FAPDDPD000",
+  "facilityDescriptor": "98fc63970fec48f59f2d680ab90a5d58",
+  "facilityName": "转接中心低压配电柜2",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUseDate": "2007-07-01",
+  "facilityUseState": "00-设施在用",
+  "lowVoltageEquipmentControlType": "02-短路保护电器",
+  "lowVoltageEquipmentType": "03-柜式成套设备",
+  "lowVoltage_deployment": [
+   {
+    "deployArea": "01-主机房-网络区",
+    "deployComputerRoom": "转接中心机房",
+    "deployDb": "郑州中支转接中心机房",
+    "deployFloor": "二层",
+    "deployGallery": "转接中心综合楼"
+   }
+  ],
+  "lowVoltage_operationsManagement": [
+   {
+    "administrativeDepartment": "00-科技管理部门",
+    "operationDepartment": "00-科技管理部门",
+    "serviceEndTime": "2021-08-27",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "河南捷联科技有限公司",
+    "serviceStartTime": "2020-08-27"
+   }
+  ],
+  "lowVoltage_ratedInputParameter": [
+   {
+    "ratedInputCurrent": "50",
+    "ratedInputPower": "380",
+    "ratedInputVoltage": "380"
+   }
+  ],
+  "lowVoltage_ratedOutputParameter": [
+   {
+    "ratedOutputCurrent": "50",
+    "ratedOutputPower": "380",
+    "ratedOutputVoltage": "380"
+   }
+  ],
+  "ratedAlternatingFrequency": "50",
+  "_dataSource": "上报"
+ },
+ {
+  "assetBrand": "台达",
+  "assetSerialNumber": "321654213",
+  "brandLand": "00-国内",
+  "communicationProtocol": [
+   "02-Tcp/ip"
+  ],
+  "facilityCategory": "FAPDDPD000",
+  "facilityDescriptor": "dd7692c4eb404449ab4bd9d0439efd7d",
+  "facilityName": "转接中心低压配电柜1",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUseDate": "2007-07-01",
+  "facilityUseState": "00-设施在用",
+  "lowVoltageEquipmentControlType": "02-短路保护电器",
+  "lowVoltageEquipmentType": "03-柜式成套设备",
+  "lowVoltage_deployment": [
+   {
+    "deployArea": "01-主机房-网络区",
+    "deployComputerRoom": "转接中心机房",
+    "deployDb": "郑州中支转接中心机房",
+    "deployFloor": "二层",
+    "deployGallery": "转接中心综合楼"
+   }
+  ],
+  "lowVoltage_operationsManagement": [
+   {
+    "administrativeDepartment": "00-科技管理部门",
+    "operationDepartment": "00-科技管理部门",
+    "serviceEndTime": "2021-08-27",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "河南捷联科技有限公司",
+    "serviceStartTime": "2020-08-27"
+   }
+  ],
+  "lowVoltage_ratedInputParameter": [
+   {
+    "ratedInputCurrent": "50",
+    "ratedInputPower": "380",
+    "ratedInputVoltage": "380"
+   }
+  ],
+  "lowVoltage_ratedOutputParameter": [
+   {
+    "ratedOutputCurrent": "50",
+    "ratedOutputPower": "380",
+    "ratedOutputVoltage": "380"
+   }
+  ],
+  "ratedAlternatingFrequency": "50",
+  "_dataSource": "上报"
+ }
+]

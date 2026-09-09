@@ -1,0 +1,198 @@
+[
+ {
+  "facilityDescriptor": "1b6b3d72b06e4fe487382ffcd534faf5",
+  "assetBrand": "易安信",
+  "assetCode": "2200000021009999",
+  "assetSerialNumber": "BRCBRW1912P033",
+  "assetType": "ds-6510b",
+  "brandLand": "01-国外",
+  "deviceHeight": "1",
+  "facilityCategory": "FAITNWDGSW",
+  "facilityName": "郑州中心支行虚拟化存储光纤交换机2",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2018-12-01",
+  "facilityUseState": "00-设施在用",
+  "fiberSwitch_deployment": [
+   {
+    "deployArea": "00-主机房-服务器区",
+    "deployComputerRoom": "郑州中支主中心机房",
+    "deployDb": "郑州中支主中心机房",
+    "deployFloor": "十一层",
+    "deployGallery": "河南省郑州市郑东新区商务外环路21号"
+   }
+  ],
+  "fiberSwitch_installationPosition": [
+   {
+    "belongCabinet": "郑州中支主中心服务器机房服务器机柜14",
+    "slotNo": "40"
+   }
+  ],
+  "fiberSwitch_operationsManagement": [
+   {
+    "administrativeDepartment": "00-科技管理部门",
+    "operationDepartment": "00-科技管理部门",
+    "serviceEndTime": "2022-04-30",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "郑州市金冠同利电子科技有限公司",
+    "serviceStartTime": "2020-04-01"
+   }
+  ],
+  "influenceSystem": "虚拟化存储",
+  "managementIp": "11.66.25.77",
+  "networkSecurityCapability": [
+   "00-IPSec"
+  ],
+  "numberOfOpticalFiberPorts": "48",
+  "operatingSystemVersionInformation": "EMC conmectrix manager 融合网络版 11.1结构操作系统7.0.0A",
+  "supportIpv6": "False",
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "59b466c4d1c5491598a78adbb45f4c1c",
+  "assetBrand": "易安信",
+  "assetCode": "2200000021009997",
+  "assetSerialNumber": "BRCALJ944E311",
+  "assetType": "300B",
+  "brandLand": "01-国外",
+  "deviceHeight": "1",
+  "facilityCategory": "FAITNWDGSW",
+  "facilityName": "转接中心虚拟化平台EMC光纤交换机（下）",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2015-08-01",
+  "facilityUseState": "00-设施在用",
+  "fiberSwitch_deployment": [
+   {
+    "deployArea": "00-主机房-服务器区",
+    "deployComputerRoom": "郑州中支转接中心机房",
+    "deployDb": "郑州中支转接中心机房",
+    "deployFloor": "二层",
+    "deployGallery": "河南省郑州市经开区第三大街与经北二路东北办公楼"
+   }
+  ],
+  "fiberSwitch_installationPosition": [
+   {
+    "belongCabinet": "郑州中支转接中心机房机柜1",
+    "slotNo": "1"
+   }
+  ],
+  "fiberSwitch_operationsManagement": [
+   {
+    "administrativeDepartment": "00-科技管理部门",
+    "operationDepartment": "00-科技管理部门",
+    "serviceEndTime": "2022-04-30",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "郑州市金冠同利电子科技有限公司",
+    "serviceStartTime": "2020-04-01"
+   }
+  ],
+  "influenceSystem": "虚拟化平台",
+  "managementIp": "11.66.26.76",
+  "networkSecurityCapability": [
+   "00-IPSec"
+  ],
+  "numberOfOpticalFiberPorts": "24",
+  "operatingSystemVersionInformation": "FabricManager Server",
+  "supportIpv6": "False",
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "7819314d24de4e2792df82068dd52da0",
+  "assetBrand": "易安信",
+  "assetCode": "2200000021009998",
+  "assetSerialNumber": "BRCBRW1911P00X",
+  "assetType": "ds-6510b",
+  "brandLand": "01-国外",
+  "deviceHeight": "1",
+  "facilityCategory": "FAITNWDGSW",
+  "facilityName": "郑州中心支行虚拟化存储光纤交换机1",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2018-12-01",
+  "facilityUseState": "00-设施在用",
+  "fiberSwitch_deployment": [
+   {
+    "deployArea": "00-主机房-服务器区",
+    "deployComputerRoom": "郑州中支主中心机房",
+    "deployDb": "郑州中支主中心机房",
+    "deployFloor": "十一层",
+    "deployGallery": "河南省郑州市郑东新区商务外环路21号"
+   }
+  ],
+  "fiberSwitch_installationPosition": [
+   {
+    "belongCabinet": "郑州中支主中心服务器机房服务器机柜14",
+    "slotNo": "35"
+   }
+  ],
+  "fiberSwitch_operationsManagement": [
+   {
+    "administrativeDepartment": "00-科技管理部门",
+    "operationDepartment": "00-科技管理部门",
+    "serviceEndTime": "2022-04-30",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "郑州市金冠同利电子科技有限公司",
+    "serviceStartTime": "2020-04-01"
+   }
+  ],
+  "influenceSystem": "虚拟化存储",
+  "managementIp": "11.66.25.78",
+  "networkSecurityCapability": [
+   "00-IPSec"
+  ],
+  "numberOfOpticalFiberPorts": "48",
+  "operatingSystemVersionInformation": "EMC conmectrix manager 融合网络版 11.1结构操作系统7.0.0A",
+  "supportIpv6": "False",
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "e09055ee03a5423f8d37a3102fe11528",
+  "assetBrand": "易安信",
+  "assetCode": "2200000021009996",
+  "assetSerialNumber": "BRCALJ2524F0HH",
+  "assetType": "300B",
+  "brandLand": "01-国外",
+  "deviceHeight": "1",
+  "facilityCategory": "FAITNWDGSW",
+  "facilityName": "转接中心虚拟化平台EMC光纤交换机（上）",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2015-08-01",
+  "facilityUseState": "00-设施在用",
+  "fiberSwitch_deployment": [
+   {
+    "deployArea": "00-主机房-服务器区",
+    "deployComputerRoom": "郑州中支转接中心机房",
+    "deployDb": "郑州中支转接中心机房",
+    "deployFloor": "二层",
+    "deployGallery": "河南省郑州市经开区第三大街与经北二路东北办公楼"
+   }
+  ],
+  "fiberSwitch_installationPosition": [
+   {
+    "belongCabinet": "郑州中支转接中心机房机柜1",
+    "slotNo": "3"
+   }
+  ],
+  "fiberSwitch_operationsManagement": [
+   {
+    "administrativeDepartment": "00-科技管理部门",
+    "operationDepartment": "00-科技管理部门",
+    "serviceEndTime": "2022-04-30",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "郑州市金冠同利电子科技有限公司",
+    "serviceStartTime": "2020-04-01"
+   }
+  ],
+  "influenceSystem": "虚拟化平台",
+  "managementIp": "11.66.26.75",
+  "networkSecurityCapability": [
+   "00-IPSec"
+  ],
+  "numberOfOpticalFiberPorts": "24",
+  "operatingSystemVersionInformation": "FabricManager Server",
+  "supportIpv6": "False",
+  "_dataSource": "双源"
+ }
+]

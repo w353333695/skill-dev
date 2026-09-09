@@ -1,0 +1,106 @@
+[
+ {
+  "facilityDescriptor": "5293e2bffe6b48d79daf28e3f3a756d4",
+  "assetBrand": "赛格迈",
+  "assetSerialNumber": "T08-576",
+  "assetType": "SGB10-1600/10",
+  "brandLand": "00-国内",
+  "communicationProtocol": [
+   "00-Modbus"
+  ],
+  "facilityCategory": "FAPDBPD000",
+  "facilityName": "郑州中支办公楼变压器1",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2010-04-01",
+  "facilityUseState": "00-设施在用",
+  "ratedAlternatingFrequency": "50",
+  "transformerType": "02-干式变压器",
+  "transformer_deployment": [
+   {
+    "deployArea": "03-主机房-其它区",
+    "deployComputerRoom": "主中心机房",
+    "deployDb": "郑州中支主中心机房",
+    "deployFloor": "负一层",
+    "deployGallery": "商务外环路21号"
+   }
+  ],
+  "transformer_operationsManagement": [
+   {
+    "administrativeDepartment": "01-后勤管理部门",
+    "operationDepartment": "01-后勤管理部门",
+    "serviceEndTime": "2023-08-21",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "中建物业",
+    "serviceStartTime": "2020-08-22"
+   }
+  ],
+  "transformer_ratedInputParameter": [
+   {
+    "ratedInputCurrent": "92",
+    "ratedInputPower": "1600",
+    "ratedInputVoltage": "10000"
+   }
+  ],
+  "transformer_ratedOutputParameter": [
+   {
+    "ratedOutputCurrent": "2309",
+    "ratedOutputPower": "1600",
+    "ratedOutputVoltage": "400"
+   }
+  ],
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "b8c7f8e8ce8046b1b02a8894d2b7e431",
+  "assetBrand": "赛格迈",
+  "assetSerialNumber": "T08-575",
+  "assetType": "SGB10-1600/10",
+  "brandLand": "00-国内",
+  "communicationProtocol": [
+   "00-Modbus"
+  ],
+  "facilityCategory": "FAPDBPD000",
+  "facilityName": "郑州中支办公楼变压器2",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2010-04-01",
+  "facilityUseState": "00-设施在用",
+  "ratedAlternatingFrequency": "50",
+  "transformerType": "02-干式变压器",
+  "transformer_deployment": [
+   {
+    "deployArea": "03-主机房-其它区",
+    "deployComputerRoom": "主中心机房",
+    "deployDb": "郑州中支主中心机房",
+    "deployFloor": "负一层",
+    "deployGallery": "商务外环路21号"
+   }
+  ],
+  "transformer_operationsManagement": [
+   {
+    "administrativeDepartment": "01-后勤管理部门",
+    "operationDepartment": "01-后勤管理部门",
+    "serviceEndTime": "2023-08-21",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "中建物业",
+    "serviceStartTime": "2020-08-22"
+   }
+  ],
+  "transformer_ratedInputParameter": [
+   {
+    "ratedInputCurrent": "92",
+    "ratedInputPower": "1600",
+    "ratedInputVoltage": "10000"
+   }
+  ],
+  "transformer_ratedOutputParameter": [
+   {
+    "ratedOutputCurrent": "2309",
+    "ratedOutputPower": "1600",
+    "ratedOutputVoltage": "400"
+   }
+  ],
+  "_dataSource": "双源"
+ }
+]

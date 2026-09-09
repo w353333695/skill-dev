@@ -1,0 +1,112 @@
+[
+ {
+  "facilityDescriptor": "a9fd1a23f27a4ef58b8fc1e31cad272e",
+  "assetBrand": "安赛",
+  "assetCode": "2200000021024083",
+  "assetSerialNumber": "DS120G21612798",
+  "assetType": "PLDSEC SMS 620ST-AS1-Pro",
+  "brandLand": "00-国内",
+  "contentOfAudit": [
+   "01-网络设备"
+  ],
+  "dataSave": "00-是",
+  "dataSavePeriod": "6",
+  "deviceHeight": "2",
+  "facilityCategory": "FAITSADAUD",
+  "facilityName": "中国人民银行郑州中心支行数据中心堡垒机2",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2016-12-01",
+  "facilityUseState": "00-设施在用",
+  "identificationPattern": [
+   "01-动态口令"
+  ],
+  "influenceSystem": "安全管理系统",
+  "managementIp": "11.66.25.202",
+  "operatingSystemVersionInformation": "win2008server",
+  "opsAudit_deployment": [
+   {
+    "deployArea": "00-主机房-服务器区",
+    "deployComputerRoom": "服务器机房",
+    "deployDb": "郑州中支主中心机房",
+    "deployFloor": "13层",
+    "deployGallery": "中国人民银行郑州中心支行办公大楼"
+   }
+  ],
+  "opsAudit_installationPosition": [
+   {
+    "slotNo": "19"
+   }
+  ],
+  "opsAudit_operationsManagement": [
+   {
+    "administrativeDepartment": "00-科技管理部门",
+    "operationDepartment": "00-科技管理部门",
+    "serviceEndTime": "2019-12-01",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "杭州帕拉迪网络科技有限公司",
+    "serviceStartTime": "2016-12-01"
+   }
+  ],
+  "safetydeploymentMode": "00-旁路",
+  "sellingLicense": "True",
+  "supportIpv6": "True",
+  "throughputRate": "01-大于100Mbps小于等于1Gbps",
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "d23b20ff1e1c43049e0665979c9816f2",
+  "assetBrand": "安赛",
+  "assetCode": "2200000021024082",
+  "assetSerialNumber": "DS120G21612797",
+  "assetType": "PLDSEC SMS 620ST-AS1-Pro",
+  "brandLand": "00-国内",
+  "contentOfAudit": [
+   "01-网络设备"
+  ],
+  "dataSave": "00-是",
+  "dataSavePeriod": "6",
+  "deviceHeight": "2",
+  "facilityCategory": "FAITSADAUD",
+  "facilityName": "中国人民银行郑州中心支行数据中心堡垒机1",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2016-12-01",
+  "facilityUseState": "00-设施在用",
+  "identificationPattern": [
+   "01-动态口令"
+  ],
+  "influenceSystem": "安全管理系统",
+  "managementIp": "11.66.25.201",
+  "operatingSystemVersionInformation": "win2008server",
+  "opsAudit_deployment": [
+   {
+    "deployArea": "00-主机房-服务器区",
+    "deployComputerRoom": "服务器机房",
+    "deployDb": "郑州中支主中心机房",
+    "deployFloor": "13层",
+    "deployGallery": "中国人民银行郑州中心支行办公大楼"
+   }
+  ],
+  "opsAudit_installationPosition": [
+   {
+    "slotNo": "20"
+   }
+  ],
+  "opsAudit_operationsManagement": [
+   {
+    "administrativeDepartment": "00-科技管理部门",
+    "operationDepartment": "00-科技管理部门",
+    "serviceEndTime": "2019-12-01",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "杭州帕拉迪网络科技有限公司",
+    "serviceStartTime": "2016-12-01"
+   }
+  ],
+  "safetydeploymentMode": "00-旁路",
+  "sellingLicense": "True",
+  "supportIpv6": "True",
+  "throughputRate": "01-大于100Mbps小于等于1Gbps",
+  "_dataSource": "双源"
+ }
+]

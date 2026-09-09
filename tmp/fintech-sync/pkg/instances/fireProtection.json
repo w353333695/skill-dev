@@ -1,0 +1,2147 @@
+[
+ {
+  "facilityDescriptor": "09cb726c37614e29a69a0054b092fa7c",
+  "assetBrand": "西格玛",
+  "assetCode": "410611048002",
+  "assetSerialNumber": "048002",
+  "assetType": "七氟丙烷",
+  "brandLand": "00-国内",
+  "facilityCategory": "FAXF000000",
+  "facilityName": "鹤壁市中支中心机房气体钢瓶",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-12-07",
+  "facilityUseDate": "2019-08-08",
+  "facilityUseState": "00-设施在用",
+  "fireProtection_deployment": [
+   {
+    "deployArea": "02-主机房-存储区",
+    "deployComputerRoom": "仓库",
+    "deployDb": "鹤壁市中支中心机房",
+    "deployFloor": "七层",
+    "deployGallery": "办公楼"
+   }
+  ],
+  "fireProtection_fireProtection": [
+   {
+    "fireAlarmSystem": "00-是",
+    "fireExhaustSystem": "00-是",
+    "gasExhaustSystem": "00-是",
+    "smokeDetectionSystem": "00-是",
+    "sprinklerSystem": "00-是",
+    "waterExhaustSystem": "00-是"
+   }
+  ],
+  "fireProtection_operationsManagement": [
+   {
+    "administrativeDepartment": "03-保卫管理部门",
+    "operationDepartment": "03-保卫管理部门",
+    "serviceEndTime": "2022-10-01",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "协力消防",
+    "serviceStartTime": "2002-10-01"
+   }
+  ],
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "12b063eccc2f469a8dfa8f58f4879a6b",
+  "assetBrand": "赛福",
+  "assetCode": "2202130051017001",
+  "assetSerialNumber": "7027012",
+  "assetType": "IG541",
+  "brandLand": "00-国内",
+  "facilityCategory": "FAXF000000",
+  "facilityName": "漯河市中支中心机房气体灭火设备灭火剂瓶组4",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2018-10-27",
+  "facilityUseState": "00-设施在用",
+  "fireProtection_deployment": [
+   {
+    "deployArea": "03-主机房-其它区",
+    "deployComputerRoom": "漯河市中支中心机房",
+    "deployDb": "漯河市中支中心机房",
+    "deployFloor": "五层",
+    "deployGallery": "漯河市郾城区嵩山东支路1号"
+   }
+  ],
+  "fireProtection_fireProtection": [
+   {
+    "fireAlarmSystem": "00-是",
+    "fireExhaustSystem": "00-是",
+    "gasExhaustSystem": "00-是",
+    "smokeDetectionSystem": "00-是",
+    "sprinklerSystem": "00-是",
+    "waterExhaustSystem": "02-不适用"
+   }
+  ],
+  "fireProtection_operationsManagement": [
+   {
+    "administrativeDepartment": "03-保卫管理部门",
+    "operationDepartment": "03-保卫管理部门",
+    "serviceEndTime": "2021-10-27",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "未知",
+    "serviceStartTime": "2018-10-27"
+   }
+  ],
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "1f1bb2f2ab3243c9b2a2f36a00b02456",
+  "assetBrand": "海湾",
+  "assetCode": "10104604",
+  "assetSerialNumber": "10104604",
+  "assetType": "GST-QKP04",
+  "brandLand": "00-国内",
+  "facilityCategory": "FAXF000000",
+  "facilityName": "濮阳市中支中心机房气体灭火系统",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2017-08-18",
+  "facilityUseState": "00-设施在用",
+  "fireProtection_deployment": [
+   {
+    "deployArea": "13-辅助区-消防区",
+    "deployComputerRoom": "濮阳市中支中心机房",
+    "deployDb": "濮阳市中支中心机房",
+    "deployFloor": "六层",
+    "deployGallery": "办公楼"
+   }
+  ],
+  "fireProtection_fireProtection": [
+   {
+    "fireAlarmSystem": "00-是",
+    "fireExhaustSystem": "01-否",
+    "gasExhaustSystem": "00-是",
+    "smokeDetectionSystem": "00-是",
+    "sprinklerSystem": "01-否",
+    "waterExhaustSystem": "01-否"
+   }
+  ],
+  "fireProtection_operationsManagement": [
+   {
+    "administrativeDepartment": "03-保卫管理部门",
+    "operationDepartment": "03-保卫管理部门",
+    "serviceEndTime": "2022-03-14",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "河南恒兴消防技术有限公司",
+    "serviceStartTime": "2021-03-15"
+   }
+  ],
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "20c96002db134434885db280d70464c1",
+  "assetBrand": "赛福",
+  "assetCode": "2202130051017001",
+  "assetSerialNumber": "7027017",
+  "assetType": "IG541",
+  "brandLand": "00-国内",
+  "facilityCategory": "FAXF000000",
+  "facilityName": "漯河市中支中心机房气体灭火设备灭火剂瓶组3",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2018-10-27",
+  "facilityUseState": "00-设施在用",
+  "fireProtection_deployment": [
+   {
+    "deployArea": "03-主机房-其它区",
+    "deployComputerRoom": "漯河市中支中心机房",
+    "deployDb": "漯河市中支中心机房",
+    "deployFloor": "五层",
+    "deployGallery": "漯河市郾城区嵩山东支路1号"
+   }
+  ],
+  "fireProtection_fireProtection": [
+   {
+    "fireAlarmSystem": "00-是",
+    "fireExhaustSystem": "00-是",
+    "gasExhaustSystem": "00-是",
+    "smokeDetectionSystem": "00-是",
+    "sprinklerSystem": "00-是",
+    "waterExhaustSystem": "02-不适用"
+   }
+  ],
+  "fireProtection_operationsManagement": [
+   {
+    "administrativeDepartment": "03-保卫管理部门",
+    "operationDepartment": "03-保卫管理部门",
+    "serviceEndTime": "2021-10-27",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "未知",
+    "serviceStartTime": "2018-10-27"
+   }
+  ],
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "213e3e1ff9af46bbb1a8075b9feb3919",
+  "assetBrand": "赛福",
+  "assetCode": "2202130051017001",
+  "assetSerialNumber": "7027016",
+  "assetType": "IG541",
+  "brandLand": "00-国内",
+  "facilityCategory": "FAXF000000",
+  "facilityName": "漯河市中支中心机房气体灭火设备灭火剂瓶组7",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2018-10-27",
+  "facilityUseState": "00-设施在用",
+  "fireProtection_deployment": [
+   {
+    "deployArea": "03-主机房-其它区",
+    "deployComputerRoom": "漯河市中支中心机房",
+    "deployDb": "漯河市中支中心机房",
+    "deployFloor": "五层",
+    "deployGallery": "漯河市郾城区嵩山东支路1号"
+   }
+  ],
+  "fireProtection_fireProtection": [
+   {
+    "fireAlarmSystem": "00-是",
+    "fireExhaustSystem": "00-是",
+    "gasExhaustSystem": "00-是",
+    "smokeDetectionSystem": "00-是",
+    "sprinklerSystem": "00-是",
+    "waterExhaustSystem": "02-不适用"
+   }
+  ],
+  "fireProtection_operationsManagement": [
+   {
+    "administrativeDepartment": "03-保卫管理部门",
+    "operationDepartment": "03-保卫管理部门",
+    "serviceEndTime": "2021-10-27",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "未知",
+    "serviceStartTime": "2018-10-27"
+   }
+  ],
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "23e9b58e77ff4e82a1750ec6e266ea17",
+  "assetBrand": "海湾",
+  "assetSerialNumber": "5065987613",
+  "assetType": "GST-QKP03",
+  "brandLand": "00-国内",
+  "facilityCategory": "FAXF000000",
+  "facilityName": "郑州中支转接中心气体灭火系统",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2007-07-01",
+  "facilityUseState": "00-设施在用",
+  "fireProtection_deployment": [
+   {
+    "deployArea": "01-主机房-网络区",
+    "deployComputerRoom": "转接中心机房",
+    "deployDb": "郑州中支转接中心机房",
+    "deployFloor": "二层",
+    "deployGallery": "转接中心综合楼"
+   }
+  ],
+  "fireProtection_fireProtection": [
+   {
+    "fireAlarmSystem": "00-是",
+    "fireExhaustSystem": "01-否",
+    "gasExhaustSystem": "00-是",
+    "smokeDetectionSystem": "00-是",
+    "sprinklerSystem": "01-否",
+    "waterExhaustSystem": "01-否"
+   }
+  ],
+  "fireProtection_operationsManagement": [
+   {
+    "administrativeDepartment": "03-保卫管理部门",
+    "operationDepartment": "03-保卫管理部门",
+    "serviceEndTime": "2027-07-01",
+    "serviceLevel": "01-7*24",
+    "serviceStartTime": "2007-07-01"
+   }
+  ],
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "2fba9164a76249d18098207d9820a33a",
+  "assetBrand": "赛福",
+  "assetCode": "2202130051017001",
+  "assetSerialNumber": "7027024",
+  "assetType": "IG541",
+  "brandLand": "00-国内",
+  "facilityCategory": "FAXF000000",
+  "facilityName": "漯河市中支中心机房气体灭火设备灭火剂瓶组2",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2018-10-27",
+  "facilityUseState": "00-设施在用",
+  "fireProtection_deployment": [
+   {
+    "deployArea": "03-主机房-其它区",
+    "deployComputerRoom": "漯河市中支中心机房",
+    "deployDb": "漯河市中支中心机房",
+    "deployFloor": "五层",
+    "deployGallery": "漯河市郾城区嵩山东支路1号"
+   }
+  ],
+  "fireProtection_fireProtection": [
+   {
+    "fireAlarmSystem": "00-是",
+    "fireExhaustSystem": "00-是",
+    "gasExhaustSystem": "00-是",
+    "smokeDetectionSystem": "00-是",
+    "sprinklerSystem": "00-是",
+    "waterExhaustSystem": "02-不适用"
+   }
+  ],
+  "fireProtection_operationsManagement": [
+   {
+    "administrativeDepartment": "03-保卫管理部门",
+    "operationDepartment": "03-保卫管理部门",
+    "serviceEndTime": "2021-10-27",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "未知",
+    "serviceStartTime": "2018-10-27"
+   }
+  ],
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "38d42ac53fff4df0a929e495c657ba62",
+  "assetBrand": "海湾",
+  "assetCode": "2202120021002068",
+  "assetSerialNumber": "20190405003",
+  "assetType": "QMQ4.2/120N",
+  "brandLand": "00-国内",
+  "facilityCategory": "FAXF000000",
+  "facilityName": "许昌市中支中心机房消防气体钢瓶",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-03-01",
+  "facilityUseDate": "2016-09-11",
+  "facilityUseState": "00-设施在用",
+  "fireProtection_deployment": [
+   {
+    "deployArea": "03-主机房-其它区",
+    "deployComputerRoom": "许昌市中心支行中心机房",
+    "deployDb": "许昌市中支中心机房",
+    "deployFloor": "四楼",
+    "deployGallery": "河南省许昌市建安区新东街571号办公楼"
+   }
+  ],
+  "fireProtection_fireProtection": [
+   {
+    "fireAlarmSystem": "00-是",
+    "fireExhaustSystem": "02-不适用",
+    "gasExhaustSystem": "00-是",
+    "smokeDetectionSystem": "01-否",
+    "sprinklerSystem": "02-不适用",
+    "waterExhaustSystem": "02-不适用"
+   }
+  ],
+  "fireProtection_operationsManagement": [
+   {
+    "administrativeDepartment": "00-科技管理部门",
+    "operationDepartment": "00-科技管理部门",
+    "serviceEndTime": "2022-12-20",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "许昌市海康盈联网络技术有限公司",
+    "serviceStartTime": "2019-12-20"
+   }
+  ],
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "39256c65ed1b4f229ea71e292ce56013",
+  "assetBrand": "磐龙",
+  "assetCode": "2202030022005028",
+  "assetSerialNumber": "1704201962",
+  "assetType": "GQQ90/2.5",
+  "brandLand": "00-国内",
+  "facilityCategory": "FAXF000000",
+  "facilityName": "新乡市中支中心机房消防气体钢瓶3",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2017-08-30",
+  "facilityUseState": "00-设施在用",
+  "fireProtection_deployment": [
+   {
+    "deployArea": "01-主机房-网络区",
+    "deployComputerRoom": "新乡市中心支行中心机房",
+    "deployDb": "新乡市中支中心机房",
+    "deployFloor": "十五层",
+    "deployGallery": "办公楼"
+   }
+  ],
+  "fireProtection_fireProtection": [
+   {
+    "fireAlarmSystem": "00-是",
+    "fireExhaustSystem": "00-是",
+    "gasExhaustSystem": "00-是",
+    "smokeDetectionSystem": "00-是",
+    "sprinklerSystem": "01-否",
+    "waterExhaustSystem": "01-否"
+   }
+  ],
+  "fireProtection_operationsManagement": [
+   {
+    "administrativeDepartment": "03-保卫管理部门",
+    "operationDepartment": "03-保卫管理部门",
+    "serviceEndTime": "2020-08-30",
+    "serviceLevel": "00-5*8",
+    "serviceProvider": "北京华科科技有限公司",
+    "serviceStartTime": "2017-08-30"
+   }
+  ],
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "43b1764bab144b1f8b45f32ce3948e28",
+  "assetBrand": "赛福",
+  "assetCode": "2202130051017001",
+  "assetSerialNumber": "7063002",
+  "assetType": "IG541",
+  "brandLand": "00-国内",
+  "facilityCategory": "FAXF000000",
+  "facilityName": "漯河市中支中心机房气体灭火设备灭火剂瓶组8",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2018-10-27",
+  "facilityUseState": "00-设施在用",
+  "fireProtection_deployment": [
+   {
+    "deployArea": "03-主机房-其它区",
+    "deployComputerRoom": "漯河市中支中心机房",
+    "deployDb": "漯河市中支中心机房",
+    "deployFloor": "五层",
+    "deployGallery": "漯河市郾城区嵩山东支路1号"
+   }
+  ],
+  "fireProtection_fireProtection": [
+   {
+    "fireAlarmSystem": "00-是",
+    "fireExhaustSystem": "00-是",
+    "gasExhaustSystem": "00-是",
+    "smokeDetectionSystem": "00-是",
+    "sprinklerSystem": "00-是",
+    "waterExhaustSystem": "02-不适用"
+   }
+  ],
+  "fireProtection_operationsManagement": [
+   {
+    "administrativeDepartment": "03-保卫管理部门",
+    "operationDepartment": "03-保卫管理部门",
+    "serviceEndTime": "2021-10-27",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "未知",
+    "serviceStartTime": "2018-10-27"
+   }
+  ],
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "4831bdcdc2764905b79f01d8ee0557d6",
+  "assetBrand": "剑安",
+  "assetCode": "2202090041004002",
+  "assetSerialNumber": "QGRK369372",
+  "assetType": "HFC-227ea",
+  "brandLand": "00-国内",
+  "facilityCategory": "FAXF000000",
+  "facilityName": "三门峡市中支中心机房柜式灭火器8",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2018-11-01",
+  "facilityUseState": "00-设施在用",
+  "fireProtection_deployment": [
+   {
+    "deployArea": "00-主机房-服务器区",
+    "deployComputerRoom": "中心机房",
+    "deployDb": "三门峡市中支中心机房",
+    "deployFloor": "六层",
+    "deployGallery": "办公大楼"
+   }
+  ],
+  "fireProtection_fireProtection": [
+   {
+    "fireAlarmSystem": "00-是",
+    "fireExhaustSystem": "00-是",
+    "gasExhaustSystem": "00-是",
+    "smokeDetectionSystem": "00-是",
+    "sprinklerSystem": "02-不适用",
+    "waterExhaustSystem": "02-不适用"
+   }
+  ],
+  "fireProtection_operationsManagement": [
+   {
+    "administrativeDepartment": "03-保卫管理部门",
+    "operationDepartment": "03-保卫管理部门",
+    "serviceEndTime": "2021-07-10",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "河南省海浪消防设备有限公司",
+    "serviceStartTime": "2018-11-01"
+   }
+  ],
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "5714d969d68046cba4fdc0465438b6a6",
+  "assetBrand": "坚瑞",
+  "assetCode": "048001",
+  "assetSerialNumber": "68253122",
+  "assetType": "GST-QKP01",
+  "brandLand": "00-国内",
+  "facilityCategory": "FAXF000000",
+  "facilityName": "安阳市中支中心机房消防控制器",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2014-09-01",
+  "facilityUseState": "00-设施在用",
+  "fireProtection_deployment": [
+   {
+    "deployArea": "31-行政管理区-值班室",
+    "deployComputerRoom": "安阳中心支行中心机房",
+    "deployDb": "安阳市中支中心机房",
+    "deployFloor": "八楼",
+    "deployGallery": "河南省安阳市开发区金融大厦"
+   }
+  ],
+  "fireProtection_fireProtection": [
+   {
+    "fireAlarmSystem": "00-是",
+    "fireExhaustSystem": "02-不适用",
+    "gasExhaustSystem": "00-是",
+    "smokeDetectionSystem": "00-是",
+    "sprinklerSystem": "02-不适用",
+    "waterExhaustSystem": "02-不适用"
+   }
+  ],
+  "fireProtection_operationsManagement": [
+   {
+    "administrativeDepartment": "03-保卫管理部门",
+    "operationDepartment": "03-保卫管理部门",
+    "serviceEndTime": "2023-06-30",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "河南安仕达消防技术有限公司",
+    "serviceStartTime": "2020-07-01"
+   }
+  ],
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "6337f92eecf04c3b9c8d0cd3be8de4fd",
+  "assetBrand": "福尔盾",
+  "assetCode": "ZMD048001",
+  "assetSerialNumber": "96876541",
+  "assetType": "HFC-227ea",
+  "brandLand": "00-国内",
+  "facilityCategory": "FAXF000000",
+  "facilityName": "驻马店市中支中心机房消防气体钢瓶",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2018-11-02",
+  "facilityUseState": "00-设施在用",
+  "fireProtection_deployment": [
+   {
+    "deployArea": "01-主机房-网络区",
+    "deployComputerRoom": "驻马店市中支中心机房",
+    "deployDb": "驻马店市中支中心机房",
+    "deployFloor": "四层",
+    "deployGallery": "驻马店市驿城区泰山路567号办公楼"
+   }
+  ],
+  "fireProtection_fireProtection": [
+   {
+    "fireAlarmSystem": "00-是",
+    "fireExhaustSystem": "00-是",
+    "gasExhaustSystem": "00-是",
+    "smokeDetectionSystem": "00-是",
+    "sprinklerSystem": "01-否",
+    "waterExhaustSystem": "01-否"
+   }
+  ],
+  "fireProtection_operationsManagement": [
+   {
+    "administrativeDepartment": "01-后勤管理部门",
+    "operationDepartment": "01-后勤管理部门",
+    "serviceEndTime": "2021-11-02",
+    "serviceLevel": "00-5*8",
+    "serviceProvider": "郑州一建集团有限公司",
+    "serviceStartTime": "2018-11-02"
+   }
+  ],
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "6393f1a307384abfa350e22c4dd8167d",
+  "assetBrand": "剑安",
+  "assetCode": "2202090041004007",
+  "assetSerialNumber": "JB-DB-RP1002F",
+  "assetType": "GQQ 40/2.5",
+  "brandLand": "00-国内",
+  "facilityCategory": "FAXF000000",
+  "facilityName": "三门峡市中支中心机房柜式灭火器3",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2020-07-10",
+  "facilityUseState": "00-设施在用",
+  "fireProtection_deployment": [
+   {
+    "deployArea": "00-主机房-服务器区",
+    "deployComputerRoom": "中心机房",
+    "deployDb": "三门峡市中支中心机房",
+    "deployFloor": "六层",
+    "deployGallery": "办公大楼"
+   }
+  ],
+  "fireProtection_fireProtection": [
+   {
+    "fireAlarmSystem": "00-是",
+    "fireExhaustSystem": "00-是",
+    "gasExhaustSystem": "00-是",
+    "smokeDetectionSystem": "00-是",
+    "sprinklerSystem": "02-不适用",
+    "waterExhaustSystem": "02-不适用"
+   }
+  ],
+  "fireProtection_operationsManagement": [
+   {
+    "administrativeDepartment": "03-保卫管理部门",
+    "operationDepartment": "03-保卫管理部门",
+    "serviceEndTime": "2023-07-10",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "河南省海浪消防设备有限公司",
+    "serviceStartTime": "2020-07-10"
+   }
+  ],
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "6b31e4bfc1c044ce8bef8bfeb31021e3",
+  "assetBrand": "海湾",
+  "assetCode": "2202030022005003",
+  "assetSerialNumber": "10105269",
+  "assetType": "GST-QKP01",
+  "brandLand": "00-国内",
+  "facilityCategory": "FAXF000000",
+  "facilityName": "新乡市中支中心机房自动消防报警灭火控制系统",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2017-08-30",
+  "facilityUseState": "00-设施在用",
+  "fireProtection_deployment": [
+   {
+    "deployArea": "13-辅助区-消防区",
+    "deployComputerRoom": "新乡市中心支行中心机房",
+    "deployDb": "新乡市中支中心机房",
+    "deployFloor": "十五层",
+    "deployGallery": "办公楼"
+   }
+  ],
+  "fireProtection_fireProtection": [
+   {
+    "fireAlarmSystem": "00-是",
+    "fireExhaustSystem": "00-是",
+    "gasExhaustSystem": "00-是",
+    "smokeDetectionSystem": "00-是",
+    "sprinklerSystem": "01-否",
+    "waterExhaustSystem": "01-否"
+   }
+  ],
+  "fireProtection_operationsManagement": [
+   {
+    "administrativeDepartment": "03-保卫管理部门",
+    "operationDepartment": "03-保卫管理部门",
+    "serviceEndTime": "2020-08-30",
+    "serviceLevel": "00-5*8",
+    "serviceProvider": "北京华科科技有限公司",
+    "serviceStartTime": "2017-08-30"
+   }
+  ],
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "6bfaff55989f4c2b98cb309e75937c40",
+  "assetBrand": "磐龙",
+  "assetCode": "048001",
+  "assetSerialNumber": "1712237782",
+  "assetType": "CQQ",
+  "brandLand": "00-国内",
+  "facilityCategory": "FAXF000000",
+  "facilityName": "开封市中心机房气体钢瓶",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2018-06-01",
+  "facilityUseState": "00-设施在用",
+  "fireProtection_deployment": [
+   {
+    "deployArea": "13-辅助区-消防区",
+    "deployComputerRoom": "开封市中心机房",
+    "deployDb": "开封市中支中心机房",
+    "deployFloor": "三层",
+    "deployGallery": "开封市龙亭区晋安路60号办公楼"
+   }
+  ],
+  "fireProtection_fireProtection": [
+   {
+    "fireAlarmSystem": "00-是",
+    "fireExhaustSystem": "02-不适用",
+    "gasExhaustSystem": "00-是",
+    "smokeDetectionSystem": "00-是",
+    "sprinklerSystem": "01-否",
+    "waterExhaustSystem": "01-否"
+   }
+  ],
+  "fireProtection_operationsManagement": [
+   {
+    "administrativeDepartment": "03-保卫管理部门",
+    "operationDepartment": "03-保卫管理部门",
+    "serviceEndTime": "2020-07-01",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "北京泰豪智能工程有限公司",
+    "serviceStartTime": "2018-06-01"
+   }
+  ],
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "6df82a91c1a141e08712d4b448c03593",
+  "assetBrand": "剑安",
+  "assetCode": "2202090041004004",
+  "assetSerialNumber": "QGRK369373",
+  "assetType": "HFC-227ea",
+  "brandLand": "00-国内",
+  "facilityCategory": "FAXF000000",
+  "facilityName": "三门峡市中支中心机房柜式灭火器6",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2018-11-01",
+  "facilityUseState": "00-设施在用",
+  "fireProtection_deployment": [
+   {
+    "deployArea": "00-主机房-服务器区",
+    "deployComputerRoom": "中心机房",
+    "deployDb": "三门峡市中支中心机房",
+    "deployFloor": "六层",
+    "deployGallery": "办公大楼"
+   }
+  ],
+  "fireProtection_fireProtection": [
+   {
+    "fireAlarmSystem": "00-是",
+    "fireExhaustSystem": "00-是",
+    "gasExhaustSystem": "00-是",
+    "smokeDetectionSystem": "00-是",
+    "sprinklerSystem": "02-不适用",
+    "waterExhaustSystem": "02-不适用"
+   }
+  ],
+  "fireProtection_operationsManagement": [
+   {
+    "administrativeDepartment": "03-保卫管理部门",
+    "operationDepartment": "03-保卫管理部门",
+    "serviceEndTime": "2021-07-10",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "河南省海浪消防设备有限公司",
+    "serviceStartTime": "2018-11-01"
+   }
+  ],
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "709e7ec73733452fa696ccf9e7c04ae8",
+  "assetBrand": "海湾",
+  "assetCode": "048002",
+  "assetSerialNumber": "480012",
+  "assetType": "GST-QKP04",
+  "brandLand": "00-国内",
+  "facilityCategory": "FAXF000000",
+  "facilityName": "开封市中心机房气体灭火控制盘",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2018-09-01",
+  "facilityUseState": "00-设施在用",
+  "fireProtection_deployment": [
+   {
+    "deployArea": "13-辅助区-消防区",
+    "deployComputerRoom": "开封市中心机房",
+    "deployDb": "开封市中支中心机房",
+    "deployFloor": "三层",
+    "deployGallery": "开封市龙亭区晋安路60号办公楼"
+   }
+  ],
+  "fireProtection_fireProtection": [
+   {
+    "fireAlarmSystem": "00-是",
+    "fireExhaustSystem": "02-不适用",
+    "gasExhaustSystem": "00-是",
+    "smokeDetectionSystem": "00-是",
+    "sprinklerSystem": "01-否",
+    "waterExhaustSystem": "01-否"
+   }
+  ],
+  "fireProtection_operationsManagement": [
+   {
+    "administrativeDepartment": "03-保卫管理部门",
+    "operationDepartment": "03-保卫管理部门",
+    "serviceEndTime": "2020-07-01",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "北京泰豪智能工程有限公司",
+    "serviceStartTime": "2018-09-01"
+   }
+  ],
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "716dec6d369b453c93d99500667535e5",
+  "assetBrand": "海湾",
+  "assetCode": "2202160022006003",
+  "assetSerialNumber": "Hwzk001",
+  "assetType": "GST-QKP04/2",
+  "brandLand": "00-国内",
+  "facilityCategory": "FAXF000000",
+  "facilityName": "周口市中支中心机房消防系统",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2018-08-06",
+  "facilityUseState": "00-设施在用",
+  "fireProtection_deployment": [
+   {
+    "deployArea": "03-主机房-其它区",
+    "deployComputerRoom": "周口市中心支行中心机房",
+    "deployDb": "周口市中支中心机房",
+    "deployFloor": "二层",
+    "deployGallery": "周口市川汇区七一路中段1号A楼"
+   }
+  ],
+  "fireProtection_fireProtection": [
+   {
+    "fireAlarmSystem": "00-是",
+    "fireExhaustSystem": "01-否",
+    "gasExhaustSystem": "00-是",
+    "smokeDetectionSystem": "00-是",
+    "sprinklerSystem": "01-否",
+    "waterExhaustSystem": "01-否"
+   }
+  ],
+  "fireProtection_operationsManagement": [
+   {
+    "administrativeDepartment": "03-保卫管理部门",
+    "operationDepartment": "03-保卫管理部门",
+    "serviceEndTime": "2021-08-06",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "恒锋信息科技股份有限公司",
+    "serviceStartTime": "2018-08-06"
+   }
+  ],
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "788496b0daa54e9b995fe34372cf4d30",
+  "assetBrand": "剑安",
+  "assetCode": "2202090041004009",
+  "assetSerialNumber": "JB-DB-RP1004F",
+  "assetType": "GQQ 40/2.5",
+  "brandLand": "00-国内",
+  "facilityCategory": "FAXF000000",
+  "facilityName": "三门峡市中支中心机房柜式灭火器1",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2020-07-10",
+  "facilityUseState": "00-设施在用",
+  "fireProtection_deployment": [
+   {
+    "deployArea": "01-主机房-网络区",
+    "deployComputerRoom": "中心机房",
+    "deployDb": "三门峡市中支中心机房",
+    "deployFloor": "六层",
+    "deployGallery": "办公大楼"
+   }
+  ],
+  "fireProtection_fireProtection": [
+   {
+    "fireAlarmSystem": "00-是",
+    "fireExhaustSystem": "00-是",
+    "gasExhaustSystem": "00-是",
+    "smokeDetectionSystem": "00-是",
+    "sprinklerSystem": "02-不适用",
+    "waterExhaustSystem": "02-不适用"
+   }
+  ],
+  "fireProtection_operationsManagement": [
+   {
+    "administrativeDepartment": "03-保卫管理部门",
+    "operationDepartment": "03-保卫管理部门",
+    "serviceEndTime": "2023-07-10",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "河南省海浪消防设备有限公司",
+    "serviceStartTime": "2020-07-10"
+   }
+  ],
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "812a642619914633991c95024ecc1f80",
+  "assetBrand": "海湾",
+  "assetCode": "2202010011000002",
+  "assetSerialNumber": "10105269",
+  "assetType": "GST-QKP01",
+  "brandLand": "00-国内",
+  "facilityCategory": "FAXF000000",
+  "facilityName": "洛阳市中支中心机房消防报警灭火系统",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2017-09-01",
+  "facilityUseState": "00-设施在用",
+  "fireProtection_deployment": [
+   {
+    "deployArea": "30-行政管理区-办公区",
+    "deployComputerRoom": "洛阳市中支中心机房",
+    "deployDb": "洛阳市中支中心机房",
+    "deployFloor": "三层",
+    "deployGallery": "洛阳市中支办公大楼"
+   }
+  ],
+  "fireProtection_fireProtection": [
+   {
+    "fireAlarmSystem": "00-是",
+    "fireExhaustSystem": "00-是",
+    "gasExhaustSystem": "00-是",
+    "smokeDetectionSystem": "00-是",
+    "sprinklerSystem": "01-否",
+    "waterExhaustSystem": "01-否"
+   }
+  ],
+  "fireProtection_operationsManagement": [
+   {
+    "administrativeDepartment": "03-保卫管理部门",
+    "operationDepartment": "03-保卫管理部门",
+    "serviceEndTime": "2022-02-23",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "郑州三信机房电子技术有限公司",
+    "serviceStartTime": "2021-02-24"
+   }
+  ],
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "864ff86f516b4c7da35b2842d9d07fb9",
+  "assetBrand": "海湾",
+  "assetCode": "048002",
+  "assetSerialNumber": "68253136",
+  "assetType": "HF-227EA",
+  "brandLand": "00-国内",
+  "facilityCategory": "FAXF000000",
+  "facilityName": "安阳市中支中心机房消防气体钢瓶",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2014-09-01",
+  "facilityUseState": "00-设施在用",
+  "fireProtection_deployment": [
+   {
+    "deployArea": "03-主机房-其它区",
+    "deployComputerRoom": "安阳中心支行中心机房",
+    "deployDb": "安阳市中支中心机房",
+    "deployFloor": "八楼",
+    "deployGallery": "河南省安阳市开发区金融大厦"
+   }
+  ],
+  "fireProtection_fireProtection": [
+   {
+    "fireAlarmSystem": "00-是",
+    "fireExhaustSystem": "02-不适用",
+    "gasExhaustSystem": "00-是",
+    "smokeDetectionSystem": "00-是",
+    "sprinklerSystem": "02-不适用",
+    "waterExhaustSystem": "02-不适用"
+   }
+  ],
+  "fireProtection_operationsManagement": [
+   {
+    "administrativeDepartment": "03-保卫管理部门",
+    "operationDepartment": "03-保卫管理部门",
+    "serviceEndTime": "2023-06-30",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "河南安仕达消防技术有限公司",
+    "serviceStartTime": "2020-07-01"
+   }
+  ],
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "90a2f22683884a5b8cf2e69fe7d83493",
+  "assetBrand": "新竹",
+  "assetSerialNumber": "164130313",
+  "assetType": "ZMB120Lx1",
+  "brandLand": "00-国内",
+  "facilityCategory": "FAXF000000",
+  "facilityName": "郑州中支转接中心七氟丙烷无管网1",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2007-07-01",
+  "facilityUseState": "00-设施在用",
+  "fireProtection_deployment": [
+   {
+    "deployArea": "01-主机房-网络区",
+    "deployComputerRoom": "转接中心机房",
+    "deployDb": "郑州中支转接中心机房",
+    "deployFloor": "二层",
+    "deployGallery": "转接中心综合楼"
+   }
+  ],
+  "fireProtection_fireProtection": [
+   {
+    "fireAlarmSystem": "00-是",
+    "fireExhaustSystem": "01-否",
+    "gasExhaustSystem": "00-是",
+    "smokeDetectionSystem": "00-是",
+    "sprinklerSystem": "01-否",
+    "waterExhaustSystem": "01-否"
+   }
+  ],
+  "fireProtection_operationsManagement": [
+   {
+    "administrativeDepartment": "03-保卫管理部门",
+    "operationDepartment": "03-保卫管理部门",
+    "serviceEndTime": "2027-07-01",
+    "serviceLevel": "01-7*24",
+    "serviceStartTime": "2007-07-01"
+   }
+  ],
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "91f93678cf194e4ea6d25e38cfe0b20d",
+  "assetBrand": "利达",
+  "assetCode": "410611048004",
+  "assetSerialNumber": "048004",
+  "assetType": "JDW-ZDM-LD3300EN",
+  "brandLand": "00-国内",
+  "facilityCategory": "FAXF000000",
+  "facilityName": "鹤壁市中支中心机房温度感应器",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2017-07-10",
+  "facilityUseState": "00-设施在用",
+  "fireProtection_deployment": [
+   {
+    "deployArea": "00-主机房-服务器区",
+    "deployComputerRoom": "仓库",
+    "deployDb": "鹤壁市中支中心机房",
+    "deployFloor": "七层",
+    "deployGallery": "办公楼"
+   }
+  ],
+  "fireProtection_fireProtection": [
+   {
+    "fireAlarmSystem": "00-是",
+    "fireExhaustSystem": "00-是",
+    "gasExhaustSystem": "00-是",
+    "smokeDetectionSystem": "00-是",
+    "sprinklerSystem": "00-是",
+    "waterExhaustSystem": "00-是"
+   }
+  ],
+  "fireProtection_operationsManagement": [
+   {
+    "administrativeDepartment": "03-保卫管理部门",
+    "operationDepartment": "03-保卫管理部门",
+    "serviceEndTime": "2022-07-10",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "协力消防",
+    "serviceStartTime": "2017-07-10"
+   }
+  ],
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "941cb304c0c04ca4acf6f7d351aa861e",
+  "assetBrand": "海湾",
+  "assetSerialNumber": "9874651321",
+  "assetType": "JB-QB-JST200",
+  "brandLand": "00-国内",
+  "facilityCategory": "FAXF000000",
+  "facilityName": "郑州中支转接中心火灾报警控制器",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2007-07-01",
+  "facilityUseState": "00-设施在用",
+  "fireProtection_deployment": [
+   {
+    "deployArea": "01-主机房-网络区",
+    "deployComputerRoom": "转接中心机房",
+    "deployDb": "郑州中支转接中心机房",
+    "deployFloor": "二层",
+    "deployGallery": "转接中心综合楼"
+   }
+  ],
+  "fireProtection_fireProtection": [
+   {
+    "fireAlarmSystem": "00-是",
+    "fireExhaustSystem": "01-否",
+    "gasExhaustSystem": "00-是",
+    "smokeDetectionSystem": "00-是",
+    "sprinklerSystem": "01-否",
+    "waterExhaustSystem": "01-否"
+   }
+  ],
+  "fireProtection_operationsManagement": [
+   {
+    "administrativeDepartment": "03-保卫管理部门",
+    "operationDepartment": "03-保卫管理部门",
+    "serviceEndTime": "2027-07-01",
+    "serviceLevel": "01-7*24",
+    "serviceStartTime": "2007-07-01"
+   }
+  ],
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "a57454c98b514bbe8b6f80d8f28586c4",
+  "assetBrand": "海湾",
+  "assetCode": "048001",
+  "assetSerialNumber": "217000555",
+  "assetType": "CQQ90/2.5C",
+  "brandLand": "00-国内",
+  "facilityCategory": "FAXF000000",
+  "facilityName": "平顶山市中支中心机房消防系统",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2017-12-26",
+  "facilityUseState": "00-设施在用",
+  "fireProtection_deployment": [
+   {
+    "deployArea": "00-主机房-服务器区",
+    "deployComputerRoom": "中心机房",
+    "deployDb": "平顶山市中支中心机房",
+    "deployFloor": "八层",
+    "deployGallery": "办公楼"
+   }
+  ],
+  "fireProtection_fireProtection": [
+   {
+    "fireAlarmSystem": "00-是",
+    "fireExhaustSystem": "00-是",
+    "gasExhaustSystem": "00-是",
+    "smokeDetectionSystem": "00-是",
+    "sprinklerSystem": "01-否",
+    "waterExhaustSystem": "01-否"
+   }
+  ],
+  "fireProtection_operationsManagement": [
+   {
+    "administrativeDepartment": "03-保卫管理部门",
+    "operationDepartment": "03-保卫管理部门",
+    "serviceEndTime": "2020-12-26",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "中平信息技术有限责任公司",
+    "serviceStartTime": "2017-12-26"
+   }
+  ],
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "a57d85114e4c4b59a79ddafdfb0db631",
+  "assetBrand": "赛福",
+  "assetCode": "2202130051017001",
+  "assetSerialNumber": "7063004",
+  "assetType": "IG541",
+  "brandLand": "00-国内",
+  "facilityCategory": "FAXF000000",
+  "facilityName": "漯河市中支中心机房气体灭火设备灭火剂瓶组9",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2018-10-27",
+  "facilityUseState": "00-设施在用",
+  "fireProtection_deployment": [
+   {
+    "deployArea": "03-主机房-其它区",
+    "deployComputerRoom": "漯河市中支中心机房",
+    "deployDb": "漯河市中支中心机房",
+    "deployFloor": "五层",
+    "deployGallery": "漯河市郾城区嵩山东支路1号"
+   }
+  ],
+  "fireProtection_fireProtection": [
+   {
+    "fireAlarmSystem": "00-是",
+    "fireExhaustSystem": "00-是",
+    "gasExhaustSystem": "00-是",
+    "smokeDetectionSystem": "00-是",
+    "sprinklerSystem": "00-是",
+    "waterExhaustSystem": "02-不适用"
+   }
+  ],
+  "fireProtection_operationsManagement": [
+   {
+    "administrativeDepartment": "03-保卫管理部门",
+    "operationDepartment": "03-保卫管理部门",
+    "serviceEndTime": "2021-10-27",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "未知",
+    "serviceStartTime": "2018-10-27"
+   }
+  ],
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "a868ebc792b0495ba5ae8c70743bebeb",
+  "assetBrand": "海湾",
+  "assetCode": "048003",
+  "assetSerialNumber": "68253145",
+  "assetType": "GST-QKP01",
+  "brandLand": "00-国内",
+  "facilityCategory": "FAXF000000",
+  "facilityName": "安阳市中支中心机房消防空气采样控制器",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2014-09-01",
+  "facilityUseState": "00-设施在用",
+  "fireProtection_deployment": [
+   {
+    "deployArea": "03-主机房-其它区",
+    "deployComputerRoom": "安阳中心支行中心机房",
+    "deployDb": "安阳市中支中心机房",
+    "deployFloor": "八楼",
+    "deployGallery": "河南省安阳市开发区金融大厦"
+   }
+  ],
+  "fireProtection_fireProtection": [
+   {
+    "fireAlarmSystem": "00-是",
+    "fireExhaustSystem": "02-不适用",
+    "gasExhaustSystem": "00-是",
+    "smokeDetectionSystem": "00-是",
+    "sprinklerSystem": "02-不适用",
+    "waterExhaustSystem": "02-不适用"
+   }
+  ],
+  "fireProtection_operationsManagement": [
+   {
+    "administrativeDepartment": "03-保卫管理部门",
+    "operationDepartment": "03-保卫管理部门",
+    "serviceEndTime": "2023-06-30",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "河南安仕达消防技术有限公司",
+    "serviceStartTime": "2020-07-01"
+   }
+  ],
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "acdf153796484c8b9200ecef186f22dd",
+  "assetBrand": "海捷",
+  "assetCode": "2202110023014000",
+  "assetSerialNumber": "24472AA84378AA",
+  "assetType": "HJRF40",
+  "brandLand": "00-国内",
+  "facilityCategory": "FAXF000000",
+  "facilityName": "南阳市中支中心机房钢瓶驱动盘",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2017-10-01",
+  "facilityUseState": "00-设施在用",
+  "fireProtection_deployment": [
+   {
+    "deployArea": "00-主机房-服务器区",
+    "deployComputerRoom": "中心机房",
+    "deployDb": "南阳市中支中心机房",
+    "deployFloor": "十二层",
+    "deployGallery": "办公楼"
+   }
+  ],
+  "fireProtection_fireProtection": [
+   {
+    "fireAlarmSystem": "00-是",
+    "fireExhaustSystem": "00-是",
+    "gasExhaustSystem": "00-是",
+    "smokeDetectionSystem": "00-是",
+    "sprinklerSystem": "00-是",
+    "waterExhaustSystem": "00-是"
+   }
+  ],
+  "fireProtection_operationsManagement": [
+   {
+    "administrativeDepartment": "03-保卫管理部门",
+    "operationDepartment": "03-保卫管理部门",
+    "serviceEndTime": "2020-10-01",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "南阳恒得实佳电子有限公司",
+    "serviceStartTime": "2017-10-01"
+   }
+  ],
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "aee9dc20e4754666a248040e648a2e07",
+  "assetBrand": "赛福",
+  "assetCode": "2202130051017001",
+  "assetSerialNumber": "7027021",
+  "assetType": "IG541",
+  "brandLand": "00-国内",
+  "facilityCategory": "FAXF000000",
+  "facilityName": "漯河市中支中心机房气体灭火设备灭火剂瓶组1",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2018-10-27",
+  "facilityUseState": "00-设施在用",
+  "fireProtection_deployment": [
+   {
+    "deployArea": "03-主机房-其它区",
+    "deployComputerRoom": "漯河市中支中心机房",
+    "deployDb": "漯河市中支中心机房",
+    "deployFloor": "五层",
+    "deployGallery": "漯河市郾城区嵩山东支路1号"
+   }
+  ],
+  "fireProtection_fireProtection": [
+   {
+    "fireAlarmSystem": "00-是",
+    "fireExhaustSystem": "00-是",
+    "gasExhaustSystem": "00-是",
+    "smokeDetectionSystem": "00-是",
+    "sprinklerSystem": "00-是",
+    "waterExhaustSystem": "02-不适用"
+   }
+  ],
+  "fireProtection_operationsManagement": [
+   {
+    "administrativeDepartment": "03-保卫管理部门",
+    "operationDepartment": "03-保卫管理部门",
+    "serviceEndTime": "2021-10-27",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "未知",
+    "serviceStartTime": "2018-10-27"
+   }
+  ],
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "be1247bfcda146398ddc7e0474ed2f83",
+  "assetBrand": "泛海三江",
+  "assetCode": "2202120021002069",
+  "assetSerialNumber": "N000150915700061",
+  "assetType": "JB-QBL-QM300/4",
+  "brandLand": "00-国内",
+  "facilityCategory": "FAXF000000",
+  "facilityName": "许昌市中支中心机房火灾报警控制器",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-03-01",
+  "facilityUseDate": "2016-09-11",
+  "facilityUseState": "00-设施在用",
+  "fireProtection_deployment": [
+   {
+    "deployArea": "03-主机房-其它区",
+    "deployComputerRoom": "许昌市中心支行中心机房",
+    "deployDb": "许昌市中支中心机房",
+    "deployFloor": "四楼",
+    "deployGallery": "河南省许昌市建安区新东街571号办公楼"
+   }
+  ],
+  "fireProtection_fireProtection": [
+   {
+    "fireAlarmSystem": "00-是",
+    "fireExhaustSystem": "02-不适用",
+    "gasExhaustSystem": "00-是",
+    "smokeDetectionSystem": "01-否",
+    "sprinklerSystem": "02-不适用",
+    "waterExhaustSystem": "02-不适用"
+   }
+  ],
+  "fireProtection_operationsManagement": [
+   {
+    "administrativeDepartment": "00-科技管理部门",
+    "operationDepartment": "00-科技管理部门",
+    "serviceEndTime": "2022-12-20",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "许昌市海康盈联网络技术有限公司",
+    "serviceStartTime": "2019-12-20"
+   }
+  ],
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "c2a3e514399a4b649190c77a0572b675",
+  "assetBrand": "海湾",
+  "assetSerialNumber": "9432132",
+  "assetType": "GST-DY100",
+  "brandLand": "00-国内",
+  "facilityCategory": "FAXF000000",
+  "facilityName": "郑州中支转接中心控制器电源箱",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2007-07-01",
+  "facilityUseState": "00-设施在用",
+  "fireProtection_deployment": [
+   {
+    "deployArea": "01-主机房-网络区",
+    "deployComputerRoom": "转接中心机房",
+    "deployDb": "郑州中支转接中心机房",
+    "deployFloor": "二层",
+    "deployGallery": "转接中心综合楼"
+   }
+  ],
+  "fireProtection_fireProtection": [
+   {
+    "fireAlarmSystem": "00-是",
+    "fireExhaustSystem": "01-否",
+    "gasExhaustSystem": "00-是",
+    "smokeDetectionSystem": "00-是",
+    "sprinklerSystem": "02-不适用",
+    "waterExhaustSystem": "02-不适用"
+   }
+  ],
+  "fireProtection_operationsManagement": [
+   {
+    "administrativeDepartment": "03-保卫管理部门",
+    "operationDepartment": "03-保卫管理部门",
+    "serviceEndTime": "2027-07-01",
+    "serviceLevel": "01-7*24",
+    "serviceStartTime": "2007-07-01"
+   }
+  ],
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "c349db08c1da41d99ad4f6fd90766e8c",
+  "assetBrand": "利达",
+  "assetCode": "2202130022100000",
+  "assetSerialNumber": "SN000001",
+  "assetType": "LD128EII",
+  "brandLand": "00-国内",
+  "facilityCategory": "FAXF000000",
+  "facilityName": "漯河市中支中心机房火警报警设备",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2005-06-06",
+  "facilityUseState": "00-设施在用",
+  "fireProtection_deployment": [
+   {
+    "deployArea": "00-主机房-服务器区",
+    "deployComputerRoom": "漯河市中支中心机房",
+    "deployDb": "漯河市中支中心机房",
+    "deployFloor": "五层",
+    "deployGallery": "漯河市郾城区嵩山东支路1号"
+   }
+  ],
+  "fireProtection_fireProtection": [
+   {
+    "fireAlarmSystem": "00-是",
+    "fireExhaustSystem": "00-是",
+    "gasExhaustSystem": "00-是",
+    "smokeDetectionSystem": "00-是",
+    "sprinklerSystem": "00-是",
+    "waterExhaustSystem": "02-不适用"
+   }
+  ],
+  "fireProtection_operationsManagement": [
+   {
+    "administrativeDepartment": "03-保卫管理部门",
+    "operationDepartment": "03-保卫管理部门",
+    "serviceEndTime": "2005-06-06",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "未知",
+    "serviceStartTime": "2005-06-06"
+   }
+  ],
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "c58ca5d5d8ce4993b5d886d5f1edf680",
+  "assetBrand": "剑安",
+  "assetCode": "2202090041004006",
+  "assetSerialNumber": "QGRK369374",
+  "assetType": "HFC-227ea",
+  "brandLand": "00-国内",
+  "facilityCategory": "FAXF000000",
+  "facilityName": "三门峡市中支中心机房柜式灭火器4",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2018-11-01",
+  "facilityUseState": "00-设施在用",
+  "fireProtection_deployment": [
+   {
+    "deployArea": "20-支持区-变配电室",
+    "deployComputerRoom": "中心机房",
+    "deployDb": "三门峡市中支中心机房",
+    "deployFloor": "六层",
+    "deployGallery": "办公大楼"
+   }
+  ],
+  "fireProtection_fireProtection": [
+   {
+    "fireAlarmSystem": "00-是",
+    "fireExhaustSystem": "00-是",
+    "gasExhaustSystem": "00-是",
+    "smokeDetectionSystem": "00-是",
+    "sprinklerSystem": "02-不适用",
+    "waterExhaustSystem": "02-不适用"
+   }
+  ],
+  "fireProtection_operationsManagement": [
+   {
+    "administrativeDepartment": "03-保卫管理部门",
+    "operationDepartment": "03-保卫管理部门",
+    "serviceEndTime": "2021-07-10",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "河南省海浪消防设备有限公司",
+    "serviceStartTime": "2018-11-01"
+   }
+  ],
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "cb54ccc41edc43ff84692ab3f2352330",
+  "assetBrand": "赛福",
+  "assetCode": "2202130051017001",
+  "assetSerialNumber": "7027023",
+  "assetType": "IG541",
+  "brandLand": "00-国内",
+  "facilityCategory": "FAXF000000",
+  "facilityName": "漯河市中支中心机房气体灭火设备灭火剂瓶组6",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2018-10-27",
+  "facilityUseState": "00-设施在用",
+  "fireProtection_deployment": [
+   {
+    "deployArea": "03-主机房-其它区",
+    "deployComputerRoom": "漯河市中支中心机房",
+    "deployDb": "漯河市中支中心机房",
+    "deployFloor": "五层",
+    "deployGallery": "漯河市郾城区嵩山东支路1号"
+   }
+  ],
+  "fireProtection_fireProtection": [
+   {
+    "fireAlarmSystem": "00-是",
+    "fireExhaustSystem": "00-是",
+    "gasExhaustSystem": "00-是",
+    "smokeDetectionSystem": "00-是",
+    "sprinklerSystem": "00-是",
+    "waterExhaustSystem": "02-不适用"
+   }
+  ],
+  "fireProtection_operationsManagement": [
+   {
+    "administrativeDepartment": "03-保卫管理部门",
+    "operationDepartment": "03-保卫管理部门",
+    "serviceEndTime": "2021-10-27",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "未知",
+    "serviceStartTime": "2018-10-27"
+   }
+  ],
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "cba45b14dba34a928629ea096b410e20",
+  "assetBrand": "海湾",
+  "assetCode": "XFQFBW07",
+  "assetSerialNumber": "FAXF00144",
+  "assetType": "NT04",
+  "brandLand": "00-国内",
+  "facilityCategory": "FAXF000000",
+  "facilityName": "信阳市中支中心机房消防系统",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2012-04-01",
+  "facilityUseState": "00-设施在用",
+  "fireProtection_deployment": [
+   {
+    "deployArea": "13-辅助区-消防区",
+    "deployComputerRoom": "信阳市中心支行中心机房",
+    "deployDb": "信阳市中支中心机房",
+    "deployFloor": "二楼",
+    "deployGallery": "信阳市浉河区长安路133号"
+   }
+  ],
+  "fireProtection_fireProtection": [
+   {
+    "fireAlarmSystem": "00-是",
+    "fireExhaustSystem": "02-不适用",
+    "gasExhaustSystem": "00-是",
+    "smokeDetectionSystem": "01-否",
+    "sprinklerSystem": "02-不适用",
+    "waterExhaustSystem": "02-不适用"
+   }
+  ],
+  "fireProtection_operationsManagement": [
+   {
+    "administrativeDepartment": "03-保卫管理部门",
+    "operationDepartment": "03-保卫管理部门",
+    "serviceEndTime": "2021-06-24",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "河南诺盾科技有限公司",
+    "serviceStartTime": "2019-12-16"
+   }
+  ],
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "cc394ad7b80544a996a82affd0c2968d",
+  "assetBrand": "剑安",
+  "assetCode": "2202090041004005",
+  "assetSerialNumber": "QGRK369371",
+  "assetType": "HFC-227ea",
+  "brandLand": "00-国内",
+  "facilityCategory": "FAXF000000",
+  "facilityName": "三门峡市中支中心机房柜式灭火器5",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2018-11-01",
+  "facilityUseState": "00-设施在用",
+  "fireProtection_deployment": [
+   {
+    "deployArea": "23-支持区-电池室",
+    "deployComputerRoom": "中心机房",
+    "deployDb": "三门峡市中支中心机房",
+    "deployFloor": "六层",
+    "deployGallery": "办公大楼"
+   }
+  ],
+  "fireProtection_fireProtection": [
+   {
+    "fireAlarmSystem": "00-是",
+    "fireExhaustSystem": "00-是",
+    "gasExhaustSystem": "00-是",
+    "smokeDetectionSystem": "00-是",
+    "sprinklerSystem": "02-不适用",
+    "waterExhaustSystem": "02-不适用"
+   }
+  ],
+  "fireProtection_operationsManagement": [
+   {
+    "administrativeDepartment": "03-保卫管理部门",
+    "operationDepartment": "03-保卫管理部门",
+    "serviceEndTime": "2021-07-10",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "河南省海浪消防设备有限公司",
+    "serviceStartTime": "2018-11-01"
+   }
+  ],
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "d2c68c58191c4928990410e9624e1e7a",
+  "assetBrand": "狮岛",
+  "assetCode": "410611048001",
+  "assetSerialNumber": "480014",
+  "assetType": "SD7012",
+  "brandLand": "00-国内",
+  "facilityCategory": "FAXF000000",
+  "facilityName": "鹤壁市中支中心机房钢瓶驱动盘",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-12-07",
+  "facilityUseDate": "2019-08-08",
+  "facilityUseState": "00-设施在用",
+  "fireProtection_deployment": [
+   {
+    "deployArea": "00-主机房-服务器区",
+    "deployComputerRoom": "仓库",
+    "deployDb": "鹤壁市中支中心机房",
+    "deployFloor": "七层",
+    "deployGallery": "办公楼"
+   }
+  ],
+  "fireProtection_fireProtection": [
+   {
+    "fireAlarmSystem": "00-是",
+    "fireExhaustSystem": "00-是",
+    "gasExhaustSystem": "00-是",
+    "smokeDetectionSystem": "00-是",
+    "sprinklerSystem": "00-是",
+    "waterExhaustSystem": "00-是"
+   }
+  ],
+  "fireProtection_operationsManagement": [
+   {
+    "administrativeDepartment": "03-保卫管理部门",
+    "operationDepartment": "03-保卫管理部门",
+    "serviceEndTime": "2022-10-01",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "协力消防",
+    "serviceStartTime": "2002-10-01"
+   }
+  ],
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "dda02dbfcc30405d874c408d41989e95",
+  "assetBrand": "磐龙",
+  "assetCode": "2202030022005006",
+  "assetSerialNumber": "1704201967",
+  "assetType": "GQQ90/2.5",
+  "brandLand": "00-国内",
+  "facilityCategory": "FAXF000000",
+  "facilityName": "新乡市中支中心机房消防气体钢瓶4",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2017-08-30",
+  "facilityUseState": "00-设施在用",
+  "fireProtection_deployment": [
+   {
+    "deployArea": "00-主机房-服务器区",
+    "deployComputerRoom": "新乡市中心支行中心机房",
+    "deployDb": "新乡市中支中心机房",
+    "deployFloor": "十五层",
+    "deployGallery": "办公楼"
+   }
+  ],
+  "fireProtection_fireProtection": [
+   {
+    "fireAlarmSystem": "00-是",
+    "fireExhaustSystem": "00-是",
+    "gasExhaustSystem": "00-是",
+    "smokeDetectionSystem": "00-是",
+    "sprinklerSystem": "01-否",
+    "waterExhaustSystem": "01-否"
+   }
+  ],
+  "fireProtection_operationsManagement": [
+   {
+    "administrativeDepartment": "03-保卫管理部门",
+    "operationDepartment": "03-保卫管理部门",
+    "serviceEndTime": "2020-08-30",
+    "serviceLevel": "00-5*8",
+    "serviceProvider": "北京华科科技有限公司",
+    "serviceStartTime": "2017-08-30"
+   }
+  ],
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "e01aa14caf36465b8aa6e3c793e5ede6",
+  "assetBrand": "赛福",
+  "assetCode": "2202130051017001",
+  "assetSerialNumber": "7027013",
+  "assetType": "IG541",
+  "brandLand": "00-国内",
+  "facilityCategory": "FAXF000000",
+  "facilityName": "漯河市中支中心机房气体灭火设备灭火剂瓶组5",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2018-10-27",
+  "facilityUseState": "00-设施在用",
+  "fireProtection_deployment": [
+   {
+    "deployArea": "03-主机房-其它区",
+    "deployComputerRoom": "漯河市中支中心机房",
+    "deployDb": "漯河市中支中心机房",
+    "deployFloor": "五层",
+    "deployGallery": "漯河市郾城区嵩山东支路1号"
+   }
+  ],
+  "fireProtection_fireProtection": [
+   {
+    "fireAlarmSystem": "00-是",
+    "fireExhaustSystem": "00-是",
+    "gasExhaustSystem": "00-是",
+    "smokeDetectionSystem": "00-是",
+    "sprinklerSystem": "00-是",
+    "waterExhaustSystem": "02-不适用"
+   }
+  ],
+  "fireProtection_operationsManagement": [
+   {
+    "administrativeDepartment": "03-保卫管理部门",
+    "operationDepartment": "03-保卫管理部门",
+    "serviceEndTime": "2021-10-27",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "未知",
+    "serviceStartTime": "2018-10-27"
+   }
+  ],
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "e28d487b859c43b9b6d110556c3dfbe6",
+  "assetBrand": "磐龙",
+  "assetCode": "2202030022005055",
+  "assetSerialNumber": "1702180601",
+  "assetType": "GQQ40/2.5",
+  "brandLand": "00-国内",
+  "facilityCategory": "FAXF000000",
+  "facilityName": "新乡市中支中心机房消防气体钢瓶1",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2017-08-30",
+  "facilityUseState": "00-设施在用",
+  "fireProtection_deployment": [
+   {
+    "deployArea": "90-屏蔽机房区",
+    "deployComputerRoom": "新乡市中心支行中心机房",
+    "deployDb": "新乡市中支中心机房",
+    "deployFloor": "十五层",
+    "deployGallery": "办公楼"
+   }
+  ],
+  "fireProtection_fireProtection": [
+   {
+    "fireAlarmSystem": "00-是",
+    "fireExhaustSystem": "00-是",
+    "gasExhaustSystem": "00-是",
+    "smokeDetectionSystem": "00-是",
+    "sprinklerSystem": "01-否",
+    "waterExhaustSystem": "01-否"
+   }
+  ],
+  "fireProtection_operationsManagement": [
+   {
+    "administrativeDepartment": "03-保卫管理部门",
+    "operationDepartment": "03-保卫管理部门",
+    "serviceEndTime": "2020-08-30",
+    "serviceLevel": "00-5*8",
+    "serviceProvider": "北京华科科技有限公司",
+    "serviceStartTime": "2017-08-30"
+   }
+  ],
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "e3c624d3465a40da8c9d9114e95534a9",
+  "assetBrand": "利达",
+  "assetCode": "410611048003",
+  "assetSerialNumber": "048003",
+  "assetType": "JTY-GM-LD3000EN",
+  "brandLand": "00-国内",
+  "facilityCategory": "FAXF000000",
+  "facilityName": "鹤壁市中支中心机房烟雾感应器",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2017-07-10",
+  "facilityUseState": "00-设施在用",
+  "fireProtection_deployment": [
+   {
+    "deployArea": "03-主机房-其它区",
+    "deployComputerRoom": "仓库",
+    "deployDb": "鹤壁市中支中心机房",
+    "deployFloor": "七层",
+    "deployGallery": "办公楼"
+   }
+  ],
+  "fireProtection_fireProtection": [
+   {
+    "fireAlarmSystem": "00-是",
+    "fireExhaustSystem": "00-是",
+    "gasExhaustSystem": "00-是",
+    "smokeDetectionSystem": "00-是",
+    "sprinklerSystem": "00-是",
+    "waterExhaustSystem": "00-是"
+   }
+  ],
+  "fireProtection_operationsManagement": [
+   {
+    "administrativeDepartment": "00-科技管理部门",
+    "operationDepartment": "03-保卫管理部门",
+    "serviceEndTime": "2022-07-10",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "协力消防",
+    "serviceStartTime": "2017-07-10"
+   }
+  ],
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "e9a273fa7c2f42bc93fe16d766848ac8",
+  "assetBrand": "剑安",
+  "assetCode": "2202090041004008",
+  "assetSerialNumber": "JB-DB-RP1003F",
+  "assetType": "GQQ 40/2.5",
+  "brandLand": "00-国内",
+  "facilityCategory": "FAXF000000",
+  "facilityName": "三门峡市中支中心机房柜式灭火器2",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2020-07-10",
+  "facilityUseState": "00-设施在用",
+  "fireProtection_deployment": [
+   {
+    "deployArea": "90-屏蔽机房区",
+    "deployComputerRoom": "中心机房",
+    "deployDb": "三门峡市中支中心机房",
+    "deployFloor": "六层",
+    "deployGallery": "办公大楼"
+   }
+  ],
+  "fireProtection_fireProtection": [
+   {
+    "fireAlarmSystem": "00-是",
+    "fireExhaustSystem": "00-是",
+    "gasExhaustSystem": "00-是",
+    "smokeDetectionSystem": "00-是",
+    "sprinklerSystem": "02-不适用",
+    "waterExhaustSystem": "02-不适用"
+   }
+  ],
+  "fireProtection_operationsManagement": [
+   {
+    "administrativeDepartment": "03-保卫管理部门",
+    "operationDepartment": "03-保卫管理部门",
+    "serviceEndTime": "2023-07-10",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "河南省海浪消防设备有限公司",
+    "serviceStartTime": "2020-07-10"
+   }
+  ],
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "eeee96955f6b4f03b850654ac6a7db2f",
+  "assetBrand": "新竹",
+  "assetSerialNumber": "256161313",
+  "assetType": "ZMB70Lx1",
+  "brandLand": "00-国内",
+  "facilityCategory": "FAXF000000",
+  "facilityName": "郑州中支转接中心七氟丙烷无管网2",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2007-07-01",
+  "facilityUseState": "00-设施在用",
+  "fireProtection_deployment": [
+   {
+    "deployArea": "01-主机房-网络区",
+    "deployComputerRoom": "转接中心机房",
+    "deployDb": "郑州中支转接中心机房",
+    "deployFloor": "二层",
+    "deployGallery": "转接中心综合楼"
+   }
+  ],
+  "fireProtection_fireProtection": [
+   {
+    "fireAlarmSystem": "00-是",
+    "fireExhaustSystem": "01-否",
+    "gasExhaustSystem": "00-是",
+    "smokeDetectionSystem": "00-是",
+    "sprinklerSystem": "01-否",
+    "waterExhaustSystem": "01-否"
+   }
+  ],
+  "fireProtection_operationsManagement": [
+   {
+    "administrativeDepartment": "03-保卫管理部门",
+    "operationDepartment": "03-保卫管理部门",
+    "serviceEndTime": "2027-07-01",
+    "serviceLevel": "01-7*24",
+    "serviceStartTime": "2007-07-01"
+   }
+  ],
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "f2199b5489124d73a4fedb7947fa3706",
+  "assetBrand": "福尔盾",
+  "assetCode": "0000000000000118",
+  "assetSerialNumber": "6513026150",
+  "assetType": "2.5GQMP70",
+  "brandLand": "00-国内",
+  "facilityCategory": "FAXF000000",
+  "facilityName": "济源市中支中心机房气体灭火系统",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2016-08-01",
+  "facilityUseState": "00-设施在用",
+  "fireProtection_deployment": [
+   {
+    "deployArea": "00-主机房-服务器区",
+    "deployComputerRoom": "中心机房",
+    "deployDb": "济源市中支中心机房",
+    "deployFloor": "二层",
+    "deployGallery": "办公楼"
+   }
+  ],
+  "fireProtection_fireProtection": [
+   {
+    "fireAlarmSystem": "00-是",
+    "fireExhaustSystem": "01-否",
+    "gasExhaustSystem": "00-是",
+    "smokeDetectionSystem": "00-是",
+    "sprinklerSystem": "01-否",
+    "waterExhaustSystem": "01-否"
+   }
+  ],
+  "fireProtection_operationsManagement": [
+   {
+    "administrativeDepartment": "03-保卫管理部门",
+    "operationDepartment": "03-保卫管理部门",
+    "serviceEndTime": "2021-12-01",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "福尔盾",
+    "serviceStartTime": "2016-08-01"
+   }
+  ],
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "f5549ba2d98248c09e262e96e5ac6409",
+  "assetBrand": "海湾",
+  "assetSerialNumber": "32146541132",
+  "assetType": "GST-QKPO1",
+  "brandLand": "00-国内",
+  "facilityCategory": "FAXF000000",
+  "facilityName": "商丘市中支中心机房气灭控制器",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2017-12-01",
+  "facilityUseState": "00-设施在用",
+  "fireProtection_deployment": [
+   {
+    "deployArea": "13-辅助区-消防区",
+    "deployComputerRoom": "商丘市中心支行中心机房",
+    "deployDb": "商丘市中支中心机房",
+    "deployFloor": "八层",
+    "deployGallery": "河南省商丘市睢阳区北海西路六号"
+   }
+  ],
+  "fireProtection_fireProtection": [
+   {
+    "fireAlarmSystem": "00-是",
+    "fireExhaustSystem": "02-不适用",
+    "gasExhaustSystem": "00-是",
+    "smokeDetectionSystem": "01-否",
+    "sprinklerSystem": "02-不适用",
+    "waterExhaustSystem": "02-不适用"
+   }
+  ],
+  "fireProtection_operationsManagement": [
+   {
+    "administrativeDepartment": "00-科技管理部门",
+    "operationDepartment": "00-科技管理部门",
+    "serviceEndTime": "2020-12-01",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "未知",
+    "serviceStartTime": "2017-12-01"
+   }
+  ],
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "f8b55aee5b4549d6bc8219c289dfd0e0",
+  "assetBrand": "剑安",
+  "assetCode": "2202090041004003",
+  "assetSerialNumber": "QGRK369370",
+  "assetType": "HFC-227ea",
+  "brandLand": "00-国内",
+  "facilityCategory": "FAXF000000",
+  "facilityName": "三门峡市中支中心机房柜式灭火器7",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2018-11-01",
+  "facilityUseState": "00-设施在用",
+  "fireProtection_deployment": [
+   {
+    "deployArea": "00-主机房-服务器区",
+    "deployComputerRoom": "中心机房",
+    "deployDb": "三门峡市中支中心机房",
+    "deployFloor": "六层",
+    "deployGallery": "办公大楼"
+   }
+  ],
+  "fireProtection_fireProtection": [
+   {
+    "fireAlarmSystem": "00-是",
+    "fireExhaustSystem": "00-是",
+    "gasExhaustSystem": "00-是",
+    "smokeDetectionSystem": "00-是",
+    "sprinklerSystem": "02-不适用",
+    "waterExhaustSystem": "02-不适用"
+   }
+  ],
+  "fireProtection_operationsManagement": [
+   {
+    "administrativeDepartment": "03-保卫管理部门",
+    "operationDepartment": "03-保卫管理部门",
+    "serviceEndTime": "2021-07-10",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "河南省海浪消防设备有限公司",
+    "serviceStartTime": "2018-11-01"
+   }
+  ],
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "f9b83fb6047a40f18ae5556dee2124c5",
+  "assetBrand": "磐龙",
+  "assetCode": "2202030022005043",
+  "assetSerialNumber": "1704202007",
+  "assetType": "GQQ90/2.5",
+  "brandLand": "00-国内",
+  "facilityCategory": "FAXF000000",
+  "facilityName": "新乡市中支中心机房消防气体钢瓶2",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2017-08-30",
+  "facilityUseState": "00-设施在用",
+  "fireProtection_deployment": [
+   {
+    "deployArea": "22-支持区-UPS区",
+    "deployComputerRoom": "新乡市中心支行中心机房",
+    "deployDb": "新乡市中支中心机房",
+    "deployFloor": "十五层",
+    "deployGallery": "办公楼"
+   }
+  ],
+  "fireProtection_fireProtection": [
+   {
+    "fireAlarmSystem": "00-是",
+    "fireExhaustSystem": "00-是",
+    "gasExhaustSystem": "00-是",
+    "smokeDetectionSystem": "00-是",
+    "sprinklerSystem": "01-否",
+    "waterExhaustSystem": "01-否"
+   }
+  ],
+  "fireProtection_operationsManagement": [
+   {
+    "administrativeDepartment": "03-保卫管理部门",
+    "operationDepartment": "03-保卫管理部门",
+    "serviceEndTime": "2020-08-30",
+    "serviceLevel": "00-5*8",
+    "serviceProvider": "北京华科科技有限公司",
+    "serviceStartTime": "2017-08-30"
+   }
+  ],
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "fea9b7369fc24f4890b746b8794e3164",
+  "assetBrand": "福尔盾",
+  "assetCode": "XFQFBW07",
+  "assetSerialNumber": "FAXF001",
+  "assetType": "NT04",
+  "brandLand": "00-国内",
+  "facilityCategory": "FAXF000000",
+  "facilityName": "焦作市中支中心机房消防气体钢瓶",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2012-04-01",
+  "facilityUseState": "00-设施在用",
+  "fireProtection_deployment": [
+   {
+    "deployArea": "13-辅助区-消防区",
+    "deployComputerRoom": "焦作市中心支行中心机房",
+    "deployDb": "焦作市中支中心机房",
+    "deployFloor": "四楼",
+    "deployGallery": "焦作市山阳区世纪路1355号"
+   }
+  ],
+  "fireProtection_fireProtection": [
+   {
+    "fireAlarmSystem": "00-是",
+    "fireExhaustSystem": "01-否",
+    "gasExhaustSystem": "00-是",
+    "smokeDetectionSystem": "00-是",
+    "sprinklerSystem": "01-否",
+    "waterExhaustSystem": "01-否"
+   }
+  ],
+  "fireProtection_operationsManagement": [
+   {
+    "administrativeDepartment": "03-保卫管理部门",
+    "operationDepartment": "03-保卫管理部门",
+    "serviceEndTime": "2021-06-24",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "河南丰达消防检测有限公司",
+    "serviceStartTime": "2019-12-16"
+   }
+  ],
+  "_dataSource": "双源"
+ }
+]

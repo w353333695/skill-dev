@@ -1,0 +1,750 @@
+[
+ {
+  "facilityDescriptor": "01c506cac34445639ff079fa67ae84b8",
+  "accessControlType": "01-双向",
+  "assetBrand": "微耕",
+  "assetCode": "0000000000000112",
+  "assetSerialNumber": "2231181772",
+  "assetType": "WG2052",
+  "brandLand": "00-国内",
+  "dataSaveCycle": 180.0,
+  "entranceGuardSystem": "00-是",
+  "entranceGuard_deployment": [
+   {
+    "deployArea": "01-主机房-网络区",
+    "deployComputerRoom": "中心机房",
+    "deployDb": "济源市中支中心机房",
+    "deployFloor": "二层",
+    "deployGallery": "办公楼"
+   }
+  ],
+  "entranceGuard_operationsManagement": [
+   {
+    "administrativeDepartment": "00-科技管理部门",
+    "operationDepartment": "00-科技管理部门",
+    "serviceEndTime": "2017-08-01",
+    "serviceLevel": "00-5*8",
+    "serviceProvider": "微耕",
+    "serviceStartTime": "2016-08-01"
+   }
+  ],
+  "facilityCategory": "FAAFMJS000",
+  "facilityName": "济源市中支中心机房门禁系统",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2016-08-01",
+  "facilityUseState": "00-设施在用",
+  "remarksInformation": "机房门禁",
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "056ac9fcef6f42bb9a103b42a5ee4dc8",
+  "accessControlType": "01-双向",
+  "assetBrand": "力维智联",
+  "assetCode": "2202120021002039",
+  "assetSerialNumber": "321654613",
+  "assetType": "V2.20",
+  "brandLand": "00-国内",
+  "dataSaveCycle": 180.0,
+  "entranceGuardSystem": "00-是",
+  "entranceGuard_deployment": [
+   {
+    "deployArea": "00-主机房-服务器区",
+    "deployComputerRoom": "许昌市中心支行中心机房",
+    "deployDb": "许昌市中支中心机房",
+    "deployFloor": "四层",
+    "deployGallery": "河南省许昌市建安区新东街571号办公楼"
+   }
+  ],
+  "entranceGuard_operationsManagement": [
+   {
+    "administrativeDepartment": "00-科技管理部门",
+    "operationDepartment": "00-科技管理部门",
+    "serviceEndTime": "2021-12-18",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "许昌协同科贸有限公司",
+    "serviceStartTime": "2019-12-18"
+   }
+  ],
+  "facilityCategory": "FAAFMJS000",
+  "facilityName": "许昌市中支中心机房门禁管理系统",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2016-09-11",
+  "facilityUseState": "00-设施在用",
+  "remarksInformation": "门禁管理",
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "17e7493fc77540ae8fb4ffec07382619",
+  "accessControlType": "00-单向",
+  "assetBrand": "中控智慧",
+  "assetCode": "2202080021018002",
+  "assetSerialNumber": "030002",
+  "assetType": "Iface7",
+  "brandLand": "00-国内",
+  "dataSaveCycle": 180.0,
+  "entranceGuardSystem": "00-是",
+  "entranceGuard_deployment": [
+   {
+    "deployArea": "30-行政管理区-办公区",
+    "deployComputerRoom": "鹤壁市中支中心机房",
+    "deployDb": "鹤壁市中支中心机房",
+    "deployFloor": "七层",
+    "deployGallery": "鹤壁市淇滨区九州路129号办公楼"
+   }
+  ],
+  "entranceGuard_operationsManagement": [
+   {
+    "administrativeDepartment": "00-科技管理部门",
+    "operationDepartment": "00-科技管理部门",
+    "serviceEndTime": "2019-05-01",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "河南九天安防工程有限公司",
+    "serviceStartTime": "2018-05-01"
+   }
+  ],
+  "facilityCategory": "FAAFMJS000",
+  "facilityName": "鹤壁市中支中心机房门禁系统",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2018-05-22",
+  "facilityUseState": "00-设施在用",
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "2408239f2670482387cc662a50eec752",
+  "accessControlType": "01-双向",
+  "assetBrand": "中控智慧",
+  "assetCode": "2202070022008000",
+  "assetSerialNumber": "FAAFM001",
+  "assetType": "F18",
+  "brandLand": "00-国内",
+  "dataSaveCycle": 180.0,
+  "entranceGuardSystem": "00-是",
+  "entranceGuard_deployment": [
+   {
+    "deployArea": "01-主机房-网络区",
+    "deployComputerRoom": "焦作市中心支行中心机房",
+    "deployDb": "焦作市中支中心机房",
+    "deployFloor": "四层",
+    "deployGallery": "焦作市山阳区世纪路1355号"
+   }
+  ],
+  "entranceGuard_operationsManagement": [
+   {
+    "administrativeDepartment": "00-科技管理部门",
+    "operationDepartment": "00-科技管理部门",
+    "serviceEndTime": "2021-11-16",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "河南捷联科技有限公司",
+    "serviceStartTime": "2020-11-17"
+   }
+  ],
+  "facilityCategory": "FAAFMJS000",
+  "facilityName": "焦作市中支中心机房门禁指纹机",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2012-04-01",
+  "facilityUseState": "00-设施在用",
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "2a0d1b4d6ccc48b4ae4ef3a3510b63c0",
+  "accessControlType": "01-双向",
+  "assetBrand": "共济科技",
+  "assetCode": "2202150021009019",
+  "assetSerialNumber": "FAAFM0018",
+  "assetType": "AT-2002",
+  "brandLand": "00-国内",
+  "dataSaveCycle": 180.0,
+  "entranceGuardSystem": "00-是",
+  "entranceGuard_deployment": [
+   {
+    "deployArea": "12-辅助区-总控中心",
+    "deployComputerRoom": "信阳市中心支行中心机房",
+    "deployDb": "信阳市中支中心机房",
+    "deployFloor": "二层",
+    "deployGallery": "信阳市浉河区长安路133号"
+   }
+  ],
+  "entranceGuard_operationsManagement": [
+   {
+    "administrativeDepartment": "00-科技管理部门",
+    "operationDepartment": "00-科技管理部门",
+    "serviceEndTime": "2021-11-16",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "深圳共济科技有限公司",
+    "serviceStartTime": "2020-11-17"
+   }
+  ],
+  "facilityCategory": "FAAFMJS000",
+  "facilityName": "信阳市中支中心机房门禁管理系统",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2012-04-01",
+  "facilityUseState": "00-设施在用",
+  "remarksInformation": "门禁管理",
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "5577bb6cf32f4cdaa3b1b254680ed12b",
+  "accessControlType": "01-双向",
+  "assetBrand": "中控智慧",
+  "assetCode": "2202090021021002",
+  "assetSerialNumber": "2161170014132504216",
+  "assetType": "MAX-MJ02NINK-01",
+  "brandLand": "00-国内",
+  "dataSaveCycle": 360.0,
+  "entranceGuardSystem": "00-是",
+  "entranceGuard_deployment": [
+   {
+    "deployArea": "00-主机房-服务器区",
+    "deployComputerRoom": "中心机房",
+    "deployDb": "三门峡市中支中心机房",
+    "deployFloor": "六层",
+    "deployGallery": "办公大楼"
+   }
+  ],
+  "entranceGuard_operationsManagement": [
+   {
+    "administrativeDepartment": "00-科技管理部门",
+    "operationDepartment": "00-科技管理部门",
+    "serviceEndTime": "2020-09-01",
+    "serviceLevel": "00-5*8",
+    "serviceProvider": "河南威帆信息技术股份有限公司",
+    "serviceStartTime": "2017-09-01"
+   }
+  ],
+  "facilityCategory": "FAAFMJS000",
+  "facilityName": "中国人民银行三门峡市中心支行 门禁系统1",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2017-09-02",
+  "facilityUseState": "00-设施在用",
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "78f06419ba104c79ac8bafe4f8238db9",
+  "accessControlType": "00-单向",
+  "assetBrand": "大华",
+  "assetCode": "ZMD030001",
+  "assetSerialNumber": "3393165100308",
+  "assetType": "四门门禁控制器",
+  "brandLand": "00-国内",
+  "dataSaveCycle": 180.0,
+  "entranceGuardSystem": "00-是",
+  "entranceGuard_deployment": [
+   {
+    "deployArea": "00-主机房-服务器区",
+    "deployComputerRoom": "驻马店市中支中心机房",
+    "deployDb": "驻马店市中支中心机房",
+    "deployFloor": "四层",
+    "deployGallery": "驻马店市驿城区泰山路567号办公楼"
+   }
+  ],
+  "entranceGuard_operationsManagement": [
+   {
+    "administrativeDepartment": "00-科技管理部门",
+    "operationDepartment": "00-科技管理部门",
+    "serviceEndTime": "2021-11-02",
+    "serviceLevel": "00-5*8",
+    "serviceProvider": "郑州一建集团有限公司",
+    "serviceStartTime": "2018-11-02"
+   }
+  ],
+  "facilityCategory": "FAAFMJS000",
+  "facilityName": "驻马店市中支中心机房门禁系统",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2018-11-02",
+  "facilityUseState": "00-设施在用",
+  "remarksInformation": "门禁系统",
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "813d285b238546339332493665f47fdd",
+  "accessControlType": "01-双向",
+  "assetBrand": "共济科技",
+  "assetCode": "410702000000000001",
+  "assetSerialNumber": "KAN5178034",
+  "assetType": "CM-DESK",
+  "brandLand": "00-国内",
+  "dataSaveCycle": 180.0,
+  "entranceGuardSystem": "00-是",
+  "entranceGuard_deployment": [
+   {
+    "deployArea": "00-主机房-服务器区",
+    "deployComputerRoom": "新乡市中心支行中心机房",
+    "deployDb": "新乡市中支中心机房",
+    "deployFloor": "十五层",
+    "deployGallery": "新乡市红旗区向阳路9号办公楼"
+   }
+  ],
+  "entranceGuard_operationsManagement": [
+   {
+    "administrativeDepartment": "00-科技管理部门",
+    "operationDepartment": "00-科技管理部门",
+    "serviceEndTime": "2021-10-31",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "深圳市共济科技股份有限公司",
+    "serviceStartTime": "2020-11-01"
+   }
+  ],
+  "facilityCategory": "FAAFMJS000",
+  "facilityName": "新乡市中心支行机房门禁系统",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2017-08-30",
+  "facilityUseState": "00-设施在用",
+  "remarksInformation": "门禁系统内置于机房环境监控系统内，为环境监控系统的一个子功能",
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "8bd0d4a8394c4c94bff2d0f97f2c730e",
+  "accessControlType": "01-双向",
+  "assetBrand": "共济科技",
+  "assetSerialNumber": "12464313",
+  "assetType": "AT2002",
+  "brandLand": "00-国内",
+  "dataSaveCycle": 180.0,
+  "entranceGuardSystem": "00-是",
+  "entranceGuard_deployment": [
+   {
+    "deployArea": "01-主机房-网络区",
+    "deployComputerRoom": "主中心机房",
+    "deployDb": "郑州中支主中心机房",
+    "deployFloor": "11层",
+    "deployGallery": "商务外环路21号"
+   }
+  ],
+  "entranceGuard_operationsManagement": [
+   {
+    "administrativeDepartment": "00-科技管理部门",
+    "operationDepartment": "00-科技管理部门",
+    "serviceEndTime": "2021-08-26",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "深圳市共济科技股份有限公司",
+    "serviceStartTime": "2020-08-27"
+   }
+  ],
+  "facilityCategory": "FAAFMJS000",
+  "facilityName": "郑州中支主机房门禁控制器",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2010-01-01",
+  "facilityUseState": "00-设施在用",
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "8f17d436670a440d8bdb0d38f0fd1bff",
+  "accessControlType": "01-双向",
+  "assetBrand": "共济科技",
+  "assetSerialNumber": "32467654",
+  "assetType": "AT2002",
+  "brandLand": "00-国内",
+  "dataSaveCycle": 180.0,
+  "entranceGuardSystem": "00-是",
+  "entranceGuard_deployment": [
+   {
+    "deployArea": "01-主机房-网络区",
+    "deployComputerRoom": "转接中心机房",
+    "deployDb": "郑州中支转接中心机房",
+    "deployFloor": "2层",
+    "deployGallery": "转接中心综合楼"
+   }
+  ],
+  "entranceGuard_operationsManagement": [
+   {
+    "administrativeDepartment": "00-科技管理部门",
+    "operationDepartment": "00-科技管理部门",
+    "serviceEndTime": "2021-08-26",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "深圳市共济科技股份有限公司",
+    "serviceStartTime": "2020-08-27"
+   }
+  ],
+  "facilityCategory": "FAAFMJS000",
+  "facilityName": "郑州中支转接中心机房门禁控制器",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2008-04-29",
+  "facilityUseState": "00-设施在用",
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "954b5fd0a7cb4cc7aa2ab3d3b7cd476e",
+  "accessControlType": "00-单向",
+  "assetBrand": "共济科技",
+  "assetCode": "2202060022005000",
+  "assetSerialNumber": "MJSN",
+  "assetType": "AcTrol",
+  "brandLand": "00-国内",
+  "dataSaveCycle": 180.0,
+  "entranceGuardSystem": "00-是",
+  "entranceGuard_deployment": [
+   {
+    "deployArea": "01-主机房-网络区",
+    "deployComputerRoom": "濮阳市中支中心机房",
+    "deployDb": "濮阳市中支中心机房",
+    "deployFloor": "六层",
+    "deployGallery": "办公楼"
+   }
+  ],
+  "entranceGuard_operationsManagement": [
+   {
+    "administrativeDepartment": "00-科技管理部门",
+    "operationDepartment": "00-科技管理部门",
+    "serviceEndTime": "2022-03-14",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "河南捷腾科技发展有限公司",
+    "serviceStartTime": "2021-03-15"
+   }
+  ],
+  "facilityCategory": "FAAFMJS000",
+  "facilityName": "濮阳市中支中心机房门禁系统",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2016-02-03",
+  "facilityUseState": "00-设施在用",
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "989a573f40774cdd89352bb62ef5657d",
+  "accessControlType": "01-双向",
+  "assetBrand": "共济科技",
+  "assetSerialNumber": "3265487984",
+  "assetType": "AT-2001",
+  "brandLand": "00-国内",
+  "dataSaveCycle": 180.0,
+  "entranceGuardSystem": "00-是",
+  "entranceGuard_deployment": [
+   {
+    "deployArea": "00-主机房-服务器区",
+    "deployComputerRoom": "所有机房",
+    "deployDb": "平顶山市中支中心机房",
+    "deployFloor": "八层",
+    "deployGallery": "平顶山市中兴南路西2号院人民银行办公楼"
+   }
+  ],
+  "entranceGuard_operationsManagement": [
+   {
+    "administrativeDepartment": "00-科技管理部门",
+    "operationDepartment": "00-科技管理部门",
+    "serviceEndTime": "2020-12-26",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "中平信息技术有限责任公司",
+    "serviceStartTime": "2017-12-26"
+   }
+  ],
+  "facilityCategory": "FAAFMJS000",
+  "facilityName": "平顶山市中支中心机房门禁系统",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2017-12-26",
+  "facilityUseState": "00-设施在用",
+  "remarksInformation": "机房门禁",
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "99bdd547e0724edab4a73323c421687a",
+  "accessControlType": "01-双向",
+  "assetBrand": "中控智慧",
+  "assetCode": "2202160021031000",
+  "assetSerialNumber": "AC27174260142",
+  "assetType": "iFace7",
+  "brandLand": "00-国内",
+  "dataSaveCycle": 180.0,
+  "entranceGuardSystem": "00-是",
+  "entranceGuard_deployment": [
+   {
+    "deployArea": "01-主机房-网络区",
+    "deployComputerRoom": "周口市中心支行中心机房",
+    "deployDb": "周口市中支中心机房",
+    "deployFloor": "二层",
+    "deployGallery": "河南省周口市川汇区七一路中段1号A楼"
+   }
+  ],
+  "entranceGuard_operationsManagement": [
+   {
+    "administrativeDepartment": "00-科技管理部门",
+    "operationDepartment": "00-科技管理部门",
+    "serviceEndTime": "2021-08-06",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "恒锋信息科技股份有限公司",
+    "serviceStartTime": "2018-08-06"
+   }
+  ],
+  "facilityCategory": "FAAFMJS000",
+  "facilityName": "周口市中支中心机房门禁管理系统",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2019-04-06",
+  "facilityUseState": "00-设施在用",
+  "remarksInformation": "周口市中支中心机房门禁管理系统",
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "ab1b0ad23c9148bc9ac3a611acc40b60",
+  "accessControlType": "01-双向",
+  "assetBrand": "银华",
+  "assetCode": "2202130021027000",
+  "assetSerialNumber": "YH",
+  "assetType": "YH",
+  "brandLand": "00-国内",
+  "dataSaveCycle": 180.0,
+  "entranceGuardSystem": "00-是",
+  "entranceGuard_deployment": [
+   {
+    "deployArea": "00-主机房-服务器区",
+    "deployComputerRoom": "漯河市中心支行中心机房",
+    "deployDb": "漯河市中支中心机房",
+    "deployFloor": "五层",
+    "deployGallery": "漯河市郾城区嵩山东支路1号"
+   }
+  ],
+  "entranceGuard_operationsManagement": [
+   {
+    "administrativeDepartment": "00-科技管理部门",
+    "operationDepartment": "00-科技管理部门",
+    "serviceEndTime": "2023-11-22",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "河南银华安防技术有限公司",
+    "serviceStartTime": "2018-11-22"
+   }
+  ],
+  "facilityCategory": "FAAFMJS000",
+  "facilityName": "漯河市中支中心机房门禁管理系统",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2018-12-21",
+  "facilityUseState": "00-设施在用",
+  "remarksInformation": "门禁管理",
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "bd3b731699e54d4880b5f38754fbb6f5",
+  "accessControlType": "01-双向",
+  "assetBrand": "中控智慧",
+  "assetCode": "2202090021029003",
+  "assetSerialNumber": "M708YBV4",
+  "assetType": "ZKAccsess 专业版3.5.3.16",
+  "brandLand": "00-国内",
+  "dataSaveCycle": 360.0,
+  "entranceGuardSystem": "00-是",
+  "entranceGuard_deployment": [
+   {
+    "deployArea": "31-行政管理区-值班室",
+    "deployComputerRoom": "中心机房",
+    "deployDb": "三门峡市中支中心机房",
+    "deployFloor": "六层",
+    "deployGallery": "办公大楼"
+   }
+  ],
+  "entranceGuard_operationsManagement": [
+   {
+    "administrativeDepartment": "00-科技管理部门",
+    "operationDepartment": "00-科技管理部门",
+    "serviceEndTime": "2023-07-10",
+    "serviceLevel": "00-5*8",
+    "serviceProvider": "河南中兆建筑工程有限公司",
+    "serviceStartTime": "2017-09-01"
+   }
+  ],
+  "facilityCategory": "FAAFMJS000",
+  "facilityName": "中国人民银行三门峡市中心支行 门禁系统2",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2017-09-01",
+  "facilityUseState": "00-设施在用",
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "be22d28f865348a89df536e3ac74fdfa",
+  "accessControlType": "01-双向",
+  "assetBrand": "中控智慧",
+  "assetCode": "2202010011000002",
+  "assetSerialNumber": "684613213",
+  "assetType": "ZKAccsess 专业版3.5.3",
+  "brandLand": "00-国内",
+  "dataSaveCycle": 180.0,
+  "entranceGuardSystem": "00-是",
+  "entranceGuard_deployment": [
+   {
+    "deployArea": "01-主机房-网络区",
+    "deployComputerRoom": "洛阳市中支中心机房",
+    "deployDb": "洛阳市中支中心机房",
+    "deployFloor": "三层",
+    "deployGallery": "洛阳市中支办公大楼"
+   }
+  ],
+  "entranceGuard_operationsManagement": [
+   {
+    "administrativeDepartment": "00-科技管理部门",
+    "operationDepartment": "00-科技管理部门",
+    "serviceEndTime": "2022-02-23",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "郑州三信机房电子技术有限公司",
+    "serviceStartTime": "2021-02-24"
+   }
+  ],
+  "facilityCategory": "FAAFMJS000",
+  "facilityName": "洛阳市中支中心机房门禁管理系统",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2017-09-01",
+  "facilityUseState": "00-设施在用",
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "d19fe4549ed143a6b7a217a80d92577f",
+  "accessControlType": "01-双向",
+  "assetBrand": "中控智慧",
+  "assetCode": "2202140021023003",
+  "assetSerialNumber": "FAAFM001564",
+  "assetType": "F18",
+  "brandLand": "00-国内",
+  "dataSaveCycle": 180.0,
+  "entranceGuardSystem": "00-是",
+  "entranceGuard_deployment": [
+   {
+    "deployArea": "00-主机房-服务器区",
+    "deployComputerRoom": "商丘市中心支行中心机房",
+    "deployDb": "商丘市中支中心机房",
+    "deployFloor": "八层",
+    "deployGallery": "河南省商丘市睢阳区北海西路六号"
+   }
+  ],
+  "entranceGuard_operationsManagement": [
+   {
+    "administrativeDepartment": "00-科技管理部门",
+    "operationDepartment": "00-科技管理部门",
+    "serviceEndTime": "2019-09-01",
+    "serviceLevel": "00-5*8",
+    "serviceProvider": "河南九天安防工程有限公司",
+    "serviceStartTime": "2016-09-01"
+   }
+  ],
+  "facilityCategory": "FAAFMJS000",
+  "facilityName": "商丘市中支中心机房门禁管理系统",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2016-09-01",
+  "facilityUseState": "00-设施在用",
+  "remarksInformation": "门禁管理",
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "dc3e571796fa47bd89b67844cbd56b5c",
+  "accessControlType": "01-双向",
+  "assetBrand": "博克",
+  "assetCode": "2202110021029016",
+  "assetSerialNumber": "16557971650037",
+  "assetType": "BRL-1606-MF",
+  "brandLand": "00-国内",
+  "dataSaveCycle": 180.0,
+  "entranceGuardSystem": "00-是",
+  "entranceGuard_deployment": [
+   {
+    "deployArea": "00-主机房-服务器区",
+    "deployComputerRoom": "所有机房",
+    "deployDb": "南阳市中支中心机房",
+    "deployFloor": "十二层",
+    "deployGallery": "南阳市新华西路路178号办公楼"
+   }
+  ],
+  "entranceGuard_operationsManagement": [
+   {
+    "administrativeDepartment": "00-科技管理部门",
+    "operationDepartment": "00-科技管理部门",
+    "serviceEndTime": "2021-11-17",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "南阳恒得实佳电子有限公司",
+    "serviceStartTime": "2019-11-18"
+   }
+  ],
+  "facilityCategory": "FAAFMJS000",
+  "facilityName": "南阳市中支中心机房门禁系统",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2019-11-18",
+  "facilityUseState": "00-设施在用",
+  "remarksInformation": "机房门禁",
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "ec0d355f7ddc4ead80042a54a6571559",
+  "accessControlType": "01-双向",
+  "assetBrand": "共济科技",
+  "assetCode": "030001",
+  "assetSerialNumber": "BL-8840T4402300",
+  "assetType": "AT-2002",
+  "brandLand": "00-国内",
+  "dataSaveCycle": 180.0,
+  "entranceGuardSystem": "00-是",
+  "entranceGuard_deployment": [
+   {
+    "deployArea": "01-主机房-网络区",
+    "deployComputerRoom": "安阳市中心支行中心机房",
+    "deployDb": "安阳市中支中心机房",
+    "deployFloor": "八层",
+    "deployGallery": "河南省安阳市开发区金融大厦"
+   }
+  ],
+  "entranceGuard_operationsManagement": [
+   {
+    "administrativeDepartment": "00-科技管理部门",
+    "operationDepartment": "00-科技管理部门",
+    "serviceEndTime": "2023-06-01",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "河南捷联科技有限公司",
+    "serviceStartTime": "2020-06-01"
+   }
+  ],
+  "facilityCategory": "FAAFMJS000",
+  "facilityName": "安阳市中支中心机房门禁管理系统",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2014-09-01",
+  "facilityUseState": "00-设施在用",
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "fcc48a93474242dd8811cd7ea8b60fd3",
+  "accessControlType": "01-双向",
+  "assetBrand": "中控智慧",
+  "assetCode": "2202020022007000",
+  "assetSerialNumber": "030001",
+  "assetType": "face7",
+  "brandLand": "00-国内",
+  "dataSaveCycle": 180.0,
+  "entranceGuardSystem": "00-是",
+  "entranceGuard_deployment": [
+   {
+    "deployArea": "00-主机房-服务器区",
+    "deployComputerRoom": "开封市中心机房",
+    "deployDb": "开封市中支中心机房",
+    "deployFloor": "三层",
+    "deployGallery": "开封市龙亭区晋安路60号办公楼"
+   }
+  ],
+  "entranceGuard_operationsManagement": [
+   {
+    "administrativeDepartment": "00-科技管理部门",
+    "operationDepartment": "00-科技管理部门",
+    "serviceEndTime": "2021-07-01",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "北京泰豪智能工程有限公司",
+    "serviceStartTime": "2018-07-01"
+   }
+  ],
+  "facilityCategory": "FAAFMJS000",
+  "facilityName": "开封市中支中心机房门禁系统",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2019-02-25",
+  "facilityUseState": "00-设施在用",
+  "remarksInformation": "开封市中支中心机房门禁系统",
+  "_dataSource": "双源"
+ }
+]

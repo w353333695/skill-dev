@@ -1,0 +1,305 @@
+{
+ "_version": 18,
+ "attrList": [
+  {
+   "custom": "true",
+   "description": "",
+   "id": "relationalIdentifier",
+   "inheritObjectId": "",
+   "isInherit": false,
+   "isMetadata": false,
+   "name": "关系标识符",
+   "notifyDenied": false,
+   "protected": false,
+   "readonly": "false",
+   "required": "true",
+   "tag": [
+    "基本信息"
+   ],
+   "tips": "",
+   "unique": "true",
+   "value": {
+    "default": "guid()",
+    "default_type": "function",
+    "mode": "default",
+    "prefix": "",
+    "regex": null,
+    "series_number_length": 0,
+    "start_value": 0,
+    "struct_define": [],
+    "type": "str"
+   },
+   "wordIndexDenied": false
+  },
+  {
+   "custom": "true",
+   "description": "",
+   "id": "powerUsedAssetCategory",
+   "inheritObjectId": "",
+   "isInherit": false,
+   "isMetadata": false,
+   "name": "用电设施类型",
+   "notifyDenied": false,
+   "protected": false,
+   "readonly": "false",
+   "required": "true",
+   "tag": [
+    "基本信息"
+   ],
+   "tips": "",
+   "unique": "false",
+   "value": {
+    "default": null,
+    "default_type": "value",
+    "mode": "default",
+    "prefix": "",
+    "regex": null,
+    "series_number_length": 0,
+    "start_value": 0,
+    "struct_define": [],
+    "type": "str"
+   },
+   "wordIndexDenied": false
+  },
+  {
+   "custom": "true",
+   "description": "",
+   "id": "powerSupplyAsset",
+   "inheritObjectId": "",
+   "isInherit": false,
+   "isMetadata": false,
+   "name": "供电设施",
+   "notifyDenied": false,
+   "protected": false,
+   "readonly": "false",
+   "required": "true",
+   "tag": [
+    "基本信息"
+   ],
+   "tips": "",
+   "unique": "false",
+   "value": {
+    "default": null,
+    "default_type": "value",
+    "mode": "default",
+    "prefix": "",
+    "regex": null,
+    "series_number_length": 0,
+    "start_value": 0,
+    "struct_define": [],
+    "type": "str"
+   },
+   "wordIndexDenied": false
+  },
+  {
+   "custom": "true",
+   "description": "",
+   "id": "powerSupplyAssetCategory",
+   "inheritObjectId": "",
+   "isInherit": false,
+   "isMetadata": false,
+   "name": "供电设施类型",
+   "notifyDenied": false,
+   "protected": false,
+   "readonly": "false",
+   "required": "true",
+   "tag": [
+    "基本信息"
+   ],
+   "tips": "",
+   "unique": "false",
+   "value": {
+    "default": null,
+    "default_type": "value",
+    "mode": "default",
+    "prefix": "",
+    "regex": null,
+    "series_number_length": 0,
+    "start_value": 0,
+    "struct_define": [],
+    "type": "str"
+   },
+   "wordIndexDenied": false
+  },
+  {
+   "custom": "true",
+   "description": "",
+   "id": "powerUsedAsset",
+   "inheritObjectId": "",
+   "isInherit": false,
+   "isMetadata": false,
+   "name": "用电设施",
+   "notifyDenied": false,
+   "protected": false,
+   "readonly": "false",
+   "required": "true",
+   "tag": [
+    "基本信息"
+   ],
+   "tips": "",
+   "unique": "false",
+   "value": {
+    "default": null,
+    "default_type": "value",
+    "mode": "default",
+    "prefix": "",
+    "regex": null,
+    "series_number_length": 0,
+    "start_value": 0,
+    "struct_define": [],
+    "type": "str"
+   },
+   "wordIndexDenied": false
+  },
+  {
+   "custom": "true",
+   "description": "",
+   "id": "importId",
+   "inheritObjectId": "",
+   "isInherit": false,
+   "isMetadata": false,
+   "name": "导入标识",
+   "notifyDenied": false,
+   "protected": false,
+   "readonly": "false",
+   "required": "false",
+   "tag": [
+    "辅助信息"
+   ],
+   "tips": "",
+   "unique": "false",
+   "value": {
+    "default": null,
+    "default_type": "value",
+    "mode": "default",
+    "prefix": "",
+    "regex": null,
+    "series_number_length": 0,
+    "start_value": 0,
+    "struct_define": [],
+    "type": "str"
+   },
+   "wordIndexDenied": false
+  },
+  {
+   "custom": "true",
+   "description": "",
+   "id": "facilityCategory",
+   "inheritObjectId": "",
+   "isInherit": false,
+   "isMetadata": false,
+   "name": "分类标识符",
+   "notifyDenied": false,
+   "protected": false,
+   "readonly": "false",
+   "required": "false",
+   "tag": [
+    "基本信息"
+   ],
+   "tips": "",
+   "unique": "false",
+   "value": {
+    "default": "GXGD000000",
+    "default_type": "value",
+    "mode": "default",
+    "prefix": "",
+    "regex": null,
+    "series_number_length": 0,
+    "start_value": 0,
+    "struct_define": [],
+    "type": "str"
+   },
+   "wordIndexDenied": false
+  },
+  {
+   "custom": "true",
+   "description": "",
+   "id": "facilityOwnershipAgency",
+   "inheritObjectId": "",
+   "isInherit": false,
+   "isMetadata": false,
+   "name": "归属机构",
+   "notifyDenied": false,
+   "protected": false,
+   "readonly": "false",
+   "required": "false",
+   "tag": [
+    "基本信息"
+   ],
+   "tips": "",
+   "unique": "false",
+   "value": {
+    "default": null,
+    "default_type": "value",
+    "mode": "default",
+    "prefix": "",
+    "regex": null,
+    "series_number_length": 0,
+    "start_value": 0,
+    "struct_define": [],
+    "type": "str"
+   },
+   "wordIndexDenied": false
+  }
+ ],
+ "category": "金融元数据.供配电",
+ "creator": "easyops",
+ "deleteAuthorizers": [],
+ "icon": "",
+ "indexList": [
+  {
+   "name": "u&relationalIdentifier",
+   "propertyIds": [
+    "relationalIdentifier"
+   ],
+   "unique": true
+  }
+ ],
+ "isAbstract": false,
+ "memo": "",
+ "modifier": "easyops",
+ "name": "供电关联关系",
+ "notifyDenied": false,
+ "objectId": "powerSupplyRelation@FINTECHDATA",
+ "parentObjectId": "CUSTOM@FINTECHDATA",
+ "parentObjectIds": [
+  "CUSTOM@FINTECHDATA"
+ ],
+ "permissionDenied": false,
+ "protected": false,
+ "readAuthorizers": [],
+ "relation_groups": [],
+ "relation_list": [],
+ "system": "",
+ "updateAuthorizers": [],
+ "view": {
+  "attr_authorizers": null,
+  "attr_category_order": [
+   "基本信息",
+   "辅助信息"
+  ],
+  "attr_order": [
+   "relationalIdentifier",
+   "powerUsedAssetCategory",
+   "powerSupplyAsset",
+   "powerSupplyAssetCategory",
+   "powerUsedAsset",
+   "importId",
+   "facilityCategory",
+   "facilityOwnershipAgency"
+  ],
+  "hide_columns": null,
+  "icon": null,
+  "image": "",
+  "inherit_attr_category_map": null,
+  "relation_default_attr": null,
+  "relation_group_order": null,
+  "relation_order": null,
+  "show_key": [
+   "relationalIdentifier"
+  ],
+  "trans_hier_relation_list": null,
+  "visible": true
+ },
+ "wordIndexDenied": false
+}

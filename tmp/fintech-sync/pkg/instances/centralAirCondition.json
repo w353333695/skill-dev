@@ -1,0 +1,74 @@
+[
+ {
+  "facilityDescriptor": "9c4d667efd4e4869af8f1025eb6e00c9",
+  "assetBrand": "三菱",
+  "assetSerialNumber": "440000039",
+  "assetType": "FDCA400HKXE4BR",
+  "brandLand": "01-国外",
+  "centralAirCondition_deployment": [
+   {
+    "deployArea": "31-行政管理区-值班室",
+    "deployComputerRoom": "主中心机房",
+    "deployDb": "郑州中支主中心机房",
+    "deployFloor": "十一层",
+    "deployGallery": "商务外环路21号"
+   }
+  ],
+  "centralAirCondition_operationsManagement": [
+   {
+    "administrativeDepartment": "00-科技管理部门",
+    "operationDepartment": "05-外包服务部门",
+    "serviceEndTime": "2021-08-26",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "河南捷联科技有限公司",
+    "serviceStartTime": "2020-08-27"
+   }
+  ],
+  "centralAirConditioningType": "03-多联式空调机组",
+  "facilityCategory": "FAKTZKT000",
+  "facilityName": "郑州中支主中心机房中央空调2",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2010-01-01",
+  "facilityUseState": "00-设施在用",
+  "ratedPower": 23.0,
+  "refrigeratingCapacity": "40",
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "d356c37ef8d74d37937c7b5c8ce9a0ca",
+  "assetBrand": "三菱",
+  "assetSerialNumber": "440000061",
+  "assetType": "FDCA400HKXE4BR",
+  "brandLand": "01-国外",
+  "centralAirCondition_deployment": [
+   {
+    "deployArea": "31-行政管理区-值班室",
+    "deployComputerRoom": "主中心机房",
+    "deployDb": "郑州中支主中心机房",
+    "deployFloor": "十一层",
+    "deployGallery": "商务外环路21号"
+   }
+  ],
+  "centralAirCondition_operationsManagement": [
+   {
+    "administrativeDepartment": "00-科技管理部门",
+    "operationDepartment": "05-外包服务部门",
+    "serviceEndTime": "2021-08-26",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "河南捷联科技有限公司",
+    "serviceStartTime": "2020-08-27"
+   }
+  ],
+  "centralAirConditioningType": "03-多联式空调机组",
+  "facilityCategory": "FAKTZKT000",
+  "facilityName": "郑州中支主中心机房中央空调1",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2010-01-01",
+  "facilityUseState": "00-设施在用",
+  "ratedPower": 23.0,
+  "refrigeratingCapacity": "40",
+  "_dataSource": "双源"
+ }
+]

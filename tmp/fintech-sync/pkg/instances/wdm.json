@@ -1,0 +1,110 @@
+[
+ {
+  "facilityDescriptor": "ac094bb52b26416894a17bd0d3f4ae07",
+  "assetBrand": "华为",
+  "assetCode": "2200000021024034",
+  "assetSerialNumber": "445787",
+  "assetType": "OSN 8800",
+  "brandLand": "00-国内",
+  "deviceHeight": "9",
+  "facilityCategory": "FAITNWDWDM",
+  "facilityName": "郑州中支主中心网络机房波分设备",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2017-03-30",
+  "facilityUseState": "00-设施在用",
+  "influenceSystem": "主中心和转接中心通信",
+  "lineRate": "02-100 Gbit/s",
+  "managementIp": "11.66.25.3",
+  "networkSecurityCapability": [
+   "00-IPSec"
+  ],
+  "numberOfFibreChannel": "01-80波",
+  "operatingSystemVersionInformation": "iManager U2000",
+  "supportIpv6": "True",
+  "supportType": [
+   "02-以太网"
+  ],
+  "wavelengthRange": "01-DWDM支持波长范围为1529.16 nm～1567.13 nm(Band-C， ITU-T G.694.1)",
+  "wdm_deployment": [
+   {
+    "deployArea": "01-主机房-网络区",
+    "deployComputerRoom": "主中心机房",
+    "deployDb": "郑州中支主中心机房",
+    "deployFloor": "十一层",
+    "deployGallery": "主中心办公楼"
+   }
+  ],
+  "wdm_installationPosition": [
+   {
+    "belongCabinet": "郑州中支主中心网络机房网络柜14",
+    "slotNo": "21"
+   }
+  ],
+  "wdm_operationsManagement": [
+   {
+    "administrativeDepartment": "00-科技管理部门",
+    "operationDepartment": "00-科技管理部门",
+    "serviceEndTime": "2021-11-01",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "北京神州新桥科技有限公司",
+    "serviceStartTime": "2020-11-01"
+   }
+  ],
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "c5cd2e298de9454b830e86db6664bb70",
+  "assetBrand": "华为",
+  "assetCode": "2200000021024035",
+  "assetSerialNumber": "134567",
+  "assetType": "OSN 8800",
+  "brandLand": "00-国内",
+  "deviceHeight": "10",
+  "facilityCategory": "FAITNWDWDM",
+  "facilityName": "郑州中支转接中心波分设备",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2017-03-30",
+  "facilityUseState": "00-设施在用",
+  "influenceSystem": "主中心和转接中心通信",
+  "lineRate": "02-100 Gbit/s",
+  "managementIp": "11.66.25.3",
+  "networkSecurityCapability": [
+   "00-IPSec"
+  ],
+  "numberOfFibreChannel": "01-80波",
+  "operatingSystemVersionInformation": "iManager U2000",
+  "supportIpv6": "True",
+  "supportType": [
+   "02-以太网"
+  ],
+  "wavelengthRange": "01-DWDM支持波长范围为1529.16 nm～1567.13 nm(Band-C， ITU-T G.694.1)",
+  "wdm_deployment": [
+   {
+    "deployArea": "01-主机房-网络区",
+    "deployComputerRoom": "转接中心机房",
+    "deployDb": "郑州中支转接中心机房",
+    "deployFloor": "二层",
+    "deployGallery": "转接中心综合楼"
+   }
+  ],
+  "wdm_installationPosition": [
+   {
+    "belongCabinet": "郑州中支转接中心机房机柜8",
+    "slotNo": "12"
+   }
+  ],
+  "wdm_operationsManagement": [
+   {
+    "administrativeDepartment": "00-科技管理部门",
+    "operationDepartment": "00-科技管理部门",
+    "serviceEndTime": "2021-11-01",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "北京神州新桥科技有限公司",
+    "serviceStartTime": "2020-11-01"
+   }
+  ],
+  "_dataSource": "双源"
+ }
+]

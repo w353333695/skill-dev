@@ -1,0 +1,258 @@
+{
+ "_version": 14,
+ "attrList": [
+  {
+   "custom": "true",
+   "description": "",
+   "id": "lineUsage",
+   "inheritObjectId": "",
+   "isInherit": false,
+   "isMetadata": false,
+   "name": "线路用途",
+   "notifyDenied": false,
+   "protected": false,
+   "readonly": "false",
+   "required": "true",
+   "tag": [
+    "基本信息"
+   ],
+   "tips": "",
+   "unique": "false",
+   "value": {
+    "default": null,
+    "default_type": "value",
+    "mode": "default",
+    "prefix": "",
+    "regex": null,
+    "series_number_length": 0,
+    "start_value": 0,
+    "struct_define": [],
+    "type": "str"
+   },
+   "wordIndexDenied": false
+  },
+  {
+   "custom": "true",
+   "description": "",
+   "id": "lineType",
+   "inheritObjectId": "",
+   "isInherit": false,
+   "isMetadata": false,
+   "name": "线路类型",
+   "notifyDenied": false,
+   "protected": false,
+   "readonly": "false",
+   "required": "true",
+   "tag": [
+    "基本信息"
+   ],
+   "tips": "",
+   "unique": "false",
+   "value": {
+    "default": null,
+    "default_type": "",
+    "mode": "default",
+    "prefix": "",
+    "regex": [
+     "00-MSTP",
+     "01-SDH",
+     "02-OTN/PTN/STN",
+     "03-ATM",
+     "04-裸光纤",
+     "05-互联网专线",
+     "99-其它"
+    ],
+    "series_number_length": 0,
+    "start_value": 0,
+    "struct_define": [],
+    "type": "enum"
+   },
+   "wordIndexDenied": false
+  },
+  {
+   "custom": "true",
+   "description": "",
+   "id": "networkBandwidth",
+   "inheritObjectId": "",
+   "isInherit": false,
+   "isMetadata": false,
+   "name": "网络带宽（M）",
+   "notifyDenied": false,
+   "protected": false,
+   "readonly": "false",
+   "required": "true",
+   "tag": [
+    "基本信息"
+   ],
+   "tips": "",
+   "unique": "false",
+   "value": {
+    "default": null,
+    "default_type": "",
+    "mode": "",
+    "prefix": "",
+    "regex": null,
+    "series_number_length": 0,
+    "start_value": 0,
+    "struct_define": [],
+    "type": "float"
+   },
+   "wordIndexDenied": false
+  },
+  {
+   "custom": "true",
+   "description": "",
+   "id": "isp",
+   "inheritObjectId": "",
+   "isInherit": false,
+   "isMetadata": false,
+   "name": "网络线路运营商",
+   "notifyDenied": false,
+   "protected": false,
+   "readonly": "false",
+   "required": "true",
+   "tag": [
+    "基本信息"
+   ],
+   "tips": "",
+   "unique": "false",
+   "value": {
+    "default": null,
+    "default_type": "",
+    "mode": "default",
+    "prefix": "",
+    "regex": [
+     "00-中国电信",
+     "01-中国联通",
+     "02-中国移动",
+     "03-中国广电",
+     "04-教育网",
+     "99-其它"
+    ],
+    "series_number_length": 0,
+    "start_value": 0,
+    "struct_define": [],
+    "type": "enum"
+   },
+   "wordIndexDenied": false
+  },
+  {
+   "custom": "true",
+   "description": "",
+   "id": "facilityCategory",
+   "inheritObjectId": "",
+   "isInherit": false,
+   "isMetadata": false,
+   "name": "设施分类标识符",
+   "notifyDenied": false,
+   "protected": false,
+   "readonly": "false",
+   "required": "false",
+   "tag": [
+    "基本信息"
+   ],
+   "tips": "",
+   "unique": "false",
+   "value": {
+    "default": "NI00000000",
+    "default_type": "value",
+    "mode": "default",
+    "prefix": "",
+    "regex": null,
+    "series_number_length": 0,
+    "start_value": 0,
+    "struct_define": [],
+    "type": "str"
+   },
+   "wordIndexDenied": false
+  },
+  {
+   "custom": "true",
+   "description": "",
+   "id": "lineCost",
+   "inheritObjectId": "",
+   "isInherit": false,
+   "isMetadata": false,
+   "name": "线路资费（元/年，网络租赁总费用）",
+   "notifyDenied": false,
+   "protected": false,
+   "readonly": "false",
+   "required": "false",
+   "tag": [
+    "基本信息"
+   ],
+   "tips": "",
+   "unique": "false",
+   "value": {
+    "default": null,
+    "default_type": "",
+    "mode": "",
+    "prefix": "",
+    "regex": null,
+    "series_number_length": 0,
+    "start_value": 0,
+    "struct_define": [],
+    "type": "float"
+   },
+   "wordIndexDenied": false
+  }
+ ],
+ "category": "金融元数据.网络设备",
+ "creator": "easyops",
+ "deleteAuthorizers": [],
+ "icon": "",
+ "indexList": [],
+ "isAbstract": false,
+ "memo": "",
+ "modifier": "easyops",
+ "name": "网络线路",
+ "notifyDenied": false,
+ "objectId": "networkLine@FINTECHDATA",
+ "parentObjectId": "CUSTOM@FINTECHDATA",
+ "parentObjectIds": [
+  "CUSTOM@FINTECHDATA",
+  "netAsset@FINTECHDATA",
+  "powerUsedAsset@FINTECHDATA"
+ ],
+ "permissionDenied": false,
+ "protected": false,
+ "readAuthorizers": [],
+ "relation_groups": [],
+ "relation_list": [],
+ "system": "",
+ "updateAuthorizers": [],
+ "view": {
+  "attr_authorizers": null,
+  "attr_category_order": [
+   "基本信息"
+  ],
+  "attr_order": [
+   "facilityDescriptor",
+   "facilityName",
+   "lineUsage",
+   "facilityUseState",
+   "lineType",
+   "networkBandwidth",
+   "facilityUpdateDate",
+   "isp",
+   "facilityUseDate",
+   "facilityCategory",
+   "facilityOwnershipAgency",
+   "remarksInformation",
+   "lineCost"
+  ],
+  "hide_columns": null,
+  "icon": null,
+  "image": "",
+  "inherit_attr_category_map": null,
+  "relation_default_attr": null,
+  "relation_group_order": null,
+  "relation_order": null,
+  "show_key": [
+   "facilityDescriptor"
+  ],
+  "trans_hier_relation_list": null,
+  "visible": true
+ },
+ "wordIndexDenied": false
+}

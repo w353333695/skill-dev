@@ -1,0 +1,1087 @@
+[
+ {
+  "facilityDescriptor": "0159ab89ee084f1e82d45be07b4b7eef",
+  "assetBrand": "共济科技",
+  "assetCode": "2202130022005000",
+  "assetSerialNumber": "CM2018120748",
+  "assetType": "CM-DESK",
+  "brandLand": "00-国内",
+  "environmentalMonitoring_deployment": [
+   {
+    "deployArea": "03-主机房-其它区",
+    "deployComputerRoom": "漯河市中支中心机房",
+    "deployDb": "漯河市中支中心机房",
+    "deployFloor": "五层",
+    "deployGallery": "漯河市郾城区嵩山东支路1号办公楼"
+   }
+  ],
+  "environmentalMonitoring_monitoringScope": [
+   {
+    "airConditioningSystem": "00-是",
+    "batteryMonitor": "00-是",
+    "generatorSystem": "01-否",
+    "leakageDetection": "00-是",
+    "powerDistributionSystem": "00-是",
+    "roomTemperatureAndHumidity": "00-是",
+    "upsSystem": "00-是"
+   }
+  ],
+  "environmentalMonitoring_operationsManagement": [
+   {
+    "administrativeDepartment": "00-科技管理部门",
+    "operationDepartment": "00-科技管理部门",
+    "serviceEndTime": "2023-12-01",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "河南征程信息技术有限公司",
+    "serviceStartTime": "2018-12-01"
+   }
+  ],
+  "environmentalMonitoring_softwareAttribute": [
+   {
+    "environmentalMonitoringSoftware": "共济软件",
+    "systemIntegrator": "浩海共济"
+   }
+  ],
+  "environmentalMonitoring_systemFunction": [
+   {
+    "alarmFunction": "00-是",
+    "linkageFunction": "00-是",
+    "logging": "00-是",
+    "monitoringFunction": "00-是",
+    "otherFeatures": "否"
+   }
+  ],
+  "facilityCategory": "FADH000000",
+  "facilityName": "漯河市中支机房环境监控系统",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2018-12-21",
+  "facilityUseState": "00-设施在用",
+  "remarksInformation": "机房环境监控系统",
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "172a32029141429fac4f47f648fbae60",
+  "assetBrand": "迈世",
+  "assetCode": "ZMD019001",
+  "assetSerialNumber": "A91309174A062",
+  "assetType": "OM-A6-T300",
+  "brandLand": "00-国内",
+  "environmentalMonitoring_deployment": [
+   {
+    "deployArea": "03-主机房-其它区",
+    "deployComputerRoom": "驻马店市中支中心机房",
+    "deployDb": "驻马店市中支中心机房",
+    "deployFloor": "四层",
+    "deployGallery": "驻马店市驿城区泰山路567号办公楼"
+   }
+  ],
+  "environmentalMonitoring_monitoringScope": [
+   {
+    "airConditioningSystem": "00-是",
+    "batteryMonitor": "01-否",
+    "generatorSystem": "01-否",
+    "leakageDetection": "00-是",
+    "powerDistributionSystem": "00-是",
+    "roomTemperatureAndHumidity": "00-是",
+    "upsSystem": "00-是"
+   }
+  ],
+  "environmentalMonitoring_operationsManagement": [
+   {
+    "administrativeDepartment": "00-科技管理部门",
+    "operationDepartment": "00-科技管理部门",
+    "serviceEndTime": "2021-11-02",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "郑州一建集团有限公司",
+    "serviceStartTime": "2018-11-02"
+   }
+  ],
+  "environmentalMonitoring_softwareAttribute": [
+   {
+    "environmentalMonitoringSoftware": "智慧机房软件",
+    "systemIntegrator": "南宁迈世信息技术有限公司"
+   }
+  ],
+  "environmentalMonitoring_systemFunction": [
+   {
+    "alarmFunction": "00-是",
+    "linkageFunction": "00-是",
+    "logging": "00-是",
+    "monitoringFunction": "00-是",
+    "otherFeatures": "否"
+   }
+  ],
+  "facilityCategory": "FADH000000",
+  "facilityName": "驻马店市中支中心机房环境监控系统",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2018-11-02",
+  "facilityUseState": "00-设施在用",
+  "remarksInformation": "驻马店市中支中心机房环境监控系统",
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "290019380cf8411cb231f54b5d5c6d05",
+  "assetBrand": "共济科技",
+  "assetSerialNumber": "65431321",
+  "assetType": "CM-DESK",
+  "brandLand": "00-国内",
+  "environmentalMonitoring_deployment": [
+   {
+    "deployArea": "03-主机房-其它区",
+    "deployComputerRoom": "中心机房",
+    "deployDb": "平顶山市中支中心机房",
+    "deployFloor": "八层",
+    "deployGallery": "办公楼"
+   }
+  ],
+  "environmentalMonitoring_monitoringScope": [
+   {
+    "airConditioningSystem": "00-是",
+    "batteryMonitor": "00-是",
+    "generatorSystem": "01-否",
+    "leakageDetection": "00-是",
+    "powerDistributionSystem": "00-是",
+    "roomTemperatureAndHumidity": "00-是",
+    "upsSystem": "00-是"
+   }
+  ],
+  "environmentalMonitoring_operationsManagement": [
+   {
+    "administrativeDepartment": "00-科技管理部门",
+    "operationDepartment": "00-科技管理部门",
+    "serviceEndTime": "2020-12-26",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "中平信息技术有限公司",
+    "serviceStartTime": "2017-12-26"
+   }
+  ],
+  "environmentalMonitoring_softwareAttribute": [
+   {
+    "environmentalMonitoringSoftware": "共济软件",
+    "systemIntegrator": "中平信息技术有限公司"
+   }
+  ],
+  "environmentalMonitoring_systemFunction": [
+   {
+    "alarmFunction": "00-是",
+    "linkageFunction": "00-是",
+    "logging": "00-是",
+    "monitoringFunction": "00-是",
+    "otherFeatures": "否"
+   }
+  ],
+  "facilityCategory": "FADH000000",
+  "facilityName": "平顶山市中支服务器机房机房环境监控系统",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2017-12-26",
+  "facilityUseState": "00-设施在用",
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "47fc1bd2697c4333a753a87a4c2a2e43",
+  "assetBrand": "共济科技",
+  "assetCode": "2202080022006000",
+  "assetSerialNumber": "410611019001",
+  "assetType": "CM-DESK",
+  "brandLand": "00-国内",
+  "environmentalMonitoring_deployment": [
+   {
+    "deployArea": "03-主机房-其它区",
+    "deployComputerRoom": "服务器机房",
+    "deployDb": "鹤壁市中支中心机房",
+    "deployFloor": "七层",
+    "deployGallery": "鹤壁市淇滨区九州路129号办公楼"
+   }
+  ],
+  "environmentalMonitoring_monitoringScope": [
+   {
+    "airConditioningSystem": "00-是",
+    "batteryMonitor": "00-是",
+    "generatorSystem": "01-否",
+    "leakageDetection": "00-是",
+    "powerDistributionSystem": "00-是",
+    "roomTemperatureAndHumidity": "00-是",
+    "upsSystem": "00-是"
+   }
+  ],
+  "environmentalMonitoring_operationsManagement": [
+   {
+    "administrativeDepartment": "00-科技管理部门",
+    "operationDepartment": "00-科技管理部门",
+    "serviceEndTime": "2020-05-02",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "浩海方舟",
+    "serviceStartTime": "2017-05-01"
+   }
+  ],
+  "environmentalMonitoring_softwareAttribute": [
+   {
+    "environmentalMonitoringSoftware": "共济软件",
+    "systemIntegrator": "浩海共济"
+   }
+  ],
+  "environmentalMonitoring_systemFunction": [
+   {
+    "alarmFunction": "00-是",
+    "linkageFunction": "00-是",
+    "logging": "00-是",
+    "monitoringFunction": "00-是",
+    "otherFeatures": "否"
+   }
+  ],
+  "facilityCategory": "FADH000000",
+  "facilityName": "鹤壁市中支服务器机房机房环境监控系统",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2017-03-23",
+  "facilityUseState": "00-设施在用",
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "52edc23b1d6b43879642d2b96e5ff654",
+  "assetBrand": "斯特纽",
+  "assetCode": "2202080022006000",
+  "assetSerialNumber": "411300043001",
+  "assetType": "isP-CMS",
+  "brandLand": "00-国内",
+  "environmentalMonitoring_deployment": [
+   {
+    "deployArea": "03-主机房-其它区",
+    "deployComputerRoom": "服务器机房",
+    "deployDb": "南阳市中支中心机房",
+    "deployFloor": "十二层",
+    "deployGallery": "南阳市新华西路178号办公楼"
+   }
+  ],
+  "environmentalMonitoring_monitoringScope": [
+   {
+    "airConditioningSystem": "00-是",
+    "batteryMonitor": "00-是",
+    "generatorSystem": "01-否",
+    "leakageDetection": "00-是",
+    "powerDistributionSystem": "00-是",
+    "roomTemperatureAndHumidity": "00-是",
+    "upsSystem": "00-是"
+   }
+  ],
+  "environmentalMonitoring_operationsManagement": [
+   {
+    "administrativeDepartment": "00-科技管理部门",
+    "operationDepartment": "00-科技管理部门",
+    "serviceEndTime": "2021-07-01",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "南阳恒得实佳",
+    "serviceStartTime": "2018-07-01"
+   }
+  ],
+  "environmentalMonitoring_softwareAttribute": [
+   {
+    "environmentalMonitoringSoftware": "斯特纽软件",
+    "systemIntegrator": "南阳恒得实佳"
+   }
+  ],
+  "environmentalMonitoring_systemFunction": [
+   {
+    "alarmFunction": "00-是",
+    "linkageFunction": "00-是",
+    "logging": "00-是",
+    "monitoringFunction": "00-是",
+    "otherFeatures": "否"
+   }
+  ],
+  "facilityCategory": "FADH000000",
+  "facilityName": "南阳市中支服务器机房机房环境监控系统",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2018-07-23",
+  "facilityUseState": "00-设施在用",
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "5978ab5a3ea846c78fe24f8c8bd35dd7",
+  "assetBrand": "共济科技",
+  "assetCode": "2202060022005000",
+  "assetSerialNumber": "160100005",
+  "assetType": "共济",
+  "brandLand": "00-国内",
+  "environmentalMonitoring_deployment": [
+   {
+    "deployArea": "03-主机房-其它区",
+    "deployComputerRoom": "濮阳市中支中心机房",
+    "deployDb": "濮阳市中支中心机房",
+    "deployFloor": "六层",
+    "deployGallery": "办公楼"
+   }
+  ],
+  "environmentalMonitoring_monitoringScope": [
+   {
+    "airConditioningSystem": "00-是",
+    "batteryMonitor": "01-否",
+    "generatorSystem": "01-否",
+    "leakageDetection": "00-是",
+    "powerDistributionSystem": "00-是",
+    "roomTemperatureAndHumidity": "00-是",
+    "upsSystem": "00-是"
+   }
+  ],
+  "environmentalMonitoring_operationsManagement": [
+   {
+    "administrativeDepartment": "00-科技管理部门",
+    "operationDepartment": "00-科技管理部门",
+    "serviceEndTime": "2022-03-14",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "河南捷腾科技发展有限公司",
+    "serviceStartTime": "2021-03-15"
+   }
+  ],
+  "environmentalMonitoring_softwareAttribute": [
+   {
+    "environmentalMonitoringSoftware": "CM-Desk组态监控平台",
+    "systemIntegrator": "河南捷腾科技发展有限公司"
+   }
+  ],
+  "environmentalMonitoring_systemFunction": [
+   {
+    "alarmFunction": "00-是",
+    "linkageFunction": "00-是",
+    "logging": "00-是",
+    "monitoringFunction": "00-是",
+    "otherFeatures": "否"
+   }
+  ],
+  "facilityCategory": "FADH000000",
+  "facilityName": "濮阳市中支中心机房环境监控系统",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2016-02-03",
+  "facilityUseState": "00-设施在用",
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "7f5554ebbf53484ab2ab53e55095d403",
+  "assetBrand": "共济科技",
+  "assetCode": "2202070022008000",
+  "assetSerialNumber": "FADHHJ0001",
+  "assetType": "深圳共济",
+  "brandLand": "00-国内",
+  "environmentalMonitoring_deployment": [
+   {
+    "deployArea": "03-主机房-其它区",
+    "deployComputerRoom": "焦作市中心支行中心机房",
+    "deployDb": "焦作市中支中心机房",
+    "deployFloor": "四楼",
+    "deployGallery": "焦作市山阳区世纪路1355号"
+   }
+  ],
+  "environmentalMonitoring_monitoringScope": [
+   {
+    "airConditioningSystem": "00-是",
+    "batteryMonitor": "01-否",
+    "generatorSystem": "01-否",
+    "leakageDetection": "00-是",
+    "powerDistributionSystem": "00-是",
+    "roomTemperatureAndHumidity": "00-是",
+    "upsSystem": "00-是"
+   }
+  ],
+  "environmentalMonitoring_operationsManagement": [
+   {
+    "administrativeDepartment": "00-科技管理部门",
+    "operationDepartment": "00-科技管理部门",
+    "serviceEndTime": "2022-11-16",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "河南捷联科技有限公司",
+    "serviceStartTime": "2018-11-05"
+   }
+  ],
+  "environmentalMonitoring_softwareAttribute": [
+   {
+    "environmentalMonitoringSoftware": "CD-Desk实时信息流监控管理系统",
+    "systemIntegrator": "深圳共济"
+   }
+  ],
+  "environmentalMonitoring_systemFunction": [
+   {
+    "alarmFunction": "00-是",
+    "linkageFunction": "00-是",
+    "logging": "00-是",
+    "monitoringFunction": "00-是",
+    "otherFeatures": "否"
+   }
+  ],
+  "facilityCategory": "FADH000000",
+  "facilityName": "焦作市中支中心机房机房环境监控系统",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2018-11-15",
+  "facilityUseState": "00-设施在用",
+  "remarksInformation": "环境监控系统集成辖区各机房环境监控",
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "83b7bfb4bcc742dfa4e37c54b50fab38",
+  "assetBrand": "龙控智能",
+  "assetCode": "2202020022007001",
+  "assetSerialNumber": "019001",
+  "assetType": "LONCOMIP2.0",
+  "brandLand": "00-国内",
+  "environmentalMonitoring_deployment": [
+   {
+    "deployArea": "03-主机房-其它区",
+    "deployComputerRoom": "开封市中心支行中心机房",
+    "deployDb": "开封市中支中心机房",
+    "deployFloor": "三层",
+    "deployGallery": "开封市龙亭区晋安路60号办公楼"
+   }
+  ],
+  "environmentalMonitoring_monitoringScope": [
+   {
+    "airConditioningSystem": "00-是",
+    "batteryMonitor": "01-否",
+    "generatorSystem": "01-否",
+    "leakageDetection": "00-是",
+    "powerDistributionSystem": "00-是",
+    "roomTemperatureAndHumidity": "00-是",
+    "upsSystem": "00-是"
+   }
+  ],
+  "environmentalMonitoring_operationsManagement": [
+   {
+    "administrativeDepartment": "00-科技管理部门",
+    "operationDepartment": "00-科技管理部门",
+    "serviceEndTime": "2022-02-25",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "北京泰豪智能工程有限公司",
+    "serviceStartTime": "2019-02-25"
+   }
+  ],
+  "environmentalMonitoring_softwareAttribute": [
+   {
+    "environmentalMonitoringSoftware": "机房动力环境监控系统",
+    "systemIntegrator": "北京泰豪智能工程有限公司"
+   }
+  ],
+  "environmentalMonitoring_systemFunction": [
+   {
+    "alarmFunction": "00-是",
+    "linkageFunction": "00-是",
+    "logging": "00-是",
+    "monitoringFunction": "00-是",
+    "otherFeatures": "否"
+   }
+  ],
+  "facilityCategory": "FADH000000",
+  "facilityName": "开封市中支中心机房机房环境监控系统",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2019-02-25",
+  "facilityUseState": "00-设施在用",
+  "remarksInformation": "开封市中支中心机房机房环境监控系统1",
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "875ddafd360f4c61bd799a117f656bd8",
+  "assetBrand": "立达华创",
+  "assetCode": "019001",
+  "assetSerialNumber": "56413132132",
+  "assetType": "立达华创",
+  "brandLand": "00-国内",
+  "environmentalMonitoring_deployment": [
+   {
+    "deployArea": "03-主机房-其它区",
+    "deployComputerRoom": "中心机房",
+    "deployDb": "安阳市中支中心机房",
+    "deployFloor": "八层",
+    "deployGallery": "安阳市开发区金融大厦"
+   }
+  ],
+  "environmentalMonitoring_monitoringScope": [
+   {
+    "airConditioningSystem": "00-是",
+    "batteryMonitor": "00-是",
+    "generatorSystem": "01-否",
+    "leakageDetection": "00-是",
+    "powerDistributionSystem": "00-是",
+    "roomTemperatureAndHumidity": "00-是",
+    "upsSystem": "00-是"
+   }
+  ],
+  "environmentalMonitoring_operationsManagement": [
+   {
+    "administrativeDepartment": "00-科技管理部门",
+    "operationDepartment": "00-科技管理部门",
+    "serviceEndTime": "2023-06-01",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "河南捷联",
+    "serviceStartTime": "2020-06-01"
+   }
+  ],
+  "environmentalMonitoring_softwareAttribute": [
+   {
+    "systemIntegrator": "河南捷联"
+   }
+  ],
+  "environmentalMonitoring_systemFunction": [
+   {
+    "alarmFunction": "00-是",
+    "linkageFunction": "00-是",
+    "logging": "00-是",
+    "monitoringFunction": "00-是",
+    "otherFeatures": "否"
+   }
+  ],
+  "facilityCategory": "FADH000000",
+  "facilityName": "安阳市中支机房机房环境监控系统",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2014-09-01",
+  "facilityUseState": "00-设施在用",
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "9832edd08e0f4511ae9fed343c712f89",
+  "assetBrand": "共济科技",
+  "assetCode": "2202150021009011",
+  "assetSerialNumber": "FADHHJ0001231",
+  "assetType": "深圳共济",
+  "brandLand": "00-国内",
+  "environmentalMonitoring_deployment": [
+   {
+    "deployArea": "03-主机房-其它区",
+    "deployComputerRoom": "信阳市中心支行中心机房",
+    "deployDb": "信阳市中支中心机房",
+    "deployFloor": "二楼",
+    "deployGallery": "信阳市浉河区长安路133号"
+   }
+  ],
+  "environmentalMonitoring_monitoringScope": [
+   {
+    "airConditioningSystem": "00-是",
+    "batteryMonitor": "01-否",
+    "generatorSystem": "01-否",
+    "leakageDetection": "00-是",
+    "powerDistributionSystem": "00-是",
+    "roomTemperatureAndHumidity": "00-是",
+    "upsSystem": "00-是"
+   }
+  ],
+  "environmentalMonitoring_operationsManagement": [
+   {
+    "administrativeDepartment": "00-科技管理部门",
+    "operationDepartment": "00-科技管理部门",
+    "serviceEndTime": "2021-12-18",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "深圳共济科技有限公司",
+    "serviceStartTime": "2019-12-18"
+   }
+  ],
+  "environmentalMonitoring_softwareAttribute": [
+   {
+    "environmentalMonitoringSoftware": "CD-Desk实时信息流监控管理系统",
+    "systemIntegrator": "深圳共济科技有限公司"
+   }
+  ],
+  "environmentalMonitoring_systemFunction": [
+   {
+    "alarmFunction": "00-是",
+    "linkageFunction": "00-是",
+    "logging": "00-是",
+    "monitoringFunction": "00-是",
+    "otherFeatures": "否"
+   }
+  ],
+  "facilityCategory": "FADH000000",
+  "facilityName": "信阳市中支中心机房机房环境监控系统",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2011-10-01",
+  "facilityUseState": "00-设施在用",
+  "remarksInformation": "环境监控系统",
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "9edfce23afc4464abe2dd563e2e9644f",
+  "assetBrand": "卓佑",
+  "assetCode": "2202090021019000",
+  "assetSerialNumber": "KTBC180049",
+  "assetType": "Cowin 8.9.0.3",
+  "brandLand": "00-国内",
+  "environmentalMonitoring_deployment": [
+   {
+    "deployArea": "03-主机房-其它区",
+    "deployComputerRoom": "中心机房",
+    "deployDb": "三门峡市中支中心机房",
+    "deployFloor": "六层",
+    "deployGallery": "办公大楼"
+   }
+  ],
+  "environmentalMonitoring_monitoringScope": [
+   {
+    "airConditioningSystem": "00-是",
+    "batteryMonitor": "01-否",
+    "generatorSystem": "01-否",
+    "leakageDetection": "00-是",
+    "powerDistributionSystem": "00-是",
+    "roomTemperatureAndHumidity": "00-是",
+    "upsSystem": "00-是"
+   }
+  ],
+  "environmentalMonitoring_operationsManagement": [
+   {
+    "administrativeDepartment": "00-科技管理部门",
+    "operationDepartment": "00-科技管理部门",
+    "serviceEndTime": "2023-06-20",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "上海卓佑计算机技术有限公司",
+    "serviceStartTime": "2020-06-20"
+   }
+  ],
+  "environmentalMonitoring_softwareAttribute": [
+   {
+    "environmentalMonitoringSoftware": "Cowin",
+    "systemIntegrator": "上海卓佑计算机技术有限公司"
+   }
+  ],
+  "environmentalMonitoring_systemFunction": [
+   {
+    "alarmFunction": "00-是",
+    "linkageFunction": "00-是",
+    "logging": "00-是",
+    "monitoringFunction": "00-是",
+    "otherFeatures": "否"
+   }
+  ],
+  "facilityCategory": "FADH000000",
+  "facilityName": "三门峡市中支动力环境监控系统",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2020-06-20",
+  "facilityUseState": "00-设施在用",
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "a15c1bb4d03b49fb878b0a152ebe1441",
+  "assetBrand": "共济科技",
+  "assetSerialNumber": "CM2010020081",
+  "assetType": "共济CM-DESK监控平台V6.0",
+  "brandLand": "00-国内",
+  "environmentalMonitoring_deployment": [
+   {
+    "deployArea": "03-主机房-其它区",
+    "deployComputerRoom": "服务器机房",
+    "deployDb": "郑州中支主中心机房",
+    "deployFloor": "11楼",
+    "deployGallery": "商务外环路21号"
+   }
+  ],
+  "environmentalMonitoring_monitoringScope": [
+   {
+    "airConditioningSystem": "00-是",
+    "batteryMonitor": "00-是",
+    "generatorSystem": "01-否",
+    "leakageDetection": "00-是",
+    "powerDistributionSystem": "00-是",
+    "roomTemperatureAndHumidity": "00-是",
+    "upsSystem": "00-是"
+   }
+  ],
+  "environmentalMonitoring_operationsManagement": [
+   {
+    "administrativeDepartment": "00-科技管理部门",
+    "operationDepartment": "00-科技管理部门",
+    "serviceEndTime": "2021-12-01",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "深圳市共济科技股份有限公司",
+    "serviceStartTime": "2018-12-01"
+   }
+  ],
+  "environmentalMonitoring_softwareAttribute": [
+   {
+    "environmentalMonitoringSoftware": "共济CM-DESK监控平台V6.0",
+    "systemIntegrator": "深圳市共济科技股份有限公司"
+   }
+  ],
+  "environmentalMonitoring_systemFunction": [
+   {
+    "alarmFunction": "00-是",
+    "linkageFunction": "00-是",
+    "logging": "00-是",
+    "monitoringFunction": "00-是",
+    "otherFeatures": "否"
+   }
+  ],
+  "facilityCategory": "FADH000000",
+  "facilityName": "郑州中支机房监控软件系统",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2018-12-01",
+  "facilityUseState": "00-设施在用",
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "a6608dbcf13747c5afcbb3651d911357",
+  "assetBrand": "共济科技",
+  "assetCode": "2202030022005002",
+  "assetSerialNumber": "KAN5178034",
+  "assetType": "CM-DESK",
+  "brandLand": "00-国内",
+  "environmentalMonitoring_deployment": [
+   {
+    "deployArea": "03-主机房-其它区",
+    "deployComputerRoom": "新乡市中心支行中心机房",
+    "deployDb": "新乡市中支中心机房",
+    "deployFloor": "十五层",
+    "deployGallery": "河南省新乡市红旗区向阳路9号办公楼"
+   }
+  ],
+  "environmentalMonitoring_monitoringScope": [
+   {
+    "airConditioningSystem": "00-是",
+    "batteryMonitor": "01-否",
+    "generatorSystem": "01-否",
+    "leakageDetection": "00-是",
+    "powerDistributionSystem": "00-是",
+    "roomTemperatureAndHumidity": "00-是",
+    "upsSystem": "00-是"
+   }
+  ],
+  "environmentalMonitoring_operationsManagement": [
+   {
+    "administrativeDepartment": "00-科技管理部门",
+    "operationDepartment": "00-科技管理部门",
+    "serviceEndTime": "2021-10-31",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "深圳市共济科技有限公司",
+    "serviceStartTime": "2020-11-01"
+   }
+  ],
+  "environmentalMonitoring_softwareAttribute": [
+   {
+    "environmentalMonitoringSoftware": "共济CM-Desk信息流监控平台软件",
+    "systemIntegrator": "深圳市共济科技股份有限公司"
+   }
+  ],
+  "environmentalMonitoring_systemFunction": [
+   {
+    "alarmFunction": "00-是",
+    "linkageFunction": "00-是",
+    "logging": "00-是",
+    "monitoringFunction": "00-是",
+    "otherFeatures": "否"
+   }
+  ],
+  "facilityCategory": "FADH000000",
+  "facilityName": "新乡市中支网络机房机房环境监控系统",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2017-08-30",
+  "facilityUseState": "00-设施在用",
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "aeeba0e13315419286b93d0f45880bc9",
+  "assetBrand": "力维智联",
+  "assetCode": "2202120021002014",
+  "assetSerialNumber": "65461425",
+  "assetType": "V2.20",
+  "brandLand": "00-国内",
+  "environmentalMonitoring_deployment": [
+   {
+    "deployArea": "03-主机房-其它区",
+    "deployComputerRoom": "许昌市中心支行中心机房",
+    "deployDb": "许昌市中支中心机房",
+    "deployFloor": "四楼",
+    "deployGallery": "河南省许昌市建安区新东街571号办公楼"
+   }
+  ],
+  "environmentalMonitoring_monitoringScope": [
+   {
+    "airConditioningSystem": "00-是",
+    "batteryMonitor": "01-否",
+    "generatorSystem": "01-否",
+    "leakageDetection": "00-是",
+    "powerDistributionSystem": "00-是",
+    "roomTemperatureAndHumidity": "00-是",
+    "upsSystem": "00-是"
+   }
+  ],
+  "environmentalMonitoring_operationsManagement": [
+   {
+    "administrativeDepartment": "00-科技管理部门",
+    "operationDepartment": "00-科技管理部门",
+    "serviceEndTime": "2021-12-18",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "许昌协同科贸有限公司",
+    "serviceStartTime": "2019-12-18"
+   }
+  ],
+  "environmentalMonitoring_softwareAttribute": [
+   {
+    "environmentalMonitoringSoftware": "中兴力维动环管理系统",
+    "systemIntegrator": "科宇智能环境技术服务有限公司"
+   }
+  ],
+  "environmentalMonitoring_systemFunction": [
+   {
+    "alarmFunction": "00-是",
+    "linkageFunction": "00-是",
+    "logging": "00-是",
+    "monitoringFunction": "00-是",
+    "otherFeatures": "否"
+   }
+  ],
+  "facilityCategory": "FADH000000",
+  "facilityName": "许昌市中支中心机房机房环境监控系统",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2016-09-11",
+  "facilityUseState": "00-设施在用",
+  "remarksInformation": "环境监控系统",
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "aff634e8d208430fa9d658fb1bf53865",
+  "assetBrand": "共济科技",
+  "assetCode": "2202160022006001",
+  "assetSerialNumber": "CM2018020189",
+  "assetType": "深圳共济",
+  "brandLand": "00-国内",
+  "environmentalMonitoring_deployment": [
+   {
+    "deployArea": "03-主机房-其它区",
+    "deployComputerRoom": "周口市中心支行中心机房",
+    "deployDb": "周口市中支中心机房",
+    "deployFloor": "二层",
+    "deployGallery": "周口市川汇区七一路中段1号A楼"
+   }
+  ],
+  "environmentalMonitoring_monitoringScope": [
+   {
+    "airConditioningSystem": "00-是",
+    "batteryMonitor": "00-是",
+    "generatorSystem": "01-否",
+    "leakageDetection": "00-是",
+    "powerDistributionSystem": "00-是",
+    "roomTemperatureAndHumidity": "00-是",
+    "upsSystem": "00-是"
+   }
+  ],
+  "environmentalMonitoring_operationsManagement": [
+   {
+    "administrativeDepartment": "00-科技管理部门",
+    "operationDepartment": "00-科技管理部门",
+    "serviceEndTime": "2021-08-06",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "恒锋信息科技股份有限公司",
+    "serviceStartTime": "2018-08-06"
+   }
+  ],
+  "environmentalMonitoring_softwareAttribute": [
+   {
+    "environmentalMonitoringSoftware": "CM-Desk实时信息流监控管理系统",
+    "systemIntegrator": "恒锋信息科技股份有限公司"
+   }
+  ],
+  "environmentalMonitoring_systemFunction": [
+   {
+    "alarmFunction": "00-是",
+    "linkageFunction": "00-是",
+    "logging": "00-是",
+    "monitoringFunction": "00-是",
+    "otherFeatures": "否"
+   }
+  ],
+  "facilityCategory": "FADH000000",
+  "facilityName": "周口市中支中心机房机房环境监控系统",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2018-08-06",
+  "facilityUseState": "00-设施在用",
+  "remarksInformation": "环境监控系统集成辖区各机房环境监控",
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "b14cc0f69ea14eb08767d9c1f7eb08d4",
+  "assetBrand": "共济科技",
+  "assetCode": "2202140022005000",
+  "assetSerialNumber": "458113",
+  "assetType": "深圳共济",
+  "brandLand": "00-国内",
+  "environmentalMonitoring_deployment": [
+   {
+    "deployArea": "03-主机房-其它区",
+    "deployComputerRoom": "商丘市中心支行中心机房",
+    "deployDb": "商丘市中支中心机房",
+    "deployFloor": "八层",
+    "deployGallery": "河南省商丘市睢阳区北海西路六号一号楼"
+   }
+  ],
+  "environmentalMonitoring_monitoringScope": [
+   {
+    "airConditioningSystem": "00-是",
+    "batteryMonitor": "01-否",
+    "generatorSystem": "01-否",
+    "leakageDetection": "00-是",
+    "powerDistributionSystem": "00-是",
+    "roomTemperatureAndHumidity": "00-是",
+    "upsSystem": "00-是"
+   }
+  ],
+  "environmentalMonitoring_operationsManagement": [
+   {
+    "administrativeDepartment": "00-科技管理部门",
+    "operationDepartment": "00-科技管理部门",
+    "serviceEndTime": "2020-01-01",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "未知",
+    "serviceStartTime": "2017-01-01"
+   }
+  ],
+  "environmentalMonitoring_softwareAttribute": [
+   {
+    "environmentalMonitoringSoftware": "CD-Desk实时信息流监控管理系统",
+    "systemIntegrator": "深圳市共济科技有限公司"
+   }
+  ],
+  "environmentalMonitoring_systemFunction": [
+   {
+    "alarmFunction": "00-是",
+    "linkageFunction": "00-是",
+    "logging": "00-是",
+    "monitoringFunction": "00-是",
+    "otherFeatures": "否"
+   }
+  ],
+  "facilityCategory": "FADH000000",
+  "facilityName": "商丘市中支中心机房机房环境监控系统",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2017-01-01",
+  "facilityUseState": "00-设施在用",
+  "remarksInformation": "环境监控系统",
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "b55e27aea90945daa8a3db418dbe7a5c",
+  "assetBrand": "卓振思众",
+  "assetCode": "2202010011000002",
+  "assetSerialNumber": "000100001744",
+  "assetType": "JZ-IEM2000",
+  "brandLand": "00-国内",
+  "environmentalMonitoring_deployment": [
+   {
+    "deployArea": "03-主机房-其它区",
+    "deployComputerRoom": "洛阳市中支中心机房",
+    "deployDb": "洛阳市中支中心机房",
+    "deployFloor": "三层",
+    "deployGallery": "洛阳市中支办公大楼"
+   }
+  ],
+  "environmentalMonitoring_monitoringScope": [
+   {
+    "airConditioningSystem": "00-是",
+    "batteryMonitor": "01-否",
+    "generatorSystem": "01-否",
+    "leakageDetection": "00-是",
+    "powerDistributionSystem": "00-是",
+    "roomTemperatureAndHumidity": "00-是",
+    "upsSystem": "00-是"
+   }
+  ],
+  "environmentalMonitoring_operationsManagement": [
+   {
+    "administrativeDepartment": "00-科技管理部门",
+    "operationDepartment": "00-科技管理部门",
+    "serviceEndTime": "2022-02-23",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "郑州三信机房电子技术有限公司",
+    "serviceStartTime": "2021-02-24"
+   }
+  ],
+  "environmentalMonitoring_softwareAttribute": [
+   {
+    "environmentalMonitoringSoftware": "SenseView动力环境监控系统",
+    "systemIntegrator": "郑州三信机房电子技术有限公司"
+   }
+  ],
+  "environmentalMonitoring_systemFunction": [
+   {
+    "alarmFunction": "00-是",
+    "linkageFunction": "00-是",
+    "logging": "00-是",
+    "monitoringFunction": "00-是",
+    "otherFeatures": "否"
+   }
+  ],
+  "facilityCategory": "FADH000000",
+  "facilityName": "洛阳市中支中心机房机房动环监控系统",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2017-09-01",
+  "facilityUseState": "00-设施在用",
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "d0302d6c859c48e8a2649d6c9eb86232",
+  "assetBrand": "尚为科技",
+  "assetCode": "2200000822003000",
+  "assetSerialNumber": "1001093",
+  "assetType": "EMS2000",
+  "brandLand": "00-国内",
+  "environmentalMonitoring_deployment": [
+   {
+    "deployArea": "03-主机房-其它区",
+    "deployComputerRoom": "中心机房",
+    "deployDb": "济源市中支中心机房",
+    "deployFloor": "二层",
+    "deployGallery": "济源市济源大道中段2号办公楼"
+   }
+  ],
+  "environmentalMonitoring_monitoringScope": [
+   {
+    "airConditioningSystem": "00-是",
+    "batteryMonitor": "01-否",
+    "generatorSystem": "01-否",
+    "leakageDetection": "00-是",
+    "powerDistributionSystem": "00-是",
+    "roomTemperatureAndHumidity": "00-是",
+    "upsSystem": "00-是"
+   }
+  ],
+  "environmentalMonitoring_operationsManagement": [
+   {
+    "administrativeDepartment": "00-科技管理部门",
+    "operationDepartment": "00-科技管理部门",
+    "serviceEndTime": "2021-04-01",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "尚为",
+    "serviceStartTime": "2016-08-01"
+   }
+  ],
+  "environmentalMonitoring_softwareAttribute": [
+   {
+    "environmentalMonitoringSoftware": "Emview3.0软件",
+    "systemIntegrator": "炫宝科技"
+   }
+  ],
+  "environmentalMonitoring_systemFunction": [
+   {
+    "alarmFunction": "00-是",
+    "linkageFunction": "00-是",
+    "logging": "00-是",
+    "monitoringFunction": "00-是",
+    "otherFeatures": "否"
+   }
+  ],
+  "facilityCategory": "FADH000000",
+  "facilityName": "济源市中支机房环境监控系统",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2016-08-01",
+  "facilityUseState": "00-设施在用",
+  "_dataSource": "双源"
+ }
+]

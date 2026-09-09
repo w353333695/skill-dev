@@ -1,0 +1,1837 @@
+[
+ {
+  "facilityDescriptor": "01a55b35a9af4e2c859dddde4d204944",
+  "assetBrand": "艾默生",
+  "assetCode": "ZMD024002",
+  "assetSerialNumber": "1708006",
+  "assetType": "DS-45-UA",
+  "brandLand": "01-国外",
+  "classificationOfAirRefrigerationVolume": "45",
+  "classificationOfAirSupplyModes": "01-下送风",
+  "classificationOfReturnAirModes": "00-上回风",
+  "coldSourceSystem": "00-风冷式",
+  "facilityCategory": "FAKTJKT000",
+  "facilityName": "驻马店市中支中心机房精密空调2",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2018-11-02",
+  "facilityUseState": "00-设施在用",
+  "fanType": "00-AC风机",
+  "naturalCooling": "02-氟泵自然冷却",
+  "outdoorUnitType": "02-蒸发式冷凝器",
+  "precisionAirCondition_deployment": [
+   {
+    "deployArea": "24-支持区-空调区",
+    "deployComputerRoom": "驻马店市中支中心机房",
+    "deployDb": "驻马店市中支中心机房",
+    "deployFloor": "四层",
+    "deployGallery": "驻马店市驿城区泰山路567号办公楼"
+   }
+  ],
+  "precisionAirCondition_operationsManagement": [
+   {
+    "administrativeDepartment": "00-科技管理部门",
+    "operationDepartment": "00-科技管理部门",
+    "serviceEndTime": "2021-11-02",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "郑州一建集团有限公司",
+    "serviceStartTime": "2018-11-02"
+   }
+  ],
+  "ratedPower": 13.0,
+  "remarksInformation": "有",
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "050acee6894f4fd09869d15e6f581169",
+  "assetBrand": "维谛",
+  "assetCode": "2202030042013007",
+  "assetSerialNumber": "21013036242172020002",
+  "assetType": "P2050FARMP1R",
+  "brandLand": "01-国外",
+  "classificationOfAirRefrigerationVolume": "50",
+  "classificationOfAirSupplyModes": "01-下送风",
+  "classificationOfReturnAirModes": "00-上回风",
+  "coldSourceSystem": "00-风冷式",
+  "facilityCategory": "FAKTJKT000",
+  "facilityName": "新乡市中支支持区机房精密空调02",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2017-08-30",
+  "facilityUseState": "00-设施在用",
+  "fanType": "00-AC风机",
+  "naturalCooling": "03-间接蒸发冷却",
+  "outdoorUnitType": "00-空气冷冷凝器",
+  "precisionAirCondition_deployment": [
+   {
+    "deployArea": "24-支持区-空调区",
+    "deployComputerRoom": "新乡市中心支行中心机房",
+    "deployDb": "新乡市中支中心机房",
+    "deployFloor": "十五层",
+    "deployGallery": "新乡市红旗区向阳路9号办公楼"
+   }
+  ],
+  "precisionAirCondition_operationsManagement": [
+   {
+    "administrativeDepartment": "00-科技管理部门",
+    "operationDepartment": "00-科技管理部门",
+    "serviceEndTime": "2021-10-31",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "维谛技术有限公司",
+    "serviceStartTime": "2020-11-01"
+   }
+  ],
+  "ratedPower": 31.0,
+  "remarksInformation": "有",
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "18ac6546f8dd4f3d9c8dc3b97edad865",
+  "assetBrand": "艾默生",
+  "assetCode": "2202120021002037",
+  "assetSerialNumber": "21013036222165070004",
+  "assetType": "P2040FARMP1R",
+  "brandLand": "01-国外",
+  "classificationOfAirRefrigerationVolume": "40",
+  "classificationOfAirSupplyModes": "01-下送风",
+  "classificationOfReturnAirModes": "00-上回风",
+  "coldSourceSystem": "00-风冷式",
+  "facilityCategory": "FAKTJKT000",
+  "facilityName": "许昌市中支中心机房精密空调2",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2016-09-11",
+  "facilityUseState": "00-设施在用",
+  "fanType": "01-EC风机",
+  "naturalCooling": "02-氟泵自然冷却",
+  "outdoorUnitType": "00-空气冷冷凝器",
+  "precisionAirCondition_deployment": [
+   {
+    "deployArea": "03-主机房-其它区",
+    "deployComputerRoom": "许昌市中心支行中心机房",
+    "deployDb": "许昌市中支中心机房",
+    "deployFloor": "四层",
+    "deployGallery": "河南省许昌市建安区新东街571号办公楼"
+   }
+  ],
+  "precisionAirCondition_operationsManagement": [
+   {
+    "administrativeDepartment": "00-科技管理部门",
+    "operationDepartment": "00-科技管理部门",
+    "serviceEndTime": "2021-12-18",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "许昌协同科贸有限公司",
+    "serviceStartTime": "2019-12-18"
+   }
+  ],
+  "ratedPower": 16.0,
+  "remarksInformation": "有",
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "1905ccd8f36a464f962a7bc819c9284d",
+  "assetBrand": "艾默生",
+  "assetSerialNumber": "21013036242178050005",
+  "assetType": "P2050FARMP1R",
+  "brandLand": "01-国外",
+  "classificationOfAirRefrigerationVolume": "50",
+  "classificationOfAirSupplyModes": "01-下送风",
+  "classificationOfReturnAirModes": "00-上回风",
+  "coldSourceSystem": "03-风冷冷冻水双冷源系统",
+  "facilityCategory": "FAKTJKT000",
+  "facilityName": "平顶山市中支服务器机房精密空调1",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2017-12-26",
+  "facilityUseState": "00-设施在用",
+  "fanType": "00-AC风机",
+  "naturalCooling": "02-氟泵自然冷却",
+  "outdoorUnitType": "00-空气冷冷凝器",
+  "precisionAirCondition_deployment": [
+   {
+    "deployArea": "24-支持区-空调区",
+    "deployComputerRoom": "中心机房",
+    "deployDb": "平顶山市中支中心机房",
+    "deployFloor": "八层",
+    "deployGallery": "办公楼"
+   }
+  ],
+  "precisionAirCondition_operationsManagement": [
+   {
+    "administrativeDepartment": "00-科技管理部门",
+    "operationDepartment": "00-科技管理部门",
+    "serviceEndTime": "2020-12-26",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "中平信息技术有限责任公司",
+    "serviceStartTime": "2017-12-26"
+   }
+  ],
+  "ratedPower": 50.0,
+  "remarksInformation": "有",
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "1a734edb6e314eb18bf81a54f209ef7c",
+  "assetBrand": "艾特网能",
+  "assetCode": "2202110022011000",
+  "assetSerialNumber": "SN92070039A01",
+  "assetType": "CoolMaster CM2050",
+  "brandLand": "00-国内",
+  "classificationOfAirRefrigerationVolume": "70",
+  "classificationOfAirSupplyModes": "01-下送风",
+  "classificationOfReturnAirModes": "00-上回风",
+  "coldSourceSystem": "00-风冷式",
+  "facilityCategory": "FAKTJKT000",
+  "facilityName": "南阳市中支服务器机房精密空调",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2018-08-01",
+  "facilityUseState": "00-设施在用",
+  "fanType": "01-EC风机",
+  "naturalCooling": "02-氟泵自然冷却",
+  "outdoorUnitType": "00-空气冷冷凝器",
+  "precisionAirCondition_deployment": [
+   {
+    "deployArea": "00-主机房-服务器区",
+    "deployComputerRoom": "服务器机房",
+    "deployDb": "南阳市中支中心机房",
+    "deployFloor": "十二层",
+    "deployGallery": "办公楼"
+   }
+  ],
+  "precisionAirCondition_operationsManagement": [
+   {
+    "administrativeDepartment": "00-科技管理部门",
+    "operationDepartment": "00-科技管理部门",
+    "serviceEndTime": "2021-08-01",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "南阳市成发电器有限公司",
+    "serviceStartTime": "2018-08-01"
+   }
+  ],
+  "ratedPower": 64.0,
+  "remarksInformation": "有",
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "1cc61655b7aa479ea3513248e371f994",
+  "assetBrand": "艾默生",
+  "assetCode": "2202070042004010",
+  "assetSerialNumber": "210130020521180B0002",
+  "assetType": "LIEBEN.PEXP1035F",
+  "brandLand": "01-国外",
+  "classificationOfAirRefrigerationVolume": "135",
+  "classificationOfAirSupplyModes": "01-下送风",
+  "classificationOfReturnAirModes": "00-上回风",
+  "coldSourceSystem": "00-风冷式",
+  "facilityCategory": "FAKTJKT000",
+  "facilityName": "焦作市中支中心机房精密空调2",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2012-04-02",
+  "facilityUseState": "00-设施在用",
+  "fanType": "01-EC风机",
+  "naturalCooling": "02-氟泵自然冷却",
+  "outdoorUnitType": "00-空气冷冷凝器",
+  "precisionAirCondition_deployment": [
+   {
+    "deployArea": "24-支持区-空调区",
+    "deployComputerRoom": "焦作市中心支行中心机房",
+    "deployDb": "焦作市中支中心机房",
+    "deployFloor": "四层",
+    "deployGallery": "焦作市山阳区世纪路1355号"
+   }
+  ],
+  "precisionAirCondition_operationsManagement": [
+   {
+    "administrativeDepartment": "00-科技管理部门",
+    "operationDepartment": "00-科技管理部门",
+    "serviceEndTime": "2021-06-08",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "河南捷联科技有限公司",
+    "serviceStartTime": "2020-08-08"
+   }
+  ],
+  "ratedPower": 33.1,
+  "remarksInformation": "有",
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "1f0bb3261a57450999c713ec893505d1",
+  "assetBrand": "世图兹",
+  "assetCode": "2202020042017011",
+  "assetSerialNumber": "86024378",
+  "assetType": "ASD402A",
+  "brandLand": "01-国外",
+  "classificationOfAirRefrigerationVolume": "43",
+  "classificationOfAirSupplyModes": "01-下送风",
+  "classificationOfReturnAirModes": "00-上回风",
+  "coldSourceSystem": "00-风冷式",
+  "facilityCategory": "FAKTJKT000",
+  "facilityName": "开封市中支中心机房精密空调2",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2018-03-01",
+  "facilityUseState": "00-设施在用",
+  "fanType": "01-EC风机",
+  "naturalCooling": "03-间接蒸发冷却",
+  "outdoorUnitType": "02-蒸发式冷凝器",
+  "precisionAirCondition_deployment": [
+   {
+    "deployArea": "16-辅助区-新风区",
+    "deployComputerRoom": "开封市中心支行中心机房",
+    "deployDb": "开封市中支中心机房",
+    "deployFloor": "三层",
+    "deployGallery": "开封市龙亭区晋安路60号办公楼"
+   }
+  ],
+  "precisionAirCondition_operationsManagement": [
+   {
+    "administrativeDepartment": "01-后勤管理部门",
+    "operationDepartment": "00-科技管理部门",
+    "serviceEndTime": "2021-03-01",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "北京泰豪智能工程有限公司",
+    "serviceStartTime": "2018-03-01"
+   }
+  ],
+  "ratedPower": 40.0,
+  "remarksInformation": "有",
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "2177ae06f5f04abb9ef74d95dcc8acb8",
+  "assetBrand": "维谛",
+  "assetSerialNumber": "SN:21013084052227010005",
+  "assetType": "PEX_AC-P1050DA036H912S1D000PN033",
+  "brandLand": "01-国外",
+  "classificationOfAirRefrigerationVolume": "50",
+  "classificationOfAirSupplyModes": "01-下送风",
+  "classificationOfReturnAirModes": "00-上回风",
+  "coldSourceSystem": "00-风冷式",
+  "facilityCategory": "FAKTJKT000",
+  "facilityName": "郑州中支主中心精密空调7",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-09-20",
+  "facilityUseDate": "2022-08-24",
+  "facilityUseState": "00-设施在用",
+  "fanType": "01-EC风机",
+  "naturalCooling": "02-氟泵自然冷却",
+  "outdoorUnitType": "00-空气冷冷凝器",
+  "precisionAirCondition_deployment": [
+   {
+    "deployArea": "00-主机房-服务器区",
+    "deployComputerRoom": "电源室机房",
+    "deployDb": "郑州中支主中心机房",
+    "deployFloor": "十一层",
+    "deployGallery": "商务外环路21号"
+   }
+  ],
+  "precisionAirCondition_operationsManagement": [
+   {
+    "administrativeDepartment": "00-科技管理部门",
+    "operationDepartment": "00-科技管理部门",
+    "serviceEndTime": "2024-08-24",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "河南吉之星电子科技有限公司",
+    "serviceStartTime": "2022-08-25"
+   }
+  ],
+  "ratedPower": 17.95,
+  "remarksInformation": "有",
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "2fb2ecf74aeb4463a2a0288da3fd58f6",
+  "assetBrand": "艾默生",
+  "assetCode": "2202070042004009",
+  "assetSerialNumber": "210130020521180B01",
+  "assetType": "LIEBEN.PEXP1035F",
+  "brandLand": "01-国外",
+  "classificationOfAirRefrigerationVolume": "135",
+  "classificationOfAirSupplyModes": "01-下送风",
+  "classificationOfReturnAirModes": "00-上回风",
+  "coldSourceSystem": "00-风冷式",
+  "facilityCategory": "FAKTJKT000",
+  "facilityName": "焦作市中支中心机房精密空调1",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2012-04-02",
+  "facilityUseState": "00-设施在用",
+  "fanType": "01-EC风机",
+  "naturalCooling": "02-氟泵自然冷却",
+  "outdoorUnitType": "00-空气冷冷凝器",
+  "precisionAirCondition_deployment": [
+   {
+    "deployArea": "24-支持区-空调区",
+    "deployComputerRoom": "焦作市中心支行中心机房",
+    "deployDb": "焦作市中支中心机房",
+    "deployFloor": "四层",
+    "deployGallery": "焦作市山阳区世纪路1355号"
+   }
+  ],
+  "precisionAirCondition_operationsManagement": [
+   {
+    "administrativeDepartment": "00-科技管理部门",
+    "operationDepartment": "00-科技管理部门",
+    "serviceEndTime": "2021-06-08",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "河南捷联科技有限公司",
+    "serviceStartTime": "2020-08-08"
+   }
+  ],
+  "ratedPower": 33.1,
+  "remarksInformation": "有",
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "3a11506235824897af1c363b21ab6f54",
+  "assetBrand": "维谛",
+  "assetSerialNumber": "SN:21013084062227010002",
+  "assetType": "P1050DP13LH902E1DF0NPA040",
+  "brandLand": "01-国外",
+  "classificationOfAirRefrigerationVolume": "50",
+  "classificationOfAirSupplyModes": "01-下送风",
+  "classificationOfReturnAirModes": "00-上回风",
+  "coldSourceSystem": "00-风冷式",
+  "facilityCategory": "FAKTJKT000",
+  "facilityName": "郑州中支主中心精密空调1",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-09-20",
+  "facilityUseDate": "2022-08-24",
+  "facilityUseState": "00-设施在用",
+  "fanType": "01-EC风机",
+  "naturalCooling": "02-氟泵自然冷却",
+  "outdoorUnitType": "00-空气冷冷凝器",
+  "precisionAirCondition_deployment": [
+   {
+    "deployArea": "01-主机房-网络区",
+    "deployComputerRoom": "清算机房",
+    "deployDb": "郑州中支主中心机房",
+    "deployFloor": "十一层",
+    "deployGallery": "商务外环路21号"
+   }
+  ],
+  "precisionAirCondition_operationsManagement": [
+   {
+    "administrativeDepartment": "00-科技管理部门",
+    "operationDepartment": "00-科技管理部门",
+    "serviceEndTime": "2024-08-24",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "河南吉之星电子科技有限公司",
+    "serviceStartTime": "2022-08-25"
+   }
+  ],
+  "ratedPower": 17.95,
+  "remarksInformation": "有",
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "4a344f7992654edf9f5a5c8e3adc052b",
+  "assetBrand": "依米康",
+  "assetCode": "2202100042018000",
+  "assetSerialNumber": "M019010500880009",
+  "assetType": "SDA121U",
+  "brandLand": "00-国内",
+  "classificationOfAirRefrigerationVolume": "12",
+  "classificationOfAirSupplyModes": "02-水平送风",
+  "classificationOfReturnAirModes": "00-上回风",
+  "coldSourceSystem": "00-风冷式",
+  "facilityCategory": "FAKTJKT000",
+  "facilityName": "驻马店市中支中心机房精密空调3",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2019-05-30",
+  "facilityUseState": "00-设施在用",
+  "fanType": "00-AC风机",
+  "naturalCooling": "02-氟泵自然冷却",
+  "outdoorUnitType": "02-蒸发式冷凝器",
+  "precisionAirCondition_deployment": [
+   {
+    "deployArea": "23-支持区-电池室",
+    "deployComputerRoom": "驻马店市中支中心机房",
+    "deployDb": "驻马店市中支中心机房",
+    "deployFloor": "四层",
+    "deployGallery": "驻马店市驿城区泰山路567号办公楼"
+   }
+  ],
+  "precisionAirCondition_operationsManagement": [
+   {
+    "administrativeDepartment": "00-科技管理部门",
+    "operationDepartment": "00-科技管理部门",
+    "serviceEndTime": "2022-05-30",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "未知",
+    "serviceStartTime": "2019-05-30"
+   }
+  ],
+  "ratedPower": 4.6,
+  "remarksInformation": "有",
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "51b7533fe53f4d75a867a1b0999fa2d8",
+  "assetBrand": "世图兹",
+  "assetCode": "2202160042019002",
+  "assetSerialNumber": "86023744",
+  "assetType": "CPD412A",
+  "brandLand": "01-国外",
+  "classificationOfAirRefrigerationVolume": "40",
+  "classificationOfAirSupplyModes": "01-下送风",
+  "classificationOfReturnAirModes": "00-上回风",
+  "coldSourceSystem": "00-风冷式",
+  "facilityCategory": "FAKTJKT000",
+  "facilityName": "周口市中支中心机房精密空调2",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2019-04-06",
+  "facilityUseState": "00-设施在用",
+  "fanType": "01-EC风机",
+  "naturalCooling": "02-氟泵自然冷却",
+  "outdoorUnitType": "00-空气冷冷凝器",
+  "precisionAirCondition_deployment": [
+   {
+    "deployArea": "24-支持区-空调区",
+    "deployComputerRoom": "周口市中心支行中心机房",
+    "deployDb": "周口市中支中心机房",
+    "deployFloor": "二层",
+    "deployGallery": "河南省周口市川汇区七一路中段1号A楼"
+   }
+  ],
+  "precisionAirCondition_operationsManagement": [
+   {
+    "administrativeDepartment": "01-后勤管理部门",
+    "operationDepartment": "00-科技管理部门",
+    "serviceEndTime": "2021-08-06",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "恒锋信息科技股份有限公司",
+    "serviceStartTime": "2018-08-06"
+   }
+  ],
+  "ratedPower": 40.0,
+  "remarksInformation": "有",
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "56d8dcd1b65642b6bfe313bb84f3d1d3",
+  "assetBrand": "依米康",
+  "assetCode": "22000008420120001",
+  "assetSerialNumber": "SR16S358N",
+  "assetType": "SCA402D",
+  "brandLand": "00-国内",
+  "classificationOfAirRefrigerationVolume": "41",
+  "classificationOfAirSupplyModes": "01-下送风",
+  "classificationOfReturnAirModes": "00-上回风",
+  "coldSourceSystem": "00-风冷式",
+  "facilityCategory": "FAKTJKT000",
+  "facilityName": "济源市中支中心机房精密空调",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2016-08-01",
+  "facilityUseState": "00-设施在用",
+  "fanType": "01-EC风机",
+  "naturalCooling": "02-氟泵自然冷却",
+  "outdoorUnitType": "00-空气冷冷凝器",
+  "precisionAirCondition_deployment": [
+   {
+    "deployArea": "00-主机房-服务器区",
+    "deployComputerRoom": "中心机房",
+    "deployDb": "济源市中支中心机房",
+    "deployFloor": "二层",
+    "deployGallery": "办公楼"
+   }
+  ],
+  "precisionAirCondition_operationsManagement": [
+   {
+    "administrativeDepartment": "01-后勤管理部门",
+    "operationDepartment": "01-后勤管理部门",
+    "serviceEndTime": "2022-03-31",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "捷联科技",
+    "serviceStartTime": "2021-04-01"
+   }
+  ],
+  "ratedPower": 14.5,
+  "remarksInformation": "有",
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "63a49957bda24aa186142062f7caaf95",
+  "assetBrand": "艾默生",
+  "assetCode": "2202070042004009",
+  "assetSerialNumber": "210130020521180B0001",
+  "assetType": "LIEBEN.PEXP1035F",
+  "brandLand": "01-国外",
+  "classificationOfAirRefrigerationVolume": "135",
+  "classificationOfAirSupplyModes": "01-下送风",
+  "classificationOfReturnAirModes": "00-上回风",
+  "coldSourceSystem": "00-风冷式",
+  "facilityCategory": "FAKTJKT000",
+  "facilityName": "信阳市中支中心机房精密空调2",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2016-04-02",
+  "facilityUseState": "00-设施在用",
+  "fanType": "01-EC风机",
+  "naturalCooling": "02-氟泵自然冷却",
+  "outdoorUnitType": "00-空气冷冷凝器",
+  "precisionAirCondition_deployment": [
+   {
+    "deployArea": "24-支持区-空调区",
+    "deployComputerRoom": "信阳市中心支行中心机房",
+    "deployDb": "信阳市中支中心机房",
+    "deployFloor": "二层",
+    "deployGallery": "信阳市浉河区长安路133号"
+   }
+  ],
+  "precisionAirCondition_operationsManagement": [
+   {
+    "administrativeDepartment": "00-科技管理部门",
+    "operationDepartment": "00-科技管理部门",
+    "serviceEndTime": "2021-06-08",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "河南信源科技有限公司",
+    "serviceStartTime": "2020-08-08"
+   }
+  ],
+  "ratedPower": 33.1,
+  "remarksInformation": "有",
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "68642ccde44a45bba9419e7a96b8508a",
+  "assetBrand": "施耐德电气",
+  "assetCode": "2202010042020004",
+  "assetSerialNumber": "UCTC020347",
+  "assetType": "TDAR1121",
+  "brandLand": "01-国外",
+  "classificationOfAirRefrigerationVolume": "40",
+  "classificationOfAirSupplyModes": "01-下送风",
+  "classificationOfReturnAirModes": "00-上回风",
+  "coldSourceSystem": "00-风冷式",
+  "facilityCategory": "FAKTJKT000",
+  "facilityName": "洛阳市中支中心机房精密空调1",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2017-09-01",
+  "facilityUseState": "00-设施在用",
+  "fanType": "00-AC风机",
+  "naturalCooling": "02-氟泵自然冷却",
+  "outdoorUnitType": "00-空气冷冷凝器",
+  "precisionAirCondition_deployment": [
+   {
+    "deployArea": "24-支持区-空调区",
+    "deployComputerRoom": "洛阳市中支中心机房",
+    "deployDb": "洛阳市中支中心机房",
+    "deployFloor": "三层",
+    "deployGallery": "洛阳市中支办公大楼"
+   }
+  ],
+  "precisionAirCondition_operationsManagement": [
+   {
+    "administrativeDepartment": "00-科技管理部门",
+    "operationDepartment": "00-科技管理部门",
+    "serviceEndTime": "2022-02-20",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "郑州三信机房电子技术有限公司",
+    "serviceStartTime": "2021-02-21"
+   }
+  ],
+  "ratedPower": 36.09,
+  "remarksInformation": "有",
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "6c957a64a08e464da7745475ba072f21",
+  "assetBrand": "维谛",
+  "assetSerialNumber": "SN:21013084062227010003",
+  "assetType": "P1050DP13LH902E1DF0NPA040",
+  "brandLand": "01-国外",
+  "classificationOfAirRefrigerationVolume": "50",
+  "classificationOfAirSupplyModes": "01-下送风",
+  "classificationOfReturnAirModes": "00-上回风",
+  "coldSourceSystem": "00-风冷式",
+  "facilityCategory": "FAKTJKT000",
+  "facilityName": "郑州中支主中心精密空调3",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-09-20",
+  "facilityUseDate": "2022-08-24",
+  "facilityUseState": "00-设施在用",
+  "fanType": "01-EC风机",
+  "naturalCooling": "02-氟泵自然冷却",
+  "outdoorUnitType": "00-空气冷冷凝器",
+  "precisionAirCondition_deployment": [
+   {
+    "deployArea": "22-支持区-UPS区",
+    "deployComputerRoom": "服务器机房",
+    "deployDb": "郑州中支主中心机房",
+    "deployFloor": "十一层",
+    "deployGallery": "商务外环路21号"
+   }
+  ],
+  "precisionAirCondition_operationsManagement": [
+   {
+    "administrativeDepartment": "00-科技管理部门",
+    "operationDepartment": "00-科技管理部门",
+    "serviceEndTime": "2024-08-24",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "河南吉之星电子科技有限公司",
+    "serviceStartTime": "2022-08-25"
+   }
+  ],
+  "ratedPower": 17.95,
+  "remarksInformation": "有",
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "784cdf551cae4111bc31b653e0b30dff",
+  "assetBrand": "艾默生",
+  "assetCode": "2202120021002038",
+  "assetSerialNumber": "21013036222165070003",
+  "assetType": "P2040FARMP1R",
+  "brandLand": "01-国外",
+  "classificationOfAirRefrigerationVolume": "20",
+  "classificationOfAirSupplyModes": "01-下送风",
+  "classificationOfReturnAirModes": "00-上回风",
+  "coldSourceSystem": "00-风冷式",
+  "facilityCategory": "FAKTJKT000",
+  "facilityName": "许昌市中支中心机房精密空调3",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2016-09-11",
+  "facilityUseState": "00-设施在用",
+  "fanType": "01-EC风机",
+  "naturalCooling": "02-氟泵自然冷却",
+  "outdoorUnitType": "00-空气冷冷凝器",
+  "precisionAirCondition_deployment": [
+   {
+    "deployArea": "24-支持区-空调区",
+    "deployComputerRoom": "许昌市中心支行中心机房",
+    "deployDb": "许昌市中支中心机房",
+    "deployFloor": "四层",
+    "deployGallery": "河南省许昌市建安区新东街571号办公楼"
+   }
+  ],
+  "precisionAirCondition_operationsManagement": [
+   {
+    "administrativeDepartment": "00-科技管理部门",
+    "operationDepartment": "00-科技管理部门",
+    "serviceEndTime": "2021-12-18",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "许昌协同科贸有限公司",
+    "serviceStartTime": "2019-12-18"
+   }
+  ],
+  "ratedPower": 9.0,
+  "remarksInformation": "有",
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "8dc6c3d84a714833a9a691c746a913c3",
+  "assetBrand": "艾默生",
+  "assetCode": "2202070042004009",
+  "assetSerialNumber": "210130020521180B001",
+  "assetType": "LIEBEN.PEXP1035F",
+  "brandLand": "01-国外",
+  "classificationOfAirRefrigerationVolume": "135",
+  "classificationOfAirSupplyModes": "01-下送风",
+  "classificationOfReturnAirModes": "00-上回风",
+  "coldSourceSystem": "00-风冷式",
+  "facilityCategory": "FAKTJKT000",
+  "facilityName": "信阳市中支中心机房精密空调1",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2011-04-02",
+  "facilityUseState": "00-设施在用",
+  "fanType": "01-EC风机",
+  "naturalCooling": "02-氟泵自然冷却",
+  "outdoorUnitType": "00-空气冷冷凝器",
+  "precisionAirCondition_deployment": [
+   {
+    "deployArea": "24-支持区-空调区",
+    "deployComputerRoom": "信阳市中心支行中心机房",
+    "deployDb": "信阳市中支中心机房",
+    "deployFloor": "二层",
+    "deployGallery": "信阳市浉河区长安路133号"
+   }
+  ],
+  "precisionAirCondition_operationsManagement": [
+   {
+    "administrativeDepartment": "00-科技管理部门",
+    "operationDepartment": "00-科技管理部门",
+    "serviceEndTime": "2021-06-08",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "河南信源科技有限公司",
+    "serviceStartTime": "2020-08-08"
+   }
+  ],
+  "ratedPower": 33.1,
+  "remarksInformation": "有",
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "8eb263200e124008af6736a658d3fa98",
+  "assetBrand": "世图兹",
+  "assetCode": "2202090021009001",
+  "assetSerialNumber": "86016702",
+  "assetType": "CPD412A",
+  "brandLand": "01-国外",
+  "classificationOfAirRefrigerationVolume": "50",
+  "classificationOfAirSupplyModes": "01-下送风",
+  "classificationOfReturnAirModes": "00-上回风",
+  "coldSourceSystem": "00-风冷式",
+  "facilityCategory": "FAKTJKT000",
+  "facilityName": "三门峡市中支中心机房机房精密空调3",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2016-01-18",
+  "facilityUseState": "00-设施在用",
+  "fanType": "01-EC风机",
+  "naturalCooling": "02-氟泵自然冷却",
+  "outdoorUnitType": "00-空气冷冷凝器",
+  "precisionAirCondition_deployment": [
+   {
+    "deployArea": "20-支持区-变配电室",
+    "deployComputerRoom": "中心机房",
+    "deployDb": "三门峡市中支中心机房",
+    "deployFloor": "六层",
+    "deployGallery": "办公大楼"
+   }
+  ],
+  "precisionAirCondition_operationsManagement": [
+   {
+    "administrativeDepartment": "00-科技管理部门",
+    "operationDepartment": "00-科技管理部门",
+    "serviceEndTime": "2021-12-31",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "河南昭展信息科技有限公司",
+    "serviceStartTime": "2016-01-18"
+   }
+  ],
+  "ratedPower": 11.0,
+  "remarksInformation": "有",
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "93466f4157ed4d91a19f4c73b875d83d",
+  "assetBrand": "世图兹",
+  "assetCode": "2202090021027018",
+  "assetSerialNumber": "CFZL-3005701-MB14269",
+  "assetType": "SCF121A2",
+  "brandLand": "01-国外",
+  "classificationOfAirRefrigerationVolume": "50",
+  "classificationOfAirSupplyModes": "02-水平送风",
+  "classificationOfReturnAirModes": "02-侧回风",
+  "coldSourceSystem": "00-风冷式",
+  "facilityCategory": "FAKTJKT000",
+  "facilityName": "三门峡市中支中心机房机房精密空调2",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2019-12-23",
+  "facilityUseState": "00-设施在用",
+  "fanType": "01-EC风机",
+  "naturalCooling": "02-氟泵自然冷却",
+  "outdoorUnitType": "00-空气冷冷凝器",
+  "precisionAirCondition_deployment": [
+   {
+    "deployArea": "03-主机房-其它区",
+    "deployComputerRoom": "中心机房",
+    "deployDb": "三门峡市中支中心机房",
+    "deployFloor": "六层",
+    "deployGallery": "办公大楼"
+   }
+  ],
+  "precisionAirCondition_operationsManagement": [
+   {
+    "administrativeDepartment": "00-科技管理部门",
+    "operationDepartment": "00-科技管理部门",
+    "serviceEndTime": "2021-12-31",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "河南昭展信息科技有限公司",
+    "serviceStartTime": "2019-12-23"
+   }
+  ],
+  "ratedPower": 8.0,
+  "remarksInformation": "有",
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "956a1ca90d774f3a9f3f61b4ef57e502",
+  "assetBrand": "维谛",
+  "assetSerialNumber": "SN:21013084052227010001",
+  "assetType": "PEX_AC-P1050DA036H912S1D000PN033",
+  "brandLand": "01-国外",
+  "classificationOfAirRefrigerationVolume": "50",
+  "classificationOfAirSupplyModes": "01-下送风",
+  "classificationOfReturnAirModes": "00-上回风",
+  "coldSourceSystem": "00-风冷式",
+  "facilityCategory": "FAKTJKT000",
+  "facilityName": "郑州中支主中心精密空调8",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-09-20",
+  "facilityUseDate": "2022-08-24",
+  "facilityUseState": "00-设施在用",
+  "fanType": "01-EC风机",
+  "naturalCooling": "02-氟泵自然冷却",
+  "outdoorUnitType": "00-空气冷冷凝器",
+  "precisionAirCondition_deployment": [
+   {
+    "deployArea": "03-主机房-其它区",
+    "deployComputerRoom": "外汇机房",
+    "deployDb": "郑州中支主中心机房",
+    "deployFloor": "十一层",
+    "deployGallery": "商务外环路21号"
+   }
+  ],
+  "precisionAirCondition_operationsManagement": [
+   {
+    "administrativeDepartment": "00-科技管理部门",
+    "operationDepartment": "00-科技管理部门",
+    "serviceEndTime": "2024-08-24",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "河南吉之星电子科技有限公司",
+    "serviceStartTime": "2022-08-25"
+   }
+  ],
+  "ratedPower": 17.95,
+  "remarksInformation": "有",
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "a2ae524ff41148abb8ee95f053bc3c1e",
+  "assetBrand": "维谛",
+  "assetCode": "2202030042013006",
+  "assetSerialNumber": "21013036242172010001",
+  "assetType": "P2050FARMP1R",
+  "brandLand": "01-国外",
+  "classificationOfAirRefrigerationVolume": "50",
+  "classificationOfAirSupplyModes": "01-下送风",
+  "classificationOfReturnAirModes": "00-上回风",
+  "coldSourceSystem": "00-风冷式",
+  "facilityCategory": "FAKTJKT000",
+  "facilityName": "新乡市中支支持区机房精密空调01",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2017-08-30",
+  "facilityUseState": "00-设施在用",
+  "fanType": "00-AC风机",
+  "naturalCooling": "03-间接蒸发冷却",
+  "outdoorUnitType": "00-空气冷冷凝器",
+  "precisionAirCondition_deployment": [
+   {
+    "deployArea": "24-支持区-空调区",
+    "deployComputerRoom": "新乡市中心支行中心机房",
+    "deployDb": "新乡市中支中心机房",
+    "deployFloor": "十五层",
+    "deployGallery": "新乡市红旗区向阳路9号办公楼"
+   }
+  ],
+  "precisionAirCondition_operationsManagement": [
+   {
+    "administrativeDepartment": "00-科技管理部门",
+    "operationDepartment": "00-科技管理部门",
+    "serviceEndTime": "2021-10-31",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "维谛技术有限公司",
+    "serviceStartTime": "2020-11-01"
+   }
+  ],
+  "ratedPower": 31.0,
+  "remarksInformation": "有",
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "a5d8899026774e29a09015cb47c9841c",
+  "assetBrand": "依米康",
+  "assetCode": "024002",
+  "assetSerialNumber": "SN060831181900188",
+  "assetType": "SCA351UES/RCS52",
+  "brandLand": "00-国内",
+  "classificationOfAirRefrigerationVolume": "35",
+  "classificationOfAirSupplyModes": "00-上送风",
+  "classificationOfReturnAirModes": "02-侧回风",
+  "coldSourceSystem": "00-风冷式",
+  "facilityCategory": "FAKTJKT000",
+  "facilityName": "鹤壁市中支服务器机房精密空调2",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2009-05-01",
+  "facilityUseState": "00-设施在用",
+  "fanType": "01-EC风机",
+  "naturalCooling": "02-氟泵自然冷却",
+  "outdoorUnitType": "00-空气冷冷凝器",
+  "precisionAirCondition_deployment": [
+   {
+    "deployArea": "00-主机房-服务器区",
+    "deployComputerRoom": "服务器机房",
+    "deployDb": "鹤壁市中支中心机房",
+    "deployFloor": "七层",
+    "deployGallery": "办公楼"
+   }
+  ],
+  "precisionAirCondition_operationsManagement": [
+   {
+    "administrativeDepartment": "00-科技管理部门",
+    "operationDepartment": "00-科技管理部门",
+    "serviceEndTime": "2017-05-01",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "浩海方舟",
+    "serviceStartTime": "2009-05-01"
+   }
+  ],
+  "ratedPower": 11.7,
+  "remarksInformation": "有",
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "a8a2a7623c11428ca80fa5b0f68b38e8",
+  "assetBrand": "艾默生",
+  "assetSerialNumber": "21F0122484218C010001",
+  "assetType": "P1035FAZMP1R",
+  "brandLand": "01-国外",
+  "classificationOfAirRefrigerationVolume": "35",
+  "classificationOfAirSupplyModes": "01-下送风",
+  "classificationOfReturnAirModes": "00-上回风",
+  "coldSourceSystem": "00-风冷式",
+  "facilityCategory": "FAKTJKT000",
+  "facilityName": "郑州中支转接中心精密空调2",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2018-12-15",
+  "facilityUseState": "00-设施在用",
+  "fanType": "01-EC风机",
+  "naturalCooling": "02-氟泵自然冷却",
+  "outdoorUnitType": "00-空气冷冷凝器",
+  "precisionAirCondition_deployment": [
+   {
+    "deployArea": "01-主机房-网络区",
+    "deployComputerRoom": "转接中心机房",
+    "deployDb": "郑州中支转接中心机房",
+    "deployFloor": "二层",
+    "deployGallery": "转接中心综合楼"
+   }
+  ],
+  "precisionAirCondition_operationsManagement": [
+   {
+    "administrativeDepartment": "00-科技管理部门",
+    "operationDepartment": "00-科技管理部门",
+    "serviceEndTime": "2021-08-26",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "河南捷联科技有限公司",
+    "serviceStartTime": "2020-08-27"
+   }
+  ],
+  "ratedPower": 12.9,
+  "remarksInformation": "有",
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "b4ace2b4a5074e74b24f4a2832957cf1",
+  "assetBrand": "依米康",
+  "assetCode": "024001",
+  "assetSerialNumber": "SN060831181900187",
+  "assetType": "SCA351UES/RCS52",
+  "brandLand": "00-国内",
+  "classificationOfAirRefrigerationVolume": "35",
+  "classificationOfAirSupplyModes": "00-上送风",
+  "classificationOfReturnAirModes": "02-侧回风",
+  "coldSourceSystem": "00-风冷式",
+  "facilityCategory": "FAKTJKT000",
+  "facilityName": "鹤壁市中支服务器机房精密空调1",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2009-05-01",
+  "facilityUseState": "00-设施在用",
+  "fanType": "01-EC风机",
+  "naturalCooling": "02-氟泵自然冷却",
+  "outdoorUnitType": "00-空气冷冷凝器",
+  "precisionAirCondition_deployment": [
+   {
+    "deployArea": "00-主机房-服务器区",
+    "deployComputerRoom": "服务器机房",
+    "deployDb": "鹤壁市中支中心机房",
+    "deployFloor": "七层",
+    "deployGallery": "办公楼"
+   }
+  ],
+  "precisionAirCondition_operationsManagement": [
+   {
+    "administrativeDepartment": "00-科技管理部门",
+    "operationDepartment": "00-科技管理部门",
+    "serviceEndTime": "2017-05-01",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "浩海方舟",
+    "serviceStartTime": "2009-05-01"
+   }
+  ],
+  "ratedPower": 11.7,
+  "remarksInformation": "有",
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "b5c5bd1c0d274e2781bdc5285d9a64f2",
+  "assetBrand": "艾默生",
+  "assetCode": "2202140042100100",
+  "assetSerialNumber": "21502386",
+  "assetType": "P2605D",
+  "brandLand": "01-国外",
+  "classificationOfAirRefrigerationVolume": "60",
+  "classificationOfAirSupplyModes": "01-下送风",
+  "classificationOfReturnAirModes": "00-上回风",
+  "coldSourceSystem": "00-风冷式",
+  "facilityCategory": "FAKTJKT000",
+  "facilityName": "商丘市中支中心机房精密空调",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2018-02-01",
+  "facilityUseState": "00-设施在用",
+  "fanType": "01-EC风机",
+  "naturalCooling": "02-氟泵自然冷却",
+  "outdoorUnitType": "00-空气冷冷凝器",
+  "precisionAirCondition_deployment": [
+   {
+    "deployArea": "24-支持区-空调区",
+    "deployComputerRoom": "商丘市中心支行中心机房",
+    "deployDb": "商丘市中支中心机房",
+    "deployFloor": "八层",
+    "deployGallery": "人行商丘中支一号办公楼"
+   }
+  ],
+  "precisionAirCondition_operationsManagement": [
+   {
+    "administrativeDepartment": "00-科技管理部门",
+    "operationDepartment": "00-科技管理部门",
+    "serviceEndTime": "2022-02-01",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "郑州盛夏电子科技有限公司",
+    "serviceStartTime": "2018-02-01"
+   }
+  ],
+  "ratedPower": 33.1,
+  "remarksInformation": "有",
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "b85b0e63827742cf8a831f2fbdcd9e1c",
+  "assetBrand": "艾默生",
+  "assetCode": "024001",
+  "assetSerialNumber": "21013008992143010001",
+  "assetType": "LiebertPEXP2050",
+  "brandLand": "01-国外",
+  "classificationOfAirRefrigerationVolume": "135",
+  "classificationOfAirSupplyModes": "01-下送风",
+  "classificationOfReturnAirModes": "00-上回风",
+  "coldSourceSystem": "00-风冷式",
+  "facilityCategory": "FAKTJKT000",
+  "facilityName": "安阳市中支中心机房精密空调",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2014-09-01",
+  "facilityUseState": "00-设施在用",
+  "fanType": "01-EC风机",
+  "naturalCooling": "02-氟泵自然冷却",
+  "outdoorUnitType": "00-空气冷冷凝器",
+  "precisionAirCondition_deployment": [
+   {
+    "deployArea": "24-支持区-空调区",
+    "deployComputerRoom": "安阳中心支行中心机房",
+    "deployDb": "安阳市中支中心机房",
+    "deployFloor": "八层",
+    "deployGallery": "河南省安阳市开发区金融大厦"
+   }
+  ],
+  "precisionAirCondition_operationsManagement": [
+   {
+    "administrativeDepartment": "00-科技管理部门",
+    "operationDepartment": "00-科技管理部门",
+    "serviceEndTime": "2023-06-01",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "河南捷联",
+    "serviceStartTime": "2020-06-01"
+   }
+  ],
+  "ratedPower": 33.1,
+  "remarksInformation": "有",
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "bc0b5588a03e47aca13f31261d715586",
+  "assetBrand": "维谛",
+  "assetSerialNumber": "SN:21013084052227010002",
+  "assetType": "PEX_AC-P1050DA036H912S1D000PN033",
+  "brandLand": "01-国外",
+  "classificationOfAirRefrigerationVolume": "50",
+  "classificationOfAirSupplyModes": "01-下送风",
+  "classificationOfReturnAirModes": "00-上回风",
+  "coldSourceSystem": "00-风冷式",
+  "facilityCategory": "FAKTJKT000",
+  "facilityName": "郑州中支主中心精密空调5",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-09-20",
+  "facilityUseDate": "2022-08-24",
+  "facilityUseState": "00-设施在用",
+  "fanType": "01-EC风机",
+  "naturalCooling": "02-氟泵自然冷却",
+  "outdoorUnitType": "00-空气冷冷凝器",
+  "precisionAirCondition_deployment": [
+   {
+    "deployArea": "00-主机房-服务器区",
+    "deployComputerRoom": "服务器机房",
+    "deployDb": "郑州中支主中心机房",
+    "deployFloor": "十一层",
+    "deployGallery": "商务外环路21号"
+   }
+  ],
+  "precisionAirCondition_operationsManagement": [
+   {
+    "administrativeDepartment": "00-科技管理部门",
+    "operationDepartment": "00-科技管理部门",
+    "serviceEndTime": "2024-08-24",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "河南吉之星电子科技有限公司",
+    "serviceStartTime": "2022-08-25"
+   }
+  ],
+  "ratedPower": 17.95,
+  "remarksInformation": "有",
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "bd78d4fa602a4944b9738fd5dd3ec641",
+  "assetBrand": "艾默生",
+  "assetCode": "2202130042016000",
+  "assetSerialNumber": "2101303626217C080001",
+  "assetType": "P2060FA",
+  "brandLand": "01-国外",
+  "classificationOfAirRefrigerationVolume": "50",
+  "classificationOfAirSupplyModes": "01-下送风",
+  "classificationOfReturnAirModes": "00-上回风",
+  "coldSourceSystem": "00-风冷式",
+  "facilityCategory": "FAKTJKT000",
+  "facilityName": "漯河市中支中心机房精密空调1",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2017-12-01",
+  "facilityUseState": "00-设施在用",
+  "fanType": "01-EC风机",
+  "naturalCooling": "02-氟泵自然冷却",
+  "outdoorUnitType": "00-空气冷冷凝器",
+  "precisionAirCondition_deployment": [
+   {
+    "deployArea": "24-支持区-空调区",
+    "deployComputerRoom": "漯河市中心支行中心机房",
+    "deployDb": "漯河市中支中心机房",
+    "deployFloor": "五层",
+    "deployGallery": "漯河市郾城区嵩山东支路1号"
+   }
+  ],
+  "precisionAirCondition_operationsManagement": [
+   {
+    "administrativeDepartment": "00-科技管理部门",
+    "operationDepartment": "00-科技管理部门",
+    "serviceEndTime": "2021-12-31",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "郑州盛夏电子科技有限公司",
+    "serviceStartTime": "2017-12-31"
+   }
+  ],
+  "ratedPower": 33.0,
+  "remarksInformation": "有",
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "c00eac4c8f064139839182de4404c5d1",
+  "assetBrand": "艾默生",
+  "assetSerialNumber": "21013036242178050004",
+  "assetType": "P2050FARMP1R",
+  "brandLand": "01-国外",
+  "classificationOfAirRefrigerationVolume": "50",
+  "classificationOfAirSupplyModes": "01-下送风",
+  "classificationOfReturnAirModes": "00-上回风",
+  "coldSourceSystem": "03-风冷冷冻水双冷源系统",
+  "facilityCategory": "FAKTJKT000",
+  "facilityName": "平顶山市中支服务器机房精密空调2",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2017-12-26",
+  "facilityUseState": "00-设施在用",
+  "fanType": "00-AC风机",
+  "naturalCooling": "02-氟泵自然冷却",
+  "outdoorUnitType": "00-空气冷冷凝器",
+  "precisionAirCondition_deployment": [
+   {
+    "deployArea": "24-支持区-空调区",
+    "deployComputerRoom": "中心机房",
+    "deployDb": "平顶山市中支中心机房",
+    "deployFloor": "八层",
+    "deployGallery": "办公楼"
+   }
+  ],
+  "precisionAirCondition_operationsManagement": [
+   {
+    "administrativeDepartment": "00-科技管理部门",
+    "operationDepartment": "00-科技管理部门",
+    "serviceEndTime": "2020-12-26",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "中平信息技术有限责任公司",
+    "serviceStartTime": "2017-12-26"
+   }
+  ],
+  "ratedPower": 50.0,
+  "remarksInformation": "有",
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "c4bf66f5fced48f3b0a4023cf1e9f117",
+  "assetBrand": "世图兹",
+  "assetCode": "2202090021027017",
+  "assetSerialNumber": "CFZL-3005701-MB14268",
+  "assetType": "SCF121A2",
+  "brandLand": "01-国外",
+  "classificationOfAirRefrigerationVolume": "50",
+  "classificationOfAirSupplyModes": "02-水平送风",
+  "classificationOfReturnAirModes": "02-侧回风",
+  "coldSourceSystem": "00-风冷式",
+  "facilityCategory": "FAKTJKT000",
+  "facilityName": "三门峡市中支中心机房机房精密空调1",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2019-12-23",
+  "facilityUseState": "00-设施在用",
+  "fanType": "01-EC风机",
+  "naturalCooling": "02-氟泵自然冷却",
+  "outdoorUnitType": "00-空气冷冷凝器",
+  "precisionAirCondition_deployment": [
+   {
+    "deployArea": "24-支持区-空调区",
+    "deployComputerRoom": "中心机房",
+    "deployDb": "三门峡市中支中心机房",
+    "deployFloor": "六层",
+    "deployGallery": "办公大楼"
+   }
+  ],
+  "precisionAirCondition_operationsManagement": [
+   {
+    "administrativeDepartment": "00-科技管理部门",
+    "operationDepartment": "00-科技管理部门",
+    "serviceEndTime": "2021-12-31",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "河南昭展信息科技有限公司",
+    "serviceStartTime": "2019-12-23"
+   }
+  ],
+  "ratedPower": 8.0,
+  "remarksInformation": "有",
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "c657a35569f94f2c926e83d171fb9401",
+  "assetBrand": "艾默生",
+  "assetSerialNumber": "21F0122484218C010002",
+  "assetType": "P1035FAZMP1R",
+  "brandLand": "01-国外",
+  "classificationOfAirRefrigerationVolume": "35",
+  "classificationOfAirSupplyModes": "01-下送风",
+  "classificationOfReturnAirModes": "00-上回风",
+  "coldSourceSystem": "00-风冷式",
+  "facilityCategory": "FAKTJKT000",
+  "facilityName": "郑州中支转接中心精密空调1",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2018-12-15",
+  "facilityUseState": "00-设施在用",
+  "fanType": "01-EC风机",
+  "naturalCooling": "02-氟泵自然冷却",
+  "outdoorUnitType": "00-空气冷冷凝器",
+  "precisionAirCondition_deployment": [
+   {
+    "deployArea": "01-主机房-网络区",
+    "deployComputerRoom": "转接中心机房",
+    "deployDb": "郑州中支转接中心机房",
+    "deployFloor": "二层",
+    "deployGallery": "转接中心综合楼"
+   }
+  ],
+  "precisionAirCondition_operationsManagement": [
+   {
+    "administrativeDepartment": "00-科技管理部门",
+    "operationDepartment": "00-科技管理部门",
+    "serviceEndTime": "2021-08-26",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "河南捷联科技有限公司",
+    "serviceStartTime": "2020-08-27"
+   }
+  ],
+  "ratedPower": 12.9,
+  "remarksInformation": "有",
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "cc479f49e9044794858d1ece340779ce",
+  "assetBrand": "维谛",
+  "assetSerialNumber": "SN:21013084062227020001",
+  "assetType": "PEX_AC-P1050DA036H912S1D000PN033",
+  "brandLand": "01-国外",
+  "classificationOfAirRefrigerationVolume": "50",
+  "classificationOfAirSupplyModes": "01-下送风",
+  "classificationOfReturnAirModes": "00-上回风",
+  "coldSourceSystem": "00-风冷式",
+  "facilityCategory": "FAKTJKT000",
+  "facilityName": "郑州中支主中心精密空调10",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-09-20",
+  "facilityUseDate": "2022-08-24",
+  "facilityUseState": "00-设施在用",
+  "fanType": "01-EC风机",
+  "naturalCooling": "02-氟泵自然冷却",
+  "outdoorUnitType": "00-空气冷冷凝器",
+  "precisionAirCondition_deployment": [
+   {
+    "deployArea": "03-主机房-其它区",
+    "deployComputerRoom": "网络机房",
+    "deployDb": "郑州中支主中心机房",
+    "deployFloor": "十一层",
+    "deployGallery": "商务外环路21号"
+   }
+  ],
+  "precisionAirCondition_operationsManagement": [
+   {
+    "administrativeDepartment": "00-科技管理部门",
+    "operationDepartment": "00-科技管理部门",
+    "serviceEndTime": "2024-08-24",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "河南吉之星电子科技有限公司",
+    "serviceStartTime": "2022-08-25"
+   }
+  ],
+  "ratedPower": 17.95,
+  "remarksInformation": "有",
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "d61eea2dc6374d069b628995ac824fe6",
+  "assetBrand": "艾默生",
+  "assetCode": "2202120021002036",
+  "assetSerialNumber": "210130362221640B0002",
+  "assetType": "P2040FARMP1R",
+  "brandLand": "01-国外",
+  "classificationOfAirRefrigerationVolume": "40",
+  "classificationOfAirSupplyModes": "01-下送风",
+  "classificationOfReturnAirModes": "00-上回风",
+  "coldSourceSystem": "00-风冷式",
+  "facilityCategory": "FAKTJKT000",
+  "facilityName": "许昌市中支中心机房精密空调1",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2016-09-11",
+  "facilityUseState": "00-设施在用",
+  "fanType": "01-EC风机",
+  "naturalCooling": "02-氟泵自然冷却",
+  "outdoorUnitType": "00-空气冷冷凝器",
+  "precisionAirCondition_deployment": [
+   {
+    "deployArea": "03-主机房-其它区",
+    "deployComputerRoom": "许昌市中心支行中心机房",
+    "deployDb": "许昌市中支中心机房",
+    "deployFloor": "四层",
+    "deployGallery": "河南省许昌市建安区新东街571号办公楼"
+   }
+  ],
+  "precisionAirCondition_operationsManagement": [
+   {
+    "administrativeDepartment": "00-科技管理部门",
+    "operationDepartment": "00-科技管理部门",
+    "serviceEndTime": "2021-12-18",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "许昌协同科贸有限公司",
+    "serviceStartTime": "2019-12-18"
+   }
+  ],
+  "ratedPower": 16.0,
+  "remarksInformation": "有",
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "d8b6de75278a400fb42ec5835542834b",
+  "assetBrand": "维谛",
+  "assetSerialNumber": "SN:21013084062227010001",
+  "assetType": "PEX_AC-P1050DA036H912S1D000PN033",
+  "brandLand": "01-国外",
+  "classificationOfAirRefrigerationVolume": "50",
+  "classificationOfAirSupplyModes": "01-下送风",
+  "classificationOfReturnAirModes": "00-上回风",
+  "coldSourceSystem": "00-风冷式",
+  "facilityCategory": "FAKTJKT000",
+  "facilityName": "郑州中支主中心精密空调6",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-09-20",
+  "facilityUseDate": "2022-08-24",
+  "facilityUseState": "00-设施在用",
+  "fanType": "01-EC风机",
+  "naturalCooling": "02-氟泵自然冷却",
+  "outdoorUnitType": "00-空气冷冷凝器",
+  "precisionAirCondition_deployment": [
+   {
+    "deployArea": "00-主机房-服务器区",
+    "deployComputerRoom": "电源室机房",
+    "deployDb": "郑州中支主中心机房",
+    "deployFloor": "十一层",
+    "deployGallery": "商务外环路21号"
+   }
+  ],
+  "precisionAirCondition_operationsManagement": [
+   {
+    "administrativeDepartment": "00-科技管理部门",
+    "operationDepartment": "00-科技管理部门",
+    "serviceEndTime": "2024-08-24",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "河南吉之星电子科技有限公司",
+    "serviceStartTime": "2022-08-25"
+   }
+  ],
+  "ratedPower": 17.95,
+  "remarksInformation": "有",
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "de7c58c6d42f43d2866fb8b5cd54934b",
+  "assetBrand": "世图兹",
+  "assetCode": "2202020042017011",
+  "assetSerialNumber": "86024379",
+  "assetType": "ASD402A",
+  "brandLand": "01-国外",
+  "classificationOfAirRefrigerationVolume": "43",
+  "classificationOfAirSupplyModes": "01-下送风",
+  "classificationOfReturnAirModes": "00-上回风",
+  "coldSourceSystem": "00-风冷式",
+  "facilityCategory": "FAKTJKT000",
+  "facilityName": "开封市中支中心机房精密空调1",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2018-03-01",
+  "facilityUseState": "00-设施在用",
+  "fanType": "01-EC风机",
+  "naturalCooling": "03-间接蒸发冷却",
+  "outdoorUnitType": "02-蒸发式冷凝器",
+  "precisionAirCondition_deployment": [
+   {
+    "deployArea": "16-辅助区-新风区",
+    "deployComputerRoom": "开封市中心支行中心机房",
+    "deployDb": "开封市中支中心机房",
+    "deployFloor": "三层",
+    "deployGallery": "开封市龙亭区晋安路60号办公楼"
+   }
+  ],
+  "precisionAirCondition_operationsManagement": [
+   {
+    "administrativeDepartment": "01-后勤管理部门",
+    "operationDepartment": "00-科技管理部门",
+    "serviceEndTime": "2021-03-01",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "北京泰豪智能工程有限公司",
+    "serviceStartTime": "2018-03-01"
+   }
+  ],
+  "ratedPower": 40.0,
+  "remarksInformation": "有",
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "e2af9c18a07b41cb905ce7bfbe461f37",
+  "assetBrand": "维谛",
+  "assetSerialNumber": "SN:21013084052227010003",
+  "assetType": "PEX_AC-P1050DA036H912S1D000PN033",
+  "brandLand": "01-国外",
+  "classificationOfAirRefrigerationVolume": "50",
+  "classificationOfAirSupplyModes": "01-下送风",
+  "classificationOfReturnAirModes": "00-上回风",
+  "coldSourceSystem": "00-风冷式",
+  "facilityCategory": "FAKTJKT000",
+  "facilityName": "郑州中支主中心精密空调9",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-09-20",
+  "facilityUseDate": "2022-08-24",
+  "facilityUseState": "00-设施在用",
+  "fanType": "01-EC风机",
+  "naturalCooling": "02-氟泵自然冷却",
+  "outdoorUnitType": "00-空气冷冷凝器",
+  "precisionAirCondition_deployment": [
+   {
+    "deployArea": "03-主机房-其它区",
+    "deployComputerRoom": "网络机房",
+    "deployDb": "郑州中支主中心机房",
+    "deployFloor": "十一层",
+    "deployGallery": "商务外环路21号"
+   }
+  ],
+  "precisionAirCondition_operationsManagement": [
+   {
+    "administrativeDepartment": "00-科技管理部门",
+    "operationDepartment": "00-科技管理部门",
+    "serviceEndTime": "2024-08-24",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "河南吉之星电子科技有限公司",
+    "serviceStartTime": "2022-08-25"
+   }
+  ],
+  "ratedPower": 17.95,
+  "remarksInformation": "有",
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "ef6f7aae186e43c0995237f747d839c9",
+  "assetBrand": "施耐德电气",
+  "assetCode": "2202010042020005",
+  "assetSerialNumber": "UCTC020348",
+  "assetType": "TDAR1121",
+  "brandLand": "01-国外",
+  "classificationOfAirRefrigerationVolume": "40",
+  "classificationOfAirSupplyModes": "01-下送风",
+  "classificationOfReturnAirModes": "00-上回风",
+  "coldSourceSystem": "00-风冷式",
+  "facilityCategory": "FAKTJKT000",
+  "facilityName": "洛阳市中支中心机房精密空调2",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2017-09-01",
+  "facilityUseState": "00-设施在用",
+  "fanType": "00-AC风机",
+  "naturalCooling": "02-氟泵自然冷却",
+  "outdoorUnitType": "00-空气冷冷凝器",
+  "precisionAirCondition_deployment": [
+   {
+    "deployArea": "24-支持区-空调区",
+    "deployComputerRoom": "洛阳市中支中心机房",
+    "deployDb": "洛阳市中支中心机房",
+    "deployFloor": "三层",
+    "deployGallery": "洛阳市中支办公大楼"
+   }
+  ],
+  "precisionAirCondition_operationsManagement": [
+   {
+    "administrativeDepartment": "00-科技管理部门",
+    "operationDepartment": "00-科技管理部门",
+    "serviceEndTime": "2022-02-20",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "郑州三信机房电子技术有限公司",
+    "serviceStartTime": "2021-02-21"
+   }
+  ],
+  "ratedPower": 36.09,
+  "remarksInformation": "有",
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "f4e54fefb35646c78e28ddcb474f60ea",
+  "assetBrand": "维谛",
+  "assetSerialNumber": "SN:21013084052227010004",
+  "assetType": "P1050DP13LH902E1DF0NPA040",
+  "brandLand": "01-国外",
+  "classificationOfAirRefrigerationVolume": "50",
+  "classificationOfAirSupplyModes": "01-下送风",
+  "classificationOfReturnAirModes": "00-上回风",
+  "coldSourceSystem": "00-风冷式",
+  "facilityCategory": "FAKTJKT000",
+  "facilityName": "郑州中支主中心精密空调2",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-09-20",
+  "facilityUseDate": "2022-08-24",
+  "facilityUseState": "00-设施在用",
+  "fanType": "01-EC风机",
+  "naturalCooling": "02-氟泵自然冷却",
+  "outdoorUnitType": "00-空气冷冷凝器",
+  "precisionAirCondition_deployment": [
+   {
+    "deployArea": "03-主机房-其它区",
+    "deployComputerRoom": "清算机房",
+    "deployDb": "郑州中支主中心机房",
+    "deployFloor": "十一层",
+    "deployGallery": "商务外环路21号"
+   }
+  ],
+  "precisionAirCondition_operationsManagement": [
+   {
+    "administrativeDepartment": "00-科技管理部门",
+    "operationDepartment": "00-科技管理部门",
+    "serviceEndTime": "2024-08-24",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "河南吉之星电子科技有限公司",
+    "serviceStartTime": "2022-08-25"
+   }
+  ],
+  "ratedPower": 17.95,
+  "remarksInformation": "有",
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "f71e331c1c0a4e6281dc1c34386b39b7",
+  "assetBrand": "世图兹",
+  "assetCode": "2202160042019001",
+  "assetSerialNumber": "86023743",
+  "assetType": "CPD412A",
+  "brandLand": "01-国外",
+  "classificationOfAirRefrigerationVolume": "40",
+  "classificationOfAirSupplyModes": "01-下送风",
+  "classificationOfReturnAirModes": "00-上回风",
+  "coldSourceSystem": "00-风冷式",
+  "facilityCategory": "FAKTJKT000",
+  "facilityName": "周口市中支中心机房精密空调1",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2019-04-06",
+  "facilityUseState": "00-设施在用",
+  "fanType": "01-EC风机",
+  "naturalCooling": "02-氟泵自然冷却",
+  "outdoorUnitType": "00-空气冷冷凝器",
+  "precisionAirCondition_deployment": [
+   {
+    "deployArea": "24-支持区-空调区",
+    "deployComputerRoom": "周口市中心支行中心机房",
+    "deployDb": "周口市中支中心机房",
+    "deployFloor": "二层",
+    "deployGallery": "河南省周口市川汇区七一路中段1号A楼"
+   }
+  ],
+  "precisionAirCondition_operationsManagement": [
+   {
+    "administrativeDepartment": "01-后勤管理部门",
+    "operationDepartment": "00-科技管理部门",
+    "serviceEndTime": "2021-08-06",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "恒锋信息科技股份有限公司",
+    "serviceStartTime": "2018-08-06"
+   }
+  ],
+  "ratedPower": 40.0,
+  "remarksInformation": "有",
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "f84c4c5b257842e3ae2bcbf37e1a57ab",
+  "assetBrand": "维谛",
+  "assetCode": "2202130042018001",
+  "assetSerialNumber": "2101303626218B040003",
+  "assetType": "P2060FA",
+  "brandLand": "01-国外",
+  "classificationOfAirRefrigerationVolume": "50",
+  "classificationOfAirSupplyModes": "01-下送风",
+  "classificationOfReturnAirModes": "00-上回风",
+  "coldSourceSystem": "00-风冷式",
+  "facilityCategory": "FAKTJKT000",
+  "facilityName": "漯河市中支中心机房精密空调2",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2018-12-01",
+  "facilityUseState": "00-设施在用",
+  "fanType": "01-EC风机",
+  "naturalCooling": "02-氟泵自然冷却",
+  "outdoorUnitType": "00-空气冷冷凝器",
+  "precisionAirCondition_deployment": [
+   {
+    "deployArea": "24-支持区-空调区",
+    "deployComputerRoom": "漯河市中心支行中心机房",
+    "deployDb": "漯河市中支中心机房",
+    "deployFloor": "五层",
+    "deployGallery": "漯河市郾城区嵩山东支路1号"
+   }
+  ],
+  "precisionAirCondition_operationsManagement": [
+   {
+    "administrativeDepartment": "00-科技管理部门",
+    "operationDepartment": "00-科技管理部门",
+    "serviceEndTime": "2021-12-31",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "郑州盛夏电子科技有限公司",
+    "serviceStartTime": "2018-12-31"
+   }
+  ],
+  "ratedPower": 33.0,
+  "remarksInformation": "有",
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "f9b4048ed0614459a037f9ff2039124e",
+  "assetBrand": "艾默生",
+  "assetCode": "ZMD024001",
+  "assetSerialNumber": "1708007",
+  "assetType": "DS-45-UA",
+  "brandLand": "01-国外",
+  "classificationOfAirRefrigerationVolume": "45",
+  "classificationOfAirSupplyModes": "01-下送风",
+  "classificationOfReturnAirModes": "00-上回风",
+  "coldSourceSystem": "00-风冷式",
+  "facilityCategory": "FAKTJKT000",
+  "facilityName": "驻马店市中支中心机房精密空调1",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2018-11-02",
+  "facilityUseState": "00-设施在用",
+  "fanType": "00-AC风机",
+  "naturalCooling": "02-氟泵自然冷却",
+  "outdoorUnitType": "02-蒸发式冷凝器",
+  "precisionAirCondition_deployment": [
+   {
+    "deployArea": "24-支持区-空调区",
+    "deployComputerRoom": "驻马店市中支中心机房",
+    "deployDb": "驻马店市中支中心机房",
+    "deployFloor": "四层",
+    "deployGallery": "驻马店市驿城区泰山路567号办公楼"
+   }
+  ],
+  "precisionAirCondition_operationsManagement": [
+   {
+    "administrativeDepartment": "00-科技管理部门",
+    "operationDepartment": "00-科技管理部门",
+    "serviceEndTime": "2021-11-02",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "郑州一建集团有限公司",
+    "serviceStartTime": "2018-11-02"
+   }
+  ],
+  "ratedPower": 13.0,
+  "remarksInformation": "有",
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "fb2b31e06b5149ad94582311a9fd5a49",
+  "assetBrand": "维谛",
+  "assetSerialNumber": "SN:21013084052227010006",
+  "assetType": "P1050DP13LH902E1DF0NPA040",
+  "brandLand": "01-国外",
+  "classificationOfAirRefrigerationVolume": "50",
+  "classificationOfAirSupplyModes": "01-下送风",
+  "classificationOfReturnAirModes": "00-上回风",
+  "coldSourceSystem": "00-风冷式",
+  "facilityCategory": "FAKTJKT000",
+  "facilityName": "郑州中支主中心精密空调4",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-09-20",
+  "facilityUseDate": "2022-08-24",
+  "facilityUseState": "00-设施在用",
+  "fanType": "01-EC风机",
+  "naturalCooling": "02-氟泵自然冷却",
+  "outdoorUnitType": "00-空气冷冷凝器",
+  "precisionAirCondition_deployment": [
+   {
+    "deployArea": "22-支持区-UPS区",
+    "deployComputerRoom": "服务器机房",
+    "deployDb": "郑州中支主中心机房",
+    "deployFloor": "十一层",
+    "deployGallery": "商务外环路21号"
+   }
+  ],
+  "precisionAirCondition_operationsManagement": [
+   {
+    "administrativeDepartment": "00-科技管理部门",
+    "operationDepartment": "00-科技管理部门",
+    "serviceEndTime": "2024-08-24",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "河南吉之星电子科技有限公司",
+    "serviceStartTime": "2022-08-25"
+   }
+  ],
+  "ratedPower": 17.95,
+  "remarksInformation": "有",
+  "_dataSource": "双源"
+ }
+]

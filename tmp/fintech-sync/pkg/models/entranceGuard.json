@@ -1,0 +1,821 @@
+{
+ "_version": 40,
+ "attrList": [
+  {
+   "custom": "true",
+   "description": "",
+   "id": "facilityDescriptor",
+   "inheritObjectId": "",
+   "isInherit": false,
+   "isMetadata": false,
+   "name": "设施标识符",
+   "notifyDenied": false,
+   "protected": false,
+   "readonly": "false",
+   "required": "true",
+   "tag": [
+    "基本信息"
+   ],
+   "tips": "",
+   "unique": "true",
+   "value": {
+    "default": "guid()",
+    "default_type": "function",
+    "mode": "default",
+    "prefix": "",
+    "regex": null,
+    "series_number_length": 0,
+    "start_value": 0,
+    "struct_define": [],
+    "type": "str"
+   },
+   "wordIndexDenied": false
+  },
+  {
+   "custom": "true",
+   "description": "",
+   "id": "assetBrand",
+   "inheritObjectId": "",
+   "isInherit": false,
+   "isMetadata": false,
+   "name": "设备品牌",
+   "notifyDenied": false,
+   "protected": false,
+   "readonly": "false",
+   "required": "true",
+   "tag": [
+    "基本信息"
+   ],
+   "tips": "",
+   "unique": "false",
+   "value": {
+    "default": null,
+    "default_type": "value",
+    "mode": "default",
+    "prefix": "",
+    "regex": null,
+    "series_number_length": 0,
+    "start_value": 0,
+    "struct_define": [],
+    "type": "str"
+   },
+   "wordIndexDenied": false
+  },
+  {
+   "custom": "true",
+   "description": "",
+   "id": "facilityName",
+   "inheritObjectId": "",
+   "isInherit": false,
+   "isMetadata": false,
+   "name": "设施名称",
+   "notifyDenied": false,
+   "protected": false,
+   "readonly": "false",
+   "required": "true",
+   "tag": [
+    "基本信息"
+   ],
+   "tips": "",
+   "unique": "false",
+   "value": {
+    "default": null,
+    "default_type": "value",
+    "mode": "default",
+    "prefix": "",
+    "regex": null,
+    "series_number_length": 0,
+    "start_value": 0,
+    "struct_define": [],
+    "type": "str"
+   },
+   "wordIndexDenied": false
+  },
+  {
+   "custom": "true",
+   "description": "",
+   "id": "assetSerialNumber",
+   "inheritObjectId": "",
+   "isInherit": false,
+   "isMetadata": false,
+   "name": "产品序列号",
+   "notifyDenied": false,
+   "protected": false,
+   "readonly": "false",
+   "required": "true",
+   "tag": [
+    "基本信息"
+   ],
+   "tips": "",
+   "unique": "false",
+   "value": {
+    "default": null,
+    "default_type": "value",
+    "mode": "default",
+    "prefix": "",
+    "regex": null,
+    "series_number_length": 0,
+    "start_value": 0,
+    "struct_define": [],
+    "type": "str"
+   },
+   "wordIndexDenied": false
+  },
+  {
+   "custom": "true",
+   "description": "",
+   "id": "assetType",
+   "inheritObjectId": "",
+   "isInherit": false,
+   "isMetadata": false,
+   "name": "设备型号",
+   "notifyDenied": false,
+   "protected": false,
+   "readonly": "false",
+   "required": "true",
+   "tag": [
+    "基本信息"
+   ],
+   "tips": "",
+   "unique": "false",
+   "value": {
+    "default": null,
+    "default_type": "value",
+    "mode": "default",
+    "prefix": "",
+    "regex": null,
+    "series_number_length": 0,
+    "start_value": 0,
+    "struct_define": [],
+    "type": "str"
+   },
+   "wordIndexDenied": false
+  },
+  {
+   "custom": "true",
+   "description": "",
+   "id": "facilityUseState",
+   "inheritObjectId": "",
+   "isInherit": false,
+   "isMetadata": false,
+   "name": "设施在用状态",
+   "notifyDenied": false,
+   "protected": false,
+   "readonly": "false",
+   "required": "true",
+   "tag": [
+    "基本信息"
+   ],
+   "tips": "",
+   "unique": "false",
+   "value": {
+    "default": null,
+    "default_type": "",
+    "mode": "default",
+    "prefix": "",
+    "regex": [
+     "00-设施在用",
+     "01-设施已停用",
+     "02-设施专用于开发或测试",
+     "03-设施已拆除或报废",
+     "04-备用设施",
+     "99-其它"
+    ],
+    "series_number_length": 0,
+    "start_value": 0,
+    "struct_define": [],
+    "type": "enum"
+   },
+   "wordIndexDenied": false
+  },
+  {
+   "custom": "true",
+   "description": "",
+   "id": "facilityUseDate",
+   "inheritObjectId": "",
+   "isInherit": false,
+   "isMetadata": false,
+   "name": "设施投产日期",
+   "notifyDenied": false,
+   "protected": false,
+   "readonly": "false",
+   "required": "true",
+   "tag": [
+    "基本信息"
+   ],
+   "tips": "",
+   "unique": "false",
+   "value": {
+    "default": null,
+    "default_type": "",
+    "mode": "",
+    "prefix": "",
+    "regex": null,
+    "series_number_length": 0,
+    "start_value": 0,
+    "struct_define": [],
+    "type": "date"
+   },
+   "wordIndexDenied": false
+  },
+  {
+   "custom": "true",
+   "description": "",
+   "id": "dataSaveCycle",
+   "inheritObjectId": "",
+   "isInherit": false,
+   "isMetadata": false,
+   "name": "日志存放周期",
+   "notifyDenied": false,
+   "protected": false,
+   "readonly": "false",
+   "required": "true",
+   "tag": [
+    "基本信息"
+   ],
+   "tips": "",
+   "unique": "false",
+   "value": {
+    "default": null,
+    "default_type": "",
+    "mode": "",
+    "prefix": "",
+    "regex": null,
+    "series_number_length": 0,
+    "start_value": 0,
+    "struct_define": [],
+    "type": "float"
+   },
+   "wordIndexDenied": false
+  },
+  {
+   "custom": "true",
+   "description": "",
+   "id": "entranceGuardSystem",
+   "inheritObjectId": "",
+   "isInherit": false,
+   "isMetadata": false,
+   "name": "门禁系统",
+   "notifyDenied": false,
+   "protected": false,
+   "readonly": "false",
+   "required": "true",
+   "tag": [
+    "基本信息"
+   ],
+   "tips": "",
+   "unique": "false",
+   "value": {
+    "default": null,
+    "default_type": "",
+    "mode": "default",
+    "prefix": "",
+    "regex": [
+     "00-是",
+     "01-否",
+     "02-不适用"
+    ],
+    "series_number_length": 0,
+    "start_value": 0,
+    "struct_define": [],
+    "type": "enum"
+   },
+   "wordIndexDenied": false
+  },
+  {
+   "custom": "true",
+   "description": "",
+   "id": "accessControlType",
+   "inheritObjectId": "",
+   "isInherit": false,
+   "isMetadata": false,
+   "name": "门禁系统类型",
+   "notifyDenied": false,
+   "protected": false,
+   "readonly": "false",
+   "required": "true",
+   "tag": [
+    "基本信息"
+   ],
+   "tips": "",
+   "unique": "false",
+   "value": {
+    "default": null,
+    "default_type": "",
+    "mode": "default",
+    "prefix": "",
+    "regex": [
+     "00-单向",
+     "01-双向",
+     "02-单向+双向都有"
+    ],
+    "series_number_length": 0,
+    "start_value": 0,
+    "struct_define": [],
+    "type": "enum"
+   },
+   "wordIndexDenied": false
+  },
+  {
+   "custom": "true",
+   "description": "",
+   "id": "facilityUpdateDate",
+   "inheritObjectId": "",
+   "isInherit": false,
+   "isMetadata": false,
+   "name": "设施信息更新日期",
+   "notifyDenied": false,
+   "protected": false,
+   "readonly": "false",
+   "required": "true",
+   "tag": [
+    "基本信息"
+   ],
+   "tips": "",
+   "unique": "false",
+   "value": {
+    "default": null,
+    "default_type": "",
+    "mode": "",
+    "prefix": "",
+    "regex": null,
+    "series_number_length": 0,
+    "start_value": 0,
+    "struct_define": [],
+    "type": "date"
+   },
+   "wordIndexDenied": false
+  },
+  {
+   "custom": "true",
+   "description": "",
+   "id": "remarksInformation",
+   "inheritObjectId": "",
+   "isInherit": false,
+   "isMetadata": false,
+   "name": "备注信息",
+   "notifyDenied": false,
+   "protected": false,
+   "readonly": "false",
+   "required": "false",
+   "tag": [
+    "基本信息"
+   ],
+   "tips": "",
+   "unique": "false",
+   "value": {
+    "default": null,
+    "default_type": "value",
+    "mode": "default",
+    "prefix": "",
+    "regex": null,
+    "series_number_length": 0,
+    "start_value": 0,
+    "struct_define": [],
+    "type": "str"
+   },
+   "wordIndexDenied": false
+  },
+  {
+   "custom": "true",
+   "description": "",
+   "id": "facilityCategory",
+   "inheritObjectId": "",
+   "isInherit": false,
+   "isMetadata": false,
+   "name": "设施分类标识符",
+   "notifyDenied": false,
+   "protected": false,
+   "readonly": "false",
+   "required": "false",
+   "tag": [
+    "基本信息"
+   ],
+   "tips": "",
+   "unique": "false",
+   "value": {
+    "default": "FAAFMJS000",
+    "default_type": "value",
+    "mode": "default",
+    "prefix": "",
+    "regex": null,
+    "series_number_length": 0,
+    "start_value": 0,
+    "struct_define": [],
+    "type": "str"
+   },
+   "wordIndexDenied": false
+  },
+  {
+   "custom": "true",
+   "description": "",
+   "id": "assetCode",
+   "inheritObjectId": "",
+   "isInherit": false,
+   "isMetadata": false,
+   "name": "资产编码（可读性标识编码）",
+   "notifyDenied": false,
+   "protected": false,
+   "readonly": "false",
+   "required": "false",
+   "tag": [
+    "基本信息"
+   ],
+   "tips": "",
+   "unique": "false",
+   "value": {
+    "default": null,
+    "default_type": "value",
+    "mode": "default",
+    "prefix": "",
+    "regex": null,
+    "series_number_length": 0,
+    "start_value": 0,
+    "struct_define": [],
+    "type": "str"
+   },
+   "wordIndexDenied": false
+  },
+  {
+   "custom": "true",
+   "description": "",
+   "id": "facilityOwnershipAgency",
+   "inheritObjectId": "",
+   "isInherit": false,
+   "isMetadata": false,
+   "name": "设施归属机构",
+   "notifyDenied": false,
+   "protected": false,
+   "readonly": "false",
+   "required": "false",
+   "tag": [
+    "基本信息"
+   ],
+   "tips": "",
+   "unique": "false",
+   "value": {
+    "default": null,
+    "default_type": "value",
+    "mode": "default",
+    "prefix": "",
+    "regex": null,
+    "series_number_length": 0,
+    "start_value": 0,
+    "struct_define": [],
+    "type": "str"
+   },
+   "wordIndexDenied": false
+  },
+  {
+   "custom": "true",
+   "description": "",
+   "id": "brandLand",
+   "inheritObjectId": "",
+   "isInherit": false,
+   "isMetadata": false,
+   "name": "品牌属地",
+   "notifyDenied": false,
+   "protected": false,
+   "readonly": "false",
+   "required": "false",
+   "tag": [
+    "基本信息"
+   ],
+   "tips": "",
+   "unique": "false",
+   "value": {
+    "default": null,
+    "default_type": "",
+    "mode": "default",
+    "prefix": "",
+    "regex": [
+     "00-国内",
+     "01-国外",
+     "99-其它"
+    ],
+    "series_number_length": 0,
+    "start_value": 0,
+    "struct_define": [],
+    "type": "enum"
+   },
+   "wordIndexDenied": false
+  },
+  {
+   "custom": "true",
+   "description": "",
+   "id": "assetValue",
+   "inheritObjectId": "",
+   "isInherit": false,
+   "isMetadata": false,
+   "name": "资产价值（万元）",
+   "notifyDenied": false,
+   "protected": false,
+   "readonly": "false",
+   "required": "false",
+   "tag": [
+    "基本信息"
+   ],
+   "tips": "",
+   "unique": "false",
+   "value": {
+    "default": null,
+    "default_type": "",
+    "mode": "",
+    "prefix": "",
+    "regex": null,
+    "series_number_length": 0,
+    "start_value": 0,
+    "struct_define": [],
+    "type": "float"
+   },
+   "wordIndexDenied": false
+  },
+  {
+   "custom": "true",
+   "description": "",
+   "id": "entranceGuard_operationsManagement",
+   "inheritObjectId": "",
+   "isInherit": false,
+   "isMetadata": false,
+   "name": "门禁系统-运维管理属性",
+   "notifyDenied": false,
+   "protected": false,
+   "readonly": "false",
+   "required": "false",
+   "tag": [
+    "基本信息"
+   ],
+   "tips": "",
+   "unique": "false",
+   "value": {
+    "default": null,
+    "default_type": "",
+    "mode": "",
+    "prefix": "",
+    "regex": null,
+    "series_number_length": 0,
+    "start_value": 0,
+    "struct_define": [
+     {
+      "id": "operationDepartment",
+      "mode": "",
+      "name": "运维部门",
+      "protected": false,
+      "regex": [
+       "00-科技管理部门",
+       "01-后勤管理部门",
+       "02-业务管理部门",
+       "03-保卫管理部门",
+       "04-物业管理部门",
+       "05-外包服务部门",
+       "99-其它"
+      ],
+      "type": "enum"
+     },
+     {
+      "id": "administrativeDepartment",
+      "mode": "",
+      "name": "管理部门",
+      "protected": false,
+      "regex": [
+       "00-科技管理部门",
+       "01-后勤管理部门",
+       "02-业务管理部门",
+       "03-保卫管理部门",
+       "04-其它外部单位",
+       "99-其它"
+      ],
+      "type": "enum"
+     },
+     {
+      "id": "serviceProvider",
+      "mode": "default",
+      "name": "服务提供商",
+      "protected": false,
+      "regex": "",
+      "type": "str"
+     },
+     {
+      "id": "serviceStartTime",
+      "mode": "",
+      "name": "服务开始时间",
+      "protected": false,
+      "regex": null,
+      "type": "date"
+     },
+     {
+      "id": "serviceEndTime",
+      "mode": "",
+      "name": "服务截止时间",
+      "protected": false,
+      "regex": null,
+      "type": "date"
+     },
+     {
+      "id": "serviceLevel",
+      "mode": "",
+      "name": "服务级别",
+      "protected": false,
+      "regex": [
+       "00-5*8",
+       "01-7*24",
+       "02-现场值守",
+       "99-其它"
+      ],
+      "type": "enum"
+     },
+     {
+      "id": "maintenanceTime",
+      "mode": "",
+      "name": "维修时间",
+      "protected": false,
+      "regex": null,
+      "type": "datetime"
+     },
+     {
+      "id": "maintenanceCause",
+      "mode": "default",
+      "name": "维修故障原因",
+      "protected": false,
+      "regex": "",
+      "type": "str"
+     },
+     {
+      "id": "maintenanceResults",
+      "mode": "default",
+      "name": "维修结果",
+      "protected": false,
+      "regex": "",
+      "type": "str"
+     }
+    ],
+    "type": "structs"
+   },
+   "wordIndexDenied": false
+  },
+  {
+   "custom": "true",
+   "description": "",
+   "id": "entranceGuard_deployment",
+   "inheritObjectId": "",
+   "isInherit": false,
+   "isMetadata": false,
+   "name": "门禁系统-部署属性",
+   "notifyDenied": false,
+   "protected": false,
+   "readonly": "false",
+   "required": "false",
+   "tag": [
+    "基本信息"
+   ],
+   "tips": "",
+   "unique": "false",
+   "value": {
+    "default": null,
+    "default_type": "",
+    "mode": "",
+    "prefix": "",
+    "regex": null,
+    "series_number_length": 0,
+    "start_value": 0,
+    "struct_define": [
+     {
+      "id": "deployDb",
+      "mode": "default",
+      "name": "部署数据中心",
+      "protected": false,
+      "regex": "",
+      "type": "str"
+     },
+     {
+      "id": "deployGallery",
+      "mode": "default",
+      "name": "所属楼座",
+      "protected": false,
+      "regex": "",
+      "type": "str"
+     },
+     {
+      "id": "deployFloor",
+      "mode": "default",
+      "name": "所属楼层",
+      "protected": false,
+      "regex": "",
+      "type": "str"
+     },
+     {
+      "id": "deployComputerRoom",
+      "mode": "default",
+      "name": "所属机房",
+      "protected": false,
+      "regex": "",
+      "type": "str"
+     },
+     {
+      "id": "deployArea",
+      "mode": "",
+      "name": "部署区域",
+      "protected": false,
+      "regex": [
+       "00-主机房-服务器区",
+       "01-主机房-网络区",
+       "02-主机房-存储区",
+       "03-主机房-其它区",
+       "10-辅助区-进线间",
+       "11-辅助区-测试区",
+       "12-辅助区-总控中心",
+       "13-辅助区-消防区",
+       "14-辅助区-安防区",
+       "15-辅助区-维修区",
+       "16-辅助区-新风区",
+       "17-辅助区-其它区",
+       "20-支持区-变配电室",
+       "21-支持区-柴油发动机房",
+       "22-支持区-UPS区",
+       "23-支持区-电池室",
+       "24-支持区-空调区",
+       "30-行政管理区-办公区",
+       "31-行政管理区-值班室",
+       "90-屏蔽机房区",
+       "99-其它"
+      ],
+      "type": "enum"
+     }
+    ],
+    "type": "structs"
+   },
+   "wordIndexDenied": false
+  }
+ ],
+ "category": "金融元数据.安全管理",
+ "creator": "easyops",
+ "deleteAuthorizers": [],
+ "icon": "",
+ "indexList": [
+  {
+   "name": "u&facilityDescriptor",
+   "propertyIds": [
+    "facilityDescriptor"
+   ],
+   "unique": true
+  }
+ ],
+ "isAbstract": false,
+ "memo": "",
+ "modifier": "easyops",
+ "name": "门禁系统",
+ "notifyDenied": false,
+ "objectId": "entranceGuard@FINTECHDATA",
+ "parentObjectId": "CUSTOM@FINTECHDATA",
+ "parentObjectIds": [
+  "CUSTOM@FINTECHDATA",
+  "powerUsedAsset@FINTECHDATA"
+ ],
+ "permissionDenied": false,
+ "protected": false,
+ "readAuthorizers": [],
+ "relation_groups": [],
+ "relation_list": [],
+ "system": "",
+ "updateAuthorizers": [],
+ "view": {
+  "attr_authorizers": null,
+  "attr_category_order": [
+   "基本信息"
+  ],
+  "attr_order": [
+   "facilityDescriptor",
+   "assetBrand",
+   "facilityName",
+   "assetSerialNumber",
+   "assetType",
+   "facilityUseState",
+   "facilityUseDate",
+   "dataSaveCycle",
+   "entranceGuardSystem",
+   "accessControlType",
+   "facilityUpdateDate",
+   "remarksInformation",
+   "facilityCategory",
+   "assetCode",
+   "facilityOwnershipAgency",
+   "brandLand",
+   "assetValue",
+   "entranceGuard_operationsManagement",
+   "entranceGuard_deployment"
+  ],
+  "hide_columns": null,
+  "icon": null,
+  "image": "",
+  "inherit_attr_category_map": null,
+  "relation_default_attr": null,
+  "relation_group_order": null,
+  "relation_order": null,
+  "show_key": [
+   "facilityDescriptor"
+  ],
+  "trans_hier_relation_list": null,
+  "visible": true
+ },
+ "wordIndexDenied": false
+}

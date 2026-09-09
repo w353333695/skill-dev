@@ -1,0 +1,2351 @@
+[
+ {
+  "facilityDescriptor": "039477c9f5664668a6e9fa712a2327ad",
+  "assetBrand": "华三",
+  "assetCode": "2202120021027002",
+  "assetSerialNumber": "210231A5T8P19C0001C5",
+  "assetType": "MSR5660",
+  "brandLand": "00-国内",
+  "deviceHeight": "4",
+  "facilityCategory": "FAITNWDRTR",
+  "facilityName": "许昌市中支中心机房业务网核心路由器2",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2020-06-19",
+  "facilityUseState": "00-设施在用",
+  "influenceSystem": "业务网系统",
+  "managementIp": "11.66.167.28",
+  "networkSecurityCapability": [
+   "00-IPSec"
+  ],
+  "numberOfCards": "11",
+  "operatingSystemVersionInformation": "Version 7.1.064, Release 0707P24",
+  "remarksInformation": "许昌至郑州备路由",
+  "router_deployment": [
+   {
+    "deployArea": "01-主机房-网络区",
+    "deployComputerRoom": "许昌市中心支行中心机房",
+    "deployDb": "许昌市中支中心机房",
+    "deployFloor": "四楼",
+    "deployGallery": "河南省许昌市建安区新东街571号办公楼"
+   }
+  ],
+  "router_installationPosition": [
+   {
+    "belongCabinet": "许昌市中支中心机房服务器机柜A07",
+    "slotNo": "36"
+   }
+  ],
+  "router_operationsManagement": [
+   {
+    "administrativeDepartment": "00-科技管理部门",
+    "operationDepartment": "00-科技管理部门",
+    "serviceEndTime": "2023-06-19",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "北京神州新桥科技有限公司",
+    "serviceStartTime": "2020-06-19"
+   }
+  ],
+  "router_protocol": [
+   {
+    "ipv6BasicProtocol": [
+     "00-ICMPv6"
+    ]
+   }
+  ],
+  "supportIpv6": "True",
+  "wirelessFunction": "False",
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "1257675558a74505ac9eceaf6c11893f",
+  "assetBrand": "华三",
+  "assetCode": "2202070021027000",
+  "assetSerialNumber": "210235A0W2X19C000074",
+  "assetType": "MSR5660",
+  "brandLand": "00-国内",
+  "deviceHeight": "4",
+  "facilityCategory": "FAITNWDRTR",
+  "facilityName": "焦作市中支中心机房业务网核心路由器1",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2020-08-20",
+  "facilityUseState": "00-设施在用",
+  "influenceSystem": "业务网系统",
+  "managementIp": "11.66.135.29",
+  "networkSecurityCapability": [
+   "00-IPSec"
+  ],
+  "numberOfCards": "11",
+  "operatingSystemVersionInformation": "Comware Software, Version 7.1.064",
+  "remarksInformation": "焦作至郑州主路由",
+  "router_deployment": [
+   {
+    "deployArea": "01-主机房-网络区",
+    "deployComputerRoom": "焦作市中心支行中心机房",
+    "deployDb": "焦作市中支中心机房",
+    "deployFloor": "四楼",
+    "deployGallery": "焦作市山阳区世纪路1355号"
+   }
+  ],
+  "router_installationPosition": [
+   {
+    "belongCabinet": "焦作市中支中心机房网络机柜1",
+    "slotNo": "24"
+   }
+  ],
+  "router_operationsManagement": [
+   {
+    "administrativeDepartment": "00-科技管理部门",
+    "operationDepartment": "00-科技管理部门",
+    "serviceEndTime": "2023-08-20",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "河南省威帆科技有限公司",
+    "serviceStartTime": "2020-08-20"
+   }
+  ],
+  "router_protocol": [
+   {
+    "ipv6BasicProtocol": [
+     "00-ICMPv6"
+    ]
+   }
+  ],
+  "supportIpv6": "True",
+  "wirelessFunction": "False",
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "158093a3605f4a37bf8d1c2d0d16d02b",
+  "assetBrand": "华三",
+  "assetCode": "2202130021100001",
+  "assetSerialNumber": "210231A5T8P19C00004L",
+  "assetType": "MSR5660",
+  "brandLand": "00-国内",
+  "deviceHeight": "6",
+  "facilityCategory": "FAITNWDRTR",
+  "facilityName": "漯河市中支中心机房业务网核心路由器1",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2020-01-01",
+  "facilityUseState": "00-设施在用",
+  "influenceSystem": "业务网系统",
+  "managementIp": "11.66.183.29",
+  "networkSecurityCapability": [
+   "00-IPSec"
+  ],
+  "numberOfCards": "11",
+  "operatingSystemVersionInformation": "Version 7.7.064 Release 0707P24",
+  "remarksInformation": "漯河至郑州主路由",
+  "router_deployment": [
+   {
+    "deployArea": "01-主机房-网络区",
+    "deployComputerRoom": "漯河市中心支行中心机房",
+    "deployDb": "漯河市中支中心机房",
+    "deployFloor": "五层",
+    "deployGallery": "漯河市郾城区嵩山东支路1号"
+   }
+  ],
+  "router_installationPosition": [
+   {
+    "belongCabinet": "漯河市中支网络机房机柜06",
+    "slotNo": "10"
+   }
+  ],
+  "router_operationsManagement": [
+   {
+    "administrativeDepartment": "00-科技管理部门",
+    "operationDepartment": "00-科技管理部门",
+    "serviceEndTime": "2023-01-01",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "河南省威帆科技有限公司",
+    "serviceStartTime": "2020-01-01"
+   }
+  ],
+  "router_protocol": [
+   {
+    "ipv6BasicProtocol": [
+     "00-ICMPv6"
+    ]
+   }
+  ],
+  "supportIpv6": "True",
+  "wirelessFunction": "False",
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "160fba2b9604493995747a30fc9770d2",
+  "assetBrand": "华为",
+  "assetCode": "2200000021029002",
+  "assetSerialNumber": "2102352PQN10MC100021",
+  "assetType": "NE40E",
+  "brandLand": "00-国内",
+  "deviceHeight": "21",
+  "facilityCategory": "FAITNWDRTR",
+  "facilityName": "郑州中支主中心上联路由器主",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2023-08-09",
+  "facilityUseDate": "2023-03-24",
+  "facilityUseState": "00-设施在用",
+  "influenceSystem": "到总行业务网业务",
+  "managementIp": "11.128.4.194",
+  "networkSecurityCapability": [
+   "00-IPSec"
+  ],
+  "numberOfCards": "6",
+  "operatingSystemVersionInformation": "Version 8.210(NE40E V800R021C00SPC100)",
+  "router_deployment": [
+   {
+    "deployArea": "01-主机房-网络区",
+    "deployComputerRoom": "主中心机房",
+    "deployDb": "郑州中支主中心机房",
+    "deployFloor": "十一层",
+    "deployGallery": "主中心办公楼"
+   }
+  ],
+  "router_installationPosition": [
+   {
+    "belongCabinet": "郑州中支主中心网络机房网络柜12",
+    "slotNo": "23"
+   }
+  ],
+  "router_operationsManagement": [
+   {
+    "administrativeDepartment": "00-科技管理部门",
+    "operationDepartment": "00-科技管理部门",
+    "serviceEndTime": "2023-09-05",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "原厂",
+    "serviceStartTime": "2023-03-06"
+   }
+  ],
+  "router_protocol": [
+   {
+    "ipv6BasicProtocol": [
+     "00-ICMPv6"
+    ]
+   }
+  ],
+  "supportIpv6": "True",
+  "wirelessFunction": "False",
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "19f2ee1846a64ea594311adfbea24449",
+  "assetBrand": "华三",
+  "assetCode": "2200000021024032",
+  "assetSerialNumber": "210235A0YUX16B000010",
+  "assetType": "SR8804-X",
+  "brandLand": "00-国内",
+  "deviceHeight": "9",
+  "facilityCategory": "FAITNWDRTR",
+  "facilityName": "郑州中支转接中心下联路由器备",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2017-01-01",
+  "facilityUseState": "00-设施在用",
+  "influenceSystem": "到总行及地市业务网业务",
+  "managementIp": "11.67.208.221",
+  "networkSecurityCapability": [
+   "00-IPSec"
+  ],
+  "numberOfCards": "4",
+  "operatingSystemVersionInformation": "Version 7.1.048, Release 7353P13",
+  "router_deployment": [
+   {
+    "deployArea": "01-主机房-网络区",
+    "deployComputerRoom": "转接中心机房",
+    "deployDb": "郑州中支转接中心机房",
+    "deployFloor": "二层",
+    "deployGallery": "转接中心综合楼"
+   }
+  ],
+  "router_installationPosition": [
+   {
+    "belongCabinet": "郑州中支转接中心机房机柜9",
+    "slotNo": "18"
+   }
+  ],
+  "router_operationsManagement": [
+   {
+    "administrativeDepartment": "00-科技管理部门",
+    "operationDepartment": "00-科技管理部门",
+    "serviceEndTime": "2021-11-01",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "北京神州新桥科技有限公司",
+    "serviceStartTime": "2020-11-01"
+   }
+  ],
+  "router_protocol": [
+   {
+    "ipv6BasicProtocol": [
+     "00-ICMPv6"
+    ]
+   }
+  ],
+  "supportIpv6": "True",
+  "wirelessFunction": "False",
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "20685a0c566545ada45b9b3cdb8317b9",
+  "assetBrand": "华三",
+  "assetCode": "2202140021031033",
+  "assetSerialNumber": "210235A0W2X19C00007J",
+  "assetType": "MSR5660",
+  "brandLand": "00-国内",
+  "deviceHeight": "4",
+  "facilityCategory": "FAITNWDRTR",
+  "facilityName": "商丘中支中心机房业务网核心路由器备",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2020-08-20",
+  "facilityUseState": "00-设施在用",
+  "influenceSystem": "业务网系统",
+  "managementIp": "11.66.215.28",
+  "networkSecurityCapability": [
+   "00-IPSec"
+  ],
+  "numberOfCards": "11",
+  "operatingSystemVersionInformation": "Comware Software, Version 7.1.064",
+  "remarksInformation": "商丘至郑州备路由",
+  "router_deployment": [
+   {
+    "deployArea": "01-主机房-网络区",
+    "deployComputerRoom": "商丘市中心支行中心机房",
+    "deployDb": "商丘市中支中心机房",
+    "deployFloor": "八层",
+    "deployGallery": "商丘市中支办公楼1号楼"
+   }
+  ],
+  "router_installationPosition": [
+   {
+    "belongCabinet": "商丘市中支中心机房服务器机柜12",
+    "slotNo": "13"
+   }
+  ],
+  "router_operationsManagement": [
+   {
+    "administrativeDepartment": "00-科技管理部门",
+    "operationDepartment": "00-科技管理部门",
+    "serviceEndTime": "2023-08-20",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "北京神州新桥科技有限公司",
+    "serviceStartTime": "2020-08-20"
+   }
+  ],
+  "router_protocol": [
+   {
+    "ipv6BasicProtocol": [
+     "00-ICMPv6"
+    ]
+   }
+  ],
+  "supportIpv6": "True",
+  "wirelessFunction": "False",
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "2d74f75b0e2848e199f3f7eda3cc8ac4",
+  "assetBrand": "华三",
+  "assetCode": "2202020021100010",
+  "assetSerialNumber": "210235A0W2X19C000043",
+  "assetType": "MSR56-60",
+  "brandLand": "00-国内",
+  "deviceHeight": "4",
+  "facilityCategory": "FAITNWDRTR",
+  "facilityName": "开封市中支中心机房业务网主核心路由器",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2020-06-01",
+  "facilityUseState": "00-设施在用",
+  "influenceSystem": "业务网系统",
+  "managementIp": "11.66.39.29",
+  "networkSecurityCapability": [
+   "00-IPSec"
+  ],
+  "numberOfCards": "8",
+  "operatingSystemVersionInformation": "Version 7.1.064, Release 0707P24",
+  "remarksInformation": "开封市中支中心机房业务网主核心路由器",
+  "router_deployment": [
+   {
+    "deployArea": "01-主机房-网络区",
+    "deployComputerRoom": "开封市中心支行中心机房",
+    "deployDb": "开封市中支中心机房",
+    "deployFloor": "三层",
+    "deployGallery": "开封市龙亭区晋安路60号办公楼"
+   }
+  ],
+  "router_installationPosition": [
+   {
+    "slotNo": "24"
+   }
+  ],
+  "router_operationsManagement": [
+   {
+    "administrativeDepartment": "00-科技管理部门",
+    "operationDepartment": "00-科技管理部门",
+    "serviceEndTime": "2023-06-01",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "北京神州新桥科技有限公司",
+    "serviceStartTime": "2020-06-01"
+   }
+  ],
+  "router_protocol": [
+   {
+    "ipv6BasicProtocol": [
+     "00-ICMPv6"
+    ]
+   }
+  ],
+  "supportIpv6": "True",
+  "wirelessFunction": "False",
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "34807a0536de4ea096f311ac1bec4e1a",
+  "assetBrand": "华三",
+  "assetCode": "2202160021100006",
+  "assetSerialNumber": "210235A0W2X19C00001P",
+  "assetType": "MSR5660",
+  "brandLand": "00-国内",
+  "deviceHeight": "4",
+  "facilityCategory": "FAITNWDRTR",
+  "facilityName": "周口市中支中心机房业务网核心路由器2",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2020-08-20",
+  "facilityUseState": "00-设施在用",
+  "influenceSystem": "业务网系统",
+  "managementIp": "11.66.231.28",
+  "networkSecurityCapability": [
+   "00-IPSec"
+  ],
+  "numberOfCards": "11",
+  "operatingSystemVersionInformation": "Comware Software, Version 7.1.064",
+  "remarksInformation": "周口至郑州备路由",
+  "router_deployment": [
+   {
+    "deployArea": "01-主机房-网络区",
+    "deployComputerRoom": "周口市中心支行中心机房",
+    "deployDb": "周口市中支中心机房",
+    "deployFloor": "二楼",
+    "deployGallery": "河南省周口市川汇区七一路中段1号A楼"
+   }
+  ],
+  "router_installationPosition": [
+   {
+    "belongCabinet": "周口市中支中心机房网络机柜B3",
+    "slotNo": "18"
+   }
+  ],
+  "router_operationsManagement": [
+   {
+    "administrativeDepartment": "00-科技管理部门",
+    "operationDepartment": "00-科技管理部门",
+    "serviceEndTime": "2023-08-20",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "河南省威帆科技有限公司",
+    "serviceStartTime": "2020-08-20"
+   }
+  ],
+  "router_protocol": [
+   {
+    "ipv6BasicProtocol": [
+     "00-ICMPv6"
+    ]
+   }
+  ],
+  "supportIpv6": "True",
+  "wirelessFunction": "False",
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "36207572375b4e07bbd0f6b5c6844fb9",
+  "assetBrand": "华三",
+  "assetCode": "2202030021100001",
+  "assetSerialNumber": "210235A0W2X19C00004G",
+  "assetType": "MSR56-60",
+  "brandLand": "00-国内",
+  "deviceHeight": "4",
+  "facilityCategory": "FAITNWDRTR",
+  "facilityName": "新乡市中支网络机房业务网省域网备核心路由器",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2020-05-01",
+  "facilityUseState": "00-设施在用",
+  "influenceSystem": "业务网系统",
+  "managementIp": "11.66.119.28",
+  "networkSecurityCapability": [
+   "00-IPSec"
+  ],
+  "numberOfCards": "8",
+  "operatingSystemVersionInformation": "version 7.1.064, Release 0707P24",
+  "remarksInformation": "业务网主核心路由器",
+  "router_deployment": [
+   {
+    "deployArea": "01-主机房-网络区",
+    "deployComputerRoom": "网络机房",
+    "deployDb": "新乡市中支中心机房",
+    "deployFloor": "十五层",
+    "deployGallery": "办公楼"
+   }
+  ],
+  "router_installationPosition": [
+   {
+    "belongCabinet": "新乡市中支网路机房机柜08",
+    "slotNo": "12"
+   }
+  ],
+  "router_operationsManagement": [
+   {
+    "administrativeDepartment": "00-科技管理部门",
+    "operationDepartment": "00-科技管理部门",
+    "serviceEndTime": "2023-05-01",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "河南威帆信息技术股份有限公司",
+    "serviceStartTime": "2020-05-01"
+   }
+  ],
+  "router_protocol": [
+   {
+    "ipv6BasicProtocol": [
+     "00-ICMPv6"
+    ]
+   }
+  ],
+  "supportIpv6": "True",
+  "wirelessFunction": "False",
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "3e9f665fd14e4835939d21460897cf67",
+  "assetBrand": "华三",
+  "assetCode": "2202070021027001",
+  "assetSerialNumber": "210235A0W2X19C000049",
+  "assetType": "MSR5660",
+  "brandLand": "00-国内",
+  "deviceHeight": "4",
+  "facilityCategory": "FAITNWDRTR",
+  "facilityName": "焦作市中支中心机房业务网核心路由器2",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2020-08-20",
+  "facilityUseState": "00-设施在用",
+  "influenceSystem": "业务网系统",
+  "managementIp": "11.66.135.29",
+  "networkSecurityCapability": [
+   "00-IPSec"
+  ],
+  "numberOfCards": "11",
+  "operatingSystemVersionInformation": "Comware Software, Version 7.1.064",
+  "remarksInformation": "焦作至郑州主路由",
+  "router_deployment": [
+   {
+    "deployArea": "01-主机房-网络区",
+    "deployComputerRoom": "焦作市中心支行中心机房",
+    "deployDb": "焦作市中支中心机房",
+    "deployFloor": "四楼",
+    "deployGallery": "焦作市山阳区世纪路1355号"
+   }
+  ],
+  "router_installationPosition": [
+   {
+    "belongCabinet": "焦作市中支中心机房网络机柜2",
+    "slotNo": "24"
+   }
+  ],
+  "router_operationsManagement": [
+   {
+    "administrativeDepartment": "00-科技管理部门",
+    "operationDepartment": "00-科技管理部门",
+    "serviceEndTime": "2023-08-20",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "河南省威帆科技有限公司",
+    "serviceStartTime": "2020-08-20"
+   }
+  ],
+  "router_protocol": [
+   {
+    "ipv6BasicProtocol": [
+     "00-ICMPv6"
+    ]
+   }
+  ],
+  "supportIpv6": "True",
+  "wirelessFunction": "False",
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "423aab81457946bbbdca2419acdfe940",
+  "assetBrand": "华三",
+  "assetCode": "2202050021031001",
+  "assetSerialNumber": "210231A5T8P19C0000DB",
+  "assetType": "MSR5660",
+  "brandLand": "00-国内",
+  "deviceHeight": "4",
+  "facilityCategory": "FAITNWDRTR",
+  "facilityName": "平顶山市中支业务网核心路由器2",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2020-08-18",
+  "facilityUseState": "00-设施在用",
+  "managementIp": "11.66.71.28",
+  "networkSecurityCapability": [
+   "00-IPSec"
+  ],
+  "numberOfCards": "8",
+  "operatingSystemVersionInformation": "version 7.1.064, Release 0707P24",
+  "remarksInformation": "备核心路由器",
+  "router_deployment": [
+   {
+    "deployArea": "01-主机房-网络区",
+    "deployComputerRoom": "中心机房",
+    "deployDb": "平顶山市中支中心机房",
+    "deployFloor": "八楼",
+    "deployGallery": "办公楼"
+   }
+  ],
+  "router_installationPosition": [
+   {
+    "belongCabinet": "平顶山市中支中心机房机柜08",
+    "slotNo": "8"
+   }
+  ],
+  "router_operationsManagement": [
+   {
+    "administrativeDepartment": "00-科技管理部门",
+    "operationDepartment": "00-科技管理部门",
+    "serviceEndTime": "2023-08-18",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "北京神州新桥科技有限公司",
+    "serviceStartTime": "2020-08-18"
+   }
+  ],
+  "router_protocol": [
+   {
+    "ipv6BasicProtocol": [
+     "00-ICMPv6"
+    ]
+   }
+  ],
+  "supportIpv6": "True",
+  "wirelessFunction": "False",
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "46f5a4526d154b849055ab72e0efc2f0",
+  "assetBrand": "华三",
+  "assetCode": "2202010021030000",
+  "assetSerialNumber": "210235A0W2X19C000045",
+  "assetType": "MSR56-60",
+  "brandLand": "00-国内",
+  "deviceHeight": "4",
+  "facilityCategory": "FAITNWDRTR",
+  "facilityName": "洛阳市中支业务网核心路由器1",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2020-04-25",
+  "facilityUseState": "00-设施在用",
+  "influenceSystem": "业务网系统",
+  "managementIp": "11.66.55.29",
+  "networkSecurityCapability": [
+   "00-IPSec"
+  ],
+  "numberOfCards": "11",
+  "operatingSystemVersionInformation": "H3C Comware Software, Version 7.1.064, Release 0707P24",
+  "remarksInformation": "业务网主路由",
+  "router_deployment": [
+   {
+    "deployArea": "01-主机房-网络区",
+    "deployComputerRoom": "洛阳市中支中心机房",
+    "deployDb": "洛阳市中支中心机房",
+    "deployFloor": "三层",
+    "deployGallery": "洛阳市中支办公大楼"
+   }
+  ],
+  "router_installationPosition": [
+   {
+    "belongCabinet": "洛阳市中支中心机房机柜N1",
+    "slotNo": "25"
+   }
+  ],
+  "router_operationsManagement": [
+   {
+    "administrativeDepartment": "00-科技管理部门",
+    "operationDepartment": "00-科技管理部门",
+    "serviceEndTime": "2023-04-22",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "河南威帆信息技术股份有限公司",
+    "serviceStartTime": "2020-04-22"
+   }
+  ],
+  "router_protocol": [
+   {
+    "ipv6BasicProtocol": [
+     "00-ICMPv6"
+    ]
+   }
+  ],
+  "supportIpv6": "True",
+  "wirelessFunction": "False",
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "4737dac723a343289e3860e8809cceac",
+  "assetBrand": "华三",
+  "assetCode": "2202120021027001",
+  "assetSerialNumber": "2202150021009017",
+  "assetType": "MSR5660",
+  "brandLand": "00-国内",
+  "deviceHeight": "4",
+  "facilityCategory": "FAITNWDRTR",
+  "facilityName": "信阳市中支中心机房业务网核心路由器1",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2020-06-19",
+  "facilityUseState": "00-设施在用",
+  "influenceSystem": "业务网系统",
+  "managementIp": "11.67.23.29",
+  "networkSecurityCapability": [
+   "00-IPSec"
+  ],
+  "numberOfCards": "11",
+  "operatingSystemVersionInformation": "Version 7.1.064, Release 0707P24",
+  "remarksInformation": "信阳至郑州主路由",
+  "router_deployment": [
+   {
+    "deployArea": "01-主机房-网络区",
+    "deployComputerRoom": "信阳市中心支行中心机房",
+    "deployDb": "信阳市中支中心机房",
+    "deployFloor": "二楼",
+    "deployGallery": "信阳市浉河区长安路133号"
+   }
+  ],
+  "router_installationPosition": [
+   {
+    "belongCabinet": "许昌市中支中心机房服务器机柜A06",
+    "slotNo": "33"
+   }
+  ],
+  "router_operationsManagement": [
+   {
+    "administrativeDepartment": "00-科技管理部门",
+    "operationDepartment": "00-科技管理部门",
+    "serviceEndTime": "2023-06-19",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "北京神州新桥科技有限公司",
+    "serviceStartTime": "2020-06-19"
+   }
+  ],
+  "router_protocol": [
+   {
+    "ipv6BasicProtocol": [
+     "00-ICMPv6"
+    ]
+   }
+  ],
+  "supportIpv6": "True",
+  "wirelessFunction": "False",
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "47426f6d76aa4f66a7154de5a6ed85af",
+  "assetBrand": "华三",
+  "assetCode": "2202120021027002",
+  "assetSerialNumber": "2202150021009018",
+  "assetType": "MSR5660",
+  "brandLand": "00-国内",
+  "deviceHeight": "4",
+  "facilityCategory": "FAITNWDRTR",
+  "facilityName": "信阳市中支中心机房业务网核心路由器2",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2020-06-19",
+  "facilityUseState": "00-设施在用",
+  "influenceSystem": "业务网系统",
+  "managementIp": "11.67.23.28",
+  "networkSecurityCapability": [
+   "00-IPSec"
+  ],
+  "numberOfCards": "11",
+  "operatingSystemVersionInformation": "Version 7.1.064, Release 0707P24",
+  "remarksInformation": "信阳至郑州备路由",
+  "router_deployment": [
+   {
+    "deployArea": "01-主机房-网络区",
+    "deployComputerRoom": "信阳市中心支行中心机房",
+    "deployDb": "信阳市中支中心机房",
+    "deployFloor": "二楼",
+    "deployGallery": "信阳市浉河区长安路133号"
+   }
+  ],
+  "router_installationPosition": [
+   {
+    "belongCabinet": "许昌市中支中心机房服务器机柜A07",
+    "slotNo": "26"
+   }
+  ],
+  "router_operationsManagement": [
+   {
+    "administrativeDepartment": "00-科技管理部门",
+    "operationDepartment": "00-科技管理部门",
+    "serviceEndTime": "2023-06-19",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "北京神州新桥科技有限公司",
+    "serviceStartTime": "2020-06-19"
+   }
+  ],
+  "router_protocol": [
+   {
+    "ipv6BasicProtocol": [
+     "00-ICMPv6"
+    ]
+   }
+  ],
+  "supportIpv6": "True",
+  "wirelessFunction": "False",
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "5a67934fe80e4462a05de174b11d47fd",
+  "assetBrand": "华三",
+  "assetCode": "ZMD029001",
+  "assetSerialNumber": "210235A1P8M179A000HC",
+  "assetType": "MSR5620",
+  "brandLand": "00-国内",
+  "deviceHeight": "2",
+  "facilityCategory": "FAITNWDRTR",
+  "facilityName": "驻马店市中支中心机房互联网路由器",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2020-07-31",
+  "facilityUseState": "00-设施在用",
+  "managementIp": "192.168.100.254",
+  "networkSecurityCapability": [
+   "00-IPSec"
+  ],
+  "numberOfCards": "5",
+  "operatingSystemVersionInformation": "Version 7.1.064, Release 0605P18",
+  "remarksInformation": "驻马店市中支中心机房互联网路由器",
+  "router_deployment": [
+   {
+    "deployArea": "01-主机房-网络区",
+    "deployComputerRoom": "驻马店市中支中心机房",
+    "deployDb": "驻马店市中支中心机房",
+    "deployFloor": "四层",
+    "deployGallery": "驻马店市驿城区泰山路567号办公楼"
+   }
+  ],
+  "router_installationPosition": [
+   {
+    "belongCabinet": "驻马店市中支中心机房机柜B1",
+    "slotNo": "26"
+   }
+  ],
+  "router_operationsManagement": [
+   {
+    "administrativeDepartment": "00-科技管理部门",
+    "operationDepartment": "00-科技管理部门",
+    "serviceEndTime": "2023-07-03",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "未知",
+    "serviceStartTime": "2020-07-31"
+   }
+  ],
+  "router_protocol": [
+   {
+    "ipv6BasicProtocol": [
+     "00-ICMPv6"
+    ]
+   }
+  ],
+  "supportIpv6": "False",
+  "wirelessFunction": "False",
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "67c25d10906642dc94347e23204f24ba",
+  "assetBrand": "华三",
+  "assetCode": "2202040021032009",
+  "assetSerialNumber": "210235A0W2X19C00007L",
+  "assetType": "MSR5660",
+  "brandLand": "00-国内",
+  "deviceHeight": "4",
+  "facilityCategory": "FAITNWDRTR",
+  "facilityName": "安阳市中支中心机房业务网核心路由器1",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2020-08-20",
+  "facilityUseState": "00-设施在用",
+  "influenceSystem": "业务网系统",
+  "managementIp": "11.66.87.29",
+  "networkSecurityCapability": [
+   "00-IPSec"
+  ],
+  "numberOfCards": "11",
+  "operatingSystemVersionInformation": "Comware Software, Version 7.1.064",
+  "remarksInformation": "安阳至郑州主路由",
+  "router_deployment": [
+   {
+    "deployArea": "01-主机房-网络区",
+    "deployComputerRoom": "安阳市中支中心机房",
+    "deployDb": "安阳市中支中心机房",
+    "deployFloor": "八层",
+    "deployGallery": "安阳市开发区金融大厦"
+   }
+  ],
+  "router_installationPosition": [
+   {
+    "belongCabinet": "安阳市中支中心机房机柜15",
+    "slotNo": "3"
+   }
+  ],
+  "router_operationsManagement": [
+   {
+    "administrativeDepartment": "00-科技管理部门",
+    "operationDepartment": "00-科技管理部门",
+    "serviceEndTime": "2023-08-20",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "河南省威帆科技有限公司",
+    "serviceStartTime": "2020-08-20"
+   }
+  ],
+  "router_protocol": [
+   {
+    "ipv6BasicProtocol": [
+     "00-ICMPv6"
+    ]
+   }
+  ],
+  "supportIpv6": "True",
+  "wirelessFunction": "False",
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "6ab1d08aa36d4711b0edb68a76d41909",
+  "assetBrand": "华三",
+  "assetCode": "2202030021000615",
+  "assetSerialNumber": "219801A07NM097000270",
+  "assetType": "ER3260",
+  "brandLand": "00-国内",
+  "deviceHeight": "1",
+  "facilityCategory": "FAITNWDRTR",
+  "facilityName": "新乡市中支网络机房业务网省域网主核心路由器2",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2009-11-01",
+  "facilityUseState": "00-设施在用",
+  "influenceSystem": "互联网",
+  "managementIp": "192.168.0.254",
+  "networkSecurityCapability": [
+   "00-IPSec"
+  ],
+  "numberOfCards": "1",
+  "operatingSystemVersionInformation": "ER3260V201R004",
+  "remarksInformation": "新乡中支互联网路由器",
+  "router_deployment": [
+   {
+    "deployArea": "01-主机房-网络区",
+    "deployComputerRoom": "网络机房",
+    "deployDb": "新乡市中支中心机房",
+    "deployFloor": "十五层",
+    "deployGallery": "办公楼"
+   }
+  ],
+  "router_installationPosition": [
+   {
+    "belongCabinet": "新乡市中支网路机房机柜10",
+    "slotNo": "35"
+   }
+  ],
+  "router_operationsManagement": [
+   {
+    "administrativeDepartment": "00-科技管理部门",
+    "operationDepartment": "00-科技管理部门",
+    "serviceEndTime": "2012-01-01",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "河南威帆信息技术股份有限公司",
+    "serviceStartTime": "2009-11-01"
+   }
+  ],
+  "router_protocol": [
+   {
+    "ipv6BasicProtocol": [
+     "00-ICMPv6"
+    ]
+   }
+  ],
+  "supportIpv6": "False",
+  "wirelessFunction": "False",
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "6b2290f37cda4d7e81168586f20fe799",
+  "assetBrand": "华三",
+  "assetCode": "2202030021100002",
+  "assetSerialNumber": "210235A0W2X19C000056",
+  "assetType": "MSR56-60",
+  "brandLand": "00-国内",
+  "deviceHeight": "4",
+  "facilityCategory": "FAITNWDRTR",
+  "facilityName": "新乡市中支网络机房业务网省域网主核心路由器1",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2020-05-01",
+  "facilityUseState": "00-设施在用",
+  "influenceSystem": "业务网系统",
+  "managementIp": "11.66.119.29",
+  "networkSecurityCapability": [
+   "00-IPSec"
+  ],
+  "numberOfCards": "8",
+  "operatingSystemVersionInformation": "version 7.1.064, Release 0707P24",
+  "remarksInformation": "业务网备核心路由器",
+  "router_deployment": [
+   {
+    "deployArea": "01-主机房-网络区",
+    "deployComputerRoom": "网络机房",
+    "deployDb": "新乡市中支中心机房",
+    "deployFloor": "十五层",
+    "deployGallery": "办公楼"
+   }
+  ],
+  "router_installationPosition": [
+   {
+    "belongCabinet": "新乡市中支网路机房机柜09",
+    "slotNo": "24"
+   }
+  ],
+  "router_operationsManagement": [
+   {
+    "administrativeDepartment": "00-科技管理部门",
+    "operationDepartment": "00-科技管理部门",
+    "serviceEndTime": "2023-05-01",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "河南威帆信息技术股份有限公司",
+    "serviceStartTime": "2020-05-01"
+   }
+  ],
+  "router_protocol": [
+   {
+    "ipv6BasicProtocol": [
+     "00-ICMPv6"
+    ]
+   }
+  ],
+  "supportIpv6": "True",
+  "wirelessFunction": "False",
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "73c6a2ac5ce9486397b899a78dc392e5",
+  "assetBrand": "华三",
+  "assetCode": "2202050021031000",
+  "assetSerialNumber": "210231A5T8P19C0000CD",
+  "assetType": "MSR5660",
+  "brandLand": "00-国内",
+  "deviceHeight": "4",
+  "facilityCategory": "FAITNWDRTR",
+  "facilityName": "平顶山市中支业务网核心路由器1",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2020-08-18",
+  "facilityUseState": "00-设施在用",
+  "managementIp": "11.66.71.29",
+  "networkSecurityCapability": [
+   "00-IPSec"
+  ],
+  "numberOfCards": "8",
+  "operatingSystemVersionInformation": "version 7.1.064, Release 0707P24",
+  "remarksInformation": "主核心路由器",
+  "router_deployment": [
+   {
+    "deployArea": "01-主机房-网络区",
+    "deployComputerRoom": "中心机房",
+    "deployDb": "平顶山市中支中心机房",
+    "deployFloor": "八楼",
+    "deployGallery": "办公楼"
+   }
+  ],
+  "router_installationPosition": [
+   {
+    "belongCabinet": "平顶山市中支中心机房机柜08",
+    "slotNo": "6"
+   }
+  ],
+  "router_operationsManagement": [
+   {
+    "administrativeDepartment": "00-科技管理部门",
+    "operationDepartment": "00-科技管理部门",
+    "serviceEndTime": "2023-08-18",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "北京神州新桥科技有限公司",
+    "serviceStartTime": "2020-08-18"
+   }
+  ],
+  "router_protocol": [
+   {
+    "ipv6BasicProtocol": [
+     "00-ICMPv6"
+    ]
+   }
+  ],
+  "supportIpv6": "True",
+  "wirelessFunction": "False",
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "76688970f6754d7e84b1b20a550879de",
+  "assetBrand": "华三",
+  "assetCode": "2202110021100002",
+  "assetSerialNumber": "210231A5T8P19C00014P",
+  "assetType": "MSR56-60",
+  "brandLand": "00-国内",
+  "deviceHeight": "4",
+  "facilityCategory": "FAITNWDRTR",
+  "facilityName": "南阳市中支网络机房业务网省域网备核心路由器",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2020-05-01",
+  "facilityUseState": "00-设施在用",
+  "managementIp": "11.67.7.28",
+  "networkSecurityCapability": [
+   "00-IPSec"
+  ],
+  "numberOfCards": "8",
+  "operatingSystemVersionInformation": "version 7.1.064, Release 0707P24",
+  "remarksInformation": "备核心路由器",
+  "router_deployment": [
+   {
+    "deployArea": "01-主机房-网络区",
+    "deployComputerRoom": "网络机房",
+    "deployDb": "南阳市中支中心机房",
+    "deployFloor": "十二楼",
+    "deployGallery": "办公楼"
+   }
+  ],
+  "router_installationPosition": [
+   {
+    "belongCabinet": "南阳市市中支网络机房机柜03",
+    "slotNo": "6"
+   }
+  ],
+  "router_operationsManagement": [
+   {
+    "administrativeDepartment": "00-科技管理部门",
+    "operationDepartment": "00-科技管理部门",
+    "serviceEndTime": "2021-07-01",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "北京神州新桥科技有限公司",
+    "serviceStartTime": "2020-07-01"
+   }
+  ],
+  "router_protocol": [
+   {
+    "ipv6BasicProtocol": [
+     "00-ICMPv6"
+    ]
+   }
+  ],
+  "supportIpv6": "True",
+  "wirelessFunction": "False",
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "76e5d7a462f64a328fe7a0fd4d9899ed",
+  "assetBrand": "华三",
+  "assetSerialNumber": "210235A1DNX178000002",
+  "assetType": "SR8810-X-S",
+  "brandLand": "00-国内",
+  "deviceHeight": "16",
+  "facilityCategory": "FAITNWDRTR",
+  "facilityName": "郑州中支转接中心金融城域网路由器R2",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2018-06-01",
+  "facilityUseState": "00-设施在用",
+  "influenceSystem": "到金融单位业务",
+  "managementIp": "9.132.47.206",
+  "networkSecurityCapability": [
+   "00-IPSec"
+  ],
+  "numberOfCards": "16",
+  "operatingSystemVersionInformation": "Version 7.1.075, Release 7655P12",
+  "router_deployment": [
+   {
+    "deployArea": "01-主机房-网络区",
+    "deployComputerRoom": "转接中心机房",
+    "deployDb": "郑州中支转接中心机房",
+    "deployFloor": "二层",
+    "deployGallery": "转接中心综合楼"
+   }
+  ],
+  "router_installationPosition": [
+   {
+    "belongCabinet": "郑州中支转接中心机房机柜10",
+    "slotNo": "18"
+   }
+  ],
+  "router_operationsManagement": [
+   {
+    "administrativeDepartment": "00-科技管理部门",
+    "operationDepartment": "00-科技管理部门",
+    "serviceEndTime": "2023-06-01",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "原厂",
+    "serviceStartTime": "2018-06-01"
+   }
+  ],
+  "router_protocol": [
+   {
+    "ipv6BasicProtocol": [
+     "00-ICMPv6"
+    ]
+   }
+  ],
+  "supportIpv6": "True",
+  "wirelessFunction": "False",
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "772c8032aeef483ea2527f0a6131f44c",
+  "assetBrand": "华三",
+  "assetCode": "2202110021100001",
+  "assetSerialNumber": "210235A0W2X19C00002Q",
+  "assetType": "MSR56-60",
+  "brandLand": "00-国内",
+  "deviceHeight": "4",
+  "facilityCategory": "FAITNWDRTR",
+  "facilityName": "南阳市中支网络机房业务网省域网主核心路由器",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2020-05-01",
+  "facilityUseState": "00-设施在用",
+  "managementIp": "11.67.7.29",
+  "networkSecurityCapability": [
+   "00-IPSec"
+  ],
+  "numberOfCards": "8",
+  "operatingSystemVersionInformation": "version 7.1.064, Release 0707P24",
+  "remarksInformation": "主核心路由器",
+  "router_deployment": [
+   {
+    "deployArea": "01-主机房-网络区",
+    "deployComputerRoom": "网络机房",
+    "deployDb": "南阳市中支中心机房",
+    "deployFloor": "十二楼",
+    "deployGallery": "办公楼"
+   }
+  ],
+  "router_installationPosition": [
+   {
+    "belongCabinet": "南阳市市中支网络机房机柜01",
+    "slotNo": "4"
+   }
+  ],
+  "router_operationsManagement": [
+   {
+    "administrativeDepartment": "00-科技管理部门",
+    "operationDepartment": "00-科技管理部门",
+    "serviceEndTime": "2021-07-01",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "北京神州新桥科技有限公司",
+    "serviceStartTime": "2020-07-01"
+   }
+  ],
+  "router_protocol": [
+   {
+    "ipv6BasicProtocol": [
+     "00-ICMPv6"
+    ]
+   }
+  ],
+  "supportIpv6": "True",
+  "wirelessFunction": "False",
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "78e06ed5db7a4dcdbba2dbcadc74c271",
+  "assetBrand": "华三",
+  "assetCode": "2200000021024033",
+  "assetSerialNumber": "210235A0YUX16B000023",
+  "assetType": "SR8804-X",
+  "brandLand": "00-国内",
+  "deviceHeight": "10",
+  "facilityCategory": "FAITNWDRTR",
+  "facilityName": "郑州中支主中心下联路由器主",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2017-01-01",
+  "facilityUseState": "00-设施在用",
+  "influenceSystem": "到总行及地市业务网业务",
+  "managementIp": "11.67.208.222",
+  "networkSecurityCapability": [
+   "00-IPSec"
+  ],
+  "numberOfCards": "4",
+  "operatingSystemVersionInformation": "Version 7.1.048, Release 7353P13",
+  "router_deployment": [
+   {
+    "deployArea": "01-主机房-网络区",
+    "deployComputerRoom": "主中心机房",
+    "deployDb": "郑州中支主中心机房",
+    "deployFloor": "十一层",
+    "deployGallery": "主中心办公楼"
+   }
+  ],
+  "router_installationPosition": [
+   {
+    "belongCabinet": "郑州中支主中心网络机房网络柜13",
+    "slotNo": "25"
+   }
+  ],
+  "router_operationsManagement": [
+   {
+    "administrativeDepartment": "00-科技管理部门",
+    "operationDepartment": "00-科技管理部门",
+    "serviceEndTime": "2021-11-01",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "北京神州新桥科技有限公司",
+    "serviceStartTime": "2020-11-01"
+   }
+  ],
+  "router_protocol": [
+   {
+    "ipv6BasicProtocol": [
+     "00-ICMPv6"
+    ]
+   }
+  ],
+  "supportIpv6": "True",
+  "wirelessFunction": "False",
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "921ec14960f046e6a6735faff24b7e99",
+  "assetBrand": "华三",
+  "assetCode": "2202140021031030",
+  "assetSerialNumber": "210235A0W2X19C00006V",
+  "assetType": "MSR5660",
+  "brandLand": "00-国内",
+  "deviceHeight": "4",
+  "facilityCategory": "FAITNWDRTR",
+  "facilityName": "商丘中支中心机房业务网核心路由器主",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2020-08-20",
+  "facilityUseState": "00-设施在用",
+  "influenceSystem": "业务网系统",
+  "managementIp": "11.66.215.29",
+  "networkSecurityCapability": [
+   "00-IPSec"
+  ],
+  "numberOfCards": "11",
+  "operatingSystemVersionInformation": "Comware Software, Version 7.1.064",
+  "remarksInformation": "商丘至郑州主路由",
+  "router_deployment": [
+   {
+    "deployArea": "01-主机房-网络区",
+    "deployComputerRoom": "商丘市中心支行中心机房",
+    "deployDb": "商丘市中支中心机房",
+    "deployFloor": "八层",
+    "deployGallery": "商丘市中支办公楼1号楼"
+   }
+  ],
+  "router_installationPosition": [
+   {
+    "belongCabinet": "商丘市中支中心机房服务器机柜12",
+    "slotNo": "36"
+   }
+  ],
+  "router_operationsManagement": [
+   {
+    "administrativeDepartment": "00-科技管理部门",
+    "operationDepartment": "00-科技管理部门",
+    "serviceEndTime": "2023-08-20",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "北京神州新桥科技有限公司",
+    "serviceStartTime": "2020-08-20"
+   }
+  ],
+  "router_protocol": [
+   {
+    "ipv6BasicProtocol": [
+     "00-ICMPv6"
+    ]
+   }
+  ],
+  "supportIpv6": "True",
+  "wirelessFunction": "False",
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "a44f9883d12c496e9f96d0484a13f287",
+  "assetBrand": "华三",
+  "assetCode": "410611029002",
+  "assetSerialNumber": "210231A5T8P19C00016L",
+  "assetType": "MSR56-60",
+  "brandLand": "00-国内",
+  "deviceHeight": "4",
+  "facilityCategory": "FAITNWDRTR",
+  "facilityName": "鹤壁市中支网络机房业务网省域网备核心路由器",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2020-05-01",
+  "facilityUseState": "00-设施在用",
+  "managementIp": "11.66.103.28",
+  "networkSecurityCapability": [
+   "00-IPSec"
+  ],
+  "numberOfCards": "8",
+  "operatingSystemVersionInformation": "version 7.1.064, Release 0707P24",
+  "router_deployment": [
+   {
+    "deployArea": "01-主机房-网络区",
+    "deployComputerRoom": "网络机房",
+    "deployDb": "鹤壁市中支中心机房",
+    "deployFloor": "七楼",
+    "deployGallery": "办公楼"
+   }
+  ],
+  "router_installationPosition": [
+   {
+    "belongCabinet": "鹤壁市中支网络机房机柜03",
+    "slotNo": "22"
+   }
+  ],
+  "router_operationsManagement": [
+   {
+    "administrativeDepartment": "00-科技管理部门",
+    "operationDepartment": "00-科技管理部门",
+    "serviceEndTime": "2023-05-01",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "河南威帆信息技术股份有限公司",
+    "serviceStartTime": "2020-05-01"
+   }
+  ],
+  "router_protocol": [
+   {
+    "ipv6BasicProtocol": [
+     "00-ICMPv6"
+    ]
+   }
+  ],
+  "supportIpv6": "True",
+  "wirelessFunction": "False",
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "a72f0aada62346c0b498af85eba762bb",
+  "assetBrand": "华三",
+  "assetCode": "2202130021100002",
+  "assetSerialNumber": "210231A5T9P19C000021",
+  "assetType": "MSR5660",
+  "brandLand": "00-国内",
+  "deviceHeight": "6",
+  "facilityCategory": "FAITNWDRTR",
+  "facilityName": "漯河市中支中心机房业务网核心路由器2",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2020-01-01",
+  "facilityUseState": "00-设施在用",
+  "influenceSystem": "业务网系统",
+  "managementIp": "11.66.183.28",
+  "networkSecurityCapability": [
+   "00-IPSec"
+  ],
+  "numberOfCards": "11",
+  "operatingSystemVersionInformation": "Version 7.7.064 Release 0707P24",
+  "remarksInformation": "漯河至郑州备路由",
+  "router_deployment": [
+   {
+    "deployArea": "01-主机房-网络区",
+    "deployComputerRoom": "漯河市中心支行中心机房",
+    "deployDb": "漯河市中支中心机房",
+    "deployFloor": "五层",
+    "deployGallery": "漯河市郾城区嵩山东支路1号"
+   }
+  ],
+  "router_installationPosition": [
+   {
+    "belongCabinet": "漯河市中支网络机房机柜05",
+    "slotNo": "10"
+   }
+  ],
+  "router_operationsManagement": [
+   {
+    "administrativeDepartment": "00-科技管理部门",
+    "operationDepartment": "00-科技管理部门",
+    "serviceEndTime": "2023-01-01",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "河南省威帆科技有限公司",
+    "serviceStartTime": "2020-01-01"
+   }
+  ],
+  "router_protocol": [
+   {
+    "ipv6BasicProtocol": [
+     "00-ICMPv6"
+    ]
+   }
+  ],
+  "supportIpv6": "True",
+  "wirelessFunction": "False",
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "aaeba7094a674474be729b73e03002ff",
+  "assetBrand": "华三",
+  "assetCode": "2202040021032010",
+  "assetSerialNumber": "210235A0W2X19C00003Y",
+  "assetType": "MSR5660",
+  "brandLand": "00-国内",
+  "deviceHeight": "4",
+  "facilityCategory": "FAITNWDRTR",
+  "facilityName": "安阳市中支中心机房业务网核心路由器2",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2020-08-20",
+  "facilityUseState": "00-设施在用",
+  "influenceSystem": "业务网系统",
+  "managementIp": "11.66.87.28",
+  "networkSecurityCapability": [
+   "00-IPSec"
+  ],
+  "numberOfCards": "11",
+  "operatingSystemVersionInformation": "Comware Software, Version 7.1.064",
+  "remarksInformation": "安阳至郑州主路由",
+  "router_deployment": [
+   {
+    "deployArea": "01-主机房-网络区",
+    "deployComputerRoom": "安阳市中支中心机房",
+    "deployDb": "安阳市中支中心机房",
+    "deployFloor": "八层",
+    "deployGallery": "安阳市开发区金融大厦"
+   }
+  ],
+  "router_installationPosition": [
+   {
+    "belongCabinet": "安阳市中支中心机房机柜16",
+    "slotNo": "2"
+   }
+  ],
+  "router_operationsManagement": [
+   {
+    "administrativeDepartment": "00-科技管理部门",
+    "operationDepartment": "00-科技管理部门",
+    "serviceEndTime": "2023-08-20",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "河南省威帆科技有限公司",
+    "serviceStartTime": "2020-08-20"
+   }
+  ],
+  "router_protocol": [
+   {
+    "ipv6BasicProtocol": [
+     "00-ICMPv6"
+    ]
+   }
+  ],
+  "supportIpv6": "True",
+  "wirelessFunction": "False",
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "ab33a7a3ed494583b8dcc6344005373c",
+  "assetBrand": "华三",
+  "assetCode": "410611029001",
+  "assetSerialNumber": "210231A5T8P19C00014R",
+  "assetType": "MSR56-60",
+  "brandLand": "00-国内",
+  "deviceHeight": "4",
+  "facilityCategory": "FAITNWDRTR",
+  "facilityName": "鹤壁市中支网络机房业务网省域网主核心路由器",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2020-05-01",
+  "facilityUseState": "00-设施在用",
+  "managementIp": "11.66.103.29",
+  "networkSecurityCapability": [
+   "00-IPSec"
+  ],
+  "numberOfCards": "8",
+  "operatingSystemVersionInformation": "version 7.1.064, Release 0707P24",
+  "router_deployment": [
+   {
+    "deployArea": "01-主机房-网络区",
+    "deployComputerRoom": "网络机房",
+    "deployDb": "鹤壁市中支中心机房",
+    "deployFloor": "七楼",
+    "deployGallery": "办公楼"
+   }
+  ],
+  "router_installationPosition": [
+   {
+    "belongCabinet": "鹤壁市中支网络机房机柜04",
+    "slotNo": "22"
+   }
+  ],
+  "router_operationsManagement": [
+   {
+    "administrativeDepartment": "00-科技管理部门",
+    "operationDepartment": "00-科技管理部门",
+    "serviceEndTime": "2023-05-01",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "河南威帆信息技术股份有限公司",
+    "serviceStartTime": "2020-05-01"
+   }
+  ],
+  "router_protocol": [
+   {
+    "ipv6BasicProtocol": [
+     "00-ICMPv6"
+    ]
+   }
+  ],
+  "supportIpv6": "True",
+  "wirelessFunction": "False",
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "b1fa0f9f858047649d4b2081419317e0",
+  "assetBrand": "华三",
+  "assetCode": "2202010021030001",
+  "assetSerialNumber": "210235A0W2X19C00004C",
+  "assetType": "MSR56-60",
+  "brandLand": "00-国内",
+  "deviceHeight": "4",
+  "facilityCategory": "FAITNWDRTR",
+  "facilityName": "洛阳市中支业务网核心路由器2",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2020-04-25",
+  "facilityUseState": "00-设施在用",
+  "influenceSystem": "业务网系统",
+  "managementIp": "11.66.55.28",
+  "networkSecurityCapability": [
+   "00-IPSec"
+  ],
+  "numberOfCards": "11",
+  "operatingSystemVersionInformation": "H3C Comware Software, Version 7.1.064, Release 0707P24",
+  "remarksInformation": "业务网备路由",
+  "router_deployment": [
+   {
+    "deployArea": "01-主机房-网络区",
+    "deployComputerRoom": "洛阳市中支中心机房",
+    "deployDb": "洛阳市中支中心机房",
+    "deployFloor": "三层",
+    "deployGallery": "洛阳市中支办公大楼"
+   }
+  ],
+  "router_installationPosition": [
+   {
+    "belongCabinet": "洛阳市中支中心机房机柜N2",
+    "slotNo": "28"
+   }
+  ],
+  "router_operationsManagement": [
+   {
+    "administrativeDepartment": "00-科技管理部门",
+    "operationDepartment": "00-科技管理部门",
+    "serviceEndTime": "2023-04-22",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "河南威帆信息技术股份有限公司",
+    "serviceStartTime": "2020-04-22"
+   }
+  ],
+  "router_protocol": [
+   {
+    "ipv6BasicProtocol": [
+     "00-ICMPv6"
+    ]
+   }
+  ],
+  "supportIpv6": "True",
+  "wirelessFunction": "False",
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "b3d43bb36713446ebd8f9a4615b68ee4",
+  "assetBrand": "华三",
+  "assetCode": "2202160021100005",
+  "assetSerialNumber": "210235A0W2X19C000018",
+  "assetType": "MSR5660",
+  "brandLand": "00-国内",
+  "deviceHeight": "4",
+  "facilityCategory": "FAITNWDRTR",
+  "facilityName": "周口市中支中心机房业务网核心路由器1",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2020-08-20",
+  "facilityUseState": "00-设施在用",
+  "influenceSystem": "业务网系统",
+  "managementIp": "11.66.231.29",
+  "networkSecurityCapability": [
+   "00-IPSec"
+  ],
+  "numberOfCards": "11",
+  "operatingSystemVersionInformation": "Comware Software, Version 7.1.064",
+  "remarksInformation": "周口至郑州主路由",
+  "router_deployment": [
+   {
+    "deployArea": "01-主机房-网络区",
+    "deployComputerRoom": "周口市中心支行中心机房",
+    "deployDb": "周口市中支中心机房",
+    "deployFloor": "二楼",
+    "deployGallery": "河南省周口市川汇区七一路中段1号A楼"
+   }
+  ],
+  "router_installationPosition": [
+   {
+    "belongCabinet": "周口市中支中心机房网络机柜B2",
+    "slotNo": "28"
+   }
+  ],
+  "router_operationsManagement": [
+   {
+    "administrativeDepartment": "00-科技管理部门",
+    "operationDepartment": "00-科技管理部门",
+    "serviceEndTime": "2023-08-20",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "河南省威帆科技有限公司",
+    "serviceStartTime": "2020-08-20"
+   }
+  ],
+  "router_protocol": [
+   {
+    "ipv6BasicProtocol": [
+     "00-ICMPv6"
+    ]
+   }
+  ],
+  "supportIpv6": "True",
+  "wirelessFunction": "False",
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "ba8cc7e4ee6b4e718ca4ea980b771556",
+  "assetBrand": "华三",
+  "assetSerialNumber": "210231A761B124000033",
+  "assetType": "SR6608",
+  "brandLand": "00-国内",
+  "deviceHeight": "7",
+  "facilityCategory": "FAITNWDRTR",
+  "facilityName": "郑州中支主中心小微平台R2",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2018-11-01",
+  "facilityUseState": "00-设施在用",
+  "influenceSystem": "到小微企业业务",
+  "managementIp": "9.132.47.188",
+  "networkSecurityCapability": [
+   "00-IPSec"
+  ],
+  "numberOfCards": "3",
+  "operatingSystemVersionInformation": "Version 5.20, Release 2603P06",
+  "router_deployment": [
+   {
+    "deployArea": "01-主机房-网络区",
+    "deployComputerRoom": "主中心网络机房",
+    "deployDb": "郑州中支主中心机房",
+    "deployFloor": "十一层",
+    "deployGallery": "主中心办公楼"
+   }
+  ],
+  "router_installationPosition": [
+   {
+    "belongCabinet": "郑州中支主中心网络机房小微平台柜",
+    "slotNo": "12"
+   }
+  ],
+  "router_operationsManagement": [
+   {
+    "administrativeDepartment": "00-科技管理部门",
+    "operationDepartment": "00-科技管理部门",
+    "serviceEndTime": "2023-11-01",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "原厂",
+    "serviceStartTime": "2018-11-01"
+   }
+  ],
+  "router_protocol": [
+   {
+    "ipv6BasicProtocol": [
+     "00-ICMPv6"
+    ]
+   }
+  ],
+  "supportIpv6": "True",
+  "wirelessFunction": "False",
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "c18bbdc72e0b448ea3a2b3c2d911d39d",
+  "assetBrand": "华三",
+  "assetCode": "2200000021031022",
+  "assetSerialNumber": "210235A0YVX19600000H",
+  "assetType": "SR8808-X",
+  "brandLand": "00-国内",
+  "deviceHeight": "20",
+  "facilityCategory": "FAITNWDRTR",
+  "facilityName": "郑州中支主中心金融城域网路由器R1",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2019-09-01",
+  "facilityUseState": "00-设施在用",
+  "influenceSystem": "到金融单位业务",
+  "managementIp": "9.132.47.205",
+  "networkSecurityCapability": [
+   "00-IPSec"
+  ],
+  "numberOfCards": "16",
+  "operatingSystemVersionInformation": "Version 7.1.075, Release 7951P01",
+  "router_deployment": [
+   {
+    "deployArea": "01-主机房-网络区",
+    "deployComputerRoom": "主中心机房",
+    "deployDb": "郑州中支主中心机房",
+    "deployFloor": "十一层",
+    "deployGallery": "主中心办公楼"
+   }
+  ],
+  "router_installationPosition": [
+   {
+    "belongCabinet": "郑州中支主中心网络机房网络柜13",
+    "slotNo": "15"
+   }
+  ],
+  "router_operationsManagement": [
+   {
+    "administrativeDepartment": "00-科技管理部门",
+    "operationDepartment": "00-科技管理部门",
+    "serviceEndTime": "2024-09-01",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "原厂",
+    "serviceStartTime": "2019-09-01"
+   }
+  ],
+  "router_protocol": [
+   {
+    "ipv6BasicProtocol": [
+     "00-ICMPv6"
+    ]
+   }
+  ],
+  "supportIpv6": "True",
+  "wirelessFunction": "False",
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "cd1a2ea0abcf43df94e636bc17e55b98",
+  "assetBrand": "华三",
+  "assetCode": "2202100021024005",
+  "assetSerialNumber": "210235A0W2X19C00003M",
+  "assetType": "MSR5660",
+  "brandLand": "00-国内",
+  "deviceHeight": "4",
+  "facilityCategory": "FAITNWDRTR",
+  "facilityName": "驻马店市中支中心机房业务网核心路由器（备）",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2020-06-01",
+  "facilityUseState": "00-设施在用",
+  "managementIp": "11.66.247.28",
+  "networkSecurityCapability": [
+   "00-IPSec"
+  ],
+  "numberOfCards": "11",
+  "operatingSystemVersionInformation": "Version 7.1.064, Release 0707P24",
+  "remarksInformation": "驻马店市中支中心机房业务网核心路由器（备）",
+  "router_deployment": [
+   {
+    "deployArea": "01-主机房-网络区",
+    "deployComputerRoom": "驻马店市中支中心机房",
+    "deployDb": "驻马店市中支中心机房",
+    "deployFloor": "四层",
+    "deployGallery": "驻马店市驿城区泰山路567号办公楼"
+   }
+  ],
+  "router_installationPosition": [
+   {
+    "belongCabinet": "驻马店市中支中心机房机柜B3",
+    "slotNo": "31"
+   }
+  ],
+  "router_operationsManagement": [
+   {
+    "administrativeDepartment": "00-科技管理部门",
+    "operationDepartment": "00-科技管理部门",
+    "serviceEndTime": "2023-06-01",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "北京神州新桥科技有限公司",
+    "serviceStartTime": "2020-06-01"
+   }
+  ],
+  "router_protocol": [
+   {
+    "ipv6BasicProtocol": [
+     "00-ICMPv6"
+    ]
+   }
+  ],
+  "supportIpv6": "True",
+  "wirelessFunction": "False",
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "cd88cd83a4d74fc49567527f0a232639",
+  "assetBrand": "华三",
+  "assetCode": "2202060021026006",
+  "assetSerialNumber": "210235A0W2X19C00001N",
+  "assetType": "MSR5660",
+  "brandLand": "00-国内",
+  "deviceHeight": "4",
+  "facilityCategory": "FAITNWDRTR",
+  "facilityName": "濮阳市中支中心机房业务网核心路由器2",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2020-05-16",
+  "facilityUseState": "00-设施在用",
+  "managementIp": "11.66.151.28",
+  "networkSecurityCapability": [
+   "00-IPSec"
+  ],
+  "numberOfCards": "11",
+  "operatingSystemVersionInformation": "Comware version 7.1.064, Release 0707P24",
+  "router_deployment": [
+   {
+    "deployArea": "01-主机房-网络区",
+    "deployComputerRoom": "濮阳市中支中心机房",
+    "deployDb": "濮阳市中支中心机房",
+    "deployFloor": "六层",
+    "deployGallery": "办公楼"
+   }
+  ],
+  "router_installationPosition": [
+   {
+    "belongCabinet": "濮阳市中支中心机房网络机柜2",
+    "slotNo": "29"
+   }
+  ],
+  "router_operationsManagement": [
+   {
+    "administrativeDepartment": "00-科技管理部门",
+    "operationDepartment": "00-科技管理部门",
+    "serviceEndTime": "2023-05-16",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "北京神州新桥科技有限公司",
+    "serviceStartTime": "2020-05-16"
+   }
+  ],
+  "router_protocol": [
+   {
+    "ipv6BasicProtocol": [
+     "00-ICMPv6"
+    ]
+   }
+  ],
+  "supportIpv6": "True",
+  "wirelessFunction": "False",
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "d1b50848c0c0412aa4f7781fb0374db2",
+  "assetBrand": "华三",
+  "assetCode": "2202100021024004",
+  "assetSerialNumber": "210235A0W2X19C00005C",
+  "assetType": "MSR5660",
+  "brandLand": "00-国内",
+  "deviceHeight": "4",
+  "facilityCategory": "FAITNWDRTR",
+  "facilityName": "驻马店市中支中心机房业务网核心路由器（主）",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2020-06-01",
+  "facilityUseState": "00-设施在用",
+  "managementIp": "11.66.247.29",
+  "networkSecurityCapability": [
+   "00-IPSec"
+  ],
+  "numberOfCards": "11",
+  "operatingSystemVersionInformation": "Version 7.1.064, Release 0707P24",
+  "remarksInformation": "驻马店市中支中心机房业务网核心路由器（主）",
+  "router_deployment": [
+   {
+    "deployArea": "01-主机房-网络区",
+    "deployComputerRoom": "驻马店市中支中心机房",
+    "deployDb": "驻马店市中支中心机房",
+    "deployFloor": "四层",
+    "deployGallery": "驻马店市驿城区泰山路567号办公楼"
+   }
+  ],
+  "router_installationPosition": [
+   {
+    "belongCabinet": "驻马店市中支中心机房机柜B5",
+    "slotNo": "31"
+   }
+  ],
+  "router_operationsManagement": [
+   {
+    "administrativeDepartment": "00-科技管理部门",
+    "operationDepartment": "00-科技管理部门",
+    "serviceEndTime": "2023-06-01",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "北京神州新桥科技有限公司",
+    "serviceStartTime": "2020-06-01"
+   }
+  ],
+  "router_protocol": [
+   {
+    "ipv6BasicProtocol": [
+     "00-ICMPv6"
+    ]
+   }
+  ],
+  "supportIpv6": "True",
+  "wirelessFunction": "False",
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "d701882a2b95463ba72d3aaa7861e243",
+  "assetBrand": "华三",
+  "assetCode": "2200000821018027",
+  "assetSerialNumber": "210235A0W2X161000174",
+  "assetType": "MSR56-60",
+  "brandLand": "00-国内",
+  "deviceHeight": "4",
+  "facilityCategory": "FAITNWDRTR",
+  "facilityName": "济源市中支中心机房业务网省域网主核心路由器",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2016-08-01",
+  "facilityUseState": "00-设施在用",
+  "managementIp": "11.67.55.28",
+  "networkSecurityCapability": [
+   "00-IPSec"
+  ],
+  "numberOfCards": "3",
+  "operatingSystemVersionInformation": "Version 7.1.059, Release 0304P15",
+  "remarksInformation": "主核心路由器",
+  "router_deployment": [
+   {
+    "deployArea": "01-主机房-网络区",
+    "deployComputerRoom": "中心机房",
+    "deployDb": "济源市中支中心机房",
+    "deployFloor": "二楼",
+    "deployGallery": "办公楼"
+   }
+  ],
+  "router_installationPosition": [
+   {
+    "belongCabinet": "济源市中支中心机房机柜03",
+    "slotNo": "27"
+   }
+  ],
+  "router_operationsManagement": [
+   {
+    "administrativeDepartment": "00-科技管理部门",
+    "operationDepartment": "00-科技管理部门",
+    "serviceEndTime": "2021-09-01",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "河南威帆信息技术股份有限公司",
+    "serviceStartTime": "2020-06-01"
+   }
+  ],
+  "router_protocol": [
+   {
+    "ipv6BasicProtocol": [
+     "00-ICMPv6"
+    ]
+   }
+  ],
+  "supportIpv6": "True",
+  "wirelessFunction": "False",
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "de1aad78f24e4a4a9e014a2e18f31405",
+  "assetBrand": "华三",
+  "assetCode": "2202020021100011",
+  "assetSerialNumber": "210235A0W2X19C00008P",
+  "assetType": "MSR56-60",
+  "brandLand": "00-国内",
+  "deviceHeight": "4",
+  "facilityCategory": "FAITNWDRTR",
+  "facilityName": "开封市中支中心机房业务网备核心路由器",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2020-06-01",
+  "facilityUseState": "00-设施在用",
+  "influenceSystem": "业务网系统",
+  "managementIp": "11.66.39.28",
+  "networkSecurityCapability": [
+   "00-IPSec"
+  ],
+  "numberOfCards": "8",
+  "operatingSystemVersionInformation": "Version 7.1.064, Release 0707P24",
+  "remarksInformation": "开封市中支中心机房业务网备核心路由器",
+  "router_deployment": [
+   {
+    "deployArea": "01-主机房-网络区",
+    "deployComputerRoom": "开封市中心支行中心机房",
+    "deployDb": "开封市中支中心机房",
+    "deployFloor": "三层",
+    "deployGallery": "开封市龙亭区晋安路60号办公楼"
+   }
+  ],
+  "router_installationPosition": [
+   {
+    "slotNo": "22"
+   }
+  ],
+  "router_operationsManagement": [
+   {
+    "administrativeDepartment": "00-科技管理部门",
+    "operationDepartment": "00-科技管理部门",
+    "serviceEndTime": "2023-06-01",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "北京神州新桥科技有限公司",
+    "serviceStartTime": "2020-06-01"
+   }
+  ],
+  "router_protocol": [
+   {
+    "ipv6BasicProtocol": [
+     "00-ICMPv6"
+    ]
+   }
+  ],
+  "supportIpv6": "True",
+  "wirelessFunction": "False",
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "de8f60b8a91946b7a7eae834113ff5db",
+  "assetBrand": "华三",
+  "assetSerialNumber": "210231A761B124000034",
+  "assetType": "SR6608",
+  "brandLand": "00-国内",
+  "deviceHeight": "7",
+  "facilityCategory": "FAITNWDRTR",
+  "facilityName": "郑州中支主中心小微平台R1",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2018-11-01",
+  "facilityUseState": "00-设施在用",
+  "influenceSystem": "到小微企业业务",
+  "managementIp": "9.132.47.187",
+  "networkSecurityCapability": [
+   "00-IPSec"
+  ],
+  "numberOfCards": "3",
+  "operatingSystemVersionInformation": "Version 5.20, Release 2603P06",
+  "router_deployment": [
+   {
+    "deployArea": "01-主机房-网络区",
+    "deployComputerRoom": "主中心网络机房",
+    "deployDb": "郑州中支主中心机房",
+    "deployFloor": "十一层",
+    "deployGallery": "主中心办公楼"
+   }
+  ],
+  "router_installationPosition": [
+   {
+    "belongCabinet": "郑州中支主中心网络机房小微平台柜",
+    "slotNo": "3"
+   }
+  ],
+  "router_operationsManagement": [
+   {
+    "administrativeDepartment": "00-科技管理部门",
+    "operationDepartment": "00-科技管理部门",
+    "serviceEndTime": "2023-11-01",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "原厂",
+    "serviceStartTime": "2018-11-01"
+   }
+  ],
+  "router_protocol": [
+   {
+    "ipv6BasicProtocol": [
+     "00-ICMPv6"
+    ]
+   }
+  ],
+  "supportIpv6": "True",
+  "wirelessFunction": "False",
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "f58c6f65a98e47789709c42aa5402999",
+  "assetBrand": "华三",
+  "assetCode": "2202120021027001",
+  "assetSerialNumber": "210231A5T8P19C0001B0",
+  "assetType": "MSR5660",
+  "brandLand": "00-国内",
+  "deviceHeight": "4",
+  "facilityCategory": "FAITNWDRTR",
+  "facilityName": "许昌市中支中心机房业务网核心路由器1",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2020-06-19",
+  "facilityUseState": "00-设施在用",
+  "influenceSystem": "业务网系统",
+  "managementIp": "11.66.167.29",
+  "networkSecurityCapability": [
+   "00-IPSec"
+  ],
+  "numberOfCards": "11",
+  "operatingSystemVersionInformation": "Version 7.1.064, Release 0707P24",
+  "remarksInformation": "许昌至郑州主路由",
+  "router_deployment": [
+   {
+    "deployArea": "01-主机房-网络区",
+    "deployComputerRoom": "许昌市中心支行中心机房",
+    "deployDb": "许昌市中支中心机房",
+    "deployFloor": "四楼",
+    "deployGallery": "河南省许昌市建安区新东街571号办公楼"
+   }
+  ],
+  "router_installationPosition": [
+   {
+    "belongCabinet": "许昌市中支中心机房服务器机柜A06",
+    "slotNo": "33"
+   }
+  ],
+  "router_operationsManagement": [
+   {
+    "administrativeDepartment": "00-科技管理部门",
+    "operationDepartment": "00-科技管理部门",
+    "serviceEndTime": "2023-06-19",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "北京神州新桥科技有限公司",
+    "serviceStartTime": "2020-06-19"
+   }
+  ],
+  "router_protocol": [
+   {
+    "ipv6BasicProtocol": [
+     "00-ICMPv6"
+    ]
+   }
+  ],
+  "supportIpv6": "True",
+  "wirelessFunction": "False",
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "f6e5bc6c7de14aadb3c808cf21f4a624",
+  "assetBrand": "华三",
+  "assetCode": "2200000021029003",
+  "assetSerialNumber": "2102352PQN10MC100007",
+  "assetType": "NE40E",
+  "brandLand": "00-国内",
+  "deviceHeight": "21",
+  "facilityCategory": "FAITNWDRTR",
+  "facilityName": "郑州中支转接中心上联路由器备",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2023-08-09",
+  "facilityUseDate": "2023-03-24",
+  "facilityUseState": "00-设施在用",
+  "influenceSystem": "到西安业务网业务",
+  "managementIp": "11.150.2.166",
+  "networkSecurityCapability": [
+   "00-IPSec"
+  ],
+  "numberOfCards": "6",
+  "operatingSystemVersionInformation": "Version 8.210(NE40E V800R021C00SPC100)",
+  "router_deployment": [
+   {
+    "deployArea": "01-主机房-网络区",
+    "deployComputerRoom": "转接中心机房",
+    "deployDb": "郑州中支转接中心机房",
+    "deployFloor": "二层",
+    "deployGallery": "转接中心综合楼"
+   }
+  ],
+  "router_installationPosition": [
+   {
+    "belongCabinet": "郑州中支转接中心机房机柜3",
+    "slotNo": "34"
+   }
+  ],
+  "router_operationsManagement": [
+   {
+    "administrativeDepartment": "00-科技管理部门",
+    "operationDepartment": "00-科技管理部门",
+    "serviceEndTime": "2027-09-05",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "原厂",
+    "serviceStartTime": "2023-03-07"
+   }
+  ],
+  "router_protocol": [
+   {
+    "ipv6BasicProtocol": [
+     "00-ICMPv6"
+    ]
+   }
+  ],
+  "supportIpv6": "True",
+  "wirelessFunction": "False",
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "f952375e88494aaa878de7d53f98edc6",
+  "assetBrand": "华三",
+  "assetCode": "2202060021026005",
+  "assetSerialNumber": "210235A0W2X19C000035",
+  "assetType": "MSR5660",
+  "brandLand": "00-国内",
+  "deviceHeight": "4",
+  "facilityCategory": "FAITNWDRTR",
+  "facilityName": "濮阳市中支中心机房业务网核心路由器1",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2020-05-16",
+  "facilityUseState": "00-设施在用",
+  "managementIp": "11.66.151.29",
+  "networkSecurityCapability": [
+   "00-IPSec"
+  ],
+  "numberOfCards": "11",
+  "operatingSystemVersionInformation": "Comware version 7.1.064, Release 0707P24",
+  "router_deployment": [
+   {
+    "deployArea": "01-主机房-网络区",
+    "deployComputerRoom": "濮阳市中支中心机房",
+    "deployDb": "濮阳市中支中心机房",
+    "deployFloor": "六层",
+    "deployGallery": "办公楼"
+   }
+  ],
+  "router_installationPosition": [
+   {
+    "belongCabinet": "濮阳市中支中心机房网络机柜1",
+    "slotNo": "24"
+   }
+  ],
+  "router_operationsManagement": [
+   {
+    "administrativeDepartment": "00-科技管理部门",
+    "operationDepartment": "00-科技管理部门",
+    "serviceEndTime": "2023-05-16",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "北京神州新桥科技有限公司",
+    "serviceStartTime": "2020-05-16"
+   }
+  ],
+  "router_protocol": [
+   {
+    "ipv6BasicProtocol": [
+     "00-ICMPv6"
+    ]
+   }
+  ],
+  "supportIpv6": "True",
+  "wirelessFunction": "False",
+  "_dataSource": "双源"
+ }
+]

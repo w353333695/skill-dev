@@ -1,0 +1,462 @@
+{
+ "_version": 14,
+ "attrList": [
+  {
+   "custom": "true",
+   "description": "",
+   "id": "precisionPowerDistribution",
+   "inheritObjectId": "",
+   "isInherit": false,
+   "isMetadata": false,
+   "name": "精密配电设备类型",
+   "notifyDenied": false,
+   "protected": false,
+   "readonly": "false",
+   "required": "true",
+   "tag": [
+    "基本信息"
+   ],
+   "tips": "",
+   "unique": "false",
+   "value": {
+    "default": null,
+    "default_type": "",
+    "mode": "default",
+    "prefix": "",
+    "regex": [
+     "00-精密配电柜（列头柜）",
+     "01-智能配电母线插接箱",
+     "02-智能PDU",
+     "99-其它"
+    ],
+    "series_number_length": 0,
+    "start_value": 0,
+    "struct_define": [],
+    "type": "enum"
+   },
+   "wordIndexDenied": false
+  },
+  {
+   "custom": "true",
+   "description": "",
+   "id": "facilityCategory",
+   "inheritObjectId": "",
+   "isInherit": false,
+   "isMetadata": false,
+   "name": "设施分类标识符",
+   "notifyDenied": false,
+   "protected": false,
+   "readonly": "false",
+   "required": "false",
+   "tag": [
+    "基本信息"
+   ],
+   "tips": "",
+   "unique": "false",
+   "value": {
+    "default": "FAPDJPD000",
+    "default_type": "value",
+    "mode": "default",
+    "prefix": "",
+    "regex": null,
+    "series_number_length": 0,
+    "start_value": 0,
+    "struct_define": [],
+    "type": "str"
+   },
+   "wordIndexDenied": false
+  },
+  {
+   "custom": "true",
+   "description": "",
+   "id": "precisionPower_ratedOutputParameter",
+   "inheritObjectId": "",
+   "isInherit": false,
+   "isMetadata": false,
+   "name": "精密配电设备-额定输出参数",
+   "notifyDenied": false,
+   "protected": false,
+   "readonly": "false",
+   "required": "false",
+   "tag": [
+    "基本信息"
+   ],
+   "tips": "",
+   "unique": "false",
+   "value": {
+    "default": null,
+    "default_type": "",
+    "mode": "",
+    "prefix": "",
+    "regex": null,
+    "series_number_length": 0,
+    "start_value": 0,
+    "struct_define": [
+     {
+      "id": "ratedOutputCurrent",
+      "mode": "default",
+      "name": "额定输出电流（A）",
+      "protected": false,
+      "regex": "",
+      "type": "str"
+     },
+     {
+      "id": "ratedOutputVoltage",
+      "mode": "default",
+      "name": "额定输出电压（V）",
+      "protected": false,
+      "regex": "",
+      "type": "str"
+     },
+     {
+      "id": "ratedOutputPower",
+      "mode": "default",
+      "name": "额定输出功率（KW）",
+      "protected": false,
+      "regex": "",
+      "type": "str"
+     }
+    ],
+    "type": "structs"
+   },
+   "wordIndexDenied": false
+  },
+  {
+   "custom": "true",
+   "description": "",
+   "id": "precisionPower_ratedInputParameter",
+   "inheritObjectId": "",
+   "isInherit": false,
+   "isMetadata": false,
+   "name": "精密配电设备-额定输入参数",
+   "notifyDenied": false,
+   "protected": false,
+   "readonly": "false",
+   "required": "false",
+   "tag": [
+    "基本信息"
+   ],
+   "tips": "",
+   "unique": "false",
+   "value": {
+    "default": null,
+    "default_type": "",
+    "mode": "",
+    "prefix": "",
+    "regex": null,
+    "series_number_length": 0,
+    "start_value": 0,
+    "struct_define": [
+     {
+      "id": "ratedInputCurrent",
+      "mode": "default",
+      "name": "额定输入电流（A）",
+      "protected": false,
+      "regex": "",
+      "type": "str"
+     },
+     {
+      "id": "ratedInputVoltage",
+      "mode": "default",
+      "name": "额定输入电压（V）",
+      "protected": false,
+      "regex": "",
+      "type": "str"
+     },
+     {
+      "id": "ratedInputPower",
+      "mode": "default",
+      "name": "额定输入功率（KW）",
+      "protected": false,
+      "regex": "",
+      "type": "str"
+     }
+    ],
+    "type": "structs"
+   },
+   "wordIndexDenied": false
+  },
+  {
+   "custom": "true",
+   "description": "",
+   "id": "precisionPower_operationsManagement",
+   "inheritObjectId": "",
+   "isInherit": false,
+   "isMetadata": false,
+   "name": "精密配电设备-运维管理属性",
+   "notifyDenied": false,
+   "protected": false,
+   "readonly": "false",
+   "required": "false",
+   "tag": [
+    "基本信息"
+   ],
+   "tips": "",
+   "unique": "false",
+   "value": {
+    "default": null,
+    "default_type": "",
+    "mode": "",
+    "prefix": "",
+    "regex": null,
+    "series_number_length": 0,
+    "start_value": 0,
+    "struct_define": [
+     {
+      "id": "operationDepartment",
+      "mode": "",
+      "name": "运维部门",
+      "protected": false,
+      "regex": [
+       "00-科技管理部门",
+       "01-后勤管理部门",
+       "02-业务管理部门",
+       "03-保卫管理部门",
+       "04-物业管理部门",
+       "05-外包服务部门",
+       "99-其它"
+      ],
+      "type": "enum"
+     },
+     {
+      "id": "administrativeDepartment",
+      "mode": "",
+      "name": "管理部门",
+      "protected": false,
+      "regex": [
+       "00-科技管理部门",
+       "01-后勤管理部门",
+       "02-业务管理部门",
+       "03-保卫管理部门",
+       "04-其它外部单位",
+       "99-其它"
+      ],
+      "type": "enum"
+     },
+     {
+      "id": "serviceProvider",
+      "mode": "default",
+      "name": "服务提供商",
+      "protected": false,
+      "regex": "",
+      "type": "str"
+     },
+     {
+      "id": "serviceStartTime",
+      "mode": "",
+      "name": "服务开始时间",
+      "protected": false,
+      "regex": null,
+      "type": "date"
+     },
+     {
+      "id": "serviceEndTime",
+      "mode": "",
+      "name": "服务截止时间",
+      "protected": false,
+      "regex": null,
+      "type": "date"
+     },
+     {
+      "id": "serviceLevel",
+      "mode": "",
+      "name": "服务级别",
+      "protected": false,
+      "regex": [
+       "00-5*8",
+       "01-7*24",
+       "02-现场值守",
+       "99-其它"
+      ],
+      "type": "enum"
+     },
+     {
+      "id": "maintenanceTime",
+      "mode": "",
+      "name": "维修时间",
+      "protected": false,
+      "regex": null,
+      "type": "datetime"
+     },
+     {
+      "id": "maintenanceCause",
+      "mode": "default",
+      "name": "维修故障原因",
+      "protected": false,
+      "regex": "",
+      "type": "str"
+     },
+     {
+      "id": "maintenanceResults",
+      "mode": "default",
+      "name": "维修结果",
+      "protected": false,
+      "regex": "",
+      "type": "str"
+     }
+    ],
+    "type": "structs"
+   },
+   "wordIndexDenied": false
+  },
+  {
+   "custom": "true",
+   "description": "",
+   "id": "precisionPower_deployment",
+   "inheritObjectId": "",
+   "isInherit": false,
+   "isMetadata": false,
+   "name": "精密配电设备-部署属性",
+   "notifyDenied": false,
+   "protected": false,
+   "readonly": "false",
+   "required": "false",
+   "tag": [
+    "基本信息"
+   ],
+   "tips": "",
+   "unique": "false",
+   "value": {
+    "default": null,
+    "default_type": "",
+    "mode": "",
+    "prefix": "",
+    "regex": null,
+    "series_number_length": 0,
+    "start_value": 0,
+    "struct_define": [
+     {
+      "id": "deployDb",
+      "mode": "default",
+      "name": "部署数据中心",
+      "protected": false,
+      "regex": "",
+      "type": "str"
+     },
+     {
+      "id": "deployGallery",
+      "mode": "default",
+      "name": "所属楼座",
+      "protected": false,
+      "regex": "",
+      "type": "str"
+     },
+     {
+      "id": "deployFloor",
+      "mode": "default",
+      "name": "所属楼层",
+      "protected": false,
+      "regex": "",
+      "type": "str"
+     },
+     {
+      "id": "deployComputerRoom",
+      "mode": "default",
+      "name": "所属机房",
+      "protected": false,
+      "regex": "",
+      "type": "str"
+     },
+     {
+      "id": "deployArea",
+      "mode": "",
+      "name": "部署区域",
+      "protected": false,
+      "regex": [
+       "00-主机房-服务器区",
+       "01-主机房-网络区",
+       "02-主机房-存储区",
+       "03-主机房-其它区",
+       "10-辅助区-进线间",
+       "11-辅助区-测试区",
+       "12-辅助区-总控中心",
+       "13-辅助区-消防区",
+       "14-辅助区-安防区",
+       "15-辅助区-维修区",
+       "16-辅助区-新风区",
+       "17-辅助区-其它区",
+       "20-支持区-变配电室",
+       "21-支持区-柴油发动机房",
+       "22-支持区-UPS区",
+       "23-支持区-电池室",
+       "24-支持区-空调区",
+       "30-行政管理区-办公区",
+       "31-行政管理区-值班室",
+       "90-屏蔽机房区",
+       "99-其它"
+      ],
+      "type": "enum"
+     }
+    ],
+    "type": "structs"
+   },
+   "wordIndexDenied": false
+  }
+ ],
+ "category": "金融元数据.供配电",
+ "creator": "easyops",
+ "deleteAuthorizers": [],
+ "icon": "",
+ "indexList": [],
+ "isAbstract": false,
+ "memo": "",
+ "modifier": "easyops",
+ "name": "精密配电设备",
+ "notifyDenied": false,
+ "objectId": "precisionPower@FINTECHDATA",
+ "parentObjectId": "CUSTOM@FINTECHDATA",
+ "parentObjectIds": [
+  "CUSTOM@FINTECHDATA",
+  "powerSupplyAsset@FINTECHDATA",
+  "powerUsedAsset@FINTECHDATA"
+ ],
+ "permissionDenied": false,
+ "protected": false,
+ "readAuthorizers": [],
+ "relation_groups": [],
+ "relation_list": [],
+ "system": "",
+ "updateAuthorizers": [],
+ "view": {
+  "attr_authorizers": null,
+  "attr_category_order": [
+   "基本信息"
+  ],
+  "attr_order": [
+   "facilityDescriptor",
+   "assetType",
+   "ratedAlternatingFrequency",
+   "assetSerialNumber",
+   "assetBrand",
+   "facilityName",
+   "facilityUpdateDate",
+   "facilityUseState",
+   "precisionPowerDistribution",
+   "facilityUseDate",
+   "assetCode",
+   "facilityCategory",
+   "facilityOwnershipAgency",
+   "remarksInformation",
+   "communicationProtocol",
+   "brandLand",
+   "assetValue",
+   "precisionPower_ratedOutputParameter",
+   "precisionPower_ratedInputParameter",
+   "precisionPower_operationsManagement",
+   "precisionPower_deployment"
+  ],
+  "hide_columns": null,
+  "icon": null,
+  "image": "",
+  "inherit_attr_category_map": null,
+  "relation_default_attr": null,
+  "relation_group_order": null,
+  "relation_order": null,
+  "show_key": [
+   "facilityDescriptor"
+  ],
+  "trans_hier_relation_list": null,
+  "visible": true
+ },
+ "wordIndexDenied": false
+}

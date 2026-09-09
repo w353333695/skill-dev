@@ -1,0 +1,158 @@
+[
+ {
+  "facilityDescriptor": "0bcbf23d774a4e25a7102c7b3cb3c50d",
+  "assetBrand": "台达",
+  "assetSerialNumber": "32269-4",
+  "assetType": "SCL1-630/10",
+  "brandLand": "00-国内",
+  "communicationProtocol": [
+   "00-Modbus"
+  ],
+  "facilityCategory": "FAPDGPD000",
+  "facilityName": "郑州中支转接中心高压配电柜",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2010-04-01",
+  "facilityUseState": "00-设施在用",
+  "highVoltage_deployment": [
+   {
+    "deployArea": "01-主机房-网络区",
+    "deployComputerRoom": "转接中心机房",
+    "deployDb": "郑州中支转接中心机房",
+    "deployFloor": "一层",
+    "deployGallery": "转接中心发电机房"
+   }
+  ],
+  "highVoltage_operationsManagement": [
+   {
+    "administrativeDepartment": "01-后勤管理部门",
+    "operationDepartment": "01-后勤管理部门",
+    "serviceEndTime": "2023-08-22",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "中建物业",
+    "serviceStartTime": "2020-08-23"
+   }
+  ],
+  "highVoltage_ratedInputParameter": [
+   {
+    "ratedInputCurrent": "36",
+    "ratedInputPower": "630",
+    "ratedInputVoltage": "10000"
+   }
+  ],
+  "highVoltage_ratedOutputParameter": [
+   {
+    "ratedOutputCurrent": "909",
+    "ratedOutputPower": "630",
+    "ratedOutputVoltage": "1200"
+   }
+  ],
+  "ratedAlternatingFrequency": "50",
+  "typesOfHighVoltageEquipment": "01-高压手车落地式成套配电柜",
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "40ddceebd4de4dbb9cba6838f5b60d4d",
+  "assetBrand": "台达",
+  "assetSerialNumber": "0900241",
+  "assetType": "KYN28A-12Z",
+  "brandLand": "00-国内",
+  "communicationProtocol": [
+   "00-Modbus"
+  ],
+  "facilityCategory": "FAPDGPD000",
+  "facilityName": "郑州中支主机房高压配电柜1",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2010-04-01",
+  "facilityUseState": "00-设施在用",
+  "highVoltage_deployment": [
+   {
+    "deployArea": "01-主机房-网络区",
+    "deployComputerRoom": "主中心机房",
+    "deployDb": "郑州中支主中心机房",
+    "deployFloor": "负一层",
+    "deployGallery": "商务外环路21号"
+   }
+  ],
+  "highVoltage_operationsManagement": [
+   {
+    "administrativeDepartment": "01-后勤管理部门",
+    "operationDepartment": "01-后勤管理部门",
+    "serviceEndTime": "2023-08-21",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "中建物业",
+    "serviceStartTime": "2020-08-22"
+   }
+  ],
+  "highVoltage_ratedInputParameter": [
+   {
+    "ratedInputCurrent": "400",
+    "ratedInputPower": "4800",
+    "ratedInputVoltage": "12000"
+   }
+  ],
+  "highVoltage_ratedOutputParameter": [
+   {
+    "ratedOutputCurrent": "400",
+    "ratedOutputPower": "4800",
+    "ratedOutputVoltage": "12000"
+   }
+  ],
+  "ratedAlternatingFrequency": "50",
+  "typesOfHighVoltageEquipment": "01-高压手车落地式成套配电柜",
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "a6c404a73e5844978bbd4d5c11beef76",
+  "assetBrand": "台达",
+  "assetSerialNumber": "0900230",
+  "assetType": "KYN28A-12Z",
+  "brandLand": "00-国内",
+  "communicationProtocol": [
+   "00-Modbus"
+  ],
+  "facilityCategory": "FAPDGPD000",
+  "facilityName": "郑州中支主机房高压配电柜2",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2010-04-01",
+  "facilityUseState": "00-设施在用",
+  "highVoltage_deployment": [
+   {
+    "deployArea": "01-主机房-网络区",
+    "deployComputerRoom": "主中心机房",
+    "deployDb": "郑州中支主中心机房",
+    "deployFloor": "负一层",
+    "deployGallery": "商务外环路21号"
+   }
+  ],
+  "highVoltage_operationsManagement": [
+   {
+    "administrativeDepartment": "01-后勤管理部门",
+    "operationDepartment": "01-后勤管理部门",
+    "serviceEndTime": "2023-08-21",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "中建物业",
+    "serviceStartTime": "2020-08-22"
+   }
+  ],
+  "highVoltage_ratedInputParameter": [
+   {
+    "ratedInputCurrent": "400",
+    "ratedInputPower": "4800",
+    "ratedInputVoltage": "12000"
+   }
+  ],
+  "highVoltage_ratedOutputParameter": [
+   {
+    "ratedOutputCurrent": "400",
+    "ratedOutputPower": "4800",
+    "ratedOutputVoltage": "12000"
+   }
+  ],
+  "ratedAlternatingFrequency": "50",
+  "typesOfHighVoltageEquipment": "01-高压手车落地式成套配电柜",
+  "_dataSource": "双源"
+ }
+]

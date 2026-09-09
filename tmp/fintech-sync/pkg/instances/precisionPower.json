@@ -1,0 +1,53 @@
+[
+ {
+  "facilityDescriptor": "f27d3e5df31f4f909d5b017faef7dced",
+  "assetBrand": "先控捷联",
+  "assetType": "DPJ-160",
+  "brandLand": "00-国内",
+  "communicationProtocol": [
+   "02-Tcp/ip"
+  ],
+  "facilityCategory": "FAPDJPD000",
+  "facilityName": "郑州中支转接中心精密配电柜",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2020-07-17",
+  "facilityUseState": "00-设施在用",
+  "precisionPowerDistribution": "00-精密配电柜（列头柜）",
+  "precisionPower_deployment": [
+   {
+    "deployArea": "01-主机房-网络区",
+    "deployComputerRoom": "转接中心机房",
+    "deployDb": "郑州中支转接中心机房",
+    "deployFloor": "二层",
+    "deployGallery": "转接中心综合楼"
+   }
+  ],
+  "precisionPower_operationsManagement": [
+   {
+    "administrativeDepartment": "00-科技管理部门",
+    "operationDepartment": "00-科技管理部门",
+    "serviceEndTime": "2023-07-16",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "河南捷联科技有限公司",
+    "serviceStartTime": "2020-07-17"
+   }
+  ],
+  "precisionPower_ratedInputParameter": [
+   {
+    "ratedInputCurrent": "157",
+    "ratedInputPower": "60",
+    "ratedInputVoltage": "380"
+   }
+  ],
+  "precisionPower_ratedOutputParameter": [
+   {
+    "ratedOutputCurrent": "157",
+    "ratedOutputPower": "60",
+    "ratedOutputVoltage": "380"
+   }
+  ],
+  "ratedAlternatingFrequency": "50",
+  "_dataSource": "双源"
+ }
+]

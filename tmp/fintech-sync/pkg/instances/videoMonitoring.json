@@ -1,0 +1,811 @@
+[
+ {
+  "facilityDescriptor": "0f5ad514940e4dc5b84a7e98c40aa145",
+  "assetBrand": "海康威视",
+  "assetCode": "2202060022007000",
+  "assetSerialNumber": "SPJKSN",
+  "assetType": "iVMS-8100E-NCG/M",
+  "brandLand": "00-国内",
+  "dataSavePeriod": 180.0,
+  "facilityCategory": "FAAFCAM000",
+  "facilityName": "濮阳市中支中心机房视频监控系统",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2019-11-01",
+  "facilityUseState": "00-设施在用",
+  "monitoringScope": [
+   "01-主机房-网络区",
+   "02-主机房-存储区",
+   "03-主机房-其它区",
+   "13-辅助区-消防区",
+   "22-支持区-UPS区",
+   "23-支持区-电池室",
+   "24-支持区-空调区"
+  ],
+  "surveillanceNumber": "7",
+  "videoMonitoring_deployment": [
+   {
+    "deployArea": "01-主机房-网络区",
+    "deployComputerRoom": "濮阳市中支中心机房",
+    "deployDb": "濮阳市中支中心机房",
+    "deployFloor": "六层",
+    "deployGallery": "办公楼"
+   }
+  ],
+  "videoMonitoring_operationsManagement": [
+   {
+    "administrativeDepartment": "03-保卫管理部门",
+    "operationDepartment": "03-保卫管理部门",
+    "serviceEndTime": "2021-11-01",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "河南银华安防技术有限公司",
+    "serviceStartTime": "2019-11-01"
+   }
+  ],
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "158d24d1617145768178d9346b929eeb",
+  "assetBrand": "大华",
+  "assetSerialNumber": "3546546",
+  "assetType": "DH-IPC-HDBW5431R-ZAS",
+  "brandLand": "00-国内",
+  "dataSavePeriod": 180.0,
+  "facilityCategory": "FAAFCAM000",
+  "facilityName": "郑州中支主中心机房视频监控",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2017-12-01",
+  "facilityUseState": "00-设施在用",
+  "monitoringScope": [
+   "03-主机房-其它区"
+  ],
+  "surveillanceNumber": "45",
+  "videoMonitoring_deployment": [
+   {
+    "deployArea": "01-主机房-网络区",
+    "deployComputerRoom": "主中心机房",
+    "deployDb": "郑州中支主中心机房",
+    "deployFloor": "11层",
+    "deployGallery": "商务外环路21号"
+   }
+  ],
+  "videoMonitoring_operationsManagement": [
+   {
+    "administrativeDepartment": "03-保卫管理部门",
+    "operationDepartment": "03-保卫管理部门",
+    "serviceEndTime": "2022-12-01",
+    "serviceLevel": "01-7*24",
+    "serviceStartTime": "2017-12-01"
+   }
+  ],
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "18edf6f9864843959a12bd6d06b8716e",
+  "assetBrand": "海康威视",
+  "assetCode": "2202070022008001",
+  "assetSerialNumber": "220587",
+  "assetType": "DS-2CD5132EFWD-IZ",
+  "brandLand": "00-国内",
+  "dataSavePeriod": 180.0,
+  "facilityCategory": "FAAFCAM000",
+  "facilityName": "信阳市中支中心机房机房视频监控",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2018-05-01",
+  "facilityUseState": "00-设施在用",
+  "monitoringScope": [
+   "01-主机房-网络区",
+   "02-主机房-存储区",
+   "20-支持区-变配电室",
+   "22-支持区-UPS区",
+   "31-行政管理区-值班室",
+   "90-屏蔽机房区"
+  ],
+  "surveillanceNumber": "6",
+  "videoMonitoring_deployment": [
+   {
+    "deployArea": "01-主机房-网络区",
+    "deployComputerRoom": "信阳市中心支行中心机房",
+    "deployDb": "信阳市中支中心机房",
+    "deployFloor": "二楼",
+    "deployGallery": "信阳市浉河区长安路133号"
+   }
+  ],
+  "videoMonitoring_operationsManagement": [
+   {
+    "administrativeDepartment": "03-保卫管理部门",
+    "operationDepartment": "03-保卫管理部门",
+    "serviceEndTime": "2017-09-11",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "河南华天光电智能科技有限公司",
+    "serviceStartTime": "2016-09-11"
+   }
+  ],
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "289d11b36cc94394bff5eba2f33e6743",
+  "assetBrand": "海康威视",
+  "assetCode": "0000000000000113",
+  "assetSerialNumber": "585639257",
+  "assetType": "DS-7908NE4",
+  "brandLand": "00-国内",
+  "dataSavePeriod": 180.0,
+  "facilityCategory": "FAAFCAM000",
+  "facilityName": "济源市中支中心机房监控摄像头",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2016-08-01",
+  "facilityUseState": "00-设施在用",
+  "monitoringScope": [
+   "00-主机房-服务器区",
+   "01-主机房-网络区",
+   "02-主机房-存储区",
+   "03-主机房-其它区"
+  ],
+  "surveillanceNumber": "7",
+  "videoMonitoring_deployment": [
+   {
+    "deployArea": "01-主机房-网络区",
+    "deployComputerRoom": "中心",
+    "deployDb": "济源市中支中心机房",
+    "deployFloor": "二层",
+    "deployGallery": "办公楼"
+   }
+  ],
+  "videoMonitoring_operationsManagement": [
+   {
+    "administrativeDepartment": "03-保卫管理部门",
+    "operationDepartment": "03-保卫管理部门",
+    "serviceEndTime": "2019-08-01",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "海康威视",
+    "serviceStartTime": "2016-08-01"
+   }
+  ],
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "37b7f0985c2742c78aeda6f2dc2299ca",
+  "assetBrand": "海康威视",
+  "assetCode": "80001",
+  "assetSerialNumber": "80001",
+  "assetType": "DS-8616",
+  "brandLand": "00-国内",
+  "dataSavePeriod": 180.0,
+  "facilityCategory": "FAAFCAM000",
+  "facilityName": "南阳市中支中心机房监控摄像头",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2017-10-01",
+  "facilityUseState": "00-设施在用",
+  "monitoringScope": [
+   "00-主机房-服务器区",
+   "01-主机房-网络区",
+   "02-主机房-存储区",
+   "03-主机房-其它区"
+  ],
+  "surveillanceNumber": "8",
+  "videoMonitoring_deployment": [
+   {
+    "deployArea": "01-主机房-网络区",
+    "deployComputerRoom": "所有机房",
+    "deployDb": "南阳市中支中心机房",
+    "deployFloor": "十二层",
+    "deployGallery": "办公楼"
+   }
+  ],
+  "videoMonitoring_operationsManagement": [
+   {
+    "administrativeDepartment": "00-科技管理部门",
+    "operationDepartment": "03-保卫管理部门",
+    "serviceEndTime": "2022-10-01",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "南阳恒得实佳",
+    "serviceStartTime": "2017-10-01"
+   }
+  ],
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "499da4b789264e8fac328417cbc32c3a",
+  "assetBrand": "海康威视",
+  "assetCode": "2202130022005000",
+  "assetSerialNumber": "6783132",
+  "assetType": "iVMS-8100E-NCG/M",
+  "brandLand": "00-国内",
+  "dataSavePeriod": 180.0,
+  "facilityCategory": "FAAFCAM000",
+  "facilityName": "漯河市中支中心机房机房视频监控",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2019-01-29",
+  "facilityUseState": "00-设施在用",
+  "monitoringScope": [
+   "00-主机房-服务器区",
+   "01-主机房-网络区",
+   "03-主机房-其它区",
+   "30-行政管理区-办公区",
+   "90-屏蔽机房区"
+  ],
+  "surveillanceNumber": "4",
+  "videoMonitoring_deployment": [
+   {
+    "deployArea": "01-主机房-网络区",
+    "deployComputerRoom": "漯河市中心支行中心机房",
+    "deployDb": "漯河市中支中心机房",
+    "deployFloor": "五层",
+    "deployGallery": "漯河市郾城区嵩山东支路1号"
+   }
+  ],
+  "videoMonitoring_operationsManagement": [
+   {
+    "administrativeDepartment": "03-保卫管理部门",
+    "operationDepartment": "03-保卫管理部门",
+    "serviceEndTime": "2022-01-29",
+    "serviceLevel": "01-7*24",
+    "serviceStartTime": "2019-01-29"
+   }
+  ],
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "4ea81b3df6464145a4a8a18d23ace35f",
+  "assetBrand": "海康威视",
+  "assetCode": "2202070022008001",
+  "assetSerialNumber": "2202070022008001",
+  "assetType": "DS-2CD5132EFWD-IZ",
+  "brandLand": "00-国内",
+  "dataSavePeriod": 180.0,
+  "facilityCategory": "FAAFCAM000",
+  "facilityName": "焦作市中支中心机房机房视频监控",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2018-05-01",
+  "facilityUseState": "00-设施在用",
+  "monitoringScope": [
+   "01-主机房-网络区",
+   "02-主机房-存储区",
+   "20-支持区-变配电室",
+   "22-支持区-UPS区",
+   "31-行政管理区-值班室",
+   "90-屏蔽机房区"
+  ],
+  "surveillanceNumber": "6",
+  "videoMonitoring_deployment": [
+   {
+    "deployArea": "01-主机房-网络区",
+    "deployComputerRoom": "焦作市中心支行中心机房",
+    "deployDb": "焦作市中支中心机房",
+    "deployFloor": "四楼",
+    "deployGallery": "焦作市山阳区世纪路1355号"
+   }
+  ],
+  "videoMonitoring_operationsManagement": [
+   {
+    "administrativeDepartment": "03-保卫管理部门",
+    "operationDepartment": "03-保卫管理部门",
+    "serviceEndTime": "2023-10-01",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "河南华天光电智能科技有限公司",
+    "serviceStartTime": "2018-08-01"
+   }
+  ],
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "686e2f22bd284f9a82a86c5dba873018",
+  "assetBrand": "海康威视",
+  "assetCode": "2202160022006002",
+  "assetSerialNumber": "412701040302",
+  "assetType": "DS-2CD5A32EFWD",
+  "brandLand": "00-国内",
+  "dataSavePeriod": 180.0,
+  "facilityCategory": "FAAFCAM000",
+  "facilityName": "周口市中支中心机房机房视频监控",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2019-08-06",
+  "facilityUseState": "00-设施在用",
+  "monitoringScope": [
+   "00-主机房-服务器区",
+   "01-主机房-网络区",
+   "03-主机房-其它区",
+   "30-行政管理区-办公区",
+   "90-屏蔽机房区"
+  ],
+  "surveillanceNumber": "11",
+  "videoMonitoring_deployment": [
+   {
+    "deployArea": "01-主机房-网络区",
+    "deployComputerRoom": "周口市中心支行中心机房",
+    "deployDb": "周口市中支中心机房",
+    "deployFloor": "二层",
+    "deployGallery": "周口市川汇区七一路中段1号A楼"
+   }
+  ],
+  "videoMonitoring_operationsManagement": [
+   {
+    "administrativeDepartment": "03-保卫管理部门",
+    "operationDepartment": "03-保卫管理部门",
+    "serviceEndTime": "2022-08-06",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "恒锋信息科技股份有限公司",
+    "serviceStartTime": "2019-08-06"
+   }
+  ],
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "97c183e490024dd89e46a8394edfda2c",
+  "assetBrand": "海康威视",
+  "assetCode": "2202020022004000",
+  "assetSerialNumber": "20160503CCRR598082576WCVU",
+  "assetType": "DS-8616N-I1616",
+  "brandLand": "00-国内",
+  "dataSavePeriod": 180.0,
+  "facilityCategory": "FAAFCAM000",
+  "facilityName": "开封市中支电视监控系统",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2016-03-17",
+  "facilityUseState": "00-设施在用",
+  "monitoringScope": [
+   "00-主机房-服务器区",
+   "01-主机房-网络区",
+   "02-主机房-存储区",
+   "22-支持区-UPS区",
+   "90-屏蔽机房区"
+  ],
+  "surveillanceNumber": "160",
+  "videoMonitoring_deployment": [
+   {
+    "deployArea": "01-主机房-网络区",
+    "deployComputerRoom": "开封市中心支行中心机房",
+    "deployDb": "开封市中支中心机房",
+    "deployFloor": "开封市龙亭区晋安路60号办公楼",
+    "deployGallery": "三层"
+   }
+  ],
+  "videoMonitoring_operationsManagement": [
+   {
+    "administrativeDepartment": "03-保卫管理部门",
+    "operationDepartment": "03-保卫管理部门",
+    "serviceEndTime": "2019-03-17",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "海康威视",
+    "serviceStartTime": "2016-03-17"
+   }
+  ],
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "9ce4f57ce5fd4396a1f223854bad685e",
+  "assetBrand": "大华",
+  "assetSerialNumber": "1K01191PBQG40P8",
+  "assetType": "DH-NVR1104HS",
+  "brandLand": "00-国内",
+  "dataSavePeriod": 180.0,
+  "facilityCategory": "FAAFCAM000",
+  "facilityName": "郑州中支转接中心机房视频监控",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2015-09-21",
+  "facilityUseState": "00-设施在用",
+  "monitoringScope": [
+   "03-主机房-其它区"
+  ],
+  "surveillanceNumber": "2",
+  "videoMonitoring_deployment": [
+   {
+    "deployArea": "01-主机房-网络区",
+    "deployComputerRoom": "转接中心机房",
+    "deployDb": "郑州中支转接中心机房",
+    "deployFloor": "二层",
+    "deployGallery": "转接中心综合楼"
+   }
+  ],
+  "videoMonitoring_operationsManagement": [
+   {
+    "administrativeDepartment": "00-科技管理部门",
+    "operationDepartment": "00-科技管理部门",
+    "serviceEndTime": "2022-12-01",
+    "serviceLevel": "01-7*24",
+    "serviceStartTime": "2015-09-21"
+   }
+  ],
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "ab23eb1b3b3940b495cff29174d72337",
+  "assetBrand": "大华",
+  "assetCode": "ZMD040001",
+  "assetSerialNumber": "54625",
+  "assetType": "大华",
+  "brandLand": "00-国内",
+  "dataSavePeriod": 180.0,
+  "facilityCategory": "FAAFCAM000",
+  "facilityName": "驻马店市中支中心机房监控摄像头",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2018-11-02",
+  "facilityUseState": "00-设施在用",
+  "monitoringScope": [
+   "00-主机房-服务器区",
+   "01-主机房-网络区",
+   "03-主机房-其它区"
+  ],
+  "surveillanceNumber": "5",
+  "videoMonitoring_deployment": [
+   {
+    "deployArea": "00-主机房-服务器区",
+    "deployComputerRoom": "驻马店市中支中心机房",
+    "deployDb": "驻马店市中支中心机房",
+    "deployFloor": "四层",
+    "deployGallery": "驻马店市驿城区泰山路567号办公楼"
+   }
+  ],
+  "videoMonitoring_operationsManagement": [
+   {
+    "administrativeDepartment": "03-保卫管理部门",
+    "operationDepartment": "03-保卫管理部门",
+    "serviceEndTime": "2021-11-02",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "郑州一建集团有限公司",
+    "serviceStartTime": "2018-11-02"
+   }
+  ],
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "ae024ac23499488eb1aaa869ffbddb02",
+  "assetBrand": "海康威视",
+  "assetCode": "410611040001",
+  "assetSerialNumber": "410611040001",
+  "assetType": "ds-2cd5132efwd-iz",
+  "brandLand": "00-国内",
+  "dataSavePeriod": 180.0,
+  "facilityCategory": "FAAFCAM000",
+  "facilityName": "鹤壁市中支中心机房监控摄像头",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2017-09-01",
+  "facilityUseState": "00-设施在用",
+  "monitoringScope": [
+   "00-主机房-服务器区",
+   "01-主机房-网络区",
+   "02-主机房-存储区",
+   "03-主机房-其它区"
+  ],
+  "surveillanceNumber": "8",
+  "videoMonitoring_deployment": [
+   {
+    "deployArea": "01-主机房-网络区",
+    "deployComputerRoom": "所有机房",
+    "deployDb": "鹤壁市中支中心机房",
+    "deployFloor": "七层",
+    "deployGallery": "办公楼"
+   }
+  ],
+  "videoMonitoring_operationsManagement": [
+   {
+    "administrativeDepartment": "00-科技管理部门",
+    "operationDepartment": "03-保卫管理部门",
+    "serviceEndTime": "2022-09-01",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "银华安防",
+    "serviceStartTime": "2017-09-01"
+   }
+  ],
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "aebfd667157e4fbaa367fea8639b8672",
+  "assetBrand": "海康威视",
+  "assetCode": "2202120021002067",
+  "assetSerialNumber": "255646",
+  "assetType": "V4.0",
+  "brandLand": "00-国内",
+  "dataSavePeriod": 180.0,
+  "facilityCategory": "FAAFCAM000",
+  "facilityName": "许昌市中支中心机房机房视频监控",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2016-09-11",
+  "facilityUseState": "00-设施在用",
+  "monitoringScope": [
+   "01-主机房-网络区",
+   "02-主机房-存储区",
+   "20-支持区-变配电室",
+   "22-支持区-UPS区",
+   "23-支持区-电池室",
+   "24-支持区-空调区",
+   "31-行政管理区-值班室"
+  ],
+  "surveillanceNumber": "13",
+  "videoMonitoring_deployment": [
+   {
+    "deployArea": "01-主机房-网络区",
+    "deployComputerRoom": "许昌市中心支行中心机房",
+    "deployDb": "许昌市中支中心机房",
+    "deployFloor": "四楼",
+    "deployGallery": "河南省许昌市建安区新东街571号办公楼"
+   }
+  ],
+  "videoMonitoring_operationsManagement": [
+   {
+    "administrativeDepartment": "00-科技管理部门",
+    "operationDepartment": "00-科技管理部门",
+    "serviceEndTime": "2017-09-11",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "科宇智能环境科技服务有限公司",
+    "serviceStartTime": "2016-09-11"
+   }
+  ],
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "b753bf5acf7f4ee7a495343805cc2295",
+  "assetBrand": "海康威视",
+  "assetSerialNumber": "68525135",
+  "assetType": "ds-2cd5132efwd-iz",
+  "brandLand": "00-国内",
+  "dataSavePeriod": 180.0,
+  "facilityCategory": "FAAFCAM000",
+  "facilityName": "平顶山市中支中心机房监控摄像头",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2017-12-26",
+  "facilityUseState": "00-设施在用",
+  "monitoringScope": [
+   "00-主机房-服务器区",
+   "01-主机房-网络区",
+   "02-主机房-存储区",
+   "03-主机房-其它区",
+   "22-支持区-UPS区",
+   "23-支持区-电池室",
+   "30-行政管理区-办公区"
+  ],
+  "surveillanceNumber": "8",
+  "videoMonitoring_deployment": [
+   {
+    "deployArea": "00-主机房-服务器区",
+    "deployComputerRoom": "中心机房",
+    "deployDb": "平顶山市中支中心机房",
+    "deployFloor": "八层",
+    "deployGallery": "办公楼"
+   }
+  ],
+  "videoMonitoring_operationsManagement": [
+   {
+    "administrativeDepartment": "00-科技管理部门",
+    "operationDepartment": "03-保卫管理部门",
+    "serviceEndTime": "2020-12-26",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "银华安防",
+    "serviceStartTime": "2017-12-26"
+   }
+  ],
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "bcd20c8199724cefa2f90cf2ba492170",
+  "assetBrand": "海康威视",
+  "assetCode": "2202090022009006",
+  "assetSerialNumber": "E46588961",
+  "assetType": "DS-2CD5132EFWD-IZ",
+  "brandLand": "00-国内",
+  "dataSavePeriod": 180.0,
+  "facilityCategory": "FAAFCAM000",
+  "facilityName": "三门峡中支中心机房视频监控",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2020-07-10",
+  "facilityUseState": "00-设施在用",
+  "monitoringScope": [
+   "01-主机房-网络区",
+   "02-主机房-存储区",
+   "20-支持区-变配电室",
+   "22-支持区-UPS区",
+   "23-支持区-电池室",
+   "24-支持区-空调区",
+   "31-行政管理区-值班室"
+  ],
+  "surveillanceNumber": "6",
+  "videoMonitoring_deployment": [
+   {
+    "deployArea": "31-行政管理区-值班室",
+    "deployComputerRoom": "中心机房",
+    "deployDb": "三门峡市中支中心机房",
+    "deployFloor": "六层",
+    "deployGallery": "办公大楼"
+   }
+  ],
+  "videoMonitoring_operationsManagement": [
+   {
+    "administrativeDepartment": "00-科技管理部门",
+    "operationDepartment": "00-科技管理部门",
+    "serviceEndTime": "2023-07-10",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "郑州首达科技有限公司",
+    "serviceStartTime": "2020-07-10"
+   }
+  ],
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "cb001d5c477d45ed87583b80932e7879",
+  "assetBrand": "海康威视",
+  "assetCode": "040001",
+  "assetSerialNumber": "000000",
+  "assetType": "ds-2cd5132efwd-iz",
+  "brandLand": "00-国内",
+  "dataSavePeriod": 180.0,
+  "facilityCategory": "FAAFCAM000",
+  "facilityName": "安阳市中支中心机房监控摄像头",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2014-09-01",
+  "facilityUseState": "00-设施在用",
+  "monitoringScope": [
+   "00-主机房-服务器区",
+   "01-主机房-网络区",
+   "02-主机房-存储区",
+   "03-主机房-其它区"
+  ],
+  "surveillanceNumber": "8",
+  "videoMonitoring_deployment": [
+   {
+    "deployArea": "01-主机房-网络区",
+    "deployComputerRoom": "安阳市中支中心机房",
+    "deployDb": "安阳市中支中心机房",
+    "deployFloor": "八层",
+    "deployGallery": "河南省安阳市开发区金融大厦"
+   }
+  ],
+  "videoMonitoring_operationsManagement": [
+   {
+    "administrativeDepartment": "03-保卫管理部门",
+    "operationDepartment": "03-保卫管理部门",
+    "serviceEndTime": "2026-10-01",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "河南银鑫科技",
+    "serviceStartTime": "2019-10-01"
+   }
+  ],
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "d05ff6c7b30e4cdf906c1b609dda4f1c",
+  "assetBrand": "海康威视",
+  "assetSerialNumber": "324786514",
+  "assetType": "DS-8616",
+  "brandLand": "00-国内",
+  "dataSavePeriod": 180.0,
+  "facilityCategory": "FAAFCAM000",
+  "facilityName": "商丘市中支中心机房机房视频监控",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2018-05-01",
+  "facilityUseState": "00-设施在用",
+  "monitoringScope": [
+   "01-主机房-网络区",
+   "02-主机房-存储区",
+   "20-支持区-变配电室",
+   "22-支持区-UPS区",
+   "31-行政管理区-值班室",
+   "90-屏蔽机房区"
+  ],
+  "surveillanceNumber": "11",
+  "videoMonitoring_deployment": [
+   {
+    "deployArea": "00-主机房-服务器区",
+    "deployComputerRoom": "商丘市中心支行中心机房",
+    "deployDb": "商丘市中支中心机房",
+    "deployFloor": "八层",
+    "deployGallery": "人行商丘中支1号办公楼"
+   }
+  ],
+  "videoMonitoring_operationsManagement": [
+   {
+    "administrativeDepartment": "03-保卫管理部门",
+    "operationDepartment": "03-保卫管理部门",
+    "serviceEndTime": "2021-05-01",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "未知",
+    "serviceStartTime": "2018-05-01"
+   }
+  ],
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "e7229af04e004c089c51e38f18d4418b",
+  "assetBrand": "海康威视",
+  "assetCode": "41070204300000000002",
+  "assetSerialNumber": "819957530",
+  "assetType": "DS-8616N-K8",
+  "brandLand": "00-国内",
+  "dataSavePeriod": 180.0,
+  "facilityCategory": "FAAFCAM000",
+  "facilityName": "新乡市中支中心机房视频监控系统",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2017-08-30",
+  "facilityUseState": "00-设施在用",
+  "monitoringScope": [
+   "00-主机房-服务器区",
+   "01-主机房-网络区",
+   "03-主机房-其它区",
+   "22-支持区-UPS区",
+   "23-支持区-电池室",
+   "24-支持区-空调区",
+   "90-屏蔽机房区"
+  ],
+  "surveillanceNumber": "9",
+  "videoMonitoring_deployment": [
+   {
+    "deployArea": "01-主机房-网络区",
+    "deployComputerRoom": "中心机房",
+    "deployDb": "新乡市中支中心机房",
+    "deployFloor": "十五层",
+    "deployGallery": "办公楼"
+   }
+  ],
+  "videoMonitoring_operationsManagement": [
+   {
+    "administrativeDepartment": "03-保卫管理部门",
+    "operationDepartment": "03-保卫管理部门",
+    "serviceEndTime": "2020-08-30",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "北京华科科技有限公司",
+    "serviceStartTime": "2017-08-30"
+   }
+  ],
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "f813daeba5b1416999cb493245e375b9",
+  "assetBrand": "海康威视",
+  "assetCode": "2202010022010000",
+  "assetSerialNumber": "722300755",
+  "assetType": "DS-2CD5A32EFWD-IZS",
+  "brandLand": "00-国内",
+  "dataSavePeriod": 180.0,
+  "facilityCategory": "FAAFCAM000",
+  "facilityName": "洛阳市中支中心机房机房监控",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2017-08-01",
+  "facilityUseState": "00-设施在用",
+  "monitoringScope": [
+   "00-主机房-服务器区",
+   "01-主机房-网络区",
+   "03-主机房-其它区",
+   "30-行政管理区-办公区",
+   "90-屏蔽机房区"
+  ],
+  "surveillanceNumber": "10",
+  "videoMonitoring_deployment": [
+   {
+    "deployArea": "01-主机房-网络区",
+    "deployComputerRoom": "洛阳市中支中心机房",
+    "deployDb": "洛阳市中支中心机房",
+    "deployFloor": "三层",
+    "deployGallery": "洛阳市中支办公大楼"
+   }
+  ],
+  "videoMonitoring_operationsManagement": [
+   {
+    "administrativeDepartment": "03-保卫管理部门",
+    "operationDepartment": "03-保卫管理部门",
+    "serviceEndTime": "2022-08-01",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "河南银华安防技术有限公司",
+    "serviceStartTime": "2017-08-01"
+   }
+  ],
+  "_dataSource": "双源"
+ }
+]

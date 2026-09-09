@@ -1,0 +1,2734 @@
+[
+ {
+  "facilityDescriptor": "04149f0cffe142f78f1243b4237a1ede",
+  "assetBrand": "艾默生",
+  "assetCode": "2202120021002003",
+  "assetSerialNumber": "21F02336552165010002",
+  "assetType": "EPK-320",
+  "backupPowerSupply": "600",
+  "brandLand": "01-国外",
+  "communicationProtocol": [
+   "00-Modbus"
+  ],
+  "facilityCategory": "FAPDUPS000",
+  "facilityName": "许昌市中支中心机房不间断供电系统UPS输出柜2",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2016-09-11",
+  "facilityUseState": "00-设施在用",
+  "ratedAlternatingFrequency": "50",
+  "uninterrupted_deployment": [
+   {
+    "deployArea": "22-支持区-UPS区",
+    "deployComputerRoom": "许昌市中心支行中心机房",
+    "deployDb": "许昌市中支中心机房",
+    "deployFloor": "四楼",
+    "deployGallery": "河南省许昌市建安区新东街571号办公楼"
+   }
+  ],
+  "uninterrupted_operationsManagement": [
+   {
+    "administrativeDepartment": "00-科技管理部门",
+    "operationDepartment": "05-外包服务部门",
+    "serviceEndTime": "2021-12-18",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "许昌协同科贸有限公司",
+    "serviceStartTime": "2019-12-18"
+   }
+  ],
+  "uninterrupted_ratedInputParameter": [
+   {
+    "ratedInputCurrent": "50",
+    "ratedInputPower": "50",
+    "ratedInputVoltage": "220"
+   }
+  ],
+  "uninterrupted_ratedOutputParameter": [
+   {
+    "ratedOutputCurrent": "10",
+    "ratedOutputPower": "5",
+    "ratedOutputVoltage": "220"
+   }
+  ],
+  "uninterrupted_uninterruptibleDistribution": [
+   {
+    "batteryType": "00-铅酸蓄电池",
+    "numberOfBatteries": "32",
+    "typeOfUninterruptibleMainsPowerModule": "01-一体化",
+    "uninterruptibleMainsType": "01-工频"
+   }
+  ],
+  "upsParallelSystem": "00-1台独立运行",
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "04a47b551e0f4b49a20197a42c22878c",
+  "assetBrand": "伊顿",
+  "assetCode": "2202020021017000",
+  "assetSerialNumber": "4L387WAA02",
+  "assetType": "93PR-200-MBS",
+  "backupPowerSupply": "480",
+  "brandLand": "01-国外",
+  "communicationProtocol": [
+   "99-其它"
+  ],
+  "facilityCategory": "FAPDUPS000",
+  "facilityName": "开封市中支UPS电源主机2",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2018-01-01",
+  "facilityUseState": "00-设施在用",
+  "ratedAlternatingFrequency": "50",
+  "uninterrupted_deployment": [
+   {
+    "deployArea": "22-支持区-UPS区",
+    "deployComputerRoom": "开封市中心支行中心机房",
+    "deployDb": "开封市中支中心机房",
+    "deployFloor": "三层",
+    "deployGallery": "开封市龙亭区晋安路60号办公楼"
+   }
+  ],
+  "uninterrupted_operationsManagement": [
+   {
+    "administrativeDepartment": "00-科技管理部门",
+    "operationDepartment": "00-科技管理部门",
+    "serviceEndTime": "2020-07-01",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "河南英诚科贸有限公司",
+    "serviceStartTime": "2018-01-01"
+   }
+  ],
+  "uninterrupted_ratedInputParameter": [
+   {
+    "ratedInputCurrent": "304",
+    "ratedInputPower": "200",
+    "ratedInputVoltage": "220"
+   }
+  ],
+  "uninterrupted_ratedOutputParameter": [
+   {
+    "ratedOutputCurrent": "303",
+    "ratedOutputPower": "200",
+    "ratedOutputVoltage": "220"
+   }
+  ],
+  "uninterrupted_uninterruptibleDistribution": [
+   {
+    "batteryType": "00-铅酸蓄电池",
+    "numberOfBatteries": "72",
+    "typeOfUninterruptibleMainsPowerModule": "00-模块化",
+    "uninterruptibleMainsType": "01-工频"
+   }
+  ],
+  "upsParallelSystem": "01-2台并机运行",
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "0534625e119c41b3ba944be6c857bd6e",
+  "assetBrand": "艾默生",
+  "assetCode": "220208002013001",
+  "assetSerialNumber": "21012015152164010004",
+  "assetType": "UHA1R-0100L",
+  "backupPowerSupply": "6",
+  "brandLand": "01-国外",
+  "communicationProtocol": [
+   "99-其它"
+  ],
+  "facilityCategory": "FAPDUPS000",
+  "facilityName": "鹤壁市中支服务器机房营业大厅UPS主机1",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2013-08-01",
+  "facilityUseState": "00-设施在用",
+  "ratedAlternatingFrequency": "50",
+  "uninterrupted_deployment": [
+   {
+    "deployArea": "00-主机房-服务器区",
+    "deployComputerRoom": "服务器机房",
+    "deployDb": "鹤壁市中支中心机房",
+    "deployFloor": "七层",
+    "deployGallery": "鹤壁市淇滨区九州路129号办公楼"
+   }
+  ],
+  "uninterrupted_operationsManagement": [
+   {
+    "administrativeDepartment": "00-科技管理部门",
+    "operationDepartment": "00-科技管理部门",
+    "serviceEndTime": "2015-08-01",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "浩海方舟",
+    "serviceStartTime": "2013-08-01"
+   }
+  ],
+  "uninterrupted_ratedInputParameter": [
+   {
+    "ratedInputCurrent": "55",
+    "ratedInputPower": "9",
+    "ratedInputVoltage": "220"
+   }
+  ],
+  "uninterrupted_ratedOutputParameter": [
+   {
+    "ratedOutputCurrent": "55",
+    "ratedOutputPower": "9",
+    "ratedOutputVoltage": "220"
+   }
+  ],
+  "uninterrupted_uninterruptibleDistribution": [
+   {
+    "batteryType": "00-铅酸蓄电池",
+    "numberOfBatteries": "16",
+    "typeOfUninterruptibleMainsPowerModule": "00-模块化",
+    "uninterruptibleMainsType": "01-工频"
+   }
+  ],
+  "upsParallelSystem": "01-2台并机运行",
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "07dfb97247864782a9a4482cd96a698e",
+  "assetBrand": "易事特",
+  "assetCode": "2202130021026001",
+  "assetSerialNumber": "800301808310022",
+  "assetType": "EA830",
+  "backupPowerSupply": "600",
+  "brandLand": "00-国内",
+  "communicationProtocol": [
+   "00-Modbus"
+  ],
+  "facilityCategory": "FAPDUPS000",
+  "facilityName": "漯河市中支电源室UPS电源主机（备）",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2018-11-01",
+  "facilityUseState": "00-设施在用",
+  "ratedAlternatingFrequency": "50",
+  "uninterrupted_deployment": [
+   {
+    "deployArea": "22-支持区-UPS区",
+    "deployComputerRoom": "漯河市中支中心机房",
+    "deployDb": "漯河市中支中心机房",
+    "deployFloor": "五层",
+    "deployGallery": "漯河市中支办公大楼"
+   }
+  ],
+  "uninterrupted_operationsManagement": [
+   {
+    "administrativeDepartment": "00-科技管理部门",
+    "operationDepartment": "00-科技管理部门",
+    "serviceEndTime": "2021-11-01",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "漯河市宏讯电子有限公司",
+    "serviceStartTime": "2018-11-01"
+   }
+  ],
+  "uninterrupted_ratedInputParameter": [
+   {
+    "ratedInputCurrent": "24",
+    "ratedInputPower": "30",
+    "ratedInputVoltage": "220"
+   }
+  ],
+  "uninterrupted_ratedOutputParameter": [
+   {
+    "ratedOutputCurrent": "24",
+    "ratedOutputPower": "30",
+    "ratedOutputVoltage": "220"
+   }
+  ],
+  "uninterrupted_uninterruptibleDistribution": [
+   {
+    "batteryType": "00-铅酸蓄电池",
+    "numberOfBatteries": "32",
+    "typeOfUninterruptibleMainsPowerModule": "01-一体化",
+    "uninterruptibleMainsType": "01-工频"
+   }
+  ],
+  "upsParallelSystem": "01-2台并机运行",
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "101d2ac826244b01a7af5cb839a748c8",
+  "assetBrand": "科士达",
+  "assetCode": "2202100021017054",
+  "assetSerialNumber": "110014952652296800001",
+  "assetType": "EP100",
+  "backupPowerSupply": "720",
+  "brandLand": "00-国内",
+  "communicationProtocol": [
+   "99-其它"
+  ],
+  "facilityCategory": "FAPDUPS000",
+  "facilityName": "驻马店市中支中心机房UPS1",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2018-11-02",
+  "facilityUseState": "00-设施在用",
+  "ratedAlternatingFrequency": "50",
+  "uninterrupted_deployment": [
+   {
+    "deployArea": "23-支持区-电池室",
+    "deployComputerRoom": "电池室",
+    "deployDb": "驻马店市中支中心机房",
+    "deployFloor": "四层",
+    "deployGallery": "驻马店市驿城区泰山路567号办公楼"
+   }
+  ],
+  "uninterrupted_operationsManagement": [
+   {
+    "administrativeDepartment": "00-科技管理部门",
+    "operationDepartment": "00-科技管理部门",
+    "serviceEndTime": "2021-11-02",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "郑州一建集团有限公司",
+    "serviceStartTime": "2018-11-02"
+   }
+  ],
+  "uninterrupted_ratedInputParameter": [
+   {
+    "ratedInputCurrent": "60",
+    "ratedInputPower": "50",
+    "ratedInputVoltage": "220"
+   }
+  ],
+  "uninterrupted_ratedOutputParameter": [
+   {
+    "ratedOutputCurrent": "50",
+    "ratedOutputPower": "40",
+    "ratedOutputVoltage": "220"
+   }
+  ],
+  "uninterrupted_uninterruptibleDistribution": [
+   {
+    "batteryType": "00-铅酸蓄电池",
+    "numberOfBatteries": "96",
+    "typeOfUninterruptibleMainsPowerModule": "01-一体化",
+    "uninterruptibleMainsType": "01-工频"
+   }
+  ],
+  "upsParallelSystem": "00-1台独立运行",
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "142a7d03d6244703998d7cc2c7a39c8c",
+  "assetBrand": "艾默生",
+  "assetCode": "2202070021010005",
+  "assetSerialNumber": "21012000442122010003",
+  "assetType": "UL33-0600L",
+  "backupPowerSupply": "600",
+  "brandLand": "01-国外",
+  "communicationProtocol": [
+   "99-其它"
+  ],
+  "facilityCategory": "FAPDUPS000",
+  "facilityName": "焦作市中支中心机房不间断供电系统UPS2",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2012-05-01",
+  "facilityUseState": "00-设施在用",
+  "ratedAlternatingFrequency": "50",
+  "uninterrupted_deployment": [
+   {
+    "deployArea": "22-支持区-UPS区",
+    "deployComputerRoom": "焦作市中心支行中心机房",
+    "deployDb": "焦作市中支中心机房",
+    "deployFloor": "四楼",
+    "deployGallery": "焦作市山阳区世纪路1355号"
+   }
+  ],
+  "uninterrupted_operationsManagement": [
+   {
+    "administrativeDepartment": "00-科技管理部门",
+    "operationDepartment": "00-科技管理部门",
+    "serviceEndTime": "2021-06-08",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "河南捷联科技有限公司",
+    "serviceStartTime": "2020-08-08"
+   }
+  ],
+  "uninterrupted_ratedInputParameter": [
+   {
+    "ratedInputCurrent": "132",
+    "ratedInputPower": "60",
+    "ratedInputVoltage": "220"
+   }
+  ],
+  "uninterrupted_ratedOutputParameter": [
+   {
+    "ratedOutputCurrent": "112",
+    "ratedOutputPower": "48",
+    "ratedOutputVoltage": "220"
+   }
+  ],
+  "uninterrupted_uninterruptibleDistribution": [
+   {
+    "batteryType": "01-锂电池",
+    "numberOfBatteries": "32",
+    "typeOfUninterruptibleMainsPowerModule": "01-一体化",
+    "uninterruptibleMainsType": "01-工频"
+   }
+  ],
+  "upsParallelSystem": "01-2台并机运行",
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "19cbd43efb8047a2ae45dc10afe14a33",
+  "assetBrand": "艾默生",
+  "assetCode": "2202070021010004",
+  "assetSerialNumber": "21012000442122010001",
+  "assetType": "UL33-0600L",
+  "backupPowerSupply": "600",
+  "brandLand": "01-国外",
+  "communicationProtocol": [
+   "99-其它"
+  ],
+  "facilityCategory": "FAPDUPS000",
+  "facilityName": "焦作市中支中心机房不间断供电系统UPS1",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2012-05-01",
+  "facilityUseState": "00-设施在用",
+  "ratedAlternatingFrequency": "50",
+  "uninterrupted_deployment": [
+   {
+    "deployArea": "22-支持区-UPS区",
+    "deployComputerRoom": "焦作市中心支行中心机房",
+    "deployDb": "焦作市中支中心机房",
+    "deployFloor": "四楼",
+    "deployGallery": "焦作市山阳区世纪路1355号"
+   }
+  ],
+  "uninterrupted_operationsManagement": [
+   {
+    "administrativeDepartment": "00-科技管理部门",
+    "operationDepartment": "00-科技管理部门",
+    "serviceEndTime": "2021-06-08",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "河南捷联科技有限公司",
+    "serviceStartTime": "2020-08-08"
+   }
+  ],
+  "uninterrupted_ratedInputParameter": [
+   {
+    "ratedInputCurrent": "132",
+    "ratedInputPower": "60",
+    "ratedInputVoltage": "220"
+   }
+  ],
+  "uninterrupted_ratedOutputParameter": [
+   {
+    "ratedOutputCurrent": "112",
+    "ratedOutputPower": "48",
+    "ratedOutputVoltage": "220"
+   }
+  ],
+  "uninterrupted_uninterruptibleDistribution": [
+   {
+    "batteryType": "01-锂电池",
+    "numberOfBatteries": "32",
+    "typeOfUninterruptibleMainsPowerModule": "01-一体化",
+    "uninterruptibleMainsType": "01-工频"
+   }
+  ],
+  "upsParallelSystem": "01-2台并机运行",
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "1c02616fe44443ee8993406a66fc204b",
+  "assetBrand": "山特",
+  "assetCode": "2202090021027010",
+  "assetSerialNumber": "19111607590068",
+  "assetType": "CASTLE 10KS",
+  "backupPowerSupply": "120",
+  "brandLand": "00-国内",
+  "communicationProtocol": [
+   "00-Modbus"
+  ],
+  "facilityCategory": "FAPDUPS000",
+  "facilityName": "中国人民银行三门峡市中心支行 机房辅助UPS电源",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2019-12-23",
+  "facilityUseState": "00-设施在用",
+  "ratedAlternatingFrequency": "50",
+  "uninterrupted_deployment": [
+   {
+    "deployArea": "23-支持区-电池室",
+    "deployComputerRoom": "中心机房",
+    "deployDb": "三门峡市中支中心机房",
+    "deployFloor": "六层",
+    "deployGallery": "办公大楼"
+   }
+  ],
+  "uninterrupted_operationsManagement": [
+   {
+    "administrativeDepartment": "00-科技管理部门",
+    "operationDepartment": "00-科技管理部门",
+    "serviceEndTime": "2022-12-10",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "三门峡浪潮办公设备有限公司",
+    "serviceStartTime": "2019-12-10"
+   }
+  ],
+  "uninterrupted_ratedInputParameter": [
+   {
+    "ratedInputCurrent": "54",
+    "ratedInputPower": "12",
+    "ratedInputVoltage": "220"
+   }
+  ],
+  "uninterrupted_ratedOutputParameter": [
+   {
+    "ratedOutputCurrent": "46",
+    "ratedOutputPower": "10",
+    "ratedOutputVoltage": "220"
+   }
+  ],
+  "uninterrupted_uninterruptibleDistribution": [
+   {
+    "batteryType": "00-铅酸蓄电池",
+    "numberOfBatteries": "32",
+    "typeOfUninterruptibleMainsPowerModule": "00-模块化",
+    "uninterruptibleMainsType": "01-工频"
+   }
+  ],
+  "upsParallelSystem": "00-1台独立运行",
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "218d7e33f3fc46dba5c765262dce682d",
+  "assetBrand": "艾默生",
+  "assetCode": "2202010021001273",
+  "assetSerialNumber": "0727-586022",
+  "assetType": "30KVA Power+",
+  "backupPowerSupply": "480",
+  "brandLand": "01-国外",
+  "communicationProtocol": [
+   "02-Tcp/ip"
+  ],
+  "facilityCategory": "FAPDUPS000",
+  "facilityName": "洛阳市中支中心机房辅助UPS",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2017-10-01",
+  "facilityUseState": "00-设施在用",
+  "ratedAlternatingFrequency": "50",
+  "uninterrupted_deployment": [
+   {
+    "deployArea": "03-主机房-其它区",
+    "deployComputerRoom": "洛阳市中心支行中心机房",
+    "deployDb": "洛阳市中支中心机房",
+    "deployFloor": "三层",
+    "deployGallery": "洛阳市中心支行办公大楼"
+   }
+  ],
+  "uninterrupted_operationsManagement": [
+   {
+    "administrativeDepartment": "00-科技管理部门",
+    "operationDepartment": "00-科技管理部门",
+    "serviceEndTime": "2019-10-01",
+    "serviceLevel": "01-7*24",
+    "serviceStartTime": "2017-10-01"
+   }
+  ],
+  "uninterrupted_ratedInputParameter": [
+   {
+    "ratedInputCurrent": "45",
+    "ratedInputPower": "30",
+    "ratedInputVoltage": "220"
+   }
+  ],
+  "uninterrupted_ratedOutputParameter": [
+   {
+    "ratedOutputCurrent": "45",
+    "ratedOutputPower": "30",
+    "ratedOutputVoltage": "220"
+   }
+  ],
+  "uninterrupted_uninterruptibleDistribution": [
+   {
+    "batteryType": "00-铅酸蓄电池",
+    "numberOfBatteries": "64",
+    "typeOfUninterruptibleMainsPowerModule": "00-模块化",
+    "uninterruptibleMainsType": "01-工频"
+   }
+  ],
+  "upsParallelSystem": "00-1台独立运行",
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "279085441b804831aa9795d825f7a3e7",
+  "assetBrand": "伊顿",
+  "assetCode": "2202020021100100",
+  "assetSerialNumber": "4P385LXX09",
+  "assetType": "93E-30-N-MBS",
+  "backupPowerSupply": "480",
+  "brandLand": "01-国外",
+  "communicationProtocol": [
+   "99-其它"
+  ],
+  "facilityCategory": "FAPDUPS000",
+  "facilityName": "开封市中支UPS电源主机1",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2021-01-13",
+  "facilityUseState": "00-设施在用",
+  "ratedAlternatingFrequency": "50",
+  "uninterrupted_deployment": [
+   {
+    "deployArea": "22-支持区-UPS区",
+    "deployComputerRoom": "开封市中心支行中心机房",
+    "deployDb": "开封市中支中心机房",
+    "deployFloor": "三层",
+    "deployGallery": "开封市龙亭区晋安路60号办公楼"
+   }
+  ],
+  "uninterrupted_operationsManagement": [
+   {
+    "administrativeDepartment": "00-科技管理部门",
+    "operationDepartment": "00-科技管理部门",
+    "serviceEndTime": "2023-12-29",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "北京星河华辰办公设备有限公司",
+    "serviceStartTime": "2020-12-29"
+   }
+  ],
+  "uninterrupted_ratedInputParameter": [
+   {
+    "ratedInputCurrent": "48",
+    "ratedInputPower": "30",
+    "ratedInputVoltage": "220"
+   }
+  ],
+  "uninterrupted_ratedOutputParameter": [
+   {
+    "ratedOutputCurrent": "46",
+    "ratedOutputPower": "30",
+    "ratedOutputVoltage": "220"
+   }
+  ],
+  "uninterrupted_uninterruptibleDistribution": [
+   {
+    "batteryType": "00-铅酸蓄电池",
+    "numberOfBatteries": "64",
+    "typeOfUninterruptibleMainsPowerModule": "01-一体化",
+    "uninterruptibleMainsType": "01-工频"
+   }
+  ],
+  "upsParallelSystem": "01-2台并机运行",
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "2b321b034fde42308a8bbddc9305c365",
+  "assetBrand": "艾默生",
+  "assetCode": "2202120021002001",
+  "assetSerialNumber": "21F02336542165010001",
+  "assetType": "EPK-320",
+  "backupPowerSupply": "600",
+  "brandLand": "01-国外",
+  "communicationProtocol": [
+   "00-Modbus"
+  ],
+  "facilityCategory": "FAPDUPS000",
+  "facilityName": "许昌市中支中心机房不间断供电系统UPS交流柜",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2016-09-11",
+  "facilityUseState": "00-设施在用",
+  "ratedAlternatingFrequency": "50",
+  "uninterrupted_deployment": [
+   {
+    "deployArea": "22-支持区-UPS区",
+    "deployComputerRoom": "许昌市中心支行中心机房",
+    "deployDb": "许昌市中支中心机房",
+    "deployFloor": "四楼",
+    "deployGallery": "河南省许昌市建安区新东街571号办公楼"
+   }
+  ],
+  "uninterrupted_operationsManagement": [
+   {
+    "administrativeDepartment": "00-科技管理部门",
+    "operationDepartment": "05-外包服务部门",
+    "serviceEndTime": "2021-12-18",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "许昌协同科贸有限公司",
+    "serviceStartTime": "2019-12-18"
+   }
+  ],
+  "uninterrupted_ratedInputParameter": [
+   {
+    "ratedInputCurrent": "27",
+    "ratedInputPower": "16",
+    "ratedInputVoltage": "220"
+   }
+  ],
+  "uninterrupted_ratedOutputParameter": [
+   {
+    "ratedOutputCurrent": "25",
+    "ratedOutputPower": "15",
+    "ratedOutputVoltage": "220"
+   }
+  ],
+  "uninterrupted_uninterruptibleDistribution": [
+   {
+    "batteryType": "00-铅酸蓄电池",
+    "numberOfBatteries": "32",
+    "typeOfUninterruptibleMainsPowerModule": "01-一体化",
+    "uninterruptibleMainsType": "01-工频"
+   }
+  ],
+  "upsParallelSystem": "00-1台独立运行",
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "32881f7466fb4d51b22304976ada14d5",
+  "assetBrand": "艾默生",
+  "assetCode": "2202140021026000",
+  "assetSerialNumber": "21012000402174005",
+  "assetType": "UL33-30KVA",
+  "backupPowerSupply": "600",
+  "brandLand": "01-国外",
+  "communicationProtocol": [
+   "00-Modbus"
+  ],
+  "facilityCategory": "FAPDUPS000",
+  "facilityName": "商丘市中支中心机房不间断供电系统UPS",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2017-12-01",
+  "facilityUseState": "00-设施在用",
+  "ratedAlternatingFrequency": "50",
+  "uninterrupted_deployment": [
+   {
+    "deployArea": "22-支持区-UPS区",
+    "deployComputerRoom": "商丘市中心支行中心机房",
+    "deployDb": "商丘市中支中心机房",
+    "deployFloor": "八层",
+    "deployGallery": "商丘市睢阳区北海西路六号"
+   }
+  ],
+  "uninterrupted_operationsManagement": [
+   {
+    "administrativeDepartment": "00-科技管理部门",
+    "operationDepartment": "00-科技管理部门",
+    "serviceEndTime": "2021-12-29",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "郑州正辉信息技术有限公司",
+    "serviceStartTime": "2017-12-29"
+   }
+  ],
+  "uninterrupted_ratedInputParameter": [
+   {
+    "ratedInputCurrent": "132",
+    "ratedInputPower": "60",
+    "ratedInputVoltage": "220"
+   }
+  ],
+  "uninterrupted_ratedOutputParameter": [
+   {
+    "ratedOutputCurrent": "112",
+    "ratedOutputPower": "48",
+    "ratedOutputVoltage": "220"
+   }
+  ],
+  "uninterrupted_uninterruptibleDistribution": [
+   {
+    "batteryType": "01-锂电池",
+    "numberOfBatteries": "64",
+    "typeOfUninterruptibleMainsPowerModule": "01-一体化",
+    "uninterruptibleMainsType": "01-工频"
+   }
+  ],
+  "upsParallelSystem": "01-2台并机运行",
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "3c40bf6eb28345ffa8c216945ed59896",
+  "assetBrand": "施耐德电气",
+  "assetCode": "2202130021026100",
+  "assetSerialNumber": "UJ1649000892",
+  "assetType": "GALAXY 300-30KVA",
+  "backupPowerSupply": "248",
+  "brandLand": "01-国外",
+  "communicationProtocol": [
+   "99-其它"
+  ],
+  "facilityCategory": "FAPDUPS000",
+  "facilityName": "新乡中支中心机房UPS1",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2017-08-30",
+  "facilityUseState": "00-设施在用",
+  "ratedAlternatingFrequency": "50",
+  "uninterrupted_deployment": [
+   {
+    "deployArea": "22-支持区-UPS区",
+    "deployComputerRoom": "新乡中支中心机房",
+    "deployDb": "新乡市中支中心机房",
+    "deployFloor": "十五层",
+    "deployGallery": "新乡市红旗区向阳路9号办公楼"
+   }
+  ],
+  "uninterrupted_operationsManagement": [
+   {
+    "administrativeDepartment": "00-科技管理部门",
+    "operationDepartment": "00-科技管理部门",
+    "serviceEndTime": "2021-12-10",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "北京卡普尼",
+    "serviceStartTime": "2020-12-10"
+   }
+  ],
+  "uninterrupted_ratedInputParameter": [
+   {
+    "ratedInputCurrent": "47",
+    "ratedInputPower": "24",
+    "ratedInputVoltage": "220"
+   }
+  ],
+  "uninterrupted_ratedOutputParameter": [
+   {
+    "ratedOutputCurrent": "46",
+    "ratedOutputPower": "24",
+    "ratedOutputVoltage": "220"
+   }
+  ],
+  "uninterrupted_uninterruptibleDistribution": [
+   {
+    "batteryType": "01-锂电池",
+    "numberOfBatteries": "16",
+    "typeOfUninterruptibleMainsPowerModule": "01-一体化",
+    "uninterruptibleMainsType": "00-高频"
+   }
+  ],
+  "upsParallelSystem": "03-2台并机加1台冗余备份运行",
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "42ccec03baf248a4a6ccd0bda32b8e7c",
+  "assetBrand": "艾默生",
+  "assetSerialNumber": "21023578352173040007",
+  "assetType": "ITA 0040kUPD01",
+  "backupPowerSupply": "8",
+  "brandLand": "01-国外",
+  "communicationProtocol": [
+   "00-Modbus",
+   "01-J bus",
+   "02-Tcp/ip"
+  ],
+  "facilityCategory": "FAPDUPS000",
+  "facilityName": "平顶山市中支电源室UPS电源主机B",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2017-12-26",
+  "facilityUseState": "00-设施在用",
+  "ratedAlternatingFrequency": "50",
+  "uninterrupted_deployment": [
+   {
+    "deployArea": "22-支持区-UPS区",
+    "deployComputerRoom": "电源室",
+    "deployDb": "平顶山市中支中心机房",
+    "deployFloor": "八层",
+    "deployGallery": "办公楼"
+   }
+  ],
+  "uninterrupted_operationsManagement": [
+   {
+    "administrativeDepartment": "00-科技管理部门",
+    "operationDepartment": "00-科技管理部门",
+    "serviceEndTime": "2020-12-26",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "中平信息技术有限责任公司",
+    "serviceStartTime": "2017-12-26"
+   }
+  ],
+  "uninterrupted_ratedInputParameter": [
+   {
+    "ratedInputCurrent": "68",
+    "ratedInputPower": "40",
+    "ratedInputVoltage": "220"
+   }
+  ],
+  "uninterrupted_ratedOutputParameter": [
+   {
+    "ratedOutputCurrent": "61",
+    "ratedOutputPower": "36",
+    "ratedOutputVoltage": "220"
+   }
+  ],
+  "uninterrupted_uninterruptibleDistribution": [
+   {
+    "batteryType": "00-铅酸蓄电池",
+    "numberOfBatteries": "64",
+    "typeOfUninterruptibleMainsPowerModule": "00-模块化",
+    "uninterruptibleMainsType": "01-工频"
+   }
+  ],
+  "upsParallelSystem": "01-2台并机运行",
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "52b03cdfaeee4f8e8ae4d42eb07b6d98",
+  "assetBrand": "艾默生",
+  "assetCode": "220208002017106",
+  "assetSerialNumber": "2101200040216A020003",
+  "assetType": "UL33-30KVA",
+  "backupPowerSupply": "8",
+  "brandLand": "01-国外",
+  "communicationProtocol": [
+   "99-其它"
+  ],
+  "facilityCategory": "FAPDUPS000",
+  "facilityName": "鹤壁市中支电源室UPS电源主机2",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2016-11-24",
+  "facilityUseState": "00-设施在用",
+  "ratedAlternatingFrequency": "50",
+  "uninterrupted_deployment": [
+   {
+    "deployArea": "22-支持区-UPS区",
+    "deployComputerRoom": "电源室",
+    "deployDb": "鹤壁市中支中心机房",
+    "deployFloor": "七层",
+    "deployGallery": "鹤壁市淇滨区九州路129号办公楼"
+   }
+  ],
+  "uninterrupted_operationsManagement": [
+   {
+    "administrativeDepartment": "00-科技管理部门",
+    "operationDepartment": "00-科技管理部门",
+    "serviceEndTime": "2021-05-01",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "浩海方舟",
+    "serviceStartTime": "2016-11-24"
+   }
+  ],
+  "uninterrupted_ratedInputParameter": [
+   {
+    "ratedInputCurrent": "66",
+    "ratedInputPower": "30",
+    "ratedInputVoltage": "220"
+   }
+  ],
+  "uninterrupted_ratedOutputParameter": [
+   {
+    "ratedOutputCurrent": "56",
+    "ratedOutputPower": "30",
+    "ratedOutputVoltage": "220"
+   }
+  ],
+  "uninterrupted_uninterruptibleDistribution": [
+   {
+    "batteryType": "00-铅酸蓄电池",
+    "numberOfBatteries": "30",
+    "typeOfUninterruptibleMainsPowerModule": "01-一体化",
+    "uninterruptibleMainsType": "01-工频"
+   }
+  ],
+  "upsParallelSystem": "01-2台并机运行",
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "5530e1536d744dfea351c87b11152de2",
+  "assetBrand": "科士达",
+  "assetCode": "2200000021029001",
+  "assetSerialNumber": "1100246208B0166700002",
+  "assetType": "EP120-L",
+  "backupPowerSupply": "120",
+  "brandLand": "00-国内",
+  "communicationProtocol": [
+   "99-其它"
+  ],
+  "facilityCategory": "FAPDUPS000",
+  "facilityName": "郑州中支主中心机房科士达UPS2",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2018-12-25",
+  "facilityUseState": "00-设施在用",
+  "ratedAlternatingFrequency": "50",
+  "uninterrupted_deployment": [
+   {
+    "deployArea": "23-支持区-电池室",
+    "deployComputerRoom": "配电室",
+    "deployDb": "郑州中支主中心机房",
+    "deployFloor": "11层",
+    "deployGallery": "主中心办公楼"
+   }
+  ],
+  "uninterrupted_operationsManagement": [
+   {
+    "administrativeDepartment": "00-科技管理部门",
+    "operationDepartment": "00-科技管理部门",
+    "serviceEndTime": "2021-08-26",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "河南捷联科技有限公司",
+    "serviceStartTime": "2020-08-27"
+   }
+  ],
+  "uninterrupted_ratedInputParameter": [
+   {
+    "ratedInputCurrent": "311",
+    "ratedInputPower": "120",
+    "ratedInputVoltage": "220"
+   }
+  ],
+  "uninterrupted_ratedOutputParameter": [
+   {
+    "ratedOutputCurrent": "145",
+    "ratedOutputPower": "96",
+    "ratedOutputVoltage": "220"
+   }
+  ],
+  "uninterrupted_uninterruptibleDistribution": [
+   {
+    "batteryType": "00-铅酸蓄电池",
+    "numberOfBatteries": "128",
+    "typeOfUninterruptibleMainsPowerModule": "01-一体化",
+    "uninterruptibleMainsType": "01-工频"
+   }
+  ],
+  "upsParallelSystem": "00-1台独立运行",
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "57dc8352e9ef4b6491081459f5495551",
+  "assetBrand": "施耐德电气",
+  "assetCode": "2202030021022006",
+  "assetSerialNumber": "UD1543102953",
+  "assetType": "symmetra LX 16KVA",
+  "backupPowerSupply": "1440",
+  "brandLand": "01-国外",
+  "communicationProtocol": [
+   "99-其它"
+  ],
+  "facilityCategory": "FAPDUPS000",
+  "facilityName": "新乡中支中心机房UPS3",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2016-04-01",
+  "facilityUseState": "00-设施在用",
+  "ratedAlternatingFrequency": "50",
+  "uninterrupted_deployment": [
+   {
+    "deployArea": "22-支持区-UPS区",
+    "deployComputerRoom": "新乡中支中心机房",
+    "deployDb": "新乡市中支中心机房",
+    "deployFloor": "十五层",
+    "deployGallery": "新乡市红旗区向阳路9号办公楼"
+   }
+  ],
+  "uninterrupted_operationsManagement": [
+   {
+    "administrativeDepartment": "00-科技管理部门",
+    "operationDepartment": "00-科技管理部门",
+    "serviceEndTime": "2021-12-10",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "北京卡普尼",
+    "serviceStartTime": "2020-12-10"
+   }
+  ],
+  "uninterrupted_ratedInputParameter": [
+   {
+    "ratedInputCurrent": "8",
+    "ratedInputPower": "16",
+    "ratedInputVoltage": "220"
+   }
+  ],
+  "uninterrupted_ratedOutputParameter": [
+   {
+    "ratedOutputCurrent": "7",
+    "ratedOutputPower": "12",
+    "ratedOutputVoltage": "220"
+   }
+  ],
+  "uninterrupted_uninterruptibleDistribution": [
+   {
+    "batteryType": "01-锂电池",
+    "numberOfBatteries": "40",
+    "typeOfUninterruptibleMainsPowerModule": "00-模块化",
+    "uninterruptibleMainsType": "00-高频"
+   }
+  ],
+  "upsParallelSystem": "03-2台并机加1台冗余备份运行",
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "60fabd1c5ff342e0b4a695131a428b9f",
+  "assetBrand": "艾默生",
+  "assetCode": "007002",
+  "assetSerialNumber": "210120004021430020002",
+  "assetType": "UL99-30KVA",
+  "backupPowerSupply": "720",
+  "brandLand": "01-国外",
+  "communicationProtocol": [
+   "00-Modbus"
+  ],
+  "facilityCategory": "FAPDUPS000",
+  "facilityName": "安阳市中支机房UPS电源主机2",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2014-09-01",
+  "facilityUseState": "00-设施在用",
+  "ratedAlternatingFrequency": "50",
+  "uninterrupted_deployment": [
+   {
+    "deployArea": "22-支持区-UPS区",
+    "deployComputerRoom": "中心机房",
+    "deployDb": "安阳市中支中心机房",
+    "deployFloor": "八层",
+    "deployGallery": "河南省安阳市开发区金融大厦"
+   }
+  ],
+  "uninterrupted_operationsManagement": [
+   {
+    "administrativeDepartment": "00-科技管理部门",
+    "operationDepartment": "00-科技管理部门",
+    "serviceEndTime": "2023-06-01",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "河南捷联",
+    "serviceStartTime": "2020-06-01"
+   }
+  ],
+  "uninterrupted_ratedInputParameter": [
+   {
+    "ratedInputCurrent": "20",
+    "ratedInputPower": "30",
+    "ratedInputVoltage": "220"
+   }
+  ],
+  "uninterrupted_ratedOutputParameter": [
+   {
+    "ratedOutputCurrent": "56",
+    "ratedOutputPower": "30",
+    "ratedOutputVoltage": "220"
+   }
+  ],
+  "uninterrupted_uninterruptibleDistribution": [
+   {
+    "batteryType": "00-铅酸蓄电池",
+    "numberOfBatteries": "60",
+    "typeOfUninterruptibleMainsPowerModule": "01-一体化",
+    "uninterruptibleMainsType": "01-工频"
+   }
+  ],
+  "upsParallelSystem": "01-2台并机运行",
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "6205ad8e11f84434b91560de4a74f27a",
+  "assetBrand": "山特",
+  "assetCode": "220000082101600",
+  "assetSerialNumber": "160219-23620002",
+  "assetType": "3C3 EX 30KS",
+  "backupPowerSupply": "2",
+  "brandLand": "00-国内",
+  "communicationProtocol": [
+   "00-Modbus"
+  ],
+  "facilityCategory": "FAPDUPS000",
+  "facilityName": "济源市中支电源室UPS电源主机1",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2016-08-01",
+  "facilityUseState": "00-设施在用",
+  "ratedAlternatingFrequency": "50",
+  "uninterrupted_deployment": [
+   {
+    "deployArea": "22-支持区-UPS区",
+    "deployComputerRoom": "中心机房",
+    "deployDb": "济源市中支中心机房",
+    "deployFloor": "二层",
+    "deployGallery": "济源市济源大道中段2号办公楼"
+   }
+  ],
+  "uninterrupted_operationsManagement": [
+   {
+    "administrativeDepartment": "01-后勤管理部门",
+    "operationDepartment": "01-后勤管理部门",
+    "serviceEndTime": "2022-03-31",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "捷联科技",
+    "serviceStartTime": "2021-04-01"
+   }
+  ],
+  "uninterrupted_ratedInputParameter": [
+   {
+    "ratedInputCurrent": "117",
+    "ratedInputPower": "33",
+    "ratedInputVoltage": "220"
+   }
+  ],
+  "uninterrupted_ratedOutputParameter": [
+   {
+    "ratedOutputCurrent": "135",
+    "ratedOutputPower": "24",
+    "ratedOutputVoltage": "220"
+   }
+  ],
+  "uninterrupted_uninterruptibleDistribution": [
+   {
+    "batteryType": "00-铅酸蓄电池",
+    "numberOfBatteries": "32",
+    "typeOfUninterruptibleMainsPowerModule": "01-一体化",
+    "uninterruptibleMainsType": "01-工频"
+   }
+  ],
+  "upsParallelSystem": "01-2台并机运行",
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "69fcf7e527a14a24bff3c0e9dc7ce805",
+  "assetBrand": "艾默生",
+  "assetCode": "007001",
+  "assetSerialNumber": "210120004021430020001",
+  "assetType": "UL99-30KVA",
+  "backupPowerSupply": "720",
+  "brandLand": "01-国外",
+  "communicationProtocol": [
+   "00-Modbus"
+  ],
+  "facilityCategory": "FAPDUPS000",
+  "facilityName": "安阳市中支机房UPS电源主机1",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2014-09-01",
+  "facilityUseState": "00-设施在用",
+  "ratedAlternatingFrequency": "50",
+  "uninterrupted_deployment": [
+   {
+    "deployArea": "22-支持区-UPS区",
+    "deployComputerRoom": "中心机房",
+    "deployDb": "安阳市中支中心机房",
+    "deployFloor": "八层",
+    "deployGallery": "河南省安阳市开发区金融大厦"
+   }
+  ],
+  "uninterrupted_operationsManagement": [
+   {
+    "administrativeDepartment": "00-科技管理部门",
+    "operationDepartment": "00-科技管理部门",
+    "serviceEndTime": "2023-06-01",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "河南捷联",
+    "serviceStartTime": "2020-06-01"
+   }
+  ],
+  "uninterrupted_ratedInputParameter": [
+   {
+    "ratedInputCurrent": "20",
+    "ratedInputPower": "30",
+    "ratedInputVoltage": "220"
+   }
+  ],
+  "uninterrupted_ratedOutputParameter": [
+   {
+    "ratedOutputCurrent": "56",
+    "ratedOutputPower": "30",
+    "ratedOutputVoltage": "220"
+   }
+  ],
+  "uninterrupted_uninterruptibleDistribution": [
+   {
+    "batteryType": "00-铅酸蓄电池",
+    "numberOfBatteries": "60",
+    "typeOfUninterruptibleMainsPowerModule": "01-一体化",
+    "uninterruptibleMainsType": "01-工频"
+   }
+  ],
+  "upsParallelSystem": "01-2台并机运行",
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "72762228981b40658dfcc49ad3448e6e",
+  "assetBrand": "艾默生",
+  "assetCode": "2202010021024024",
+  "assetSerialNumber": "UJ1649007053",
+  "assetType": "galaxy 300",
+  "backupPowerSupply": "480",
+  "brandLand": "01-国外",
+  "communicationProtocol": [
+   "02-Tcp/ip"
+  ],
+  "facilityCategory": "FAPDUPS000",
+  "facilityName": "洛阳市中支中心机房生产UPS2",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2017-09-01",
+  "facilityUseState": "00-设施在用",
+  "ratedAlternatingFrequency": "50",
+  "uninterrupted_deployment": [
+   {
+    "deployArea": "22-支持区-UPS区",
+    "deployComputerRoom": "洛阳市中心支行中心机房",
+    "deployDb": "洛阳市中支中心机房",
+    "deployFloor": "三层",
+    "deployGallery": "洛阳市中心支行办公大楼"
+   }
+  ],
+  "uninterrupted_operationsManagement": [
+   {
+    "administrativeDepartment": "00-科技管理部门",
+    "operationDepartment": "00-科技管理部门",
+    "serviceEndTime": "2022-01-31",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "郑州三信机房电子有限公司",
+    "serviceStartTime": "2021-02-01"
+   }
+  ],
+  "uninterrupted_ratedInputParameter": [
+   {
+    "ratedInputCurrent": "91",
+    "ratedInputPower": "60",
+    "ratedInputVoltage": "220"
+   }
+  ],
+  "uninterrupted_ratedOutputParameter": [
+   {
+    "ratedOutputCurrent": "91",
+    "ratedOutputPower": "60",
+    "ratedOutputVoltage": "220"
+   }
+  ],
+  "uninterrupted_uninterruptibleDistribution": [
+   {
+    "batteryType": "00-铅酸蓄电池",
+    "numberOfBatteries": "64",
+    "typeOfUninterruptibleMainsPowerModule": "01-一体化",
+    "uninterruptibleMainsType": "00-高频"
+   }
+  ],
+  "upsParallelSystem": "00-1台独立运行",
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "84e3815d6d0c44d1b3d6eecb9c2ea409",
+  "assetBrand": "艾默生",
+  "assetCode": "2202120021002002",
+  "assetSerialNumber": "21F02336552165010001",
+  "assetType": "EPK-320",
+  "backupPowerSupply": "600",
+  "brandLand": "01-国外",
+  "communicationProtocol": [
+   "00-Modbus"
+  ],
+  "facilityCategory": "FAPDUPS000",
+  "facilityName": "许昌市中支中心机房不间断供电系统UPS输出柜1",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2016-09-11",
+  "facilityUseState": "00-设施在用",
+  "ratedAlternatingFrequency": "50",
+  "uninterrupted_deployment": [
+   {
+    "deployArea": "22-支持区-UPS区",
+    "deployComputerRoom": "许昌市中心支行中心机房",
+    "deployDb": "许昌市中支中心机房",
+    "deployFloor": "四楼",
+    "deployGallery": "河南省许昌市建安区新东街571号办公楼"
+   }
+  ],
+  "uninterrupted_operationsManagement": [
+   {
+    "administrativeDepartment": "00-科技管理部门",
+    "operationDepartment": "05-外包服务部门",
+    "serviceEndTime": "2021-12-18",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "许昌协同科贸有限公司",
+    "serviceStartTime": "2019-12-18"
+   }
+  ],
+  "uninterrupted_ratedInputParameter": [
+   {
+    "ratedInputCurrent": "50",
+    "ratedInputPower": "50",
+    "ratedInputVoltage": "220"
+   }
+  ],
+  "uninterrupted_ratedOutputParameter": [
+   {
+    "ratedOutputCurrent": "11",
+    "ratedOutputPower": "5",
+    "ratedOutputVoltage": "220"
+   }
+  ],
+  "uninterrupted_uninterruptibleDistribution": [
+   {
+    "batteryType": "00-铅酸蓄电池",
+    "numberOfBatteries": "32",
+    "typeOfUninterruptibleMainsPowerModule": "01-一体化",
+    "uninterruptibleMainsType": "01-工频"
+   }
+  ],
+  "upsParallelSystem": "00-1台独立运行",
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "85f0ed70515a4484950856f1f79194e0",
+  "assetBrand": "易事特",
+  "assetCode": "2202130021026000",
+  "assetSerialNumber": "800301808310033",
+  "assetType": "EA830",
+  "backupPowerSupply": "600",
+  "brandLand": "00-国内",
+  "communicationProtocol": [
+   "00-Modbus"
+  ],
+  "facilityCategory": "FAPDUPS000",
+  "facilityName": "漯河市中支电源室UPS电源主机(主)",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2018-11-01",
+  "facilityUseState": "00-设施在用",
+  "ratedAlternatingFrequency": "50",
+  "uninterrupted_deployment": [
+   {
+    "deployArea": "22-支持区-UPS区",
+    "deployComputerRoom": "漯河市中支中心机房",
+    "deployDb": "漯河市中支中心机房",
+    "deployFloor": "五层",
+    "deployGallery": "漯河市中支办公大楼"
+   }
+  ],
+  "uninterrupted_operationsManagement": [
+   {
+    "administrativeDepartment": "00-科技管理部门",
+    "operationDepartment": "00-科技管理部门",
+    "serviceEndTime": "2021-11-01",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "漯河市宏讯电子有限公司",
+    "serviceStartTime": "2018-11-01"
+   }
+  ],
+  "uninterrupted_ratedInputParameter": [
+   {
+    "ratedInputCurrent": "24",
+    "ratedInputPower": "30",
+    "ratedInputVoltage": "220"
+   }
+  ],
+  "uninterrupted_ratedOutputParameter": [
+   {
+    "ratedOutputCurrent": "24",
+    "ratedOutputPower": "30",
+    "ratedOutputVoltage": "220"
+   }
+  ],
+  "uninterrupted_uninterruptibleDistribution": [
+   {
+    "batteryType": "00-铅酸蓄电池",
+    "numberOfBatteries": "32",
+    "typeOfUninterruptibleMainsPowerModule": "01-一体化",
+    "uninterruptibleMainsType": "01-工频"
+   }
+  ],
+  "upsParallelSystem": "01-2台并机运行",
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "8e99042ed697427ea818a132f194dfa6",
+  "assetBrand": "维谛",
+  "assetCode": "220208002102400",
+  "assetSerialNumber": "2101201622218801002E",
+  "assetType": "Liebert ITA2 10KVA",
+  "backupPowerSupply": "24",
+  "brandLand": "01-国外",
+  "communicationProtocol": [
+   "99-其它"
+  ],
+  "facilityCategory": "FAPDUPS000",
+  "facilityName": "鹤壁市中支服务器机房应急照明UPS",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2019-01-01",
+  "facilityUseState": "00-设施在用",
+  "ratedAlternatingFrequency": "50",
+  "uninterrupted_deployment": [
+   {
+    "deployArea": "00-主机房-服务器区",
+    "deployComputerRoom": "服务器机房",
+    "deployDb": "鹤壁市中支中心机房",
+    "deployFloor": "七层",
+    "deployGallery": "鹤壁市淇滨区九州路129号办公楼"
+   }
+  ],
+  "uninterrupted_operationsManagement": [
+   {
+    "administrativeDepartment": "00-科技管理部门",
+    "operationDepartment": "00-科技管理部门",
+    "serviceEndTime": "2021-12-01",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "河南吉之星商贸有限公司",
+    "serviceStartTime": "2019-01-01"
+   }
+  ],
+  "uninterrupted_ratedInputParameter": [
+   {
+    "ratedInputCurrent": "60",
+    "ratedInputPower": "10",
+    "ratedInputVoltage": "220"
+   }
+  ],
+  "uninterrupted_ratedOutputParameter": [
+   {
+    "ratedOutputCurrent": "46",
+    "ratedOutputPower": "10",
+    "ratedOutputVoltage": "220"
+   }
+  ],
+  "uninterrupted_uninterruptibleDistribution": [
+   {
+    "batteryType": "00-铅酸蓄电池",
+    "numberOfBatteries": "16",
+    "typeOfUninterruptibleMainsPowerModule": "00-模块化",
+    "uninterruptibleMainsType": "01-工频"
+   }
+  ],
+  "upsParallelSystem": "00-1台独立运行",
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "91621ad649d2479aa934d00f07fce14c",
+  "assetBrand": "科士达",
+  "assetCode": "2202160021026005",
+  "assetSerialNumber": "110010081863547700010",
+  "assetType": "MK3320",
+  "backupPowerSupply": "1300",
+  "brandLand": "00-国内",
+  "communicationProtocol": [
+   "99-其它"
+  ],
+  "facilityCategory": "FAPDUPS000",
+  "facilityName": "周口市中支中心机房不间断供电系统UPS2",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2018-08-06",
+  "facilityUseState": "00-设施在用",
+  "ratedAlternatingFrequency": "50",
+  "uninterrupted_deployment": [
+   {
+    "deployArea": "22-支持区-UPS区",
+    "deployComputerRoom": "周口市中心支行中心机房",
+    "deployDb": "周口市中支中心机房",
+    "deployFloor": "二层",
+    "deployGallery": "周口市川汇区七一路中段1号A楼"
+   }
+  ],
+  "uninterrupted_operationsManagement": [
+   {
+    "administrativeDepartment": "00-科技管理部门",
+    "operationDepartment": "00-科技管理部门",
+    "serviceEndTime": "2021-08-06",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "恒锋信息科技股份有限公司",
+    "serviceStartTime": "2018-08-06"
+   }
+  ],
+  "uninterrupted_ratedInputParameter": [
+   {
+    "ratedInputCurrent": "80",
+    "ratedInputPower": "40",
+    "ratedInputVoltage": "220"
+   }
+  ],
+  "uninterrupted_ratedOutputParameter": [
+   {
+    "ratedOutputCurrent": "80",
+    "ratedOutputPower": "32",
+    "ratedOutputVoltage": "220"
+   }
+  ],
+  "uninterrupted_uninterruptibleDistribution": [
+   {
+    "batteryType": "00-铅酸蓄电池",
+    "numberOfBatteries": "64",
+    "typeOfUninterruptibleMainsPowerModule": "00-模块化",
+    "uninterruptibleMainsType": "01-工频"
+   }
+  ],
+  "upsParallelSystem": "00-1台独立运行",
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "9a5256efcd7542728c1e2078e75bc6f2",
+  "assetBrand": "维谛",
+  "assetCode": "2202060021024065",
+  "assetSerialNumber": "2101200040218C030004",
+  "assetType": "UL33-0300L",
+  "backupPowerSupply": "600",
+  "brandLand": "01-国外",
+  "communicationProtocol": [
+   "00-Modbus",
+   "01-J bus",
+   "02-Tcp/ip"
+  ],
+  "facilityCategory": "FAPDUPS000",
+  "facilityName": "濮阳市中支中心机房不间断电源1",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2019-01-05",
+  "facilityUseState": "00-设施在用",
+  "ratedAlternatingFrequency": "50",
+  "uninterrupted_deployment": [
+   {
+    "deployArea": "22-支持区-UPS区",
+    "deployComputerRoom": "濮阳市中支中心机房",
+    "deployDb": "濮阳市中支中心机房",
+    "deployFloor": "六层",
+    "deployGallery": "办公楼"
+   }
+  ],
+  "uninterrupted_operationsManagement": [
+   {
+    "administrativeDepartment": "00-科技管理部门",
+    "operationDepartment": "00-科技管理部门",
+    "serviceEndTime": "2022-03-14",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "郑州市新光华贸易有限公司",
+    "serviceStartTime": "2021-03-15"
+   }
+  ],
+  "uninterrupted_ratedInputParameter": [
+   {
+    "ratedInputCurrent": "66",
+    "ratedInputPower": "30",
+    "ratedInputVoltage": "220"
+   }
+  ],
+  "uninterrupted_ratedOutputParameter": [
+   {
+    "ratedOutputCurrent": "56",
+    "ratedOutputPower": "30",
+    "ratedOutputVoltage": "220"
+   }
+  ],
+  "uninterrupted_uninterruptibleDistribution": [
+   {
+    "batteryType": "00-铅酸蓄电池",
+    "numberOfBatteries": "60",
+    "typeOfUninterruptibleMainsPowerModule": "01-一体化",
+    "uninterruptibleMainsType": "01-工频"
+   }
+  ],
+  "upsParallelSystem": "01-2台并机运行",
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "9ac2ad5d0bbd472c9427d1022b20caa4",
+  "assetBrand": "艾默生",
+  "assetCode": "2202150021016006",
+  "assetSerialNumber": "21012000312158020003",
+  "assetType": "UH31-0200L",
+  "backupPowerSupply": "480",
+  "brandLand": "01-国外",
+  "communicationProtocol": [
+   "00-Modbus"
+  ],
+  "facilityCategory": "FAPDUPS000",
+  "facilityName": "信阳市中支中心机房不间断供电系统UPS2",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2012-04-01",
+  "facilityUseState": "00-设施在用",
+  "ratedAlternatingFrequency": "60",
+  "uninterrupted_deployment": [
+   {
+    "deployArea": "22-支持区-UPS区",
+    "deployComputerRoom": "信阳市中心支行中心机房",
+    "deployDb": "信阳市中支中心机房",
+    "deployFloor": "二楼",
+    "deployGallery": "信阳市浉河区长安路133号"
+   }
+  ],
+  "uninterrupted_operationsManagement": [
+   {
+    "administrativeDepartment": "00-科技管理部门",
+    "operationDepartment": "00-科技管理部门",
+    "serviceEndTime": "2021-10-07",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "河南信源",
+    "serviceStartTime": "2020-10-08"
+   }
+  ],
+  "uninterrupted_ratedInputParameter": [
+   {
+    "ratedInputCurrent": "27",
+    "ratedInputPower": "16",
+    "ratedInputVoltage": "220"
+   }
+  ],
+  "uninterrupted_ratedOutputParameter": [
+   {
+    "ratedOutputCurrent": "10",
+    "ratedOutputPower": "5",
+    "ratedOutputVoltage": "220"
+   }
+  ],
+  "uninterrupted_uninterruptibleDistribution": [
+   {
+    "batteryType": "00-铅酸蓄电池",
+    "numberOfBatteries": "32",
+    "typeOfUninterruptibleMainsPowerModule": "01-一体化",
+    "uninterruptibleMainsType": "01-工频"
+   }
+  ],
+  "upsParallelSystem": "01-2台并机运行",
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "9dc13a465b4c4994aa97cc4ccb397935",
+  "assetBrand": "维谛",
+  "assetCode": "2202090021029004",
+  "assetSerialNumber": "2101202287220A0B0004",
+  "assetType": "APM160-40KVA",
+  "backupPowerSupply": "240",
+  "brandLand": "01-国外",
+  "communicationProtocol": [
+   "00-Modbus"
+  ],
+  "facilityCategory": "FAPDUPS000",
+  "facilityName": "中国人民银行三门峡市中心支行 机房主UPS电源",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2020-12-10",
+  "facilityUseState": "00-设施在用",
+  "ratedAlternatingFrequency": "50",
+  "uninterrupted_deployment": [
+   {
+    "deployArea": "24-支持区-空调区",
+    "deployComputerRoom": "中心机房",
+    "deployDb": "三门峡市中支中心机房",
+    "deployFloor": "六层",
+    "deployGallery": "办公大楼"
+   }
+  ],
+  "uninterrupted_operationsManagement": [
+   {
+    "administrativeDepartment": "00-科技管理部门",
+    "operationDepartment": "00-科技管理部门",
+    "serviceEndTime": "2023-12-10",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "河南吉之星电子科技有限公司",
+    "serviceStartTime": "2020-12-10"
+   }
+  ],
+  "uninterrupted_ratedInputParameter": [
+   {
+    "ratedInputCurrent": "322",
+    "ratedInputPower": "166",
+    "ratedInputVoltage": "220"
+   }
+  ],
+  "uninterrupted_ratedOutputParameter": [
+   {
+    "ratedOutputCurrent": "243",
+    "ratedOutputPower": "160",
+    "ratedOutputVoltage": "220"
+   }
+  ],
+  "uninterrupted_uninterruptibleDistribution": [
+   {
+    "batteryType": "00-铅酸蓄电池",
+    "numberOfBatteries": "128",
+    "typeOfUninterruptibleMainsPowerModule": "00-模块化",
+    "uninterruptibleMainsType": "00-高频"
+   }
+  ],
+  "upsParallelSystem": "01-2台并机运行",
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "a50d9605454443c68d1378deb58a57b0",
+  "assetBrand": "艾默生",
+  "assetCode": "220208002017105",
+  "assetSerialNumber": "2101200040216A030005",
+  "assetType": "UL33-30KVA",
+  "backupPowerSupply": "8",
+  "brandLand": "01-国外",
+  "communicationProtocol": [
+   "99-其它"
+  ],
+  "facilityCategory": "FAPDUPS000",
+  "facilityName": "鹤壁市中支电源室UPS电源主机1",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2016-11-24",
+  "facilityUseState": "00-设施在用",
+  "ratedAlternatingFrequency": "50",
+  "uninterrupted_deployment": [
+   {
+    "deployArea": "22-支持区-UPS区",
+    "deployComputerRoom": "电源室",
+    "deployDb": "鹤壁市中支中心机房",
+    "deployFloor": "七层",
+    "deployGallery": "鹤壁市淇滨区九州路129号办公楼"
+   }
+  ],
+  "uninterrupted_operationsManagement": [
+   {
+    "administrativeDepartment": "00-科技管理部门",
+    "operationDepartment": "00-科技管理部门",
+    "serviceEndTime": "2021-05-01",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "浩海方舟",
+    "serviceStartTime": "2016-11-24"
+   }
+  ],
+  "uninterrupted_ratedInputParameter": [
+   {
+    "ratedInputCurrent": "66",
+    "ratedInputPower": "30",
+    "ratedInputVoltage": "220"
+   }
+  ],
+  "uninterrupted_ratedOutputParameter": [
+   {
+    "ratedOutputCurrent": "56",
+    "ratedOutputPower": "30",
+    "ratedOutputVoltage": "220"
+   }
+  ],
+  "uninterrupted_uninterruptibleDistribution": [
+   {
+    "batteryType": "00-铅酸蓄电池",
+    "numberOfBatteries": "30",
+    "typeOfUninterruptibleMainsPowerModule": "01-一体化",
+    "uninterruptibleMainsType": "01-工频"
+   }
+  ],
+  "upsParallelSystem": "01-2台并机运行",
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "a6336a78104040df93cfa1ffdf14c30f",
+  "assetBrand": "艾默生",
+  "assetSerialNumber": "21023578352173050011",
+  "assetType": "ITA 0040kUPD01",
+  "backupPowerSupply": "8",
+  "brandLand": "01-国外",
+  "communicationProtocol": [
+   "00-Modbus",
+   "01-J bus",
+   "02-Tcp/ip"
+  ],
+  "facilityCategory": "FAPDUPS000",
+  "facilityName": "平顶山市中支电源室UPS电源主机A",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2017-12-26",
+  "facilityUseState": "00-设施在用",
+  "ratedAlternatingFrequency": "50",
+  "uninterrupted_deployment": [
+   {
+    "deployArea": "22-支持区-UPS区",
+    "deployComputerRoom": "电源室",
+    "deployDb": "平顶山市中支中心机房",
+    "deployFloor": "八层",
+    "deployGallery": "办公楼"
+   }
+  ],
+  "uninterrupted_operationsManagement": [
+   {
+    "administrativeDepartment": "00-科技管理部门",
+    "operationDepartment": "00-科技管理部门",
+    "serviceEndTime": "2020-12-26",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "中平信息技术有限责任公司",
+    "serviceStartTime": "2017-12-26"
+   }
+  ],
+  "uninterrupted_ratedInputParameter": [
+   {
+    "ratedInputCurrent": "68",
+    "ratedInputPower": "40",
+    "ratedInputVoltage": "220"
+   }
+  ],
+  "uninterrupted_ratedOutputParameter": [
+   {
+    "ratedOutputCurrent": "61",
+    "ratedOutputPower": "36",
+    "ratedOutputVoltage": "220"
+   }
+  ],
+  "uninterrupted_uninterruptibleDistribution": [
+   {
+    "batteryType": "00-铅酸蓄电池",
+    "numberOfBatteries": "64",
+    "typeOfUninterruptibleMainsPowerModule": "00-模块化",
+    "uninterruptibleMainsType": "01-工频"
+   }
+  ],
+  "upsParallelSystem": "01-2台并机运行",
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "abb29e341cc94077bc3f32a607712541",
+  "assetBrand": "维谛",
+  "assetCode": "2202060021024066",
+  "assetSerialNumber": "2101200040218C040002",
+  "assetType": "UL33-0300L",
+  "backupPowerSupply": "600",
+  "brandLand": "01-国外",
+  "communicationProtocol": [
+   "00-Modbus",
+   "01-J bus",
+   "02-Tcp/ip"
+  ],
+  "facilityCategory": "FAPDUPS000",
+  "facilityName": "濮阳市中支中心机房不间断电源2",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2019-01-05",
+  "facilityUseState": "00-设施在用",
+  "ratedAlternatingFrequency": "50",
+  "uninterrupted_deployment": [
+   {
+    "deployArea": "22-支持区-UPS区",
+    "deployComputerRoom": "濮阳市中支中心机房",
+    "deployDb": "濮阳市中支中心机房",
+    "deployFloor": "六层",
+    "deployGallery": "办公楼"
+   }
+  ],
+  "uninterrupted_operationsManagement": [
+   {
+    "administrativeDepartment": "00-科技管理部门",
+    "operationDepartment": "00-科技管理部门",
+    "serviceEndTime": "2022-03-14",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "郑州市新光华贸易有限公司",
+    "serviceStartTime": "2021-03-15"
+   }
+  ],
+  "uninterrupted_ratedInputParameter": [
+   {
+    "ratedInputCurrent": "66",
+    "ratedInputPower": "30",
+    "ratedInputVoltage": "220"
+   }
+  ],
+  "uninterrupted_ratedOutputParameter": [
+   {
+    "ratedOutputCurrent": "56",
+    "ratedOutputPower": "30",
+    "ratedOutputVoltage": "220"
+   }
+  ],
+  "uninterrupted_uninterruptibleDistribution": [
+   {
+    "batteryType": "00-铅酸蓄电池",
+    "numberOfBatteries": "60",
+    "typeOfUninterruptibleMainsPowerModule": "01-一体化",
+    "uninterruptibleMainsType": "01-工频"
+   }
+  ],
+  "upsParallelSystem": "01-2台并机运行",
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "b1d3e7c2834f48009104512ccd7b8bd8",
+  "assetBrand": "施耐德电气",
+  "assetCode": "2202010021024024",
+  "assetSerialNumber": "UJ1649007054",
+  "assetType": "galaxy 300",
+  "backupPowerSupply": "480",
+  "brandLand": "01-国外",
+  "communicationProtocol": [
+   "02-Tcp/ip"
+  ],
+  "facilityCategory": "FAPDUPS000",
+  "facilityName": "洛阳市中支中心机房生产UPS1",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2017-09-01",
+  "facilityUseState": "00-设施在用",
+  "ratedAlternatingFrequency": "50",
+  "uninterrupted_deployment": [
+   {
+    "deployArea": "22-支持区-UPS区",
+    "deployComputerRoom": "洛阳市中心支行中心机房",
+    "deployDb": "洛阳市中支中心机房",
+    "deployFloor": "三层",
+    "deployGallery": "洛阳市中心支行办公大楼"
+   }
+  ],
+  "uninterrupted_operationsManagement": [
+   {
+    "administrativeDepartment": "00-科技管理部门",
+    "operationDepartment": "00-科技管理部门",
+    "serviceEndTime": "2022-01-31",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "郑州三信机房电子有限公司",
+    "serviceStartTime": "2021-02-01"
+   }
+  ],
+  "uninterrupted_ratedInputParameter": [
+   {
+    "ratedInputCurrent": "91",
+    "ratedInputPower": "60",
+    "ratedInputVoltage": "220"
+   }
+  ],
+  "uninterrupted_ratedOutputParameter": [
+   {
+    "ratedOutputCurrent": "91",
+    "ratedOutputPower": "60",
+    "ratedOutputVoltage": "220"
+   }
+  ],
+  "uninterrupted_uninterruptibleDistribution": [
+   {
+    "batteryType": "00-铅酸蓄电池",
+    "numberOfBatteries": "64",
+    "typeOfUninterruptibleMainsPowerModule": "01-一体化",
+    "uninterruptibleMainsType": "00-高频"
+   }
+  ],
+  "upsParallelSystem": "00-1台独立运行",
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "ba6d73f586634df496b4f8e1069d8cb6",
+  "assetBrand": "先控捷联",
+  "assetCode": "2200000021032000",
+  "assetSerialNumber": "A107011Z002",
+  "assetType": "CMS-150/25",
+  "backupPowerSupply": "120",
+  "brandLand": "00-国内",
+  "communicationProtocol": [
+   "00-Modbus"
+  ],
+  "facilityCategory": "FAPDUPS000",
+  "facilityName": "郑州中支转接中心UPS2",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2020-07-17",
+  "facilityUseState": "00-设施在用",
+  "ratedAlternatingFrequency": "50",
+  "uninterrupted_deployment": [
+   {
+    "deployArea": "23-支持区-电池室",
+    "deployComputerRoom": "转接中心机房",
+    "deployDb": "郑州中支转接中心机房",
+    "deployFloor": "二层",
+    "deployGallery": "转接中心综合楼"
+   }
+  ],
+  "uninterrupted_operationsManagement": [
+   {
+    "administrativeDepartment": "00-科技管理部门",
+    "operationDepartment": "00-科技管理部门",
+    "serviceEndTime": "2023-07-16",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "河南捷联科技有限公司",
+    "serviceStartTime": "2020-07-17"
+   }
+  ],
+  "uninterrupted_ratedInputParameter": [
+   {
+    "ratedInputCurrent": "196",
+    "ratedInputPower": "75",
+    "ratedInputVoltage": "220"
+   }
+  ],
+  "uninterrupted_ratedOutputParameter": [
+   {
+    "ratedOutputCurrent": "177",
+    "ratedOutputPower": "67",
+    "ratedOutputVoltage": "220"
+   }
+  ],
+  "uninterrupted_uninterruptibleDistribution": [
+   {
+    "batteryType": "00-铅酸蓄电池",
+    "numberOfBatteries": "64",
+    "typeOfUninterruptibleMainsPowerModule": "00-模块化",
+    "uninterruptibleMainsType": "00-高频"
+   }
+  ],
+  "upsParallelSystem": "00-1台独立运行",
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "bf12012cf2124cafa139f795baffe279",
+  "assetBrand": "科士达",
+  "assetCode": "ZMD007001",
+  "assetSerialNumber": "110014952730926400002",
+  "assetType": "EP100",
+  "backupPowerSupply": "720",
+  "brandLand": "00-国内",
+  "communicationProtocol": [
+   "99-其它"
+  ],
+  "facilityCategory": "FAPDUPS000",
+  "facilityName": "驻马店市中支中心机房UPS2",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2018-11-02",
+  "facilityUseState": "00-设施在用",
+  "ratedAlternatingFrequency": "50",
+  "uninterrupted_deployment": [
+   {
+    "deployArea": "23-支持区-电池室",
+    "deployComputerRoom": "电池室",
+    "deployDb": "驻马店市中支中心机房",
+    "deployFloor": "四层",
+    "deployGallery": "驻马店市驿城区泰山路567号办公楼"
+   }
+  ],
+  "uninterrupted_operationsManagement": [
+   {
+    "administrativeDepartment": "00-科技管理部门",
+    "operationDepartment": "00-科技管理部门",
+    "serviceEndTime": "2021-11-02",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "郑州一建集团有限公司",
+    "serviceStartTime": "2018-11-02"
+   }
+  ],
+  "uninterrupted_ratedInputParameter": [
+   {
+    "ratedInputCurrent": "60",
+    "ratedInputPower": "50",
+    "ratedInputVoltage": "220"
+   }
+  ],
+  "uninterrupted_ratedOutputParameter": [
+   {
+    "ratedOutputCurrent": "50",
+    "ratedOutputPower": "40",
+    "ratedOutputVoltage": "220"
+   }
+  ],
+  "uninterrupted_uninterruptibleDistribution": [
+   {
+    "batteryType": "00-铅酸蓄电池",
+    "numberOfBatteries": "96",
+    "typeOfUninterruptibleMainsPowerModule": "01-一体化",
+    "uninterruptibleMainsType": "01-工频"
+   }
+  ],
+  "upsParallelSystem": "00-1台独立运行",
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "c25dec2f79b64845b109e124d8c6a89e",
+  "assetBrand": "华为",
+  "assetCode": "2202080020171015",
+  "assetSerialNumber": "210229037610FB000003",
+  "assetType": "UPS5000-A-60KTTl",
+  "backupPowerSupply": "8",
+  "brandLand": "00-国内",
+  "communicationProtocol": [
+   "00-Modbus"
+  ],
+  "facilityCategory": "FAPDUPS000",
+  "facilityName": "南阳市中支电源室UPS电源主机1",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2017-10-15",
+  "facilityUseState": "00-设施在用",
+  "ratedAlternatingFrequency": "50",
+  "uninterrupted_deployment": [
+   {
+    "deployArea": "22-支持区-UPS区",
+    "deployComputerRoom": "中心机房",
+    "deployDb": "南阳市中支中心机房",
+    "deployFloor": "十二层",
+    "deployGallery": "南阳市新华西路178号号办公楼"
+   }
+  ],
+  "uninterrupted_operationsManagement": [
+   {
+    "administrativeDepartment": "00-科技管理部门",
+    "operationDepartment": "00-科技管理部门",
+    "serviceEndTime": "2022-10-15",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "南阳恒得实佳",
+    "serviceStartTime": "2020-10-15"
+   }
+  ],
+  "uninterrupted_ratedInputParameter": [
+   {
+    "ratedInputCurrent": "66",
+    "ratedInputPower": "30",
+    "ratedInputVoltage": "220"
+   }
+  ],
+  "uninterrupted_ratedOutputParameter": [
+   {
+    "ratedOutputCurrent": "56",
+    "ratedOutputPower": "30",
+    "ratedOutputVoltage": "220"
+   }
+  ],
+  "uninterrupted_uninterruptibleDistribution": [
+   {
+    "batteryType": "00-铅酸蓄电池",
+    "numberOfBatteries": "28",
+    "typeOfUninterruptibleMainsPowerModule": "01-一体化",
+    "uninterruptibleMainsType": "01-工频"
+   }
+  ],
+  "upsParallelSystem": "01-2台并机运行",
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "c7c22885b1f74becae790fde9c28e774",
+  "assetBrand": "艾默生",
+  "assetCode": "220208002013002",
+  "assetSerialNumber": "2101201515216303005A",
+  "assetType": "UHA1R-0100L",
+  "backupPowerSupply": "6",
+  "brandLand": "01-国外",
+  "communicationProtocol": [
+   "99-其它"
+  ],
+  "facilityCategory": "FAPDUPS000",
+  "facilityName": "鹤壁市中支服务器机房营业大厅UPS主机2",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2013-08-01",
+  "facilityUseState": "00-设施在用",
+  "ratedAlternatingFrequency": "50",
+  "uninterrupted_deployment": [
+   {
+    "deployArea": "00-主机房-服务器区",
+    "deployComputerRoom": "服务器机房",
+    "deployDb": "鹤壁市中支中心机房",
+    "deployFloor": "七层",
+    "deployGallery": "鹤壁市淇滨区九州路129号办公楼"
+   }
+  ],
+  "uninterrupted_operationsManagement": [
+   {
+    "administrativeDepartment": "00-科技管理部门",
+    "operationDepartment": "00-科技管理部门",
+    "serviceEndTime": "2015-08-01",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "浩海方舟",
+    "serviceStartTime": "2013-08-01"
+   }
+  ],
+  "uninterrupted_ratedInputParameter": [
+   {
+    "ratedInputCurrent": "55",
+    "ratedInputPower": "9",
+    "ratedInputVoltage": "220"
+   }
+  ],
+  "uninterrupted_ratedOutputParameter": [
+   {
+    "ratedOutputCurrent": "55",
+    "ratedOutputPower": "9",
+    "ratedOutputVoltage": "220"
+   }
+  ],
+  "uninterrupted_uninterruptibleDistribution": [
+   {
+    "batteryType": "00-铅酸蓄电池",
+    "numberOfBatteries": "16",
+    "typeOfUninterruptibleMainsPowerModule": "00-模块化",
+    "uninterruptibleMainsType": "01-工频"
+   }
+  ],
+  "upsParallelSystem": "01-2台并机运行",
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "ca3810343ef94d94b1f6080c8b1b255c",
+  "assetBrand": "科士达",
+  "assetCode": "2202160021026004",
+  "assetSerialNumber": "110010081863547700003",
+  "assetType": "MK3320",
+  "backupPowerSupply": "1300",
+  "brandLand": "00-国内",
+  "communicationProtocol": [
+   "99-其它"
+  ],
+  "facilityCategory": "FAPDUPS000",
+  "facilityName": "周口市中支中心机房不间断供电系统UPS1",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2018-08-06",
+  "facilityUseState": "00-设施在用",
+  "ratedAlternatingFrequency": "50",
+  "uninterrupted_deployment": [
+   {
+    "deployArea": "22-支持区-UPS区",
+    "deployComputerRoom": "周口市中心支行中心机房",
+    "deployDb": "周口市中支中心机房",
+    "deployFloor": "二层",
+    "deployGallery": "周口市川汇区七一路中段1号A楼"
+   }
+  ],
+  "uninterrupted_operationsManagement": [
+   {
+    "administrativeDepartment": "00-科技管理部门",
+    "operationDepartment": "00-科技管理部门",
+    "serviceEndTime": "2021-08-06",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "恒锋信息科技股份有限公司",
+    "serviceStartTime": "2018-08-06"
+   }
+  ],
+  "uninterrupted_ratedInputParameter": [
+   {
+    "ratedInputCurrent": "80",
+    "ratedInputPower": "40",
+    "ratedInputVoltage": "220"
+   }
+  ],
+  "uninterrupted_ratedOutputParameter": [
+   {
+    "ratedOutputCurrent": "80",
+    "ratedOutputPower": "32",
+    "ratedOutputVoltage": "220"
+   }
+  ],
+  "uninterrupted_uninterruptibleDistribution": [
+   {
+    "batteryType": "00-铅酸蓄电池",
+    "numberOfBatteries": "64",
+    "typeOfUninterruptibleMainsPowerModule": "00-模块化",
+    "uninterruptibleMainsType": "01-工频"
+   }
+  ],
+  "upsParallelSystem": "00-1台独立运行",
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "d165eeaa116648bc868e2227971a61b8",
+  "assetBrand": "施耐德电气",
+  "assetCode": "2202130021026101",
+  "assetSerialNumber": "UJ1649000890",
+  "assetType": "GALAXY 300-30KVA",
+  "backupPowerSupply": "245",
+  "brandLand": "01-国外",
+  "communicationProtocol": [
+   "99-其它"
+  ],
+  "facilityCategory": "FAPDUPS000",
+  "facilityName": "新乡中支中心机房UPS2",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2017-08-30",
+  "facilityUseState": "00-设施在用",
+  "ratedAlternatingFrequency": "50",
+  "uninterrupted_deployment": [
+   {
+    "deployArea": "22-支持区-UPS区",
+    "deployComputerRoom": "新乡中支中心机房",
+    "deployDb": "新乡市中支中心机房",
+    "deployFloor": "十五层",
+    "deployGallery": "新乡市红旗区向阳路9号办公楼"
+   }
+  ],
+  "uninterrupted_operationsManagement": [
+   {
+    "administrativeDepartment": "00-科技管理部门",
+    "operationDepartment": "00-科技管理部门",
+    "serviceEndTime": "2021-12-10",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "北京卡普尼",
+    "serviceStartTime": "2020-12-10"
+   }
+  ],
+  "uninterrupted_ratedInputParameter": [
+   {
+    "ratedInputCurrent": "47",
+    "ratedInputPower": "24",
+    "ratedInputVoltage": "220"
+   }
+  ],
+  "uninterrupted_ratedOutputParameter": [
+   {
+    "ratedOutputCurrent": "46",
+    "ratedOutputPower": "24",
+    "ratedOutputVoltage": "220"
+   }
+  ],
+  "uninterrupted_uninterruptibleDistribution": [
+   {
+    "batteryType": "01-锂电池",
+    "numberOfBatteries": "16",
+    "typeOfUninterruptibleMainsPowerModule": "01-一体化",
+    "uninterruptibleMainsType": "00-高频"
+   }
+  ],
+  "upsParallelSystem": "03-2台并机加1台冗余备份运行",
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "e0b10cdca0f342b88cb865df9e2e77ca",
+  "assetBrand": "山特",
+  "assetCode": "220000082101601",
+  "assetSerialNumber": "160229-48890007",
+  "assetType": "3C3 EX 30KS",
+  "backupPowerSupply": "2",
+  "brandLand": "00-国内",
+  "communicationProtocol": [
+   "00-Modbus"
+  ],
+  "facilityCategory": "FAPDUPS000",
+  "facilityName": "济源市中支电源室UPS电源主机2",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2016-08-01",
+  "facilityUseState": "00-设施在用",
+  "ratedAlternatingFrequency": "50",
+  "uninterrupted_deployment": [
+   {
+    "deployArea": "22-支持区-UPS区",
+    "deployComputerRoom": "中心机房",
+    "deployDb": "济源市中支中心机房",
+    "deployFloor": "二层",
+    "deployGallery": "济源市济源大道中段2号办公楼"
+   }
+  ],
+  "uninterrupted_operationsManagement": [
+   {
+    "administrativeDepartment": "01-后勤管理部门",
+    "operationDepartment": "01-后勤管理部门",
+    "serviceEndTime": "2022-03-31",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "捷联科技",
+    "serviceStartTime": "2021-04-01"
+   }
+  ],
+  "uninterrupted_ratedInputParameter": [
+   {
+    "ratedInputCurrent": "117",
+    "ratedInputPower": "33",
+    "ratedInputVoltage": "220"
+   }
+  ],
+  "uninterrupted_ratedOutputParameter": [
+   {
+    "ratedOutputCurrent": "135",
+    "ratedOutputPower": "24",
+    "ratedOutputVoltage": "220"
+   }
+  ],
+  "uninterrupted_uninterruptibleDistribution": [
+   {
+    "batteryType": "00-铅酸蓄电池",
+    "numberOfBatteries": "32",
+    "typeOfUninterruptibleMainsPowerModule": "01-一体化",
+    "uninterruptibleMainsType": "01-工频"
+   }
+  ],
+  "upsParallelSystem": "01-2台并机运行",
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "e4a265d37eb641579f9840bf17f39512",
+  "assetBrand": "华为",
+  "assetSerialNumber": "2102310NYJ10G1000001",
+  "assetType": "UPS500-E",
+  "backupPowerSupply": "390",
+  "brandLand": "00-国内",
+  "communicationProtocol": [
+   "00-Modbus"
+  ],
+  "facilityCategory": "FAPDUPS000",
+  "facilityName": "郑州中支主中心机房华为UPS",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2017-01-01",
+  "facilityUseState": "00-设施在用",
+  "ratedAlternatingFrequency": "50",
+  "uninterrupted_deployment": [
+   {
+    "deployArea": "23-支持区-电池室",
+    "deployComputerRoom": "配电室",
+    "deployDb": "郑州中支主中心机房",
+    "deployFloor": "11层",
+    "deployGallery": "主中心办公楼"
+   }
+  ],
+  "uninterrupted_operationsManagement": [
+   {
+    "administrativeDepartment": "00-科技管理部门",
+    "operationDepartment": "00-科技管理部门",
+    "serviceEndTime": "2021-08-26",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "河南捷联科技有限公司",
+    "serviceStartTime": "2020-08-27"
+   }
+  ],
+  "uninterrupted_ratedInputParameter": [
+   {
+    "ratedInputCurrent": "213",
+    "ratedInputPower": "80",
+    "ratedInputVoltage": "220"
+   }
+  ],
+  "uninterrupted_ratedOutputParameter": [
+   {
+    "ratedOutputCurrent": "105",
+    "ratedOutputPower": "80",
+    "ratedOutputVoltage": "220"
+   }
+  ],
+  "uninterrupted_uninterruptibleDistribution": [
+   {
+    "batteryType": "00-铅酸蓄电池",
+    "numberOfBatteries": "40",
+    "typeOfUninterruptibleMainsPowerModule": "00-模块化",
+    "uninterruptibleMainsType": "00-高频"
+   }
+  ],
+  "upsParallelSystem": "00-1台独立运行",
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "e618c0a8fa3d4b62a7f25c15d4338297",
+  "assetBrand": "科士达",
+  "assetCode": "2200000021029001",
+  "assetSerialNumber": "1100246208B0166700001",
+  "assetType": "EP120-L",
+  "backupPowerSupply": "120",
+  "brandLand": "00-国内",
+  "communicationProtocol": [
+   "99-其它"
+  ],
+  "facilityCategory": "FAPDUPS000",
+  "facilityName": "郑州中支主中心机房科士达UPS1",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2018-12-25",
+  "facilityUseState": "00-设施在用",
+  "ratedAlternatingFrequency": "50",
+  "uninterrupted_deployment": [
+   {
+    "deployArea": "23-支持区-电池室",
+    "deployComputerRoom": "配电室",
+    "deployDb": "郑州中支主中心机房",
+    "deployFloor": "11层",
+    "deployGallery": "主中心办公楼"
+   }
+  ],
+  "uninterrupted_operationsManagement": [
+   {
+    "administrativeDepartment": "00-科技管理部门",
+    "operationDepartment": "00-科技管理部门",
+    "serviceEndTime": "2021-08-26",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "河南捷联科技有限公司",
+    "serviceStartTime": "2020-08-27"
+   }
+  ],
+  "uninterrupted_ratedInputParameter": [
+   {
+    "ratedInputCurrent": "311",
+    "ratedInputPower": "120",
+    "ratedInputVoltage": "220"
+   }
+  ],
+  "uninterrupted_ratedOutputParameter": [
+   {
+    "ratedOutputCurrent": "145",
+    "ratedOutputPower": "96",
+    "ratedOutputVoltage": "220"
+   }
+  ],
+  "uninterrupted_uninterruptibleDistribution": [
+   {
+    "batteryType": "00-铅酸蓄电池",
+    "numberOfBatteries": "128",
+    "typeOfUninterruptibleMainsPowerModule": "01-一体化",
+    "uninterruptibleMainsType": "01-工频"
+   }
+  ],
+  "upsParallelSystem": "00-1台独立运行",
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "e893e94d3540408d97f64c9cc18bf9f6",
+  "assetBrand": "艾默生",
+  "assetCode": "2202120021002001",
+  "assetSerialNumber": "21F02336542165010001111",
+  "assetType": "EPK-320",
+  "backupPowerSupply": "600",
+  "brandLand": "01-国外",
+  "communicationProtocol": [
+   "00-Modbus"
+  ],
+  "facilityCategory": "FAPDUPS000",
+  "facilityName": "许昌市中支中心机房不间断供电系统UPS交流柜",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2016-09-11",
+  "facilityUseState": "00-设施在用",
+  "ratedAlternatingFrequency": "50",
+  "uninterrupted_deployment": [
+   {
+    "deployArea": "22-支持区-UPS区",
+    "deployComputerRoom": "许昌市中心支行中心机房",
+    "deployDb": "许昌市中支中心机房",
+    "deployFloor": "四楼",
+    "deployGallery": "河南省许昌市建安区新东街571号办公楼"
+   }
+  ],
+  "uninterrupted_operationsManagement": [
+   {
+    "administrativeDepartment": "00-科技管理部门",
+    "operationDepartment": "05-外包服务部门",
+    "serviceEndTime": "2021-12-18",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "许昌协同科贸有限公司",
+    "serviceStartTime": "2019-12-18"
+   }
+  ],
+  "uninterrupted_ratedInputParameter": [
+   {
+    "ratedInputCurrent": "27",
+    "ratedInputPower": "16",
+    "ratedInputVoltage": "220"
+   }
+  ],
+  "uninterrupted_ratedOutputParameter": [
+   {
+    "ratedOutputCurrent": "25",
+    "ratedOutputPower": "15",
+    "ratedOutputVoltage": "220"
+   }
+  ],
+  "uninterrupted_uninterruptibleDistribution": [
+   {
+    "batteryType": "00-铅酸蓄电池",
+    "numberOfBatteries": "32",
+    "typeOfUninterruptibleMainsPowerModule": "01-一体化",
+    "uninterruptibleMainsType": "01-工频"
+   }
+  ],
+  "upsParallelSystem": "00-1台独立运行",
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "eb7fc5e4e7ca441caa325ad05c6850de",
+  "assetBrand": "先控捷联",
+  "assetCode": "2200000021026076",
+  "assetSerialNumber": "AG03008Z012",
+  "assetType": "CMS-150/25",
+  "backupPowerSupply": "120",
+  "brandLand": "00-国内",
+  "communicationProtocol": [
+   "00-Modbus"
+  ],
+  "facilityCategory": "FAPDUPS000",
+  "facilityName": "郑州中支转接中心UPS1",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2018-12-05",
+  "facilityUseState": "00-设施在用",
+  "ratedAlternatingFrequency": "50",
+  "uninterrupted_deployment": [
+   {
+    "deployArea": "23-支持区-电池室",
+    "deployComputerRoom": "转接中心机房",
+    "deployDb": "郑州中支转接中心机房",
+    "deployFloor": "二层",
+    "deployGallery": "转接中心综合楼"
+   }
+  ],
+  "uninterrupted_operationsManagement": [
+   {
+    "administrativeDepartment": "00-科技管理部门",
+    "operationDepartment": "00-科技管理部门",
+    "serviceEndTime": "2021-12-05",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "河南捷联科技有限公司",
+    "serviceStartTime": "2018-12-05"
+   }
+  ],
+  "uninterrupted_ratedInputParameter": [
+   {
+    "ratedInputCurrent": "196",
+    "ratedInputPower": "75",
+    "ratedInputVoltage": "220"
+   }
+  ],
+  "uninterrupted_ratedOutputParameter": [
+   {
+    "ratedOutputCurrent": "177",
+    "ratedOutputPower": "67",
+    "ratedOutputVoltage": "220"
+   }
+  ],
+  "uninterrupted_uninterruptibleDistribution": [
+   {
+    "batteryType": "00-铅酸蓄电池",
+    "numberOfBatteries": "64",
+    "typeOfUninterruptibleMainsPowerModule": "00-模块化",
+    "uninterruptibleMainsType": "00-高频"
+   }
+  ],
+  "upsParallelSystem": "00-1台独立运行",
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "f3de0b441181450c9621ea2add9441ed",
+  "assetBrand": "艾默生",
+  "assetCode": "2202150021009002",
+  "assetSerialNumber": "21012000312113030005",
+  "assetType": "UH31-0200L",
+  "backupPowerSupply": "480",
+  "brandLand": "01-国外",
+  "communicationProtocol": [
+   "00-Modbus"
+  ],
+  "facilityCategory": "FAPDUPS000",
+  "facilityName": "信阳市中支中心机房不间断供电系统UPS1",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2012-04-01",
+  "facilityUseState": "00-设施在用",
+  "ratedAlternatingFrequency": "60",
+  "uninterrupted_deployment": [
+   {
+    "deployArea": "22-支持区-UPS区",
+    "deployComputerRoom": "信阳市中心支行中心机房",
+    "deployDb": "信阳市中支中心机房",
+    "deployFloor": "二楼",
+    "deployGallery": "信阳市浉河区长安路133号"
+   }
+  ],
+  "uninterrupted_operationsManagement": [
+   {
+    "administrativeDepartment": "00-科技管理部门",
+    "operationDepartment": "00-科技管理部门",
+    "serviceEndTime": "2021-10-07",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "河南信源",
+    "serviceStartTime": "2020-10-08"
+   }
+  ],
+  "uninterrupted_ratedInputParameter": [
+   {
+    "ratedInputCurrent": "27",
+    "ratedInputPower": "16",
+    "ratedInputVoltage": "220"
+   }
+  ],
+  "uninterrupted_ratedOutputParameter": [
+   {
+    "ratedOutputCurrent": "11",
+    "ratedOutputPower": "5",
+    "ratedOutputVoltage": "220"
+   }
+  ],
+  "uninterrupted_uninterruptibleDistribution": [
+   {
+    "batteryType": "00-铅酸蓄电池",
+    "numberOfBatteries": "32",
+    "typeOfUninterruptibleMainsPowerModule": "01-一体化",
+    "uninterruptibleMainsType": "01-工频"
+   }
+  ],
+  "upsParallelSystem": "01-2台并机运行",
+  "_dataSource": "双源"
+ }
+]

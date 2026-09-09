@@ -1,0 +1,36 @@
+[
+ {
+  "assetBrand": "华三",
+  "assetCode": "SN0000111",
+  "assetSerialNumber": "SN0000111",
+  "assetType": "UIN001",
+  "assetValue": 1000.05,
+  "brandLand": "00-国内",
+  "classificationOfHumidifiers": "00-红外线式加湿器",
+  "facilityCategory": "FAKTJSX000",
+  "facilityDescriptor": "6aa21ce42f2044618cc89cf3b093ecb8",
+  "facilityName": "1125优锘加湿系统011409",
+  "facilityUseDate": "2020-01-23",
+  "facilityUseState": "00-设施在用",
+  "humidification_deployment": [
+   {
+    "deployArea": "01-主机房-网络区",
+    "deployComputerRoom": "生产机房",
+    "deployFloor": "5层",
+    "deployGallery": "14号楼"
+   }
+  ],
+  "humidification_operationsManagement": [
+   {
+    "administrativeDepartment": "03-保卫管理部门",
+    "operationDepartment": "03-保卫管理部门",
+    "serviceEndTime": "2020-01-23",
+    "serviceLevel": "00-5*8",
+    "serviceProvider": "优锘",
+    "serviceStartTime": "2020-01-23"
+   }
+  ],
+  "ratedPower": 106.55,
+  "_dataSource": "上报"
+ }
+]

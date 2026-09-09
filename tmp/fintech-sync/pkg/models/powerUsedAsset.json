@@ -1,0 +1,44 @@
+{
+ "_version": 1,
+ "attrList": [],
+ "category": "金融元数据.用电设备",
+ "creator": "easyops",
+ "deleteAuthorizers": [],
+ "icon": "",
+ "indexList": [],
+ "isAbstract": true,
+ "memo": "",
+ "modifier": "",
+ "name": "用电设备",
+ "notifyDenied": false,
+ "objectId": "powerUsedAsset@FINTECHDATA",
+ "parentObjectId": "",
+ "parentObjectIds": [],
+ "permissionDenied": false,
+ "protected": false,
+ "readAuthorizers": [],
+ "relation_groups": [],
+ "relation_list": [],
+ "system": "",
+ "updateAuthorizers": [],
+ "view": {
+  "attr_authorizers": null,
+  "attr_category_order": [
+   "基本信息"
+  ],
+  "attr_order": [],
+  "hide_columns": null,
+  "icon": null,
+  "image": "",
+  "inherit_attr_category_map": null,
+  "relation_default_attr": null,
+  "relation_group_order": null,
+  "relation_order": null,
+  "show_key": [
+   "instanceId"
+  ],
+  "trans_hier_relation_list": null,
+  "visible": true
+ },
+ "wordIndexDenied": false
+}

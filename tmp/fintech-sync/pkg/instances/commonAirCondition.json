@@ -1,0 +1,36 @@
+[
+ {
+  "facilityDescriptor": "f2a52733e8bf4360a3467c0efe29a56e",
+  "assetBrand": "科华",
+  "assetSerialNumber": "AKK0350M1N0000G68HB0007",
+  "assetType": "KFR-35GW/LB-N3(1L04)",
+  "brandLand": "00-国内",
+  "classificationOfGeneralAirConditioning": "00-挂壁式空调",
+  "commonAirCondition_deployment": [
+   {
+    "deployArea": "23-支持区-电池室",
+    "deployComputerRoom": "转接中心电池间",
+    "deployDb": "郑州中支转接中心机房",
+    "deployFloor": "一层",
+    "deployGallery": "转接中心综合楼"
+   }
+  ],
+  "commonAirCondition_operationsManagement": [
+   {
+    "administrativeDepartment": "00-科技管理部门",
+    "operationDepartment": "00-科技管理部门",
+    "serviceEndTime": "2028-01-01",
+    "serviceLevel": "01-7*24",
+    "serviceStartTime": "2018-01-01"
+   }
+  ],
+  "facilityCategory": "FAKTPKT000",
+  "facilityName": "郑州中支转接中心电池间空调",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2018-01-01",
+  "facilityUseState": "00-设施在用",
+  "ratedPower": 3.5,
+  "_dataSource": "双源"
+ }
+]

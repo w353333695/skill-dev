@@ -1,0 +1,817 @@
+[
+ {
+  "facilityDescriptor": "0f846b7b8138499c833c3be2272c7959",
+  "assetBrand": "网康科技",
+  "assetCode": "2202120021002066",
+  "assetSerialNumber": "NS00211002709",
+  "assetType": "NI3100-B3",
+  "authenticationPattern": [
+   "00-本地认证"
+  ],
+  "brandLand": "00-国内",
+  "bypass": "True",
+  "deviceHeight": "1",
+  "facilityCategory": "FAITSADBMS",
+  "facilityName": "许昌市中支中心机房互联网上网行为管理系统",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2015-12-08",
+  "facilityUseState": "00-设施在用",
+  "influenceSystem": "许昌市中支机关互联网",
+  "managementIp": "100.1.1.3",
+  "onlineBehavior_deployment": [
+   {
+    "deployArea": "01-主机房-网络区",
+    "deployComputerRoom": "许昌市中心支行中心机房",
+    "deployDb": "许昌市中支中心机房",
+    "deployFloor": "四楼",
+    "deployGallery": "河南省许昌市建安区新东街751号办公楼"
+   }
+  ],
+  "onlineBehavior_installationPosition": [
+   {
+    "belongCabinet": "许昌市中支中心机房服务器机柜A08",
+    "slotNo": "33"
+   }
+  ],
+  "onlineBehavior_logSave": [
+   {
+    "logLocation": "00-本地存储",
+    "storagePeriod": "6"
+   }
+  ],
+  "onlineBehavior_operationsManagement": [
+   {
+    "administrativeDepartment": "00-科技管理部门",
+    "operationDepartment": "00-科技管理部门",
+    "serviceEndTime": "2018-12-08",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "河南天一通讯技术有限公司",
+    "serviceStartTime": "2015-12-08"
+   }
+  ],
+  "operatingSystemVersionInformation": "7.2.1.014",
+  "safetydeploymentMode": "02-串联-网桥模式",
+  "sellingLicense": "True",
+  "supportFunciton": [
+   "00-行为分析与审计",
+   "01-流量分析与管理",
+   "02-应用识别与控制"
+  ],
+  "supportIpv6": "True",
+  "throughputRate": "00-小于等于100Mbps",
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "1a18d8ba11e847c89e6618da96cf07ab",
+  "assetBrand": "华三",
+  "assetCode": "2202110024009000",
+  "assetSerialNumber": "219801A0XY919AP00003",
+  "assetType": "ACG1000",
+  "authenticationPattern": [
+   "00-本地认证"
+  ],
+  "brandLand": "00-国内",
+  "bypass": "True",
+  "deviceHeight": "1",
+  "facilityCategory": "FAITSADBMS",
+  "facilityName": "南阳市中支网络机房上网行为管理",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2019-07-01",
+  "facilityUseState": "00-设施在用",
+  "influenceSystem": "互联网",
+  "managementIp": "192.168.1.254",
+  "onlineBehavior_deployment": [
+   {
+    "deployArea": "01-主机房-网络区",
+    "deployComputerRoom": "网络机房",
+    "deployDb": "南阳市中支中心机房",
+    "deployFloor": "十二层",
+    "deployGallery": "办公楼"
+   }
+  ],
+  "onlineBehavior_installationPosition": [
+   {
+    "belongCabinet": "南阳市市中支网络机房机柜01",
+    "slotNo": "17"
+   }
+  ],
+  "onlineBehavior_logSave": [
+   {
+    "logLocation": "00-本地存储",
+    "storagePeriod": "12"
+   }
+  ],
+  "onlineBehavior_operationsManagement": [
+   {
+    "administrativeDepartment": "00-科技管理部门",
+    "operationDepartment": "00-科技管理部门",
+    "serviceEndTime": "2022-07-01",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "郑州国联网络技术有限公司",
+    "serviceStartTime": "2019-07-01"
+   }
+  ],
+  "operatingSystemVersionInformation": "version1.10，Release 6609",
+  "safetydeploymentMode": "03-串联-混合模式",
+  "sellingLicense": "True",
+  "supportFunciton": [
+   "00-行为分析与审计",
+   "01-流量分析与管理",
+   "02-应用识别与控制"
+  ],
+  "supportIpv6": "True",
+  "throughputRate": "00-小于等于100Mbps",
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "24ccc6e4695b4085acc10ff291a33227",
+  "assetBrand": "深信服",
+  "assetCode": "2202020021018003",
+  "assetSerialNumber": "5011029217",
+  "assetType": "AC-1000-C400",
+  "authenticationPattern": [
+   "00-本地认证"
+  ],
+  "brandLand": "00-国内",
+  "bypass": "False",
+  "deviceHeight": "1",
+  "facilityCategory": "FAITSADBMS",
+  "facilityName": "开封市中支上网行为管理系统",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2018-07-01",
+  "facilityUseState": "00-设施在用",
+  "influenceSystem": "开封市中支互联网",
+  "managementIp": "192.168.101.1",
+  "onlineBehavior_deployment": [
+   {
+    "deployArea": "01-主机房-网络区",
+    "deployComputerRoom": "开封市中心支行中心机房",
+    "deployDb": "开封市中支中心机房",
+    "deployFloor": "三层",
+    "deployGallery": "410202043DA000000000000000000001"
+   }
+  ],
+  "onlineBehavior_installationPosition": [
+   {
+    "belongCabinet": "开封市中支中心机房机柜2",
+    "slotNo": "34"
+   }
+  ],
+  "onlineBehavior_logSave": [
+   {
+    "logLocation": "00-本地存储",
+    "storagePeriod": "12"
+   }
+  ],
+  "onlineBehavior_operationsManagement": [
+   {
+    "administrativeDepartment": "00-科技管理部门",
+    "operationDepartment": "00-科技管理部门",
+    "serviceEndTime": "2021-03-01",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "郑州市乐金科技发展有限公司",
+    "serviceStartTime": "2018-07-01"
+   }
+  ],
+  "operatingSystemVersionInformation": "AC12.0.12",
+  "safetydeploymentMode": "01-串联-路由模式",
+  "sellingLicense": "True",
+  "supportFunciton": [
+   "00-行为分析与审计",
+   "01-流量分析与管理",
+   "02-应用识别与控制"
+  ],
+  "supportIpv6": "True",
+  "throughputRate": "01-大于100Mbps小于等于1Gbps",
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "2952ee20d75547eaa9a1cb873e96f60e",
+  "assetBrand": "网康科技",
+  "assetCode": "2202160021023008",
+  "assetSerialNumber": "NS00210402984",
+  "assetType": "NI3000-MG",
+  "authenticationPattern": [
+   "00-本地认证"
+  ],
+  "brandLand": "00-国内",
+  "bypass": "True",
+  "deviceHeight": "1",
+  "facilityCategory": "FAITSADBMS",
+  "facilityName": "周口市中支中心机房",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2017-07-17",
+  "facilityUseState": "00-设施在用",
+  "influenceSystem": "周口市中支机关互联网",
+  "managementIp": "192.168.1.2",
+  "onlineBehavior_deployment": [
+   {
+    "deployArea": "01-主机房-网络区",
+    "deployComputerRoom": "周口市中心支行中心机房",
+    "deployDb": "周口市中支中心机房",
+    "deployFloor": "二楼",
+    "deployGallery": "周口市川汇区七一路中段1号A楼"
+   }
+  ],
+  "onlineBehavior_installationPosition": [
+   {
+    "belongCabinet": "周口市中支中心机房网络机柜A1",
+    "slotNo": "40"
+   }
+  ],
+  "onlineBehavior_logSave": [
+   {
+    "logLocation": "00-本地存储",
+    "storagePeriod": "6"
+   }
+  ],
+  "onlineBehavior_operationsManagement": [
+   {
+    "administrativeDepartment": "00-科技管理部门",
+    "operationDepartment": "00-科技管理部门",
+    "serviceEndTime": "2018-07-17",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "网康科技有限公司",
+    "serviceStartTime": "2017-07-17"
+   }
+  ],
+  "operatingSystemVersionInformation": "8.0.0.28",
+  "safetydeploymentMode": "01-串联-路由模式",
+  "sellingLicense": "True",
+  "supportFunciton": [
+   "00-行为分析与审计",
+   "01-流量分析与管理",
+   "02-应用识别与控制"
+  ],
+  "supportIpv6": "True",
+  "throughputRate": "00-小于等于100Mbps",
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "5082385538e44320a67231a9f9ee06a1",
+  "assetBrand": "网康科技",
+  "assetCode": "2202300210201512",
+  "assetSerialNumber": "NS00310702367",
+  "assetType": "NI3100-HB",
+  "authenticationPattern": [
+   "00-本地认证"
+  ],
+  "brandLand": "00-国内",
+  "bypass": "True",
+  "deviceHeight": "2",
+  "facilityCategory": "FAITSADBMS",
+  "facilityName": "漯河市中支中心机房互联网上网行为管理系统",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2015-12-01",
+  "facilityUseState": "00-设施在用",
+  "influenceSystem": "漯河市中支机关互联网",
+  "managementIp": "192.168.0.1",
+  "onlineBehavior_deployment": [
+   {
+    "deployArea": "01-主机房-网络区",
+    "deployComputerRoom": "漯河市中心支行中心机房",
+    "deployDb": "漯河市中支中心机房",
+    "deployFloor": "五层",
+    "deployGallery": "漯河市郾城区嵩山东支路1号"
+   }
+  ],
+  "onlineBehavior_installationPosition": [
+   {
+    "belongCabinet": "漯河市中支网络机房机柜04",
+    "slotNo": "20"
+   }
+  ],
+  "onlineBehavior_logSave": [
+   {
+    "logLocation": "00-本地存储",
+    "storagePeriod": "6"
+   }
+  ],
+  "onlineBehavior_operationsManagement": [
+   {
+    "administrativeDepartment": "00-科技管理部门",
+    "operationDepartment": "00-科技管理部门",
+    "serviceEndTime": "2018-12-01",
+    "serviceLevel": "01-7*24",
+    "serviceStartTime": "2015-12-01"
+   }
+  ],
+  "operatingSystemVersionInformation": "R8.4.0.008",
+  "safetydeploymentMode": "02-串联-网桥模式",
+  "sellingLicense": "True",
+  "supportFunciton": [
+   "00-行为分析与审计",
+   "01-流量分析与管理",
+   "02-应用识别与控制"
+  ],
+  "supportIpv6": "True",
+  "throughputRate": "00-小于等于100Mbps",
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "7c6b2196d58642dbb88145888d35b8ba",
+  "assetBrand": "网康科技",
+  "assetCode": "2202070021019002",
+  "assetSerialNumber": "NS00410103713111",
+  "assetType": "NI3100-20",
+  "authenticationPattern": [
+   "00-本地认证"
+  ],
+  "brandLand": "00-国内",
+  "bypass": "True",
+  "deviceHeight": "1",
+  "facilityCategory": "FAITSADBMS",
+  "facilityName": "信阳市中支中心机房互联网上网行为管理系统1",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2016-09-27",
+  "facilityUseState": "00-设施在用",
+  "influenceSystem": "信阳市中支机关互联网",
+  "managementIp": "192.168.0.2",
+  "onlineBehavior_deployment": [
+   {
+    "deployArea": "01-主机房-网络区",
+    "deployComputerRoom": "信阳市中心支行中心机房",
+    "deployDb": "信阳市中支中心机房",
+    "deployFloor": "二楼",
+    "deployGallery": "信阳市浉河区长安路133号"
+   }
+  ],
+  "onlineBehavior_installationPosition": [
+   {
+    "belongCabinet": "信阳市中支中心机房服务器机柜A15",
+    "slotNo": "33"
+   }
+  ],
+  "onlineBehavior_logSave": [
+   {
+    "logLocation": "00-本地存储",
+    "storagePeriod": "6"
+   }
+  ],
+  "onlineBehavior_operationsManagement": [
+   {
+    "administrativeDepartment": "00-科技管理部门",
+    "operationDepartment": "00-科技管理部门",
+    "serviceEndTime": "2021-07-30",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "河南威帆科技有限公司",
+    "serviceStartTime": "2020-07-30"
+   }
+  ],
+  "operatingSystemVersionInformation": "8.0.0.28",
+  "safetydeploymentMode": "02-串联-网桥模式",
+  "sellingLicense": "True",
+  "supportFunciton": [
+   "00-行为分析与审计",
+   "01-流量分析与管理",
+   "02-应用识别与控制"
+  ],
+  "supportIpv6": "True",
+  "throughputRate": "00-小于等于100Mbps",
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "a131ce2d22c343c7a1ad39cc1dca95d2",
+  "assetBrand": "深信服",
+  "assetCode": "2200000821017007",
+  "assetSerialNumber": "5016014146",
+  "assetType": "AC-1180",
+  "authenticationPattern": [
+   "00-本地认证"
+  ],
+  "brandLand": "00-国内",
+  "bypass": "True",
+  "deviceHeight": "1",
+  "facilityCategory": "FAITSADBMS",
+  "facilityName": "济源市中支中心机房上网行为管理",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2016-08-01",
+  "facilityUseState": "00-设施在用",
+  "influenceSystem": "互联网",
+  "managementIp": "192.168.1.2",
+  "onlineBehavior_deployment": [
+   {
+    "deployArea": "01-主机房-网络区",
+    "deployComputerRoom": "中心机房",
+    "deployDb": "济源市中支中心机房",
+    "deployFloor": "二层",
+    "deployGallery": "办公楼"
+   }
+  ],
+  "onlineBehavior_installationPosition": [
+   {
+    "belongCabinet": "济源市中支中心机房机柜04",
+    "slotNo": "9"
+   }
+  ],
+  "onlineBehavior_logSave": [
+   {
+    "logLocation": "00-本地存储",
+    "storagePeriod": "12"
+   }
+  ],
+  "onlineBehavior_operationsManagement": [
+   {
+    "administrativeDepartment": "00-科技管理部门",
+    "operationDepartment": "00-科技管理部门",
+    "serviceEndTime": "2021-04-01",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "深信服",
+    "serviceStartTime": "2016-08-01"
+   }
+  ],
+  "operatingSystemVersionInformation": "AC12.0.42",
+  "safetydeploymentMode": "02-串联-网桥模式",
+  "sellingLicense": "True",
+  "supportFunciton": [
+   "00-行为分析与审计",
+   "01-流量分析与管理",
+   "02-应用识别与控制"
+  ],
+  "supportIpv6": "True",
+  "throughputRate": "00-小于等于100Mbps",
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "b59b3959d6144c79a2dca789e3c0e48b",
+  "assetBrand": "网康科技",
+  "assetCode": "2202030021025017",
+  "assetSerialNumber": "NS00111002421",
+  "assetType": "NI3100-20",
+  "authenticationPattern": [
+   "00-本地认证"
+  ],
+  "brandLand": "00-国内",
+  "bypass": "True",
+  "deviceHeight": "1",
+  "facilityCategory": "FAITSADBMS",
+  "facilityName": "新乡市中支中心机房互联网上网行为管理系统",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2017-09-27",
+  "facilityUseState": "00-设施在用",
+  "influenceSystem": "新乡市中支机关互联网",
+  "managementIp": "192.168.0.252",
+  "onlineBehavior_deployment": [
+   {
+    "deployArea": "01-主机房-网络区",
+    "deployComputerRoom": "新乡市中心支行中心机房",
+    "deployDb": "新乡市中支中心机房",
+    "deployFloor": "十五层",
+    "deployGallery": "新乡市红旗区向阳路9号"
+   }
+  ],
+  "onlineBehavior_installationPosition": [
+   {
+    "belongCabinet": "新乡市中支网路机房机柜10",
+    "slotNo": "20"
+   }
+  ],
+  "onlineBehavior_logSave": [
+   {
+    "logLocation": "00-本地存储",
+    "storagePeriod": "6"
+   }
+  ],
+  "onlineBehavior_operationsManagement": [
+   {
+    "administrativeDepartment": "00-科技管理部门",
+    "operationDepartment": "00-科技管理部门",
+    "serviceEndTime": "2020-09-27",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "河南威帆科技有限公司",
+    "serviceStartTime": "2017-09-27"
+   }
+  ],
+  "operatingSystemVersionInformation": "8.0.0.28",
+  "safetydeploymentMode": "02-串联-网桥模式",
+  "sellingLicense": "True",
+  "supportFunciton": [
+   "00-行为分析与审计",
+   "01-流量分析与管理",
+   "02-应用识别与控制"
+  ],
+  "supportIpv6": "True",
+  "throughputRate": "00-小于等于100Mbps",
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "c686971926a84e82b8ef7207015ceaf2",
+  "assetBrand": "华为",
+  "assetCode": "2202140021024000",
+  "assetSerialNumber": "210235945540G6000238",
+  "assetType": "USG6350",
+  "authenticationPattern": [
+   "00-本地认证"
+  ],
+  "brandLand": "00-国内",
+  "bypass": "True",
+  "deviceHeight": "1",
+  "facilityCategory": "FAITSADBMS",
+  "facilityName": "商丘市中支中心机房互联网上网行为管理系统",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2017-02-16",
+  "facilityUseState": "00-设施在用",
+  "influenceSystem": "商丘市中支机关互联网",
+  "managementIp": "192.168.0.2",
+  "onlineBehavior_deployment": [
+   {
+    "deployArea": "01-主机房-网络区",
+    "deployComputerRoom": "商丘市中心支行中心机房",
+    "deployDb": "商丘市中支中心机房",
+    "deployFloor": "八层",
+    "deployGallery": "商丘市中支一号办公楼"
+   }
+  ],
+  "onlineBehavior_installationPosition": [
+   {
+    "belongCabinet": "商丘市中支中心机房服务器机柜13",
+    "slotNo": "11"
+   }
+  ],
+  "onlineBehavior_logSave": [
+   {
+    "logLocation": "00-本地存储",
+    "storagePeriod": "6"
+   }
+  ],
+  "onlineBehavior_operationsManagement": [
+   {
+    "administrativeDepartment": "00-科技管理部门",
+    "operationDepartment": "00-科技管理部门",
+    "serviceEndTime": "2020-02-16",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "未知",
+    "serviceStartTime": "2017-02-16"
+   }
+  ],
+  "safetydeploymentMode": "02-串联-网桥模式",
+  "sellingLicense": "True",
+  "supportFunciton": [
+   "00-行为分析与审计",
+   "01-流量分析与管理",
+   "02-应用识别与控制"
+  ],
+  "supportIpv6": "True",
+  "throughputRate": "00-小于等于100Mbps",
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "c78f4dec9ea04b6abfe2446a6b4c7548",
+  "assetBrand": "华三",
+  "assetCode": "2202090021020076",
+  "assetSerialNumber": "219801A0QS916AP00030",
+  "assetType": "NS-ACG1000-M+LIS-1",
+  "authenticationPattern": [
+   "00-本地认证"
+  ],
+  "brandLand": "00-国内",
+  "bypass": "True",
+  "deviceHeight": "2",
+  "facilityCategory": "FAITSADBMS",
+  "facilityName": "三门峡市中支中心机房互联网上网行为管理系统",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2017-03-15",
+  "facilityUseState": "00-设施在用",
+  "influenceSystem": "互联网",
+  "managementIp": "192.168.120.3",
+  "onlineBehavior_deployment": [
+   {
+    "deployArea": "00-主机房-服务器区",
+    "deployComputerRoom": "中心机房",
+    "deployDb": "三门峡市中支中心机房",
+    "deployFloor": "六楼",
+    "deployGallery": "办公大楼"
+   }
+  ],
+  "onlineBehavior_installationPosition": [
+   {
+    "belongCabinet": "中国人民银行三门峡市中心支行 机柜22",
+    "slotNo": "20"
+   }
+  ],
+  "onlineBehavior_logSave": [
+   {
+    "logLocation": "00-本地存储",
+    "storagePeriod": "6"
+   }
+  ],
+  "onlineBehavior_operationsManagement": [
+   {
+    "administrativeDepartment": "00-科技管理部门",
+    "operationDepartment": "00-科技管理部门",
+    "serviceEndTime": "2023-03-15",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "河南威帆信息技术股份有限公司",
+    "serviceStartTime": "2017-03-15"
+   }
+  ],
+  "operatingSystemVersionInformation": "Version 7.1.064, Release 9313P07",
+  "safetydeploymentMode": "01-串联-路由模式",
+  "sellingLicense": "True",
+  "supportFunciton": [
+   "00-行为分析与审计"
+  ],
+  "supportIpv6": "True",
+  "throughputRate": "01-大于100Mbps小于等于1Gbps",
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "d9d69868b2564f21a1a233b71d275bed",
+  "assetBrand": "网康科技",
+  "assetCode": "2202070021019002",
+  "assetSerialNumber": "NS00410103713222",
+  "assetType": "NI3100-20",
+  "authenticationPattern": [
+   "00-本地认证"
+  ],
+  "brandLand": "00-国内",
+  "bypass": "True",
+  "deviceHeight": "1",
+  "facilityCategory": "FAITSADBMS",
+  "facilityName": "焦作市中支中心机房互联网上网行为管理系统",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2016-09-27",
+  "facilityUseState": "00-设施在用",
+  "influenceSystem": "焦作市中支机关互联网",
+  "managementIp": "192.168.0.2",
+  "onlineBehavior_deployment": [
+   {
+    "deployArea": "01-主机房-网络区",
+    "deployComputerRoom": "焦作市中心支行中心机房",
+    "deployDb": "焦作市中支中心机房",
+    "deployFloor": "四楼",
+    "deployGallery": "焦作市山阳区世纪路1355号"
+   }
+  ],
+  "onlineBehavior_installationPosition": [
+   {
+    "belongCabinet": "焦作市中支中心机房网络机柜7",
+    "slotNo": "15"
+   }
+  ],
+  "onlineBehavior_logSave": [
+   {
+    "logLocation": "00-本地存储",
+    "storagePeriod": "6"
+   }
+  ],
+  "onlineBehavior_operationsManagement": [
+   {
+    "administrativeDepartment": "00-科技管理部门",
+    "operationDepartment": "00-科技管理部门",
+    "serviceEndTime": "2021-07-30",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "河南威帆科技有限公司",
+    "serviceStartTime": "2020-07-30"
+   }
+  ],
+  "operatingSystemVersionInformation": "8.0.0.28",
+  "safetydeploymentMode": "02-串联-网桥模式",
+  "sellingLicense": "True",
+  "supportFunciton": [
+   "00-行为分析与审计",
+   "01-流量分析与管理",
+   "02-应用识别与控制"
+  ],
+  "supportIpv6": "True",
+  "throughputRate": "00-小于等于100Mbps",
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "dbb8860c4a9748e6b9148ed38da7c2a2",
+  "assetBrand": "天融信",
+  "assetCode": "2202040021023001",
+  "assetSerialNumber": "Q1610470121",
+  "assetType": "TopACM 3000",
+  "authenticationPattern": [
+   "00-本地认证"
+  ],
+  "brandLand": "00-国内",
+  "bypass": "False",
+  "deviceHeight": "1",
+  "facilityCategory": "FAITSADBMS",
+  "facilityName": "安阳市中支中心机房互联网上网行为管理系统",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2016-10-31",
+  "facilityUseState": "00-设施在用",
+  "influenceSystem": "安阳市中支中心机房互联网上网行为管理系统",
+  "managementIp": "192.168.0.126",
+  "onlineBehavior_deployment": [
+   {
+    "deployArea": "01-主机房-网络区",
+    "deployComputerRoom": "安阳市中支中心机房",
+    "deployDb": "安阳市中支中心机房",
+    "deployFloor": "八层",
+    "deployGallery": "安阳市开发区金融大厦"
+   }
+  ],
+  "onlineBehavior_installationPosition": [
+   {
+    "belongCabinet": "安阳市中支中心机房机柜04",
+    "slotNo": "34"
+   }
+  ],
+  "onlineBehavior_logSave": [
+   {
+    "logLocation": "00-本地存储",
+    "storagePeriod": "6"
+   }
+  ],
+  "onlineBehavior_operationsManagement": [
+   {
+    "administrativeDepartment": "00-科技管理部门",
+    "operationDepartment": "00-科技管理部门",
+    "serviceEndTime": "2021-07-30",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "河南同有信息科技有限公司",
+    "serviceStartTime": "2020-07-30"
+   }
+  ],
+  "operatingSystemVersionInformation": "ACM-31314-V3.0.0152",
+  "safetydeploymentMode": "01-串联-路由模式",
+  "sellingLicense": "True",
+  "supportFunciton": [
+   "00-行为分析与审计",
+   "01-流量分析与管理",
+   "02-应用识别与控制"
+  ],
+  "supportIpv6": "False",
+  "throughputRate": "01-大于100Mbps小于等于1Gbps",
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "fefb275d4a614345b8c542fc80d7561d",
+  "assetBrand": "深信服",
+  "assetCode": "2202080021016001",
+  "assetSerialNumber": "5014018032",
+  "assetType": "AC-1220",
+  "authenticationPattern": [
+   "00-本地认证"
+  ],
+  "brandLand": "00-国内",
+  "bypass": "True",
+  "deviceHeight": "1",
+  "facilityCategory": "FAITSADBMS",
+  "facilityName": "鹤壁市中支网络机房上网行为管理",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2016-02-01",
+  "facilityUseState": "00-设施在用",
+  "influenceSystem": "互联网",
+  "managementIp": "180.155.100.254",
+  "onlineBehavior_deployment": [
+   {
+    "deployArea": "01-主机房-网络区",
+    "deployComputerRoom": "网络机房",
+    "deployDb": "鹤壁市中支中心机房",
+    "deployFloor": "七层",
+    "deployGallery": "办公楼"
+   }
+  ],
+  "onlineBehavior_installationPosition": [
+   {
+    "belongCabinet": "鹤壁市中支网络机房机柜02",
+    "slotNo": "15"
+   }
+  ],
+  "onlineBehavior_logSave": [
+   {
+    "logLocation": "00-本地存储",
+    "storagePeriod": "12"
+   }
+  ],
+  "onlineBehavior_operationsManagement": [
+   {
+    "administrativeDepartment": "00-科技管理部门",
+    "operationDepartment": "00-科技管理部门",
+    "serviceEndTime": "2022-10-01",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "郑州国联网络技术有限公司",
+    "serviceStartTime": "2019-10-01"
+   }
+  ],
+  "operatingSystemVersionInformation": "AC12.0.14",
+  "safetydeploymentMode": "03-串联-混合模式",
+  "sellingLicense": "True",
+  "supportFunciton": [
+   "00-行为分析与审计",
+   "01-流量分析与管理",
+   "02-应用识别与控制"
+  ],
+  "supportIpv6": "True",
+  "throughputRate": "00-小于等于100Mbps",
+  "_dataSource": "双源"
+ }
+]

@@ -1,0 +1,1072 @@
+[
+ {
+  "facilityDescriptor": "073d4eb4210d438399ab534fabc3ac45",
+  "assetBrand": "安赛",
+  "assetCode": "2202010021028005",
+  "assetSerialNumber": "6192636",
+  "assetType": "NIDS1000",
+  "brandLand": "00-国内",
+  "bypass": "False",
+  "categoryOfEquipment": "00-IDS",
+  "deviceHeight": "1",
+  "facilityCategory": "FAITSADIDS",
+  "facilityName": "入侵检测系统洛阳市中支行探测引擎",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2019-02-27",
+  "facilityUseState": "00-设施在用",
+  "idsIps_dataSave": [
+   {
+    "dataLocation": [
+     "01-服务器存储"
+    ],
+    "storagePeriod": "6"
+   }
+  ],
+  "idsIps_deployment": [
+   {
+    "deployArea": "01-主机房-网络区",
+    "deployComputerRoom": "洛阳市中支中心机房",
+    "deployDb": "洛阳市中支中心机房",
+    "deployFloor": "三层",
+    "deployGallery": "洛阳市中支办公大楼"
+   }
+  ],
+  "idsIps_installationPosition": [
+   {
+    "slotNo": "25"
+   }
+  ],
+  "idsIps_operationsManagement": [
+   {
+    "administrativeDepartment": "00-科技管理部门",
+    "operationDepartment": "00-科技管理部门",
+    "serviceEndTime": "2022-02-27",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "北京安赛创想科技有限公司",
+    "serviceStartTime": "2019-02-27"
+   }
+  ],
+  "managementIp": "11.66.49.143",
+  "operatingSystemVersionInformation": "Version:3.0 Build:2019112622",
+  "safetydeploymentMode": "00-旁路",
+  "sellingLicense": "True",
+  "supportIpv6": "True",
+  "throughputRate": "01-大于100Mbps小于等于1Gbps",
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "0c2c91242ef74941b4ee0b6527a7f478",
+  "assetBrand": "安赛",
+  "assetCode": "6192627",
+  "assetSerialNumber": "6192627",
+  "assetType": "NIDS1000",
+  "brandLand": "00-国内",
+  "bypass": "False",
+  "categoryOfEquipment": "00-IDS",
+  "deviceHeight": "2",
+  "facilityCategory": "FAITSADIDS",
+  "facilityName": "周口市中支中心机房业务网入侵检测系统",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2019-09-11",
+  "facilityUseState": "00-设施在用",
+  "idsIps_dataSave": [
+   {
+    "dataLocation": [
+     "01-服务器存储"
+    ],
+    "storagePeriod": "6"
+   }
+  ],
+  "idsIps_deployment": [
+   {
+    "deployArea": "01-主机房-网络区",
+    "deployComputerRoom": "周口市中心支行中心机房",
+    "deployDb": "周口市中支中心机房",
+    "deployFloor": "二楼",
+    "deployGallery": "周口市川汇区七一路中段1号A楼"
+   }
+  ],
+  "idsIps_installationPosition": [
+   {
+    "belongCabinet": "周口市中支中心机房网络机柜B2",
+    "slotNo": "36"
+   }
+  ],
+  "idsIps_operationsManagement": [
+   {
+    "administrativeDepartment": "00-科技管理部门",
+    "operationDepartment": "00-科技管理部门",
+    "serviceEndTime": "2022-09-11",
+    "serviceLevel": "00-5*8",
+    "serviceStartTime": "2019-09-11"
+   }
+  ],
+  "managementIp": "11.66.225.143",
+  "operatingSystemVersionInformation": "天象安全检测系统V3.0",
+  "safetydeploymentMode": "00-旁路",
+  "sellingLicense": "True",
+  "supportIpv6": "True",
+  "throughputRate": "01-大于100Mbps小于等于1Gbps",
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "2d2ad7abeabe4054927c31aa16cf736f",
+  "assetBrand": "安赛",
+  "assetCode": "2202020021024001",
+  "assetSerialNumber": "6192635",
+  "assetType": "NIDS1000",
+  "brandLand": "00-国内",
+  "bypass": "False",
+  "categoryOfEquipment": "00-IDS",
+  "deviceHeight": "1",
+  "facilityCategory": "FAITSADIDS",
+  "facilityName": "开封市中支中心机房入侵检测系统",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2019-02-01",
+  "facilityUseState": "00-设施在用",
+  "idsIps_dataSave": [
+   {
+    "dataLocation": [
+     "00-本地存储"
+    ],
+    "storagePeriod": "12"
+   }
+  ],
+  "idsIps_deployment": [
+   {
+    "deployArea": "01-主机房-网络区",
+    "deployComputerRoom": "开封市中心支行中心机房",
+    "deployDb": "开封市中支中心机房",
+    "deployFloor": "三层",
+    "deployGallery": "开封市龙亭区晋安路60号办公楼"
+   }
+  ],
+  "idsIps_installationPosition": [
+   {
+    "belongCabinet": "开封市中支中心机房机柜2",
+    "slotNo": "6"
+   }
+  ],
+  "idsIps_operationsManagement": [
+   {
+    "administrativeDepartment": "00-科技管理部门",
+    "operationDepartment": "00-科技管理部门",
+    "serviceEndTime": "2019-02-01",
+    "serviceLevel": "00-5*8",
+    "serviceProvider": "未知",
+    "serviceStartTime": "2019-02-01"
+   }
+  ],
+  "managementIp": "11.66.33.143",
+  "operatingSystemVersionInformation": "天象安全检测系统 V3.0",
+  "safetydeploymentMode": "00-旁路",
+  "sellingLicense": "True",
+  "supportIpv6": "True",
+  "throughputRate": "01-大于100Mbps小于等于1Gbps",
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "3a6342df956f45ef86aa245ade1bbe15",
+  "assetBrand": "安赛",
+  "assetCode": "2202090021027000",
+  "assetSerialNumber": "NA13051953",
+  "assetType": "NIDS1000",
+  "brandLand": "00-国内",
+  "bypass": "True",
+  "categoryOfEquipment": "00-IDS",
+  "deviceHeight": "1",
+  "facilityCategory": "FAITSADIDS",
+  "facilityName": "中国人民银行三门峡市中心支行 入侵检测系统",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2018-12-19",
+  "facilityUseState": "00-设施在用",
+  "idsIps_dataSave": [
+   {
+    "dataLocation": [
+     "00-本地存储"
+    ],
+    "storagePeriod": "12"
+   }
+  ],
+  "idsIps_deployment": [
+   {
+    "deployArea": "01-主机房-网络区",
+    "deployComputerRoom": "中心机房",
+    "deployDb": "三门峡市中支中心机房",
+    "deployFloor": "六楼",
+    "deployGallery": "办公大楼"
+   }
+  ],
+  "idsIps_installationPosition": [
+   {
+    "slotNo": "10"
+   }
+  ],
+  "idsIps_operationsManagement": [
+   {
+    "administrativeDepartment": "00-科技管理部门",
+    "operationDepartment": "00-科技管理部门",
+    "serviceEndTime": "2021-12-19",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "上级行提供",
+    "serviceStartTime": "2018-12-19"
+   }
+  ],
+  "managementIp": "11.66.196.143",
+  "operatingSystemVersionInformation": "安赛NIDS下一代入侵检测系统",
+  "safetydeploymentMode": "00-旁路",
+  "sellingLicense": "True",
+  "supportIpv6": "True",
+  "throughputRate": "01-大于100Mbps小于等于1Gbps",
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "4262ef9043e2423faf1a29227aab406e",
+  "assetBrand": "安赛",
+  "assetCode": "2202030021030012",
+  "assetSerialNumber": "65431",
+  "assetType": "NIDS1000",
+  "brandLand": "00-国内",
+  "bypass": "False",
+  "categoryOfEquipment": "00-IDS",
+  "deviceHeight": "1",
+  "facilityCategory": "FAITSADIDS",
+  "facilityName": "新乡市中支中心机房业务网入侵检测系统",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2018-12-19",
+  "facilityUseState": "00-设施在用",
+  "idsIps_dataSave": [
+   {
+    "dataLocation": [
+     "00-本地存储"
+    ],
+    "storagePeriod": "6"
+   }
+  ],
+  "idsIps_deployment": [
+   {
+    "deployArea": "01-主机房-网络区",
+    "deployComputerRoom": "新乡市中心支行中心机房",
+    "deployDb": "新乡市中支中心机房",
+    "deployFloor": "十五层",
+    "deployGallery": "新乡市红旗区向阳路9号"
+   }
+  ],
+  "idsIps_installationPosition": [
+   {
+    "slotNo": "22"
+   }
+  ],
+  "idsIps_operationsManagement": [
+   {
+    "administrativeDepartment": "00-科技管理部门",
+    "operationDepartment": "00-科技管理部门",
+    "serviceEndTime": "2021-12-19",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "安赛",
+    "serviceStartTime": "2018-12-19"
+   }
+  ],
+  "managementIp": "11.66.113.143",
+  "operatingSystemVersionInformation": "天象安全检测系统V3.0",
+  "safetydeploymentMode": "00-旁路",
+  "sellingLicense": "True",
+  "supportIpv6": "True",
+  "throughputRate": "01-大于100Mbps小于等于1Gbps",
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "7a267d7d21af4a99af746ca2bd16ea32",
+  "assetBrand": "安赛",
+  "assetCode": "037001",
+  "assetSerialNumber": "6192629",
+  "assetType": "NIDS1000",
+  "brandLand": "00-国内",
+  "bypass": "True",
+  "categoryOfEquipment": "01-IPS",
+  "deviceHeight": "2",
+  "facilityCategory": "FAITSADIDS",
+  "facilityName": "安阳市中支网络机房入侵检测",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2014-09-01",
+  "facilityUseState": "00-设施在用",
+  "idsIps_dataSave": [
+   {
+    "dataLocation": [
+     "01-服务器存储"
+    ],
+    "storagePeriod": "6"
+   }
+  ],
+  "idsIps_deployment": [
+   {
+    "deployArea": "01-主机房-网络区",
+    "deployComputerRoom": "中心机房",
+    "deployDb": "安阳市中支中心机房",
+    "deployFloor": "八层",
+    "deployGallery": "金融大厦"
+   }
+  ],
+  "idsIps_installationPosition": [
+   {
+    "belongCabinet": "安阳市中支8楼机柜2",
+    "slotNo": "6"
+   }
+  ],
+  "idsIps_operationsManagement": [
+   {
+    "administrativeDepartment": "00-科技管理部门",
+    "operationDepartment": "00-科技管理部门",
+    "serviceEndTime": "2022-02-01",
+    "serviceLevel": "01-7*24",
+    "serviceStartTime": "2019-02-01"
+   }
+  ],
+  "managementIp": "11.66.81.143",
+  "operatingSystemVersionInformation": "天象安全检测系统V3.0",
+  "safetydeploymentMode": "00-旁路",
+  "sellingLicense": "True",
+  "supportIpv6": "True",
+  "throughputRate": "01-大于100Mbps小于等于1Gbps",
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "a2aea3fbbcf24c598dfb1f80b2f736de",
+  "assetBrand": "安赛",
+  "assetCode": "2202060021025001",
+  "assetSerialNumber": "6192628",
+  "assetType": "NIDS1000",
+  "brandLand": "00-国内",
+  "bypass": "False",
+  "categoryOfEquipment": "00-IDS",
+  "deviceHeight": "2",
+  "facilityCategory": "FAITSADIDS",
+  "facilityName": "濮阳市中支中心机房入侵检测设备",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2019-02-28",
+  "facilityUseState": "00-设施在用",
+  "idsIps_dataSave": [
+   {
+    "dataLocation": [
+     "01-服务器存储"
+    ],
+    "storagePeriod": "6"
+   }
+  ],
+  "idsIps_deployment": [
+   {
+    "deployArea": "01-主机房-网络区",
+    "deployComputerRoom": "濮阳市中支中心机房",
+    "deployDb": "濮阳市中支中心机房",
+    "deployFloor": "六层",
+    "deployGallery": "办公楼"
+   }
+  ],
+  "idsIps_installationPosition": [
+   {
+    "slotNo": "15"
+   }
+  ],
+  "idsIps_operationsManagement": [
+   {
+    "administrativeDepartment": "00-科技管理部门",
+    "operationDepartment": "00-科技管理部门",
+    "serviceEndTime": "2022-02-28",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "安赛科技",
+    "serviceStartTime": "2019-02-28"
+   }
+  ],
+  "managementIp": "11.66.145.143",
+  "operatingSystemVersionInformation": "天象安全检测系统V3.0",
+  "safetydeploymentMode": "00-旁路",
+  "sellingLicense": "True",
+  "supportIpv6": "True",
+  "throughputRate": "01-大于100Mbps小于等于1Gbps",
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "a43ae7bbfe744cacb81e8a83f8c7454a",
+  "assetBrand": "安赛",
+  "assetCode": "2202130021029000",
+  "assetSerialNumber": "6192634",
+  "assetType": "NIDS1000",
+  "brandLand": "00-国内",
+  "bypass": "True",
+  "categoryOfEquipment": "00-IDS",
+  "deviceHeight": "1",
+  "facilityCategory": "FAITSADIDS",
+  "facilityName": "漯河市中支中心机房业务网入侵检测系统",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2019-03-01",
+  "facilityUseState": "00-设施在用",
+  "idsIps_dataSave": [
+   {
+    "dataLocation": [
+     "01-服务器存储"
+    ],
+    "storagePeriod": "6"
+   }
+  ],
+  "idsIps_deployment": [
+   {
+    "deployArea": "01-主机房-网络区",
+    "deployComputerRoom": "漯河市中支中心机房",
+    "deployDb": "漯河市中支中心机房",
+    "deployFloor": "五层",
+    "deployGallery": "漯河市郾城区嵩山东支路1号"
+   }
+  ],
+  "idsIps_installationPosition": [
+   {
+    "belongCabinet": "漯河市中支网络机房机柜02",
+    "slotNo": "15"
+   }
+  ],
+  "idsIps_operationsManagement": [
+   {
+    "administrativeDepartment": "00-科技管理部门",
+    "operationDepartment": "00-科技管理部门",
+    "serviceEndTime": "2022-03-01",
+    "serviceLevel": "00-5*8",
+    "serviceStartTime": "2019-03-01"
+   }
+  ],
+  "managementIp": "11.66.177.143",
+  "operatingSystemVersionInformation": "天象安全检测系统V3.0",
+  "safetydeploymentMode": "00-旁路",
+  "sellingLicense": "True",
+  "supportIpv6": "True",
+  "throughputRate": "01-大于100Mbps小于等于1Gbps",
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "a77cef3e8cd149c28da615d3c0d047d2",
+  "assetBrand": "安赛",
+  "assetCode": "2200000821022000",
+  "assetSerialNumber": "6192641",
+  "assetType": "NIDS1000",
+  "brandLand": "00-国内",
+  "bypass": "True",
+  "categoryOfEquipment": "01-IPS",
+  "deviceHeight": "2",
+  "facilityCategory": "FAITSADIDS",
+  "facilityName": "济源市中支中心机房入侵检测",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2019-02-01",
+  "facilityUseState": "00-设施在用",
+  "idsIps_dataSave": [
+   {
+    "dataLocation": [
+     "00-本地存储"
+    ],
+    "storagePeriod": "12"
+   }
+  ],
+  "idsIps_deployment": [
+   {
+    "deployArea": "01-主机房-网络区",
+    "deployComputerRoom": "中心机房",
+    "deployDb": "济源市中支中心机房",
+    "deployFloor": "二层",
+    "deployGallery": "办公楼"
+   }
+  ],
+  "idsIps_installationPosition": [
+   {
+    "belongCabinet": "济源市中支中心机房机柜03",
+    "slotNo": "35"
+   }
+  ],
+  "idsIps_operationsManagement": [
+   {
+    "administrativeDepartment": "01-后勤管理部门",
+    "operationDepartment": "00-科技管理部门",
+    "serviceEndTime": "2022-02-01",
+    "serviceLevel": "00-5*8",
+    "serviceProvider": "安赛",
+    "serviceStartTime": "2019-02-01"
+   }
+  ],
+  "managementIp": "11.66.49.143",
+  "operatingSystemVersionInformation": "天象安全检测系统V3.0",
+  "safetydeploymentMode": "00-旁路",
+  "sellingLicense": "True",
+  "supportIpv6": "True",
+  "throughputRate": "01-大于100Mbps小于等于1Gbps",
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "af6b642dd1bd4cdb999a41c5ff144207",
+  "assetBrand": "安赛",
+  "assetCode": "2202070021026004",
+  "assetSerialNumber": "3126546",
+  "assetType": "NIDS1000",
+  "brandLand": "00-国内",
+  "bypass": "False",
+  "categoryOfEquipment": "00-IDS",
+  "deviceHeight": "1",
+  "facilityCategory": "FAITSADIDS",
+  "facilityName": "焦作市中支中心机房业务网入侵检测系统",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2018-12-19",
+  "facilityUseState": "00-设施在用",
+  "idsIps_dataSave": [
+   {
+    "dataLocation": [
+     "01-服务器存储"
+    ],
+    "storagePeriod": "6"
+   }
+  ],
+  "idsIps_deployment": [
+   {
+    "deployArea": "01-主机房-网络区",
+    "deployComputerRoom": "焦作市中心支行中心机房",
+    "deployDb": "焦作市中支中心机房",
+    "deployFloor": "四楼",
+    "deployGallery": "焦作市山阳区世纪路1355号"
+   }
+  ],
+  "idsIps_installationPosition": [
+   {
+    "belongCabinet": "焦作市中支中心机房网络机柜4",
+    "slotNo": "22"
+   }
+  ],
+  "idsIps_operationsManagement": [
+   {
+    "administrativeDepartment": "00-科技管理部门",
+    "operationDepartment": "00-科技管理部门",
+    "serviceEndTime": "2021-12-19",
+    "serviceLevel": "01-7*24",
+    "serviceStartTime": "2018-12-19"
+   }
+  ],
+  "managementIp": "11.66.129.143",
+  "operatingSystemVersionInformation": "天象安全检测系统V3.0",
+  "safetydeploymentMode": "00-旁路",
+  "sellingLicense": "True",
+  "supportIpv6": "True",
+  "throughputRate": "01-大于100Mbps小于等于1Gbps",
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "b8161f1b64e6428f89886170d4046d33",
+  "assetBrand": "安赛",
+  "assetCode": "2202100021023001",
+  "assetSerialNumber": "6192626",
+  "assetType": "NIDS1000",
+  "brandLand": "00-国内",
+  "bypass": "True",
+  "categoryOfEquipment": "01-IPS",
+  "deviceHeight": "2",
+  "facilityCategory": "FAITSADIDS",
+  "facilityName": "驻马店市中支中心机房业务网入侵检测",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2019-02-01",
+  "facilityUseState": "00-设施在用",
+  "idsIps_dataSave": [
+   {
+    "dataLocation": [
+     "01-服务器存储"
+    ],
+    "storagePeriod": "6"
+   }
+  ],
+  "idsIps_deployment": [
+   {
+    "deployArea": "01-主机房-网络区",
+    "deployComputerRoom": "驻马店市中支中心机房",
+    "deployDb": "驻马店市中支中心机房",
+    "deployFloor": "四层",
+    "deployGallery": "驻马店市驿城区泰山路567号办公楼"
+   }
+  ],
+  "idsIps_installationPosition": [
+   {
+    "belongCabinet": "驻马店市中支中心机房机柜B5",
+    "slotNo": "28"
+   }
+  ],
+  "idsIps_operationsManagement": [
+   {
+    "administrativeDepartment": "00-科技管理部门",
+    "operationDepartment": "00-科技管理部门",
+    "serviceEndTime": "2022-02-01",
+    "serviceLevel": "00-5*8",
+    "serviceProvider": "未知",
+    "serviceStartTime": "2019-02-01"
+   }
+  ],
+  "managementIp": "11.66.241.143",
+  "operatingSystemVersionInformation": "天象安全检测系统V3.0",
+  "safetydeploymentMode": "00-旁路",
+  "sellingLicense": "True",
+  "supportIpv6": "True",
+  "throughputRate": "01-大于100Mbps小于等于1Gbps",
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "c2f55d865a014b6fa25f40936ed68534",
+  "assetBrand": "安赛",
+  "assetCode": "2202070021026004",
+  "assetSerialNumber": "6192638",
+  "assetType": "NIDS1000",
+  "brandLand": "00-国内",
+  "bypass": "False",
+  "categoryOfEquipment": "00-IDS",
+  "deviceHeight": "1",
+  "facilityCategory": "FAITSADIDS",
+  "facilityName": "商丘市中支中心机房业务网入侵检测系统",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2018-12-19",
+  "facilityUseState": "00-设施在用",
+  "idsIps_dataSave": [
+   {
+    "dataLocation": [
+     "01-服务器存储"
+    ],
+    "storagePeriod": "6"
+   }
+  ],
+  "idsIps_deployment": [
+   {
+    "deployArea": "01-主机房-网络区",
+    "deployComputerRoom": "商丘市中心支行中心机房",
+    "deployDb": "商丘市中支中心机房",
+    "deployFloor": "八楼",
+    "deployGallery": "河南省商丘市睢阳区北海西路六号一号楼"
+   }
+  ],
+  "idsIps_installationPosition": [
+   {
+    "belongCabinet": "商丘市中支中心机房服务器机柜10",
+    "slotNo": "23"
+   }
+  ],
+  "idsIps_operationsManagement": [
+   {
+    "administrativeDepartment": "00-科技管理部门",
+    "operationDepartment": "00-科技管理部门",
+    "serviceEndTime": "2021-12-19",
+    "serviceLevel": "00-5*8",
+    "serviceProvider": "未知",
+    "serviceStartTime": "2018-12-19"
+   }
+  ],
+  "managementIp": "11.66.209.143",
+  "operatingSystemVersionInformation": "天象安全检测系统V3.0",
+  "safetydeploymentMode": "00-旁路",
+  "sellingLicense": "True",
+  "supportIpv6": "True",
+  "throughputRate": "01-大于100Mbps小于等于1Gbps",
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "c4649c08e9084b12893fee95463ddd81",
+  "assetBrand": "安赛",
+  "assetCode": "2202070021026004",
+  "assetSerialNumber": "2202070021026004",
+  "assetType": "NIDS1000",
+  "brandLand": "00-国内",
+  "bypass": "False",
+  "categoryOfEquipment": "00-IDS",
+  "deviceHeight": "1",
+  "facilityCategory": "FAITSADIDS",
+  "facilityName": "信阳市中支中心机房业务网入侵检测系统",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2018-12-19",
+  "facilityUseState": "00-设施在用",
+  "idsIps_dataSave": [
+   {
+    "dataLocation": [
+     "01-服务器存储"
+    ],
+    "storagePeriod": "6"
+   }
+  ],
+  "idsIps_deployment": [
+   {
+    "deployArea": "01-主机房-网络区",
+    "deployComputerRoom": "信阳市中心支行中心机房",
+    "deployDb": "信阳市中支中心机房",
+    "deployFloor": "二楼",
+    "deployGallery": "信阳市浉河区长安路133号"
+   }
+  ],
+  "idsIps_installationPosition": [
+   {
+    "slotNo": "22"
+   }
+  ],
+  "idsIps_operationsManagement": [
+   {
+    "administrativeDepartment": "00-科技管理部门",
+    "operationDepartment": "00-科技管理部门",
+    "serviceEndTime": "2020-12-19",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "未知",
+    "serviceStartTime": "2018-12-19"
+   }
+  ],
+  "managementIp": "11.66.129.143",
+  "operatingSystemVersionInformation": "天象安全检测系统V3.0",
+  "safetydeploymentMode": "00-旁路",
+  "sellingLicense": "True",
+  "supportIpv6": "True",
+  "throughputRate": "01-大于100Mbps小于等于1Gbps",
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "d5b570fb81f746808653373c5405bc7a",
+  "assetBrand": "安赛",
+  "assetCode": "2202050021030000",
+  "assetSerialNumber": "0012011302189897",
+  "assetType": "NIDS1000",
+  "brandLand": "00-国内",
+  "bypass": "True",
+  "categoryOfEquipment": "01-IPS",
+  "deviceHeight": "2",
+  "facilityCategory": "FAITSADIDS",
+  "facilityName": "平顶山市中支网络机房入侵检测",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2018-12-15",
+  "facilityUseState": "00-设施在用",
+  "idsIps_dataSave": [
+   {
+    "dataLocation": [
+     "00-本地存储"
+    ],
+    "storagePeriod": "12"
+   }
+  ],
+  "idsIps_deployment": [
+   {
+    "deployArea": "01-主机房-网络区",
+    "deployComputerRoom": "网络机房",
+    "deployDb": "平顶山市中支中心机房",
+    "deployFloor": "八层",
+    "deployGallery": "办公楼"
+   }
+  ],
+  "idsIps_installationPosition": [
+   {
+    "slotNo": "35"
+   }
+  ],
+  "idsIps_operationsManagement": [
+   {
+    "administrativeDepartment": "00-科技管理部门",
+    "operationDepartment": "00-科技管理部门",
+    "serviceEndTime": "2021-12-15",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "安赛",
+    "serviceStartTime": "2018-12-15"
+   }
+  ],
+  "managementIp": "11.66.65.143",
+  "operatingSystemVersionInformation": "天象安全检测系统V3.0",
+  "safetydeploymentMode": "00-旁路",
+  "sellingLicense": "True",
+  "supportIpv6": "True",
+  "throughputRate": "01-大于100Mbps小于等于1Gbps",
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "dc12ab6e2c334b15b716897270be0ca3",
+  "assetBrand": "安赛",
+  "assetCode": "2202120021026002",
+  "assetSerialNumber": "6192625",
+  "assetType": "NIDS1000",
+  "brandLand": "00-国内",
+  "bypass": "False",
+  "categoryOfEquipment": "00-IDS",
+  "deviceHeight": "2",
+  "facilityCategory": "FAITSADIDS",
+  "facilityName": "许昌市中支中心机房业务网入侵检测系统",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2019-03-01",
+  "facilityUseState": "00-设施在用",
+  "idsIps_dataSave": [
+   {
+    "dataLocation": [
+     "01-服务器存储"
+    ],
+    "storagePeriod": "12"
+   }
+  ],
+  "idsIps_deployment": [
+   {
+    "deployArea": "01-主机房-网络区",
+    "deployComputerRoom": "许昌市中心支行中心机房",
+    "deployDb": "许昌市中支中心机房",
+    "deployFloor": "四楼",
+    "deployGallery": "河南省许昌市建安区新东街571号办公楼"
+   }
+  ],
+  "idsIps_installationPosition": [
+   {
+    "slotNo": "22"
+   }
+  ],
+  "idsIps_operationsManagement": [
+   {
+    "administrativeDepartment": "00-科技管理部门",
+    "operationDepartment": "00-科技管理部门",
+    "serviceEndTime": "2023-03-01",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "未知",
+    "serviceStartTime": "2019-03-01"
+   }
+  ],
+  "managementIp": "11.66.161.143",
+  "operatingSystemVersionInformation": "天象安全检测系统V3.0",
+  "safetydeploymentMode": "00-旁路",
+  "sellingLicense": "True",
+  "supportIpv6": "True",
+  "throughputRate": "01-大于100Mbps小于等于1Gbps",
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "e0ada0b7670047d88a977eca4f60a635",
+  "assetBrand": "启明星辰",
+  "assetCode": "2200000021031008",
+  "assetSerialNumber": "0013211302189986",
+  "assetType": "NDE-NS600-TC－B",
+  "brandLand": "00-国内",
+  "bypass": "True",
+  "categoryOfEquipment": "00-IDS",
+  "deviceHeight": "1",
+  "facilityCategory": "FAITSADIDS",
+  "facilityName": "中国人民银行郑州中心支行入侵检测IDS1",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2013-01-01",
+  "facilityUseState": "00-设施在用",
+  "idsIps_dataSave": [
+   {
+    "dataLocation": [
+     "00-本地存储"
+    ],
+    "storagePeriod": "6"
+   }
+  ],
+  "idsIps_deployment": [
+   {
+    "deployArea": "01-主机房-网络区",
+    "deployComputerRoom": "服务器机房",
+    "deployDb": "郑州中支主中心机房",
+    "deployFloor": "11层",
+    "deployGallery": "中国人民银行郑州中心支行办公大楼"
+   }
+  ],
+  "idsIps_installationPosition": [
+   {
+    "slotNo": "35"
+   }
+  ],
+  "idsIps_operationsManagement": [
+   {
+    "administrativeDepartment": "00-科技管理部门",
+    "operationDepartment": "00-科技管理部门",
+    "serviceEndTime": "2024-02-18",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "北京安赛创想科技有限公司",
+    "serviceStartTime": "2019-02-18"
+   }
+  ],
+  "managementIp": "11.66.17.143",
+  "operatingSystemVersionInformation": "天阗入侵检测与管理系统V7.0",
+  "safetydeploymentMode": "00-旁路",
+  "sellingLicense": "True",
+  "supportIpv6": "True",
+  "throughputRate": "01-大于100Mbps小于等于1Gbps",
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "f2ed54702a5b4573949e4c6e9deefee7",
+  "assetBrand": "启明星辰",
+  "assetCode": "2200000021031009",
+  "assetSerialNumber": "0013211302189985",
+  "assetType": "NDE-NS600-TC－B",
+  "brandLand": "00-国内",
+  "bypass": "True",
+  "categoryOfEquipment": "00-IDS",
+  "deviceHeight": "1",
+  "facilityCategory": "FAITSADIDS",
+  "facilityName": "中国人民银行郑州中心支行入侵检测IDS2",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2013-01-01",
+  "facilityUseState": "00-设施在用",
+  "idsIps_dataSave": [
+   {
+    "dataLocation": [
+     "00-本地存储"
+    ],
+    "storagePeriod": "6"
+   }
+  ],
+  "idsIps_deployment": [
+   {
+    "deployArea": "01-主机房-网络区",
+    "deployComputerRoom": "服务器机房",
+    "deployDb": "郑州中支主中心机房",
+    "deployFloor": "11层",
+    "deployGallery": "中国人民银行郑州中心支行办公大楼"
+   }
+  ],
+  "idsIps_installationPosition": [
+   {
+    "slotNo": "2"
+   }
+  ],
+  "idsIps_operationsManagement": [
+   {
+    "administrativeDepartment": "00-科技管理部门",
+    "operationDepartment": "00-科技管理部门",
+    "serviceEndTime": "2024-02-18",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "北京安赛创想科技有限公司",
+    "serviceStartTime": "2019-02-18"
+   }
+  ],
+  "managementIp": "11.66.17.144",
+  "operatingSystemVersionInformation": "天阗入侵检测与管理系统V7.0",
+  "safetydeploymentMode": "00-旁路",
+  "sellingLicense": "True",
+  "supportIpv6": "True",
+  "throughputRate": "01-大于100Mbps小于等于1Gbps",
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "f72539a441e5400f93783c4f546a4083",
+  "assetBrand": "安赛",
+  "assetCode": "2202110021029000",
+  "assetSerialNumber": "6192630",
+  "assetType": "NIDS1000",
+  "brandLand": "00-国内",
+  "bypass": "True",
+  "categoryOfEquipment": "01-IPS",
+  "deviceHeight": "2",
+  "facilityCategory": "FAITSADIDS",
+  "facilityName": "南阳市中支网络机房入侵检测",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2019-02-01",
+  "facilityUseState": "00-设施在用",
+  "idsIps_dataSave": [
+   {
+    "dataLocation": [
+     "00-本地存储"
+    ],
+    "storagePeriod": "12"
+   }
+  ],
+  "idsIps_deployment": [
+   {
+    "deployArea": "01-主机房-网络区",
+    "deployComputerRoom": "网络机房",
+    "deployDb": "南阳市中支中心机房",
+    "deployFloor": "十二层",
+    "deployGallery": "办公楼"
+   }
+  ],
+  "idsIps_installationPosition": [
+   {
+    "belongCabinet": "南阳市市中支网络机房机柜04",
+    "slotNo": "8"
+   }
+  ],
+  "idsIps_operationsManagement": [
+   {
+    "administrativeDepartment": "00-科技管理部门",
+    "operationDepartment": "00-科技管理部门",
+    "serviceEndTime": "2022-02-01",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "未知",
+    "serviceStartTime": "2019-02-01"
+   }
+  ],
+  "managementIp": "11.67.4.217",
+  "operatingSystemVersionInformation": "天象安全检测系统V3.0",
+  "safetydeploymentMode": "00-旁路",
+  "sellingLicense": "True",
+  "supportIpv6": "True",
+  "throughputRate": "01-大于100Mbps小于等于1Gbps",
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "fa95dd169cc44bf7a10ad1db6578f56c",
+  "assetBrand": "安赛",
+  "assetCode": "2202080021025000",
+  "assetSerialNumber": "6192640",
+  "assetType": "NIDS1000",
+  "brandLand": "00-国内",
+  "bypass": "True",
+  "categoryOfEquipment": "01-IPS",
+  "deviceHeight": "2",
+  "facilityCategory": "FAITSADIDS",
+  "facilityName": "鹤壁市中支网络机房入侵检测",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2019-02-01",
+  "facilityUseState": "00-设施在用",
+  "idsIps_dataSave": [
+   {
+    "dataLocation": [
+     "00-本地存储"
+    ],
+    "storagePeriod": "12"
+   }
+  ],
+  "idsIps_deployment": [
+   {
+    "deployArea": "01-主机房-网络区",
+    "deployComputerRoom": "网络机房",
+    "deployDb": "鹤壁市中支中心机房",
+    "deployFloor": "七层",
+    "deployGallery": "办公楼"
+   }
+  ],
+  "idsIps_installationPosition": [
+   {
+    "belongCabinet": "鹤壁市中支网络机房机柜03",
+    "slotNo": "35"
+   }
+  ],
+  "idsIps_operationsManagement": [
+   {
+    "administrativeDepartment": "00-科技管理部门",
+    "operationDepartment": "00-科技管理部门",
+    "serviceEndTime": "2022-02-01",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "未知",
+    "serviceStartTime": "2019-02-01"
+   }
+  ],
+  "managementIp": "11.66.97.143",
+  "operatingSystemVersionInformation": "天象安全检测系统V3.0",
+  "safetydeploymentMode": "00-旁路",
+  "sellingLicense": "True",
+  "supportIpv6": "True",
+  "throughputRate": "01-大于100Mbps小于等于1Gbps",
+  "_dataSource": "双源"
+ }
+]

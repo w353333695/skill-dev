@@ -1,0 +1,2508 @@
+[
+ {
+  "facilityDescriptor": "039acf473efc466b8d76fa266150bc8a",
+  "assetBrand": "深信服",
+  "assetCode": "2200000821017006",
+  "assetSerialNumber": "5055003332",
+  "assetType": "AF-1020",
+  "brandLand": "00-国内",
+  "bypassFunction": "False",
+  "deploymentMode": "00-路由方式",
+  "deviceHeight": "1",
+  "facilityCategory": "FAITNWDFWD",
+  "facilityName": "济源市中支互联网防火墙",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2016-08-01",
+  "facilityUseState": "00-设施在用",
+  "firewall_deployment": [
+   {
+    "deployArea": "01-主机房-网络区",
+    "deployComputerRoom": "中心机房",
+    "deployDb": "济源市中支中心机房",
+    "deployFloor": "二层",
+    "deployGallery": "办公楼"
+   }
+  ],
+  "firewall_installationPosition": [
+   {
+    "belongCabinet": "济源市中支中心机房机柜04",
+    "slotNo": "15"
+   }
+  ],
+  "firewall_log": [
+   {
+    "logLocation": "00-本地存储",
+    "storagePeriod": "6"
+   }
+  ],
+  "firewall_operationsManagement": [
+   {
+    "administrativeDepartment": "03-保卫管理部门",
+    "operationDepartment": "03-保卫管理部门",
+    "serviceEndTime": "2021-05-21",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "深信服",
+    "serviceStartTime": "2016-08-01"
+   }
+  ],
+  "firewall_protocol": [
+   {
+    "ipv6BasicProtocol": [
+     "00-ICMPv6"
+    ]
+   }
+  ],
+  "handlingCapacity": "10",
+  "influenceSystem": "电子政务外网",
+  "managementIp": "192.168.1.1",
+  "maximumNewConnectionRate": "100",
+  "maximumNumberOfConcurrentConnections": "30",
+  "networkSecurityCapability": [
+   "00-IPSec"
+  ],
+  "numberOfCards": "0",
+  "operatingSystemVersionInformation": "AF8.0",
+  "remarksInformation": "有",
+  "securityFunction": "01-四层控制",
+  "supportIpv6": "True",
+  "wirelessFunction": "False",
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "0b7e787a78014b558778f3a66d80c209",
+  "assetBrand": "天融信",
+  "assetCode": "2202030021030010",
+  "assetSerialNumber": "Q1903058207",
+  "assetType": "NGFW4000",
+  "brandLand": "00-国内",
+  "bypassFunction": "False",
+  "deploymentMode": "00-路由方式",
+  "deviceHeight": "1",
+  "facilityCategory": "FAITNWDFWD",
+  "facilityName": "新乡市中支中心机房业务网保卫专网防火墙1",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2019-04-08",
+  "facilityUseState": "00-设施在用",
+  "firewall_deployment": [
+   {
+    "deployArea": "01-主机房-网络区",
+    "deployComputerRoom": "新乡市中心支行中心机房",
+    "deployDb": "新乡市中支中心机房",
+    "deployFloor": "十五层",
+    "deployGallery": "新乡市红旗区向阳路9号"
+   }
+  ],
+  "firewall_installationPosition": [
+   {
+    "belongCabinet": "新乡市中支网路机房机柜09",
+    "slotNo": "39"
+   }
+  ],
+  "firewall_log": [
+   {
+    "logLocation": "00-本地存储",
+    "storagePeriod": "6"
+   }
+  ],
+  "firewall_operationsManagement": [
+   {
+    "administrativeDepartment": "00-科技管理部门",
+    "operationDepartment": "00-科技管理部门",
+    "serviceEndTime": "2022-04-08",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "河南威帆信息技术股份有限公司",
+    "serviceStartTime": "2019-04-08"
+   }
+  ],
+  "firewall_protocol": [
+   {
+    "ipv6BasicProtocol": [
+     "00-ICMPv6"
+    ]
+   }
+  ],
+  "handlingCapacity": "10",
+  "influenceSystem": "保卫监控回放系统",
+  "managementIp": "11.66.119.61",
+  "maximumNewConnectionRate": "100",
+  "maximumNumberOfConcurrentConnections": "30",
+  "networkSecurityCapability": [
+   "00-IPSec"
+  ],
+  "numberOfCards": "0",
+  "operatingSystemVersionInformation": "Topsec Operating Systemtos_3.3.020.065.1",
+  "remarksInformation": "有",
+  "securityFunction": "01-四层控制",
+  "supportIpv6": "True",
+  "wirelessFunction": "False",
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "0b9ecb1859b5443c922d7091bd4e22ad",
+  "assetBrand": "天融信",
+  "assetCode": "22020400210230004",
+  "assetSerialNumber": "Q1610470125",
+  "assetType": "NGFW4000-UF（TG-4130L)",
+  "brandLand": "00-国内",
+  "bypassFunction": "False",
+  "deploymentMode": "00-路由方式",
+  "deviceHeight": "1",
+  "facilityCategory": "FAITNWDFWD",
+  "facilityName": "安阳市中支中心机房业务网保卫专网防火墙1",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2019-04-08",
+  "facilityUseState": "00-设施在用",
+  "firewall_deployment": [
+   {
+    "deployArea": "01-主机房-网络区",
+    "deployComputerRoom": "安阳市中支中心机房",
+    "deployDb": "安阳市中支中心机房",
+    "deployFloor": "八层",
+    "deployGallery": "安阳市开发区金融大厦"
+   }
+  ],
+  "firewall_installationPosition": [
+   {
+    "belongCabinet": "安阳市中支中心机房机柜06",
+    "slotNo": "38"
+   }
+  ],
+  "firewall_log": [
+   {
+    "logLocation": "00-本地存储",
+    "storagePeriod": "6"
+   }
+  ],
+  "firewall_operationsManagement": [
+   {
+    "administrativeDepartment": "00-科技管理部门",
+    "operationDepartment": "00-科技管理部门",
+    "serviceEndTime": "2022-04-08",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "河南同有信息科技有限公司",
+    "serviceStartTime": "2020-04-08"
+   }
+  ],
+  "firewall_protocol": [
+   {
+    "ipv6BasicProtocol": [
+     "00-ICMPv6"
+    ]
+   }
+  ],
+  "handlingCapacity": "10",
+  "influenceSystem": "保卫监控回放系统",
+  "managementIp": "11.66.87.61",
+  "maximumNewConnectionRate": "100",
+  "maximumNumberOfConcurrentConnections": "30",
+  "networkSecurityCapability": [
+   "00-IPSec"
+  ],
+  "numberOfCards": "1",
+  "operatingSystemVersionInformation": "Topsec Operating Systemtos_3.3.020.065F.1",
+  "remarksInformation": "有",
+  "securityFunction": "00-三层控制",
+  "supportIpv6": "False",
+  "wirelessFunction": "False",
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "12c950b6c0954efbbc6e1b1d2df2728d",
+  "assetBrand": "深信服",
+  "assetCode": "2202080021019033",
+  "assetSerialNumber": "013001",
+  "assetType": "1020",
+  "brandLand": "00-国内",
+  "bypassFunction": "False",
+  "deploymentMode": "00-路由方式",
+  "deviceHeight": "1",
+  "facilityCategory": "FAITNWDFWD",
+  "facilityName": "鹤壁市中支5楼设备间电子政务外网防火墙",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2017-12-22",
+  "facilityUseState": "00-设施在用",
+  "firewall_deployment": [
+   {
+    "deployArea": "01-主机房-网络区",
+    "deployComputerRoom": "5楼设备间",
+    "deployDb": "鹤壁市中支中心机房",
+    "deployFloor": "五层",
+    "deployGallery": "办公楼"
+   }
+  ],
+  "firewall_installationPosition": [
+   {
+    "belongCabinet": "鹤壁市中支五楼设备间机柜11",
+    "slotNo": "21"
+   }
+  ],
+  "firewall_log": [
+   {
+    "logLocation": "00-本地存储",
+    "storagePeriod": "6"
+   }
+  ],
+  "firewall_operationsManagement": [
+   {
+    "administrativeDepartment": "01-后勤管理部门",
+    "operationDepartment": "01-后勤管理部门",
+    "serviceEndTime": "2020-12-22",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "郑州国联网络技术有限公司",
+    "serviceStartTime": "2017-12-22"
+   }
+  ],
+  "firewall_protocol": [
+   {
+    "ipv6BasicProtocol": [
+     "00-ICMPv6"
+    ]
+   }
+  ],
+  "handlingCapacity": "10",
+  "influenceSystem": "电子政务外网",
+  "managementIp": "100.79.117.30",
+  "maximumNewConnectionRate": "100",
+  "maximumNumberOfConcurrentConnections": "30",
+  "networkSecurityCapability": [
+   "00-IPSec"
+  ],
+  "numberOfCards": "0",
+  "operatingSystemVersionInformation": "AC6.8",
+  "remarksInformation": "有",
+  "securityFunction": "01-四层控制",
+  "supportIpv6": "True",
+  "wirelessFunction": "False",
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "1c6ac92268df4014880478a4fafc3b8a",
+  "assetBrand": "天融信",
+  "assetCode": "2202150021009005",
+  "assetSerialNumber": "Q1812876458",
+  "assetType": "NGFW4000-UF(TG-A2408)",
+  "brandLand": "00-国内",
+  "bypassFunction": "False",
+  "deploymentMode": "00-路由方式",
+  "deviceHeight": "1",
+  "facilityCategory": "FAITNWDFWD",
+  "facilityName": "信阳市中支中心机房业务网保卫专网防火墙1",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2019-05-15",
+  "facilityUseState": "00-设施在用",
+  "firewall_deployment": [
+   {
+    "deployArea": "00-主机房-服务器区",
+    "deployComputerRoom": "信阳市中心支行中心机房",
+    "deployDb": "信阳市中支中心机房",
+    "deployFloor": "二楼",
+    "deployGallery": "信阳市浉河区长安路133号"
+   }
+  ],
+  "firewall_installationPosition": [
+   {
+    "belongCabinet": "信阳市中支中心机房服务器机柜A08",
+    "slotNo": "14"
+   }
+  ],
+  "firewall_log": [
+   {
+    "logLocation": "00-本地存储",
+    "storagePeriod": "6"
+   }
+  ],
+  "firewall_operationsManagement": [
+   {
+    "administrativeDepartment": "00-科技管理部门",
+    "operationDepartment": "00-科技管理部门",
+    "serviceEndTime": "2020-05-15",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "河南威凡科技有限公司",
+    "serviceStartTime": "2019-05-15"
+   }
+  ],
+  "firewall_protocol": [
+   {
+    "ipv6BasicProtocol": [
+     "00-ICMPv6"
+    ]
+   }
+  ],
+  "handlingCapacity": "10",
+  "influenceSystem": "保卫监控回放系统",
+  "managementIp": "11.66.167.61",
+  "maximumNewConnectionRate": "100",
+  "maximumNumberOfConcurrentConnections": "30",
+  "networkSecurityCapability": [
+   "00-IPSec"
+  ],
+  "numberOfCards": "0",
+  "operatingSystemVersionInformation": "Topsec Operating Systemtos_3.3.020.065.1",
+  "remarksInformation": "有",
+  "securityFunction": "01-四层控制",
+  "supportIpv6": "True",
+  "wirelessFunction": "False",
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "3580cbe6d5a04beaaf999a4f361cfb32",
+  "assetBrand": "天融信",
+  "assetCode": "2202090021026028",
+  "assetSerialNumber": "Q1812992538",
+  "assetType": "NGFW4000-UF",
+  "brandLand": "00-国内",
+  "bypassFunction": "False",
+  "deploymentMode": "00-路由方式",
+  "deviceHeight": "1",
+  "facilityCategory": "FAITNWDFWD",
+  "facilityName": "中国人民银行三门峡市中心支行 保卫监控子网网防火墙1",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2019-05-30",
+  "facilityUseState": "00-设施在用",
+  "firewall_deployment": [
+   {
+    "deployArea": "01-主机房-网络区",
+    "deployComputerRoom": "中心机房",
+    "deployDb": "三门峡市中支中心机房",
+    "deployFloor": "六楼",
+    "deployGallery": "办公大楼"
+   }
+  ],
+  "firewall_installationPosition": [
+   {
+    "belongCabinet": "中国人民银行三门峡市中心支行 机柜9",
+    "slotNo": "22"
+   }
+  ],
+  "firewall_log": [
+   {
+    "logLocation": "00-本地存储",
+    "storagePeriod": "12"
+   }
+  ],
+  "firewall_operationsManagement": [
+   {
+    "administrativeDepartment": "00-科技管理部门",
+    "operationDepartment": "00-科技管理部门",
+    "serviceEndTime": "2022-05-30",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "河南威帆信息技术股份有限公司",
+    "serviceStartTime": "2019-05-30"
+   }
+  ],
+  "firewall_protocol": [
+   {
+    "ipv6BasicProtocol": [
+     "00-ICMPv6"
+    ]
+   }
+  ],
+  "handlingCapacity": "10",
+  "influenceSystem": "保卫监控网络",
+  "managementIp": "11.66.199.61",
+  "maximumNewConnectionRate": "120",
+  "maximumNumberOfConcurrentConnections": "50",
+  "networkSecurityCapability": [
+   "00-IPSec"
+  ],
+  "numberOfCards": "1",
+  "operatingSystemVersionInformation": "tos_3.3.020.065.1",
+  "remarksInformation": "有",
+  "securityFunction": "01-四层控制",
+  "supportIpv6": "True",
+  "wirelessFunction": "False",
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "39100fa0cb1544d8b92378caae16f2b7",
+  "assetBrand": "天融信",
+  "assetCode": "2202160021031024",
+  "assetSerialNumber": "Q1907085897",
+  "assetType": "NGFW4000(TG-716499)",
+  "brandLand": "00-国内",
+  "bypassFunction": "False",
+  "deploymentMode": "00-路由方式",
+  "deviceHeight": "1",
+  "facilityCategory": "FAITNWDFWD",
+  "facilityName": "周口市中支中心机房业务网保卫专网防火墙",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2019-04-10",
+  "facilityUseState": "00-设施在用",
+  "firewall_deployment": [
+   {
+    "deployArea": "01-主机房-网络区",
+    "deployComputerRoom": "周口市中心支行中心机房",
+    "deployDb": "周口市中支中心机房",
+    "deployFloor": "二层",
+    "deployGallery": "周口市川汇区七一路中段1号A楼"
+   }
+  ],
+  "firewall_installationPosition": [
+   {
+    "belongCabinet": "周口市中支中心机房网络机柜B3",
+    "slotNo": "33"
+   }
+  ],
+  "firewall_log": [
+   {
+    "logLocation": "00-本地存储",
+    "storagePeriod": "6"
+   }
+  ],
+  "firewall_operationsManagement": [
+   {
+    "administrativeDepartment": "00-科技管理部门",
+    "operationDepartment": "00-科技管理部门",
+    "serviceEndTime": "2020-08-01",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "天融信网络安全技术有限公司",
+    "serviceStartTime": "2019-08-01"
+   }
+  ],
+  "firewall_protocol": [
+   {
+    "ipv6BasicProtocol": [
+     "00-ICMPv6"
+    ]
+   }
+  ],
+  "handlingCapacity": "10",
+  "influenceSystem": "保卫监控回放系统",
+  "managementIp": "11.66.232.61",
+  "maximumNewConnectionRate": "100",
+  "maximumNumberOfConcurrentConnections": "30",
+  "networkSecurityCapability": [
+   "00-IPSec"
+  ],
+  "numberOfCards": "0",
+  "operatingSystemVersionInformation": "Topsec Operating Systemtos V3",
+  "remarksInformation": "有",
+  "securityFunction": "01-四层控制",
+  "supportIpv6": "True",
+  "wirelessFunction": "False",
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "40daf4d31e3f4e4fa6184fc83bd92f19",
+  "assetBrand": "天融信",
+  "assetCode": "2202070021026001",
+  "assetSerialNumber": "Q1903058216",
+  "assetType": "NGFW4000(TG-3204-BJ)",
+  "brandLand": "00-国内",
+  "bypassFunction": "False",
+  "deploymentMode": "00-路由方式",
+  "deviceHeight": "1",
+  "facilityCategory": "FAITNWDFWD",
+  "facilityName": "焦作市中支中心机房业务网保卫专网防火墙2",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2019-04-08",
+  "facilityUseState": "00-设施在用",
+  "firewall_deployment": [
+   {
+    "deployArea": "01-主机房-网络区",
+    "deployComputerRoom": "焦作市中心支行中心机房",
+    "deployDb": "焦作市中支中心机房",
+    "deployFloor": "四楼",
+    "deployGallery": "焦作市山阳区世纪路1355号"
+   }
+  ],
+  "firewall_installationPosition": [
+   {
+    "belongCabinet": "焦作市中支中心机房网络机柜2",
+    "slotNo": "29"
+   }
+  ],
+  "firewall_log": [
+   {
+    "logLocation": "00-本地存储",
+    "storagePeriod": "6"
+   }
+  ],
+  "firewall_operationsManagement": [
+   {
+    "administrativeDepartment": "00-科技管理部门",
+    "operationDepartment": "00-科技管理部门",
+    "serviceEndTime": "2022-04-08",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "焦作路达科技公司",
+    "serviceStartTime": "2019-04-08"
+   }
+  ],
+  "firewall_protocol": [
+   {
+    "ipv6BasicProtocol": [
+     "00-ICMPv6"
+    ]
+   }
+  ],
+  "handlingCapacity": "10",
+  "influenceSystem": "保卫监控回放系统",
+  "managementIp": "11.66.135.61",
+  "maximumNewConnectionRate": "100",
+  "maximumNumberOfConcurrentConnections": "30",
+  "networkSecurityCapability": [
+   "00-IPSec"
+  ],
+  "numberOfCards": "0",
+  "operatingSystemVersionInformation": "Topsec Operating Systemtos_3.3.020.065.1",
+  "remarksInformation": "有",
+  "securityFunction": "01-四层控制",
+  "supportIpv6": "True",
+  "wirelessFunction": "False",
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "40f390fbcdd44b0c91575252d4fda772",
+  "assetBrand": "华三",
+  "assetCode": "2202010021027057",
+  "assetSerialNumber": "219801A1C49185Q0000Z",
+  "assetType": "SecPath F1000-AK125",
+  "brandLand": "00-国内",
+  "bypassFunction": "False",
+  "deploymentMode": "00-路由方式",
+  "deviceHeight": "1",
+  "facilityCategory": "FAITNWDFWD",
+  "facilityName": "洛阳市中支互联网边界防火墙-主",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2018-08-01",
+  "facilityUseState": "00-设施在用",
+  "firewall_deployment": [
+   {
+    "deployArea": "01-主机房-网络区",
+    "deployComputerRoom": "洛阳市中支中心机房",
+    "deployDb": "洛阳市中支中心机房",
+    "deployFloor": "三层",
+    "deployGallery": "洛阳市中支办公大楼"
+   }
+  ],
+  "firewall_installationPosition": [
+   {
+    "belongCabinet": "洛阳市中支中心机房机柜N3",
+    "slotNo": "20"
+   }
+  ],
+  "firewall_log": [
+   {
+    "logLocation": "00-本地存储",
+    "storagePeriod": "6"
+   }
+  ],
+  "firewall_operationsManagement": [
+   {
+    "administrativeDepartment": "00-科技管理部门",
+    "operationDepartment": "00-科技管理部门",
+    "serviceEndTime": "2021-08-01",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "百年金海科技有限公司",
+    "serviceStartTime": "2018-08-01"
+   }
+  ],
+  "firewall_protocol": [
+   {
+    "ipv6BasicProtocol": [
+     "00-ICMPv6"
+    ]
+   }
+  ],
+  "handlingCapacity": "3",
+  "influenceSystem": "中支机关互联网",
+  "managementIp": "192.168.8.1",
+  "maximumNewConnectionRate": "100",
+  "maximumNumberOfConcurrentConnections": "100",
+  "networkSecurityCapability": [
+   "00-IPSec"
+  ],
+  "numberOfCards": "0",
+  "operatingSystemVersionInformation": "version 7.1.064, Release 9514P15",
+  "remarksInformation": "有",
+  "securityFunction": "01-四层控制",
+  "supportIpv6": "True",
+  "wirelessFunction": "False",
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "410fd82512e54f949b5066bd83b5ca5a",
+  "assetBrand": "天融信",
+  "assetSerialNumber": "K1206137886",
+  "assetType": "TopVPN6000(TV-6830-VONE)",
+  "brandLand": "00-国内",
+  "bypassFunction": "False",
+  "deploymentMode": "00-路由方式",
+  "deviceHeight": "2",
+  "facilityCategory": "FAITNWDFWD",
+  "facilityName": "郑州中支主中心小微平台防火墙",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2016-11-01",
+  "facilityUseState": "00-设施在用",
+  "firewall_deployment": [
+   {
+    "deployArea": "01-主机房-网络区",
+    "deployComputerRoom": "主中心网络机房",
+    "deployDb": "郑州中支主中心机房",
+    "deployFloor": "十一层",
+    "deployGallery": "主中心办公楼"
+   }
+  ],
+  "firewall_installationPosition": [
+   {
+    "belongCabinet": "郑州中支主中心网络机房小微平台柜",
+    "slotNo": "19"
+   }
+  ],
+  "firewall_log": [
+   {
+    "logLocation": "00-本地存储",
+    "storagePeriod": "12"
+   }
+  ],
+  "firewall_operationsManagement": [
+   {
+    "administrativeDepartment": "00-科技管理部门",
+    "operationDepartment": "00-科技管理部门",
+    "serviceEndTime": "2026-11-01",
+    "serviceLevel": "01-7*24",
+    "serviceStartTime": "2016-11-01"
+   }
+  ],
+  "firewall_protocol": [
+   {
+    "ipv6BasicProtocol": [
+     "00-ICMPv6"
+    ]
+   }
+  ],
+  "handlingCapacity": "10",
+  "influenceSystem": "小微平台业务",
+  "managementIp": "11.66.17.252",
+  "maximumNewConnectionRate": "100",
+  "maximumNumberOfConcurrentConnections": "30",
+  "networkSecurityCapability": [
+   "00-IPSec"
+  ],
+  "numberOfCards": "0",
+  "operatingSystemVersionInformation": "Topsec Operating System tos_3.3.010.042.1 K1206137886",
+  "remarksInformation": "有",
+  "securityFunction": "01-四层控制",
+  "supportIpv6": "True",
+  "wirelessFunction": "False",
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "44e348a28b4745379d60dccc4419910c",
+  "assetBrand": "天融信",
+  "assetCode": "2202050021030005",
+  "assetSerialNumber": "Q1908097102",
+  "assetType": "NGFW4000（TG-3204-BJ）",
+  "brandLand": "00-国内",
+  "bypassFunction": "False",
+  "deploymentMode": "00-路由方式",
+  "deviceHeight": "1",
+  "facilityCategory": "FAITNWDFWD",
+  "facilityName": "平顶山市中支保卫监控子网边界防火墙2",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2019-11-13",
+  "facilityUseState": "00-设施在用",
+  "firewall_deployment": [
+   {
+    "deployArea": "01-主机房-网络区",
+    "deployComputerRoom": "网络机房",
+    "deployDb": "平顶山市中支中心机房",
+    "deployFloor": "八层",
+    "deployGallery": "办公楼"
+   }
+  ],
+  "firewall_installationPosition": [
+   {
+    "belongCabinet": "平顶山市中支中心机房机柜09",
+    "slotNo": "2"
+   }
+  ],
+  "firewall_log": [
+   {
+    "logLocation": "00-本地存储",
+    "storagePeriod": "6"
+   }
+  ],
+  "firewall_operationsManagement": [
+   {
+    "administrativeDepartment": "01-后勤管理部门",
+    "operationDepartment": "01-后勤管理部门",
+    "serviceEndTime": "2022-11-13",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "河南威帆信息技术有限公司",
+    "serviceStartTime": "2019-11-13"
+   }
+  ],
+  "firewall_protocol": [
+   {
+    "ipv6BasicProtocol": [
+     "00-ICMPv6"
+    ]
+   }
+  ],
+  "handlingCapacity": "10",
+  "influenceSystem": "保卫监控",
+  "managementIp": "11.66.71.61",
+  "maximumNewConnectionRate": "100",
+  "maximumNumberOfConcurrentConnections": "60",
+  "networkSecurityCapability": [
+   "00-IPSec"
+  ],
+  "numberOfCards": "0",
+  "operatingSystemVersionInformation": "Topsec Operating System tos_3.3.020.065.1",
+  "remarksInformation": "有",
+  "securityFunction": "01-四层控制",
+  "supportIpv6": "True",
+  "wirelessFunction": "False",
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "4c0cc65ff6bb4ff69ffb9782a017d4f6",
+  "assetBrand": "天融信",
+  "assetCode": "2202020021100012",
+  "assetSerialNumber": "Q1907086480",
+  "assetType": "NGFW4000(TG-3204-BJ)",
+  "brandLand": "00-国内",
+  "bypassFunction": "False",
+  "deploymentMode": "00-路由方式",
+  "deviceHeight": "1",
+  "facilityCategory": "FAITNWDFWD",
+  "facilityName": "开封市中支中心机房安全保卫管理系统备防火墙",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2019-08-01",
+  "facilityUseState": "00-设施在用",
+  "firewall_deployment": [
+   {
+    "deployArea": "01-主机房-网络区",
+    "deployComputerRoom": "开封市中心支行中心机房",
+    "deployDb": "开封市中支中心机房",
+    "deployFloor": "三层",
+    "deployGallery": "开封市龙亭区晋安路60号办公楼"
+   }
+  ],
+  "firewall_installationPosition": [
+   {
+    "belongCabinet": "开封市中支中心机房机柜2",
+    "slotNo": "22"
+   }
+  ],
+  "firewall_log": [
+   {
+    "logLocation": "00-本地存储",
+    "storagePeriod": "6"
+   }
+  ],
+  "firewall_operationsManagement": [
+   {
+    "administrativeDepartment": "00-科技管理部门",
+    "operationDepartment": "00-科技管理部门",
+    "serviceEndTime": "2022-08-01",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "河南威帆信息技术股份有限公司",
+    "serviceStartTime": "2018-08-01"
+   }
+  ],
+  "firewall_protocol": [
+   {
+    "ipv6BasicProtocol": [
+     "00-ICMPv6"
+    ]
+   }
+  ],
+  "handlingCapacity": "10",
+  "influenceSystem": "安全保卫管理系统",
+  "managementIp": "11.66.39.61",
+  "maximumNewConnectionRate": "100",
+  "maximumNumberOfConcurrentConnections": "30",
+  "networkSecurityCapability": [
+   "00-IPSec"
+  ],
+  "numberOfCards": "0",
+  "operatingSystemVersionInformation": "Topsec Operating System tos_3.3.020.065.1",
+  "remarksInformation": "有",
+  "securityFunction": "01-四层控制",
+  "supportIpv6": "True",
+  "wirelessFunction": "False",
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "4d25c6b7d66d4ec08fa7dcaa53760e16",
+  "assetBrand": "天融信",
+  "assetCode": "2202050021030004",
+  "assetSerialNumber": "Q1908097100",
+  "assetType": "NGFW4000（TG-3204-BJ）",
+  "brandLand": "00-国内",
+  "bypassFunction": "False",
+  "deploymentMode": "00-路由方式",
+  "deviceHeight": "1",
+  "facilityCategory": "FAITNWDFWD",
+  "facilityName": "平顶山市中支保卫监控子网边界防火墙1",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2019-11-13",
+  "facilityUseState": "00-设施在用",
+  "firewall_deployment": [
+   {
+    "deployArea": "01-主机房-网络区",
+    "deployComputerRoom": "网络机房",
+    "deployDb": "平顶山市中支中心机房",
+    "deployFloor": "八层",
+    "deployGallery": "办公楼"
+   }
+  ],
+  "firewall_installationPosition": [
+   {
+    "belongCabinet": "平顶山市中支中心机房机柜09",
+    "slotNo": "6"
+   }
+  ],
+  "firewall_log": [
+   {
+    "logLocation": "00-本地存储",
+    "storagePeriod": "6"
+   }
+  ],
+  "firewall_operationsManagement": [
+   {
+    "administrativeDepartment": "01-后勤管理部门",
+    "operationDepartment": "01-后勤管理部门",
+    "serviceEndTime": "2022-11-13",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "河南威帆信息技术有限公司",
+    "serviceStartTime": "2019-11-13"
+   }
+  ],
+  "firewall_protocol": [
+   {
+    "ipv6BasicProtocol": [
+     "00-ICMPv6"
+    ]
+   }
+  ],
+  "handlingCapacity": "10",
+  "influenceSystem": "保卫监控",
+  "managementIp": "11.66.71.61",
+  "maximumNewConnectionRate": "100",
+  "maximumNumberOfConcurrentConnections": "60",
+  "networkSecurityCapability": [
+   "00-IPSec"
+  ],
+  "numberOfCards": "0",
+  "operatingSystemVersionInformation": "Topsec Operating System tos_3.3.020.065.1",
+  "remarksInformation": "有",
+  "securityFunction": "01-四层控制",
+  "supportIpv6": "True",
+  "wirelessFunction": "False",
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "5cbd390ad4184138aec23ebf11d83f2d",
+  "assetBrand": "天融信",
+  "assetSerialNumber": "Q1611479453",
+  "assetType": "NGFW4000-UF(TG-51136)",
+  "brandLand": "00-国内",
+  "bypassFunction": "False",
+  "deploymentMode": "00-路由方式",
+  "deviceHeight": "2",
+  "facilityCategory": "FAITNWDFWD",
+  "facilityName": "郑州中支转接中心金融城域网防火墙备",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2016-11-01",
+  "facilityUseState": "00-设施在用",
+  "firewall_deployment": [
+   {
+    "deployArea": "01-主机房-网络区",
+    "deployComputerRoom": "转接中心机房",
+    "deployDb": "郑州中支转接中心机房",
+    "deployFloor": "二层",
+    "deployGallery": "转接中心综合楼"
+   }
+  ],
+  "firewall_installationPosition": [
+   {
+    "belongCabinet": "郑州中支转接中心机房机柜3",
+    "slotNo": "31"
+   }
+  ],
+  "firewall_log": [
+   {
+    "logLocation": "00-本地存储",
+    "storagePeriod": "12"
+   }
+  ],
+  "firewall_operationsManagement": [
+   {
+    "administrativeDepartment": "00-科技管理部门",
+    "operationDepartment": "00-科技管理部门",
+    "serviceEndTime": "2021-11-01",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "北京神州新桥科技有限公司",
+    "serviceStartTime": "2020-11-01"
+   }
+  ],
+  "firewall_protocol": [
+   {
+    "ipv6BasicProtocol": [
+     "00-ICMPv6"
+    ]
+   }
+  ],
+  "handlingCapacity": "10",
+  "influenceSystem": "金融城域网业务",
+  "managementIp": "192.168.1.254",
+  "maximumNewConnectionRate": "100",
+  "maximumNumberOfConcurrentConnections": "30",
+  "networkSecurityCapability": [
+   "00-IPSec"
+  ],
+  "numberOfCards": "0",
+  "operatingSystemVersionInformation": "Topsec Operating System tos_3.3.010.100.1_more Q1611479453",
+  "remarksInformation": "有",
+  "securityFunction": "01-四层控制",
+  "supportIpv6": "True",
+  "wirelessFunction": "False",
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "61cac8fad71747ee806f848ad2747ca0",
+  "assetBrand": "天融信",
+  "assetCode": "2202030021030009",
+  "assetSerialNumber": "Q1903058210",
+  "assetType": "NGFW4000",
+  "brandLand": "00-国内",
+  "bypassFunction": "False",
+  "deploymentMode": "00-路由方式",
+  "deviceHeight": "1",
+  "facilityCategory": "FAITNWDFWD",
+  "facilityName": "新乡市中支中心机房业务网保卫专网防火墙2",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2019-04-08",
+  "facilityUseState": "00-设施在用",
+  "firewall_deployment": [
+   {
+    "deployArea": "01-主机房-网络区",
+    "deployComputerRoom": "新乡市中心支行中心机房",
+    "deployDb": "新乡市中支中心机房",
+    "deployFloor": "十五层",
+    "deployGallery": "新乡市红旗区向阳路9号"
+   }
+  ],
+  "firewall_installationPosition": [
+   {
+    "belongCabinet": "新乡市中支网路机房机柜08",
+    "slotNo": "39"
+   }
+  ],
+  "firewall_log": [
+   {
+    "logLocation": "00-本地存储",
+    "storagePeriod": "6"
+   }
+  ],
+  "firewall_operationsManagement": [
+   {
+    "administrativeDepartment": "00-科技管理部门",
+    "operationDepartment": "00-科技管理部门",
+    "serviceEndTime": "2022-04-08",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "河南威帆信息技术股份有限公司",
+    "serviceStartTime": "2019-04-08"
+   }
+  ],
+  "firewall_protocol": [
+   {
+    "ipv6BasicProtocol": [
+     "00-ICMPv6"
+    ]
+   }
+  ],
+  "handlingCapacity": "10",
+  "influenceSystem": "保卫监控回放系统",
+  "managementIp": "11.66.119.61",
+  "maximumNewConnectionRate": "100",
+  "maximumNumberOfConcurrentConnections": "30",
+  "networkSecurityCapability": [
+   "00-IPSec"
+  ],
+  "numberOfCards": "0",
+  "operatingSystemVersionInformation": "Topsec Operating Systemtos_3.3.020.065.1",
+  "remarksInformation": "有",
+  "securityFunction": "01-四层控制",
+  "supportIpv6": "True",
+  "wirelessFunction": "False",
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "675b5a6386a9494e8344345ef08f08c9",
+  "assetBrand": "天融信",
+  "assetCode": "2202020021100001",
+  "assetSerialNumber": "Q1907086476",
+  "assetType": "NGFW4000(TG-3204-BJ)",
+  "brandLand": "00-国内",
+  "bypassFunction": "False",
+  "deploymentMode": "00-路由方式",
+  "deviceHeight": "1",
+  "facilityCategory": "FAITNWDFWD",
+  "facilityName": "开封市中支中心机房安全保卫管理系统主防火墙",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2019-08-01",
+  "facilityUseState": "00-设施在用",
+  "firewall_deployment": [
+   {
+    "deployArea": "01-主机房-网络区",
+    "deployComputerRoom": "开封市中心支行中心机房",
+    "deployDb": "开封市中支中心机房",
+    "deployFloor": "三层",
+    "deployGallery": "开封市龙亭区晋安路60号办公楼"
+   }
+  ],
+  "firewall_installationPosition": [
+   {
+    "belongCabinet": "开封市中支中心机房机柜2",
+    "slotNo": "23"
+   }
+  ],
+  "firewall_log": [
+   {
+    "logLocation": "00-本地存储",
+    "storagePeriod": "6"
+   }
+  ],
+  "firewall_operationsManagement": [
+   {
+    "administrativeDepartment": "00-科技管理部门",
+    "operationDepartment": "00-科技管理部门",
+    "serviceEndTime": "2022-08-01",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "河南威帆信息技术股份有限公司",
+    "serviceStartTime": "2018-08-01"
+   }
+  ],
+  "firewall_protocol": [
+   {
+    "ipv6BasicProtocol": [
+     "00-ICMPv6"
+    ]
+   }
+  ],
+  "handlingCapacity": "10",
+  "influenceSystem": "安全保卫管理系统",
+  "managementIp": "11.66.39.61",
+  "maximumNewConnectionRate": "100",
+  "maximumNumberOfConcurrentConnections": "30",
+  "networkSecurityCapability": [
+   "00-IPSec"
+  ],
+  "numberOfCards": "0",
+  "operatingSystemVersionInformation": "Topsec Operating System tos_3.3.020.065.1",
+  "remarksInformation": "有",
+  "securityFunction": "01-四层控制",
+  "supportIpv6": "True",
+  "wirelessFunction": "False",
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "71ae66a2df3b4b6e9938f47004828ac5",
+  "assetBrand": "天融信",
+  "assetSerialNumber": "Q1811760631",
+  "assetType": "NGFW4000-UF(TG-51235)",
+  "brandLand": "00-国内",
+  "bypassFunction": "False",
+  "deploymentMode": "00-路由方式",
+  "deviceHeight": "2",
+  "facilityCategory": "FAITNWDFWD",
+  "facilityName": "郑州中支主中心业务网纵向防火墙备",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2018-11-01",
+  "facilityUseState": "00-设施在用",
+  "firewall_deployment": [
+   {
+    "deployArea": "01-主机房-网络区",
+    "deployComputerRoom": "主中心网络机房",
+    "deployDb": "郑州中支主中心机房",
+    "deployFloor": "十一层",
+    "deployGallery": "主中心办公楼"
+   }
+  ],
+  "firewall_installationPosition": [
+   {
+    "belongCabinet": "郑州中支主中心网络机房网络柜3",
+    "slotNo": "22"
+   }
+  ],
+  "firewall_log": [
+   {
+    "logLocation": "00-本地存储",
+    "storagePeriod": "6"
+   }
+  ],
+  "firewall_operationsManagement": [
+   {
+    "administrativeDepartment": "00-科技管理部门",
+    "operationDepartment": "00-科技管理部门",
+    "serviceEndTime": "2021-11-01",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "河南威帆信息技术有限公司",
+    "serviceStartTime": "2018-11-01"
+   }
+  ],
+  "firewall_protocol": [
+   {
+    "ipv6BasicProtocol": [
+     "00-ICMPv6"
+    ]
+   }
+  ],
+  "handlingCapacity": "10",
+  "influenceSystem": "业务网业务",
+  "managementIp": "11.66.17.246",
+  "maximumNewConnectionRate": "100",
+  "maximumNumberOfConcurrentConnections": "30",
+  "networkSecurityCapability": [
+   "00-IPSec"
+  ],
+  "numberOfCards": "0",
+  "operatingSystemVersionInformation": "Topsec Operating System tos_3.3.017.065.1 Q1811760631",
+  "remarksInformation": "有",
+  "securityFunction": "01-四层控制",
+  "supportIpv6": "True",
+  "wirelessFunction": "False",
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "73e8384bf39348f09617e23bcb7df8ff",
+  "assetBrand": "华三",
+  "assetCode": "2202090021020084",
+  "assetSerialNumber": "210235A1FTH16A000101",
+  "assetType": "NS-SecPathF1030",
+  "brandLand": "00-国内",
+  "bypassFunction": "False",
+  "deploymentMode": "00-路由方式",
+  "deviceHeight": "1",
+  "facilityCategory": "FAITNWDFWD",
+  "facilityName": "中国人民银行三门峡市中心支行 互联网防火墙",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2017-03-15",
+  "facilityUseState": "00-设施在用",
+  "firewall_deployment": [
+   {
+    "deployArea": "01-主机房-网络区",
+    "deployComputerRoom": "中心机房",
+    "deployDb": "三门峡市中支中心机房",
+    "deployFloor": "六楼",
+    "deployGallery": "办公大楼"
+   }
+  ],
+  "firewall_installationPosition": [
+   {
+    "belongCabinet": "中国人民银行三门峡市中心支行 机柜9",
+    "slotNo": "12"
+   }
+  ],
+  "firewall_log": [
+   {
+    "logLocation": "00-本地存储",
+    "storagePeriod": "12"
+   }
+  ],
+  "firewall_operationsManagement": [
+   {
+    "administrativeDepartment": "00-科技管理部门",
+    "operationDepartment": "00-科技管理部门",
+    "serviceEndTime": "2020-03-15",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "河南威帆信息技术股份有限公司",
+    "serviceStartTime": "2017-03-15"
+   }
+  ],
+  "firewall_protocol": [
+   {
+    "ipv6BasicProtocol": [
+     "00-ICMPv6"
+    ]
+   }
+  ],
+  "handlingCapacity": "10",
+  "influenceSystem": "互联网网络",
+  "managementIp": "192.168.120.1",
+  "maximumNewConnectionRate": "120",
+  "maximumNumberOfConcurrentConnections": "50",
+  "networkSecurityCapability": [
+   "00-IPSec"
+  ],
+  "numberOfCards": "1",
+  "operatingSystemVersionInformation": "Version 7.1.064, Release 9313P07",
+  "remarksInformation": "有",
+  "securityFunction": "01-四层控制",
+  "supportIpv6": "True",
+  "wirelessFunction": "False",
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "811e64b9610a4d778afaf9a0fef7533a",
+  "assetBrand": "天融信",
+  "assetSerialNumber": "Q1907086482",
+  "assetType": "NGFW4000(TG-3204-BJ)",
+  "brandLand": "00-国内",
+  "bypassFunction": "False",
+  "deploymentMode": "00-路由方式",
+  "deviceHeight": "1",
+  "facilityCategory": "FAITNWDFWD",
+  "facilityName": "洛阳市中支保卫专网防火墙2",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2019-04-08",
+  "facilityUseState": "00-设施在用",
+  "firewall_deployment": [
+   {
+    "deployArea": "01-主机房-网络区",
+    "deployComputerRoom": "洛阳市中支中心机房",
+    "deployDb": "洛阳市中支中心机房",
+    "deployFloor": "三层",
+    "deployGallery": "洛阳市中支办公大楼"
+   }
+  ],
+  "firewall_installationPosition": [
+   {
+    "belongCabinet": "洛阳市中支中心机房机柜N3",
+    "slotNo": "13"
+   }
+  ],
+  "firewall_log": [
+   {
+    "logLocation": "00-本地存储",
+    "storagePeriod": "6"
+   }
+  ],
+  "firewall_operationsManagement": [
+   {
+    "administrativeDepartment": "00-科技管理部门",
+    "operationDepartment": "00-科技管理部门",
+    "serviceEndTime": "2022-07-23",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "郑州飞源科技有限公司",
+    "serviceStartTime": "2019-07-23"
+   }
+  ],
+  "firewall_protocol": [
+   {
+    "ipv6BasicProtocol": [
+     "00-ICMPv6"
+    ]
+   }
+  ],
+  "handlingCapacity": "2",
+  "influenceSystem": "保卫监控四级联网系统,保卫联合值守系统",
+  "managementIp": "11.66.55.61",
+  "maximumNewConnectionRate": "100",
+  "maximumNumberOfConcurrentConnections": "145",
+  "networkSecurityCapability": [
+   "00-IPSec"
+  ],
+  "numberOfCards": "1",
+  "operatingSystemVersionInformation": "tos_3.3.020.065.1",
+  "remarksInformation": "有",
+  "securityFunction": "01-四层控制",
+  "supportIpv6": "True",
+  "wirelessFunction": "False",
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "87d5298133a343f88913971600956be9",
+  "assetBrand": "天融信",
+  "assetCode": "2202090021026029",
+  "assetSerialNumber": "Q1812992535",
+  "assetType": "NGFW4000-UF",
+  "brandLand": "00-国内",
+  "bypassFunction": "False",
+  "deploymentMode": "00-路由方式",
+  "deviceHeight": "1",
+  "facilityCategory": "FAITNWDFWD",
+  "facilityName": "中国人民银行三门峡市中心支行 保卫监控子网网防火墙2",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2019-05-30",
+  "facilityUseState": "00-设施在用",
+  "firewall_deployment": [
+   {
+    "deployArea": "01-主机房-网络区",
+    "deployComputerRoom": "中心机房",
+    "deployDb": "三门峡市中支中心机房",
+    "deployFloor": "六楼",
+    "deployGallery": "办公大楼"
+   }
+  ],
+  "firewall_installationPosition": [
+   {
+    "belongCabinet": "中国人民银行三门峡市中心支行 机柜10",
+    "slotNo": "22"
+   }
+  ],
+  "firewall_log": [
+   {
+    "logLocation": "00-本地存储",
+    "storagePeriod": "12"
+   }
+  ],
+  "firewall_operationsManagement": [
+   {
+    "administrativeDepartment": "00-科技管理部门",
+    "operationDepartment": "00-科技管理部门",
+    "serviceEndTime": "2022-05-30",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "河南威帆信息技术股份有限公司",
+    "serviceStartTime": "2019-05-30"
+   }
+  ],
+  "firewall_protocol": [
+   {
+    "ipv6BasicProtocol": [
+     "00-ICMPv6"
+    ]
+   }
+  ],
+  "handlingCapacity": "10",
+  "influenceSystem": "保卫监控网络",
+  "managementIp": "11.66.199.61",
+  "maximumNewConnectionRate": "120",
+  "maximumNumberOfConcurrentConnections": "50",
+  "networkSecurityCapability": [
+   "00-IPSec"
+  ],
+  "numberOfCards": "1",
+  "operatingSystemVersionInformation": "tos_3.3.020.065.1",
+  "remarksInformation": "有",
+  "securityFunction": "01-四层控制",
+  "supportIpv6": "True",
+  "wirelessFunction": "False",
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "8d81322c6ac9454fb39790c614f2115a",
+  "assetBrand": "天融信",
+  "assetSerialNumber": "Q1907086478",
+  "assetType": "NGFW4000(TG-3204-BJ)",
+  "brandLand": "00-国内",
+  "bypassFunction": "False",
+  "deploymentMode": "00-路由方式",
+  "deviceHeight": "1",
+  "facilityCategory": "FAITNWDFWD",
+  "facilityName": "洛阳市中支保卫专网防火墙1",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2019-04-08",
+  "facilityUseState": "00-设施在用",
+  "firewall_deployment": [
+   {
+    "deployArea": "01-主机房-网络区",
+    "deployComputerRoom": "洛阳市中支中心机房",
+    "deployDb": "洛阳市中支中心机房",
+    "deployFloor": "三层",
+    "deployGallery": "洛阳市中支办公大楼"
+   }
+  ],
+  "firewall_installationPosition": [
+   {
+    "belongCabinet": "洛阳市中支中心机房机柜N3",
+    "slotNo": "15"
+   }
+  ],
+  "firewall_log": [
+   {
+    "logLocation": "00-本地存储",
+    "storagePeriod": "6"
+   }
+  ],
+  "firewall_operationsManagement": [
+   {
+    "administrativeDepartment": "00-科技管理部门",
+    "operationDepartment": "00-科技管理部门",
+    "serviceEndTime": "2022-07-23",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "郑州飞源科技有限公司",
+    "serviceStartTime": "2019-07-23"
+   }
+  ],
+  "firewall_protocol": [
+   {
+    "ipv6BasicProtocol": [
+     "00-ICMPv6"
+    ]
+   }
+  ],
+  "handlingCapacity": "2",
+  "influenceSystem": "保卫监控四级联网系统,保卫联合值守系统",
+  "managementIp": "11.66.55.61",
+  "maximumNewConnectionRate": "100",
+  "maximumNumberOfConcurrentConnections": "145",
+  "networkSecurityCapability": [
+   "00-IPSec"
+  ],
+  "numberOfCards": "1",
+  "operatingSystemVersionInformation": "tos_3.3.020.065.1",
+  "remarksInformation": "有",
+  "securityFunction": "01-四层控制",
+  "supportIpv6": "True",
+  "wirelessFunction": "False",
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "9d7be60207ab4ba4b9a78c52bf6868ce",
+  "assetBrand": "天融信",
+  "assetSerialNumber": "Q1611479451",
+  "assetType": "NGFW4000-UF(TG-51136)",
+  "brandLand": "00-国内",
+  "bypassFunction": "False",
+  "deploymentMode": "00-路由方式",
+  "deviceHeight": "2",
+  "facilityCategory": "FAITNWDFWD",
+  "facilityName": "郑州中支主中心金融城域网防火墙主",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2016-11-01",
+  "facilityUseState": "00-设施在用",
+  "firewall_deployment": [
+   {
+    "deployArea": "01-主机房-网络区",
+    "deployComputerRoom": "主中心网络机房",
+    "deployDb": "郑州中支主中心机房",
+    "deployFloor": "十一层",
+    "deployGallery": "主中心办公楼"
+   }
+  ],
+  "firewall_installationPosition": [
+   {
+    "belongCabinet": "郑州中支主中心网络机房网络柜5",
+    "slotNo": "12"
+   }
+  ],
+  "firewall_log": [
+   {
+    "logLocation": "00-本地存储",
+    "storagePeriod": "6"
+   }
+  ],
+  "firewall_operationsManagement": [
+   {
+    "administrativeDepartment": "00-科技管理部门",
+    "operationDepartment": "00-科技管理部门",
+    "serviceEndTime": "2021-11-01",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "北京神州新桥科技有限公司",
+    "serviceStartTime": "2020-11-01"
+   }
+  ],
+  "firewall_protocol": [
+   {
+    "ipv6BasicProtocol": [
+     "00-ICMPv6"
+    ]
+   }
+  ],
+  "handlingCapacity": "10",
+  "influenceSystem": "金融城域网业务",
+  "managementIp": "11.66.17.252",
+  "maximumNewConnectionRate": "100",
+  "maximumNumberOfConcurrentConnections": "30",
+  "networkSecurityCapability": [
+   "00-IPSec"
+  ],
+  "numberOfCards": "0",
+  "operatingSystemVersionInformation": "Topsec Operating System tos_3.3.010.100.1_more Q1611479451",
+  "remarksInformation": "有",
+  "securityFunction": "01-四层控制",
+  "supportIpv6": "True",
+  "wirelessFunction": "False",
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "a082aaddf1d94aec975d9b4376b7ba49",
+  "assetBrand": "天融信",
+  "assetSerialNumber": "Q1611479452",
+  "assetType": "NGFW4000-UF(TG-51136)",
+  "brandLand": "00-国内",
+  "bypassFunction": "False",
+  "deploymentMode": "00-路由方式",
+  "deviceHeight": "2",
+  "facilityCategory": "FAITNWDFWD",
+  "facilityName": "郑州中支主中心金融城域网防火墙备",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2016-11-01",
+  "facilityUseState": "00-设施在用",
+  "firewall_deployment": [
+   {
+    "deployArea": "01-主机房-网络区",
+    "deployComputerRoom": "主中心网络机房",
+    "deployDb": "郑州中支主中心机房",
+    "deployFloor": "十一层",
+    "deployGallery": "主中心办公楼"
+   }
+  ],
+  "firewall_installationPosition": [
+   {
+    "belongCabinet": "郑州中支主中心网络机房网络柜5",
+    "slotNo": "9"
+   }
+  ],
+  "firewall_log": [
+   {
+    "logLocation": "00-本地存储",
+    "storagePeriod": "6"
+   }
+  ],
+  "firewall_operationsManagement": [
+   {
+    "administrativeDepartment": "00-科技管理部门",
+    "operationDepartment": "00-科技管理部门",
+    "serviceEndTime": "2021-11-01",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "北京神州新桥科技有限公司",
+    "serviceStartTime": "2020-11-01"
+   }
+  ],
+  "firewall_protocol": [
+   {
+    "ipv6BasicProtocol": [
+     "00-ICMPv6"
+    ]
+   }
+  ],
+  "handlingCapacity": "10",
+  "influenceSystem": "金融城域网业务",
+  "managementIp": "11.66.17.252",
+  "maximumNewConnectionRate": "100",
+  "maximumNumberOfConcurrentConnections": "30",
+  "networkSecurityCapability": [
+   "00-IPSec"
+  ],
+  "numberOfCards": "0",
+  "operatingSystemVersionInformation": "Topsec Operating System tos_3.3.010.100.1_more Q1611479451",
+  "remarksInformation": "有",
+  "securityFunction": "01-四层控制",
+  "supportIpv6": "True",
+  "wirelessFunction": "False",
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "b0f0bbc228e64f0990a8e61054e2d371",
+  "assetBrand": "华为",
+  "assetCode": "2202100021022003",
+  "assetSerialNumber": "2102355271AMG8001546",
+  "assetType": "USG6620",
+  "brandLand": "00-国内",
+  "bypassFunction": "False",
+  "deploymentMode": "00-路由方式",
+  "deviceHeight": "1",
+  "facilityCategory": "FAITNWDFWD",
+  "facilityName": "驻马店市中支中心机房保卫子网防火墙",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2019-01-22",
+  "facilityUseState": "00-设施在用",
+  "firewall_deployment": [
+   {
+    "deployArea": "00-主机房-服务器区",
+    "deployComputerRoom": "驻马店市中支中心机房",
+    "deployDb": "驻马店市中支中心机房",
+    "deployFloor": "四层",
+    "deployGallery": "驻马店市驿城区泰山路567号办公楼"
+   }
+  ],
+  "firewall_installationPosition": [
+   {
+    "belongCabinet": "驻马店市中支中心机房机柜A1",
+    "slotNo": "37"
+   }
+  ],
+  "firewall_log": [
+   {
+    "logLocation": "00-本地存储",
+    "storagePeriod": "6"
+   }
+  ],
+  "firewall_operationsManagement": [
+   {
+    "administrativeDepartment": "00-科技管理部门",
+    "operationDepartment": "00-科技管理部门",
+    "serviceEndTime": "2022-01-22",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "未知",
+    "serviceStartTime": "2019-01-22"
+   }
+  ],
+  "firewall_protocol": [
+   {
+    "ipv6BasicProtocol": [
+     "00-ICMPv6"
+    ]
+   }
+  ],
+  "handlingCapacity": "10",
+  "influenceSystem": "保卫监控",
+  "managementIp": "11.66.247.61",
+  "maximumNewConnectionRate": "100",
+  "maximumNumberOfConcurrentConnections": "30",
+  "networkSecurityCapability": [
+   "00-IPSec"
+  ],
+  "numberOfCards": "0",
+  "operatingSystemVersionInformation": "Version 5.170",
+  "remarksInformation": "有",
+  "securityFunction": "01-四层控制",
+  "supportIpv6": "True",
+  "wirelessFunction": "False",
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "b67dbbdaaf20407982e344a4f95fbacd",
+  "assetBrand": "天融信",
+  "assetCode": "2202150021009006",
+  "assetSerialNumber": "Q1812876456",
+  "assetType": "NGFW4000-UF(TG-A2408)",
+  "brandLand": "00-国内",
+  "bypassFunction": "False",
+  "deploymentMode": "00-路由方式",
+  "deviceHeight": "1",
+  "facilityCategory": "FAITNWDFWD",
+  "facilityName": "信阳市中支中心机房业务网保卫专网防火墙2",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2019-05-15",
+  "facilityUseState": "00-设施在用",
+  "firewall_deployment": [
+   {
+    "deployArea": "00-主机房-服务器区",
+    "deployComputerRoom": "信阳市中心支行中心机房",
+    "deployDb": "信阳市中支中心机房",
+    "deployFloor": "二楼",
+    "deployGallery": "信阳市浉河区长安路133号"
+   }
+  ],
+  "firewall_installationPosition": [
+   {
+    "belongCabinet": "信阳市中支中心机房服务器机柜A08",
+    "slotNo": "12"
+   }
+  ],
+  "firewall_log": [
+   {
+    "logLocation": "00-本地存储",
+    "storagePeriod": "6"
+   }
+  ],
+  "firewall_operationsManagement": [
+   {
+    "administrativeDepartment": "00-科技管理部门",
+    "operationDepartment": "00-科技管理部门",
+    "serviceEndTime": "2020-05-15",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "河南威凡科技有限公司",
+    "serviceStartTime": "2019-05-15"
+   }
+  ],
+  "firewall_protocol": [
+   {
+    "ipv6BasicProtocol": [
+     "00-ICMPv6"
+    ]
+   }
+  ],
+  "handlingCapacity": "10",
+  "influenceSystem": "保卫监控回放系统",
+  "managementIp": "11.66.167.62",
+  "maximumNewConnectionRate": "100",
+  "maximumNumberOfConcurrentConnections": "30",
+  "networkSecurityCapability": [
+   "00-IPSec"
+  ],
+  "numberOfCards": "0",
+  "operatingSystemVersionInformation": "Topsec Operating Systemtos_3.3.020.065.1",
+  "remarksInformation": "有",
+  "securityFunction": "01-四层控制",
+  "supportIpv6": "True",
+  "wirelessFunction": "False",
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "c1d5b5453ee941aa8ab24c837cbfc6f8",
+  "assetBrand": "天融信",
+  "assetCode": "2202110021029012",
+  "assetSerialNumber": "4101103301001",
+  "assetType": "NGFW4000",
+  "brandLand": "00-国内",
+  "bypassFunction": "False",
+  "deploymentMode": "00-路由方式",
+  "deviceHeight": "1",
+  "facilityCategory": "FAITNWDFWD",
+  "facilityName": "南阳市中支中心机房办公网防火墙1",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2020-04-02",
+  "facilityUseState": "00-设施在用",
+  "firewall_deployment": [
+   {
+    "deployArea": "90-屏蔽机房区",
+    "deployComputerRoom": "南阳市中心支行中心机房",
+    "deployDb": "南阳市中支中心机房",
+    "deployFloor": "十二楼",
+    "deployGallery": "南阳市新华西路178号"
+   }
+  ],
+  "firewall_installationPosition": [
+   {
+    "belongCabinet": "南阳市市中支网络机房机柜03",
+    "slotNo": "12"
+   }
+  ],
+  "firewall_log": [
+   {
+    "logLocation": "00-本地存储",
+    "storagePeriod": "6"
+   }
+  ],
+  "firewall_operationsManagement": [
+   {
+    "administrativeDepartment": "00-科技管理部门",
+    "operationDepartment": "00-科技管理部门",
+    "serviceEndTime": "2022-10-15",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "南阳恒得实佳",
+    "serviceStartTime": "2020-10-15"
+   }
+  ],
+  "firewall_protocol": [
+   {
+    "ipv6BasicProtocol": [
+     "00-ICMPv6"
+    ]
+   }
+  ],
+  "handlingCapacity": "10",
+  "influenceSystem": "办公网安全",
+  "maximumNewConnectionRate": "100",
+  "maximumNumberOfConcurrentConnections": "30",
+  "networkSecurityCapability": [
+   "00-IPSec"
+  ],
+  "numberOfCards": "0",
+  "operatingSystemVersionInformation": "Topsec Operating",
+  "remarksInformation": "有",
+  "securityFunction": "01-四层控制",
+  "supportIpv6": "True",
+  "wirelessFunction": "False",
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "cb71dce19efd49aab3bf1693d25dcb3f",
+  "assetBrand": "天融信",
+  "assetCode": "22020400210230005",
+  "assetSerialNumber": "Q1610470126",
+  "assetType": "NGFW4000-UF（TG-4130L)",
+  "brandLand": "00-国内",
+  "bypassFunction": "False",
+  "deploymentMode": "00-路由方式",
+  "deviceHeight": "1",
+  "facilityCategory": "FAITNWDFWD",
+  "facilityName": "安阳市中支中心机房业务网保卫专网防火墙2",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2019-04-08",
+  "facilityUseState": "00-设施在用",
+  "firewall_deployment": [
+   {
+    "deployArea": "01-主机房-网络区",
+    "deployComputerRoom": "安阳市中支中心机房",
+    "deployDb": "安阳市中支中心机房",
+    "deployFloor": "八层",
+    "deployGallery": "安阳市开发区金融大厦"
+   }
+  ],
+  "firewall_installationPosition": [
+   {
+    "belongCabinet": "安阳市中支中心机房机柜06",
+    "slotNo": "36"
+   }
+  ],
+  "firewall_log": [
+   {
+    "logLocation": "00-本地存储",
+    "storagePeriod": "6"
+   }
+  ],
+  "firewall_operationsManagement": [
+   {
+    "administrativeDepartment": "00-科技管理部门",
+    "operationDepartment": "00-科技管理部门",
+    "serviceEndTime": "2022-04-08",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "河南同有信息科技有限公司",
+    "serviceStartTime": "2020-04-08"
+   }
+  ],
+  "firewall_protocol": [
+   {
+    "ipv6BasicProtocol": [
+     "00-ICMPv6"
+    ]
+   }
+  ],
+  "handlingCapacity": "10",
+  "influenceSystem": "保卫监控回放系统",
+  "managementIp": "11.66.87.61",
+  "maximumNewConnectionRate": "100",
+  "maximumNumberOfConcurrentConnections": "30",
+  "networkSecurityCapability": [
+   "00-IPSec"
+  ],
+  "numberOfCards": "1",
+  "operatingSystemVersionInformation": "Topsec Operating Systemtos_3.3.020.065F.1",
+  "remarksInformation": "有",
+  "securityFunction": "00-三层控制",
+  "supportIpv6": "False",
+  "wirelessFunction": "False",
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "ccdacb087b3c43dd8152b00d7c22ae80",
+  "assetBrand": "天融信",
+  "assetCode": "2202140021031005",
+  "assetSerialNumber": "Q1812887170",
+  "assetType": "NGFW4000(TG-42566)",
+  "brandLand": "00-国内",
+  "bypassFunction": "False",
+  "deploymentMode": "00-路由方式",
+  "deviceHeight": "1",
+  "facilityCategory": "FAITNWDFWD",
+  "facilityName": "商丘市中支中心机房业务网保卫专网防火墙1",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2019-08-01",
+  "facilityUseState": "00-设施在用",
+  "firewall_deployment": [
+   {
+    "deployArea": "01-主机房-网络区",
+    "deployComputerRoom": "商丘市中心支行中心机房",
+    "deployDb": "商丘市中支中心机房",
+    "deployFloor": "八层",
+    "deployGallery": "商丘市睢阳区北海西路六号"
+   }
+  ],
+  "firewall_installationPosition": [
+   {
+    "belongCabinet": "商丘市中支保卫科机柜1",
+    "slotNo": "22"
+   }
+  ],
+  "firewall_log": [
+   {
+    "logLocation": "00-本地存储",
+    "storagePeriod": "6"
+   }
+  ],
+  "firewall_operationsManagement": [
+   {
+    "administrativeDepartment": "00-科技管理部门",
+    "operationDepartment": "00-科技管理部门",
+    "serviceEndTime": "2021-08-01",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "河南金奥电子技术有限公司",
+    "serviceStartTime": "2019-08-01"
+   }
+  ],
+  "firewall_protocol": [
+   {
+    "ipv6BasicProtocol": [
+     "00-ICMPv6"
+    ]
+   }
+  ],
+  "handlingCapacity": "10",
+  "influenceSystem": "保卫监控回放系统",
+  "managementIp": "11.66.135.61",
+  "maximumNewConnectionRate": "100",
+  "maximumNumberOfConcurrentConnections": "30",
+  "networkSecurityCapability": [
+   "00-IPSec"
+  ],
+  "numberOfCards": "0",
+  "operatingSystemVersionInformation": "Topsec Operating System tos_3.3.010.073.67_18",
+  "remarksInformation": "有",
+  "securityFunction": "01-四层控制",
+  "supportIpv6": "True",
+  "wirelessFunction": "False",
+  "_dataSource": "双源"
+ },
+ {
+  "assetBrand": "天融信",
+  "assetCode": "2202130021029000",
+  "assetSerialNumber": "Q1812876445",
+  "assetType": "NGFW4000-UF(TG-A2408)",
+  "brandLand": "00-国内",
+  "bypassFunction": "False",
+  "deploymentMode": "00-路由方式",
+  "deviceHeight": "1",
+  "facilityCategory": "FAITNWDFWD",
+  "facilityDescriptor": "d51c5c2bf1164d62be806fa8b2c8ba86",
+  "facilityName": "漯河市中支中心机房业务网保卫专网防火墙（主）",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUseDate": "2019-03-14",
+  "facilityUseState": "00-设施在用",
+  "firewall_deployment": [
+   {
+    "deployArea": "01-主机房-网络区",
+    "deployComputerRoom": "漯河市中支中心机房",
+    "deployDb": "漯河市中支中心机房",
+    "deployFloor": "五层",
+    "deployGallery": "漯河市中支办公楼"
+   }
+  ],
+  "firewall_installationPosition": [
+   {
+    "belongCabinet": "漯河市中支网络机房屏蔽机柜",
+    "slotNo": "1"
+   }
+  ],
+  "firewall_log": [
+   {
+    "logLocation": "00-本地存储",
+    "storagePeriod": "12"
+   }
+  ],
+  "firewall_operationsManagement": [
+   {
+    "administrativeDepartment": "01-后勤管理部门",
+    "operationDepartment": "01-后勤管理部门",
+    "serviceEndTime": "2022-03-14",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "河南威帆信息技术股份有限公司",
+    "serviceStartTime": "2019-03-14"
+   }
+  ],
+  "firewall_protocol": [
+   {
+    "ipv6BasicProtocol": [
+     "00-ICMPv6"
+    ]
+   }
+  ],
+  "handlingCapacity": "1",
+  "influenceSystem": "保卫监控回放系统",
+  "managementIp": "https://11.66.183.61",
+  "maximumNewConnectionRate": "100",
+  "maximumNumberOfConcurrentConnections": "30",
+  "networkSecurityCapability": [
+   "00-IPSec"
+  ],
+  "numberOfCards": "0",
+  "operatingSystemVersionInformation": "Topsec Operating System tos_3.3.020.065I.1 Q1812876445",
+  "remarksInformation": "有",
+  "securityFunction": "01-四层控制",
+  "supportIpv6": "True",
+  "wirelessFunction": "False",
+  "_dataSource": "上报"
+ },
+ {
+  "facilityDescriptor": "d79653f4b7c84aacbd186bd0196c6d11",
+  "assetBrand": "天融信",
+  "assetSerialNumber": "Q1405220528",
+  "assetType": "NGFW4000-UF(TG-51136)",
+  "brandLand": "00-国内",
+  "bypassFunction": "False",
+  "deploymentMode": "00-路由方式",
+  "deviceHeight": "2",
+  "facilityCategory": "FAITNWDFWD",
+  "facilityName": "郑州中支主中心互联网防火墙",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2014-04-01",
+  "facilityUseState": "00-设施在用",
+  "firewall_deployment": [
+   {
+    "deployArea": "01-主机房-网络区",
+    "deployComputerRoom": "主中心网络机房",
+    "deployDb": "郑州中支主中心机房",
+    "deployFloor": "十一层",
+    "deployGallery": "主中心办公楼"
+   }
+  ],
+  "firewall_installationPosition": [
+   {
+    "belongCabinet": "郑州中支主中心网络机房网络柜1",
+    "slotNo": "33"
+   }
+  ],
+  "firewall_log": [
+   {
+    "logLocation": "00-本地存储",
+    "storagePeriod": "6"
+   }
+  ],
+  "firewall_operationsManagement": [
+   {
+    "administrativeDepartment": "00-科技管理部门",
+    "operationDepartment": "00-科技管理部门",
+    "serviceEndTime": "2026-11-01",
+    "serviceLevel": "01-7*24",
+    "serviceStartTime": "2014-04-01"
+   }
+  ],
+  "firewall_protocol": [
+   {
+    "ipv6BasicProtocol": [
+     "00-ICMPv6"
+    ]
+   }
+  ],
+  "handlingCapacity": "10",
+  "influenceSystem": "互联网业务",
+  "managementIp": "192.168.0.252",
+  "maximumNewConnectionRate": "100",
+  "maximumNumberOfConcurrentConnections": "30",
+  "networkSecurityCapability": [
+   "00-IPSec"
+  ],
+  "numberOfCards": "0",
+  "operatingSystemVersionInformation": "Topsec Operating System tos_3.3.010.042.1 K1206137886",
+  "remarksInformation": "有",
+  "securityFunction": "01-四层控制",
+  "supportIpv6": "True",
+  "wirelessFunction": "False",
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "d7b467eaa1a94a8397be609f40733686",
+  "assetBrand": "天融信",
+  "assetCode": "2202070021026000",
+  "assetSerialNumber": "Q1903058200",
+  "assetType": "NGFW4000(TG-3204-BJ)",
+  "brandLand": "00-国内",
+  "bypassFunction": "False",
+  "deploymentMode": "00-路由方式",
+  "deviceHeight": "1",
+  "facilityCategory": "FAITNWDFWD",
+  "facilityName": "焦作市中支中心机房业务网保卫专网防火墙1",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2019-04-08",
+  "facilityUseState": "00-设施在用",
+  "firewall_deployment": [
+   {
+    "deployArea": "01-主机房-网络区",
+    "deployComputerRoom": "焦作市中心支行中心机房",
+    "deployDb": "焦作市中支中心机房",
+    "deployFloor": "四楼",
+    "deployGallery": "焦作市山阳区世纪路1355号"
+   }
+  ],
+  "firewall_installationPosition": [
+   {
+    "belongCabinet": "焦作市中支中心机房网络机柜2",
+    "slotNo": "31"
+   }
+  ],
+  "firewall_log": [
+   {
+    "logLocation": "00-本地存储",
+    "storagePeriod": "6"
+   }
+  ],
+  "firewall_operationsManagement": [
+   {
+    "administrativeDepartment": "00-科技管理部门",
+    "operationDepartment": "00-科技管理部门",
+    "serviceEndTime": "2022-04-08",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "焦作路达科技公司",
+    "serviceStartTime": "2019-04-08"
+   }
+  ],
+  "firewall_protocol": [
+   {
+    "ipv6BasicProtocol": [
+     "00-ICMPv6"
+    ]
+   }
+  ],
+  "handlingCapacity": "10",
+  "influenceSystem": "保卫监控回放系统",
+  "managementIp": "11.66.135.61",
+  "maximumNewConnectionRate": "100",
+  "maximumNumberOfConcurrentConnections": "30",
+  "networkSecurityCapability": [
+   "00-IPSec"
+  ],
+  "numberOfCards": "0",
+  "operatingSystemVersionInformation": "Topsec Operating Systemtos_3.3.020.065.1",
+  "remarksInformation": "有",
+  "securityFunction": "01-四层控制",
+  "supportIpv6": "True",
+  "wirelessFunction": "False",
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "da190919501d4b2dbb4991f57ddcfab2",
+  "assetBrand": "天融信",
+  "assetSerialNumber": "Q1811760632",
+  "assetType": "NGFW4000-UF(TG-51235)",
+  "brandLand": "00-国内",
+  "bypassFunction": "False",
+  "deploymentMode": "00-路由方式",
+  "deviceHeight": "2",
+  "facilityCategory": "FAITNWDFWD",
+  "facilityName": "郑州中支主中心业务网纵向防火墙主",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2018-11-01",
+  "facilityUseState": "00-设施在用",
+  "firewall_deployment": [
+   {
+    "deployArea": "01-主机房-网络区",
+    "deployComputerRoom": "主中心网络机房",
+    "deployDb": "郑州中支主中心机房",
+    "deployFloor": "十一层",
+    "deployGallery": "主中心办公楼"
+   }
+  ],
+  "firewall_installationPosition": [
+   {
+    "belongCabinet": "郑州中支主中心网络机房网络柜2",
+    "slotNo": "12"
+   }
+  ],
+  "firewall_log": [
+   {
+    "logLocation": "00-本地存储",
+    "storagePeriod": "6"
+   }
+  ],
+  "firewall_operationsManagement": [
+   {
+    "administrativeDepartment": "00-科技管理部门",
+    "operationDepartment": "00-科技管理部门",
+    "serviceEndTime": "2021-11-01",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "河南威帆信息技术有限公司",
+    "serviceStartTime": "2018-11-01"
+   }
+  ],
+  "firewall_protocol": [
+   {
+    "ipv6BasicProtocol": [
+     "00-ICMPv6"
+    ]
+   }
+  ],
+  "handlingCapacity": "10",
+  "influenceSystem": "业务网业务",
+  "managementIp": "11.66.17.245",
+  "maximumNewConnectionRate": "100",
+  "maximumNumberOfConcurrentConnections": "30",
+  "networkSecurityCapability": [
+   "00-IPSec"
+  ],
+  "numberOfCards": "0",
+  "operatingSystemVersionInformation": "Topsec Operating System tos_3.3.017.065.1 Q1811760632",
+  "remarksInformation": "有",
+  "securityFunction": "01-四层控制",
+  "supportIpv6": "True",
+  "wirelessFunction": "False",
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "ecf0639f69b24df6b718959585259ca0",
+  "assetBrand": "天融信",
+  "assetCode": "2202150021009004",
+  "assetSerialNumber": "Q2011618634",
+  "assetType": "NGFW4000-UF",
+  "brandLand": "00-国内",
+  "bypassFunction": "False",
+  "deploymentMode": "00-路由方式",
+  "deviceHeight": "1",
+  "facilityCategory": "FAITNWDFWD",
+  "facilityName": "信阳市中支中心机房互联网防火墙",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2020-12-21",
+  "facilityUseState": "00-设施在用",
+  "firewall_deployment": [
+   {
+    "deployArea": "01-主机房-网络区",
+    "deployComputerRoom": "信阳市中心支行中心机房",
+    "deployDb": "信阳市中支中心机房",
+    "deployFloor": "二楼",
+    "deployGallery": "信阳市浉河区长安路133号"
+   }
+  ],
+  "firewall_installationPosition": [
+   {
+    "belongCabinet": "信阳市中支中心机房服务器机柜A08",
+    "slotNo": "35"
+   }
+  ],
+  "firewall_log": [
+   {
+    "logLocation": "00-本地存储",
+    "storagePeriod": "6"
+   }
+  ],
+  "firewall_operationsManagement": [
+   {
+    "administrativeDepartment": "00-科技管理部门",
+    "operationDepartment": "00-科技管理部门",
+    "serviceEndTime": "2021-12-21",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "海康盈联网络技术有限公司",
+    "serviceStartTime": "2020-12-21"
+   }
+  ],
+  "firewall_protocol": [
+   {
+    "ipv6BasicProtocol": [
+     "00-ICMPv6"
+    ]
+   }
+  ],
+  "handlingCapacity": "10",
+  "influenceSystem": "互联网系统",
+  "managementIp": "100.1.1.2",
+  "maximumNewConnectionRate": "100",
+  "maximumNumberOfConcurrentConnections": "30",
+  "networkSecurityCapability": [
+   "00-IPSec"
+  ],
+  "numberOfCards": "0",
+  "operatingSystemVersionInformation": "Topsec Operating Systemtos_3.3.020.065.1",
+  "remarksInformation": "有",
+  "securityFunction": "01-四层控制",
+  "supportIpv6": "True",
+  "wirelessFunction": "False",
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "f0e9658a4ed04690b6b8368ba1756016",
+  "assetBrand": "天融信",
+  "assetCode": "2202050021030003",
+  "assetSerialNumber": "Q1712613045",
+  "assetType": "NGFW4000（TG-22112）",
+  "brandLand": "00-国内",
+  "bypassFunction": "False",
+  "deploymentMode": "00-路由方式",
+  "deviceHeight": "1",
+  "facilityCategory": "FAITNWDFWD",
+  "facilityName": "平顶山市中支互联网防火墙",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2018-01-05",
+  "facilityUseState": "00-设施在用",
+  "firewall_deployment": [
+   {
+    "deployArea": "01-主机房-网络区",
+    "deployComputerRoom": "网络机房",
+    "deployDb": "平顶山市中支中心机房",
+    "deployFloor": "八层",
+    "deployGallery": "办公楼"
+   }
+  ],
+  "firewall_installationPosition": [
+   {
+    "belongCabinet": "平顶山市中支中心机房机柜02",
+    "slotNo": "7"
+   }
+  ],
+  "firewall_log": [
+   {
+    "logLocation": "00-本地存储",
+    "storagePeriod": "6"
+   }
+  ],
+  "firewall_operationsManagement": [
+   {
+    "administrativeDepartment": "01-后勤管理部门",
+    "operationDepartment": "01-后勤管理部门",
+    "serviceEndTime": "2021-01-05",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "河南威帆信息技术有限公司",
+    "serviceStartTime": "2018-01-05"
+   }
+  ],
+  "firewall_protocol": [
+   {
+    "ipv6BasicProtocol": [
+     "00-ICMPv6"
+    ]
+   }
+  ],
+  "handlingCapacity": "10",
+  "influenceSystem": "互联网",
+  "managementIp": "192.168.200.1",
+  "maximumNewConnectionRate": "100",
+  "maximumNumberOfConcurrentConnections": "60",
+  "networkSecurityCapability": [
+   "00-IPSec"
+  ],
+  "numberOfCards": "0",
+  "operatingSystemVersionInformation": "Topsec Operating System tos_3.3.010.073.57",
+  "remarksInformation": "有",
+  "securityFunction": "01-四层控制",
+  "supportIpv6": "True",
+  "wirelessFunction": "False",
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "f3e9f4978c8046c5a56b1610cb0a69c7",
+  "assetBrand": "天融信",
+  "assetSerialNumber": "Q1611479454",
+  "assetType": "NGFW4000-UF(TG-51136)",
+  "brandLand": "00-国内",
+  "bypassFunction": "False",
+  "deploymentMode": "00-路由方式",
+  "deviceHeight": "2",
+  "facilityCategory": "FAITNWDFWD",
+  "facilityName": "郑州中支转接中心金融城域网防火墙主",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2016-11-01",
+  "facilityUseState": "00-设施在用",
+  "firewall_deployment": [
+   {
+    "deployArea": "01-主机房-网络区",
+    "deployComputerRoom": "转接中心机房",
+    "deployDb": "郑州中支转接中心机房",
+    "deployFloor": "二层",
+    "deployGallery": "转接中心综合楼"
+   }
+  ],
+  "firewall_installationPosition": [
+   {
+    "belongCabinet": "郑州中支转接中心机房机柜3",
+    "slotNo": "34"
+   }
+  ],
+  "firewall_log": [
+   {
+    "logLocation": "00-本地存储",
+    "storagePeriod": "12"
+   }
+  ],
+  "firewall_operationsManagement": [
+   {
+    "administrativeDepartment": "00-科技管理部门",
+    "operationDepartment": "00-科技管理部门",
+    "serviceEndTime": "2021-11-01",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "北京神州新桥科技有限公司",
+    "serviceStartTime": "2020-11-01"
+   }
+  ],
+  "firewall_protocol": [
+   {
+    "ipv6BasicProtocol": [
+     "00-ICMPv6"
+    ]
+   }
+  ],
+  "handlingCapacity": "10",
+  "influenceSystem": "金融城域网业务",
+  "managementIp": "192.168.1.254",
+  "maximumNewConnectionRate": "100",
+  "maximumNumberOfConcurrentConnections": "30",
+  "networkSecurityCapability": [
+   "00-IPSec"
+  ],
+  "numberOfCards": "0",
+  "operatingSystemVersionInformation": "Topsec Operating System tos_3.3.010.100.1_more Q1611479454",
+  "remarksInformation": "有",
+  "securityFunction": "01-四层控制",
+  "supportIpv6": "True",
+  "wirelessFunction": "False",
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "f5e20a9bcf954e9a9ee3e58568ebffcb",
+  "assetBrand": "华三",
+  "assetCode": "2202010021027058",
+  "assetSerialNumber": "219801A1C49185Q0000R",
+  "assetType": "SecPath F1000-AK125",
+  "brandLand": "00-国内",
+  "bypassFunction": "False",
+  "deploymentMode": "00-路由方式",
+  "deviceHeight": "1",
+  "facilityCategory": "FAITNWDFWD",
+  "facilityName": "洛阳市中支互联网边界防火墙-备",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2018-08-01",
+  "facilityUseState": "00-设施在用",
+  "firewall_deployment": [
+   {
+    "deployArea": "01-主机房-网络区",
+    "deployComputerRoom": "洛阳市中支中心机房",
+    "deployDb": "洛阳市中支中心机房",
+    "deployFloor": "三层",
+    "deployGallery": "洛阳市中支办公大楼"
+   }
+  ],
+  "firewall_installationPosition": [
+   {
+    "belongCabinet": "洛阳市中支中心机房机柜N3",
+    "slotNo": "18"
+   }
+  ],
+  "firewall_log": [
+   {
+    "logLocation": "00-本地存储",
+    "storagePeriod": "6"
+   }
+  ],
+  "firewall_operationsManagement": [
+   {
+    "administrativeDepartment": "00-科技管理部门",
+    "operationDepartment": "00-科技管理部门",
+    "serviceEndTime": "2021-08-01",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "百年金海科技有限公司",
+    "serviceStartTime": "2018-08-01"
+   }
+  ],
+  "firewall_protocol": [
+   {
+    "ipv6BasicProtocol": [
+     "00-ICMPv6"
+    ]
+   }
+  ],
+  "handlingCapacity": "3",
+  "influenceSystem": "中支机关互联网",
+  "managementIp": "192.168.8.1",
+  "maximumNewConnectionRate": "100",
+  "maximumNumberOfConcurrentConnections": "100",
+  "networkSecurityCapability": [
+   "00-IPSec"
+  ],
+  "numberOfCards": "0",
+  "operatingSystemVersionInformation": "version 7.1.064, Release 9514P15",
+  "remarksInformation": "有",
+  "securityFunction": "01-四层控制",
+  "supportIpv6": "True",
+  "wirelessFunction": "False",
+  "_dataSource": "双源"
+ }
+]

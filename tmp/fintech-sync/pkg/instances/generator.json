@@ -1,0 +1,1136 @@
+[
+ {
+  "facilityDescriptor": "00486bf008394fbab4bc04ac6abc615b",
+  "alternatorType": "02-柴油高压发电机",
+  "assetBrand": "金都",
+  "assetCode": "2202150021009003",
+  "assetSerialNumber": "201812062",
+  "assetType": "GDW250S",
+  "brandLand": "00-国内",
+  "communicationProtocol": [
+   "00-Modbus"
+  ],
+  "facilityCategory": "FAPDFDJ000",
+  "facilityName": "信阳市中支发电机",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2018-12-01",
+  "facilityUseState": "00-设施在用",
+  "generator_deployment": [
+   {
+    "deployArea": "21-支持区-柴油发动机房",
+    "deployComputerRoom": "其他",
+    "deployDb": "信阳市中支中心机房",
+    "deployFloor": "一楼",
+    "deployGallery": "信阳市浉河区长安路133号"
+   }
+  ],
+  "generator_generatorOperating": [
+   {
+    "nominalCapacity": "220",
+    "powerFactor": 0.8
+   }
+  ],
+  "generator_operationsManagement": [
+   {
+    "administrativeDepartment": "01-后勤管理部门",
+    "operationDepartment": "01-后勤管理部门",
+    "serviceEndTime": "2021-12-18",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "河南信源科技有限公司",
+    "serviceStartTime": "2019-12-18"
+   }
+  ],
+  "generator_ratedInputParameter": [
+   {
+    "ratedInputCurrent": "0",
+    "ratedInputPower": "0",
+    "ratedInputVoltage": "0"
+   }
+  ],
+  "generator_ratedOutputParameter": [
+   {
+    "ratedOutputCurrent": "397",
+    "ratedOutputPower": "220",
+    "ratedOutputVoltage": "1100"
+   }
+  ],
+  "ratedAlternatingFrequency": "50",
+  "remarksInformation": "发电机",
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "12e91d00805b4ad589bfd79dd2a483ac",
+  "alternatorType": "06-柴油低压发电机",
+  "assetBrand": "赛瓦特",
+  "assetCode": "2202020041000002",
+  "assetSerialNumber": "J503800",
+  "assetType": "SPG241",
+  "brandLand": "00-国内",
+  "communicationProtocol": [
+   "00-Modbus"
+  ],
+  "facilityCategory": "FAPDFDJ000",
+  "facilityName": "开封市中支发电机",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2015-12-01",
+  "facilityUseState": "00-设施在用",
+  "generator_deployment": [
+   {
+    "deployArea": "21-支持区-柴油发动机房",
+    "deployComputerRoom": "开封市中心支行中心机房",
+    "deployDb": "开封市中支中心机房",
+    "deployFloor": "一层",
+    "deployGallery": "开封市龙亭区晋安路60号办公楼"
+   }
+  ],
+  "generator_generatorOperating": [
+   {
+    "nominalCapacity": "200",
+    "powerFactor": 0.8
+   }
+  ],
+  "generator_operationsManagement": [
+   {
+    "administrativeDepartment": "01-后勤管理部门",
+    "operationDepartment": "01-后勤管理部门",
+    "serviceEndTime": "2018-12-01",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "未知",
+    "serviceStartTime": "2015-12-01"
+   }
+  ],
+  "generator_ratedInputParameter": [
+   {
+    "ratedInputCurrent": "0",
+    "ratedInputPower": "0",
+    "ratedInputVoltage": "0"
+   }
+  ],
+  "generator_ratedOutputParameter": [
+   {
+    "ratedOutputCurrent": "900",
+    "ratedOutputPower": "200",
+    "ratedOutputVoltage": "400"
+   }
+  ],
+  "ratedAlternatingFrequency": "50",
+  "remarksInformation": "发电机",
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "189abda607ec4160bc5be4da9ac725c0",
+  "alternatorType": "02-柴油高压发电机",
+  "assetBrand": "山特",
+  "assetCode": "473000001",
+  "assetSerialNumber": "XK0600200747",
+  "assetType": "DC6181ZLD",
+  "brandLand": "00-国内",
+  "communicationProtocol": [
+   "00-Modbus"
+  ],
+  "facilityCategory": "FAPDFDJ000",
+  "facilityName": "南阳市中支发电机",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2018-03-01",
+  "facilityUseState": "00-设施在用",
+  "generator_deployment": [
+   {
+    "deployArea": "21-支持区-柴油发动机房",
+    "deployComputerRoom": "其他",
+    "deployDb": "南阳市中支中心机房",
+    "deployFloor": "负一楼",
+    "deployGallery": "南阳市新华西路178号办公大楼"
+   }
+  ],
+  "generator_generatorOperating": [
+   {
+    "nominalCapacity": "567",
+    "powerFactor": 0.8
+   }
+  ],
+  "generator_operationsManagement": [
+   {
+    "administrativeDepartment": "01-后勤管理部门",
+    "operationDepartment": "01-后勤管理部门",
+    "serviceEndTime": "2021-08-01",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "南阳电力",
+    "serviceStartTime": "2018-08-01"
+   }
+  ],
+  "generator_ratedInputParameter": [
+   {
+    "ratedInputCurrent": "0",
+    "ratedInputPower": "0",
+    "ratedInputVoltage": "0"
+   }
+  ],
+  "generator_ratedOutputParameter": [
+   {
+    "ratedOutputCurrent": "65",
+    "ratedOutputPower": "500",
+    "ratedOutputVoltage": "1100"
+   }
+  ],
+  "ratedAlternatingFrequency": "50",
+  "remarksInformation": "发电机",
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "36cdb51c39e54419bea0db4f5b084ece",
+  "alternatorType": "02-柴油高压发电机",
+  "assetBrand": "山特",
+  "assetCode": "011001",
+  "assetSerialNumber": "AZ",
+  "assetType": "TZH-150",
+  "brandLand": "00-国内",
+  "communicationProtocol": [
+   "00-Modbus"
+  ],
+  "facilityCategory": "FAPDFDJ000",
+  "facilityName": "安阳市中支发电机",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2015-07-01",
+  "facilityUseState": "00-设施在用",
+  "generator_deployment": [
+   {
+    "deployArea": "21-支持区-柴油发动机房",
+    "deployComputerRoom": "其他",
+    "deployDb": "安阳市中支中心机房",
+    "deployFloor": "地下室",
+    "deployGallery": "安阳市开发区金融大厦"
+   }
+  ],
+  "generator_generatorOperating": [
+   {
+    "nominalCapacity": "187",
+    "powerFactor": 0.8
+   }
+  ],
+  "generator_operationsManagement": [
+   {
+    "administrativeDepartment": "01-后勤管理部门",
+    "operationDepartment": "01-后勤管理部门",
+    "serviceEndTime": "2022-07-01",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "早升科技",
+    "serviceStartTime": "2015-07-01"
+   }
+  ],
+  "generator_ratedInputParameter": [
+   {
+    "ratedInputCurrent": "30",
+    "ratedInputPower": "1000",
+    "ratedInputVoltage": "380"
+   }
+  ],
+  "generator_ratedOutputParameter": [
+   {
+    "ratedOutputCurrent": "271",
+    "ratedOutputPower": "150",
+    "ratedOutputVoltage": "1100"
+   }
+  ],
+  "ratedAlternatingFrequency": "50",
+  "remarksInformation": "发电机",
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "3c9200bdb59a43fdbf0449ab7436d99c",
+  "alternatorType": "06-柴油低压发电机",
+  "assetBrand": "斯坦福",
+  "assetSerialNumber": "X09G310407",
+  "assetType": "IMB15",
+  "brandLand": "01-国外",
+  "communicationProtocol": [
+   "00-Modbus"
+  ],
+  "facilityCategory": "FAPDFDJ000",
+  "facilityName": "郑州中支主中心机房发电机",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2010-04-01",
+  "facilityUseState": "00-设施在用",
+  "generator_deployment": [
+   {
+    "deployArea": "21-支持区-柴油发动机房",
+    "deployComputerRoom": "主中心机房",
+    "deployDb": "郑州中支主中心机房",
+    "deployFloor": "负一层",
+    "deployGallery": "商务外环路21号"
+   }
+  ],
+  "generator_generatorOperating": [
+   {
+    "nominalCapacity": "1400",
+    "powerFactor": 0.8
+   }
+  ],
+  "generator_operationsManagement": [
+   {
+    "administrativeDepartment": "01-后勤管理部门",
+    "operationDepartment": "01-后勤管理部门",
+    "serviceEndTime": "2023-08-21",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "中建物业",
+    "serviceStartTime": "2020-08-22"
+   }
+  ],
+  "generator_ratedInputParameter": [
+   {
+    "ratedInputCurrent": "0",
+    "ratedInputPower": "0",
+    "ratedInputVoltage": "0"
+   }
+  ],
+  "generator_ratedOutputParameter": [
+   {
+    "ratedOutputCurrent": "2000",
+    "ratedOutputPower": "1120",
+    "ratedOutputVoltage": "400"
+   }
+  ],
+  "ratedAlternatingFrequency": "50",
+  "remarksInformation": "发电机",
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "40342081b110485e98690dbe2a1c7e2d",
+  "alternatorType": "02-柴油高压发电机",
+  "assetBrand": "金都",
+  "assetCode": "2202070041006000",
+  "assetSerialNumber": "201812062",
+  "assetType": "GDW250S",
+  "brandLand": "00-国内",
+  "communicationProtocol": [
+   "00-Modbus"
+  ],
+  "facilityCategory": "FAPDFDJ000",
+  "facilityName": "焦作市中支发电机",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2018-12-01",
+  "facilityUseState": "00-设施在用",
+  "generator_deployment": [
+   {
+    "deployArea": "21-支持区-柴油发动机房",
+    "deployComputerRoom": "其它",
+    "deployDb": "焦作市中支中心机房",
+    "deployFloor": "一楼",
+    "deployGallery": "焦作市山阳区世纪路1355号"
+   }
+  ],
+  "generator_generatorOperating": [
+   {
+    "nominalCapacity": "6800",
+    "powerFactor": 0.6
+   }
+  ],
+  "generator_operationsManagement": [
+   {
+    "administrativeDepartment": "01-后勤管理部门",
+    "operationDepartment": "01-后勤管理部门",
+    "serviceEndTime": "2018-12-01",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "未知",
+    "serviceStartTime": "2018-12-01"
+   }
+  ],
+  "generator_ratedInputParameter": [
+   {
+    "ratedInputCurrent": "0",
+    "ratedInputPower": "0",
+    "ratedInputVoltage": "0"
+   }
+  ],
+  "generator_ratedOutputParameter": [
+   {
+    "ratedOutputCurrent": "10",
+    "ratedOutputPower": "3800",
+    "ratedOutputVoltage": "1100"
+   }
+  ],
+  "ratedAlternatingFrequency": "50",
+  "remarksInformation": "发电机",
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "5606f9ed6a4c40a88606520770946ecb",
+  "alternatorType": "06-柴油低压发电机",
+  "assetBrand": "华力机电",
+  "assetSerialNumber": "21170700301-03",
+  "assetType": "HLF-300",
+  "brandLand": "00-国内",
+  "communicationProtocol": [
+   "00-Modbus"
+  ],
+  "facilityCategory": "FAPDFDJ000",
+  "facilityName": "郑州中支转接中心机房发电机",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2017-07-14",
+  "facilityUseState": "00-设施在用",
+  "generator_deployment": [
+   {
+    "deployArea": "21-支持区-柴油发动机房",
+    "deployComputerRoom": "转接中心机房",
+    "deployDb": "郑州中支转接中心机房",
+    "deployFloor": "一层",
+    "deployGallery": "转接中心发电机房"
+   }
+  ],
+  "generator_generatorOperating": [
+   {
+    "nominalCapacity": "300",
+    "powerFactor": 0.8
+   }
+  ],
+  "generator_operationsManagement": [
+   {
+    "administrativeDepartment": "01-后勤管理部门",
+    "operationDepartment": "01-后勤管理部门",
+    "serviceEndTime": "2023-08-21",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "中建物业",
+    "serviceStartTime": "2020-08-22"
+   }
+  ],
+  "generator_ratedInputParameter": [
+   {
+    "ratedInputCurrent": "0",
+    "ratedInputPower": "0",
+    "ratedInputVoltage": "0"
+   }
+  ],
+  "generator_ratedOutputParameter": [
+   {
+    "ratedOutputCurrent": "541",
+    "ratedOutputPower": "300",
+    "ratedOutputVoltage": "400"
+   }
+  ],
+  "ratedAlternatingFrequency": "50",
+  "remarksInformation": "发电机",
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "65abb7cfe37640d69349b9756f9a80c0",
+  "alternatorType": "02-柴油高压发电机",
+  "assetBrand": "斯坦福",
+  "assetCode": "011001",
+  "assetSerialNumber": "H16012039611",
+  "assetType": "STF 200-1-4",
+  "brandLand": "01-国外",
+  "communicationProtocol": [
+   "00-Modbus"
+  ],
+  "facilityCategory": "FAPDFDJ000",
+  "facilityName": "济源市中支发电机",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2017-01-01",
+  "facilityUseState": "00-设施在用",
+  "generator_deployment": [
+   {
+    "deployArea": "21-支持区-柴油发动机房",
+    "deployComputerRoom": "其他",
+    "deployDb": "济源市中支中心机房",
+    "deployFloor": "一楼",
+    "deployGallery": "办公楼"
+   }
+  ],
+  "generator_generatorOperating": [
+   {
+    "nominalCapacity": "262",
+    "powerFactor": 0.8
+   }
+  ],
+  "generator_operationsManagement": [
+   {
+    "administrativeDepartment": "01-后勤管理部门",
+    "operationDepartment": "01-后勤管理部门",
+    "serviceEndTime": "2017-12-01",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "郑发发电",
+    "serviceStartTime": "2016-12-01"
+   }
+  ],
+  "generator_ratedInputParameter": [
+   {
+    "ratedInputCurrent": "1",
+    "ratedInputPower": "30",
+    "ratedInputVoltage": "24"
+   }
+  ],
+  "generator_ratedOutputParameter": [
+   {
+    "ratedOutputCurrent": "361",
+    "ratedOutputPower": "200",
+    "ratedOutputVoltage": "1100"
+   }
+  ],
+  "ratedAlternatingFrequency": "50",
+  "remarksInformation": "发电机",
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "7c5be069ebf84d1ea84a76e05354852a",
+  "alternatorType": "02-柴油高压发电机",
+  "assetBrand": "金都",
+  "assetCode": "2202070041006000",
+  "assetSerialNumber": "2018120621",
+  "assetType": "GDW250S",
+  "brandLand": "00-国内",
+  "communicationProtocol": [
+   "00-Modbus"
+  ],
+  "facilityCategory": "FAPDFDJ000",
+  "facilityName": "焦作市中支发电机",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2018-12-01",
+  "facilityUseState": "00-设施在用",
+  "generator_deployment": [
+   {
+    "deployArea": "21-支持区-柴油发动机房",
+    "deployComputerRoom": "其它",
+    "deployDb": "焦作市中支中心机房",
+    "deployFloor": "一楼",
+    "deployGallery": "焦作市山阳区世纪路1355号"
+   }
+  ],
+  "generator_generatorOperating": [
+   {
+    "nominalCapacity": "6800",
+    "powerFactor": 0.6
+   }
+  ],
+  "generator_operationsManagement": [
+   {
+    "administrativeDepartment": "01-后勤管理部门",
+    "operationDepartment": "01-后勤管理部门",
+    "serviceEndTime": "2018-12-01",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "未知",
+    "serviceStartTime": "2018-12-01"
+   }
+  ],
+  "generator_ratedInputParameter": [
+   {
+    "ratedInputCurrent": "0",
+    "ratedInputPower": "0",
+    "ratedInputVoltage": "0"
+   }
+  ],
+  "generator_ratedOutputParameter": [
+   {
+    "ratedOutputCurrent": "10",
+    "ratedOutputPower": "3800",
+    "ratedOutputVoltage": "1100"
+   }
+  ],
+  "ratedAlternatingFrequency": "50",
+  "remarksInformation": "发电机",
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "8749a20226444fc08da47c12e9c4c57b",
+  "alternatorType": "06-柴油低压发电机",
+  "assetBrand": "科泰",
+  "assetCode": "BJ188024",
+  "assetSerialNumber": "BJ188024",
+  "assetType": "KJ165E",
+  "brandLand": "00-国内",
+  "communicationProtocol": [
+   "00-Modbus"
+  ],
+  "facilityCategory": "FAPDFDJ000",
+  "facilityName": "濮阳市中支发电机",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2008-10-01",
+  "facilityUseState": "00-设施在用",
+  "generator_deployment": [
+   {
+    "deployArea": "21-支持区-柴油发动机房",
+    "deployComputerRoom": "濮阳市中支中心机房",
+    "deployDb": "濮阳市中支中心机房",
+    "deployFloor": "办公院西南角",
+    "deployGallery": "发电机室"
+   }
+  ],
+  "generator_generatorOperating": [
+   {
+    "nominalCapacity": "165",
+    "powerFactor": 0.8
+   }
+  ],
+  "generator_operationsManagement": [
+   {
+    "administrativeDepartment": "01-后勤管理部门",
+    "operationDepartment": "01-后勤管理部门",
+    "serviceEndTime": "2008-10-01",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "未知",
+    "serviceStartTime": "2008-10-01"
+   }
+  ],
+  "generator_ratedInputParameter": [
+   {
+    "ratedInputCurrent": "0",
+    "ratedInputPower": "0",
+    "ratedInputVoltage": "0"
+   }
+  ],
+  "generator_ratedOutputParameter": [
+   {
+    "ratedOutputCurrent": "238",
+    "ratedOutputPower": "132",
+    "ratedOutputVoltage": "400"
+   }
+  ],
+  "ratedAlternatingFrequency": "50",
+  "remarksInformation": "发电机",
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "9a6d08e4ec7d4d748052132782a244c7",
+  "alternatorType": "02-柴油高压发电机",
+  "assetBrand": "山特",
+  "assetCode": "2202120021002004",
+  "assetSerialNumber": "16100013",
+  "assetType": "HYW-280T5",
+  "brandLand": "00-国内",
+  "communicationProtocol": [
+   "00-Modbus"
+  ],
+  "facilityCategory": "FAPDFDJ000",
+  "facilityName": "许昌市中支柴油发电机",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2016-09-11",
+  "facilityUseState": "00-设施在用",
+  "generator_deployment": [
+   {
+    "deployArea": "21-支持区-柴油发动机房",
+    "deployComputerRoom": "许昌市中支中心机房",
+    "deployDb": "许昌市中支中心机房",
+    "deployFloor": "负一楼",
+    "deployGallery": "河南省许昌市建安区新东街571号办公楼"
+   }
+  ],
+  "generator_generatorOperating": [
+   {
+    "nominalCapacity": "220",
+    "powerFactor": 0.8
+   }
+  ],
+  "generator_operationsManagement": [
+   {
+    "administrativeDepartment": "00-科技管理部门",
+    "operationDepartment": "00-科技管理部门",
+    "serviceEndTime": "2021-12-18",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "许昌协同科贸有限公司",
+    "serviceStartTime": "2019-12-18"
+   }
+  ],
+  "generator_ratedInputParameter": [
+   {
+    "ratedInputCurrent": "0",
+    "ratedInputPower": "0",
+    "ratedInputVoltage": "0"
+   }
+  ],
+  "generator_ratedOutputParameter": [
+   {
+    "ratedOutputCurrent": "397",
+    "ratedOutputPower": "220",
+    "ratedOutputVoltage": "1100"
+   }
+  ],
+  "ratedAlternatingFrequency": "50",
+  "remarksInformation": "发电机",
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "a3c5a2d3cf4244989988fae8e60b7e97",
+  "alternatorType": "02-柴油高压发电机",
+  "assetBrand": "山特",
+  "assetSerialNumber": "H1205005",
+  "assetType": "MP-250--4",
+  "brandLand": "00-国内",
+  "communicationProtocol": [
+   "00-Modbus"
+  ],
+  "facilityCategory": "FAPDFDJ000",
+  "facilityName": "商丘市中支发电机",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2015-12-01",
+  "facilityUseState": "00-设施在用",
+  "generator_deployment": [
+   {
+    "deployArea": "21-支持区-柴油发动机房",
+    "deployComputerRoom": "商丘市中支中心机房",
+    "deployDb": "商丘市中支中心机房",
+    "deployFloor": "一层",
+    "deployGallery": "商丘市睢阳区北海西路六号"
+   }
+  ],
+  "generator_generatorOperating": [
+   {
+    "nominalCapacity": "2000",
+    "powerFactor": 0.8
+   }
+  ],
+  "generator_operationsManagement": [
+   {
+    "administrativeDepartment": "01-后勤管理部门",
+    "operationDepartment": "01-后勤管理部门",
+    "serviceEndTime": "2018-12-01",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "未知",
+    "serviceStartTime": "2015-12-01"
+   }
+  ],
+  "generator_ratedInputParameter": [
+   {
+    "ratedInputCurrent": "0",
+    "ratedInputPower": "0",
+    "ratedInputVoltage": "0"
+   }
+  ],
+  "generator_ratedOutputParameter": [
+   {
+    "ratedOutputCurrent": "451",
+    "ratedOutputPower": "250",
+    "ratedOutputVoltage": "1100"
+   }
+  ],
+  "ratedAlternatingFrequency": "50",
+  "remarksInformation": "发电机",
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "a5288355c4a746f4ad3c6fc49b1994bb",
+  "alternatorType": "02-柴油高压发电机",
+  "assetBrand": "斯坦福",
+  "assetCode": "011001",
+  "assetSerialNumber": "H160120396",
+  "assetType": "STF 200-1-4",
+  "brandLand": "01-国外",
+  "communicationProtocol": [
+   "00-Modbus"
+  ],
+  "facilityCategory": "FAPDFDJ000",
+  "facilityName": "济源市中支发电机",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2017-01-01",
+  "facilityUseState": "00-设施在用",
+  "generator_deployment": [
+   {
+    "deployArea": "21-支持区-柴油发动机房",
+    "deployComputerRoom": "其他",
+    "deployDb": "济源市中支中心机房",
+    "deployFloor": "一楼",
+    "deployGallery": "办公楼"
+   }
+  ],
+  "generator_generatorOperating": [
+   {
+    "nominalCapacity": "262",
+    "powerFactor": 0.8
+   }
+  ],
+  "generator_operationsManagement": [
+   {
+    "administrativeDepartment": "01-后勤管理部门",
+    "operationDepartment": "01-后勤管理部门",
+    "serviceEndTime": "2017-12-01",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "郑发发电",
+    "serviceStartTime": "2016-12-01"
+   }
+  ],
+  "generator_ratedInputParameter": [
+   {
+    "ratedInputCurrent": "1",
+    "ratedInputPower": "30",
+    "ratedInputVoltage": "24"
+   }
+  ],
+  "generator_ratedOutputParameter": [
+   {
+    "ratedOutputCurrent": "361",
+    "ratedOutputPower": "200",
+    "ratedOutputVoltage": "1100"
+   }
+  ],
+  "ratedAlternatingFrequency": "50",
+  "remarksInformation": "发电机",
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "a585126531ae4434b65042cb956c5491",
+  "alternatorType": "02-柴油高压发电机",
+  "assetBrand": "山特",
+  "assetCode": "2202160041000013",
+  "assetSerialNumber": "BF20081229",
+  "assetType": "BF-V165ST",
+  "brandLand": "00-国内",
+  "communicationProtocol": [
+   "00-Modbus"
+  ],
+  "facilityCategory": "FAPDFDJ000",
+  "facilityName": "周口市中支发电机",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2008-12-29",
+  "facilityUseState": "00-设施在用",
+  "generator_deployment": [
+   {
+    "deployArea": "21-支持区-柴油发动机房",
+    "deployComputerRoom": "周口市中心机房",
+    "deployDb": "周口市中支中心机房",
+    "deployFloor": "一楼",
+    "deployGallery": "河南省周口市川汇区七一路中段1号B楼"
+   }
+  ],
+  "generator_generatorOperating": [
+   {
+    "nominalCapacity": "120",
+    "powerFactor": 0.8
+   }
+  ],
+  "generator_operationsManagement": [
+   {
+    "administrativeDepartment": "01-后勤管理部门",
+    "operationDepartment": "01-后勤管理部门",
+    "serviceEndTime": "2011-12-29",
+    "serviceLevel": "01-7*24",
+    "serviceStartTime": "2008-12-29"
+   }
+  ],
+  "generator_ratedInputParameter": [
+   {
+    "ratedInputCurrent": "216",
+    "ratedInputPower": "120",
+    "ratedInputVoltage": "400"
+   }
+  ],
+  "generator_ratedOutputParameter": [
+   {
+    "ratedOutputCurrent": "216",
+    "ratedOutputPower": "120",
+    "ratedOutputVoltage": "1100"
+   }
+  ],
+  "ratedAlternatingFrequency": "50",
+  "remarksInformation": "发电机",
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "bdde4a5b66304a9ead45cc55e7032a63",
+  "alternatorType": "02-柴油高压发电机",
+  "assetBrand": "山特",
+  "assetCode": "2202130021025023",
+  "assetSerialNumber": "Z201612130",
+  "assetType": "ZCDL-S340",
+  "brandLand": "00-国内",
+  "communicationProtocol": [
+   "00-Modbus"
+  ],
+  "facilityCategory": "FAPDFDJ000",
+  "facilityName": "漯河市中心支行柴油发电机",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2016-12-01",
+  "facilityUseState": "00-设施在用",
+  "generator_deployment": [
+   {
+    "deployArea": "21-支持区-柴油发动机房",
+    "deployDb": "漯河市中支中心机房",
+    "deployFloor": "一层",
+    "deployGallery": "漯河市郾城区嵩山东支路1号"
+   }
+  ],
+  "generator_generatorOperating": [
+   {
+    "nominalCapacity": "1000",
+    "powerFactor": 0.5
+   }
+  ],
+  "generator_operationsManagement": [
+   {
+    "administrativeDepartment": "01-后勤管理部门",
+    "operationDepartment": "01-后勤管理部门",
+    "serviceEndTime": "2019-12-01",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "正驰动力",
+    "serviceStartTime": "2016-12-01"
+   }
+  ],
+  "generator_ratedInputParameter": [
+   {
+    "ratedInputCurrent": "558",
+    "ratedInputPower": "310",
+    "ratedInputVoltage": "400"
+   }
+  ],
+  "generator_ratedOutputParameter": [
+   {
+    "ratedOutputCurrent": "558",
+    "ratedOutputPower": "310",
+    "ratedOutputVoltage": "1100"
+   }
+  ],
+  "ratedAlternatingFrequency": "50",
+  "remarksInformation": "发电机",
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "c2182919904a4cf8accd2520f4b0c87f",
+  "alternatorType": "02-柴油高压发电机",
+  "assetBrand": "玉柴",
+  "assetCode": "2202090041005000",
+  "assetSerialNumber": "TD700J90246",
+  "assetType": "YC6TD780L-D20",
+  "brandLand": "00-国内",
+  "communicationProtocol": [
+   "00-Modbus"
+  ],
+  "facilityCategory": "FAPDFDJ000",
+  "facilityName": "三门峡市中支发电机组",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2019-03-11",
+  "facilityUseState": "00-设施在用",
+  "generator_deployment": [
+   {
+    "deployArea": "21-支持区-柴油发动机房",
+    "deployComputerRoom": "中心机房",
+    "deployDb": "三门峡市中支中心机房",
+    "deployFloor": "一层",
+    "deployGallery": "发电机房"
+   }
+  ],
+  "generator_generatorOperating": [
+   {
+    "nominalCapacity": "361",
+    "powerFactor": 0.8
+   }
+  ],
+  "generator_operationsManagement": [
+   {
+    "administrativeDepartment": "01-后勤管理部门",
+    "operationDepartment": "01-后勤管理部门",
+    "serviceEndTime": "2021-12-24",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "广西玉柴动力股份有限公司",
+    "serviceStartTime": "2018-12-24"
+   }
+  ],
+  "generator_ratedInputParameter": [
+   {
+    "ratedInputCurrent": "0",
+    "ratedInputPower": "0",
+    "ratedInputVoltage": "0"
+   }
+  ],
+  "generator_ratedOutputParameter": [
+   {
+    "ratedOutputCurrent": "902",
+    "ratedOutputPower": "520",
+    "ratedOutputVoltage": "1100"
+   }
+  ],
+  "ratedAlternatingFrequency": "50",
+  "remarksInformation": "发电机",
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "ca5c702feff642f2bc609b511bfc639e",
+  "alternatorType": "06-柴油低压发电机",
+  "assetBrand": "东风康明斯",
+  "assetCode": "2202030041009006",
+  "assetSerialNumber": "Z1201709060",
+  "assetType": "ZCDL-C350",
+  "brandLand": "00-国内",
+  "communicationProtocol": [
+   "00-Modbus"
+  ],
+  "facilityCategory": "FAPDFDJ000",
+  "facilityName": "新乡市中支发电机",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2017-11-30",
+  "facilityUseState": "00-设施在用",
+  "generator_deployment": [
+   {
+    "deployArea": "21-支持区-柴油发动机房",
+    "deployComputerRoom": "中心机房",
+    "deployDb": "新乡市中支中心机房",
+    "deployFloor": "一层发电机室",
+    "deployGallery": "河南省新乡市红旗区向阳路9号"
+   }
+  ],
+  "generator_generatorOperating": [
+   {
+    "nominalCapacity": "437",
+    "powerFactor": 0.8
+   }
+  ],
+  "generator_operationsManagement": [
+   {
+    "administrativeDepartment": "01-后勤管理部门",
+    "operationDepartment": "01-后勤管理部门",
+    "serviceEndTime": "2019-11-30",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "杨州正驰动力设备有限公司",
+    "serviceStartTime": "2017-11-30"
+   }
+  ],
+  "generator_ratedInputParameter": [
+   {
+    "ratedInputCurrent": "100",
+    "ratedInputPower": "1000",
+    "ratedInputVoltage": "380"
+   }
+  ],
+  "generator_ratedOutputParameter": [
+   {
+    "ratedOutputCurrent": "630",
+    "ratedOutputPower": "350",
+    "ratedOutputVoltage": "400"
+   }
+  ],
+  "ratedAlternatingFrequency": "50",
+  "remarksInformation": "发电机",
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "cf073c965e584e00b99d79e398b74454",
+  "alternatorType": "02-柴油高压发电机",
+  "assetBrand": "斯坦福",
+  "assetCode": "011001",
+  "assetSerialNumber": "H160120396",
+  "assetType": "STF 200-1-4",
+  "brandLand": "01-国外",
+  "communicationProtocol": [
+   "00-Modbus"
+  ],
+  "facilityCategory": "FAPDFDJ000",
+  "facilityName": "鹤壁市中支发电机",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2017-01-01",
+  "facilityUseState": "00-设施在用",
+  "generator_deployment": [
+   {
+    "deployArea": "21-支持区-柴油发动机房",
+    "deployComputerRoom": "其他",
+    "deployDb": "鹤壁市中支中心机房",
+    "deployFloor": "一楼",
+    "deployGallery": "鹤壁市淇滨区九州路129号车库"
+   }
+  ],
+  "generator_generatorOperating": [
+   {
+    "nominalCapacity": "2000",
+    "powerFactor": 0.8
+   }
+  ],
+  "generator_operationsManagement": [
+   {
+    "administrativeDepartment": "01-后勤管理部门",
+    "operationDepartment": "01-后勤管理部门",
+    "serviceEndTime": "2017-12-01",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "郑发发电",
+    "serviceStartTime": "2016-12-01"
+   }
+  ],
+  "generator_ratedInputParameter": [
+   {
+    "ratedInputCurrent": "100",
+    "ratedInputPower": "1000",
+    "ratedInputVoltage": "380"
+   }
+  ],
+  "generator_ratedOutputParameter": [
+   {
+    "ratedOutputCurrent": "361",
+    "ratedOutputPower": "200",
+    "ratedOutputVoltage": "1100"
+   }
+  ],
+  "ratedAlternatingFrequency": "50",
+  "remarksInformation": "发电机",
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "eddae595cf344cd2a0ccb9c0a63b3b3e",
+  "alternatorType": "02-柴油高压发电机",
+  "assetBrand": "百发",
+  "assetSerialNumber": "061025D",
+  "assetType": "412S",
+  "brandLand": "00-国内",
+  "communicationProtocol": [
+   "00-Modbus"
+  ],
+  "facilityCategory": "FAPDFDJ000",
+  "facilityName": "平顶山市中支发电机",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2006-11-01",
+  "facilityUseState": "00-设施在用",
+  "generator_deployment": [
+   {
+    "deployArea": "21-支持区-柴油发动机房",
+    "deployComputerRoom": "支持区机房",
+    "deployDb": "平顶山市中支中心机房",
+    "deployFloor": "一层",
+    "deployGallery": "平顶山市中兴南路西2号院人民银行办公楼一楼西侧"
+   }
+  ],
+  "generator_generatorOperating": [
+   {
+    "nominalCapacity": "300",
+    "powerFactor": 0.8
+   }
+  ],
+  "generator_operationsManagement": [
+   {
+    "administrativeDepartment": "01-后勤管理部门",
+    "operationDepartment": "01-后勤管理部门",
+    "serviceEndTime": "2009-11-01",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "无锡百发",
+    "serviceStartTime": "2006-11-01"
+   }
+  ],
+  "generator_ratedInputParameter": [
+   {
+    "ratedInputCurrent": "540",
+    "ratedInputPower": "300",
+    "ratedInputVoltage": "380"
+   }
+  ],
+  "generator_ratedOutputParameter": [
+   {
+    "ratedOutputCurrent": "500",
+    "ratedOutputPower": "300",
+    "ratedOutputVoltage": "1100"
+   }
+  ],
+  "ratedAlternatingFrequency": "50",
+  "remarksInformation": "发电机",
+  "_dataSource": "双源"
+ }
+]

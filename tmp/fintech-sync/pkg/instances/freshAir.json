@@ -1,0 +1,815 @@
+[
+ {
+  "facilityDescriptor": "1dc0373c208b4fbeb072617ee737f4a2",
+  "assetBrand": "亚都",
+  "assetCode": "2202060042012007",
+  "assetSerialNumber": "2202060042012007",
+  "assetType": "YHD",
+  "brandLand": "00-国内",
+  "facilityCategory": "FAKTXKT000",
+  "facilityName": "濮阳市中支中心机房新风机",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2017-04-01",
+  "facilityUseState": "00-设施在用",
+  "freshAirFiltrationLevel": "00-一级（个）",
+  "freshAirRate": "2000",
+  "freshAir_deployment": [
+   {
+    "deployArea": "16-辅助区-新风区",
+    "deployComputerRoom": "濮阳市中支中心机房",
+    "deployDb": "濮阳市中支中心机房",
+    "deployFloor": "六层",
+    "deployGallery": "办公楼"
+   }
+  ],
+  "freshAir_operationsManagement": [
+   {
+    "administrativeDepartment": "00-科技管理部门",
+    "operationDepartment": "00-科技管理部门",
+    "serviceEndTime": "2020-04-01",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "河南捷腾科技发展有限公司",
+    "serviceStartTime": "2017-04-01"
+   }
+  ],
+  "performanceOfFreshAirFilter": "01-中效过滤器",
+  "ratedPower": 1.1,
+  "remarksInformation": "新风",
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "25810344b797443b9e10084110df9a03",
+  "assetBrand": "亚都",
+  "assetSerialNumber": "56465132",
+  "assetType": "YHQ-D1000",
+  "brandLand": "00-国内",
+  "facilityCategory": "FAKTXKT000",
+  "facilityName": "商丘市中支中心机房新风机空气调节系统",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2018-01-04",
+  "facilityUseState": "00-设施在用",
+  "freshAirFiltrationLevel": "00-一级（个）",
+  "freshAirRate": "1000",
+  "freshAir_deployment": [
+   {
+    "deployArea": "16-辅助区-新风区",
+    "deployComputerRoom": "商丘市中心支行中心机房",
+    "deployDb": "商丘市中支中心机房",
+    "deployFloor": "八层",
+    "deployGallery": "商丘中支1号楼"
+   }
+  ],
+  "freshAir_operationsManagement": [
+   {
+    "administrativeDepartment": "00-科技管理部门",
+    "operationDepartment": "00-科技管理部门",
+    "serviceEndTime": "2022-01-01",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "郑州盛夏电子科技有限公司",
+    "serviceStartTime": "2018-01-04"
+   }
+  ],
+  "performanceOfFreshAirFilter": "01-中效过滤器",
+  "ratedPower": 1000.0,
+  "remarksInformation": "新风",
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "2efb51bb6eef49b0a9b6acdec0023b88",
+  "assetBrand": "亚都",
+  "assetSerialNumber": "09414019",
+  "assetType": "YHQ-L1600",
+  "brandLand": "00-国内",
+  "facilityCategory": "FAKTXKT000",
+  "facilityName": "郑州中支科技处新风系统3",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2009-12-03",
+  "facilityUseState": "00-设施在用",
+  "freshAirFiltrationLevel": "01-二级（个）",
+  "freshAirRate": "1600",
+  "freshAir_deployment": [
+   {
+    "deployArea": "03-主机房-其它区",
+    "deployComputerRoom": "主中心机房",
+    "deployDb": "郑州中支主中心机房",
+    "deployFloor": "十一层",
+    "deployGallery": "商务外环路21号"
+   }
+  ],
+  "freshAir_operationsManagement": [
+   {
+    "administrativeDepartment": "00-科技管理部门",
+    "operationDepartment": "00-科技管理部门",
+    "serviceEndTime": "2021-08-26",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "河南捷联科技有限公司",
+    "serviceStartTime": "2020-08-27"
+   }
+  ],
+  "performanceOfFreshAirFilter": "00-粗效过滤器",
+  "ratedPower": 0.64,
+  "remarksInformation": "新风",
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "4bc8a3f5a0aa45f5a0c9303e203bd491",
+  "assetBrand": "天方",
+  "assetCode": "2202020042017010",
+  "assetSerialNumber": "049001",
+  "assetType": "X-15D",
+  "brandLand": "00-国内",
+  "facilityCategory": "FAKTXKT000",
+  "facilityName": "开封市中支中心机房新风系统",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2018-06-01",
+  "facilityUseState": "00-设施在用",
+  "freshAirFiltrationLevel": "01-二级（个）",
+  "freshAirRate": "2700",
+  "freshAir_deployment": [
+   {
+    "deployArea": "16-辅助区-新风区",
+    "deployComputerRoom": "开封市中心机房",
+    "deployDb": "开封市中支中心机房",
+    "deployFloor": "三层",
+    "deployGallery": "开封市龙亭区晋安路60号办公楼"
+   }
+  ],
+  "freshAir_operationsManagement": [
+   {
+    "administrativeDepartment": "00-科技管理部门",
+    "operationDepartment": "00-科技管理部门",
+    "serviceEndTime": "2020-07-01",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "北京泰豪智能工程有限公司",
+    "serviceStartTime": "2018-06-01"
+   }
+  ],
+  "performanceOfFreshAirFilter": "02-高中效过滤器",
+  "ratedPower": 300.0,
+  "remarksInformation": "新风",
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "52b2b86c97c0413bb5a9cc5649d8e4c8",
+  "assetBrand": "亚都",
+  "assetSerialNumber": "09417009",
+  "assetType": "YHQ-L1600",
+  "brandLand": "00-国内",
+  "facilityCategory": "FAKTXKT000",
+  "facilityName": "郑州中支科技处新风系统2",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2009-12-03",
+  "facilityUseState": "00-设施在用",
+  "freshAirFiltrationLevel": "01-二级（个）",
+  "freshAirRate": "1600",
+  "freshAir_deployment": [
+   {
+    "deployArea": "03-主机房-其它区",
+    "deployComputerRoom": "主中心机房",
+    "deployDb": "郑州中支主中心机房",
+    "deployFloor": "十一层",
+    "deployGallery": "商务外环路21号"
+   }
+  ],
+  "freshAir_operationsManagement": [
+   {
+    "administrativeDepartment": "00-科技管理部门",
+    "operationDepartment": "00-科技管理部门",
+    "serviceEndTime": "2021-08-26",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "河南捷联科技有限公司",
+    "serviceStartTime": "2020-08-27"
+   }
+  ],
+  "performanceOfFreshAirFilter": "00-粗效过滤器",
+  "ratedPower": 0.64,
+  "remarksInformation": "新风",
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "698ef49c5cc7421ba0003e251b3092a9",
+  "assetBrand": "天方",
+  "assetCode": "049001",
+  "assetSerialNumber": "22456879",
+  "assetType": "X-10C",
+  "brandLand": "00-国内",
+  "facilityCategory": "FAKTXKT000",
+  "facilityName": "安阳市中支服务器机房新风系统",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2014-09-01",
+  "facilityUseState": "00-设施在用",
+  "freshAirFiltrationLevel": "01-二级（个）",
+  "freshAirRate": "2000",
+  "freshAir_deployment": [
+   {
+    "deployArea": "30-行政管理区-办公区",
+    "deployComputerRoom": "安阳市中心支行中心机房",
+    "deployDb": "安阳市中支中心机房",
+    "deployFloor": "八楼",
+    "deployGallery": "河南省安阳市开发区金融大厦"
+   }
+  ],
+  "freshAir_operationsManagement": [
+   {
+    "administrativeDepartment": "00-科技管理部门",
+    "operationDepartment": "00-科技管理部门",
+    "serviceEndTime": "2023-06-01",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "河南捷联",
+    "serviceStartTime": "2020-06-01"
+   }
+  ],
+  "performanceOfFreshAirFilter": "01-中效过滤器",
+  "ratedPower": 1100.0,
+  "remarksInformation": "新风",
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "709816122c0946d89c10532871ceaffb",
+  "assetBrand": "天方",
+  "assetSerialNumber": "17062230",
+  "assetType": "X-15G",
+  "brandLand": "00-国内",
+  "facilityCategory": "FAKTXKT000",
+  "facilityName": "平顶山市中支服务器机房新风系统",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2017-12-26",
+  "facilityUseState": "00-设施在用",
+  "freshAirFiltrationLevel": "01-二级（个）",
+  "freshAirRate": "1500",
+  "freshAir_deployment": [
+   {
+    "deployArea": "30-行政管理区-办公区",
+    "deployComputerRoom": "中心机房",
+    "deployDb": "平顶山市中支中心机房",
+    "deployFloor": "八层",
+    "deployGallery": "办公楼"
+   }
+  ],
+  "freshAir_operationsManagement": [
+   {
+    "administrativeDepartment": "00-科技管理部门",
+    "operationDepartment": "00-科技管理部门",
+    "serviceEndTime": "2020-12-26",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "中平信息技术有限公司",
+    "serviceStartTime": "2017-12-26"
+   }
+  ],
+  "performanceOfFreshAirFilter": "01-中效过滤器",
+  "ratedPower": 300.0,
+  "remarksInformation": "新风",
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "7b7a1fdaa19944709f103e916ab4de8d",
+  "assetBrand": "亚都",
+  "assetCode": "ZCKQA100",
+  "assetSerialNumber": "32465498",
+  "assetType": "YH-D1600",
+  "brandLand": "00-国内",
+  "facilityCategory": "FAKTXKT000",
+  "facilityName": "焦作市中支中心机房新风机空气调节系统",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2012-04-01",
+  "facilityUseState": "00-设施在用",
+  "freshAirFiltrationLevel": "00-一级（个）",
+  "freshAirRate": "1600",
+  "freshAir_deployment": [
+   {
+    "deployArea": "16-辅助区-新风区",
+    "deployComputerRoom": "焦作市中心支行中心机房",
+    "deployDb": "焦作市中支中心机房",
+    "deployFloor": "四楼",
+    "deployGallery": "焦作市山阳区世纪路1355号"
+   }
+  ],
+  "freshAir_operationsManagement": [
+   {
+    "administrativeDepartment": "00-科技管理部门",
+    "operationDepartment": "00-科技管理部门",
+    "serviceEndTime": "2021-11-16",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "河南捷联科技有限公司",
+    "serviceStartTime": "2020-11-17"
+   }
+  ],
+  "performanceOfFreshAirFilter": "01-中效过滤器",
+  "ratedPower": 1000.0,
+  "remarksInformation": "新风",
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "8220a19524a9453da87b71a8e7e5c976",
+  "assetBrand": "天方",
+  "assetCode": "2202030042013009",
+  "assetSerialNumber": "1703196",
+  "assetType": "X-08D",
+  "brandLand": "00-国内",
+  "facilityCategory": "FAKTXKT000",
+  "facilityName": "新乡市中支机房新风系统2",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2017-08-30",
+  "facilityUseState": "00-设施在用",
+  "freshAirFiltrationLevel": "01-二级（个）",
+  "freshAirRate": "800",
+  "freshAir_deployment": [
+   {
+    "deployArea": "90-屏蔽机房区",
+    "deployComputerRoom": "中心机房",
+    "deployDb": "新乡市中支中心机房",
+    "deployFloor": "十五层",
+    "deployGallery": "办公楼"
+   }
+  ],
+  "freshAir_operationsManagement": [
+   {
+    "administrativeDepartment": "00-科技管理部门",
+    "operationDepartment": "00-科技管理部门",
+    "serviceEndTime": "2020-08-30",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "北京华科科技有限公司",
+    "serviceStartTime": "2017-08-30"
+   }
+  ],
+  "performanceOfFreshAirFilter": "01-中效过滤器",
+  "ratedPower": 500.0,
+  "remarksInformation": "新风",
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "8275aeb1226a4f5f8ff3a4b6076e96af",
+  "assetBrand": "天方",
+  "assetCode": "2202030042013008",
+  "assetSerialNumber": "1703228",
+  "assetType": "X-08D",
+  "brandLand": "00-国内",
+  "facilityCategory": "FAKTXKT000",
+  "facilityName": "新乡市中支机房新风系统1",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2017-08-30",
+  "facilityUseState": "00-设施在用",
+  "freshAirFiltrationLevel": "01-二级（个）",
+  "freshAirRate": "800",
+  "freshAir_deployment": [
+   {
+    "deployArea": "00-主机房-服务器区",
+    "deployComputerRoom": "中心机房",
+    "deployDb": "新乡市中支中心机房",
+    "deployFloor": "十五层",
+    "deployGallery": "办公楼"
+   }
+  ],
+  "freshAir_operationsManagement": [
+   {
+    "administrativeDepartment": "00-科技管理部门",
+    "operationDepartment": "00-科技管理部门",
+    "serviceEndTime": "2020-08-30",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "北京华科科技有限公司",
+    "serviceStartTime": "2017-08-30"
+   }
+  ],
+  "performanceOfFreshAirFilter": "01-中效过滤器",
+  "ratedPower": 500.0,
+  "remarksInformation": "新风",
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "9bf6efcde2664ae6801cb2bbe05398fb",
+  "assetBrand": "亚都",
+  "assetSerialNumber": "09141020",
+  "assetType": "YHQ-L1600",
+  "brandLand": "00-国内",
+  "facilityCategory": "FAKTXKT000",
+  "facilityName": "郑州中支科技处新风系统1",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2009-12-03",
+  "facilityUseState": "00-设施在用",
+  "freshAirFiltrationLevel": "01-二级（个）",
+  "freshAirRate": "1600",
+  "freshAir_deployment": [
+   {
+    "deployArea": "03-主机房-其它区",
+    "deployComputerRoom": "主中心机房",
+    "deployDb": "郑州中支主中心机房",
+    "deployFloor": "十一层",
+    "deployGallery": "商务外环路21号"
+   }
+  ],
+  "freshAir_operationsManagement": [
+   {
+    "administrativeDepartment": "00-科技管理部门",
+    "operationDepartment": "00-科技管理部门",
+    "serviceEndTime": "2021-08-26",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "河南捷联科技有限公司",
+    "serviceStartTime": "2020-08-27"
+   }
+  ],
+  "performanceOfFreshAirFilter": "00-粗效过滤器",
+  "ratedPower": 0.64,
+  "remarksInformation": "新风",
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "9d28062e36d248b2adb44cdf44d2966c",
+  "assetBrand": "天方",
+  "assetCode": "2202120021021083",
+  "assetSerialNumber": "TFHR015D",
+  "assetType": "HR15D",
+  "brandLand": "00-国内",
+  "facilityCategory": "FAKTXKT000",
+  "facilityName": "许昌市中支中心机房新风机空气调节系统",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2016-09-11",
+  "facilityUseState": "00-设施在用",
+  "freshAirFiltrationLevel": "00-一级（个）",
+  "freshAirRate": "1600",
+  "freshAir_deployment": [
+   {
+    "deployArea": "01-主机房-网络区",
+    "deployComputerRoom": "许昌市中心支行中心机房",
+    "deployDb": "许昌市中支中心机房",
+    "deployFloor": "四楼",
+    "deployGallery": "河南省许昌市建安区新东街571号办公楼"
+   }
+  ],
+  "freshAir_operationsManagement": [
+   {
+    "administrativeDepartment": "00-科技管理部门",
+    "operationDepartment": "00-科技管理部门",
+    "serviceEndTime": "2017-09-11",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "河南威帆信息科技股份有限公司",
+    "serviceStartTime": "2016-09-11"
+   }
+  ],
+  "performanceOfFreshAirFilter": "01-中效过滤器",
+  "ratedPower": 600.0,
+  "remarksInformation": "新风",
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "a5a4d632d22a45508229ca4d66080121",
+  "assetBrand": "亚都",
+  "assetCode": "2202010011000002",
+  "assetSerialNumber": "17170147",
+  "assetType": "YH-10NS1C",
+  "brandLand": "00-国内",
+  "facilityCategory": "FAKTXKT000",
+  "facilityName": "洛阳市中支中心机房新风系统",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2017-09-01",
+  "facilityUseState": "00-设施在用",
+  "freshAirFiltrationLevel": "01-二级（个）",
+  "freshAirRate": "1600",
+  "freshAir_deployment": [
+   {
+    "deployArea": "24-支持区-空调区",
+    "deployComputerRoom": "洛阳市中支中心机房",
+    "deployDb": "焦作市中支中心机房",
+    "deployFloor": "三层",
+    "deployGallery": "洛阳市中支办公大楼"
+   }
+  ],
+  "freshAir_operationsManagement": [
+   {
+    "administrativeDepartment": "00-科技管理部门",
+    "operationDepartment": "00-科技管理部门",
+    "serviceEndTime": "2022-02-23",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "郑州三信机房电子技术有限公司",
+    "serviceStartTime": "2021-02-24"
+   }
+  ],
+  "performanceOfFreshAirFilter": "00-粗效过滤器",
+  "ratedPower": 0.4,
+  "remarksInformation": "新风",
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "b450aac194af4575bfba815b14d707a0",
+  "assetBrand": "亚都",
+  "assetSerialNumber": "09313033",
+  "assetType": "YHQ-U1300",
+  "brandLand": "00-国内",
+  "facilityCategory": "FAKTXKT000",
+  "facilityName": "郑州中支科技处新风系统4",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2009-12-03",
+  "facilityUseState": "00-设施在用",
+  "freshAirFiltrationLevel": "01-二级（个）",
+  "freshAirRate": "1300",
+  "freshAir_deployment": [
+   {
+    "deployArea": "03-主机房-其它区",
+    "deployComputerRoom": "主中心机房",
+    "deployDb": "郑州中支主中心机房",
+    "deployFloor": "十一层",
+    "deployGallery": "商务外环路21号"
+   }
+  ],
+  "freshAir_operationsManagement": [
+   {
+    "administrativeDepartment": "00-科技管理部门",
+    "operationDepartment": "00-科技管理部门",
+    "serviceEndTime": "2021-08-26",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "河南捷联科技有限公司",
+    "serviceStartTime": "2020-08-27"
+   }
+  ],
+  "performanceOfFreshAirFilter": "00-粗效过滤器",
+  "ratedPower": 0.89,
+  "remarksInformation": "新风",
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "b68013c3a0684e5a9181a30f03b23caa",
+  "assetBrand": "亚都",
+  "assetCode": "ZCKQA100",
+  "assetSerialNumber": "35467987",
+  "assetType": "YPF-600M",
+  "brandLand": "00-国内",
+  "facilityCategory": "FAKTXKT000",
+  "facilityName": "信阳市中支中心机房新风机空气调节系统",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2012-04-01",
+  "facilityUseState": "00-设施在用",
+  "freshAirFiltrationLevel": "00-一级（个）",
+  "freshAirRate": "1600",
+  "freshAir_deployment": [
+   {
+    "deployArea": "16-辅助区-新风区",
+    "deployComputerRoom": "信阳市中心支行中心机房",
+    "deployDb": "信阳市中支中心机房",
+    "deployFloor": "二层",
+    "deployGallery": "信阳市浉河区长安路133号"
+   }
+  ],
+  "freshAir_operationsManagement": [
+   {
+    "administrativeDepartment": "00-科技管理部门",
+    "operationDepartment": "00-科技管理部门",
+    "serviceEndTime": "2021-11-16",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "北京华科机房装饰工程有限公司",
+    "serviceStartTime": "2020-11-17"
+   }
+  ],
+  "performanceOfFreshAirFilter": "01-中效过滤器",
+  "ratedPower": 1000.0,
+  "remarksInformation": "新风",
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "c2b108fc73a14a5ca9deacb4c165e08a",
+  "assetBrand": "天方",
+  "assetCode": "ZKZZ0001",
+  "assetSerialNumber": "1707155",
+  "assetType": "X-15D",
+  "brandLand": "00-国内",
+  "facilityCategory": "FAKTXKT000",
+  "facilityName": "周口市中支中心机房新风机空气调节系统",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2019-04-06",
+  "facilityUseState": "00-设施在用",
+  "freshAirFiltrationLevel": "00-一级（个）",
+  "freshAirRate": "1500",
+  "freshAir_deployment": [
+   {
+    "deployArea": "16-辅助区-新风区",
+    "deployComputerRoom": "周口市中心支行中心机房",
+    "deployDb": "周口市中支中心机房",
+    "deployFloor": "二层",
+    "deployGallery": "周口市川汇区七一路中段1号A楼"
+   }
+  ],
+  "freshAir_operationsManagement": [
+   {
+    "administrativeDepartment": "00-科技管理部门",
+    "operationDepartment": "00-科技管理部门",
+    "serviceEndTime": "2021-08-06",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "恒锋信息科技股份有限公司",
+    "serviceStartTime": "2018-08-06"
+   }
+  ],
+  "performanceOfFreshAirFilter": "02-高中效过滤器",
+  "ratedPower": 0.3,
+  "remarksInformation": "新风",
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "c8e966c7b99b4682b1707dbba8312f3c",
+  "assetBrand": "天方",
+  "assetCode": "2202130021016000",
+  "assetSerialNumber": "SN0008D",
+  "assetType": "X-08D",
+  "brandLand": "00-国内",
+  "facilityCategory": "FAKTXKT000",
+  "facilityName": "漯河市中心支行机房新风系统",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2015-03-05",
+  "facilityUseState": "00-设施在用",
+  "freshAirFiltrationLevel": "01-二级（个）",
+  "freshAirRate": "2000",
+  "freshAir_deployment": [
+   {
+    "deployArea": "00-主机房-服务器区",
+    "deployComputerRoom": "漯河市中支中心机房",
+    "deployDb": "漯河市中支中心机房",
+    "deployFloor": "五层",
+    "deployGallery": "漯河市郾城区嵩山东支路1号"
+   }
+  ],
+  "freshAir_operationsManagement": [
+   {
+    "administrativeDepartment": "00-科技管理部门",
+    "operationDepartment": "00-科技管理部门",
+    "serviceEndTime": "2018-03-05",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "暂无",
+    "serviceStartTime": "2015-03-05"
+   }
+  ],
+  "performanceOfFreshAirFilter": "01-中效过滤器",
+  "ratedPower": 1100.0,
+  "remarksInformation": "新风",
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "d13c80b2cecb4ac48f138aa304adddab",
+  "assetBrand": "亚都",
+  "assetCode": "410611049001",
+  "assetSerialNumber": "410611049001",
+  "assetType": "YXHQ-D2000",
+  "brandLand": "00-国内",
+  "facilityCategory": "FAKTXKT000",
+  "facilityName": "鹤壁市中支服务器机房新风系统",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2019-04-01",
+  "facilityUseState": "00-设施在用",
+  "freshAirFiltrationLevel": "01-二级（个）",
+  "freshAirRate": "2000",
+  "freshAir_deployment": [
+   {
+    "deployArea": "30-行政管理区-办公区",
+    "deployComputerRoom": "中心机房",
+    "deployDb": "鹤壁市中支中心机房",
+    "deployFloor": "七层",
+    "deployGallery": "办公楼"
+   }
+  ],
+  "freshAir_operationsManagement": [
+   {
+    "administrativeDepartment": "00-科技管理部门",
+    "operationDepartment": "00-科技管理部门",
+    "serviceEndTime": "2021-04-01",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "河南松峰",
+    "serviceStartTime": "2019-04-01"
+   }
+  ],
+  "performanceOfFreshAirFilter": "01-中效过滤器",
+  "ratedPower": 1100.0,
+  "remarksInformation": "新风",
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "d5c296108ec049dd89841f19b53749c6",
+  "assetBrand": "亚都",
+  "assetCode": "2202090042018010",
+  "assetSerialNumber": "FAP1519021501",
+  "assetType": "YH（Q)-L1600",
+  "brandLand": "00-国内",
+  "facilityCategory": "FAKTXKT000",
+  "facilityName": "三门峡市中支 新风系统",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2020-05-17",
+  "facilityUseState": "00-设施在用",
+  "freshAirFiltrationLevel": "01-二级（个）",
+  "freshAirRate": "1500",
+  "freshAir_deployment": [
+   {
+    "deployArea": "20-支持区-变配电室",
+    "deployComputerRoom": "中心机房",
+    "deployDb": "三门峡市中支中心机房",
+    "deployFloor": "六层",
+    "deployGallery": "办公大楼"
+   }
+  ],
+  "freshAir_operationsManagement": [
+   {
+    "administrativeDepartment": "00-科技管理部门",
+    "operationDepartment": "00-科技管理部门",
+    "serviceEndTime": "2023-05-17",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "智信安装集团有限公司",
+    "serviceStartTime": "2020-05-17"
+   }
+  ],
+  "performanceOfFreshAirFilter": "02-高中效过滤器",
+  "ratedPower": 120.0,
+  "remarksInformation": "新风",
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "edccca3ff8f14d1b853bfb8fdb6410f8",
+  "assetBrand": "环都拓普",
+  "assetCode": "049001",
+  "assetSerialNumber": "SN000001",
+  "assetType": "HDTP",
+  "brandLand": "00-国内",
+  "facilityCategory": "FAKTXKT000",
+  "facilityName": "南阳市中支服务器机房新风系统",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2017-10-01",
+  "facilityUseState": "00-设施在用",
+  "freshAirFiltrationLevel": "01-二级（个）",
+  "freshAirRate": "2000",
+  "freshAir_deployment": [
+   {
+    "deployArea": "16-辅助区-新风区",
+    "deployComputerRoom": "中心机房",
+    "deployDb": "南阳市中支中心机房",
+    "deployFloor": "十二层",
+    "deployGallery": "办公楼"
+   }
+  ],
+  "freshAir_operationsManagement": [
+   {
+    "administrativeDepartment": "00-科技管理部门",
+    "operationDepartment": "00-科技管理部门",
+    "serviceEndTime": "2021-10-01",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "南阳恒得实佳电",
+    "serviceStartTime": "2020-10-01"
+   }
+  ],
+  "performanceOfFreshAirFilter": "01-中效过滤器",
+  "ratedPower": 1100.0,
+  "remarksInformation": "新风",
+  "_dataSource": "双源"
+ },
+ {
+  "facilityDescriptor": "edd6529e6c5f45ea84b466b4c38eb7f2",
+  "assetBrand": "环都拓普",
+  "assetCode": "2200000851012021",
+  "assetSerialNumber": "20160302",
+  "assetType": "XHBQ-D",
+  "brandLand": "00-国内",
+  "facilityCategory": "FAKTXKT000",
+  "facilityName": "济源市中支服务器机房新风系统",
+  "facilityOwnershipAgency": "A1000141000266",
+  "facilityUpdateDate": "2022-02-12",
+  "facilityUseDate": "2016-08-01",
+  "facilityUseState": "00-设施在用",
+  "freshAirFiltrationLevel": "01-二级（个）",
+  "freshAirRate": "2000",
+  "freshAir_deployment": [
+   {
+    "deployArea": "00-主机房-服务器区",
+    "deployComputerRoom": "中心机房",
+    "deployDb": "济源市中支中心机房",
+    "deployFloor": "二层",
+    "deployGallery": "办公楼"
+   }
+  ],
+  "freshAir_operationsManagement": [
+   {
+    "administrativeDepartment": "00-科技管理部门",
+    "operationDepartment": "00-科技管理部门",
+    "serviceEndTime": "2019-08-01",
+    "serviceLevel": "01-7*24",
+    "serviceProvider": "炫宝",
+    "serviceStartTime": "2016-08-01"
+   }
+  ],
+  "performanceOfFreshAirFilter": "01-中效过滤器",
+  "ratedPower": 300.0,
+  "remarksInformation": "新风",
+  "_dataSource": "双源"
+ }
+]

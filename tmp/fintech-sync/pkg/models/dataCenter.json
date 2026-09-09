@@ -1,0 +1,1123 @@
+{
+ "_version": 46,
+ "attrList": [
+  {
+   "custom": "true",
+   "description": "",
+   "id": "facilityDescriptor",
+   "inheritObjectId": "",
+   "isInherit": false,
+   "isMetadata": false,
+   "name": "设施标识符",
+   "notifyDenied": false,
+   "protected": false,
+   "readonly": "false",
+   "required": "true",
+   "tag": [
+    "基本信息"
+   ],
+   "tips": "",
+   "unique": "true",
+   "value": {
+    "default": "guid()",
+    "default_type": "function",
+    "mode": "default",
+    "prefix": "",
+    "regex": null,
+    "series_number_length": 0,
+    "start_value": 0,
+    "struct_define": [],
+    "type": "str"
+   },
+   "wordIndexDenied": false
+  },
+  {
+   "custom": "true",
+   "description": "",
+   "id": "geographicalPosition",
+   "inheritObjectId": "",
+   "isInherit": false,
+   "isMetadata": false,
+   "name": "地理位置",
+   "notifyDenied": false,
+   "protected": false,
+   "readonly": "false",
+   "required": "true",
+   "tag": [
+    "基本信息"
+   ],
+   "tips": "",
+   "unique": "false",
+   "value": {
+    "default": null,
+    "default_type": "value",
+    "mode": "default",
+    "prefix": "",
+    "regex": null,
+    "series_number_length": 0,
+    "start_value": 0,
+    "struct_define": [],
+    "type": "str"
+   },
+   "wordIndexDenied": false
+  },
+  {
+   "custom": "true",
+   "description": "",
+   "id": "nationalArea",
+   "inheritObjectId": "",
+   "isInherit": false,
+   "isMetadata": false,
+   "name": "国家地区",
+   "notifyDenied": false,
+   "protected": false,
+   "readonly": "false",
+   "required": "true",
+   "tag": [
+    "基本信息"
+   ],
+   "tips": "",
+   "unique": "false",
+   "value": {
+    "default": null,
+    "default_type": "value",
+    "mode": "default",
+    "prefix": "",
+    "regex": null,
+    "series_number_length": 0,
+    "start_value": 0,
+    "struct_define": [],
+    "type": "str"
+   },
+   "wordIndexDenied": false
+  },
+  {
+   "custom": "true",
+   "description": "",
+   "id": "facilityName",
+   "inheritObjectId": "",
+   "isInherit": false,
+   "isMetadata": false,
+   "name": "设施名称",
+   "notifyDenied": false,
+   "protected": false,
+   "readonly": "false",
+   "required": "true",
+   "tag": [
+    "基本信息"
+   ],
+   "tips": "",
+   "unique": "false",
+   "value": {
+    "default": null,
+    "default_type": "value",
+    "mode": "default",
+    "prefix": "",
+    "regex": null,
+    "series_number_length": 0,
+    "start_value": 0,
+    "struct_define": [],
+    "type": "str"
+   },
+   "wordIndexDenied": false
+  },
+  {
+   "custom": "true",
+   "description": "",
+   "id": "facilityUseState",
+   "inheritObjectId": "",
+   "isInherit": false,
+   "isMetadata": false,
+   "name": "设施在用状态",
+   "notifyDenied": false,
+   "protected": false,
+   "readonly": "false",
+   "required": "true",
+   "tag": [
+    "基本信息"
+   ],
+   "tips": "",
+   "unique": "false",
+   "value": {
+    "default": null,
+    "default_type": "",
+    "mode": "default",
+    "prefix": "",
+    "regex": [
+     "00-设施在用",
+     "01-设施已停用",
+     "02-设施专用于开发或测试",
+     "03-设施已拆除或报废",
+     "04-备用设施",
+     "99-其它"
+    ],
+    "series_number_length": 0,
+    "start_value": 0,
+    "struct_define": [],
+    "type": "enum"
+   },
+   "wordIndexDenied": false
+  },
+  {
+   "custom": "true",
+   "description": "",
+   "id": "functionalOrientation",
+   "inheritObjectId": "",
+   "isInherit": false,
+   "isMetadata": false,
+   "name": "功能定位",
+   "notifyDenied": false,
+   "protected": false,
+   "readonly": "false",
+   "required": "true",
+   "tag": [
+    "基本信息"
+   ],
+   "tips": "",
+   "unique": "false",
+   "value": {
+    "default": null,
+    "default_type": "",
+    "mode": "default",
+    "prefix": "",
+    "regex": [
+     "00-主要生产中心",
+     "01-同城备份中心",
+     "02-同城多活中心",
+     "03-异地备份中心",
+     "04-异地多活中心",
+     "99-其它"
+    ],
+    "series_number_length": 0,
+    "start_value": 0,
+    "struct_define": [],
+    "type": "enum"
+   },
+   "wordIndexDenied": false
+  },
+  {
+   "custom": "true",
+   "description": "",
+   "id": "constructionMode",
+   "inheritObjectId": "",
+   "isInherit": false,
+   "isMetadata": false,
+   "name": "建设模式",
+   "notifyDenied": false,
+   "protected": false,
+   "readonly": "false",
+   "required": "true",
+   "tag": [
+    "基本信息"
+   ],
+   "tips": "",
+   "unique": "false",
+   "value": {
+    "default": null,
+    "default_type": "",
+    "mode": "default",
+    "prefix": "",
+    "regex": [
+     "00-自主建设",
+     "01-租赁建设",
+     "02-托管模式",
+     "03-自主+租赁（机房场地租赁+机房内部自主建设）",
+     "99-其它"
+    ],
+    "series_number_length": 0,
+    "start_value": 0,
+    "struct_define": [],
+    "type": "enum"
+   },
+   "wordIndexDenied": false
+  },
+  {
+   "custom": "true",
+   "description": "",
+   "id": "facilityUseDate",
+   "inheritObjectId": "",
+   "isInherit": false,
+   "isMetadata": false,
+   "name": "设施投产日期",
+   "notifyDenied": false,
+   "protected": false,
+   "readonly": "false",
+   "required": "true",
+   "tag": [
+    "基本信息"
+   ],
+   "tips": "",
+   "unique": "false",
+   "value": {
+    "default": null,
+    "default_type": "",
+    "mode": "",
+    "prefix": "",
+    "regex": null,
+    "series_number_length": 0,
+    "start_value": 0,
+    "struct_define": [],
+    "type": "date"
+   },
+   "wordIndexDenied": false
+  },
+  {
+   "custom": "true",
+   "description": "",
+   "id": "facilityUpdateDate",
+   "inheritObjectId": "",
+   "isInherit": false,
+   "isMetadata": false,
+   "name": "设施信息更新日期",
+   "notifyDenied": false,
+   "protected": false,
+   "readonly": "false",
+   "required": "true",
+   "tag": [
+    "基本信息"
+   ],
+   "tips": "",
+   "unique": "false",
+   "value": {
+    "default": null,
+    "default_type": "",
+    "mode": "",
+    "prefix": "",
+    "regex": null,
+    "series_number_length": 0,
+    "start_value": 0,
+    "struct_define": [],
+    "type": "date"
+   },
+   "wordIndexDenied": false
+  },
+  {
+   "custom": "true",
+   "description": "",
+   "id": "dbLevel",
+   "inheritObjectId": "",
+   "isInherit": false,
+   "isMetadata": false,
+   "name": "数据中心级别",
+   "notifyDenied": false,
+   "protected": false,
+   "readonly": "false",
+   "required": "true",
+   "tag": [
+    "基本信息"
+   ],
+   "tips": "",
+   "unique": "false",
+   "value": {
+    "default": null,
+    "default_type": "",
+    "mode": "default",
+    "prefix": "",
+    "regex": [
+     "00-总行、总部",
+     "01-省级分支机构",
+     "02-副省级分支机构",
+     "03-地市级分支机构",
+     "04-县区级分支机构",
+     "05-海外分行",
+     "99-其它"
+    ],
+    "series_number_length": 0,
+    "start_value": 0,
+    "struct_define": [],
+    "type": "enum"
+   },
+   "wordIndexDenied": false
+  },
+  {
+   "custom": "true",
+   "description": "",
+   "id": "facilityCategory",
+   "inheritObjectId": "",
+   "isInherit": false,
+   "isMetadata": false,
+   "name": "设施分类标识符",
+   "notifyDenied": false,
+   "protected": false,
+   "readonly": "false",
+   "required": "false",
+   "tag": [
+    "基本信息"
+   ],
+   "tips": "",
+   "unique": "false",
+   "value": {
+    "default": "DC00000000",
+    "default_type": "value",
+    "mode": "default",
+    "prefix": "",
+    "regex": null,
+    "series_number_length": 0,
+    "start_value": 0,
+    "struct_define": [],
+    "type": "str"
+   },
+   "wordIndexDenied": false
+  },
+  {
+   "custom": "true",
+   "description": "",
+   "id": "lei",
+   "inheritObjectId": "",
+   "isInherit": false,
+   "isMetadata": false,
+   "name": "LEI全球法人机构识别编码",
+   "notifyDenied": false,
+   "protected": false,
+   "readonly": "false",
+   "required": "false",
+   "tag": [
+    "基本信息"
+   ],
+   "tips": "",
+   "unique": "false",
+   "value": {
+    "default": null,
+    "default_type": "value",
+    "mode": "default",
+    "prefix": "",
+    "regex": null,
+    "series_number_length": 0,
+    "start_value": 0,
+    "struct_define": [],
+    "type": "str"
+   },
+   "wordIndexDenied": false
+  },
+  {
+   "custom": "true",
+   "description": "",
+   "id": "facilityOwnershipAgency",
+   "inheritObjectId": "",
+   "isInherit": false,
+   "isMetadata": false,
+   "name": "设施归属机构",
+   "notifyDenied": false,
+   "protected": false,
+   "readonly": "false",
+   "required": "false",
+   "tag": [
+    "基本信息"
+   ],
+   "tips": "",
+   "unique": "false",
+   "value": {
+    "default": null,
+    "default_type": "value",
+    "mode": "default",
+    "prefix": "",
+    "regex": null,
+    "series_number_length": 0,
+    "start_value": 0,
+    "struct_define": [],
+    "type": "str"
+   },
+   "wordIndexDenied": false
+  },
+  {
+   "custom": "true",
+   "description": "",
+   "id": "administrativeArea",
+   "inheritObjectId": "",
+   "isInherit": false,
+   "isMetadata": false,
+   "name": "行政区划",
+   "notifyDenied": false,
+   "protected": false,
+   "readonly": "false",
+   "required": "false",
+   "tag": [
+    "基本信息"
+   ],
+   "tips": "",
+   "unique": "false",
+   "value": {
+    "default": null,
+    "default_type": "value",
+    "mode": "default",
+    "prefix": "",
+    "regex": null,
+    "series_number_length": 0,
+    "start_value": 0,
+    "struct_define": [],
+    "type": "str"
+   },
+   "wordIndexDenied": false
+  },
+  {
+   "custom": "true",
+   "description": "",
+   "id": "remarksInformation",
+   "inheritObjectId": "",
+   "isInherit": false,
+   "isMetadata": false,
+   "name": "备注信息",
+   "notifyDenied": false,
+   "protected": false,
+   "readonly": "false",
+   "required": "false",
+   "tag": [
+    "基本信息"
+   ],
+   "tips": "",
+   "unique": "false",
+   "value": {
+    "default": null,
+    "default_type": "value",
+    "mode": "default",
+    "prefix": "",
+    "regex": null,
+    "series_number_length": 0,
+    "start_value": 0,
+    "struct_define": [],
+    "type": "str"
+   },
+   "wordIndexDenied": false
+  },
+  {
+   "custom": "true",
+   "description": "",
+   "id": "computerRoomGradeNationalStandard",
+   "inheritObjectId": "",
+   "isInherit": false,
+   "isMetadata": false,
+   "name": "机房等级-国标标准",
+   "notifyDenied": false,
+   "protected": false,
+   "readonly": "false",
+   "required": "false",
+   "tag": [
+    "基本信息"
+   ],
+   "tips": "",
+   "unique": "false",
+   "value": {
+    "default": null,
+    "default_type": "",
+    "mode": "default",
+    "prefix": "",
+    "regex": [
+     "00-高于GB50174-2017《数据中心设计规范机房等级标准》A级标准",
+     "01-等同于GB50174-2017《数据中心设计规范机房等级标准》A级标准",
+     "02-等同于GB50174-2017《数据中心设计规范机房等级标准》B级标准",
+     "03-等同于GB50174-2017《数据中心设计规范机房等级标准》C级标准",
+     "04-低于GB50174-2017《数据中心设计规范机房等级标准》C级标准",
+     "99-其它"
+    ],
+    "series_number_length": 0,
+    "start_value": 0,
+    "struct_define": [],
+    "type": "enum"
+   },
+   "wordIndexDenied": false
+  },
+  {
+   "custom": "true",
+   "description": "",
+   "id": "computerRoomGradeUptimeTier",
+   "inheritObjectId": "",
+   "isInherit": false,
+   "isMetadata": false,
+   "name": "机房等级-UptimeTIER等级",
+   "notifyDenied": false,
+   "protected": false,
+   "readonly": "false",
+   "required": "false",
+   "tag": [
+    "基本信息"
+   ],
+   "tips": "",
+   "unique": "false",
+   "value": {
+    "default": null,
+    "default_type": "",
+    "mode": "default",
+    "prefix": "",
+    "regex": [
+     "00-高于 Uptime TIER 数据中心等级认证体系Tier IV级标准",
+     "01-等同于 Uptime TIER 数据中心等级认证体系Tier IV级标准",
+     "02-等同于 Uptime TIER 数据中心等级认证体系Tier III级标准",
+     "03-等同于 Uptime TIER 数据中心等级认证体系Tier II级标准",
+     "04-等同于 Uptime TIER 数据中心等级认证体系Tier I级标准",
+     "05-低于 Uptime TIER 数据中心等级认证体系Tier I级标准",
+     "06-未评级",
+     "99-其它"
+    ],
+    "series_number_length": 0,
+    "start_value": 0,
+    "struct_define": [],
+    "type": "enum"
+   },
+   "wordIndexDenied": false
+  },
+  {
+   "custom": "true",
+   "description": "",
+   "id": "dataCenter_energyEnvironmentAdv",
+   "inheritObjectId": "",
+   "isInherit": false,
+   "isMetadata": false,
+   "name": "数据中心-节能环保",
+   "notifyDenied": false,
+   "protected": false,
+   "readonly": "false",
+   "required": "false",
+   "tag": [
+    "基本信息"
+   ],
+   "tips": "",
+   "unique": "false",
+   "value": {
+    "default": null,
+    "default_type": "",
+    "mode": "",
+    "prefix": "",
+    "regex": null,
+    "series_number_length": 0,
+    "start_value": 0,
+    "struct_define": [
+     {
+      "id": "designCabinetNumber",
+      "mode": "default",
+      "name": "设计总机柜（个）",
+      "protected": false,
+      "regex": "",
+      "type": "str"
+     },
+     {
+      "id": "usedCabinetNumber",
+      "mode": "default",
+      "name": "已用机柜数（个）",
+      "protected": false,
+      "regex": "",
+      "type": "str"
+     },
+     {
+      "id": "designPower",
+      "mode": "",
+      "name": "设计总功率（KW）",
+      "protected": false,
+      "regex": null,
+      "type": "float"
+     },
+     {
+      "id": "averageUnitPriceOfWater",
+      "mode": "",
+      "name": "用水平均单价（元）",
+      "protected": false,
+      "regex": null,
+      "type": "float"
+     },
+     {
+      "id": "annualWater",
+      "mode": "",
+      "name": "年用水量（吨）",
+      "protected": false,
+      "regex": null,
+      "type": "float"
+     },
+     {
+      "id": "electricityType",
+      "mode": "",
+      "name": "用电类型",
+      "protected": false,
+      "regex": [
+       "00-大工业用电",
+       "01-工业用电",
+       "02-商业用电",
+       "03-居民用电",
+       "04-行政用电",
+       "05-高工高计（分段计量）",
+       "99-其它"
+      ],
+      "type": "enum"
+     },
+     {
+      "id": "averageUnitPriceOfElectricity",
+      "mode": "",
+      "name": "用电平均单价（元）",
+      "protected": false,
+      "regex": null,
+      "type": "float"
+     },
+     {
+      "id": "annualElectricityConsumption",
+      "mode": "",
+      "name": "年用电量（度）",
+      "protected": false,
+      "regex": null,
+      "type": "float"
+     },
+     {
+      "id": "designingPue",
+      "mode": "",
+      "name": "设计能源效率指标",
+      "protected": false,
+      "regex": null,
+      "type": "float"
+     },
+     {
+      "id": "actualPue",
+      "mode": "",
+      "name": "实际能源效率指标",
+      "protected": false,
+      "regex": null,
+      "type": "float"
+     },
+     {
+      "id": "refrigerationScheme",
+      "mode": "",
+      "name": "制冷方案",
+      "protected": false,
+      "regex": [
+       "00-带自然冷却节能模块的风冷式冷水机组制冷",
+       "01-水冷系统",
+       "02-自然冷却",
+       "03-空调制冷",
+       "04-风冷系统",
+       "99-其它"
+      ],
+      "type": "enums"
+     }
+    ],
+    "type": "structs"
+   },
+   "wordIndexDenied": false
+  },
+  {
+   "custom": "true",
+   "description": "",
+   "id": "dataCenter_availability",
+   "inheritObjectId": "",
+   "isInherit": false,
+   "isMetadata": false,
+   "name": "数据中心-可用性",
+   "notifyDenied": false,
+   "protected": false,
+   "readonly": "false",
+   "required": "false",
+   "tag": [
+    "基本信息"
+   ],
+   "tips": "",
+   "unique": "false",
+   "value": {
+    "default": null,
+    "default_type": "",
+    "mode": "",
+    "prefix": "",
+    "regex": null,
+    "series_number_length": 0,
+    "start_value": 0,
+    "struct_define": [
+     {
+      "id": "netLevel",
+      "mode": "",
+      "name": "接入网络级别",
+      "protected": false,
+      "regex": [
+       "00-国家级骨干网",
+       "01-省级核心网",
+       "02-地市级接入网",
+       "99-其它"
+      ],
+      "type": "enum"
+     },
+     {
+      "id": "networkOperatorNumber",
+      "mode": "default",
+      "name": "接入网络运营商数量（个）",
+      "protected": false,
+      "regex": "",
+      "type": "str"
+     },
+     {
+      "id": "networkOperator",
+      "mode": "",
+      "name": "网络运营商",
+      "protected": false,
+      "regex": [
+       "00-中国电信",
+       "01-中国联通",
+       "02-中国移动",
+       "03-中国广电",
+       "04-教育网",
+       "99-其它"
+      ],
+      "type": "enums"
+     },
+     {
+      "id": "powerScheme",
+      "mode": "",
+      "name": "供电方案",
+      "protected": false,
+      "regex": [
+       "00-单路市电",
+       "01-双路市电",
+       "02-单路市电+发电机",
+       "03-多路市电+发电机",
+       "99-其它"
+      ],
+      "type": "enum"
+     }
+    ],
+    "type": "structs"
+   },
+   "wordIndexDenied": false
+  },
+  {
+   "custom": "true",
+   "description": "",
+   "id": "dataCenter_area",
+   "inheritObjectId": "",
+   "isInherit": false,
+   "isMetadata": false,
+   "name": "数据中心-机房面积",
+   "notifyDenied": false,
+   "protected": false,
+   "readonly": "false",
+   "required": "false",
+   "tag": [
+    "基本信息"
+   ],
+   "tips": "",
+   "unique": "false",
+   "value": {
+    "default": null,
+    "default_type": "",
+    "mode": "",
+    "prefix": "",
+    "regex": null,
+    "series_number_length": 0,
+    "start_value": 0,
+    "struct_define": [
+     {
+      "id": "mainMachineRoomUsableArea",
+      "mode": "",
+      "name": "主机房使用面积（㎡）",
+      "protected": false,
+      "regex": null,
+      "type": "float"
+     },
+     {
+      "id": "auxiliaryArea",
+      "mode": "",
+      "name": "辅助区面积（㎡）",
+      "protected": false,
+      "regex": null,
+      "type": "float"
+     },
+     {
+      "id": "supportArea",
+      "mode": "",
+      "name": "支持区面积（㎡）",
+      "protected": false,
+      "regex": null,
+      "type": "float"
+     },
+     {
+      "id": "administrativeArea",
+      "mode": "",
+      "name": "行政管理区面积（㎡）",
+      "protected": false,
+      "regex": null,
+      "type": "float"
+     },
+     {
+      "id": "constructionArea",
+      "mode": "",
+      "name": "建筑面积（㎡）",
+      "protected": false,
+      "regex": null,
+      "type": "float"
+     },
+     {
+      "id": "parkArea",
+      "mode": "",
+      "name": "园区面积（㎡）",
+      "protected": false,
+      "regex": null,
+      "type": "float"
+     }
+    ],
+    "type": "structs"
+   },
+   "wordIndexDenied": false
+  },
+  {
+   "custom": "true",
+   "description": "",
+   "id": "dataCenter_security",
+   "inheritObjectId": "",
+   "isInherit": false,
+   "isMetadata": false,
+   "name": "数据中心-安全性",
+   "notifyDenied": false,
+   "protected": false,
+   "readonly": "false",
+   "required": "false",
+   "tag": [
+    "基本信息"
+   ],
+   "tips": "",
+   "unique": "false",
+   "value": {
+    "default": null,
+    "default_type": "",
+    "mode": "",
+    "prefix": "",
+    "regex": null,
+    "series_number_length": 0,
+    "start_value": 0,
+    "struct_define": [
+     {
+      "id": "antiEarthquakeLevel",
+      "mode": "",
+      "name": "建筑抗震",
+      "protected": false,
+      "regex": [
+       "00-低于国家建筑抗震等级标准八级",
+       "01-八级",
+       "02-九级",
+       "03-十级",
+       "04-十一级",
+       "05-高于国家建筑抗震等级标准十一级"
+      ],
+      "type": "enum"
+     },
+     {
+      "id": "buildingLightningProtection",
+      "mode": "",
+      "name": "建筑防雷",
+      "protected": false,
+      "regex": [
+       "00-A",
+       "01-B",
+       "02-C",
+       "99-其它"
+      ],
+      "type": "enum"
+     },
+     {
+      "id": "buildingBearingCapacity",
+      "mode": "default",
+      "name": "建筑承重（N/㎡）",
+      "protected": false,
+      "regex": "",
+      "type": "str"
+     },
+     {
+      "id": "fireExtinguishingSystemType",
+      "mode": "",
+      "name": "灭火系统类型",
+      "protected": false,
+      "regex": [
+       "00-管网式洁净气体灭火系统",
+       "01-柜式气体灭火系统",
+       "02-管网+柜式",
+       "03-悬挂式灭火系统",
+       "99-其它"
+      ],
+      "type": "enums"
+     }
+    ],
+    "type": "structs"
+   },
+   "wordIndexDenied": false
+  },
+  {
+   "custom": "true",
+   "description": "",
+   "id": "dataCenter_manageability",
+   "inheritObjectId": "",
+   "isInherit": false,
+   "isMetadata": false,
+   "name": "数据中心-可管理性",
+   "notifyDenied": false,
+   "protected": false,
+   "readonly": "false",
+   "required": "false",
+   "tag": [
+    "基本信息"
+   ],
+   "tips": "",
+   "unique": "false",
+   "value": {
+    "default": null,
+    "default_type": "",
+    "mode": "",
+    "prefix": "",
+    "regex": null,
+    "series_number_length": 0,
+    "start_value": 0,
+    "struct_define": [
+     {
+      "id": "operationNumbers",
+      "mode": "default",
+      "name": "运维人数（人）",
+      "protected": false,
+      "regex": "",
+      "type": "str"
+     },
+     {
+      "id": "electricalEquipmentOpsPersonnel",
+      "mode": "default",
+      "name": "电气设备运维人数（人）",
+      "protected": false,
+      "regex": "",
+      "type": "str"
+     },
+     {
+      "id": "hvacOpsPersonnel",
+      "mode": "default",
+      "name": "暖通运维人数（人）",
+      "protected": false,
+      "regex": "",
+      "type": "str"
+     },
+     {
+      "id": "itEquipmentOpsPersonnel",
+      "mode": "default",
+      "name": "IT设备运维人数（人）",
+      "protected": false,
+      "regex": "",
+      "type": "str"
+     },
+     {
+      "id": "networkOpsPersonnel",
+      "mode": "default",
+      "name": "网络运维人数（人）",
+      "protected": false,
+      "regex": "",
+      "type": "str"
+     },
+     {
+      "id": "otherSupportingOpsPersonnel",
+      "mode": "default",
+      "name": "其它辅助运维人数（人）",
+      "protected": false,
+      "regex": "",
+      "type": "str"
+     },
+     {
+      "id": "dutyCondition",
+      "mode": "",
+      "name": "值班情况",
+      "protected": false,
+      "regex": [
+       "00-7*24值班",
+       "01-5*8值班",
+       "02-非现场值班",
+       "99-其它"
+      ],
+      "type": "enum"
+     },
+     {
+      "id": "averageOpsCosts",
+      "mode": "",
+      "name": "年平均运维费用（万元/年）",
+      "protected": false,
+      "regex": null,
+      "type": "float"
+     },
+     {
+      "id": "outsourcedNumber",
+      "mode": "default",
+      "name": "外包运维人员总数（人）",
+      "protected": false,
+      "regex": "",
+      "type": "str"
+     },
+     {
+      "id": "disasterStatisticsInThePastFiveYears",
+      "mode": "default",
+      "name": "近五年受灾情况统计（次）",
+      "protected": false,
+      "regex": "",
+      "type": "str"
+     }
+    ],
+    "type": "structs"
+   },
+   "wordIndexDenied": false
+  }
+ ],
+ "category": "金融元数据.数据中心",
+ "creator": "easyops",
+ "deleteAuthorizers": [],
+ "icon": "",
+ "indexList": [
+  {
+   "name": "u&facilityDescriptor",
+   "propertyIds": [
+    "facilityDescriptor"
+   ],
+   "unique": true
+  }
+ ],
+ "isAbstract": false,
+ "memo": "",
+ "modifier": "easyops",
+ "name": "数据中心",
+ "notifyDenied": false,
+ "objectId": "dataCenter@FINTECHDATA",
+ "parentObjectId": "CUSTOM@FINTECHDATA",
+ "parentObjectIds": [
+  "CUSTOM@FINTECHDATA"
+ ],
+ "permissionDenied": false,
+ "protected": false,
+ "readAuthorizers": [],
+ "relation_groups": [],
+ "relation_list": [],
+ "system": "",
+ "updateAuthorizers": [],
+ "view": {
+  "attr_authorizers": null,
+  "attr_category_order": [
+   "基本信息"
+  ],
+  "attr_order": [
+   "facilityDescriptor",
+   "geographicalPosition",
+   "nationalArea",
+   "facilityName",
+   "facilityUseState",
+   "functionalOrientation",
+   "constructionMode",
+   "facilityUseDate",
+   "facilityUpdateDate",
+   "dbLevel",
+   "facilityCategory",
+   "lei",
+   "facilityOwnershipAgency",
+   "administrativeArea",
+   "remarksInformation",
+   "computerRoomGradeNationalStandard",
+   "computerRoomGradeUptimeTier",
+   "dataCenter_energyEnvironmentAdv",
+   "dataCenter_availability",
+   "dataCenter_area",
+   "dataCenter_security",
+   "dataCenter_manageability"
+  ],
+  "hide_columns": null,
+  "icon": null,
+  "image": "",
+  "inherit_attr_category_map": null,
+  "relation_default_attr": null,
+  "relation_group_order": null,
+  "relation_order": null,
+  "show_key": [
+   "facilityDescriptor"
+  ],
+  "trans_hier_relation_list": null,
+  "visible": true
+ },
+ "wordIndexDenied": false
+}

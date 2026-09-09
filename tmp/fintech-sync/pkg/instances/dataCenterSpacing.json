@@ -1,0 +1,24 @@
+[
+ {
+  "relationalIdentifier": "a76bf329024546fdad0210d032febb82",
+  "affiliation": "00-主备关系",
+  "airlineDistance": 11.0,
+  "facilityCategory": "GXDC000000",
+  "facilityOwnershipAgency": "A1000141000266",
+  "localDb": "郑州中支主中心机房",
+  "oppositeDb": "郑州中支转接中心机房",
+  "_dataSource": "双源(有差异)",
+  "_diffDetail": [
+   {
+    "attr": "localDb",
+    "reportValue": "郑州中支主中心机房",
+    "mgmtValue": "77e1d9d6869044889909f41f30517418"
+   },
+   {
+    "attr": "oppositeDb",
+    "reportValue": "郑州中支转接中心机房",
+    "mgmtValue": "96f680d2b4f348a198a690325356a7c4"
+   }
+  ]
+ }
+]

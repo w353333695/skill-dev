@@ -1,0 +1,812 @@
+[
+ {
+  "relationalIdentifier": "0ccf18819c604f06befccac501f5c448",
+  "FacilityDescriptor": "许昌市中支中心机房动环监控服务器1",
+  "SoftwareDescriptor": "f8407ba0fec346dd94724a4ccbc63b2a",
+  "applicationServerType": "01-物理服务器",
+  "facilityCategory": "GXSL000000",
+  "facilityOwnershipAgency": "A1000141000266",
+  "_dataSource": "双源"
+ },
+ {
+  "relationalIdentifier": "0e5bb5329d76416987fd76e12ae3dd20",
+  "FacilityDescriptor": "郑州人行电子支付服务器（主）",
+  "SoftwareDescriptor": "5644ee3342ee45899bfa625f317f0813",
+  "applicationServerType": "01-物理服务器",
+  "facilityCategory": "GXSL000000",
+  "facilityOwnershipAgency": "A1000141000266",
+  "_dataSource": "双源"
+ },
+ {
+  "relationalIdentifier": "10cd547b83f74840b6b6f353f6861edd",
+  "FacilityDescriptor": "许昌市中支中心机房桌面云集群服务器1-2",
+  "SoftwareDescriptor": "a4eaa9a0f4e34c32aa56c76785a21214",
+  "applicationServerType": "01-物理服务器",
+  "facilityCategory": "GXSL000000",
+  "facilityOwnershipAgency": "A1000141000266",
+  "_dataSource": "双源"
+ },
+ {
+  "relationalIdentifier": "12e4e09eb6f349a3a23a114271b0e73d",
+  "FacilityDescriptor": "漯河市中支中心机房业务网云桌面平台服务器",
+  "SoftwareDescriptor": "3f9389d0a8374dc89847dbd3c0122c33",
+  "applicationServerType": "01-物理服务器",
+  "facilityCategory": "GXSL000000",
+  "facilityOwnershipAgency": "A1000141000266",
+  "_dataSource": "双源"
+ },
+ {
+  "relationalIdentifier": "13c09d2cce6c4554995a2adff68a613e",
+  "FacilityDescriptor": "郑州时间戳服务器2",
+  "SoftwareDescriptor": "0e380699e42b4fa6a1a15c19eea981e8",
+  "applicationServerType": "01-物理服务器",
+  "facilityCategory": "GXSL000000",
+  "facilityOwnershipAgency": "A1000141000266",
+  "_dataSource": "双源"
+ },
+ {
+  "relationalIdentifier": "17dc239f42c74d99bfbb1c2b41203992",
+  "FacilityDescriptor": "郑州运维监控系统 ITSMAPP UIP",
+  "SoftwareDescriptor": "0e380699e42b4fa6a1a15c19eea981e8",
+  "applicationServerType": "01-物理服务器",
+  "facilityCategory": "GXSL000000",
+  "facilityOwnershipAgency": "A1000141000266",
+  "_dataSource": "双源"
+ },
+ {
+  "relationalIdentifier": "202b3940fdb5443aab2fb9960a87c113",
+  "FacilityDescriptor": "郑州消息中间件MQ(主)",
+  "SoftwareDescriptor": "5644ee3342ee45899bfa625f317f0813",
+  "applicationServerType": "01-物理服务器",
+  "facilityCategory": "GXSL000000",
+  "facilityOwnershipAgency": "A1000141000266",
+  "_dataSource": "双源"
+ },
+ {
+  "relationalIdentifier": "214d965b989d4fbaa0417dcc0aa1ae50",
+  "FacilityDescriptor": "许昌市中支中心机房桌面云集群服务器1-3",
+  "SoftwareDescriptor": "a4eaa9a0f4e34c32aa56c76785a21214",
+  "applicationServerType": "01-物理服务器",
+  "facilityCategory": "GXSL000000",
+  "facilityOwnershipAgency": "A1000141000266",
+  "_dataSource": "双源"
+ },
+ {
+  "relationalIdentifier": "24267730db8b4284963ee0a32ac45b22",
+  "FacilityDescriptor": "郑州金融业综合统计信息平台DataNode6",
+  "SoftwareDescriptor": "0e380699e42b4fa6a1a15c19eea981e8",
+  "applicationServerType": "01-物理服务器",
+  "facilityCategory": "GXSL000000",
+  "facilityOwnershipAgency": "A1000141000266",
+  "_dataSource": "双源"
+ },
+ {
+  "relationalIdentifier": "2501430658704cc38a266bf4999e2146",
+  "FacilityDescriptor": "郑州数字签名服务器2",
+  "SoftwareDescriptor": "0e380699e42b4fa6a1a15c19eea981e8",
+  "applicationServerType": "01-物理服务器",
+  "facilityCategory": "GXSL000000",
+  "facilityOwnershipAgency": "A1000141000266",
+  "_dataSource": "双源"
+ },
+ {
+  "relationalIdentifier": "252410c7484f4c6fb100514638c6b7bc",
+  "FacilityDescriptor": "郑州金融业综合统计信息平台DataNode4",
+  "SoftwareDescriptor": "0e380699e42b4fa6a1a15c19eea981e8",
+  "applicationServerType": "01-物理服务器",
+  "facilityCategory": "GXSL000000",
+  "facilityOwnershipAgency": "A1000141000266",
+  "_dataSource": "双源"
+ },
+ {
+  "relationalIdentifier": "25dfb2b725fb40e9bdfeaee91fb8ba29",
+  "FacilityDescriptor": "郑州人行电子支付服务器（备）",
+  "SoftwareDescriptor": "5644ee3342ee45899bfa625f317f0813",
+  "applicationServerType": "01-物理服务器",
+  "facilityCategory": "GXSL000000",
+  "facilityOwnershipAgency": "A1000141000266",
+  "_dataSource": "双源"
+ },
+ {
+  "relationalIdentifier": "26a927d85a104b909b448df826f3ef19",
+  "FacilityDescriptor": "许昌市中支中心机房IT运维服务器",
+  "SoftwareDescriptor": "3fa28e817c6843b1ac983806fac719cf",
+  "applicationServerType": "01-物理服务器",
+  "facilityCategory": "GXSL000000",
+  "facilityOwnershipAgency": "A1000141000266",
+  "_dataSource": "双源"
+ },
+ {
+  "relationalIdentifier": "296569be35844f88bfbe1fea69af0a4e",
+  "FacilityDescriptor": "许昌市中支中心机房远程培训服务器",
+  "SoftwareDescriptor": "28947cdc58e54a8c86582a1a19d77786",
+  "applicationServerType": "01-物理服务器",
+  "facilityCategory": "GXSL000000",
+  "facilityOwnershipAgency": "A1000141000266",
+  "_dataSource": "双源"
+ },
+ {
+  "relationalIdentifier": "2b5c6769dd6844bd98a504cc9d58c0a7",
+  "FacilityDescriptor": "郑州电子凭证库.印章（备）",
+  "SoftwareDescriptor": "0e380699e42b4fa6a1a15c19eea981e8",
+  "applicationServerType": "01-物理服务器",
+  "facilityCategory": "GXSL000000",
+  "facilityOwnershipAgency": "A1000141000266",
+  "_dataSource": "双源"
+ },
+ {
+  "relationalIdentifier": "2c2af0dd231a4a09b5d677b10bf648ef",
+  "FacilityDescriptor": "郑州异地备份服务器（B机）",
+  "SoftwareDescriptor": "1ab8419ffab34507893bba1ab2e05487",
+  "applicationServerType": "01-物理服务器",
+  "facilityCategory": "GXSL000000",
+  "facilityOwnershipAgency": "A1000141000266",
+  "_dataSource": "双源"
+ },
+ {
+  "relationalIdentifier": "2e5070b1e15e476092ee65ff5eee5b50",
+  "FacilityDescriptor": "郑州金融业综合统计信息平台DataNode5",
+  "SoftwareDescriptor": "0e380699e42b4fa6a1a15c19eea981e8",
+  "applicationServerType": "01-物理服务器",
+  "facilityCategory": "GXSL000000",
+  "facilityOwnershipAgency": "A1000141000266",
+  "_dataSource": "双源"
+ },
+ {
+  "relationalIdentifier": "2e963b7470be49e383477507cb8e1075",
+  "FacilityDescriptor": "许昌市中支中心机房多点控制单元服务器（MCU）",
+  "SoftwareDescriptor": "39d2a7c1d21f49d48373c682211fc80a",
+  "applicationServerType": "01-物理服务器",
+  "facilityCategory": "GXSL000000",
+  "facilityOwnershipAgency": "A1000141000266",
+  "_dataSource": "双源"
+ },
+ {
+  "relationalIdentifier": "3532ec5b7cb740629121c6d7a58fa954",
+  "FacilityDescriptor": "驻马店市中支中心机房业务网云桌面服务器1",
+  "SoftwareDescriptor": "5066cee896054cbd9faa7c4511e01977",
+  "applicationServerType": "01-物理服务器",
+  "facilityCategory": "GXSL000000",
+  "facilityOwnershipAgency": "A1000141000266",
+  "_dataSource": "双源"
+ },
+ {
+  "relationalIdentifier": "37b5bf8f17e44747ab28d9ebce9d60b3",
+  "FacilityDescriptor": "郑州虚拟机11.66.17.204",
+  "SoftwareDescriptor": "ab42b9f7fe22442b922743f7ca8064ea",
+  "applicationServerType": "01-物理服务器",
+  "facilityCategory": "GXSL000000",
+  "facilityOwnershipAgency": "A1000141000266",
+  "_dataSource": "双源"
+ },
+ {
+  "relationalIdentifier": "3ebbf21493a249398efc64bfab6543c5",
+  "FacilityDescriptor": "焦作市中支中心机房运维监控服务器",
+  "SoftwareDescriptor": "16f89011d68e4e698cc84e161b4833f1",
+  "applicationServerType": "01-物理服务器",
+  "facilityCategory": "GXSL000000",
+  "facilityOwnershipAgency": "A1000141000266",
+  "_dataSource": "双源"
+ },
+ {
+  "relationalIdentifier": "42fef6e28d134c9eaec7d99fc3fe4222",
+  "FacilityDescriptor": "安阳市中支中心机房运维监控服务器",
+  "SoftwareDescriptor": "e2b3be2a4bf44e7ba4bc201c1e7ceaa9",
+  "applicationServerType": "01-物理服务器",
+  "facilityCategory": "GXSL000000",
+  "facilityOwnershipAgency": "A1000141000266",
+  "_dataSource": "双源"
+ },
+ {
+  "relationalIdentifier": "503fa96277ca4a779d6908b8b62ab316",
+  "FacilityDescriptor": "许昌市中支中心机房FTP服务器",
+  "SoftwareDescriptor": "428c9c8de3aa414484a880e1a438a7fa",
+  "applicationServerType": "01-物理服务器",
+  "facilityCategory": "GXSL000000",
+  "facilityOwnershipAgency": "A1000141000266",
+  "_dataSource": "双源"
+ },
+ {
+  "relationalIdentifier": "506596761002454aa6565deaea81cb38",
+  "FacilityDescriptor": "郑州电子凭证库.印章（主）",
+  "SoftwareDescriptor": "0e380699e42b4fa6a1a15c19eea981e8",
+  "applicationServerType": "01-物理服务器",
+  "facilityCategory": "GXSL000000",
+  "facilityOwnershipAgency": "A1000141000266",
+  "_dataSource": "双源"
+ },
+ {
+  "relationalIdentifier": "506949432b7d4c8cb967401bfed2f363",
+  "FacilityDescriptor": "郑州虚拟机9.132.63.85",
+  "SoftwareDescriptor": "0e380699e42b4fa6a1a15c19eea981e8",
+  "applicationServerType": "01-物理服务器",
+  "facilityCategory": "GXSL000000",
+  "facilityOwnershipAgency": "A1000141000266",
+  "_dataSource": "双源"
+ },
+ {
+  "relationalIdentifier": "51d07412561a4c1a9ac66734d2fab6dd",
+  "FacilityDescriptor": "焦作市中支中心机房OA服务器",
+  "SoftwareDescriptor": "567f9494a80e449f8d8c227012774564",
+  "applicationServerType": "01-物理服务器",
+  "facilityCategory": "GXSL000000",
+  "facilityOwnershipAgency": "A1000141000266",
+  "_dataSource": "双源"
+ },
+ {
+  "relationalIdentifier": "5315527e203946b09938d806487dd0d0",
+  "FacilityDescriptor": "郑州时间戳服务器1",
+  "SoftwareDescriptor": "0e380699e42b4fa6a1a15c19eea981e8",
+  "applicationServerType": "01-物理服务器",
+  "facilityCategory": "GXSL000000",
+  "facilityOwnershipAgency": "A1000141000266",
+  "_dataSource": "双源"
+ },
+ {
+  "relationalIdentifier": "545dbb025e2246d78b5ba3eb750b5b95",
+  "FacilityDescriptor": "郑州金融业综合统计信息平台DataNode7",
+  "SoftwareDescriptor": "0e380699e42b4fa6a1a15c19eea981e8",
+  "applicationServerType": "01-物理服务器",
+  "facilityCategory": "GXSL000000",
+  "facilityOwnershipAgency": "A1000141000266",
+  "_dataSource": "双源"
+ },
+ {
+  "relationalIdentifier": "595b18d972c14ec3bfb2b651315782ba",
+  "FacilityDescriptor": "焦作市中支中心机房协同办公服务器",
+  "SoftwareDescriptor": "1e7f015b15144a06ac0d7e74d88c0c27",
+  "applicationServerType": "01-物理服务器",
+  "facilityCategory": "GXSL000000",
+  "facilityOwnershipAgency": "A1000141000266",
+  "_dataSource": "双源"
+ },
+ {
+  "relationalIdentifier": "655ef14574774260806ed0ad0ece30b3",
+  "FacilityDescriptor": "郑州金融业综合统计信息平台DataNode8",
+  "SoftwareDescriptor": "0e380699e42b4fa6a1a15c19eea981e8",
+  "applicationServerType": "01-物理服务器",
+  "facilityCategory": "GXSL000000",
+  "facilityOwnershipAgency": "A1000141000266",
+  "_dataSource": "双源"
+ },
+ {
+  "relationalIdentifier": "6a2f02f343164cfd9463d6b8031fd962",
+  "FacilityDescriptor": "郑州数字签名服务器1",
+  "SoftwareDescriptor": "0e380699e42b4fa6a1a15c19eea981e8",
+  "applicationServerType": "01-物理服务器",
+  "facilityCategory": "GXSL000000",
+  "facilityOwnershipAgency": "A1000141000266",
+  "_dataSource": "双源"
+ },
+ {
+  "relationalIdentifier": "6b05f1d624a94c1097ae56ef73ba1916",
+  "FacilityDescriptor": "周口市中支中心机房课程分发服务器",
+  "SoftwareDescriptor": "2a737ed292a24f5ab92f1bdbb46821e6",
+  "applicationServerType": "01-物理服务器",
+  "facilityCategory": "GXSL000000",
+  "facilityOwnershipAgency": "A1000141000266",
+  "_dataSource": "双源"
+ },
+ {
+  "relationalIdentifier": "6d93f172cfd94b73be613ec6996cfb4c",
+  "FacilityDescriptor": "新乡市中支中心机房运维监控服务器",
+  "SoftwareDescriptor": "7efbf6e3b2d849a5a9eec1e628baae73",
+  "applicationServerType": "01-物理服务器",
+  "facilityCategory": "GXSL000000",
+  "facilityOwnershipAgency": "A1000141000266",
+  "_dataSource": "双源"
+ },
+ {
+  "relationalIdentifier": "74decf2518204f44b0f638e8060b9353",
+  "FacilityDescriptor": "郑州金融业综合统计信息平台DataNode3",
+  "SoftwareDescriptor": "0e380699e42b4fa6a1a15c19eea981e8",
+  "applicationServerType": "01-物理服务器",
+  "facilityCategory": "GXSL000000",
+  "facilityOwnershipAgency": "A1000141000266",
+  "_dataSource": "双源"
+ },
+ {
+  "relationalIdentifier": "7779961900324a938a7f5bffe1769fa7",
+  "FacilityDescriptor": "南阳市中支服务器机房课程分发子系统",
+  "SoftwareDescriptor": "442fb8a8cffd4e628cfb05d834c695e1",
+  "applicationServerType": "01-物理服务器",
+  "facilityCategory": "GXSL000000",
+  "facilityOwnershipAgency": "A1000141000266",
+  "_dataSource": "双源"
+ },
+ {
+  "relationalIdentifier": "79735913631743d8830e638358eb2a97",
+  "FacilityDescriptor": "郑州运维监控系统 NMSCJ",
+  "SoftwareDescriptor": "0e380699e42b4fa6a1a15c19eea981e8",
+  "applicationServerType": "01-物理服务器",
+  "facilityCategory": "GXSL000000",
+  "facilityOwnershipAgency": "A1000141000266",
+  "_dataSource": "双源"
+ },
+ {
+  "relationalIdentifier": "7b9d4d408aba4bf6aa721a4bd1a21b3c",
+  "FacilityDescriptor": "郑州账户CDP",
+  "SoftwareDescriptor": "4c0eb25d119744c1903dca324b6c214b",
+  "applicationServerType": "01-物理服务器",
+  "facilityCategory": "GXSL000000",
+  "facilityOwnershipAgency": "A1000141000266",
+  "_dataSource": "双源"
+ },
+ {
+  "relationalIdentifier": "7ff2278d750c48288f15e3afba3f3993",
+  "FacilityDescriptor": "安阳市中支中心机房协同办公服务器",
+  "SoftwareDescriptor": "44cf3e274d2a419899237c876e0d9233",
+  "applicationServerType": "01-物理服务器",
+  "facilityCategory": "GXSL000000",
+  "facilityOwnershipAgency": "A1000141000266",
+  "_dataSource": "双源"
+ },
+ {
+  "relationalIdentifier": "802d7be662684a389c387fdbd6990363",
+  "FacilityDescriptor": "郑州门禁系统数据服务器",
+  "SoftwareDescriptor": "1ab8419ffab34507893bba1ab2e05487",
+  "applicationServerType": "01-物理服务器",
+  "facilityCategory": "GXSL000000",
+  "facilityOwnershipAgency": "A1000141000266",
+  "_dataSource": "双源"
+ },
+ {
+  "relationalIdentifier": "83b4d983193c4ceebcaddab31073e017",
+  "FacilityDescriptor": "许昌市中支中心机房桌面云集群服务器1-1",
+  "SoftwareDescriptor": "a4eaa9a0f4e34c32aa56c76785a21214",
+  "applicationServerType": "01-物理服务器",
+  "facilityCategory": "GXSL000000",
+  "facilityOwnershipAgency": "A1000141000266",
+  "_dataSource": "双源"
+ },
+ {
+  "relationalIdentifier": "87089204a3064ababc53d5943d6578c8",
+  "FacilityDescriptor": "周口市中支中心机房协同办公服务器",
+  "SoftwareDescriptor": "08071af16f134ca8b3327d5870c3a203",
+  "applicationServerType": "01-物理服务器",
+  "facilityCategory": "GXSL000000",
+  "facilityOwnershipAgency": "A1000141000266",
+  "_dataSource": "双源"
+ },
+ {
+  "relationalIdentifier": "8db5059004154df98baa97ee78127667",
+  "FacilityDescriptor": "郑州异地备份服务器（A机）",
+  "SoftwareDescriptor": "1ab8419ffab34507893bba1ab2e05487",
+  "applicationServerType": "01-物理服务器",
+  "facilityCategory": "GXSL000000",
+  "facilityOwnershipAgency": "A1000141000266",
+  "_dataSource": "双源"
+ },
+ {
+  "relationalIdentifier": "9110dd2e60c34b6e832516642b2152e6",
+  "FacilityDescriptor": "许昌市中支中心机房郑州大数据服务器1",
+  "SoftwareDescriptor": "4a06ddc2240b4061894cf416ff68f158",
+  "applicationServerType": "01-物理服务器",
+  "facilityCategory": "GXSL000000",
+  "facilityOwnershipAgency": "A1000141000266",
+  "_dataSource": "双源"
+ },
+ {
+  "relationalIdentifier": "91e6b4a4047449ae83376ef6321fb322",
+  "FacilityDescriptor": "郑州虚拟机11.66.17.205",
+  "SoftwareDescriptor": "ab42b9f7fe22442b922743f7ca8064ea",
+  "applicationServerType": "01-物理服务器",
+  "facilityCategory": "GXSL000000",
+  "facilityOwnershipAgency": "A1000141000266",
+  "_dataSource": "双源"
+ },
+ {
+  "relationalIdentifier": "920a570ac5be427aa5db5b0eb292f5b0",
+  "FacilityDescriptor": "郑州NTP服务器111",
+  "SoftwareDescriptor": "1ab8419ffab34507893bba1ab2e05487",
+  "applicationServerType": "01-物理服务器",
+  "facilityCategory": "GXSL000000",
+  "facilityOwnershipAgency": "A1000141000266",
+  "_dataSource": "双源"
+ },
+ {
+  "relationalIdentifier": "92dc835aa957493ab4103478a67207a9",
+  "FacilityDescriptor": "郑州电子凭证库数据库1",
+  "SoftwareDescriptor": "4c0eb25d119744c1903dca324b6c214b",
+  "applicationServerType": "01-物理服务器",
+  "facilityCategory": "GXSL000000",
+  "facilityOwnershipAgency": "A1000141000266",
+  "_dataSource": "双源"
+ },
+ {
+  "relationalIdentifier": "93bbd98e2ab94dd88c6d060565d1c221",
+  "FacilityDescriptor": "许昌市中支中心机房桌面云集群服务器2-1",
+  "SoftwareDescriptor": "cd7f79d7468f4700a6f60d715d57e177",
+  "applicationServerType": "01-物理服务器",
+  "facilityCategory": "GXSL000000",
+  "facilityOwnershipAgency": "A1000141000266",
+  "_dataSource": "双源"
+ },
+ {
+  "relationalIdentifier": "97ca81b04ae144689aeb02f7ae3a831d",
+  "FacilityDescriptor": "郑州运维监控系统 NMSDB",
+  "SoftwareDescriptor": "0e380699e42b4fa6a1a15c19eea981e8",
+  "applicationServerType": "01-物理服务器",
+  "facilityCategory": "GXSL000000",
+  "facilityOwnershipAgency": "A1000141000266",
+  "_dataSource": "双源"
+ },
+ {
+  "relationalIdentifier": "98030a2c8398451889dad264e616575b",
+  "FacilityDescriptor": "平顶山市中支内容分发服务器",
+  "SoftwareDescriptor": "38b15d7aae8e411a97c7448887b08c9d",
+  "applicationServerType": "01-物理服务器",
+  "facilityCategory": "GXSL000000",
+  "facilityOwnershipAgency": "A1000141000266",
+  "_dataSource": "双源"
+ },
+ {
+  "relationalIdentifier": "9957875974c24932bbef436ebaee42ff",
+  "FacilityDescriptor": "濮阳市中支中心机房远程培训课程分发子系统服务器",
+  "SoftwareDescriptor": "6b64d86c0d474230ad7d432530992fc2",
+  "applicationServerType": "01-物理服务器",
+  "facilityCategory": "GXSL000000",
+  "facilityOwnershipAgency": "A1000141000266",
+  "_dataSource": "双源"
+ },
+ {
+  "relationalIdentifier": "9d3a0065747d4728b37e28bb77ae8057",
+  "FacilityDescriptor": "鹤壁市中支服务器机房HCI超融合虚拟化平台服务器1",
+  "SoftwareDescriptor": "e40c1008aa794b268463b381aa708cbe",
+  "applicationServerType": "01-物理服务器",
+  "facilityCategory": "GXSL000000",
+  "facilityOwnershipAgency": "A1000141000266",
+  "_dataSource": "双源"
+ },
+ {
+  "relationalIdentifier": "9e973dd49f5b421798a772cd36049d03",
+  "FacilityDescriptor": "漯河市中支中心机房业务网云桌面平台服务器",
+  "SoftwareDescriptor": "455d4dff6bc4448faa19b80ce791870c",
+  "applicationServerType": "01-物理服务器",
+  "facilityCategory": "GXSL000000",
+  "facilityOwnershipAgency": "A1000141000266",
+  "_dataSource": "双源"
+ },
+ {
+  "relationalIdentifier": "9f4767ec5df345c4a5be72cb5e7014bb",
+  "FacilityDescriptor": "鹤壁市中支服务器机房云桌面服务器1",
+  "SoftwareDescriptor": "795da59bb3514df197839793d4521620",
+  "applicationServerType": "01-物理服务器",
+  "facilityCategory": "GXSL000000",
+  "facilityOwnershipAgency": "A1000141000266",
+  "_dataSource": "双源"
+ },
+ {
+  "relationalIdentifier": "a009c17466e34e78b81fd433249e93a3",
+  "FacilityDescriptor": "郑州运维监控系统 ITSMDB",
+  "SoftwareDescriptor": "0e380699e42b4fa6a1a15c19eea981e8",
+  "applicationServerType": "01-物理服务器",
+  "facilityCategory": "GXSL000000",
+  "facilityOwnershipAgency": "A1000141000266",
+  "_dataSource": "双源"
+ },
+ {
+  "relationalIdentifier": "a35501f730c74adb910a16636d20c895",
+  "FacilityDescriptor": "南阳市中支机房环境监控服务器",
+  "SoftwareDescriptor": "442fb8a8cffd4e628cfb05d834c695e1",
+  "applicationServerType": "01-物理服务器",
+  "facilityCategory": "GXSL000000",
+  "facilityOwnershipAgency": "A1000141000266",
+  "_dataSource": "双源"
+ },
+ {
+  "relationalIdentifier": "a3c91ebbc64b4f80b12fc1a1980367c8",
+  "FacilityDescriptor": "郑州数字签名服务器(工行)",
+  "SoftwareDescriptor": "0e380699e42b4fa6a1a15c19eea981e8",
+  "applicationServerType": "01-物理服务器",
+  "facilityCategory": "GXSL000000",
+  "facilityOwnershipAgency": "A1000141000266",
+  "_dataSource": "双源"
+ },
+ {
+  "relationalIdentifier": "a64cf99ae7e04b238f3a56c6e815db7c",
+  "FacilityDescriptor": "郑州NTP服务器",
+  "SoftwareDescriptor": "1ab8419ffab34507893bba1ab2e05487",
+  "applicationServerType": "01-物理服务器",
+  "facilityCategory": "GXSL000000",
+  "facilityOwnershipAgency": "A1000141000266",
+  "_dataSource": "双源"
+ },
+ {
+  "relationalIdentifier": "ac2901c7c3a2427fb59c709c7321bd19",
+  "FacilityDescriptor": "郑州大数据独立应用服务器",
+  "SoftwareDescriptor": "0e380699e42b4fa6a1a15c19eea981e8",
+  "applicationServerType": "01-物理服务器",
+  "facilityCategory": "GXSL000000",
+  "facilityOwnershipAgency": "A1000141000266",
+  "_dataSource": "双源"
+ },
+ {
+  "relationalIdentifier": "ad13c17ef72f466baa733e3854a7e0ca",
+  "FacilityDescriptor": "商丘中支云桌面系统服务器",
+  "SoftwareDescriptor": "02a0ef85d14f43a3a703a8597b9c2441",
+  "applicationServerType": "01-物理服务器",
+  "facilityCategory": "GXSL000000",
+  "facilityOwnershipAgency": "A1000141000266",
+  "_dataSource": "双源"
+ },
+ {
+  "relationalIdentifier": "adc0b622c4cc4263a0804be7e57e3ae1",
+  "FacilityDescriptor": "洛阳IT运维系统服务器",
+  "SoftwareDescriptor": "fcced36ca8c1426d8387e6a8f7c73020",
+  "applicationServerType": "01-物理服务器",
+  "facilityCategory": "GXSL000000",
+  "facilityOwnershipAgency": "A1000141000266",
+  "_dataSource": "双源"
+ },
+ {
+  "relationalIdentifier": "b0c606917de246d18a50555d7f476eb4",
+  "FacilityDescriptor": "许昌市中支中心机房桌面云集群服务器2-3",
+  "SoftwareDescriptor": "cd7f79d7468f4700a6f60d715d57e177",
+  "applicationServerType": "01-物理服务器",
+  "facilityCategory": "GXSL000000",
+  "facilityOwnershipAgency": "A1000141000266",
+  "_dataSource": "双源"
+ },
+ {
+  "relationalIdentifier": "b28b78d43f9d45fb9bd0be1a79e7a425",
+  "FacilityDescriptor": "中国人民银行三门峡市中心支行 FTP服务器2",
+  "SoftwareDescriptor": "e6530f930cc140f294109bdab8cd6e6b",
+  "applicationServerType": "01-物理服务器",
+  "facilityCategory": "GXSL000000",
+  "facilityOwnershipAgency": "A1000141000266",
+  "_dataSource": "双源"
+ },
+ {
+  "relationalIdentifier": "b3c5da36302d451a9338ed10504f0c2e",
+  "FacilityDescriptor": "郑州消息中间件MQ(备)",
+  "SoftwareDescriptor": "5644ee3342ee45899bfa625f317f0813",
+  "applicationServerType": "01-物理服务器",
+  "facilityCategory": "GXSL000000",
+  "facilityOwnershipAgency": "A1000141000266",
+  "_dataSource": "双源"
+ },
+ {
+  "relationalIdentifier": "b52d35acf80d4f22b06d5e25949da4ce",
+  "FacilityDescriptor": "濮阳市中支中心机房远程培训课程分发子系统服务器",
+  "SoftwareDescriptor": "45925d1072784d9f8aafc20966a63d2d",
+  "applicationServerType": "01-物理服务器",
+  "facilityCategory": "GXSL000000",
+  "facilityOwnershipAgency": "A1000141000266",
+  "_dataSource": "双源"
+ },
+ {
+  "relationalIdentifier": "b9f692434c664b9a8e62a4b8ee4da885",
+  "FacilityDescriptor": "南阳市中支FTP服务器",
+  "SoftwareDescriptor": "442fb8a8cffd4e628cfb05d834c695e1",
+  "applicationServerType": "01-物理服务器",
+  "facilityCategory": "GXSL000000",
+  "facilityOwnershipAgency": "A1000141000266",
+  "_dataSource": "双源"
+ },
+ {
+  "relationalIdentifier": "bdf2872991de47cf85325dfcfd63f275",
+  "FacilityDescriptor": "郑州虚拟机9.132.63.207",
+  "SoftwareDescriptor": "ab42b9f7fe22442b922743f7ca8064ea",
+  "applicationServerType": "01-物理服务器",
+  "facilityCategory": "GXSL000000",
+  "facilityOwnershipAgency": "A1000141000266",
+  "_dataSource": "双源"
+ },
+ {
+  "relationalIdentifier": "c000727b24e24a2cb78a5a11c403b87d",
+  "FacilityDescriptor": "郑州虚拟化平台存储服务器DD2500",
+  "SoftwareDescriptor": "19999c65df134a7e97841afa78435956",
+  "applicationServerType": "01-物理服务器",
+  "facilityCategory": "GXSL000000",
+  "facilityOwnershipAgency": "A1000141000266",
+  "_dataSource": "双源"
+ },
+ {
+  "relationalIdentifier": "c0a9e0001a5d42b083795bd2ad8fa5c0",
+  "FacilityDescriptor": "郑州运维监控系统 NMSAPP",
+  "SoftwareDescriptor": "0e380699e42b4fa6a1a15c19eea981e8",
+  "applicationServerType": "01-物理服务器",
+  "facilityCategory": "GXSL000000",
+  "facilityOwnershipAgency": "A1000141000266",
+  "_dataSource": "双源"
+ },
+ {
+  "relationalIdentifier": "c11243bf36d340dc85b6190bb8b9e6c0",
+  "FacilityDescriptor": "许昌市中支中心机房动环监控服务器1",
+  "SoftwareDescriptor": "167bcc473fb04012a66ab56e434cca1a",
+  "applicationServerType": "01-物理服务器",
+  "facilityCategory": "GXSL000000",
+  "facilityOwnershipAgency": "A1000141000266",
+  "_dataSource": "双源"
+ },
+ {
+  "relationalIdentifier": "c94a8b34db9c446fb754bc2b6e17fd47",
+  "FacilityDescriptor": "中国人民银行三门峡市中心支行 WEB服务器2",
+  "SoftwareDescriptor": "db628742d4bb420e81784c72d568428c",
+  "applicationServerType": "01-物理服务器",
+  "facilityCategory": "GXSL000000",
+  "facilityOwnershipAgency": "A1000141000266",
+  "_dataSource": "双源"
+ },
+ {
+  "relationalIdentifier": "caa0f52aa7f04b949e9d989623b50153",
+  "FacilityDescriptor": "驻马店市中支中心机房业务网云桌面服务器1",
+  "SoftwareDescriptor": "41c43981963448e6974d90d7b258f0d4",
+  "applicationServerType": "01-物理服务器",
+  "facilityCategory": "GXSL000000",
+  "facilityOwnershipAgency": "A1000141000266",
+  "_dataSource": "双源"
+ },
+ {
+  "relationalIdentifier": "cdbbb7757f284e9a9bc0b0e01912205f",
+  "FacilityDescriptor": "濮阳市中支中心机房运维监控服务器",
+  "SoftwareDescriptor": "5a38552a5c2a4c358ef62efa1eaf6ff6",
+  "applicationServerType": "01-物理服务器",
+  "facilityCategory": "GXSL000000",
+  "facilityOwnershipAgency": "A1000141000266",
+  "_dataSource": "双源"
+ },
+ {
+  "relationalIdentifier": "ce83b7616d3d46e88917e269fafb3d86",
+  "FacilityDescriptor": "郑州FineBI测试服务器",
+  "SoftwareDescriptor": "0e380699e42b4fa6a1a15c19eea981e8",
+  "applicationServerType": "01-物理服务器",
+  "facilityCategory": "GXSL000000",
+  "facilityOwnershipAgency": "A1000141000266",
+  "_dataSource": "双源"
+ },
+ {
+  "relationalIdentifier": "cff58a9bc68642cd9caa8155574131f6",
+  "FacilityDescriptor": "许昌市中支中心机房桌面云集群服务器2-2",
+  "SoftwareDescriptor": "cd7f79d7468f4700a6f60d715d57e177",
+  "applicationServerType": "01-物理服务器",
+  "facilityCategory": "GXSL000000",
+  "facilityOwnershipAgency": "A1000141000266",
+  "_dataSource": "双源"
+ },
+ {
+  "relationalIdentifier": "d04f8fd04a78458f8e2a01c9f44041e3",
+  "FacilityDescriptor": "开封市中支桌面云平台系统服务器1",
+  "SoftwareDescriptor": "4e9a66ec25c94824b38be54124466b04",
+  "applicationServerType": "01-物理服务器",
+  "facilityCategory": "GXSL000000",
+  "facilityOwnershipAgency": "A1000141000266",
+  "_dataSource": "双源"
+ },
+ {
+  "relationalIdentifier": "d9382becf9b7405784473b06385223c9",
+  "FacilityDescriptor": "安阳市中支中心机房远程培训服务器",
+  "SoftwareDescriptor": "e1d2d9bce100464991df91faae49a6eb",
+  "applicationServerType": "01-物理服务器",
+  "facilityCategory": "GXSL000000",
+  "facilityOwnershipAgency": "A1000141000266",
+  "_dataSource": "双源"
+ },
+ {
+  "relationalIdentifier": "d9aa4c6d6c6d4b44a86969fe61f91b3c",
+  "FacilityDescriptor": "济源市中支服务器机房课程分发子系统",
+  "SoftwareDescriptor": "489a3ee5ad424de6920814ef58e4cfa0",
+  "applicationServerType": "01-物理服务器",
+  "facilityCategory": "GXSL000000",
+  "facilityOwnershipAgency": "A1000141000266",
+  "_dataSource": "双源"
+ },
+ {
+  "relationalIdentifier": "dbcee1b7da7f4b7b8db2a854d234673d",
+  "FacilityDescriptor": "商丘中支中心机房动环监控系统服务器",
+  "SoftwareDescriptor": "f7db704baaff4d6899615f8e5bad5c3b",
+  "applicationServerType": "01-物理服务器",
+  "facilityCategory": "GXSL000000",
+  "facilityOwnershipAgency": "A1000141000266",
+  "_dataSource": "双源"
+ },
+ {
+  "relationalIdentifier": "de3aff3ecd9140b39daf834459125ea9",
+  "FacilityDescriptor": "许昌市中支中心机房动环监控服务器2",
+  "SoftwareDescriptor": "f8407ba0fec346dd94724a4ccbc63b2a",
+  "applicationServerType": "01-物理服务器",
+  "facilityCategory": "GXSL000000",
+  "facilityOwnershipAgency": "A1000141000266",
+  "_dataSource": "双源"
+ },
+ {
+  "relationalIdentifier": "df58ba6b265346e29f891108a5e33205",
+  "FacilityDescriptor": "郑州NTP服务器112",
+  "SoftwareDescriptor": "1ab8419ffab34507893bba1ab2e05487",
+  "applicationServerType": "01-物理服务器",
+  "facilityCategory": "GXSL000000",
+  "facilityOwnershipAgency": "A1000141000266",
+  "_dataSource": "双源"
+ },
+ {
+  "relationalIdentifier": "e2769a0df0d0406f94da1ef2f28d11ca",
+  "FacilityDescriptor": "郑州电子凭证库数据库2",
+  "SoftwareDescriptor": "4c0eb25d119744c1903dca324b6c214b",
+  "applicationServerType": "01-物理服务器",
+  "facilityCategory": "GXSL000000",
+  "facilityOwnershipAgency": "A1000141000266",
+  "_dataSource": "双源"
+ },
+ {
+  "relationalIdentifier": "e3700352b4564a6f9e59c4e584356cc9",
+  "FacilityDescriptor": "焦作市中支中心机房课程分发服务器",
+  "SoftwareDescriptor": "ca6c2e8dc11c497ca43b28d86843c350",
+  "applicationServerType": "01-物理服务器",
+  "facilityCategory": "GXSL000000",
+  "facilityOwnershipAgency": "A1000141000266",
+  "_dataSource": "双源"
+ },
+ {
+  "relationalIdentifier": "eb0f89790b774f7785d8c5ba909f1c1f",
+  "FacilityDescriptor": "鹤壁市中支服务器机房云桌面服务器1",
+  "SoftwareDescriptor": "33a50f6d094247ebb8bb862c6277a314",
+  "applicationServerType": "01-物理服务器",
+  "facilityCategory": "GXSL000000",
+  "facilityOwnershipAgency": "A1000141000266",
+  "_dataSource": "双源"
+ },
+ {
+  "relationalIdentifier": "f0c7675036724aa7bdf5fe011a3b7c6d",
+  "FacilityDescriptor": "远程培训课程分发子系统",
+  "SoftwareDescriptor": "1ab8419ffab34507893bba1ab2e05487",
+  "applicationServerType": "01-物理服务器",
+  "facilityCategory": "GXSL000000",
+  "facilityOwnershipAgency": "A1000141000266",
+  "_dataSource": "双源"
+ },
+ {
+  "relationalIdentifier": "f38e93d1296340528af98f90141387c3",
+  "FacilityDescriptor": "新乡市中支中心机房课程分发服务器",
+  "SoftwareDescriptor": "e9e85eb5badf433b917134b3a287045c",
+  "applicationServerType": "01-物理服务器",
+  "facilityCategory": "GXSL000000",
+  "facilityOwnershipAgency": "A1000141000266",
+  "_dataSource": "双源"
+ },
+ {
+  "relationalIdentifier": "f3e8f19bec9741ceb3976141df52d06f",
+  "FacilityDescriptor": "漯河市中支中心机房业务网云桌面平台服务器",
+  "SoftwareDescriptor": "3a1fd9ab566a4adf88998af563ada0f4",
+  "applicationServerType": "01-物理服务器",
+  "facilityCategory": "GXSL000000",
+  "facilityOwnershipAgency": "A1000141000266",
+  "_dataSource": "双源"
+ },
+ {
+  "relationalIdentifier": "f4ee55bc338d445c8e14ae53b8b46c9f",
+  "FacilityDescriptor": "中国人民银行三门峡市中心支行 IT运维服务器",
+  "SoftwareDescriptor": "0c13385d4599417cb9ecfe308c061297",
+  "applicationServerType": "01-物理服务器",
+  "facilityCategory": "GXSL000000",
+  "facilityOwnershipAgency": "A1000141000266",
+  "_dataSource": "双源"
+ },
+ {
+  "relationalIdentifier": "f7b56fa8165a4f9f8aaa8d4896744480",
+  "FacilityDescriptor": "鹤壁市中支服务器机房TBS生产机虚拟化平台服务器",
+  "SoftwareDescriptor": "81d039e9725e4960ae47aaab78118ac6",
+  "applicationServerType": "01-物理服务器",
+  "facilityCategory": "GXSL000000",
+  "facilityOwnershipAgency": "A1000141000266",
+  "_dataSource": "双源"
+ },
+ {
+  "relationalIdentifier": "f88efa33e5c74d7692352332cdbdf89a",
+  "FacilityDescriptor": "郑州虚拟化平台备份服务器Avamar",
+  "SoftwareDescriptor": "19999c65df134a7e97841afa78435956",
+  "applicationServerType": "01-物理服务器",
+  "facilityCategory": "GXSL000000",
+  "facilityOwnershipAgency": "A1000141000266",
+  "_dataSource": "双源"
+ },
+ {
+  "relationalIdentifier": "fad9d6d708114d228c5eaf467c5cba05",
+  "FacilityDescriptor": "郑州虚拟机11.66.17.206",
+  "SoftwareDescriptor": "ab42b9f7fe22442b922743f7ca8064ea",
+  "applicationServerType": "01-物理服务器",
+  "facilityCategory": "GXSL000000",
+  "facilityOwnershipAgency": "A1000141000266",
+  "_dataSource": "双源"
+ }
+]
