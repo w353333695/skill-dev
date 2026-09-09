@@ -20,7 +20,7 @@ MODEL_MAP = {
     '运维审计设备':          {'model_id': 'opsAudit@FINTECHDATA',              'key': '设施标识符'},
     '虚拟机资源':            {'model_id': 'virtualMachine@FINTECHDATA',       'key': '设施标识符', 'mgmt_alias': '虚拟机'},
     '机架式服务器':          {'model_id': 'rackServer@FINTECHDATA',           'key': '设施标识符'},
-    '基础软件':             {'model_id': 'basedSoftware@FINTECHDATA',         'key': '设施标识符'},
+    '基础软件':             {'model_id': 'basedSoftware@FINTECHDATA',         'key': '软件标识符'},
     '光纤交换机':            {'model_id': 'fiberSwitch@FINTECHDATA',          'key': '设施标识符'},
     '机柜':                {'model_id': 'commonCabinet@FINTECHDATA',         'key': '设施标识符', 'mgmt_alias': '普通机柜'},
     '视频监控类':            {'model_id': 'videoMonitoring@FINTECHDATA',      'key': '设施标识符', 'mgmt_alias': '视频监控系统'},
@@ -40,8 +40,8 @@ MODEL_MAP = {
     '变压器设备':           {'model_id': 'transformer@FINTECHDATA',          'key': '设施标识符'},
     '波分复用设备':          {'model_id': 'wdm@FINTECHDATA',                  'key': '设施标识符'},
     '数据中心':             {'model_id': 'dataCenter@FINTECHDATA',           'key': '设施标识符'},   # 仅上报
-    '数据中心间距':          {'model_id': 'dataCenterSpacing@FINTECHDATA',    'key': '设施标识符'},
-    '应用系统':             {'model_id': 'application@FINTECHDATA',          'key': '设施标识符'},
+    '数据中心间距':          {'model_id': 'dataCenterSpacing@FINTECHDATA',    'key': '关系标识符'},
+    '应用系统':             {'model_id': 'application@FINTECHDATA',          'key': '应用系统标识符'},
     '供电关联关系':          {'model_id': 'powerSupplyRelation@FINTECHDATA',  'key': '关系标识符'},
     '网络线路':             {'model_id': 'networkLine@FINTECHDATA',           'key': '设施标识符'},
     '网络线路关联关系':       {'model_id': 'networkRelation@FINTECHDATA',     'key': '关系标识符'},
@@ -51,10 +51,14 @@ MODEL_MAP = {
 }
 
 # model_id → [(上报列名|None, 管理列名|None, cmdb属性id), ...]
+# 属性 id 支持点号嵌套（structs 子字段，如 'switches_deployment.deployArea'）：
+# transform 产出嵌套 dict，import 前组装为 CMDB structs 形态 list[dict]。
 # 初始为空：investigate() 生成骨架（out/config-skeleton.py），人工核对后粘贴此处
 FIELD_MAP = {}
 
 # cmdb属性id → {excel侧裸值 → cmdb合法值(regex 中的值)}
+# enums(多选)同样查此表；前缀/后缀式裸值（如 设施在用→00-设施在用、主机房-网络区→01-主机房-网络区）
+# 由 clean_value 的 regex 前缀归一自动处理，无需逐条列举。
 ENUM_MAP = {
     'facilityUseState': {'设施在用': '00-设施在用', '设施已停用': '01-设施已停用',
                          '设施专用于开发或测试': '02-设施专用于开发或测试',
@@ -125,10 +129,15 @@ SCHEMA_CACHE = OUT / 'schema-cache.json'
 
 def _attr_brief(a):
     v = a.get('value') or {}
-    return {'name': a.get('name'), 'type': v.get('type'), 'regex': v.get('regex') or None}
+    brief = {'name': a.get('name'), 'type': v.get('type'), 'regex': v.get('regex') or None}
+    # structs 子字段展平为 dotted id（一层；CMDB struct_define 不允许嵌套 struct）
+    for sd in v.get('struct_define') or []:
+        brief.setdefault('sub', {})[f"{a['id']}.{sd['id']}"] = {
+            'name': sd.get('name'), 'type': sd.get('type'), 'regex': sd.get('regex') or None}
+    return brief
 
 def fetch_schema(model_id, refresh=False):
-    """detail → {attrs:{id:{name,type,regex}}, key_attr}；缓存到 out/schema-cache.json"""
+    """detail → {attrs:{id|id.sub:{name,type,regex}}, key_attr}；缓存到 out/schema-cache.json"""
     cache = {}
     if SCHEMA_CACHE.exists():
         cache = json.loads(SCHEMA_CACHE.read_text())
@@ -140,6 +149,11 @@ def fetch_schema(model_id, refresh=False):
     data = json.loads(out)['data']
     schema = {'attrs': {a['id']: _attr_brief(a) for a in data.get('attrList', [])},
               'key_attr': None}
+    # 展平：dotted 子字段并入顶层索引（顶层与子字段名冲突时子字段优先——excel 列语义即 struct 子字段）
+    flat = {}
+    for aid, a in schema['attrs'].items():
+        flat.update(a.pop('sub', {}))
+    schema['attrs'].update(flat)
     cfg = next(c for c in MODEL_MAP.values() if c['model_id'] == model_id)
     schema['key_attr'] = resolve_key_attr(schema['attrs'], cfg['key'])
     cache[model_id] = schema
@@ -153,18 +167,58 @@ def resolve_key_attr(attrs, key_name):
             return aid
     return None
 
+def _strip_annot(s):
+    """去尾部括号注释：'资产价值(万元)'→'资产价值'（循环去嵌套尾注）。"""
+    s = norm_text(s)
+    prev = None
+    while prev != s:
+        prev = s
+        s = re.sub(r'[(（][^()（）]*[)）]$', '', s).strip()
+    return s
+
 def match_field_map(schema, report_headers, mgmt_headers):
-    """按属性中文名自动配 excel 列（norm 后比较）；产出三元组骨架 + 未匹配清单。"""
+    """按属性中文名自动配 excel 列（norm 后比较）。匹配优先级：
+    1) 精确名（structs 子字段名优先于顶层名——excel 列语义即子字段，如 部署数据中心）
+    2) 去尾部括号注释（'板卡数量(个)'→'板卡数量'；仍子字段优先）
+    产出三元组骨架 + 未匹配清单。"""
+    def name_index():
+        sub_idx, top_idx = {}, {}
+        for aid, a in schema['attrs'].items():
+            idx = sub_idx if '.' in aid else top_idx
+            idx.setdefault(norm_text(a['name']), aid)   # 首个胜出，id 排序已定序
+        return sub_idx, top_idx
+    sub_idx, top_idx = name_index()
+    def lookup(h):
+        n = norm_text(h)
+        if n in sub_idx: return sub_idx[n]
+        if n in top_idx: return top_idx[n]
+        b = _strip_annot(h)
+        if b and b in sub_idx: return sub_idx[b]
+        if b and b in top_idx: return top_idx[b]
+        return None
     pairs, used_r, used_m = [], set(), set()
-    for aid, a in sorted(schema['attrs'].items()):
+    # 子字段优先：dotted 属性先配列（同名时 excel 列语义=struct 子字段）
+    ordered = sorted(schema['attrs'].items(),
+                     key=lambda kv: ('.' not in kv[0], kv[0]))
+    for aid, a in ordered:
         if aid in ('_dataSource', '_diffDetail', 'memo'):
             continue  # CUSTOM 继承属性/差异字段不参与列映射
         n = norm_text(a['name'])
-        rc_ = next((h for h in report_headers if norm_text(h) == n), None)
-        mc_ = next((h for h in mgmt_headers if norm_text(h) == n), None)
+        b = _strip_annot(a['name'])
+        def find(headers, used):
+            for cand in (n, b):
+                if not cand: continue
+                hits = [h for h in headers if h not in used and norm_text(h) == cand]
+                if not hits:
+                    hits = [h for h in headers if h not in used and _strip_annot(h) == cand]
+                if hits: return hits[0]
+            return None
+        rc_ = find(report_headers, used_r)
+        mc_ = find(mgmt_headers, used_m)
         if rc_: used_r.add(rc_)
         if mc_: used_m.add(mc_)
         pairs.append((rc_, mc_, aid))
+    # 双侧已配列但配到不同属性时去重（一列只归一个属性）：后配的让位
     uh = [h for h in report_headers if h not in used_r and h not in RULES['skip_columns']]
     uh += [h for h in mgmt_headers if h not in used_m and h not in RULES['skip_columns']]
     ua = [aid for r, m, aid in pairs if r is None and m is None]
@@ -236,6 +290,21 @@ def investigate():
     print('investigate 完成 →', OUT / 'investigate.md')
 
 # ============================== transform ==============================
+def _enum_one(s, attr_id, attr_def, ctx):
+    """单枚举值归一：ENUM_MAP → regex 直通 → regex 前缀匹配（裸值'主机房-网络区'→'01-主机房-网络区'）。"""
+    m = ctx['enums'].get(attr_id, {})
+    if s in m:
+        return m[s]
+    rx = attr_def.get('regex')
+    if rx:
+        if s in rx:
+            return s
+        hits = [v for v in rx if isinstance(v, str) and v != '其它' and v.endswith(s)]
+        if len(hits) == 1:
+            return hits[0]
+    ctx['errors'].append(f'{attr_id}: 枚举值「{s}」不在合法集 {rx} 且 ENUM_MAP 未映射')
+    return s
+
 def clean_value(v, attr_id, attr_def, ctx):
     if v is None:
         return None
@@ -244,28 +313,46 @@ def clean_value(v, attr_id, attr_def, ctx):
     if isinstance(v, float) and v.is_integer():
         v = int(v)
     s = str(v).strip()
-    if s in ctx['invalid'] or s == '':
+    if s in ctx['invalid'] or s == '' or s == '无':
         return None
-    if attr_def.get('type') == 'enum':
-        m = ctx['enums'].get(attr_id, {})
-        if s in m:
-            return m[s]
-        if attr_def.get('regex') and s in attr_def['regex']:
-            return s
-        ctx['errors'].append(f'{attr_id}: 枚举值「{s}」不在合法集 {attr_def.get("regex")} 且 ENUM_MAP 未映射')
-        return s
+    t = attr_def.get('type')
+    if t == 'enum':
+        return _enum_one(s, attr_id, attr_def, ctx)
+    if t == 'enums':
+        parts = [p.strip() for p in re.split(r'[,，;；]', s) if p.strip()]
+        return ','.join(_enum_one(p, attr_id, attr_def, ctx) for p in parts) or None
+    if t == 'float':
+        try:
+            return float(s)
+        except ValueError:
+            pass                                      # 非数值保留原串，import 报错可见
     return s
 
+def _nest_set(out, aid, value):
+    """dotted id 嵌套展开：'a.b' → out[a][b]=value（transform 中间形态，import 前再组装）。"""
+    if '.' in aid:
+        head, rest = aid.split('.', 1)
+        out.setdefault(head, {})
+        if not isinstance(out[head], dict):          # 与顶层属性冲突时 struct 让位
+            return
+        _nest_set(out[head], rest, value)
+    else:
+        if value is not None:
+            out[aid] = value
+        elif aid in out and out[aid] is None:
+            del out[aid]                              # None 污染清理
+
 def normalize_row(raw, pairs, side, ctx):
-    """excel行 → {cmdb属性id: 值}。单边列（该侧为 None）不产出键。"""
+    """excel行 → {cmdb属性id: 值}（dotted id 为嵌套 dict）。单边列（该侧为 None）不产出键。"""
     out = {}
     attrs = ctx.get('_attr', {})                              # {attr_id: 属性定义}
     for rcol, mcol, aid in pairs:
         col = rcol if side == 'report' else mcol
         if col is None:
             continue
-        # 简报笔误修正：按 aid 取单个属性定义传入（而非整个 attrs dict）
-        out[aid] = clean_value(raw.get(col), aid, attrs.get(aid, {'name': '', 'type': 'str'}), ctx)
+        # 按 aid 取单个属性定义传入（而非整个 attrs dict）
+        val = clean_value(raw.get(col), aid, attrs.get(aid, {'name': '', 'type': 'str'}), ctx)
+        _nest_set(out, aid, val)
     return out
 
 def transform(side):
@@ -291,15 +378,25 @@ def transform(side):
     return stats
 
 # ============================== compare ==============================
+def _iter_leaves(d, prefix=''):
+    """嵌套 dict 展平为 [(dotted_path, value)]（仅 dict 递归；list/标量为叶）。"""
+    for k, v in d.items():
+        path = f'{prefix}.{k}' if prefix else k
+        if isinstance(v, dict):
+            yield from _iter_leaves(v, path)
+        else:
+            yield path, v
+
 def merge_model(r_rows, m_rows, key_attr, attr_ids):
     r = {row[key_attr]: row for row in r_rows if row.get(key_attr)}
     m = {row[key_attr]: row for row in m_rows if row.get(key_attr)}
     orphan = [row for row in r_rows + m_rows if not row.get(key_attr)]
     merged, stats = [], {'both_same': 0, 'both_diff': 0, 'report_only': 0, 'mgmt_only': 0}
+    plain_attrs = {a.split('.')[0] for a in attr_ids}       # dotted 归并到顶层容器
     for k in sorted(set(r) | set(m), key=str):
         if k in r and k in m:
             row, diffs = {key_attr: k}, []
-            for a in attr_ids:
+            for a in sorted(plain_attrs):
                 if a == key_attr:
                     continue
                 rv, mv = r[k].get(a), m[k].get(a)
@@ -307,10 +404,18 @@ def merge_model(r_rows, m_rows, key_attr, attr_ids):
                     continue
                 if mv is None:   row[a] = rv
                 elif rv is None: row[a] = mv
-                elif str(rv) == str(mv): row[a] = rv
                 else:
-                    row[a] = rv
-                    diffs.append({'attr': a, 'reportValue': str(rv), 'mgmtValue': str(mv)})
+                    # 双侧都有：逐叶比较（struct 子字段级差异定位）
+                    rl = dict(_iter_leaves(rv, a)) if isinstance(rv, dict) else {a: rv}
+                    ml = dict(_iter_leaves(mv, a)) if isinstance(mv, dict) else {a: mv}
+                    if rl == ml:
+                        row[a] = rv
+                    else:
+                        row[a] = rv                          # 上报优先
+                        for p in sorted(set(rl) | set(ml)):
+                            if str(rl.get(p)) != str(ml.get(p)):
+                                diffs.append({'attr': p, 'reportValue': str(rl.get(p)),
+                                              'mgmtValue': str(ml.get(p))})
             row['_dataSource'] = '双源(有差异)' if diffs else '双源'
             row['_diffDetail'] = diffs
             stats['both_diff' if diffs else 'both_same'] += 1
@@ -356,8 +461,19 @@ def compare():
     print('compare 完成 →', OUT / 'diff-report.md')
 
 # ============================== import ==============================
-def build_import_body(key_attr, rows):
-    datas = [{k: v for k, v in row.items() if v not in (None, '', [])} for row in rows]
+def _assemble(row, structs_attrs):
+    """transform 嵌套 dict → CMDB 实例形态：structs 属性 {a:{b:v}} → [ {b:v} ]（空 struct 剔除）。"""
+    out = {}
+    for k, v in row.items():
+        if isinstance(v, dict):
+            if k in structs_attrs and any(x is not None for x in v.values()):
+                out[k] = [v]                            # CMDB structs = list[dict]
+        else:
+            out[k] = v
+    return out
+
+def build_import_body(key_attr, rows, structs_attrs=()):
+    datas = [{k: v for k, v in _assemble(r, structs_attrs).items() if v not in (None, '', [], {})} for r in rows]
     return {'keys': [key_attr], 'datas': datas}
 
 def run_import(model_id, body_path):
@@ -386,8 +502,10 @@ def import_cmdb(only=None):
             continue
         rows = json.loads(mp_.read_text())
         schema = fetch_schema(mid)
+        structs_attrs = {aid for aid, a in schema['attrs'].items()
+                         if '.' not in aid and a['type'] in ('structs', 'struct')}
         bp = bdir / f"{mid.split('@')[0]}.json"
-        bp.write_text(json.dumps(build_import_body(schema['key_attr'], rows), ensure_ascii=False))
+        bp.write_text(json.dumps(build_import_body(schema['key_attr'], rows, structs_attrs), ensure_ascii=False))
         r = run_import(mid, bp)
         d = r.get('data') or {}
         result[mid] = {'merged': len(rows), 'insert': d.get('insert_count'), 'update': d.get('update_count'),

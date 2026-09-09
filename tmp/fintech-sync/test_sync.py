@@ -49,12 +49,10 @@ def test_match_field_map():
         ['设施标识符', '资产编码（可读性标识编码）'])
     pm = {(r, m): a for r, m, a in pairs}
     assert pm[('设施标识符', '设施标识符')] == 'facilityDescriptor'      # 双侧同名直配
-    # 简报原文为 ('资产编码','资产编码')，与 mgmt 表头（只有「资产编码（可读性标识编码）」）
-    # 及断言4（该列留待人工）矛盾，任何实现无法同时满足——按 plan Task3 Step2 人工回填语义修正
-    assert ('资产编码', None) in pm                                     # 报侧配到，管理侧同义列待人工
+    # 去尾部括号注释匹配：管理侧「资产编码（可读性标识编码）」自动配 assetCode（v2 自动化）
+    assert pm[('资产编码', '资产编码（可读性标识编码）')] == 'assetCode'
     assert ('设备高度(U)', None) in pm                                  # 管理侧无此列→None（后续人工补）
-    # 未匹配列待人工；顺序=实现语义：先上报侧未匹配，后管理侧未匹配
-    assert uh == ['审计列X', '资产编码（可读性标识编码）']
+    assert uh == ['审计列X']                                            # 未匹配列只剩审计列
     # 设施在用状态在两侧 fake 表头均无列→属未匹配属性（真实表头有此列）
     assert ua == ['facilityUseState']
 
@@ -113,9 +111,9 @@ def test_normalize_row_full():
              (None, '设施信息更新日期', 'facilityUpdateDate')]
     raw = {'设施标识符': ' abc ', '管理IP地址': '******', '设施信息更新日期': '2024-01-01'}
     out = sync.normalize_row(raw, pairs, 'report', CTX)
-    assert out == {'facilityDescriptor': 'abc', 'ip': None}    # 脱敏→None；管理独有列报侧不取
+    assert out == {'facilityDescriptor': 'abc'}        # 脱敏→None 且不产出键；管理独有列报侧不取
     out2 = sync.normalize_row(raw, pairs, 'mgmt', CTX)
-    assert out2['ip'] is None and out2['facilityUpdateDate'] == '2024-01-01'
+    assert out2.get('ip') is None and out2['facilityUpdateDate'] == '2024-01-01'
 
 PAIRS = [('设施标识符', '设施标识符', 'fd'), ('管理IP地址', '管理IP地址', 'ip')]
 
@@ -154,6 +152,77 @@ def test_compare_report_table_not_interrupted(monkeypatch, tmp_path):
     tl = [i for i, k in enumerate(kinds) if k == 'T']
     assert all(i < first_b for i in tl)                       # 全部表行在首个 bullet 之前
     assert set(kinds[tl[0]:tl[-1] + 1]) == {'T'}              # 表行区间连续无夹断
+
+def test_match_field_map_struct_sub_field_priority():
+    # structs 子字段与顶层属性同名冲突时，excel 列语义=子字段（部署数据中心→xx_deployment.deployDb）
+    schema = {'attrs': {
+        'facilityDescriptor': {'name': '设施标识符', 'type': 'str', 'regex': None},
+        'deployDb':           {'name': '部署数据中心', 'type': 'str', 'regex': None},   # 顶层同名（模拟）
+        'x_deployment.deployDb': {'name': '部署数据中心', 'type': 'str', 'regex': None}},  # 子字段
+        'key_attr': 'facilityDescriptor'}
+    pairs, uh, _ = sync.match_field_map(schema, ['设施标识符', '部署数据中心'], ['设施标识符'])
+    pm = {(r, m): a for r, m, a in pairs}
+    assert pm[('部署数据中心', None)] == 'x_deployment.deployDb'      # 子字段优先
+
+def test_match_field_map_bare_vs_annotated():
+    # 管理裸名「设备高度」自动配上报「设备高度(U)」的属性（v2 双向去注释）
+    pairs, uh, _ = sync.match_field_map(
+        {'attrs': {'deviceHeight': {'name': '设备高度(U)', 'type': 'str', 'regex': None}},
+         'key_attr': None},
+        ['设备高度(U)'], ['设备高度'])
+    assert pairs == [('设备高度(U)', '设备高度', 'deviceHeight')] and uh == []
+
+def test_clean_value_enum_prefix_match():
+    # 裸值=regex 某合法值的后缀（且唯一、排除「其它」）→前缀归一
+    d = {'type': 'enum', 'name': '', 'regex': ['01-主机房-网络区', '02-主机房-存储区', '99-其它']}
+    assert sync.clean_value('主机房-网络区', 'deployArea', d, {'enums': {}, 'invalid': [], 'errors': []}) == '01-主机房-网络区'
+    assert sync.clean_value('01-主机房-网络区', 'deployArea', d, {'enums': {}, 'invalid': [], 'errors': []}) == '01-主机房-网络区'
+    # 后缀歧义（两个候选）→不猜，记错误
+    ctx = {'enums': {}, 'invalid': [], 'errors': []}
+    d2 = {'type': 'enum', 'name': '', 'regex': ['01-主机房-网络区', '02-别的-网络区', '99-其它']}
+    assert sync.clean_value('网络区', 'deployArea', d2, ctx) == '网络区'
+    assert any('网络区' in e for e in ctx['errors'])
+
+def test_clean_value_enums_multi():
+    d = {'type': 'enums', 'name': '', 'regex': ['00-IPSec', '01-MACSec']}
+    ctx = {'enums': {}, 'invalid': [], 'errors': []}
+    assert sync.clean_value('IPSec, MACSec', 'nsc', d, ctx) == '00-IPSec,01-MACSec'   # 多选拆分逐个归一
+    assert sync.clean_value('00-IPSec', 'nsc', d, ctx) == '00-IPSec'
+
+def test_clean_value_float_and_none_values():
+    assert sync.clean_value('10.5', 'w', {'type': 'float', 'name': ''}, {'enums': {}, 'invalid': [], 'errors': []}) == 10.5
+    assert sync.clean_value('无', 'v', {'type': 'str', 'name': ''}, {'enums': {}, 'invalid': [], 'errors': []}) is None
+
+def test_normalize_row_nested_and_assemble():
+    pairs = [('设施标识符', '设施标识符', 'facilityDescriptor'),
+             ('部署区域', '部署区域', 'x_deployment.deployArea')]
+    ctx = {'enums': {}, 'invalid': [], 'errors': [],
+           '_attr': {'x_deployment.deployArea': {'name': '部署区域', 'type': 'enum',
+                                                 'regex': ['01-主机房-网络区', '99-其它']}}}
+    out = sync.normalize_row({'设施标识符': 'k1', '部署区域': '主机房-网络区'}, pairs, 'report', ctx)
+    assert out == {'facilityDescriptor': 'k1', 'x_deployment': {'deployArea': '01-主机房-网络区'}}
+    # 空 struct 值 → 组装时剔除
+    out2 = sync.normalize_row({'设施标识符': 'k2', '部署区域': '无'}, pairs, 'report', ctx)
+    assembled = sync._assemble(out2, {'x_deployment'})
+    assert assembled == {'facilityDescriptor': 'k2'}
+    # structs 组装为 list[dict]
+    assembled2 = sync._assemble(out, {'x_deployment'})
+    assert assembled2['x_deployment'] == [{'deployArea': '01-主机房-网络区'}]
+
+def test_merge_model_struct_leaf_diff():
+    r = [{'fd': 'a', 'dep': {'area': '01-网络区', 'db': 'D1'}}]
+    m = [{'fd': 'a', 'dep': {'area': '01-网络区', 'db': 'D2'}}]
+    merged, stats, _ = sync.merge_model(r, m, 'fd', ['fd', 'dep'])
+    assert stats['both_diff'] == 1
+    assert merged[0]['_diffDetail'] == [{'attr': 'dep.db', 'reportValue': 'D1', 'mgmtValue': 'D2'}]
+    assert merged[0]['dep'] == {'area': '01-网络区', 'db': 'D1'}      # 上报优先（子字段级）
+
+def test_build_import_body_structs():
+    rows = [{'fd': 'a', 'dep': {'x': '1'}, '_dataSource': '双源', '_diffDetail': []},
+            {'fd': 'b', 'dep': {}, '_diffDetail': [{'attr': 'dep.x', 'reportValue': '1', 'mgmtValue': '2'}]}]
+    body = sync.build_import_body('fd', rows, structs_attrs={'dep'})
+    assert body['datas'][0]['dep'] == [{'x': '1'}]
+    assert 'dep' not in body['datas'][1] and body['datas'][1]['_diffDetail'][0]['attr'] == 'dep.x'
 
 def test_build_import_body():
     rows = [{'fd': 'a', 'ip': '1.1.1.1', '_dataSource': '双源', '_diffDetail': []},
