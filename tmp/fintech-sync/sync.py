@@ -1443,7 +1443,8 @@ def clean_value(v, attr_id, attr_def, ctx):
         return _enum_one(s, attr_id, attr_def, ctx)
     if t == 'enums':
         parts = [p.strip() for p in re.split(r'[,，;；]', s) if p.strip()]
-        return ','.join(_enum_one(p, attr_id, attr_def, ctx) for p in parts) or None
+        vals = [_enum_one(p, attr_id, attr_def, ctx) for p in parts]
+        return vals or None                              # CMDB enums 实例值=list（逗号拼接 str 会被拒）
     if t == 'float':
         try:
             return float(s)
@@ -1570,7 +1571,12 @@ _DATE_RE = re.compile(r'^\d{4}-\d{2}-\d{2}')
 
 def _loose_eq(a, b):
     """宽松等值：str 去 'NN-' 编码前缀与空格后比较（'02-Java'=='Java'、'99-其他'=='其他'）。
-    日期守卫：完整日期形态（YYYY-MM-DD）不剥前缀（否则 2024-01-15/2023-01-15 同剥成 01-15 误等）。"""
+    enums list 值先 join 为 str 再比较。日期守卫：完整日期形态（YYYY-MM-DD）不剥前缀
+    （否则 2024-01-15/2023-01-15 同剥成 01-15 误等）。"""
+    if isinstance(a, list):
+        a = ','.join(str(x) for x in a)
+    if isinstance(b, list):
+        b = ','.join(str(x) for x in b)
     if not isinstance(a, str) or not isinstance(b, str):
         return str(a) == str(b)
     if _DATE_RE.match(a) or _DATE_RE.match(b):
@@ -1611,8 +1617,9 @@ def merge_model(r_rows, m_rows, key_attr, attr_ids):
                     row[a] = rv
                     for p in sorted(set(rl) & set(ml)):            # 只比双侧都有值的叶
                         if not _loose_eq(rl[p], ml[p]):
-                            diffs.append({'attr': p, 'reportValue': str(rl[p]),
-                                          'mgmtValue': str(ml[p])})
+                            _s = lambda v: ','.join(str(x) for x in v) if isinstance(v, list) else str(v)
+                            diffs.append({'attr': p, 'reportValue': _s(rl[p]),
+                                          'mgmtValue': _s(ml[p])})
                 if a in DIFF_EXEMPT_ATTRS:
                     diffs = [d for d in diffs if d['attr'] != a]   # 口径豁免：值取上报，不记差异
             row['_dataSource'] = '双源(有差异)' if diffs else '双源'

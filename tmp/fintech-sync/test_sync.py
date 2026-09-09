@@ -186,8 +186,29 @@ def test_clean_value_enum_prefix_match():
 def test_clean_value_enums_multi():
     d = {'type': 'enums', 'name': '', 'regex': ['00-IPSec', '01-MACSec']}
     ctx = {'enums': {}, 'invalid': [], 'errors': []}
-    assert sync.clean_value('IPSec, MACSec', 'nsc', d, ctx) == '00-IPSec,01-MACSec'   # 多选拆分逐个归一
-    assert sync.clean_value('00-IPSec', 'nsc', d, ctx) == '00-IPSec'
+    assert sync.clean_value('IPSec, MACSec', 'nsc', d, ctx) == ['00-IPSec', '01-MACSec']   # 多值拆分归一为 list
+    assert sync.clean_value('00-IPSec', 'nsc', d, ctx) == ['00-IPSec']                     # 单值也统一 list
+    assert sync.clean_value('00-IPSec,01-MACSec', 'nsc', d, ctx) == ['00-IPSec', '01-MACSec']  # 已归一多值直拆
+
+def test_loose_eq_list_join():
+    # enums list 值比较：join 后走宽松等值
+    assert sync._loose_eq(['00-IPSec', '01-MACSec'], '00-IPSec,01-MACSec')
+    assert sync._loose_eq(['02-Java'], ['Java'])
+    assert not sync._loose_eq(['00-IPSec'], ['01-MACSec'])
+
+def test_merge_model_enums_list_diff_detail():
+    # enums list 差异明细 reportValue/mgmtValue 为 join 后的 str
+    r = [{'fd': 'a', 'nsc': ['00-IPSec', '01-MACSec']}]
+    m = [{'fd': 'a', 'nsc': ['00-IPSec']}]
+    merged, stats, _ = sync.merge_model(r, m, 'fd', ['fd', 'nsc'])
+    assert stats['both_diff'] == 1
+    assert merged[0]['_diffDetail'] == [{'attr': 'nsc', 'reportValue': '00-IPSec,01-MACSec', 'mgmtValue': '00-IPSec'}]
+    assert merged[0]['nsc'] == ['00-IPSec', '01-MACSec']       # 上报优先，保持 list 形态
+
+def test_build_import_body_enums_list_passthrough():
+    rows = [{'fd': 'a', 'nsc': ['00-IPSec', '01-MACSec'], '_dataSource': '双源', '_diffDetail': []}]
+    body = sync.build_import_body('fd', rows)
+    assert body['datas'][0]['nsc'] == ['00-IPSec', '01-MACSec']    # list 透传不丢形态
 
 def test_clean_value_float_and_none_values():
     assert sync.clean_value('10.5', 'w', {'type': 'float', 'name': ''}, {'enums': {}, 'invalid': [], 'errors': []}) == 10.5
