@@ -120,5 +120,118 @@ def api_cli(resource, verb, *args, body=None, body_file=None, yes=False):
     r = subprocess.run(cmd, capture_output=True, text=True, cwd='/workspace')
     return r.returncode, r.stdout, r.stderr
 
+# ============================== investigate ==============================
+SCHEMA_CACHE = OUT / 'schema-cache.json'
+
+def _attr_brief(a):
+    v = a.get('value') or {}
+    return {'name': a.get('name'), 'type': v.get('type'), 'regex': v.get('regex') or None}
+
+def fetch_schema(model_id, refresh=False):
+    """detail → {attrs:{id:{name,type,regex}}, key_attr}；缓存到 out/schema-cache.json"""
+    cache = {}
+    if SCHEMA_CACHE.exists() and not refresh:
+        cache = json.loads(SCHEMA_CACHE.read_text())
+    if model_id in cache and not refresh:
+        return cache[model_id]
+    rc, out, err = api_cli('object_model', 'detail', model_id)
+    if rc != 0:
+        raise RuntimeError(f'detail {model_id} 失败: {err.strip()[:200]}')
+    data = json.loads(out)['data']
+    schema = {'attrs': {a['id']: _attr_brief(a) for a in data.get('attrList', [])},
+              'key_attr': None}
+    cfg = next(c for c in MODEL_MAP.values() if c['model_id'] == model_id)
+    schema['key_attr'] = resolve_key_attr(schema['attrs'], cfg['key'])
+    cache[model_id] = schema
+    OUT.mkdir(exist_ok=True)
+    SCHEMA_CACHE.write_text(json.dumps(cache, ensure_ascii=False, indent=1))
+    return schema
+
+def resolve_key_attr(attrs, key_name):
+    for aid, a in attrs.items():
+        if norm_text(a['name']) == norm_text(key_name):
+            return aid
+    return None
+
+def match_field_map(schema, report_headers, mgmt_headers):
+    """按属性中文名自动配 excel 列（norm 后比较）；产出三元组骨架 + 未匹配清单。"""
+    pairs, used_r, used_m = [], set(), set()
+    for aid, a in sorted(schema['attrs'].items()):
+        if aid in ('_dataSource', '_diffDetail', 'memo'):
+            continue  # CUSTOM 继承属性/差异字段不参与列映射
+        n = norm_text(a['name'])
+        rc_ = next((h for h in report_headers if norm_text(h) == n), None)
+        mc_ = next((h for h in mgmt_headers if norm_text(h) == n), None)
+        if rc_: used_r.add(rc_)
+        if mc_: used_m.add(mc_)
+        pairs.append((rc_, mc_, aid))
+    uh = [h for h in report_headers if h not in used_r and h not in RULES['skip_columns']]
+    uh += [h for h in mgmt_headers if h not in used_m and h not in RULES['skip_columns']]
+    ua = [aid for r, m, aid in pairs if r is None and m is None]
+    return pairs, uh, ua
+
+def build_custom_attrs_body(detail):
+    """CUSTOM 缺 _dataSource/_diffDetail 时产出 import body；已全有→None。"""
+    ids = {a['id'] for a in detail.get('attrList', [])}
+    if {'_dataSource', '_diffDetail'} <= ids:
+        return None
+    attrs = list(detail['attrList'])
+    if '_dataSource' not in ids:
+        attrs.append({'id': '_dataSource', 'name': '数据来源',
+                      'value': {'type': 'enum', 'regex': ['上报', '管理', '双源', '双源(有差异)'],
+                                'default': None, 'mode': 'default'}})
+    if '_diffDetail' not in ids:
+        attrs.append({'id': '_diffDetail', 'name': '差异明细',
+                      'value': {'type': 'struct', 'default': None, 'mode': 'default',
+                                'struct_define': [
+                                    {'id': 'attr', 'name': '属性ID', 'type': 'str'},
+                                    {'id': 'reportValue', 'name': '上报值', 'type': 'str'},
+                                    {'id': 'mgmtValue', 'name': '管理值', 'type': 'str'}]}})
+    obj = {k: v for k, v in detail.items() if k != 'attrList'}
+    obj['attrList'] = attrs
+    if 'parentObjectIds' in obj:
+        obj.pop('parentObjectId', None)   # 已弃用字段不回写
+    return {'object_list': [obj]}
+
+def ensure_custom_attrs():
+    rc, out, err = api_cli('object_model', 'detail', 'CUSTOM@FINTECHDATA')
+    body = build_custom_attrs_body(json.loads(out)['data'])
+    if body is None:
+        return False
+    p = OUT / 'custom-attrs-import.json'
+    p.write_text(json.dumps(body, ensure_ascii=False))
+    rc2, out2, err2 = api_cli('object_model', 'import', body_file=p, yes=True)
+    if rc2 != 0:
+        raise RuntimeError(f'补建 CUSTOM 属性失败: {err2.strip()[:300]}')
+    return True
+
+def investigate():
+    OUT.mkdir(exist_ok=True)
+    lines, skel = ['# 模型 schema 调研报告', '', '| 模型 | 属性数 | key属性 | 上报表头 | 管理表头 | 未匹配列 | 未匹配属性 |',
+                   '|---|---|---|---|---|---|---|'], {}
+    key_missing = []
+    for main, cfg in sorted(MODEL_MAP.items()):
+        schema = fetch_schema(cfg['model_id'])
+        if not schema['key_attr']:
+            key_missing.append(f"{cfg['model_id']}: 找不到名为「{cfg['key']}」的属性")
+        rp, mp = find_file('report', main), find_file('mgmt', main)
+        rh = list(read_excel_rows(rp)[0].keys()) if rp else []
+        mh = list(read_excel_rows(mp)[0].keys()) if mp else []
+        pairs, uh, ua = match_field_map(schema, rh, mh)
+        skel[cfg['model_id']] = {'pairs': pairs, 'report_only_cols': [r for r, m, a in pairs if r and not m],
+                                 'mgmt_only_cols': [m for r, m, a in pairs if m and not r]}
+        lines.append(f"| {cfg['model_id']} | {len(schema['attrs'])} | {schema['key_attr']} "
+                     f"| {len(rh)} | {len(mh)} | {uh} | {ua} |")
+    created = ensure_custom_attrs()
+    lines += ['', f'## CUSTOM 属性', f'_dataSource/_diffDetail: {"本次补建" if created else "已存在"}']
+    if key_missing:
+        lines += ['', '## ⚠️ key 属性缺失'] + key_missing
+    (OUT / 'investigate.md').write_text('\n'.join(lines))
+    (OUT / 'config-skeleton.py').write_text(
+        '# FIELD_MAP 骨架（investigate 自动生成，人工核对后整体粘贴回 sync.py 的 FIELD_MAP）\n'
+        'FIELD_MAP = ' + json.dumps({m: [list(p) for p in v['pairs']] for m, v in skel.items()},
+                                    ensure_ascii=False, indent=1))
+    print('investigate 完成 →', OUT / 'investigate.md')
+
 if __name__ == '__main__':
     print('use --stage investigate|transform|compare|import')
