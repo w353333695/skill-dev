@@ -1,0 +1,326 @@
+{
+ "onlineBehavior@FINTECHDATA": {
+  "merged": 13,
+  "insert": 0,
+  "update": 13,
+  "failed": 0,
+  "fail_detail": [],
+  "after_total": 13,
+  "error": ""
+ },
+ "uninterrupted@FINTECHDATA": {
+  "merged": 44,
+  "insert": 0,
+  "update": 44,
+  "failed": 0,
+  "fail_detail": [],
+  "after_total": 44,
+  "error": ""
+ },
+ "centralAirCondition@FINTECHDATA": {
+  "merged": 2,
+  "insert": 0,
+  "update": 2,
+  "failed": 0,
+  "fail_detail": [],
+  "after_total": 2,
+  "error": ""
+ },
+ "switches@FINTECHDATA": {
+  "merged": 407,
+  "insert": 0,
+  "update": 407,
+  "failed": 0,
+  "fail_detail": [],
+  "after_total": 407,
+  "error": ""
+ },
+ "lowVoltage@FINTECHDATA": {
+  "merged": 4,
+  "insert": 0,
+  "update": 4,
+  "failed": 0,
+  "fail_detail": [],
+  "after_total": 4,
+  "error": ""
+ },
+ "powerSupplyRelation@FINTECHDATA": {
+  "merged": 630,
+  "insert": 0,
+  "update": 630,
+  "failed": 0,
+  "fail_detail": [],
+  "after_total": 630,
+  "error": ""
+ },
+ "fiberSwitch@FINTECHDATA": {
+  "merged": 4,
+  "insert": 0,
+  "update": 4,
+  "failed": 0,
+  "fail_detail": [],
+  "after_total": 4,
+  "error": ""
+ },
+ "idsIps@FINTECHDATA": {
+  "merged": 19,
+  "insert": 0,
+  "update": 19,
+  "failed": 0,
+  "fail_detail": [],
+  "after_total": 19,
+  "error": ""
+ },
+ "humidification@FINTECHDATA": {
+  "merged": 1,
+  "insert": 0,
+  "update": 1,
+  "failed": 0,
+  "fail_detail": [],
+  "after_total": 1,
+  "error": ""
+ },
+ "environmentalMonitoring@FINTECHDATA": {
+  "merged": 18,
+  "insert": 0,
+  "update": 18,
+  "failed": 0,
+  "fail_detail": [],
+  "after_total": 18,
+  "error": ""
+ },
+ "generator@FINTECHDATA": {
+  "merged": 19,
+  "insert": 0,
+  "update": 19,
+  "failed": 0,
+  "fail_detail": [],
+  "after_total": 19,
+  "error": ""
+ },
+ "transformer@FINTECHDATA": {
+  "merged": 2,
+  "insert": 0,
+  "update": 2,
+  "failed": 0,
+  "fail_detail": [],
+  "after_total": 2,
+  "error": ""
+ },
+ "basedSoftware@FINTECHDATA": {
+  "merged": 95,
+  "insert": 0,
+  "update": 95,
+  "failed": 0,
+  "fail_detail": [],
+  "after_total": 95,
+  "error": ""
+ },
+ "application@FINTECHDATA": {
+  "merged": 43,
+  "insert": 0,
+  "update": 43,
+  "failed": 0,
+  "fail_detail": [],
+  "after_total": 43,
+  "error": ""
+ },
+ "applicationRelation@FINTECHDATA": {
+  "merged": 44,
+  "insert": 0,
+  "update": 44,
+  "failed": 0,
+  "fail_detail": [],
+  "after_total": 44,
+  "error": ""
+ },
+ "applicationSoftRelation@FINTECHDATA": {
+  "merged": 43,
+  "insert": 0,
+  "update": 43,
+  "failed": 0,
+  "fail_detail": [],
+  "after_total": 43,
+  "error": ""
+ },
+ "dataCenter@FINTECHDATA": {
+  "merged": 19,
+  "insert": 0,
+  "update": 19,
+  "failed": 0,
+  "fail_detail": [],
+  "after_total": 19,
+  "error": ""
+ },
+ "dataCenterSpacing@FINTECHDATA": {
+  "merged": 1,
+  "insert": 0,
+  "update": 1,
+  "failed": 0,
+  "fail_detail": [],
+  "after_total": 1,
+  "error": ""
+ },
+ "freshAir@FINTECHDATA": {
+  "merged": 21,
+  "insert": 0,
+  "update": 21,
+  "failed": 0,
+  "fail_detail": [],
+  "after_total": 21,
+  "error": ""
+ },
+ "commonAirCondition@FINTECHDATA": {
+  "merged": 1,
+  "insert": 0,
+  "update": 1,
+  "failed": 0,
+  "fail_detail": [],
+  "after_total": 1,
+  "error": ""
+ },
+ "rackServer@FINTECHDATA": {
+  "merged": 157,
+  "insert": 0,
+  "update": 157,
+  "failed": 0,
+  "fail_detail": [],
+  "after_total": 157,
+  "error": ""
+ },
+ "commonCabinet@FINTECHDATA": {
+  "merged": 459,
+  "insert": 0,
+  "update": 459,
+  "failed": 0,
+  "fail_detail": [],
+  "after_total": 459,
+  "error": ""
+ },
+ "wdm@FINTECHDATA": {
+  "merged": 2,
+  "insert": 0,
+  "update": 2,
+  "failed": 0,
+  "fail_detail": [],
+  "after_total": 2,
+  "error": ""
+ },
+ "fireProtection@FINTECHDATA": {
+  "merged": 49,
+  "insert": 0,
+  "update": 49,
+  "failed": 0,
+  "fail_detail": [],
+  "after_total": 49,
+  "error": ""
+ },
+ "precisionAirCondition@FINTECHDATA": {
+  "merged": 43,
+  "insert": 0,
+  "update": 43,
+  "failed": 0,
+  "fail_detail": [],
+  "after_total": 43,
+  "error": ""
+ },
+ "precisionPower@FINTECHDATA": {
+  "merged": 1,
+  "insert": 0,
+  "update": 1,
+  "failed": 0,
+  "fail_detail": [],
+  "after_total": 1,
+  "error": ""
+ },
+ "networkLine@FINTECHDATA": {
+  "merged": 269,
+  "insert": 0,
+  "update": 269,
+  "failed": 0,
+  "fail_detail": [],
+  "after_total": 269,
+  "error": ""
+ },
+ "networkRelation@FINTECHDATA": {
+  "merged": 496,
+  "insert": 0,
+  "update": 496,
+  "failed": 0,
+  "fail_detail": [],
+  "after_total": 496,
+  "error": ""
+ },
+ "virtualMachine@FINTECHDATA": {
+  "merged": 197,
+  "insert": 0,
+  "update": 197,
+  "failed": 0,
+  "fail_detail": [],
+  "after_total": 197,
+  "error": ""
+ },
+ "videoMonitoring@FINTECHDATA": {
+  "merged": 19,
+  "insert": 0,
+  "update": 19,
+  "failed": 0,
+  "fail_detail": [],
+  "after_total": 19,
+  "error": ""
+ },
+ "router@FINTECHDATA": {
+  "merged": 41,
+  "insert": 0,
+  "update": 41,
+  "failed": 0,
+  "fail_detail": [],
+  "after_total": 41,
+  "error": ""
+ },
+ "softwareRelation@FINTECHDATA": {
+  "merged": 90,
+  "insert": 0,
+  "update": 90,
+  "failed": 0,
+  "fail_detail": [],
+  "after_total": 90,
+  "error": ""
+ },
+ "opsAudit@FINTECHDATA": {
+  "merged": 2,
+  "insert": 0,
+  "update": 2,
+  "failed": 0,
+  "fail_detail": [],
+  "after_total": 2,
+  "error": ""
+ },
+ "entranceGuard@FINTECHDATA": {
+  "merged": 20,
+  "insert": 0,
+  "update": 20,
+  "failed": 0,
+  "fail_detail": [],
+  "after_total": 20,
+  "error": ""
+ },
+ "firewall@FINTECHDATA": {
+  "merged": 36,
+  "insert": 0,
+  "update": 36,
+  "failed": 0,
+  "fail_detail": [],
+  "after_total": 36,
+  "error": ""
+ },
+ "highVoltage@FINTECHDATA": {
+  "merged": 3,
+  "insert": 0,
+  "update": 3,
+  "failed": 0,
+  "fail_detail": [],
+  "after_total": 3,
+  "error": ""
+ }
+}

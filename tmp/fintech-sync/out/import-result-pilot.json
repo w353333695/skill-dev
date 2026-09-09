@@ -1,0 +1,11 @@
+{
+ "switches@FINTECHDATA": {
+  "merged": 407,
+  "insert": 2,
+  "update": 405,
+  "failed": 0,
+  "fail_detail": [],
+  "after_total": 407,
+  "error": ""
+ }
+}
