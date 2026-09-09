@@ -1008,8 +1008,7 @@ FIELD_MAP = {
         (None, "软件标识符", "SoftwareDescriptor"),
         ("服务器类型标识", "服务器类型标识", "applicationServerType"),
         ("分类标识符", "分类标识符", "facilityCategory"),
-        (None, None, "facilityOwnershipAgency"),
-        ("归属机构", "归属机构", "facilityOwnershipAgencyTMP"),
+        ("归属机构", None, "facilityOwnershipAgency"),   # TMP enum(预置吉林银行枚举)与河南数据不兼容，弃映射
         ("关系标识符", "关系标识符", "relationalIdentifier"),
     ],
     'opsAudit@FINTECHDATA': [
@@ -1175,9 +1174,19 @@ ENUM_MAP = {
     'facilityUseState': {'设施在用': '00-设施在用', '设施已停用': '01-设施已停用',
                          '设施专用于开发或测试': '02-设施专用于开发或测试',
                          '设施已拆除或报废': '03-设施已拆除或报废', '备用设施': '04-备用设施', '其它': '99-其它'},
+    # bool 型 enum（regex=['True','False']）的 excel 形态归一
     'supportIpv6':      {'是': 'True', '否': 'False', '1-True': 'True', '0-False': 'False'},
     'wirelessFunction': {'是': 'True', '否': 'False', '1-True': 'True', '0-False': 'False'},
+    'bypass':           {'是': 'True', '否': 'False', '1-True': 'True', '0-False': 'False'},
+    'bypassFunction':   {'是': 'True', '否': 'False', '1-True': 'True', '0-False': 'False'},
+    'emergencyPlan':    {'是': 'True', '否': 'False', '1-True': 'True', '0-False': 'False'},
+    'internetSever':    {'是': 'True', '否': 'False', '1-True': 'True', '0-False': 'False'},
+    'sellingLicense':   {'是': 'True', '否': 'False', '1-True': 'True', '0-False': 'False'},
+    'supportDistributed': {'是': 'True', '否': 'False', '1-True': 'True', '0-False': 'False'},
     'brandLand':        {'国内': '00-国内', '国外': '01-国外', '其它': '99-其它'},
+    # 后缀歧义（多个 regex 值同后缀），显式指定
+    'performanceOfFreshAirFilter': {'中效过滤器': '01-中效过滤器'},
+    'idsIps_dataSave.dataLocation': {'服务器存储': '01-服务器存储'},
 }
 
 RULES = {
@@ -1403,7 +1412,7 @@ def investigate():
 
 # ============================== transform ==============================
 def _enum_one(s, attr_id, attr_def, ctx):
-    """单枚举值归一：ENUM_MAP → regex 直通 → regex 前缀匹配（裸值'主机房-网络区'→'01-主机房-网络区'）。"""
+    """单枚举值归一：ENUM_MAP → regex 直通 → regex 后缀匹配（去空格；裸值'主机房-网络区'→'01-主机房-网络区'）。"""
     m = ctx['enums'].get(attr_id, {})
     if s in m:
         return m[s]
@@ -1411,7 +1420,9 @@ def _enum_one(s, attr_id, attr_def, ctx):
     if rx:
         if s in rx:
             return s
-        hits = [v for v in rx if isinstance(v, str) and v != '其它' and v.endswith(s)]
+        squeeze = lambda t: re.sub(r'\s+', '', t)
+        hits = [v for v in rx if isinstance(v, str) and v != '其它'
+                and (v.endswith(s) or squeeze(v).endswith(squeeze(s)))]
         if len(hits) == 1:
             return hits[0]
     ctx['errors'].append(f'{attr_id}: 枚举值「{s}」不在合法集 {rx} 且 ENUM_MAP 未映射')
@@ -1467,20 +1478,79 @@ def normalize_row(raw, pairs, side, ctx):
         _nest_set(out, aid, val)
     return out
 
+def build_resolve_tables():
+    """mgmt 侧编码→语义值 反解表（消除编码体系假差异）：
+    - hex2name: 32位实例 hexID → 设施名称（关系端点/宿主机等引用）
+    - cat2code: 分类中文短名 → 人行分类编码（facilityCategory 编码统一）
+    - org2name: 机构 hex → 机构中文名（facilityOwnershipAgency）
+    report 侧编码为准；反解后仍不同源（如 郑州中支 vs 河南省分行）属真口径差异，保留。"""
+    hex2name, org2name, cat_code = {}, {}, {}
+    mgmt_cat2code = {}
+    for main in MODEL_MAP:                               # report 分类编码表
+        rp = find_file('report', main)
+        if rp:
+            rows = read_excel_rows(rp)
+            v = rows[0].get('设施分类标识符') or rows[0].get('分类标识符') or rows[0].get('软件分类标识符')
+            if v: cat_code[main] = str(v).strip()
+    for main in MODEL_MAP:
+        mp = find_file('mgmt', main)
+        if not mp:
+            continue
+        for r in read_excel_rows(mp):
+            k, name = r.get('设施标识符'), r.get('设施名称')
+            if k and name:
+                hex2name[str(k).strip()] = str(name).strip()
+            h, n = r.get('设施归属机构'), r.get('设施归属机构名称')
+            if h and n:
+                org2name[str(h).strip()] = str(n).strip()
+            cv = r.get('设施分类标识符') or r.get('分类标识符')
+            if cv:
+                mgmt_cat2code.setdefault(str(cv).strip(), cat_code.get(main))
+    # 基础软件分类：mgmt 中文细分名 = report 分类路径末级 → 编码
+    bs = find_file('report', '基础软件')
+    if bs:
+        for r in read_excel_rows(bs):
+            c, p = r.get('软件分类标识符'), r.get('基础软件分类')
+            if c and p:
+                mgmt_cat2code.setdefault(str(p).strip().split('-')[-1], str(c).strip())
+    return hex2name, mgmt_cat2code, org2name
+
+RESOLVE_SKIP_COLS = {'设施标识符', '关系标识符', '软件标识符', '应用系统标识符'}   # 键列不反解（否则两侧键错位）
+RESOLVE_CAT_COLS = {'设施分类标识符', '分类标识符', '软件分类标识符'}   # 分类反解仅限分类列（防自由文本误伤，如备注恰=分类短名）
+
+def resolve_refs(row, hex2name, cat2code, org2name):
+    """mgmt 行值反解：完整匹配索引键才替换。hex 引用（任意列）/分类中文（仅分类列）/机构 hex（任意列）。键列跳过。"""
+    out = {}
+    for k, v in row.items():
+        if isinstance(v, str) and k not in RESOLVE_SKIP_COLS:
+            s = v.strip()
+            if s in hex2name:              out[k] = hex2name[s]
+            elif k in RESOLVE_CAT_COLS and s in cat2code:
+                out[k] = cat2code[s]
+            elif s in org2name:            out[k] = org2name[s]
+            else:                          out[k] = v
+        else:
+            out[k] = v
+    return out
+
 def transform(side):
     assert FIELD_MAP, 'FIELD_MAP 为空：先跑 investigate 并把 out/config-skeleton.py 核对后粘回'
     outdir = OUT / 'transformed' / side
     outdir.mkdir(parents=True, exist_ok=True)
     stats, all_errors = {}, []
+    resolver = (lambda raw: raw) if side == 'report' else None
     for main, cfg in sorted(MODEL_MAP.items()):
         p = find_file(side, main)
         if p is None:
             continue                                    # 该侧无此文件（单边模型）
+        if side == 'mgmt' and resolver is None:
+            tables = build_resolve_tables()             # mgmt 首模型时构建一次
+            resolver = lambda raw, t=tables: resolve_refs(raw, *t)
         schema = fetch_schema(cfg['model_id'])
         rows = read_excel_rows(p)
         ctx = {'enums': ENUM_MAP, 'invalid': RULES['invalid_values'],
                'errors': [], '_attr': schema['attrs']}
-        unified = [normalize_row(r, FIELD_MAP[cfg['model_id']], side, ctx) for r in rows]
+        unified = [normalize_row(resolver(r), FIELD_MAP[cfg['model_id']], side, ctx) for r in rows]
         (outdir / f"{cfg['model_id'].split('@')[0]}.json").write_text(
             json.dumps(unified, ensure_ascii=False, indent=1))
         stats[cfg['model_id']] = {'rows': len(unified), 'enum_errors': len(ctx['errors'])}
@@ -1490,6 +1560,19 @@ def transform(side):
     return stats
 
 # ============================== compare ==============================
+DIFF_EXEMPT_ATTRS = {'facilityOwnershipAgency', 'softwareOwnershipAgency', 'softwareCategory'}
+# 系统性口径/编码体系差异豁免逐行比较（值仍取上报侧写入）：
+# - facilityOwnershipAgency/softwareOwnershipAgency: 上报=本级机构(郑州中支) vs 管理=上级机构(河南省分行)，全员同模式口径差
+# - softwareCategory: basedSoftware 已反解（路径末级对照）；application 侧 mgmt 中文细分名无编码对照表（仅 1 个编码 YYGJGXL000）
+# 豁免避免 3000+ 行全员"双源(有差异)"淹没真实数据差异。
+
+def _loose_eq(a, b):
+    """宽松等值：str 去 'NN-' 编码前缀与空格后比较（'02-Java'=='Java'、'99-其他'=='其他'）。"""
+    if not isinstance(a, str) or not isinstance(b, str):
+        return str(a) == str(b)
+    strip = lambda t: re.sub(r'^\d+-', '', t).replace(' ', '')
+    return strip(a) == strip(b)
+
 def _iter_leaves(d, prefix=''):
     """嵌套 dict 展平为 [(dotted_path, value)]（仅 dict 递归；list/标量为叶）。"""
     for k, v in d.items():
@@ -1514,20 +1597,19 @@ def merge_model(r_rows, m_rows, key_attr, attr_ids):
                 rv, mv = r[k].get(a), m[k].get(a)
                 if rv is None and mv is None:
                     continue
-                if mv is None:   row[a] = rv
-                elif rv is None: row[a] = mv
+                if mv is None or mv == {}:   row[a] = rv
+                elif rv is None or rv == {}: row[a] = mv
                 else:
-                    # 双侧都有：逐叶比较（struct 子字段级差异定位）
+                    # 双侧都有：逐叶比较（struct 子字段级差异定位；单侧缺叶不记差异）
                     rl = dict(_iter_leaves(rv, a)) if isinstance(rv, dict) else {a: rv}
                     ml = dict(_iter_leaves(mv, a)) if isinstance(mv, dict) else {a: mv}
-                    if rl == ml:
-                        row[a] = rv
-                    else:
-                        row[a] = rv                          # 上报优先
-                        for p in sorted(set(rl) | set(ml)):
-                            if str(rl.get(p)) != str(ml.get(p)):
-                                diffs.append({'attr': p, 'reportValue': str(rl.get(p)),
-                                              'mgmtValue': str(ml.get(p))})
+                    row[a] = rv
+                    for p in sorted(set(rl) & set(ml)):            # 只比双侧都有值的叶
+                        if not _loose_eq(rl[p], ml[p]):
+                            diffs.append({'attr': p, 'reportValue': str(rl[p]),
+                                          'mgmtValue': str(ml[p])})
+                if a in DIFF_EXEMPT_ATTRS:
+                    diffs = [d for d in diffs if d['attr'] != a]   # 口径豁免：值取上报，不记差异
             row['_dataSource'] = '双源(有差异)' if diffs else '双源'
             row['_diffDetail'] = diffs
             stats['both_diff' if diffs else 'both_same'] += 1
