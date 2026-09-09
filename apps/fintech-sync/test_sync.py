@@ -1,4 +1,4 @@
-# tmp/fintech-sync/test_sync.py
+# apps/fintech-sync/test_sync.py
 import json
 import sys
 from pathlib import Path

@@ -1204,7 +1204,7 @@ ORG_CODE_MAP = {
 
 RUN_SH     = '/workspace/.claude/skills/api-orchestrator/scripts/run.sh'
 CMDB_SPEC  = '/workspace/.api-orchestrator/platforms/easyops/easyops-cmdb.yaml'
-OUT        = Path('/workspace/tmp/fintech-sync/out')
+OUT        = Path(__file__).resolve().parent / 'out'
 
 # ============================== 基础层 ==============================
 def norm_text(s):
