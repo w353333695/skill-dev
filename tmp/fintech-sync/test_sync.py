@@ -154,3 +154,24 @@ def test_compare_report_table_not_interrupted(monkeypatch, tmp_path):
     tl = [i for i, k in enumerate(kinds) if k == 'T']
     assert all(i < first_b for i in tl)                       # 全部表行在首个 bullet 之前
     assert set(kinds[tl[0]:tl[-1] + 1]) == {'T'}              # 表行区间连续无夹断
+
+def test_build_import_body():
+    rows = [{'fd': 'a', 'ip': '1.1.1.1', '_dataSource': '双源', '_diffDetail': []},
+            {'fd': 'b', 'ip': None, '_dataSource': '上报', '_diffDetail':
+             [{'attr': 'ip', 'reportValue': 'x', 'mgmtValue': '******'}]}]
+    body = sync.build_import_body('fd', rows)
+    assert body['keys'] == ['fd']
+    assert body['datas'][0] == {'fd': 'a', 'ip': '1.1.1.1', '_dataSource': '双源'}   # None/空剔除
+    assert body['datas'][1]['_diffDetail'][0]['attr'] == 'ip'
+
+def test_run_import_parses(monkeypatch):
+    fake = {'code': 0, 'data': {'insert_count': 10, 'update_count': 5, 'failed_count': 0, 'data': []}}
+    monkeypatch.setattr(sync, 'api_cli', lambda *a, **k: (0, json.dumps(fake), ''))
+    r = sync.run_import('x@FINTECHDATA', '/dev/null')
+    assert r['data']['insert_count'] == 10
+
+def test_search_total(monkeypatch):
+    monkeypatch.setattr(sync, 'api_cli', lambda *a, **k: (0, '', '{"_meta":{"total":407}}'))
+    assert sync.search_total('x@FINTECHDATA') == 407
+    monkeypatch.setattr(sync, 'api_cli', lambda *a, **k: (0, '', ''))   # exit0+空=0
+    assert sync.search_total('x@FINTECHDATA') == 0

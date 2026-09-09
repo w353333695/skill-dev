@@ -354,5 +354,53 @@ def compare():
     (OUT / 'diff-report.md').write_text('\n'.join(lines))
     print('compare 完成 →', OUT / 'diff-report.md')
 
+# ============================== import ==============================
+def build_import_body(key_attr, rows):
+    datas = [{k: v for k, v in row.items() if v not in (None, '', [])} for row in rows]
+    return {'keys': [key_attr], 'datas': datas}
+
+def run_import(model_id, body_path):
+    rc, out, err = api_cli('object_instance', 'import', model_id, body_file=body_path, yes=True)
+    if rc != 0:
+        return {'code': -1, 'error': err.strip()[:300]}
+    return json.loads(out)
+
+def search_total(model_id):
+    rc, out, err = api_cli('object_instance', 'search', model_id,
+                           body='{"fields":["instanceId"],"page":1,"page_size":1,"ignore_missing_field_error":true}')
+    m = re.search(r'"total":(\d+)', err)
+    return int(m.group(1)) if m else 0
+
+def import_cmdb(only=None):
+    """only=模型id 则只写该模型（试点）；None 全量。body 落盘留审计。"""
+    bdir = OUT / 'import-bodies'
+    bdir.mkdir(parents=True, exist_ok=True)
+    result = {}
+    for main, cfg in sorted(MODEL_MAP.items()):
+        mid = cfg['model_id']
+        if only and mid != only:
+            continue
+        mp_ = OUT / 'merged' / f"{mid.split('@')[0]}.json"
+        if not mp_.exists():
+            continue
+        rows = json.loads(mp_.read_text())
+        schema = fetch_schema(mid)
+        bp = bdir / f"{mid.split('@')[0]}.json"
+        bp.write_text(json.dumps(build_import_body(schema['key_attr'], rows), ensure_ascii=False))
+        r = run_import(mid, bp)
+        d = r.get('data') or {}
+        result[mid] = {'merged': len(rows), 'insert': d.get('insert_count'), 'update': d.get('update_count'),
+                       'failed': d.get('failed_count'), 'fail_detail': (d.get('data') or [])[:10],
+                       'after_total': search_total(mid), 'error': r.get('error')}
+        print(mid, result[mid])
+    (OUT / 'import-result.json').write_text(json.dumps(result, ensure_ascii=False, indent=1))
+    return result
+
 if __name__ == '__main__':
-    print('use --stage investigate|transform|compare|import')
+    stage = sys.argv[sys.argv.index('--stage') + 1] if '--stage' in sys.argv else None
+    only = sys.argv[sys.argv.index('--only') + 1] if '--only' in sys.argv else None
+    if stage == 'investigate': investigate()
+    elif stage == 'transform': transform('report'); transform('mgmt')
+    elif stage == 'compare':   compare()
+    elif stage == 'import':    import_cmdb(only=only)
+    else: print('usage: sync.py --stage investigate|transform|compare|import [--only <model_id>]')
