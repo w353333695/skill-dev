@@ -235,5 +235,60 @@ def investigate():
                                     ensure_ascii=False, indent=1))
     print('investigate 完成 →', OUT / 'investigate.md')
 
+# ============================== transform ==============================
+def clean_value(v, attr_id, attr_def, ctx):
+    if v is None:
+        return None
+    if isinstance(v, (datetime, date)):
+        return v.strftime('%Y-%m-%d')
+    if isinstance(v, float) and v.is_integer():
+        v = int(v)
+    s = str(v).strip()
+    if s in ctx['invalid'] or s == '':
+        return None
+    if attr_def.get('type') == 'enum':
+        m = ctx['enums'].get(attr_id, {})
+        if s in m:
+            return m[s]
+        if attr_def.get('regex') and s in attr_def['regex']:
+            return s
+        ctx['errors'].append(f'{attr_id}: 枚举值「{s}」不在合法集 {attr_def.get("regex")} 且 ENUM_MAP 未映射')
+        return s
+    return s
+
+def normalize_row(raw, pairs, side, ctx):
+    """excel行 → {cmdb属性id: 值}。单边列（该侧为 None）不产出键。"""
+    out = {}
+    attrs = ctx.get('_attr', {})                              # {attr_id: 属性定义}
+    for rcol, mcol, aid in pairs:
+        col = rcol if side == 'report' else mcol
+        if col is None:
+            continue
+        # 简报笔误修正：按 aid 取单个属性定义传入（而非整个 attrs dict）
+        out[aid] = clean_value(raw.get(col), aid, attrs.get(aid, {'name': '', 'type': 'str'}), ctx)
+    return out
+
+def transform(side):
+    assert FIELD_MAP, 'FIELD_MAP 为空：先跑 investigate 并把 out/config-skeleton.py 核对后粘回'
+    outdir = OUT / 'transformed' / side
+    outdir.mkdir(parents=True, exist_ok=True)
+    stats, all_errors = {}, []
+    for main, cfg in sorted(MODEL_MAP.items()):
+        p = find_file(side, main)
+        if p is None:
+            continue                                    # 该侧无此文件（单边模型）
+        schema = fetch_schema(cfg['model_id'])
+        rows = read_excel_rows(p)
+        ctx = {'enums': ENUM_MAP, 'invalid': RULES['invalid_values'],
+               'errors': [], '_attr': schema['attrs']}
+        unified = [normalize_row(r, FIELD_MAP[cfg['model_id']], side, ctx) for r in rows]
+        (outdir / f"{cfg['model_id'].split('@')[0]}.json").write_text(
+            json.dumps(unified, ensure_ascii=False, indent=1))
+        stats[cfg['model_id']] = {'rows': len(unified), 'enum_errors': len(ctx['errors'])}
+        all_errors += ctx['errors']
+    (OUT / f'transform-{side}-errors.json').write_text(json.dumps(all_errors, ensure_ascii=False, indent=1))
+    print(f'transform({side}):', json.dumps(stats, ensure_ascii=False)[:400], '... 枚举错误', len(all_errors))
+    return stats
+
 if __name__ == '__main__':
     print('use --stage investigate|transform|compare|import')

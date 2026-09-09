@@ -89,3 +89,30 @@ def test_fetch_schema_refresh_keeps_other_models(monkeypatch, tmp_path):
     after = json.loads(sync.SCHEMA_CACHE.read_text())
     assert 'other@FINTECHDATA' in after                       # 别的模型还在（bug 时会被清掉）
     assert 'switches@FINTECHDATA' in after and after['switches@FINTECHDATA'] == schema
+
+CTX = {'enums': {'facilityUseState': {'设施在用': '00-设施在用'}},
+       'invalid': ['******'], 'errors': []}
+
+def test_clean_value_date():
+    import datetime
+    assert sync.clean_value(datetime.date(2022, 8, 31), 'd', {'type': 'date', 'name': ''}, CTX) == '2022-08-31'
+    assert sync.clean_value('2022-08-31 ', 'd', {'type': 'date', 'name': ''}, CTX) == '2022-08-31'
+
+def test_clean_value_number_and_enum():
+    assert sync.clean_value(123.0, 'v', {'type': 'str', 'name': ''}, CTX) == '123'
+    assert sync.clean_value('设施在用', 'facilityUseState',
+                            {'type': 'enum', 'name': '', 'regex': ['00-设施在用']}, CTX) == '00-设施在用'
+    assert sync.clean_value('00-设施在用', 'facilityUseState',
+                            {'type': 'enum', 'name': '', 'regex': ['00-设施在用']}, CTX) == '00-设施在用'
+    sync.clean_value('神秘值', 'facilityUseState', {'type': 'enum', 'name': '', 'regex': ['00-设施在用']}, CTX)
+    assert any('神秘值' in e for e in CTX['errors'])          # 错误收集不中断
+
+def test_normalize_row_full():
+    pairs = [('设施标识符', '设施标识符', 'facilityDescriptor'),
+             ('管理IP地址', '管理IP地址', 'ip'),
+             (None, '设施信息更新日期', 'facilityUpdateDate')]
+    raw = {'设施标识符': ' abc ', '管理IP地址': '******', '设施信息更新日期': '2024-01-01'}
+    out = sync.normalize_row(raw, pairs, 'report', CTX)
+    assert out == {'facilityDescriptor': 'abc', 'ip': None}    # 脱敏→None；管理独有列报侧不取
+    out2 = sync.normalize_row(raw, pairs, 'mgmt', CTX)
+    assert out2['ip'] is None and out2['facilityUpdateDate'] == '2024-01-01'
