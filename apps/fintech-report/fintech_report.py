@@ -85,6 +85,10 @@ OBJ_CLEANUP = "FINTECH_REPORT_CLEANUP@EASYOPS"
 OBJ_FAIL_DETAIL = "FINTECH_REPORT_INSTANCE@EASYOPS"
 
 # ---- 内嵌上报策略（对应 Go conf.default.yaml report_conf 段；行数少，不值得外挂） ----
+# 全局字段黑名单: CMDB 系统/管理字段，任何数据元定义里都没有——混进报文会被人行
+# 「属性数量校验」拒收（WL-20001 数据元属性数量过多，2026-09-08 现场
+# powerSupplyRelation 的 importId 实证：报文 8 字段 vs 人行定义 7 字段）
+FIELD_BLACKLIST = {"importId"}
 # 唯一键字段翻译（模型特殊 PK → 上报口径 facilityDescriptor/facilityCategory）
 PK_TRANSLATE = {
     "basedSoftware@FINTECHDATA": ("softwareDescriptor", "softwareCategory"),
@@ -396,6 +400,8 @@ class Converter:
                 continue
             if aid == IGNORE_INST_ATTR:
                 continue  # ignoreReport 标记本身不上报（标记为 true 的实例在外层过滤）
+            if aid in FIELD_BLACKLIST:
+                continue  # CMDB 系统字段兜底剔除（tag 过滤失效时的保险，人行无此属性）
             # 映射模式取源字段
             src_id = self.mapping.get(aid) or aid
             value = inst.get(src_id)
