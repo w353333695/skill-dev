@@ -1195,6 +1195,13 @@ RULES = {
     'skip_columns': ['记录ID', '拥有者', '创建者', '创建时间', '最近修改时间', '数据校验结果'],
 }
 
+# 设施归属机构统一换人行编号（用户决策 2026-09-09）：上报名「郑州中心支行」与管理名「河南省分行」
+# 为同一机构（Task 6 口径豁免已裁定），落库统一用管理侧编号。softwareRelation 的 TMP enum 属性不动。
+ORG_CODE_MAP = {
+    '中国人民银行郑州中心支行': 'A1000141000266',
+    '中国人民银行河南省分行': 'A1000141000266',
+}
+
 RUN_SH     = '/workspace/.claude/skills/api-orchestrator/scripts/run.sh'
 CMDB_SPEC  = '/workspace/.api-orchestrator/platforms/easyops/easyops-cmdb.yaml'
 OUT        = Path('/workspace/tmp/fintech-sync/out')
@@ -1438,6 +1445,11 @@ def clean_value(v, attr_id, attr_def, ctx):
     s = str(v).strip()
     if s in ctx['invalid'] or s == '' or s == '无':
         return None
+    if attr_id == 'facilityOwnershipAgency':                 # 机构统一换编号（用户决策）
+        if s in ORG_CODE_MAP:
+            return ORG_CODE_MAP[s]
+        ctx['errors'].append(f'{attr_id}: 机构「{s}」不在 ORG_CODE_MAP，保留原值')
+        return s
     t = attr_def.get('type')
     if t == 'enum':
         return _enum_one(s, attr_id, attr_def, ctx)

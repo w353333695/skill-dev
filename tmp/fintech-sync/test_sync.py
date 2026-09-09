@@ -245,6 +245,20 @@ def test_build_import_body_structs():
     assert body['datas'][0]['dep'] == [{'x': '1'}]
     assert 'dep' not in body['datas'][1] and body['datas'][1]['_diffDetail'][0]['attr'] == 'dep.x'
 
+def test_org_code_mapping():
+    # 设施归属机构统一换编号：机构名称→人行编号
+    ctx = {'enums': {}, 'invalid': [], 'errors': []}
+    d = {'type': 'str', 'name': '设施归属机构'}
+    assert sync.clean_value('中国人民银行郑州中心支行', 'facilityOwnershipAgency', d, ctx) == 'A1000141000266'
+    assert sync.clean_value('中国人民银行河南省分行', 'facilityOwnershipAgency', d, ctx) == 'A1000141000266'
+    # 未知机构：保留原值并记错误（不中断）
+    assert sync.clean_value('某某未知机构', 'facilityOwnershipAgency', d, ctx) == '某某未知机构'
+    assert any('某某未知机构' in e for e in ctx['errors'])
+    # 其他属性同值不映射
+    ctx2 = {'enums': {}, 'invalid': [], 'errors': []}
+    assert sync.clean_value('中国人民银行郑州中心支行', 'otherAttr', d, ctx2) == '中国人民银行郑州中心支行'
+    assert ctx2['errors'] == []
+
 def test_loose_eq_basic():
     assert sync._loose_eq('02-Java', 'Java')
     assert sync._loose_eq('99-其他', '其他')
