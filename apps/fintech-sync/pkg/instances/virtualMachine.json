@@ -1,7 +1,7 @@
 [
  {
   "facilityDescriptor": "001e1591eeab4739a46e4ae2542bb638",
-  "belongsServer": "郑州虚拟机11.66.17.205",
+  "belongsServer": "9d1c0dadabf04d8ca548bc5072fe1c6b",
   "belongsServerType": "01-私有",
   "facilityCategory": "FAVMVMW000",
   "facilityName": "CCPC应用服务器",
@@ -15,11 +15,17 @@
   "virtualizationSoftwareBrandLand": "01-国外",
   "virtualizationSoftwarePlatform": "VMware",
   "vmManagementPlatform": "VCenter Server",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "009cb198381c4e05a7709accdf7060d7",
-  "belongsServer": "郑州虚拟机11.66.17.205",
+  "belongsServer": "9d1c0dadabf04d8ca548bc5072fe1c6b",
   "belongsServerType": "01-私有",
   "facilityCategory": "FAVMVMW000",
   "facilityName": "第三方组件服务器（11.66.18.11）",
@@ -33,11 +39,17 @@
   "virtualizationSoftwareBrandLand": "01-国外",
   "virtualizationSoftwarePlatform": "VMware",
   "vmManagementPlatform": "VCenter Server",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "018387f1bf6b499b96556ab93e61b0df",
-  "belongsServer": "郑州虚拟机9.132.63.207",
+  "belongsServer": "258a95a470084167886053c4257ee2c9",
   "belongsServerType": "01-私有",
   "facilityCategory": "FAVMVMW000",
   "facilityName": "fastDFS",
@@ -51,11 +63,17 @@
   "virtualizationSoftwareBrandLand": "01-国外",
   "virtualizationSoftwarePlatform": "VMware",
   "vmManagementPlatform": "VCenter Server",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "0236444732554121b1e87ef47fdfd6bc",
-  "belongsServer": "郑州虚拟机11.66.17.204",
+  "belongsServer": "b734bc454f3b43358269b9e3d3f58870",
   "belongsServerType": "01-私有",
   "facilityCategory": "FAVMVMW000",
   "facilityName": "账户影像web系统",
@@ -69,11 +87,17 @@
   "virtualizationSoftwareBrandLand": "01-国外",
   "virtualizationSoftwarePlatform": "VMware",
   "vmManagementPlatform": "VCenter Server",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "03794660fc7142088b023121112b4188",
-  "belongsServer": "郑州虚拟机11.66.17.204",
+  "belongsServer": "b734bc454f3b43358269b9e3d3f58870",
   "belongsServerType": "01-私有",
   "facilityCategory": "FAVMVMW000",
   "facilityName": "业务网网管系统",
@@ -87,11 +111,17 @@
   "virtualizationSoftwareBrandLand": "01-国外",
   "virtualizationSoftwarePlatform": "VMware",
   "vmManagementPlatform": "VCenter Server",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "0389c0edb19e4d98bc3f5f0eb9685ce8",
-  "belongsServer": "郑州虚拟机11.66.17.206",
+  "belongsServer": "5f03228324534812a20f377ddad125b7",
   "belongsServerType": "01-私有",
   "facilityCategory": "FAVMVMW000",
   "facilityName": "协同办公平台",
@@ -105,11 +135,17 @@
   "virtualizationSoftwareBrandLand": "01-国外",
   "virtualizationSoftwarePlatform": "VMware",
   "vmManagementPlatform": "VCenter Server",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "042b6989b4674ebe92c181931a18e7bc",
-  "belongsServer": "郑州虚拟机11.66.17.206",
+  "belongsServer": "5f03228324534812a20f377ddad125b7",
   "belongsServerType": "01-私有",
   "facilityCategory": "FAVMVMW000",
   "facilityName": "发行库区出入管理系统",
@@ -123,11 +159,17 @@
   "virtualizationSoftwareBrandLand": "01-国外",
   "virtualizationSoftwarePlatform": "VMware",
   "vmManagementPlatform": "VCenter Server",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "059e84b6c9914a058c65a10968bba2f6",
-  "belongsServer": "郑州虚拟机11.66.17.204",
+  "belongsServer": "b734bc454f3b43358269b9e3d3f58870",
   "belongsServerType": "01-私有",
   "facilityCategory": "FAVMVMW000",
   "facilityName": "河南大数据备份服务器",
@@ -141,11 +183,17 @@
   "virtualizationSoftwareBrandLand": "01-国外",
   "virtualizationSoftwarePlatform": "VMware",
   "vmManagementPlatform": "VCenter Server",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "09fd343f316f4bd68c5edac097df4c2f",
-  "belongsServer": "郑州虚拟机11.66.17.204",
+  "belongsServer": "b734bc454f3b43358269b9e3d3f58870",
   "belongsServerType": "01-私有",
   "facilityCategory": "FAVMVMW000",
   "facilityName": "数据下发平台-1",
@@ -159,11 +207,17 @@
   "virtualizationSoftwareBrandLand": "01-国外",
   "virtualizationSoftwarePlatform": "VMware",
   "vmManagementPlatform": "VCenter Server",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "0a93cb25c5d146078bbd6bc51a804f16",
-  "belongsServer": "郑州虚拟机9.132.63.207",
+  "belongsServer": "258a95a470084167886053c4257ee2c9",
   "belongsServerType": "01-私有",
   "facilityCategory": "FAVMVMW000",
   "facilityName": "二代查询机后台管理1",
@@ -177,11 +231,17 @@
   "virtualizationSoftwareBrandLand": "01-国外",
   "virtualizationSoftwarePlatform": "VMware",
   "vmManagementPlatform": "VCenter Server",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "0c99b22b67e9459293ec5c20ba362e94",
-  "belongsServer": "郑州虚拟机9.132.63.207",
+  "belongsServer": "258a95a470084167886053c4257ee2c9",
   "belongsServerType": "01-私有",
   "facilityCategory": "FAVMVMW000",
   "facilityName": "财政支出联网＿生产环境",
@@ -195,11 +255,17 @@
   "virtualizationSoftwareBrandLand": "01-国外",
   "virtualizationSoftwarePlatform": "VMware",
   "vmManagementPlatform": "VCenter Server",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "0d07d71e9e7e40ca89012bb0a8782ab9",
-  "belongsServer": "郑州虚拟机9.132.63.207",
+  "belongsServer": "258a95a470084167886053c4257ee2c9",
   "belongsServerType": "01-私有",
   "facilityCategory": "FAVMVMW000",
   "facilityName": "账户电子化审批商行web-dw",
@@ -213,11 +279,17 @@
   "virtualizationSoftwareBrandLand": "01-国外",
   "virtualizationSoftwarePlatform": "VMware",
   "vmManagementPlatform": "VCenter Server",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "0feef84823f742e8958edf57516bdc26",
-  "belongsServer": "郑州虚拟机11.66.17.206",
+  "belongsServer": "5f03228324534812a20f377ddad125b7",
   "belongsServerType": "01-私有",
   "facilityCategory": "FAVMVMW000",
   "facilityName": "Patrol Central",
@@ -231,11 +303,17 @@
   "virtualizationSoftwareBrandLand": "01-国外",
   "virtualizationSoftwarePlatform": "VMware",
   "vmManagementPlatform": "VCenter Server",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "1492ffc314094a9f96b069a78115b5b0",
-  "belongsServer": "郑州虚拟机9.132.63.207",
+  "belongsServer": "258a95a470084167886053c4257ee2c9",
   "belongsServerType": "01-私有",
   "facilityCategory": "FAVMVMW000",
   "facilityName": "zzacsemc1-ft",
@@ -249,11 +327,17 @@
   "virtualizationSoftwareBrandLand": "01-国外",
   "virtualizationSoftwarePlatform": "VMware",
   "vmManagementPlatform": "VCenter Server",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "16018e566df244348cfe2906280ff83b",
-  "belongsServer": "郑州虚拟机11.66.17.206",
+  "belongsServer": "5f03228324534812a20f377ddad125b7",
   "belongsServerType": "01-私有",
   "facilityCategory": "FAVMVMW000",
   "facilityName": "newOA APP",
@@ -267,11 +351,17 @@
   "virtualizationSoftwareBrandLand": "01-国外",
   "virtualizationSoftwarePlatform": "VMware",
   "vmManagementPlatform": "VCenter Server",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "163e5b55026b4b819d82f737946cf552",
-  "belongsServer": "郑州虚拟机11.66.17.206",
+  "belongsServer": "5f03228324534812a20f377ddad125b7",
   "belongsServerType": "01-私有",
   "facilityCategory": "FAVMVMW000",
   "facilityName": "金融业科技信息管理报送系统---生产",
@@ -285,11 +375,17 @@
   "virtualizationSoftwareBrandLand": "01-国外",
   "virtualizationSoftwarePlatform": "VMware",
   "vmManagementPlatform": "VCenter Server",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "16e94e07706642079db5ff1a7b46892e",
-  "belongsServer": "郑州虚拟机9.132.63.207",
+  "belongsServer": "258a95a470084167886053c4257ee2c9",
   "belongsServerType": "01-私有",
   "facilityCategory": "FAVMVMW000",
   "facilityName": "TIPSMOMB_Tran-test",
@@ -303,11 +399,17 @@
   "virtualizationSoftwareBrandLand": "01-国外",
   "virtualizationSoftwarePlatform": "VMware",
   "vmManagementPlatform": "VCenter Server",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "17b53685bf1f4870b032cf501cdd87dd",
-  "belongsServer": "郑州虚拟机11.66.17.206",
+  "belongsServer": "5f03228324534812a20f377ddad125b7",
   "belongsServerType": "01-私有",
   "facilityCategory": "FAVMVMW000",
   "facilityName": "金融业科技信息管理报送系统---测试",
@@ -321,11 +423,17 @@
   "virtualizationSoftwareBrandLand": "01-国外",
   "virtualizationSoftwarePlatform": "VMware",
   "vmManagementPlatform": "VCenter Server",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "183347c73edd43bfb5c33ff00f01e2a6",
-  "belongsServer": "郑州虚拟机9.132.63.207",
+  "belongsServer": "258a95a470084167886053c4257ee2c9",
   "belongsServerType": "01-私有",
   "facilityCategory": "FAVMVMW000",
   "facilityName": "大型修缮项目库",
@@ -339,11 +447,17 @@
   "virtualizationSoftwareBrandLand": "01-国外",
   "virtualizationSoftwarePlatform": "VMware",
   "vmManagementPlatform": "VCenter Server",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "1af5df7fb8974446966aa1cc7b6a8dfd",
-  "belongsServer": "郑州虚拟机9.132.63.207",
+  "belongsServer": "258a95a470084167886053c4257ee2c9",
   "belongsServerType": "01-私有",
   "facilityCategory": "FAVMVMW000",
   "facilityName": "行风标准化系统-生产",
@@ -357,11 +471,17 @@
   "virtualizationSoftwareBrandLand": "01-国外",
   "virtualizationSoftwarePlatform": "VMware",
   "vmManagementPlatform": "VCenter Server",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "1bbf53a5952144cdbd164debca4b9da2",
-  "belongsServer": "郑州虚拟机9.132.63.207",
+  "belongsServer": "258a95a470084167886053c4257ee2c9",
   "belongsServerType": "01-私有",
   "facilityCategory": "FAVMVMW000",
   "facilityName": "tjbspt",
@@ -375,11 +495,17 @@
   "virtualizationSoftwareBrandLand": "01-国外",
   "virtualizationSoftwarePlatform": "VMware",
   "vmManagementPlatform": "VCenter Server",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "1bfa78f750374e6aa78487c6a2b93d90",
-  "belongsServer": "郑州虚拟机11.66.17.204",
+  "belongsServer": "b734bc454f3b43358269b9e3d3f58870",
   "belongsServerType": "01-私有",
   "facilityCategory": "FAVMVMW000",
   "facilityName": "文明系统（主）",
@@ -393,11 +519,17 @@
   "virtualizationSoftwareBrandLand": "01-国外",
   "virtualizationSoftwarePlatform": "VMware",
   "vmManagementPlatform": "VCenter Server",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "1c5de799453c475ab6d5c2723c4a47b5",
-  "belongsServer": "洛阳H3C超融合服务器3",
+  "belongsServer": "32d99a0814d84487b146c387a14188d5",
   "belongsServerType": "01-私有",
   "facilityCategory": "FAVMVMW000",
   "facilityName": "洛阳市中支协同办公文件服务器",
@@ -411,11 +543,17 @@
   "virtualizationSoftwareBrandLand": "00-国内",
   "virtualizationSoftwarePlatform": "H3C CAS 虚拟化平台",
   "vmManagementPlatform": "H3C CAS CVM",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "1ddab62a5e6c45a89179643e092eeaea",
-  "belongsServer": "鹤壁市中支服务器机房HCI超融合虚拟化平台服务器2",
+  "belongsServer": "0b77ce3d7ecd4989ac0d0403b85720aa",
   "belongsServerType": "01-私有",
   "facilityCategory": "FAVMVMW000",
   "facilityName": "鹤壁市中支网站数据库服务器",
@@ -429,11 +567,17 @@
   "virtualizationSoftwareBrandLand": "00-国内",
   "virtualizationSoftwarePlatform": "深信服",
   "vmManagementPlatform": "超融合",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "1e1106a3f4224578ab983dee780ffff9",
-  "belongsServer": "郑州虚拟机11.66.17.204",
+  "belongsServer": "b734bc454f3b43358269b9e3d3f58870",
   "belongsServerType": "01-私有",
   "facilityCategory": "FAVMVMW000",
   "facilityName": "门禁数据库同步服务器",
@@ -447,11 +591,17 @@
   "virtualizationSoftwareBrandLand": "01-国外",
   "virtualizationSoftwarePlatform": "VMware",
   "vmManagementPlatform": "VCenter Server",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "1fdf6a82253e46559ec7ec7997924038",
-  "belongsServer": "郑州虚拟机11.66.17.206",
+  "belongsServer": "5f03228324534812a20f377ddad125b7",
   "belongsServerType": "01-私有",
   "facilityCategory": "FAVMVMW000",
   "facilityName": "proxy02",
@@ -465,11 +615,17 @@
   "virtualizationSoftwareBrandLand": "01-国外",
   "virtualizationSoftwarePlatform": "VMware",
   "vmManagementPlatform": "VCenter Server",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "2132cfc6a0f84c28a224b2504fc9dc0f",
-  "belongsServer": "郑州虚拟机11.66.17.204",
+  "belongsServer": "b734bc454f3b43358269b9e3d3f58870",
   "belongsServerType": "01-私有",
   "facilityCategory": "FAVMVMW000",
   "facilityName": "GTP-ft",
@@ -483,11 +639,17 @@
   "virtualizationSoftwareBrandLand": "01-国外",
   "virtualizationSoftwarePlatform": "VMware",
   "vmManagementPlatform": "VCenter Server",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "239b1fc01e14413abfa7850f991086d1",
-  "belongsServer": "郑州虚拟机11.66.17.205",
+  "belongsServer": "9d1c0dadabf04d8ca548bc5072fe1c6b",
   "belongsServerType": "01-私有",
   "facilityCategory": "FAVMVMW000",
   "facilityName": "内联网防火墙日志服务器",
@@ -501,11 +663,17 @@
   "virtualizationSoftwareBrandLand": "01-国外",
   "virtualizationSoftwarePlatform": "VMware",
   "vmManagementPlatform": "VCenter Server",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "23ff288f3ff446e180910a4235dc75e2",
-  "belongsServer": "郑州虚拟机11.66.17.205",
+  "belongsServer": "9d1c0dadabf04d8ca548bc5072fe1c6b",
   "belongsServerType": "01-私有",
   "facilityCategory": "FAVMVMW000",
   "facilityName": "CRAMS数据库-SLAVE",
@@ -519,11 +687,17 @@
   "virtualizationSoftwareBrandLand": "01-国外",
   "virtualizationSoftwarePlatform": "VMware",
   "vmManagementPlatform": "VCenter Server",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "26c10f8ad2d34aaebf3ebe0d0396e832",
-  "belongsServer": "郑州虚拟机11.66.17.204",
+  "belongsServer": "b734bc454f3b43358269b9e3d3f58870",
   "belongsServerType": "01-私有",
   "facilityCategory": "FAVMVMW000",
   "facilityName": "堡垒机前置_统计平台",
@@ -537,11 +711,17 @@
   "virtualizationSoftwareBrandLand": "01-国外",
   "virtualizationSoftwarePlatform": "VMware",
   "vmManagementPlatform": "VCenter Server",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "27ca14216129456ea9f09894618e4d1a",
-  "belongsServer": "郑州虚拟机11.66.17.206",
+  "belongsServer": "5f03228324534812a20f377ddad125b7",
   "belongsServerType": "01-私有",
   "facilityCategory": "FAVMVMW000",
   "facilityName": "大数据BI前置机",
@@ -555,11 +735,17 @@
   "virtualizationSoftwareBrandLand": "01-国外",
   "virtualizationSoftwarePlatform": "VMware",
   "vmManagementPlatform": "VCenter Server",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "28f6b08b4b5946e280bd950a8f1eac85",
-  "belongsServer": "郑州虚拟机11.66.17.204",
+  "belongsServer": "b734bc454f3b43358269b9e3d3f58870",
   "belongsServerType": "01-私有",
   "facilityCategory": "FAVMVMW000",
   "facilityName": "郑州中支机房监控系统",
@@ -573,11 +759,17 @@
   "virtualizationSoftwareBrandLand": "01-国外",
   "virtualizationSoftwarePlatform": "VMware",
   "vmManagementPlatform": "VCenter Server",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "2a1bfb400b054e7f93224379f837f13e",
-  "belongsServer": "郑州虚拟机11.66.17.204",
+  "belongsServer": "b734bc454f3b43358269b9e3d3f58870",
   "belongsServerType": "01-私有",
   "facilityCategory": "FAVMVMW000",
   "facilityName": "LDAP-报表",
@@ -591,11 +783,17 @@
   "virtualizationSoftwareBrandLand": "01-国外",
   "virtualizationSoftwarePlatform": "VMware",
   "vmManagementPlatform": "VCenter Server",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "2a48ea84f0944f85baf308825e13d554",
-  "belongsServer": "郑州虚拟机11.66.17.206",
+  "belongsServer": "5f03228324534812a20f377ddad125b7",
   "belongsServerType": "01-私有",
   "facilityCategory": "FAVMVMW000",
   "facilityName": "运维和服务",
@@ -609,11 +807,17 @@
   "virtualizationSoftwareBrandLand": "01-国外",
   "virtualizationSoftwarePlatform": "VMware",
   "vmManagementPlatform": "VCenter Server",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "2c0fc35f28384e81b6e651f0a4ddbdab",
-  "belongsServer": "驻马店市中支中心机房业务网云桌面服务器1",
+  "belongsServer": "613e4ef2a6e14f82aaeee1d5e009484d",
   "belongsServerType": "01-私有",
   "facilityCategory": "FAVMVMW000",
   "facilityName": "驻马店市中支中心机房业务网云桌面",
@@ -627,11 +831,17 @@
   "virtualizationSoftwareBrandLand": "00-国内",
   "virtualizationSoftwarePlatform": "虚拟桌面接入管理系统VDI5.3.8 R2",
   "vmManagementPlatform": "虚拟化管理平台",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "2c8ee8ca82f444329edf4eb694567e4d",
-  "belongsServer": "郑州虚拟机9.132.63.207",
+  "belongsServer": "258a95a470084167886053c4257ee2c9",
   "belongsServerType": "01-私有",
   "facilityCategory": "FAVMVMW000",
   "facilityName": "焦作电子公文交换系统",
@@ -645,11 +855,17 @@
   "virtualizationSoftwareBrandLand": "01-国外",
   "virtualizationSoftwarePlatform": "VMware",
   "vmManagementPlatform": "VCenter Server",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "2c9355b8e6054d8493e0077bc65ba3a0",
-  "belongsServer": "郑州虚拟机11.66.17.206",
+  "belongsServer": "5f03228324534812a20f377ddad125b7",
   "belongsServerType": "01-私有",
   "facilityCategory": "FAVMVMW000",
   "facilityName": "OA运维堡垒机",
@@ -663,11 +879,17 @@
   "virtualizationSoftwareBrandLand": "01-国外",
   "virtualizationSoftwarePlatform": "VMware",
   "vmManagementPlatform": "VCenter Server",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "2d2f171643f447f8a531715e46ebfeb2",
-  "belongsServer": "郑州虚拟机11.66.17.204",
+  "belongsServer": "b734bc454f3b43358269b9e3d3f58870",
   "belongsServerType": "01-私有",
   "facilityCategory": "FAVMVMW000",
   "facilityName": "评议系统",
@@ -681,11 +903,17 @@
   "virtualizationSoftwareBrandLand": "01-国外",
   "virtualizationSoftwarePlatform": "VMware",
   "vmManagementPlatform": "VCenter Server",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "2e0d793355234d3abd1eed5b316429cb",
-  "belongsServer": "郑州虚拟机11.66.17.204",
+  "belongsServer": "b734bc454f3b43358269b9e3d3f58870",
   "belongsServerType": "01-私有",
   "facilityCategory": "FAVMVMW000",
   "facilityName": "波分设备管理机",
@@ -699,11 +927,17 @@
   "virtualizationSoftwareBrandLand": "01-国外",
   "virtualizationSoftwarePlatform": "VMware",
   "vmManagementPlatform": "VCenter Server",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "3082ffff60b148918103eab042b7c40e",
-  "belongsServer": "许昌市中支中心机房桌面云集群服务器2-1",
+  "belongsServer": "f95a1ff174bf4ae498d4f1a4e8a663c0",
   "belongsServerType": "01-私有",
   "facilityCategory": "FAVMVMW000",
   "facilityName": "许昌市中支中心机房业务网云桌面平台",
@@ -717,11 +951,17 @@
   "virtualizationSoftwareBrandLand": "00-国内",
   "virtualizationSoftwarePlatform": "华为FUSIONCOMPUTE R6.5",
   "vmManagementPlatform": "华为FUSIONCOMPUTE R6.5",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "33f8e8da2dc1448d8629e1443554047b",
-  "belongsServer": "郑州虚拟机11.66.17.205",
+  "belongsServer": "9d1c0dadabf04d8ca548bc5072fe1c6b",
   "belongsServerType": "01-私有",
   "facilityCategory": "FAVMVMW000",
   "facilityName": "人事考勤系统",
@@ -735,11 +975,17 @@
   "virtualizationSoftwareBrandLand": "01-国外",
   "virtualizationSoftwarePlatform": "VMware",
   "vmManagementPlatform": "VCenter Server",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "341ea0432a38435dae55b0af2ab1d4a0",
-  "belongsServer": "中国人民银行三门峡市中心支行 云桌面服务器",
+  "belongsServer": "0009389991f1417596ea684839588f2f",
   "belongsServerType": "01-私有",
   "facilityCategory": "FAVMVMW000",
   "facilityName": "中国人民银行三门峡市中心支行 云终端",
@@ -753,11 +999,17 @@
   "virtualizationSoftwareBrandLand": "00-国内",
   "virtualizationSoftwarePlatform": "SANGFOR(深信服)",
   "vmManagementPlatform": "VMP 5.3.8",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "3710136398054d1792ad454c7b4af413",
-  "belongsServer": "郑州虚拟机11.66.17.205",
+  "belongsServer": "9d1c0dadabf04d8ca548bc5072fe1c6b",
   "belongsServerType": "01-私有",
   "facilityCategory": "FAVMVMW000",
   "facilityName": "数据中心报表系统DB",
@@ -771,11 +1023,17 @@
   "virtualizationSoftwareBrandLand": "01-国外",
   "virtualizationSoftwarePlatform": "VMware",
   "vmManagementPlatform": "VCenter Server",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "401db45f58924906a6e6b595f0d9589d",
-  "belongsServer": "郑州虚拟机9.132.63.207",
+  "belongsServer": "258a95a470084167886053c4257ee2c9",
   "belongsServerType": "01-私有",
   "facilityCategory": "FAVMVMW000",
   "facilityName": "账户电子化审批生产DB",
@@ -789,11 +1047,17 @@
   "virtualizationSoftwareBrandLand": "01-国外",
   "virtualizationSoftwarePlatform": "VMware",
   "vmManagementPlatform": "VCenter Server",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "4248078c80ad40faba74f727d0fed5ec",
-  "belongsServer": "郑州虚拟机11.66.17.204",
+  "belongsServer": "b734bc454f3b43358269b9e3d3f58870",
   "belongsServerType": "01-私有",
   "facilityCategory": "FAVMVMW000",
   "facilityName": "机关事务管理（全省集中版）系统-测试环境",
@@ -807,11 +1071,17 @@
   "virtualizationSoftwareBrandLand": "01-国外",
   "virtualizationSoftwarePlatform": "VMware",
   "vmManagementPlatform": "VCenter Server",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "46c6206f70254feb8abea038939ebcbd",
-  "belongsServer": "周口市中支中心机房云桌面节点1",
+  "belongsServer": "aa9ba62333ff4bd88b86d6999d1f849b",
   "belongsServerType": "01-私有",
   "facilityCategory": "FAVMVMW000",
   "facilityName": "周口市中支中心机房业务网云桌面平台",
@@ -825,11 +1095,17 @@
   "virtualizationSoftwareBrandLand": "00-国内",
   "virtualizationSoftwarePlatform": "深信服超融合虚拟化软件V5.3.8R1",
   "vmManagementPlatform": "深信服云桌面虚拟化管理软件V2.0",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "47c32632320d41359d029f99cc471315",
-  "belongsServer": "郑州虚拟机9.132.63.207",
+  "belongsServer": "258a95a470084167886053c4257ee2c9",
   "belongsServerType": "01-私有",
   "facilityCategory": "FAVMVMW000",
   "facilityName": "业务网网络设备日志服务器",
@@ -843,11 +1119,17 @@
   "virtualizationSoftwareBrandLand": "01-国外",
   "virtualizationSoftwarePlatform": "VMware",
   "vmManagementPlatform": "VCenter Server",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "48a980193d7d471f8ab508e412ad10f5",
-  "belongsServer": "郑州虚拟机9.132.63.207",
+  "belongsServer": "258a95a470084167886053c4257ee2c9",
   "belongsServerType": "01-私有",
   "facilityCategory": "FAVMVMW000",
   "facilityName": "TIPSMOMB_Tran_SC",
@@ -861,11 +1143,17 @@
   "virtualizationSoftwareBrandLand": "01-国外",
   "virtualizationSoftwarePlatform": "VMware",
   "vmManagementPlatform": "VCenter Server",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "48b997c1b7604f8293634266f1b26080",
-  "belongsServer": "郑州虚拟机11.66.17.204",
+  "belongsServer": "b734bc454f3b43358269b9e3d3f58870",
   "belongsServerType": "01-私有",
   "facilityCategory": "FAVMVMW000",
   "facilityName": "网上调查评测系统",
@@ -879,11 +1167,17 @@
   "virtualizationSoftwareBrandLand": "01-国外",
   "virtualizationSoftwarePlatform": "VMware",
   "vmManagementPlatform": "VCenter Server",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "48dabd55b17b4be0a74f06142fc02af1",
-  "belongsServer": "郑州虚拟机11.66.17.206",
+  "belongsServer": "5f03228324534812a20f377ddad125b7",
   "belongsServerType": "01-私有",
   "facilityCategory": "FAVMVMW000",
   "facilityName": "wekan",
@@ -897,11 +1191,17 @@
   "virtualizationSoftwareBrandLand": "01-国外",
   "virtualizationSoftwarePlatform": "VMware",
   "vmManagementPlatform": "VCenter Server",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "48f01218d2884fcfad2c83e433d4aadd",
-  "belongsServer": "洛阳H3C超融合服务器2",
+  "belongsServer": "c517abdb06944183af69346502c85ce4",
   "belongsServerType": "01-私有",
   "facilityCategory": "FAVMVMW000",
   "facilityName": "洛阳市中支FTP服务器",
@@ -915,11 +1215,17 @@
   "virtualizationSoftwareBrandLand": "00-国内",
   "virtualizationSoftwarePlatform": "H3C CAS 虚拟化平台",
   "vmManagementPlatform": "H3C CAS CVM",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "4d71cc5377834a318ba9fcc475a427ee",
-  "belongsServer": "洛阳H3C超融合服务器2",
+  "belongsServer": "c517abdb06944183af69346502c85ce4",
   "belongsServerType": "01-私有",
   "facilityCategory": "FAVMVMW000",
   "facilityName": "洛阳市中支配置备份和SYSLOG服务器",
@@ -933,11 +1239,17 @@
   "virtualizationSoftwareBrandLand": "00-国内",
   "virtualizationSoftwarePlatform": "H3C CAS 虚拟化平台",
   "vmManagementPlatform": "H3C CAS CVM",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "4f9f4b47f9754f699331c69bfbd004f1",
-  "belongsServer": "郑州虚拟机11.66.17.206",
+  "belongsServer": "5f03228324534812a20f377ddad125b7",
   "belongsServerType": "01-私有",
   "facilityCategory": "FAVMVMW000",
   "facilityName": "vcenter-backup",
@@ -951,11 +1263,17 @@
   "virtualizationSoftwareBrandLand": "01-国外",
   "virtualizationSoftwarePlatform": "VMware",
   "vmManagementPlatform": "VCenter Server",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "5063aa75a29849329c23f3f72fd4305d",
-  "belongsServer": "郑州虚拟机11.66.17.206",
+  "belongsServer": "5f03228324534812a20f377ddad125b7",
   "belongsServerType": "01-私有",
   "facilityCategory": "FAVMVMW000",
   "facilityName": "短信平台",
@@ -969,11 +1287,17 @@
   "virtualizationSoftwareBrandLand": "01-国外",
   "virtualizationSoftwarePlatform": "VMware",
   "vmManagementPlatform": "VCenter Server",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "51bff5d07a934d39b65175d85d0f2a5c",
-  "belongsServer": "郑州虚拟机11.66.17.204",
+  "belongsServer": "b734bc454f3b43358269b9e3d3f58870",
   "belongsServerType": "01-私有",
   "facilityCategory": "FAVMVMW000",
   "facilityName": "节约能源综合管理系统",
@@ -987,11 +1311,17 @@
   "virtualizationSoftwareBrandLand": "01-国外",
   "virtualizationSoftwarePlatform": "VMware",
   "vmManagementPlatform": "VCenter Server",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "554565d4842641b58a14e76769d2b705",
-  "belongsServer": "郑州虚拟机11.66.17.204",
+  "belongsServer": "b734bc454f3b43358269b9e3d3f58870",
   "belongsServerType": "01-私有",
   "facilityCategory": "FAVMVMW000",
   "facilityName": "new OA DB 读写分离 扩容生产",
@@ -1005,11 +1335,17 @@
   "virtualizationSoftwareBrandLand": "01-国外",
   "virtualizationSoftwarePlatform": "VMware",
   "vmManagementPlatform": "VCenter Server",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "554675f783b64d599e14b6d0a6cde322",
-  "belongsServer": "郑州虚拟机11.66.17.206",
+  "belongsServer": "5f03228324534812a20f377ddad125b7",
   "belongsServerType": "01-私有",
   "facilityCategory": "FAVMVMW000",
   "facilityName": "HAYWDA1N",
@@ -1023,11 +1359,17 @@
   "virtualizationSoftwareBrandLand": "01-国外",
   "virtualizationSoftwarePlatform": "VMware",
   "vmManagementPlatform": "VCenter Server",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "55a5ae1762b748049a60df4db5cb617c",
-  "belongsServer": "郑州虚拟机11.66.17.206",
+  "belongsServer": "5f03228324534812a20f377ddad125b7",
   "belongsServerType": "01-私有",
   "facilityCategory": "FAVMVMW000",
   "facilityName": "Fims",
@@ -1041,11 +1383,17 @@
   "virtualizationSoftwareBrandLand": "01-国外",
   "virtualizationSoftwarePlatform": "VMware",
   "vmManagementPlatform": "VCenter Server",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "570c5d1ed1b44a6ab7c5584e0c717239",
-  "belongsServer": "郑州虚拟机11.66.17.205",
+  "belongsServer": "9d1c0dadabf04d8ca548bc5072fe1c6b",
   "belongsServerType": "01-私有",
   "facilityCategory": "FAVMVMW000",
   "facilityName": "CRAMS数据库-新生产",
@@ -1059,11 +1407,17 @@
   "virtualizationSoftwareBrandLand": "01-国外",
   "virtualizationSoftwarePlatform": "VMware",
   "vmManagementPlatform": "VCenter Server",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "5b8e0bf2428d44f9bd79d81909be790c",
-  "belongsServer": "郑州虚拟机9.132.63.207",
+  "belongsServer": "258a95a470084167886053c4257ee2c9",
   "belongsServerType": "01-私有",
   "facilityCategory": "FAVMVMW000",
   "facilityName": "工资系统",
@@ -1077,11 +1431,17 @@
   "virtualizationSoftwareBrandLand": "01-国外",
   "virtualizationSoftwarePlatform": "VMware",
   "vmManagementPlatform": "VCenter Server",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "5c0fb2627b1e4f0e8f14b3851381d04e",
-  "belongsServer": "郑州虚拟机11.66.17.204",
+  "belongsServer": "b734bc454f3b43358269b9e3d3f58870",
   "belongsServerType": "01-私有",
   "facilityCategory": "FAVMVMW000",
   "facilityName": "CRAMS应用服务器-CDP-验证",
@@ -1095,11 +1455,17 @@
   "virtualizationSoftwareBrandLand": "01-国外",
   "virtualizationSoftwarePlatform": "VMware",
   "vmManagementPlatform": "VCenter Server",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "5c320bdbc8184c49a12434faba1803fe",
-  "belongsServer": "郑州虚拟机9.132.63.207",
+  "belongsServer": "258a95a470084167886053c4257ee2c9",
   "belongsServerType": "01-私有",
   "facilityCategory": "FAVMVMW000",
   "facilityName": "财政支出联网＿测试环境",
@@ -1113,11 +1479,17 @@
   "virtualizationSoftwareBrandLand": "01-国外",
   "virtualizationSoftwarePlatform": "VMware",
   "vmManagementPlatform": "VCenter Server",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "5c661f92e79f470486d9408142d0cd11",
-  "belongsServer": "郑州虚拟机9.132.63.207",
+  "belongsServer": "258a95a470084167886053c4257ee2c9",
   "belongsServerType": "01-私有",
   "facilityCategory": "FAVMVMW000",
   "facilityName": "proxy04",
@@ -1131,11 +1503,17 @@
   "virtualizationSoftwareBrandLand": "01-国外",
   "virtualizationSoftwarePlatform": "VMware",
   "vmManagementPlatform": "VCenter Server",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "5cc30c91aaf847df947f059721c228f4",
-  "belongsServer": "郑州虚拟机11.66.17.204",
+  "belongsServer": "b734bc454f3b43358269b9e3d3f58870",
   "belongsServerType": "01-私有",
   "facilityCategory": "FAVMVMW000",
   "facilityName": "纵向防火墙日志服务器",
@@ -1149,11 +1527,17 @@
   "virtualizationSoftwareBrandLand": "01-国外",
   "virtualizationSoftwarePlatform": "VMware",
   "vmManagementPlatform": "VCenter Server",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "5df1f78cae4a4ddba1d04f0e8ae29a6b",
-  "belongsServer": "郑州虚拟机11.66.17.204",
+  "belongsServer": "b734bc454f3b43358269b9e3d3f58870",
   "belongsServerType": "01-私有",
   "facilityCategory": "FAVMVMW000",
   "facilityName": "养老保险统筹",
@@ -1167,11 +1551,17 @@
   "virtualizationSoftwareBrandLand": "01-国外",
   "virtualizationSoftwarePlatform": "VMware",
   "vmManagementPlatform": "VCenter Server",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "5ebee86d679349568cb64984c1b8c980",
-  "belongsServer": "郑州虚拟机9.132.63.207",
+  "belongsServer": "258a95a470084167886053c4257ee2c9",
   "belongsServerType": "01-私有",
   "facilityCategory": "FAVMVMW000",
   "facilityName": "精准扶贫APP",
@@ -1185,11 +1575,17 @@
   "virtualizationSoftwareBrandLand": "01-国外",
   "virtualizationSoftwarePlatform": "VMware",
   "vmManagementPlatform": "VCenter Server",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "5f46c340f2bc45eaa94028302aa2be67",
-  "belongsServer": "郑州虚拟机11.66.17.204",
+  "belongsServer": "b734bc454f3b43358269b9e3d3f58870",
   "belongsServerType": "01-私有",
   "facilityCategory": "FAVMVMW000",
   "facilityName": "360云查",
@@ -1203,11 +1599,17 @@
   "virtualizationSoftwareBrandLand": "01-国外",
   "virtualizationSoftwarePlatform": "VMware",
   "vmManagementPlatform": "VCenter Server",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "6061c7362044481694649e6f6902767d",
-  "belongsServer": "郑州虚拟机11.66.17.204",
+  "belongsServer": "b734bc454f3b43358269b9e3d3f58870",
   "belongsServerType": "01-私有",
   "facilityCategory": "FAVMVMW000",
   "facilityName": "ZZ-APP-PBCDC-B",
@@ -1221,11 +1623,17 @@
   "virtualizationSoftwareBrandLand": "01-国外",
   "virtualizationSoftwarePlatform": "VMware",
   "vmManagementPlatform": "VCenter Server",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "608b5858bb024311bb23c153c64c448f",
-  "belongsServer": "郑州虚拟机11.66.17.204",
+  "belongsServer": "b734bc454f3b43358269b9e3d3f58870",
   "belongsServerType": "01-私有",
   "facilityCategory": "FAVMVMW000",
   "facilityName": "统一用户管理系统",
@@ -1239,11 +1647,17 @@
   "virtualizationSoftwareBrandLand": "01-国外",
   "virtualizationSoftwarePlatform": "VMware",
   "vmManagementPlatform": "VCenter Server",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "609a7636da9c4f5f88356344d818729a",
-  "belongsServer": "郑州虚拟机11.66.17.206",
+  "belongsServer": "5f03228324534812a20f377ddad125b7",
   "belongsServerType": "01-私有",
   "facilityCategory": "FAVMVMW000",
   "facilityName": "河南省辖内干部考核测评信息系统",
@@ -1257,11 +1671,17 @@
   "virtualizationSoftwareBrandLand": "01-国外",
   "virtualizationSoftwarePlatform": "VMware",
   "vmManagementPlatform": "VCenter Server",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "60fc40a533f64f95b8bd339a75476c16",
-  "belongsServer": "郑州虚拟机11.66.17.204",
+  "belongsServer": "b734bc454f3b43358269b9e3d3f58870",
   "belongsServerType": "01-私有",
   "facilityCategory": "FAVMVMW000",
   "facilityName": "new OA DB 02 扩容生产",
@@ -1275,11 +1695,17 @@
   "virtualizationSoftwareBrandLand": "01-国外",
   "virtualizationSoftwarePlatform": "VMware",
   "vmManagementPlatform": "VCenter Server",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "6235c5f4b951481cbe5f78a00e39b1c0",
-  "belongsServer": "郑州虚拟机9.132.63.207",
+  "belongsServer": "258a95a470084167886053c4257ee2c9",
   "belongsServerType": "01-私有",
   "facilityCategory": "FAVMVMW000",
   "facilityName": "一代查询机后台管理1",
@@ -1293,11 +1719,17 @@
   "virtualizationSoftwareBrandLand": "01-国外",
   "virtualizationSoftwarePlatform": "VMware",
   "vmManagementPlatform": "VCenter Server",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "62e48cbb5d614b999d01cfbf5ee0abd4",
-  "belongsServer": "郑州虚拟机9.132.63.207",
+  "belongsServer": "258a95a470084167886053c4257ee2c9",
   "belongsServerType": "01-私有",
   "facilityCategory": "FAVMVMW000",
   "facilityName": "清算辅助管理系统A",
@@ -1311,11 +1743,17 @@
   "virtualizationSoftwareBrandLand": "01-国外",
   "virtualizationSoftwarePlatform": "VMware",
   "vmManagementPlatform": "VCenter Server",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "64eff60dac6648af984ecc5f14985203",
-  "belongsServer": "郑州虚拟机11.66.17.206",
+  "belongsServer": "5f03228324534812a20f377ddad125b7",
   "belongsServerType": "01-私有",
   "facilityCategory": "FAVMVMW000",
   "facilityName": "二代查询机后台管理",
@@ -1329,11 +1767,17 @@
   "virtualizationSoftwareBrandLand": "01-国外",
   "virtualizationSoftwarePlatform": "VMware",
   "vmManagementPlatform": "VCenter Server",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "64f52229e76e4de7b30412bd2e4fcaae",
-  "belongsServer": "郑州虚拟机11.66.17.205",
+  "belongsServer": "9d1c0dadabf04d8ca548bc5072fe1c6b",
   "belongsServerType": "01-私有",
   "facilityCategory": "FAVMVMW000",
   "facilityName": "jspxcms(11.66.19.211)",
@@ -1347,11 +1791,17 @@
   "virtualizationSoftwareBrandLand": "01-国外",
   "virtualizationSoftwarePlatform": "VMware",
   "vmManagementPlatform": "VCenter Server",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "65262128eea84cbd91ad42f9a5caeb59",
-  "belongsServer": "郑州虚拟机11.66.17.205",
+  "belongsServer": "9d1c0dadabf04d8ca548bc5072fe1c6b",
   "belongsServerType": "01-私有",
   "facilityCategory": "FAVMVMW000",
   "facilityName": "安全应用软件服务器",
@@ -1365,11 +1815,17 @@
   "virtualizationSoftwareBrandLand": "01-国外",
   "virtualizationSoftwarePlatform": "VMware",
   "vmManagementPlatform": "VCenter Server",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "675ac33ec93642828bc8cf68bed9165e",
-  "belongsServer": "驻马店市中支中心机房互联网云桌面服务器5",
+  "belongsServer": "bce3c54519164e02b5471189b126c47a",
   "belongsServerType": "01-私有",
   "facilityCategory": "FAVMVMW000",
   "facilityName": "驻马店市中支中心机房互联网云桌面",
@@ -1383,11 +1839,17 @@
   "virtualizationSoftwareBrandLand": "00-国内",
   "virtualizationSoftwarePlatform": "虚拟桌面接入管理系统VDI5.3.8 R2",
   "vmManagementPlatform": "虚拟化管理平台",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "67ac8e363a534e2b9d415889e39a5c5f",
-  "belongsServer": "开封市中支桌面云平台系统服务器1",
+  "belongsServer": "b909c226932b474dbd7640d9c4715362",
   "belongsServerType": "01-私有",
   "facilityCategory": "FAVMVMW000",
   "facilityName": "开封市中支业务网云桌面平台",
@@ -1401,11 +1863,17 @@
   "virtualizationSoftwareBrandLand": "00-国内",
   "virtualizationSoftwarePlatform": "Virtualization Management Platform (VMP 5.3.8R2)",
   "vmManagementPlatform": "虚拟桌面接入管理系统VDI5.3.8 R2",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "694d3d6e5b694badaa4e502fa4a313a8",
-  "belongsServer": "郑州虚拟机11.66.17.206",
+  "belongsServer": "5f03228324534812a20f377ddad125b7",
   "belongsServerType": "01-私有",
   "facilityCategory": "FAVMVMW000",
   "facilityName": "fastDFS_生产1",
@@ -1419,11 +1887,17 @@
   "virtualizationSoftwareBrandLand": "01-国外",
   "virtualizationSoftwarePlatform": "VMware",
   "vmManagementPlatform": "VCenter Server",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "6978a274414b4dd59a80efb04e81ea38",
-  "belongsServer": "郑州虚拟机11.66.17.205",
+  "belongsServer": "9d1c0dadabf04d8ca548bc5072fe1c6b",
   "belongsServerType": "01-私有",
   "facilityCategory": "FAVMVMW000",
   "facilityName": "DzzOffice",
@@ -1437,11 +1911,17 @@
   "virtualizationSoftwareBrandLand": "01-国外",
   "virtualizationSoftwarePlatform": "VMware",
   "vmManagementPlatform": "VCenter Server",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "6a079f94203f45f78447651986915c65",
-  "belongsServer": "郑州虚拟机11.66.17.206",
+  "belongsServer": "5f03228324534812a20f377ddad125b7",
   "belongsServerType": "01-私有",
   "facilityCategory": "FAVMVMW000",
   "facilityName": "new OA BACKUP 扩容生产",
@@ -1455,11 +1935,17 @@
   "virtualizationSoftwareBrandLand": "01-国外",
   "virtualizationSoftwarePlatform": "VMware",
   "vmManagementPlatform": "VCenter Server",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "6ae701b6310e44cc8784af06e89018ec",
-  "belongsServer": "郑州虚拟机9.132.63.207",
+  "belongsServer": "258a95a470084167886053c4257ee2c9",
   "belongsServerType": "01-私有",
   "facilityCategory": "FAVMVMW000",
   "facilityName": "TIPSMOMA-test",
@@ -1473,11 +1959,17 @@
   "virtualizationSoftwareBrandLand": "01-国外",
   "virtualizationSoftwarePlatform": "VMware",
   "vmManagementPlatform": "VCenter Server",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "6b8aec947b114ae28f4df74419e1f99b",
-  "belongsServer": "郑州虚拟机11.66.17.205",
+  "belongsServer": "9d1c0dadabf04d8ca548bc5072fe1c6b",
   "belongsServerType": "01-私有",
   "facilityCategory": "FAVMVMW000",
   "facilityName": "征信查询监管平台",
@@ -1491,11 +1983,17 @@
   "virtualizationSoftwareBrandLand": "01-国外",
   "virtualizationSoftwarePlatform": "VMware",
   "vmManagementPlatform": "VCenter Server",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "6d290adb10b048a4af3a6ea21df94dc4",
-  "belongsServer": "郑州虚拟机9.132.63.207",
+  "belongsServer": "258a95a470084167886053c4257ee2c9",
   "belongsServerType": "01-私有",
   "facilityCategory": "FAVMVMW000",
   "facilityName": "OA3",
@@ -1509,11 +2007,17 @@
   "virtualizationSoftwareBrandLand": "01-国外",
   "virtualizationSoftwarePlatform": "VMware",
   "vmManagementPlatform": "VCenter Server",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "6dcec1952f8645369f59f45d0ae81430",
-  "belongsServer": "郑州虚拟机11.66.17.206",
+  "belongsServer": "5f03228324534812a20f377ddad125b7",
   "belongsServerType": "01-私有",
   "facilityCategory": "FAVMVMW000",
   "facilityName": "河南省人民银行无记名国债兑付系统",
@@ -1527,11 +2031,17 @@
   "virtualizationSoftwareBrandLand": "01-国外",
   "virtualizationSoftwarePlatform": "VMware",
   "vmManagementPlatform": "VCenter Server",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "6ed9b97340d943a5b370776183e0f529",
-  "belongsServer": "洛阳H3C超融合服务器3",
+  "belongsServer": "32d99a0814d84487b146c387a14188d5",
   "belongsServerType": "01-私有",
   "facilityCategory": "FAVMVMW000",
   "facilityName": "洛阳市中支GitLab服务器",
@@ -1545,11 +2055,17 @@
   "virtualizationSoftwareBrandLand": "00-国内",
   "virtualizationSoftwarePlatform": "H3C CAS 虚拟化平台",
   "vmManagementPlatform": "H3C CAS CVM",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "70c663d5ce1f4bce86b2f81e5271bafd",
-  "belongsServer": "郑州虚拟机11.66.17.204",
+  "belongsServer": "b734bc454f3b43358269b9e3d3f58870",
   "belongsServerType": "01-私有",
   "facilityCategory": "FAVMVMW000",
   "facilityName": "ZZ-APP-PBCDC-D",
@@ -1563,11 +2079,17 @@
   "virtualizationSoftwareBrandLand": "01-国外",
   "virtualizationSoftwarePlatform": "VMware",
   "vmManagementPlatform": "VCenter Server",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "70cc1f7fd7c948959cf77bbd2f8e1b05",
-  "belongsServer": "郑州虚拟机11.66.17.204",
+  "belongsServer": "b734bc454f3b43358269b9e3d3f58870",
   "belongsServerType": "01-私有",
   "facilityCategory": "FAVMVMW000",
   "facilityName": "一代查询机后台管理",
@@ -1581,11 +2103,17 @@
   "virtualizationSoftwareBrandLand": "01-国外",
   "virtualizationSoftwarePlatform": "VMware",
   "vmManagementPlatform": "VCenter Server",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "71ba0a00e3554282abea06ddaf6172e6",
-  "belongsServer": "郑州虚拟机9.132.63.207",
+  "belongsServer": "258a95a470084167886053c4257ee2c9",
   "belongsServerType": "01-私有",
   "facilityCategory": "FAVMVMW000",
   "facilityName": "Zabbix-Proxy_DMZ-9.132.63.138",
@@ -1599,11 +2127,17 @@
   "virtualizationSoftwareBrandLand": "01-国外",
   "virtualizationSoftwarePlatform": "VMware",
   "vmManagementPlatform": "VCenter Server",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "729d27e7f1ba413a9ed6c1ca5d866a20",
-  "belongsServer": "鹤壁市中支服务器机房HCI超融合虚拟化平台服务器2",
+  "belongsServer": "0b77ce3d7ecd4989ac0d0403b85720aa",
   "belongsServerType": "01-私有",
   "facilityCategory": "FAVMVMW000",
   "facilityName": "鹤壁市中支FTP服务器",
@@ -1617,11 +2151,17 @@
   "virtualizationSoftwareBrandLand": "00-国内",
   "virtualizationSoftwarePlatform": "深信服",
   "vmManagementPlatform": "超融合",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "736f035560664356a574215012eb1160",
-  "belongsServer": "郑州虚拟机11.66.17.204",
+  "belongsServer": "b734bc454f3b43358269b9e3d3f58870",
   "belongsServerType": "01-私有",
   "facilityCategory": "FAVMVMW000",
   "facilityName": "CRAMS数据库-CDP-验证",
@@ -1635,11 +2175,17 @@
   "virtualizationSoftwareBrandLand": "01-国外",
   "virtualizationSoftwarePlatform": "VMware",
   "vmManagementPlatform": "VCenter Server",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "737dc6478e554dba8737b3acb854a366",
-  "belongsServer": "洛阳H3C超融合服务器3",
+  "belongsServer": "32d99a0814d84487b146c387a14188d5",
   "belongsServerType": "01-私有",
   "facilityCategory": "FAVMVMW000",
   "facilityName": "洛阳市中支保卫技防设备信息管理系统服务器",
@@ -1653,11 +2199,17 @@
   "virtualizationSoftwareBrandLand": "00-国内",
   "virtualizationSoftwarePlatform": "H3C CAS 虚拟化平台",
   "vmManagementPlatform": "H3C CAS CVM",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "7c366a26258041d39633f578dc073acc",
-  "belongsServer": "郑州虚拟机11.66.17.204",
+  "belongsServer": "b734bc454f3b43358269b9e3d3f58870",
   "belongsServerType": "01-私有",
   "facilityCategory": "FAVMVMW000",
   "facilityName": "ZabbixProxy1-11.66.25.51",
@@ -1671,11 +2223,17 @@
   "virtualizationSoftwareBrandLand": "01-国外",
   "virtualizationSoftwarePlatform": "VMware",
   "vmManagementPlatform": "VCenter Server",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "7c48f8f448254c6d9616a9ef8e2a05b3",
-  "belongsServer": "郑州虚拟机11.66.17.204",
+  "belongsServer": "b734bc454f3b43358269b9e3d3f58870",
   "belongsServerType": "01-私有",
   "facilityCategory": "FAVMVMW000",
   "facilityName": "四大学习平台",
@@ -1689,11 +2247,17 @@
   "virtualizationSoftwareBrandLand": "01-国外",
   "virtualizationSoftwarePlatform": "VMware",
   "vmManagementPlatform": "VCenter Server",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "7c95ec1bb4204e309cc9682d0066ae5d",
-  "belongsServer": "郑州虚拟机9.132.63.207",
+  "belongsServer": "258a95a470084167886053c4257ee2c9",
   "belongsServerType": "01-私有",
   "facilityCategory": "FAVMVMW000",
   "facilityName": "PICP-MQ-product",
@@ -1707,11 +2271,17 @@
   "virtualizationSoftwareBrandLand": "01-国外",
   "virtualizationSoftwarePlatform": "VMware",
   "vmManagementPlatform": "VCenter Server",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "7e05570ea72d4f97a89d152f65677d8e",
-  "belongsServer": "郑州虚拟机11.66.17.205",
+  "belongsServer": "9d1c0dadabf04d8ca548bc5072fe1c6b",
   "belongsServerType": "01-私有",
   "facilityCategory": "FAVMVMW000",
   "facilityName": "DZDZNJ(电子对账）",
@@ -1725,11 +2295,17 @@
   "virtualizationSoftwareBrandLand": "01-国外",
   "virtualizationSoftwarePlatform": "VMware",
   "vmManagementPlatform": "VCenter Server",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "7e1ee0a52b0d4afba11a78c15f6b14fb",
-  "belongsServer": "郑州虚拟机11.66.17.205",
+  "belongsServer": "9d1c0dadabf04d8ca548bc5072fe1c6b",
   "belongsServerType": "01-私有",
   "facilityCategory": "FAVMVMW000",
   "facilityName": "zzemc_test",
@@ -1743,11 +2319,17 @@
   "virtualizationSoftwareBrandLand": "01-国外",
   "virtualizationSoftwarePlatform": "VMware",
   "vmManagementPlatform": "VCenter Server",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "7eb936a3b60545a0a531eb0d62716f27",
-  "belongsServer": "郑州虚拟机11.66.17.204",
+  "belongsServer": "b734bc454f3b43358269b9e3d3f58870",
   "belongsServerType": "01-私有",
   "facilityCategory": "FAVMVMW000",
   "facilityName": "FTPServer",
@@ -1761,11 +2343,17 @@
   "virtualizationSoftwareBrandLand": "01-国外",
   "virtualizationSoftwarePlatform": "VMware",
   "vmManagementPlatform": "VCenter Server",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "7f2cc51edad546bba3c0a03555a0f654",
-  "belongsServer": "郑州虚拟机11.66.17.204",
+  "belongsServer": "b734bc454f3b43358269b9e3d3f58870",
   "belongsServerType": "01-私有",
   "facilityCategory": "FAVMVMW000",
   "facilityName": "农村支付报表分析系统",
@@ -1779,11 +2367,17 @@
   "virtualizationSoftwareBrandLand": "01-国外",
   "virtualizationSoftwarePlatform": "VMware",
   "vmManagementPlatform": "VCenter Server",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "808908475aa84714b6006e80f61d4764",
-  "belongsServer": "郑州虚拟机11.66.17.206",
+  "belongsServer": "5f03228324534812a20f377ddad125b7",
   "belongsServerType": "01-私有",
   "facilityCategory": "FAVMVMW000",
   "facilityName": "账户电子化审批测试DB",
@@ -1797,11 +2391,17 @@
   "virtualizationSoftwareBrandLand": "01-国外",
   "virtualizationSoftwarePlatform": "VMware",
   "vmManagementPlatform": "VCenter Server",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "8287f849ea4242d0a2c3bb9894a5a439",
-  "belongsServer": "郑州虚拟机11.66.17.205",
+  "belongsServer": "9d1c0dadabf04d8ca548bc5072fe1c6b",
   "belongsServerType": "01-私有",
   "facilityCategory": "FAVMVMW000",
   "facilityName": "new OA APP 扩容生产",
@@ -1815,11 +2415,17 @@
   "virtualizationSoftwareBrandLand": "01-国外",
   "virtualizationSoftwarePlatform": "VMware",
   "vmManagementPlatform": "VCenter Server",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "837cc49b24dc4909bcf48597eb6eb61f",
-  "belongsServer": "洛阳H3C超融合服务器2",
+  "belongsServer": "c517abdb06944183af69346502c85ce4",
   "belongsServerType": "01-私有",
   "facilityCategory": "FAVMVMW000",
   "facilityName": "洛阳市中支金蝶财务软件服务器",
@@ -1833,11 +2439,17 @@
   "virtualizationSoftwareBrandLand": "00-国内",
   "virtualizationSoftwarePlatform": "H3C CAS 虚拟化平台",
   "vmManagementPlatform": "H3C CAS CVM",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "83f853f4867d45e5b4a28524927b84ab",
-  "belongsServer": "郑州虚拟机11.66.17.205",
+  "belongsServer": "9d1c0dadabf04d8ca548bc5072fe1c6b",
   "belongsServerType": "01-私有",
   "facilityCategory": "FAVMVMW000",
   "facilityName": "基础组件服务器（11.66.18.10）",
@@ -1851,11 +2463,17 @@
   "virtualizationSoftwareBrandLand": "01-国外",
   "virtualizationSoftwarePlatform": "VMware",
   "vmManagementPlatform": "VCenter Server",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "8529f5b3ec974dddace0b74e682efebc",
-  "belongsServer": "郑州虚拟机11.66.17.204",
+  "belongsServer": "b734bc454f3b43358269b9e3d3f58870",
   "belongsServerType": "01-私有",
   "facilityCategory": "FAVMVMW000",
   "facilityName": "聘用制员工薪酬管理系统",
@@ -1869,11 +2487,17 @@
   "virtualizationSoftwareBrandLand": "01-国外",
   "virtualizationSoftwarePlatform": "VMware",
   "vmManagementPlatform": "VCenter Server",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "876d9c12c3b445348c7e036118967a8c",
-  "belongsServer": "郑州虚拟机9.132.63.207",
+  "belongsServer": "258a95a470084167886053c4257ee2c9",
   "belongsServerType": "01-私有",
   "facilityCategory": "FAVMVMW000",
   "facilityName": "CRAMS应用服务器",
@@ -1887,11 +2511,17 @@
   "virtualizationSoftwareBrandLand": "01-国外",
   "virtualizationSoftwarePlatform": "VMware",
   "vmManagementPlatform": "VCenter Server",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "87e186c97ffc4b9c9d90478d2c25c729",
-  "belongsServer": "郑州虚拟机9.132.63.207",
+  "belongsServer": "258a95a470084167886053c4257ee2c9",
   "belongsServerType": "01-私有",
   "facilityCategory": "FAVMVMW000",
   "facilityName": "行员考核",
@@ -1905,11 +2535,17 @@
   "virtualizationSoftwareBrandLand": "01-国外",
   "virtualizationSoftwarePlatform": "VMware",
   "vmManagementPlatform": "VCenter Server",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "8a26619ea5584353ad42d269613cc9ce",
-  "belongsServer": "郑州虚拟机9.132.63.207",
+  "belongsServer": "258a95a470084167886053c4257ee2c9",
   "belongsServerType": "01-私有",
   "facilityCategory": "FAVMVMW000",
   "facilityName": "CAMS-HBFX-FPXT-TLQ-B-test",
@@ -1923,11 +2559,17 @@
   "virtualizationSoftwareBrandLand": "01-国外",
   "virtualizationSoftwarePlatform": "VMware",
   "vmManagementPlatform": "VCenter Server",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "8abbf6951c884eea86aa50501152f35c",
-  "belongsServer": "郑州虚拟机9.132.63.207",
+  "belongsServer": "258a95a470084167886053c4257ee2c9",
   "belongsServerType": "01-私有",
   "facilityCategory": "FAVMVMW000",
   "facilityName": "CAMS-HBFX-FPXT-TLQ-A-test",
@@ -1941,11 +2583,17 @@
   "virtualizationSoftwareBrandLand": "01-国外",
   "virtualizationSoftwarePlatform": "VMware",
   "vmManagementPlatform": "VCenter Server",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "8d0e38d9d91b4c3da2d817b62fcbacff",
-  "belongsServer": "郑州虚拟机9.132.63.207",
+  "belongsServer": "258a95a470084167886053c4257ee2c9",
   "belongsServerType": "01-私有",
   "facilityCategory": "FAVMVMW000",
   "facilityName": "人行柜台查询前置系统",
@@ -1959,11 +2607,17 @@
   "virtualizationSoftwareBrandLand": "01-国外",
   "virtualizationSoftwarePlatform": "VMware",
   "vmManagementPlatform": "VCenter Server",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "8f770eee259f4f64a9c11c2838c3b673",
-  "belongsServer": "郑州虚拟机9.132.63.207",
+  "belongsServer": "258a95a470084167886053c4257ee2c9",
   "belongsServerType": "01-私有",
   "facilityCategory": "FAVMVMW000",
   "facilityName": "金融行业态势感知与信息共享平台-test",
@@ -1977,11 +2631,17 @@
   "virtualizationSoftwareBrandLand": "01-国外",
   "virtualizationSoftwarePlatform": "VMware",
   "vmManagementPlatform": "VCenter Server",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "902a80d716804fd59d342197bd91a61d",
-  "belongsServer": "郑州虚拟机11.66.17.206",
+  "belongsServer": "5f03228324534812a20f377ddad125b7",
   "belongsServerType": "01-私有",
   "facilityCategory": "FAVMVMW000",
   "facilityName": "机关事务信息管理系统",
@@ -1995,11 +2655,17 @@
   "virtualizationSoftwareBrandLand": "01-国外",
   "virtualizationSoftwarePlatform": "VMware",
   "vmManagementPlatform": "VCenter Server",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "92b2a4add0794a458c80abeed13f2c94",
-  "belongsServer": "郑州虚拟机9.132.63.207",
+  "belongsServer": "258a95a470084167886053c4257ee2c9",
   "belongsServerType": "01-私有",
   "facilityCategory": "FAVMVMW000",
   "facilityName": "ACS前置MQ-生产环境",
@@ -2013,11 +2679,17 @@
   "virtualizationSoftwareBrandLand": "01-国外",
   "virtualizationSoftwarePlatform": "VMware",
   "vmManagementPlatform": "VCenter Server",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "93a27a6f4d6044708e22c15962c65d30",
-  "belongsServer": "郑州虚拟机11.66.17.206",
+  "belongsServer": "5f03228324534812a20f377ddad125b7",
   "belongsServerType": "01-私有",
   "facilityCategory": "FAVMVMW000",
   "facilityName": "基线管理系统",
@@ -2031,11 +2703,17 @@
   "virtualizationSoftwareBrandLand": "01-国外",
   "virtualizationSoftwarePlatform": "VMware",
   "vmManagementPlatform": "VCenter Server",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "96722952e9e642f48526b7af0bfa62e9",
-  "belongsServer": "郑州虚拟机11.66.17.206",
+  "belongsServer": "5f03228324534812a20f377ddad125b7",
   "belongsServerType": "01-私有",
   "facilityCategory": "FAVMVMW000",
   "facilityName": "proxy01",
@@ -2049,11 +2727,17 @@
   "virtualizationSoftwareBrandLand": "01-国外",
   "virtualizationSoftwarePlatform": "VMware",
   "vmManagementPlatform": "VCenter Server",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "97e26498d2614cd28a2ee9029e20afeb",
-  "belongsServer": "郑州虚拟机11.66.17.206",
+  "belongsServer": "5f03228324534812a20f377ddad125b7",
   "belongsServerType": "01-私有",
   "facilityCategory": "FAVMVMW000",
   "facilityName": "CCPC数据库服务器",
@@ -2067,11 +2751,17 @@
   "virtualizationSoftwareBrandLand": "01-国外",
   "virtualizationSoftwarePlatform": "VMware",
   "vmManagementPlatform": "VCenter Server",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "99a894bbf11a44d69b61978a65fb96e4",
-  "belongsServer": "郑州虚拟机11.66.17.205",
+  "belongsServer": "9d1c0dadabf04d8ca548bc5072fe1c6b",
   "belongsServerType": "01-私有",
   "facilityCategory": "FAVMVMW000",
   "facilityName": "账户电子化审批生产APP",
@@ -2085,11 +2775,17 @@
   "virtualizationSoftwareBrandLand": "01-国外",
   "virtualizationSoftwarePlatform": "VMware",
   "vmManagementPlatform": "VCenter Server",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "9b587769c41642d3b329a11920715f24",
-  "belongsServer": "郑州虚拟机11.66.17.206",
+  "belongsServer": "5f03228324534812a20f377ddad125b7",
   "belongsServerType": "01-私有",
   "facilityCategory": "FAVMVMW000",
   "facilityName": "账户影像web服务_生产1",
@@ -2103,11 +2799,17 @@
   "virtualizationSoftwareBrandLand": "01-国外",
   "virtualizationSoftwarePlatform": "VMware",
   "vmManagementPlatform": "VCenter Server",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "9d0566032fa945b3b2d43bb116c4d8db",
-  "belongsServer": "洛阳H3C超融合服务器2",
+  "belongsServer": "c517abdb06944183af69346502c85ce4",
   "belongsServerType": "01-私有",
   "facilityCategory": "FAVMVMW000",
   "facilityName": "洛阳市中支FTP服务器（资金网段）",
@@ -2121,11 +2823,17 @@
   "virtualizationSoftwareBrandLand": "00-国内",
   "virtualizationSoftwarePlatform": "H3C CAS 虚拟化平台",
   "vmManagementPlatform": "H3C CAS CVM",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "9e8ceeedaecd4dc0ba54114b3fef4b27",
-  "belongsServer": "郑州虚拟机11.66.17.206",
+  "belongsServer": "5f03228324534812a20f377ddad125b7",
   "belongsServerType": "01-私有",
   "facilityCategory": "FAVMVMW000",
   "facilityName": "征信数据流转平台",
@@ -2139,11 +2847,17 @@
   "virtualizationSoftwareBrandLand": "01-国外",
   "virtualizationSoftwarePlatform": "VMware",
   "vmManagementPlatform": "VCenter Server",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "9feaef8c015740c08a411e67c40003c2",
-  "belongsServer": "郑州虚拟机9.132.63.207",
+  "belongsServer": "258a95a470084167886053c4257ee2c9",
   "belongsServerType": "01-私有",
   "facilityCategory": "FAVMVMW000",
   "facilityName": "金融高管考试系统",
@@ -2157,11 +2871,17 @@
   "virtualizationSoftwareBrandLand": "01-国外",
   "virtualizationSoftwarePlatform": "VMware",
   "vmManagementPlatform": "VCenter Server",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "a0ca36c0a45146ba913cf88af8e6feb8",
-  "belongsServer": "郑州虚拟机11.66.17.206",
+  "belongsServer": "5f03228324534812a20f377ddad125b7",
   "belongsServerType": "01-私有",
   "facilityCategory": "FAVMVMW000",
   "facilityName": "newOA DB",
@@ -2175,11 +2895,17 @@
   "virtualizationSoftwareBrandLand": "01-国外",
   "virtualizationSoftwarePlatform": "VMware",
   "vmManagementPlatform": "VCenter Server",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "a25f0e18cf5c4ee88d13243f3232f4d9",
-  "belongsServer": "郑州虚拟机9.132.63.207",
+  "belongsServer": "258a95a470084167886053c4257ee2c9",
   "belongsServerType": "01-私有",
   "facilityCategory": "FAVMVMW000",
   "facilityName": "mail_server",
@@ -2193,11 +2919,17 @@
   "virtualizationSoftwareBrandLand": "01-国外",
   "virtualizationSoftwarePlatform": "VMware",
   "vmManagementPlatform": "VCenter Server",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "a3e30bcb110044f985ced4d3535f0baa",
-  "belongsServer": "郑州虚拟机9.132.63.207",
+  "belongsServer": "258a95a470084167886053c4257ee2c9",
   "belongsServerType": "01-私有",
   "facilityCategory": "FAVMVMW000",
   "facilityName": "ACS前置MQ-test-deleted",
@@ -2211,11 +2943,17 @@
   "virtualizationSoftwareBrandLand": "01-国外",
   "virtualizationSoftwarePlatform": "VMware",
   "vmManagementPlatform": "VCenter Server",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "a49e87d7382f49bbb5ac2279e3e91356",
-  "belongsServer": "郑州虚拟机11.66.17.204",
+  "belongsServer": "b734bc454f3b43358269b9e3d3f58870",
   "belongsServerType": "01-私有",
   "facilityCategory": "FAVMVMW000",
   "facilityName": "数据服务器",
@@ -2229,11 +2967,17 @@
   "virtualizationSoftwareBrandLand": "01-国外",
   "virtualizationSoftwarePlatform": "VMware",
   "vmManagementPlatform": "VCenter Server",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "a4a5a48cadd549a1b42edd37113c5691",
-  "belongsServer": "郑州虚拟机11.66.17.204",
+  "belongsServer": "b734bc454f3b43358269b9e3d3f58870",
   "belongsServerType": "01-私有",
   "facilityCategory": "FAVMVMW000",
   "facilityName": "账户电子化审批测试APP",
@@ -2247,11 +2991,17 @@
   "virtualizationSoftwareBrandLand": "01-国外",
   "virtualizationSoftwarePlatform": "VMware",
   "vmManagementPlatform": "VCenter Server",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "a62883f14a6c4de0bcf4de6a09c4e5e4",
-  "belongsServer": "郑州虚拟机9.132.63.207",
+  "belongsServer": "258a95a470084167886053c4257ee2c9",
   "belongsServerType": "01-私有",
   "facilityCategory": "FAVMVMW000",
   "facilityName": "PICP-Test",
@@ -2265,11 +3015,17 @@
   "virtualizationSoftwareBrandLand": "01-国外",
   "virtualizationSoftwarePlatform": "VMware",
   "vmManagementPlatform": "VCenter Server",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "a661a0cb446349deba3981e335b52563",
-  "belongsServer": "郑州虚拟机11.66.17.205",
+  "belongsServer": "9d1c0dadabf04d8ca548bc5072fe1c6b",
   "belongsServerType": "01-私有",
   "facilityCategory": "FAVMVMW000",
   "facilityName": "OA4",
@@ -2283,11 +3039,17 @@
   "virtualizationSoftwareBrandLand": "01-国外",
   "virtualizationSoftwarePlatform": "VMware",
   "vmManagementPlatform": "VCenter Server",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "a6bb6345fb8444b4a50ec40c89481cd9",
-  "belongsServer": "焦作市中支中心机房云桌面节点1",
+  "belongsServer": "af22e9e58d10414c8a743900003bf77e",
   "belongsServerType": "01-私有",
   "facilityCategory": "FAVMVMW000",
   "facilityName": "焦作市中支中心机房业务网云桌面平台",
@@ -2301,11 +3063,17 @@
   "virtualizationSoftwareBrandLand": "00-国内",
   "virtualizationSoftwarePlatform": "深信服超融合虚拟化软件V5.0",
   "vmManagementPlatform": "深信服云桌面虚拟化管理软件V2.0",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "a78694897f4349c682fc02edfe9e7be6",
-  "belongsServer": "郑州虚拟机11.66.17.204",
+  "belongsServer": "b734bc454f3b43358269b9e3d3f58870",
   "belongsServerType": "01-私有",
   "facilityCategory": "FAVMVMW000",
   "facilityName": "vc-test",
@@ -2319,11 +3087,17 @@
   "virtualizationSoftwareBrandLand": "01-国外",
   "virtualizationSoftwarePlatform": "VMware",
   "vmManagementPlatform": "VCenter Server",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "a87782571b204616854f040e7ee1cd7a",
-  "belongsServer": "郑州虚拟机11.66.17.205",
+  "belongsServer": "9d1c0dadabf04d8ca548bc5072fe1c6b",
   "belongsServerType": "01-私有",
   "facilityCategory": "FAVMVMW000",
   "facilityName": "数据中心报表系统APP",
@@ -2337,11 +3111,17 @@
   "virtualizationSoftwareBrandLand": "01-国外",
   "virtualizationSoftwarePlatform": "VMware",
   "vmManagementPlatform": "VCenter Server",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "aca85eef9cde40bea83fa706b3fea2aa",
-  "belongsServer": "郑州虚拟机9.132.63.207",
+  "belongsServer": "258a95a470084167886053c4257ee2c9",
   "belongsServerType": "01-私有",
   "facilityCategory": "FAVMVMW000",
   "facilityName": "注销企业帐户数据比对系统",
@@ -2355,11 +3135,17 @@
   "virtualizationSoftwareBrandLand": "01-国外",
   "virtualizationSoftwarePlatform": "VMware",
   "vmManagementPlatform": "VCenter Server",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "ad71e65017754c1daf5da4c1982a0cb5",
-  "belongsServer": "郑州虚拟机11.66.17.204",
+  "belongsServer": "b734bc454f3b43358269b9e3d3f58870",
   "belongsServerType": "01-私有",
   "facilityCategory": "FAVMVMW000",
   "facilityName": "廉政考试测试",
@@ -2373,11 +3159,17 @@
   "virtualizationSoftwareBrandLand": "01-国外",
   "virtualizationSoftwarePlatform": "VMware",
   "vmManagementPlatform": "VCenter Server",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "ad7cae85cd9c4794ab748321706cd1d9",
-  "belongsServer": "郑州虚拟机11.66.17.206",
+  "belongsServer": "5f03228324534812a20f377ddad125b7",
   "belongsServerType": "01-私有",
   "facilityCategory": "FAVMVMW000",
   "facilityName": "人事系统",
@@ -2391,11 +3183,17 @@
   "virtualizationSoftwareBrandLand": "01-国外",
   "virtualizationSoftwarePlatform": "VMware",
   "vmManagementPlatform": "VCenter Server",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "b2ff40c608364e2ea83ca57b83b9437f",
-  "belongsServer": "郑州虚拟机11.66.17.204",
+  "belongsServer": "b734bc454f3b43358269b9e3d3f58870",
   "belongsServerType": "01-私有",
   "facilityCategory": "FAVMVMW000",
   "facilityName": "360天擎",
@@ -2409,11 +3207,17 @@
   "virtualizationSoftwareBrandLand": "01-国外",
   "virtualizationSoftwarePlatform": "VMware",
   "vmManagementPlatform": "VCenter Server",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "b4136fc572f84878bc1090e64a662f5c",
-  "belongsServer": "洛阳H3C超融合服务器3",
+  "belongsServer": "32d99a0814d84487b146c387a14188d5",
   "belongsServerType": "01-私有",
   "facilityCategory": "FAVMVMW000",
   "facilityName": "洛阳市中支综合信息管理系统",
@@ -2427,11 +3231,17 @@
   "virtualizationSoftwareBrandLand": "00-国内",
   "virtualizationSoftwarePlatform": "H3C CAS 虚拟化平台",
   "vmManagementPlatform": "H3C CAS CVM",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "b49809c2036e497daa1d9dbc87167c8d",
-  "belongsServer": "漯河市中支中心机房业务网云桌面平台服务器",
+  "belongsServer": "3fbb7efc88a440cabb6cd2a1e5e227bd",
   "belongsServerType": "01-私有",
   "facilityCategory": "FAVMVMW000",
   "facilityName": "漯河市中支中心机房业务网云桌面平台1",
@@ -2445,11 +3255,17 @@
   "virtualizationSoftwareBrandLand": "00-国内",
   "virtualizationSoftwarePlatform": "深信服超融合虚拟化软件V5.0",
   "vmManagementPlatform": "深信服云桌面虚拟化管理软件V2.0",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "b58927203cca435d87c2cd167b2d9c32",
-  "belongsServer": "郑州虚拟机9.132.63.207",
+  "belongsServer": "258a95a470084167886053c4257ee2c9",
   "belongsServerType": "01-私有",
   "facilityCategory": "FAVMVMW000",
   "facilityName": "new OA APP生产",
@@ -2463,11 +3279,17 @@
   "virtualizationSoftwareBrandLand": "01-国外",
   "virtualizationSoftwarePlatform": "VMware",
   "vmManagementPlatform": "VCenter Server",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "b66be421f3e94ca394ab9cd853c09894",
-  "belongsServer": "郑州虚拟机11.66.17.204",
+  "belongsServer": "b734bc454f3b43358269b9e3d3f58870",
   "belongsServerType": "01-私有",
   "facilityCategory": "FAVMVMW000",
   "facilityName": "财务报表",
@@ -2481,11 +3303,17 @@
   "virtualizationSoftwareBrandLand": "01-国外",
   "virtualizationSoftwarePlatform": "VMware",
   "vmManagementPlatform": "VCenter Server",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "b7a65c05ad084754b96c95017d7f45be",
-  "belongsServer": "郑州虚拟机9.132.63.207",
+  "belongsServer": "258a95a470084167886053c4257ee2c9",
   "belongsServerType": "01-私有",
   "facilityCategory": "FAVMVMW000",
   "facilityName": "金融城域网邮件系统-dw",
@@ -2499,11 +3327,17 @@
   "virtualizationSoftwareBrandLand": "01-国外",
   "virtualizationSoftwarePlatform": "VMware",
   "vmManagementPlatform": "VCenter Server",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "b9039360f95741b8982ba6758ffbdb9a",
-  "belongsServer": "郑州虚拟机9.132.63.207",
+  "belongsServer": "258a95a470084167886053c4257ee2c9",
   "belongsServerType": "01-私有",
   "facilityCategory": "FAVMVMW000",
   "facilityName": "zabbix",
@@ -2517,11 +3351,17 @@
   "virtualizationSoftwareBrandLand": "01-国外",
   "virtualizationSoftwarePlatform": "VMware",
   "vmManagementPlatform": "VCenter Server",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "bb6006c6874e4a1da68f41f83078f2f6",
-  "belongsServer": "郑州虚拟机11.66.17.205",
+  "belongsServer": "9d1c0dadabf04d8ca548bc5072fe1c6b",
   "belongsServerType": "01-私有",
   "facilityCategory": "FAVMVMW000",
   "facilityName": "审计信息共享平台-opensuse",
@@ -2535,11 +3375,17 @@
   "virtualizationSoftwareBrandLand": "01-国外",
   "virtualizationSoftwarePlatform": "VMware",
   "vmManagementPlatform": "VCenter Server",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "bcb079b8677b4b42a67a8228cfd682ae",
-  "belongsServer": "郑州虚拟机11.66.17.205",
+  "belongsServer": "9d1c0dadabf04d8ca548bc5072fe1c6b",
   "belongsServerType": "01-私有",
   "facilityCategory": "FAVMVMW000",
   "facilityName": "newOA DB生产",
@@ -2553,11 +3399,17 @@
   "virtualizationSoftwareBrandLand": "01-国外",
   "virtualizationSoftwarePlatform": "VMware",
   "vmManagementPlatform": "VCenter Server",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "bd0ffad944a841c78b132b95b195d0b7",
-  "belongsServer": "郑州虚拟机11.66.17.204",
+  "belongsServer": "b734bc454f3b43358269b9e3d3f58870",
   "belongsServerType": "01-私有",
   "facilityCategory": "FAVMVMW000",
   "facilityName": "远程接管管理机",
@@ -2571,11 +3423,17 @@
   "virtualizationSoftwareBrandLand": "01-国外",
   "virtualizationSoftwarePlatform": "VMware",
   "vmManagementPlatform": "VCenter Server",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "be55ae4eb6de4afb83f3f65eba195086",
-  "belongsServer": "郑州虚拟机11.66.17.205",
+  "belongsServer": "9d1c0dadabf04d8ca548bc5072fe1c6b",
   "belongsServerType": "01-私有",
   "facilityCategory": "FAVMVMW000",
   "facilityName": "HAYWDA2N",
@@ -2589,11 +3447,17 @@
   "virtualizationSoftwareBrandLand": "01-国外",
   "virtualizationSoftwarePlatform": "VMware",
   "vmManagementPlatform": "VCenter Server",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "be92d1d2d67e4351b3e9534a7aa68460",
-  "belongsServer": "郑州虚拟机11.66.17.204",
+  "belongsServer": "b734bc454f3b43358269b9e3d3f58870",
   "belongsServerType": "01-私有",
   "facilityCategory": "FAVMVMW000",
   "facilityName": "郑州综合信息服务系统",
@@ -2607,11 +3471,17 @@
   "virtualizationSoftwareBrandLand": "01-国外",
   "virtualizationSoftwarePlatform": "VMware",
   "vmManagementPlatform": "VCenter Server",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "bfc41b4cf78b46088ffb22dda2761629",
-  "belongsServer": "郑州虚拟机9.132.63.207",
+  "belongsServer": "258a95a470084167886053c4257ee2c9",
   "belongsServerType": "01-私有",
   "facilityCategory": "FAVMVMW000",
   "facilityName": "Tips测试环境",
@@ -2625,11 +3495,17 @@
   "virtualizationSoftwareBrandLand": "01-国外",
   "virtualizationSoftwarePlatform": "VMware",
   "vmManagementPlatform": "VCenter Server",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "c082f11f781f4f79838cf0df9f899356",
-  "belongsServer": "郑州虚拟机11.66.17.204",
+  "belongsServer": "b734bc454f3b43358269b9e3d3f58870",
   "belongsServerType": "01-私有",
   "facilityCategory": "FAVMVMW000",
   "facilityName": "VRV一体化",
@@ -2643,11 +3519,17 @@
   "virtualizationSoftwareBrandLand": "01-国外",
   "virtualizationSoftwarePlatform": "VMware",
   "vmManagementPlatform": "VCenter Server",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "c1aa07aba9204308b5034e3b5cabc9be",
-  "belongsServer": "商丘中支云桌面系统服务器",
+  "belongsServer": "4df7d7e6afc54792a89f994df6566929",
   "belongsServerType": "01-私有",
   "facilityCategory": "FAVMVMW000",
   "facilityName": "商丘市中支中心机房业务网云桌面平台",
@@ -2661,11 +3543,17 @@
   "virtualizationSoftwareBrandLand": "00-国内",
   "virtualizationSoftwarePlatform": "深信服超融合虚拟化软件V5.0",
   "vmManagementPlatform": "深信服云桌面虚拟化管理软件V2.0",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "c2208a7edd9241d783ed43699501b1ef",
-  "belongsServer": "漯河市中支中心机房业务网云桌面平台服务器",
+  "belongsServer": "3fbb7efc88a440cabb6cd2a1e5e227bd",
   "belongsServerType": "01-私有",
   "facilityCategory": "FAVMVMW000",
   "facilityName": "漯河市中支中心机房业务网云桌面平台2",
@@ -2679,11 +3567,17 @@
   "virtualizationSoftwareBrandLand": "00-国内",
   "virtualizationSoftwarePlatform": "深信服超融合虚拟化软件V5.0",
   "vmManagementPlatform": "深信服云桌面虚拟化管理软件V2.0",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "c2328c8029a14068968cf5ca031d7f45",
-  "belongsServer": "郑州虚拟机11.66.17.206",
+  "belongsServer": "5f03228324534812a20f377ddad125b7",
   "belongsServerType": "01-私有",
   "facilityCategory": "FAVMVMW000",
   "facilityName": "云存储系统",
@@ -2697,11 +3591,17 @@
   "virtualizationSoftwareBrandLand": "01-国外",
   "virtualizationSoftwarePlatform": "VMware",
   "vmManagementPlatform": "VCenter Server",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "c47d677573124bd8acb7db1022861231",
-  "belongsServer": "鹤壁市中支服务器机房HCI超融合虚拟化平台服务器2",
+  "belongsServer": "0b77ce3d7ecd4989ac0d0403b85720aa",
   "belongsServerType": "01-私有",
   "facilityCategory": "FAVMVMW000",
   "facilityName": "鹤壁市中支协同办公系统本地文件服务器",
@@ -2715,11 +3615,17 @@
   "virtualizationSoftwareBrandLand": "00-国内",
   "virtualizationSoftwarePlatform": "深信服",
   "vmManagementPlatform": "超融合",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "c64f9298109b4bcb99a06bc83cc1467d",
-  "belongsServer": "郑州虚拟机11.66.17.204",
+  "belongsServer": "b734bc454f3b43358269b9e3d3f58870",
   "belongsServerType": "01-私有",
   "facilityCategory": "FAVMVMW000",
   "facilityName": "DNS服务器",
@@ -2733,11 +3639,17 @@
   "virtualizationSoftwareBrandLand": "01-国外",
   "virtualizationSoftwarePlatform": "VMware",
   "vmManagementPlatform": "VCenter Server",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "c6a92d898a7d41f09973da7ff4c74d05",
-  "belongsServer": "平顶山市中支内容分发服务器",
+  "belongsServer": "f6b26df6def44dcb98ba8a06b13eacee",
   "belongsServerType": "01-私有",
   "facilityCategory": "FAVMVMW000",
   "facilityName": "平顶山市中支中心机房业务网云桌面平台",
@@ -2751,11 +3663,17 @@
   "virtualizationSoftwareBrandLand": "00-国内",
   "virtualizationSoftwarePlatform": "深信服超融合虚拟化软件V5.0",
   "vmManagementPlatform": "深信服云桌面虚拟化管理软件V2.0",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "c986b9a373004530a0b55e057a18d4bf",
-  "belongsServer": "郑州虚拟机11.66.17.206",
+  "belongsServer": "5f03228324534812a20f377ddad125b7",
   "belongsServerType": "01-私有",
   "facilityCategory": "FAVMVMW000",
   "facilityName": "账户影像web服务_生产2",
@@ -2769,11 +3687,17 @@
   "virtualizationSoftwareBrandLand": "01-国外",
   "virtualizationSoftwarePlatform": "VMware",
   "vmManagementPlatform": "VCenter Server",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "cae1cbbf953144be8ee2b1bd2bc6ca5e",
-  "belongsServer": "郑州虚拟机11.66.17.204",
+  "belongsServer": "b734bc454f3b43358269b9e3d3f58870",
   "belongsServerType": "01-私有",
   "facilityCategory": "FAVMVMW000",
   "facilityName": "CRAMS数据库-温备",
@@ -2787,11 +3711,17 @@
   "virtualizationSoftwareBrandLand": "01-国外",
   "virtualizationSoftwarePlatform": "VMware",
   "vmManagementPlatform": "VCenter Server",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "cdb22c31cff0487c86d96d24145bbc34",
-  "belongsServer": "郑州虚拟机9.132.63.207",
+  "belongsServer": "258a95a470084167886053c4257ee2c9",
   "belongsServerType": "01-私有",
   "facilityCategory": "FAVMVMW000",
   "facilityName": "ACS前置MQ-测试环境",
@@ -2805,11 +3735,17 @@
   "virtualizationSoftwareBrandLand": "01-国外",
   "virtualizationSoftwarePlatform": "VMware",
   "vmManagementPlatform": "VCenter Server",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "cdd912293e9a45b9bd07d2144a620b86",
-  "belongsServer": "郑州虚拟机9.132.63.207",
+  "belongsServer": "258a95a470084167886053c4257ee2c9",
   "belongsServerType": "01-私有",
   "facilityCategory": "FAVMVMW000",
   "facilityName": "货金FTP",
@@ -2823,11 +3759,17 @@
   "virtualizationSoftwareBrandLand": "01-国外",
   "virtualizationSoftwarePlatform": "VMware",
   "vmManagementPlatform": "VCenter Server",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "ce44c5d578884358a44bbc09ce44c5eb",
-  "belongsServer": "郑州虚拟机9.132.63.207",
+  "belongsServer": "258a95a470084167886053c4257ee2c9",
   "belongsServerType": "01-私有",
   "facilityCategory": "FAVMVMW000",
   "facilityName": "Avamar Virtual Edition 7.5",
@@ -2841,11 +3783,17 @@
   "virtualizationSoftwareBrandLand": "01-国外",
   "virtualizationSoftwarePlatform": "VMware",
   "vmManagementPlatform": "VCenter Server",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "d242472364974cbe88c084a3e70e41fe",
-  "belongsServer": "郑州虚拟机11.66.17.205",
+  "belongsServer": "9d1c0dadabf04d8ca548bc5072fe1c6b",
   "belongsServerType": "01-私有",
   "facilityCategory": "FAVMVMW000",
   "facilityName": "数据库服务器（11.66.18.9）",
@@ -2859,11 +3807,17 @@
   "virtualizationSoftwareBrandLand": "01-国外",
   "virtualizationSoftwarePlatform": "VMware",
   "vmManagementPlatform": "VCenter Server",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "d443511881f84a2c8acbdf80d90117f9",
-  "belongsServer": "郑州虚拟机9.132.63.207",
+  "belongsServer": "258a95a470084167886053c4257ee2c9",
   "belongsServerType": "01-私有",
   "facilityCategory": "FAVMVMW000",
   "facilityName": "金融行业态势感知与信息共享平台-node2",
@@ -2877,11 +3831,17 @@
   "virtualizationSoftwareBrandLand": "01-国外",
   "virtualizationSoftwarePlatform": "VMware",
   "vmManagementPlatform": "VCenter Server",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "d47f91ba9272488381a0b7a9f489b191",
-  "belongsServer": "郑州虚拟机9.132.63.207",
+  "belongsServer": "258a95a470084167886053c4257ee2c9",
   "belongsServerType": "01-私有",
   "facilityCategory": "FAVMVMW000",
   "facilityName": "账户电子化审批TLQ-dw",
@@ -2895,11 +3855,17 @@
   "virtualizationSoftwareBrandLand": "01-国外",
   "virtualizationSoftwarePlatform": "VMware",
   "vmManagementPlatform": "VCenter Server",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "d6fea0f4d5ff4225a260668785c4af9a",
-  "belongsServer": "洛阳H3C超融合服务器2",
+  "belongsServer": "c517abdb06944183af69346502c85ce4",
   "belongsServerType": "01-私有",
   "facilityCategory": "FAVMVMW000",
   "facilityName": "洛阳市中支人事考勤系统服务器",
@@ -2913,11 +3879,17 @@
   "virtualizationSoftwareBrandLand": "00-国内",
   "virtualizationSoftwarePlatform": "H3C CAS 虚拟化平台",
   "vmManagementPlatform": "H3C CAS CVM",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "db806dc3c166488e98272bb2438ef8e2",
-  "belongsServer": "郑州虚拟机9.132.63.207",
+  "belongsServer": "258a95a470084167886053c4257ee2c9",
   "belongsServerType": "01-私有",
   "facilityCategory": "FAVMVMW000",
   "facilityName": "CAMS-TLQ-B",
@@ -2931,11 +3903,17 @@
   "virtualizationSoftwareBrandLand": "01-国外",
   "virtualizationSoftwarePlatform": "VMware",
   "vmManagementPlatform": "VCenter Server",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "db8fece8d4784cd8bd3dbd361d180806",
-  "belongsServer": "郑州虚拟机11.66.17.204",
+  "belongsServer": "b734bc454f3b43358269b9e3d3f58870",
   "belongsServerType": "01-私有",
   "facilityCategory": "FAVMVMW000",
   "facilityName": "CRAMS MQ服务器",
@@ -2949,11 +3927,17 @@
   "virtualizationSoftwareBrandLand": "01-国外",
   "virtualizationSoftwarePlatform": "VMware",
   "vmManagementPlatform": "VCenter Server",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "dbdae9b865bd463cae1fc715de3e2c5f",
-  "belongsServer": "开封市中支超融合系统服务器1",
+  "belongsServer": "a2c95b0b8c38499c8016fb99afe6eceb",
   "belongsServerType": "01-私有",
   "facilityCategory": "FAVMVMW000",
   "facilityName": "开封市中支超融合系统服务器",
@@ -2967,11 +3951,17 @@
   "virtualizationSoftwareBrandLand": "00-国内",
   "virtualizationSoftwarePlatform": "SANGFOR aCloud 5.8.6 Build20181030",
   "vmManagementPlatform": "SANGFOR aCloud 5.8.6 Build20181030",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "dc193ee7d2d243c69295cd24495bfc6f",
-  "belongsServer": "郑州虚拟机9.132.63.207",
+  "belongsServer": "258a95a470084167886053c4257ee2c9",
   "belongsServerType": "01-私有",
   "facilityCategory": "FAVMVMW000",
   "facilityName": "金融行业态势感知与信息共享平台-node1",
@@ -2985,11 +3975,17 @@
   "virtualizationSoftwareBrandLand": "01-国外",
   "virtualizationSoftwarePlatform": "VMware",
   "vmManagementPlatform": "VCenter Server",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "e0512fe5368d45d1abbf45e3ff724d8e",
-  "belongsServer": "郑州虚拟机11.66.17.204",
+  "belongsServer": "b734bc454f3b43358269b9e3d3f58870",
   "belongsServerType": "01-私有",
   "facilityCategory": "FAVMVMW000",
   "facilityName": "业务系统巡检服务器",
@@ -3003,11 +3999,17 @@
   "virtualizationSoftwareBrandLand": "01-国外",
   "virtualizationSoftwarePlatform": "VMware",
   "vmManagementPlatform": "VCenter Server",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "e24ea0eb91d44fe8b4310fb535da6d83",
-  "belongsServer": "鹤壁市中支服务器机房HCI超融合虚拟化平台服务器2",
+  "belongsServer": "0b77ce3d7ecd4989ac0d0403b85720aa",
   "belongsServerType": "01-私有",
   "facilityCategory": "FAVMVMW000",
   "facilityName": "鹤壁市中支网站web服务器",
@@ -3021,11 +4023,17 @@
   "virtualizationSoftwareBrandLand": "00-国内",
   "virtualizationSoftwarePlatform": "深信服",
   "vmManagementPlatform": "超融合",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "e2664219204e4b1682d2e2591422fc2d",
-  "belongsServer": "郑州虚拟机11.66.17.206",
+  "belongsServer": "5f03228324534812a20f377ddad125b7",
   "belongsServerType": "01-私有",
   "facilityCategory": "FAVMVMW000",
   "facilityName": "fastDFS_监控服务_生产0",
@@ -3039,11 +4047,17 @@
   "virtualizationSoftwareBrandLand": "01-国外",
   "virtualizationSoftwarePlatform": "VMware",
   "vmManagementPlatform": "VCenter Server",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "e2ac095b1d234912ab105e54082e1ef8",
-  "belongsServer": "郑州虚拟机11.66.17.206",
+  "belongsServer": "5f03228324534812a20f377ddad125b7",
   "belongsServerType": "01-私有",
   "facilityCategory": "FAVMVMW000",
   "facilityName": "客户端智能管理系统",
@@ -3057,11 +4071,17 @@
   "virtualizationSoftwareBrandLand": "01-国外",
   "virtualizationSoftwarePlatform": "VMware",
   "vmManagementPlatform": "VCenter Server",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "e2f9976a1d3d4465bee80d86ed9d9645",
-  "belongsServer": "郑州虚拟机11.66.17.204",
+  "belongsServer": "b734bc454f3b43358269b9e3d3f58870",
   "belongsServerType": "01-私有",
   "facilityCategory": "FAVMVMW000",
   "facilityName": "软件科远程接管管理机",
@@ -3075,11 +4095,17 @@
   "virtualizationSoftwareBrandLand": "01-国外",
   "virtualizationSoftwarePlatform": "VMware",
   "vmManagementPlatform": "VCenter Server",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "e34abad541e54f4d8181ac529f504c61",
-  "belongsServer": "郑州虚拟机9.132.63.207",
+  "belongsServer": "258a95a470084167886053c4257ee2c9",
   "belongsServerType": "01-私有",
   "facilityCategory": "FAVMVMW000",
   "facilityName": "TIPSMOMA_SC",
@@ -3093,11 +4119,17 @@
   "virtualizationSoftwareBrandLand": "01-国外",
   "virtualizationSoftwarePlatform": "VMware",
   "vmManagementPlatform": "VCenter Server",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "e3b53158986548abb789d894ee3f9ab9",
-  "belongsServer": "郑州虚拟机11.66.17.206",
+  "belongsServer": "5f03228324534812a20f377ddad125b7",
   "belongsServerType": "01-私有",
   "facilityCategory": "FAVMVMW000",
   "facilityName": "网络科共享机",
@@ -3111,11 +4143,17 @@
   "virtualizationSoftwareBrandLand": "01-国外",
   "virtualizationSoftwarePlatform": "VMware",
   "vmManagementPlatform": "VCenter Server",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "e4b13c5783724eef978d4adebcd0b270",
-  "belongsServer": "郑州虚拟机11.66.17.205",
+  "belongsServer": "9d1c0dadabf04d8ca548bc5072fe1c6b",
   "belongsServerType": "01-私有",
   "facilityCategory": "FAVMVMW000",
   "facilityName": "在线网络测试系统",
@@ -3129,11 +4167,17 @@
   "virtualizationSoftwareBrandLand": "01-国外",
   "virtualizationSoftwarePlatform": "VMware",
   "vmManagementPlatform": "VCenter Server",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "e64f583e421244bd9f037783106eb2d5",
-  "belongsServer": "洛阳VM虚拟服务器1",
+  "belongsServer": "4a92eddbc7384ad495fbfbc344b6cad4",
   "belongsServerType": "01-私有",
   "facilityCategory": "FAVMVMW000",
   "facilityName": "洛阳中支远程培训课程分发子系统服务器",
@@ -3147,11 +4191,17 @@
   "virtualizationSoftwareBrandLand": "01-国外",
   "virtualizationSoftwarePlatform": "VMware Vsphere",
   "vmManagementPlatform": "VCenter Server",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "e796eef9feec4daebf527bdb0df03aaf",
-  "belongsServer": "郑州虚拟机9.132.63.207",
+  "belongsServer": "258a95a470084167886053c4257ee2c9",
   "belongsServerType": "01-私有",
   "facilityCategory": "FAVMVMW000",
   "facilityName": "CAMS-HBFX-FPXT-TLQ-A",
@@ -3165,11 +4215,17 @@
   "virtualizationSoftwareBrandLand": "01-国外",
   "virtualizationSoftwarePlatform": "VMware",
   "vmManagementPlatform": "VCenter Server",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "e8d8e83e2d3444d3a77849546f01ff0a",
-  "belongsServer": "鹤壁市中支服务器机房HCI超融合虚拟化平台服务器1",
+  "belongsServer": "623528d8d940415da8fe92be95feeb50",
   "belongsServerType": "01-私有",
   "facilityCategory": "FAVMVMW000",
   "facilityName": "鹤壁市中支运维监控",
@@ -3183,11 +4239,17 @@
   "virtualizationSoftwareBrandLand": "00-国内",
   "virtualizationSoftwarePlatform": "深信服",
   "vmManagementPlatform": "超融合",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "e90e548256d24fb2b994c8ba717ae7bf",
-  "belongsServer": "郑州虚拟机11.66.17.204",
+  "belongsServer": "b734bc454f3b43358269b9e3d3f58870",
   "belongsServerType": "01-私有",
   "facilityCategory": "FAVMVMW000",
   "facilityName": "CRAMS WEB服务器",
@@ -3201,11 +4263,17 @@
   "virtualizationSoftwareBrandLand": "01-国外",
   "virtualizationSoftwarePlatform": "VMware",
   "vmManagementPlatform": "VCenter Server",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "e957c98ed7684a2b975aeaae631a3f96",
-  "belongsServer": "郑州虚拟机9.132.63.207",
+  "belongsServer": "258a95a470084167886053c4257ee2c9",
   "belongsServerType": "01-私有",
   "facilityCategory": "FAVMVMW000",
   "facilityName": "tips-mq",
@@ -3219,11 +4287,17 @@
   "virtualizationSoftwareBrandLand": "01-国外",
   "virtualizationSoftwarePlatform": "VMware",
   "vmManagementPlatform": "VCenter Server",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "e9f8f2c38d9a4ae7b9b5b1520ab1d737",
-  "belongsServer": "郑州虚拟机9.132.63.207",
+  "belongsServer": "258a95a470084167886053c4257ee2c9",
   "belongsServerType": "01-私有",
   "facilityCategory": "FAVMVMW000",
   "facilityName": "proxy03",
@@ -3237,11 +4311,17 @@
   "virtualizationSoftwareBrandLand": "01-国外",
   "virtualizationSoftwarePlatform": "VMware",
   "vmManagementPlatform": "VCenter Server",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "ea9fa5e2d74c43a8bb52519ad04997f8",
-  "belongsServer": "郑州虚拟机11.66.17.204",
+  "belongsServer": "b734bc454f3b43358269b9e3d3f58870",
   "belongsServerType": "01-私有",
   "facilityCategory": "FAVMVMW000",
   "facilityName": "业务网漏洞扫描系统",
@@ -3255,11 +4335,17 @@
   "virtualizationSoftwareBrandLand": "01-国外",
   "virtualizationSoftwarePlatform": "VMware",
   "vmManagementPlatform": "VCenter Server",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "ecc9a5b407e647f88158e054d150e07d",
-  "belongsServer": "郑州虚拟机9.132.63.207",
+  "belongsServer": "258a95a470084167886053c4257ee2c9",
   "belongsServerType": "01-私有",
   "facilityCategory": "FAVMVMW000",
   "facilityName": "反洗钱-TLQ-测试",
@@ -3273,11 +4359,17 @@
   "virtualizationSoftwareBrandLand": "01-国外",
   "virtualizationSoftwarePlatform": "VMware",
   "vmManagementPlatform": "VCenter Server",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "ecdeec9e4f4140b6b546be40df7089c8",
-  "belongsServer": "郑州虚拟机11.66.17.204",
+  "belongsServer": "b734bc454f3b43358269b9e3d3f58870",
   "belongsServerType": "01-私有",
   "facilityCategory": "FAVMVMW000",
   "facilityName": "newOA Web生产",
@@ -3291,11 +4383,17 @@
   "virtualizationSoftwareBrandLand": "01-国外",
   "virtualizationSoftwarePlatform": "VMware",
   "vmManagementPlatform": "VCenter Server",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "ee3d50ab1482427da8137ce87eda96ab",
-  "belongsServer": "郑州虚拟机11.66.17.204",
+  "belongsServer": "b734bc454f3b43358269b9e3d3f58870",
   "belongsServerType": "01-私有",
   "facilityCategory": "FAVMVMW000",
   "facilityName": "账户电子化审批测试账户系统",
@@ -3309,11 +4407,17 @@
   "virtualizationSoftwareBrandLand": "01-国外",
   "virtualizationSoftwarePlatform": "VMware",
   "vmManagementPlatform": "VCenter Server",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "eed55ab537604f1cad539596fd75132c",
-  "belongsServer": "郑州虚拟机9.132.63.207",
+  "belongsServer": "258a95a470084167886053c4257ee2c9",
   "belongsServerType": "01-私有",
   "facilityCategory": "FAVMVMW000",
   "facilityName": "账户影像web服务_DMZ1",
@@ -3327,11 +4431,17 @@
   "virtualizationSoftwareBrandLand": "01-国外",
   "virtualizationSoftwarePlatform": "VMware",
   "vmManagementPlatform": "VCenter Server",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "eff7948face3463d80941ffdc1fb7ae1",
-  "belongsServer": "郑州虚拟机11.66.17.205",
+  "belongsServer": "9d1c0dadabf04d8ca548bc5072fe1c6b",
   "belongsServerType": "01-私有",
   "facilityCategory": "FAVMVMW000",
   "facilityName": "跨境人民币业务非现场监测系统(2020.12断网)",
@@ -3345,11 +4455,17 @@
   "virtualizationSoftwareBrandLand": "01-国外",
   "virtualizationSoftwarePlatform": "VMware",
   "vmManagementPlatform": "VCenter Server",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "f012cd85a3ba4647bc1fbd9b84a0a20d",
-  "belongsServer": "郑州虚拟机11.66.17.206",
+  "belongsServer": "5f03228324534812a20f377ddad125b7",
   "belongsServerType": "01-私有",
   "facilityCategory": "FAVMVMW000",
   "facilityName": "数据下发平台-2",
@@ -3363,11 +4479,17 @@
   "virtualizationSoftwareBrandLand": "01-国外",
   "virtualizationSoftwarePlatform": "VMware",
   "vmManagementPlatform": "VCenter Server",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "f1b3293e1a704521bfadaaeb78c90141",
-  "belongsServer": "郑州虚拟机11.66.17.204",
+  "belongsServer": "b734bc454f3b43358269b9e3d3f58870",
   "belongsServerType": "01-私有",
   "facilityCategory": "FAVMVMW000",
   "facilityName": "CRAMS应用服务器-温备",
@@ -3381,11 +4503,17 @@
   "virtualizationSoftwareBrandLand": "01-国外",
   "virtualizationSoftwarePlatform": "VMware",
   "vmManagementPlatform": "VCenter Server",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "f2bea275ea0c4adb89ecee63c8f1e9b5",
-  "belongsServer": "郑州虚拟机11.66.17.204",
+  "belongsServer": "b734bc454f3b43358269b9e3d3f58870",
   "belongsServerType": "01-私有",
   "facilityCategory": "FAVMVMW000",
   "facilityName": "new OA DB 01 扩容生产",
@@ -3399,11 +4527,17 @@
   "virtualizationSoftwareBrandLand": "01-国外",
   "virtualizationSoftwarePlatform": "VMware",
   "vmManagementPlatform": "VCenter Server",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "f6977c1200874fe4a1c8bbcb663390a0",
-  "belongsServer": "郑州虚拟机9.132.63.207",
+  "belongsServer": "258a95a470084167886053c4257ee2c9",
   "belongsServerType": "01-私有",
   "facilityCategory": "FAVMVMW000",
   "facilityName": "反洗钱二代",
@@ -3417,11 +4551,17 @@
   "virtualizationSoftwareBrandLand": "01-国外",
   "virtualizationSoftwarePlatform": "VMware",
   "vmManagementPlatform": "VCenter Server",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "f731b1e3297c4941bb7e4e71d73883c0",
-  "belongsServer": "郑州虚拟机9.132.63.207",
+  "belongsServer": "258a95a470084167886053c4257ee2c9",
   "belongsServerType": "01-私有",
   "facilityCategory": "FAVMVMW000",
   "facilityName": "帐户BI数据分析",
@@ -3435,11 +4575,17 @@
   "virtualizationSoftwareBrandLand": "01-国外",
   "virtualizationSoftwarePlatform": "VMware",
   "vmManagementPlatform": "VCenter Server",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "f936403bd56e4dbe8bf37ce1948b55ce",
-  "belongsServer": "郑州虚拟机11.66.17.206",
+  "belongsServer": "5f03228324534812a20f377ddad125b7",
   "belongsServerType": "01-私有",
   "facilityCategory": "FAVMVMW000",
   "facilityName": "ZZ-APP-PBCDC-A",
@@ -3453,11 +4599,17 @@
   "virtualizationSoftwareBrandLand": "01-国外",
   "virtualizationSoftwarePlatform": "VMware",
   "vmManagementPlatform": "VCenter Server",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "fb5ae0c19abf44ada9544508d1f46634",
-  "belongsServer": "郑州虚拟机9.132.63.207",
+  "belongsServer": "258a95a470084167886053c4257ee2c9",
   "belongsServerType": "01-私有",
   "facilityCategory": "FAVMVMW000",
   "facilityName": "精准扶贫DB",
@@ -3471,11 +4623,17 @@
   "virtualizationSoftwareBrandLand": "01-国外",
   "virtualizationSoftwarePlatform": "VMware",
   "vmManagementPlatform": "VCenter Server",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "fbc730186996475997aa77d5ecef6414",
-  "belongsServer": "郑州虚拟机9.132.63.207",
+  "belongsServer": "258a95a470084167886053c4257ee2c9",
   "belongsServerType": "01-私有",
   "facilityCategory": "FAVMVMW000",
   "facilityName": "账户影像web服务_DMZ2",
@@ -3489,11 +4647,17 @@
   "virtualizationSoftwareBrandLand": "01-国外",
   "virtualizationSoftwarePlatform": "VMware",
   "vmManagementPlatform": "VCenter Server",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "fc4d59e7665940cea97774c8231d43a2",
-  "belongsServer": "郑州虚拟机11.66.17.206",
+  "belongsServer": "5f03228324534812a20f377ddad125b7",
   "belongsServerType": "01-私有",
   "facilityCategory": "FAVMVMW000",
   "facilityName": "ZZ-APP-PBCDC-C",
@@ -3507,11 +4671,17 @@
   "virtualizationSoftwareBrandLand": "01-国外",
   "virtualizationSoftwarePlatform": "VMware",
   "vmManagementPlatform": "VCenter Server",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "ff4ded8b28874caea25161db9f19d183",
-  "belongsServer": "郑州虚拟机11.66.17.205",
+  "belongsServer": "9d1c0dadabf04d8ca548bc5072fe1c6b",
   "belongsServerType": "01-私有",
   "facilityCategory": "FAVMVMW000",
   "facilityName": "业务组件服务器（11.66.18.12）",
@@ -3525,11 +4695,17 @@
   "virtualizationSoftwareBrandLand": "01-国外",
   "virtualizationSoftwarePlatform": "VMware",
   "vmManagementPlatform": "VCenter Server",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "ffe8311a0f3746d28fa39b97f6a1df93",
-  "belongsServer": "郑州虚拟机11.66.17.204",
+  "belongsServer": "b734bc454f3b43358269b9e3d3f58870",
   "belongsServerType": "01-私有",
   "facilityCategory": "FAVMVMW000",
   "facilityName": "newOA WEB",
@@ -3543,6 +4719,12 @@
   "virtualizationSoftwareBrandLand": "01-国外",
   "virtualizationSoftwarePlatform": "VMware",
   "vmManagementPlatform": "VCenter Server",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  }
 ]

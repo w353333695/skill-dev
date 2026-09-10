@@ -10,7 +10,7 @@
    {
     "deployArea": "03-主机房-其它区",
     "deployComputerRoom": "漯河市中支中心机房",
-    "deployDb": "漯河市中支中心机房",
+    "deployDb": "ef79accbafa44c6298104908bbf8202d",
     "deployFloor": "五层",
     "deployGallery": "漯河市郾城区嵩山东支路1号办公楼"
    }
@@ -58,7 +58,12 @@
   "facilityUseDate": "2018-12-21",
   "facilityUseState": "00-设施在用",
   "remarksInformation": "机房环境监控系统",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "172a32029141429fac4f47f648fbae60",
@@ -71,7 +76,7 @@
    {
     "deployArea": "03-主机房-其它区",
     "deployComputerRoom": "驻马店市中支中心机房",
-    "deployDb": "驻马店市中支中心机房",
+    "deployDb": "79a0df7c04154292ad5efcee3ce2b74f",
     "deployFloor": "四层",
     "deployGallery": "驻马店市驿城区泰山路567号办公楼"
    }
@@ -119,7 +124,12 @@
   "facilityUseDate": "2018-11-02",
   "facilityUseState": "00-设施在用",
   "remarksInformation": "驻马店市中支中心机房环境监控系统",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "290019380cf8411cb231f54b5d5c6d05",
@@ -131,7 +141,7 @@
    {
     "deployArea": "03-主机房-其它区",
     "deployComputerRoom": "中心机房",
-    "deployDb": "平顶山市中支中心机房",
+    "deployDb": "cef9b1d212644d818ae42965f7395b25",
     "deployFloor": "八层",
     "deployGallery": "办公楼"
    }
@@ -178,7 +188,12 @@
   "facilityUpdateDate": "2022-02-12",
   "facilityUseDate": "2017-12-26",
   "facilityUseState": "00-设施在用",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "47fc1bd2697c4333a753a87a4c2a2e43",
@@ -191,7 +206,7 @@
    {
     "deployArea": "03-主机房-其它区",
     "deployComputerRoom": "服务器机房",
-    "deployDb": "鹤壁市中支中心机房",
+    "deployDb": "92c1063572d5431784306d4b5258830d",
     "deployFloor": "七层",
     "deployGallery": "鹤壁市淇滨区九州路129号办公楼"
    }
@@ -238,7 +253,12 @@
   "facilityUpdateDate": "2022-02-12",
   "facilityUseDate": "2017-03-23",
   "facilityUseState": "00-设施在用",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "52edc23b1d6b43879642d2b96e5ff654",
@@ -251,7 +271,7 @@
    {
     "deployArea": "03-主机房-其它区",
     "deployComputerRoom": "服务器机房",
-    "deployDb": "南阳市中支中心机房",
+    "deployDb": "870c4c17bebb4734baff5104d4f0f3fb",
     "deployFloor": "十二层",
     "deployGallery": "南阳市新华西路178号办公楼"
    }
@@ -298,7 +318,12 @@
   "facilityUpdateDate": "2022-02-12",
   "facilityUseDate": "2018-07-23",
   "facilityUseState": "00-设施在用",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "5978ab5a3ea846c78fe24f8c8bd35dd7",
@@ -311,7 +336,7 @@
    {
     "deployArea": "03-主机房-其它区",
     "deployComputerRoom": "濮阳市中支中心机房",
-    "deployDb": "濮阳市中支中心机房",
+    "deployDb": "a0172c84ea0e4d399267a75c2449a054",
     "deployFloor": "六层",
     "deployGallery": "办公楼"
    }
@@ -358,7 +383,12 @@
   "facilityUpdateDate": "2022-02-12",
   "facilityUseDate": "2016-02-03",
   "facilityUseState": "00-设施在用",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "7f5554ebbf53484ab2ab53e55095d403",
@@ -371,7 +401,7 @@
    {
     "deployArea": "03-主机房-其它区",
     "deployComputerRoom": "焦作市中心支行中心机房",
-    "deployDb": "焦作市中支中心机房",
+    "deployDb": "26783106134c4a1fabeb4616468578fb",
     "deployFloor": "四楼",
     "deployGallery": "焦作市山阳区世纪路1355号"
    }
@@ -419,7 +449,12 @@
   "facilityUseDate": "2018-11-15",
   "facilityUseState": "00-设施在用",
   "remarksInformation": "环境监控系统集成辖区各机房环境监控",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "83b7bfb4bcc742dfa4e37c54b50fab38",
@@ -432,7 +467,7 @@
    {
     "deployArea": "03-主机房-其它区",
     "deployComputerRoom": "开封市中心支行中心机房",
-    "deployDb": "开封市中支中心机房",
+    "deployDb": "bc868096be7647988f5c29d1f1b04036",
     "deployFloor": "三层",
     "deployGallery": "开封市龙亭区晋安路60号办公楼"
    }
@@ -480,7 +515,12 @@
   "facilityUseDate": "2019-02-25",
   "facilityUseState": "00-设施在用",
   "remarksInformation": "开封市中支中心机房机房环境监控系统1",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "875ddafd360f4c61bd799a117f656bd8",
@@ -493,7 +533,7 @@
    {
     "deployArea": "03-主机房-其它区",
     "deployComputerRoom": "中心机房",
-    "deployDb": "安阳市中支中心机房",
+    "deployDb": "5289a14829ef427b8c5ef3bfd01f28aa",
     "deployFloor": "八层",
     "deployGallery": "安阳市开发区金融大厦"
    }
@@ -539,7 +579,12 @@
   "facilityUpdateDate": "2022-02-12",
   "facilityUseDate": "2014-09-01",
   "facilityUseState": "00-设施在用",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "9832edd08e0f4511ae9fed343c712f89",
@@ -552,7 +597,7 @@
    {
     "deployArea": "03-主机房-其它区",
     "deployComputerRoom": "信阳市中心支行中心机房",
-    "deployDb": "信阳市中支中心机房",
+    "deployDb": "eb8c6860e97d477090c2d80e059c2598",
     "deployFloor": "二楼",
     "deployGallery": "信阳市浉河区长安路133号"
    }
@@ -600,7 +645,12 @@
   "facilityUseDate": "2011-10-01",
   "facilityUseState": "00-设施在用",
   "remarksInformation": "环境监控系统",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "9edfce23afc4464abe2dd563e2e9644f",
@@ -613,7 +663,7 @@
    {
     "deployArea": "03-主机房-其它区",
     "deployComputerRoom": "中心机房",
-    "deployDb": "三门峡市中支中心机房",
+    "deployDb": "9894dd4c692d4aef8a77fd532decde7b",
     "deployFloor": "六层",
     "deployGallery": "办公大楼"
    }
@@ -660,7 +710,12 @@
   "facilityUpdateDate": "2022-02-12",
   "facilityUseDate": "2020-06-20",
   "facilityUseState": "00-设施在用",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "a15c1bb4d03b49fb878b0a152ebe1441",
@@ -672,7 +727,7 @@
    {
     "deployArea": "03-主机房-其它区",
     "deployComputerRoom": "服务器机房",
-    "deployDb": "郑州中支主中心机房",
+    "deployDb": "77e1d9d6869044889909f41f30517418",
     "deployFloor": "11楼",
     "deployGallery": "商务外环路21号"
    }
@@ -719,7 +774,12 @@
   "facilityUpdateDate": "2022-02-12",
   "facilityUseDate": "2018-12-01",
   "facilityUseState": "00-设施在用",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "a6608dbcf13747c5afcbb3651d911357",
@@ -732,7 +792,7 @@
    {
     "deployArea": "03-主机房-其它区",
     "deployComputerRoom": "新乡市中心支行中心机房",
-    "deployDb": "新乡市中支中心机房",
+    "deployDb": "a2cb90d474104946a0238306baa08672",
     "deployFloor": "十五层",
     "deployGallery": "河南省新乡市红旗区向阳路9号办公楼"
    }
@@ -779,7 +839,12 @@
   "facilityUpdateDate": "2022-02-12",
   "facilityUseDate": "2017-08-30",
   "facilityUseState": "00-设施在用",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "aeeba0e13315419286b93d0f45880bc9",
@@ -792,7 +857,7 @@
    {
     "deployArea": "03-主机房-其它区",
     "deployComputerRoom": "许昌市中心支行中心机房",
-    "deployDb": "许昌市中支中心机房",
+    "deployDb": "2e8c7a9f7bbd43efbfd90baa81db0b2d",
     "deployFloor": "四楼",
     "deployGallery": "河南省许昌市建安区新东街571号办公楼"
    }
@@ -840,7 +905,12 @@
   "facilityUseDate": "2016-09-11",
   "facilityUseState": "00-设施在用",
   "remarksInformation": "环境监控系统",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "aff634e8d208430fa9d658fb1bf53865",
@@ -853,7 +923,7 @@
    {
     "deployArea": "03-主机房-其它区",
     "deployComputerRoom": "周口市中心支行中心机房",
-    "deployDb": "周口市中支中心机房",
+    "deployDb": "2952ee20d75547eaa9a1cb873e96f60e",
     "deployFloor": "二层",
     "deployGallery": "周口市川汇区七一路中段1号A楼"
    }
@@ -901,7 +971,12 @@
   "facilityUseDate": "2018-08-06",
   "facilityUseState": "00-设施在用",
   "remarksInformation": "环境监控系统集成辖区各机房环境监控",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "b14cc0f69ea14eb08767d9c1f7eb08d4",
@@ -914,7 +989,7 @@
    {
     "deployArea": "03-主机房-其它区",
     "deployComputerRoom": "商丘市中心支行中心机房",
-    "deployDb": "商丘市中支中心机房",
+    "deployDb": "fdddc1be23854dbc898a91708ca50080",
     "deployFloor": "八层",
     "deployGallery": "河南省商丘市睢阳区北海西路六号一号楼"
    }
@@ -962,7 +1037,12 @@
   "facilityUseDate": "2017-01-01",
   "facilityUseState": "00-设施在用",
   "remarksInformation": "环境监控系统",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "b55e27aea90945daa8a3db418dbe7a5c",
@@ -975,7 +1055,7 @@
    {
     "deployArea": "03-主机房-其它区",
     "deployComputerRoom": "洛阳市中支中心机房",
-    "deployDb": "洛阳市中支中心机房",
+    "deployDb": "09fd31dac1a648c59cab24f486dd561c",
     "deployFloor": "三层",
     "deployGallery": "洛阳市中支办公大楼"
    }
@@ -1022,7 +1102,12 @@
   "facilityUpdateDate": "2022-02-12",
   "facilityUseDate": "2017-09-01",
   "facilityUseState": "00-设施在用",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "d0302d6c859c48e8a2649d6c9eb86232",
@@ -1035,7 +1120,7 @@
    {
     "deployArea": "03-主机房-其它区",
     "deployComputerRoom": "中心机房",
-    "deployDb": "济源市中支中心机房",
+    "deployDb": "9b823d05699e4a2e85f226f1f815849d",
     "deployFloor": "二层",
     "deployGallery": "济源市济源大道中段2号办公楼"
    }
@@ -1082,6 +1167,11 @@
   "facilityUpdateDate": "2022-02-12",
   "facilityUseDate": "2016-08-01",
   "facilityUseState": "00-设施在用",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  }
 ]

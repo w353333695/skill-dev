@@ -19,7 +19,7 @@
    {
     "deployArea": "01-主机房-网络区",
     "deployComputerRoom": "转接中心机房",
-    "deployDb": "郑州中支转接中心机房",
+    "deployDb": "96f680d2b4f348a198a690325356a7c4",
     "deployFloor": "二层",
     "deployGallery": "转接中心综合楼"
    }
@@ -39,7 +39,13 @@
    }
   ],
   "ratedAlternatingFrequency": "50",
-  "_dataSource": "管理"
+  "_dataSource": "管理",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "assetBrand": "台达",
@@ -61,7 +67,7 @@
    {
     "deployArea": "01-主机房-网络区",
     "deployComputerRoom": "转接中心机房",
-    "deployDb": "郑州中支转接中心机房",
+    "deployDb": "96f680d2b4f348a198a690325356a7c4",
     "deployFloor": "二层",
     "deployGallery": "转接中心综合楼"
    }
@@ -81,7 +87,13 @@
    }
   ],
   "ratedAlternatingFrequency": "50",
-  "_dataSource": "管理"
+  "_dataSource": "管理",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "assetBrand": "台达",
@@ -102,7 +114,7 @@
    {
     "deployArea": "01-主机房-网络区",
     "deployComputerRoom": "转接中心机房",
-    "deployDb": "郑州中支转接中心机房",
+    "deployDb": "96f680d2b4f348a198a690325356a7c4",
     "deployFloor": "二层",
     "deployGallery": "转接中心综合楼"
    }
@@ -132,7 +144,13 @@
    }
   ],
   "ratedAlternatingFrequency": "50",
-  "_dataSource": "上报"
+  "_dataSource": "上报",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "assetBrand": "台达",
@@ -153,7 +171,7 @@
    {
     "deployArea": "01-主机房-网络区",
     "deployComputerRoom": "转接中心机房",
-    "deployDb": "郑州中支转接中心机房",
+    "deployDb": "96f680d2b4f348a198a690325356a7c4",
     "deployFloor": "二层",
     "deployGallery": "转接中心综合楼"
    }
@@ -183,6 +201,12 @@
    }
   ],
   "ratedAlternatingFrequency": "50",
-  "_dataSource": "上报"
+  "_dataSource": "上报",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  }
 ]

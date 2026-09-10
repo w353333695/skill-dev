@@ -27,7 +27,7 @@
    {
     "deployArea": "01-主机房-网络区",
     "deployComputerRoom": "洛阳市中支中心机房",
-    "deployDb": "洛阳市中支中心机房",
+    "deployDb": "09fd31dac1a648c59cab24f486dd561c",
     "deployFloor": "三层",
     "deployGallery": "洛阳市中支办公大楼"
    }
@@ -53,7 +53,11 @@
   "sellingLicense": "True",
   "supportIpv6": "True",
   "throughputRate": "01-大于100Mbps小于等于1Gbps",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "0c2c91242ef74941b4ee0b6527a7f478",
@@ -83,14 +87,14 @@
    {
     "deployArea": "01-主机房-网络区",
     "deployComputerRoom": "周口市中心支行中心机房",
-    "deployDb": "周口市中支中心机房",
+    "deployDb": "2952ee20d75547eaa9a1cb873e96f60e",
     "deployFloor": "二楼",
     "deployGallery": "周口市川汇区七一路中段1号A楼"
    }
   ],
   "idsIps_installationPosition": [
    {
-    "belongCabinet": "周口市中支中心机房网络机柜B2",
+    "belongCabinet": "56b6047eee3c4728a64c417b6f280c2d",
     "slotNo": "36"
    }
   ],
@@ -109,7 +113,11 @@
   "sellingLicense": "True",
   "supportIpv6": "True",
   "throughputRate": "01-大于100Mbps小于等于1Gbps",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "2d2ad7abeabe4054927c31aa16cf736f",
@@ -139,14 +147,14 @@
    {
     "deployArea": "01-主机房-网络区",
     "deployComputerRoom": "开封市中心支行中心机房",
-    "deployDb": "开封市中支中心机房",
+    "deployDb": "bc868096be7647988f5c29d1f1b04036",
     "deployFloor": "三层",
     "deployGallery": "开封市龙亭区晋安路60号办公楼"
    }
   ],
   "idsIps_installationPosition": [
    {
-    "belongCabinet": "开封市中支中心机房机柜2",
+    "belongCabinet": "d699c42375bb4a5c9e2771d070a9b8be",
     "slotNo": "6"
    }
   ],
@@ -166,7 +174,11 @@
   "sellingLicense": "True",
   "supportIpv6": "True",
   "throughputRate": "01-大于100Mbps小于等于1Gbps",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "3a6342df956f45ef86aa245ade1bbe15",
@@ -196,7 +208,7 @@
    {
     "deployArea": "01-主机房-网络区",
     "deployComputerRoom": "中心机房",
-    "deployDb": "三门峡市中支中心机房",
+    "deployDb": "9894dd4c692d4aef8a77fd532decde7b",
     "deployFloor": "六楼",
     "deployGallery": "办公大楼"
    }
@@ -222,7 +234,11 @@
   "sellingLicense": "True",
   "supportIpv6": "True",
   "throughputRate": "01-大于100Mbps小于等于1Gbps",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "4262ef9043e2423faf1a29227aab406e",
@@ -252,7 +268,7 @@
    {
     "deployArea": "01-主机房-网络区",
     "deployComputerRoom": "新乡市中心支行中心机房",
-    "deployDb": "新乡市中支中心机房",
+    "deployDb": "a2cb90d474104946a0238306baa08672",
     "deployFloor": "十五层",
     "deployGallery": "新乡市红旗区向阳路9号"
    }
@@ -278,7 +294,11 @@
   "sellingLicense": "True",
   "supportIpv6": "True",
   "throughputRate": "01-大于100Mbps小于等于1Gbps",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "7a267d7d21af4a99af746ca2bd16ea32",
@@ -308,14 +328,14 @@
    {
     "deployArea": "01-主机房-网络区",
     "deployComputerRoom": "中心机房",
-    "deployDb": "安阳市中支中心机房",
+    "deployDb": "5289a14829ef427b8c5ef3bfd01f28aa",
     "deployFloor": "八层",
     "deployGallery": "金融大厦"
    }
   ],
   "idsIps_installationPosition": [
    {
-    "belongCabinet": "安阳市中支8楼机柜2",
+    "belongCabinet": "c0b99e56fdf449debd42d7e4f834b9cd",
     "slotNo": "6"
    }
   ],
@@ -334,7 +354,11 @@
   "sellingLicense": "True",
   "supportIpv6": "True",
   "throughputRate": "01-大于100Mbps小于等于1Gbps",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "a2aea3fbbcf24c598dfb1f80b2f736de",
@@ -364,7 +388,7 @@
    {
     "deployArea": "01-主机房-网络区",
     "deployComputerRoom": "濮阳市中支中心机房",
-    "deployDb": "濮阳市中支中心机房",
+    "deployDb": "a0172c84ea0e4d399267a75c2449a054",
     "deployFloor": "六层",
     "deployGallery": "办公楼"
    }
@@ -390,7 +414,11 @@
   "sellingLicense": "True",
   "supportIpv6": "True",
   "throughputRate": "01-大于100Mbps小于等于1Gbps",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "a43ae7bbfe744cacb81e8a83f8c7454a",
@@ -420,14 +448,14 @@
    {
     "deployArea": "01-主机房-网络区",
     "deployComputerRoom": "漯河市中支中心机房",
-    "deployDb": "漯河市中支中心机房",
+    "deployDb": "ef79accbafa44c6298104908bbf8202d",
     "deployFloor": "五层",
     "deployGallery": "漯河市郾城区嵩山东支路1号"
    }
   ],
   "idsIps_installationPosition": [
    {
-    "belongCabinet": "漯河市中支网络机房机柜02",
+    "belongCabinet": "7b8f39c5ecdb4ca1a7114914275b8073",
     "slotNo": "15"
    }
   ],
@@ -446,7 +474,11 @@
   "sellingLicense": "True",
   "supportIpv6": "True",
   "throughputRate": "01-大于100Mbps小于等于1Gbps",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "a77cef3e8cd149c28da615d3c0d047d2",
@@ -476,14 +508,14 @@
    {
     "deployArea": "01-主机房-网络区",
     "deployComputerRoom": "中心机房",
-    "deployDb": "济源市中支中心机房",
+    "deployDb": "9b823d05699e4a2e85f226f1f815849d",
     "deployFloor": "二层",
     "deployGallery": "办公楼"
    }
   ],
   "idsIps_installationPosition": [
    {
-    "belongCabinet": "济源市中支中心机房机柜03",
+    "belongCabinet": "ead010d595194e8295f39d32aad8d30e",
     "slotNo": "35"
    }
   ],
@@ -503,7 +535,11 @@
   "sellingLicense": "True",
   "supportIpv6": "True",
   "throughputRate": "01-大于100Mbps小于等于1Gbps",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "af6b642dd1bd4cdb999a41c5ff144207",
@@ -533,14 +569,14 @@
    {
     "deployArea": "01-主机房-网络区",
     "deployComputerRoom": "焦作市中心支行中心机房",
-    "deployDb": "焦作市中支中心机房",
+    "deployDb": "26783106134c4a1fabeb4616468578fb",
     "deployFloor": "四楼",
     "deployGallery": "焦作市山阳区世纪路1355号"
    }
   ],
   "idsIps_installationPosition": [
    {
-    "belongCabinet": "焦作市中支中心机房网络机柜4",
+    "belongCabinet": "60b783fea31f45ec8e651197421e39c7",
     "slotNo": "22"
    }
   ],
@@ -559,7 +595,11 @@
   "sellingLicense": "True",
   "supportIpv6": "True",
   "throughputRate": "01-大于100Mbps小于等于1Gbps",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "b8161f1b64e6428f89886170d4046d33",
@@ -589,14 +629,14 @@
    {
     "deployArea": "01-主机房-网络区",
     "deployComputerRoom": "驻马店市中支中心机房",
-    "deployDb": "驻马店市中支中心机房",
+    "deployDb": "79a0df7c04154292ad5efcee3ce2b74f",
     "deployFloor": "四层",
     "deployGallery": "驻马店市驿城区泰山路567号办公楼"
    }
   ],
   "idsIps_installationPosition": [
    {
-    "belongCabinet": "驻马店市中支中心机房机柜B5",
+    "belongCabinet": "b414bb4b1ca94503b811ed34bcf4f8f1",
     "slotNo": "28"
    }
   ],
@@ -616,7 +656,11 @@
   "sellingLicense": "True",
   "supportIpv6": "True",
   "throughputRate": "01-大于100Mbps小于等于1Gbps",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "c2f55d865a014b6fa25f40936ed68534",
@@ -646,14 +690,14 @@
    {
     "deployArea": "01-主机房-网络区",
     "deployComputerRoom": "商丘市中心支行中心机房",
-    "deployDb": "商丘市中支中心机房",
+    "deployDb": "fdddc1be23854dbc898a91708ca50080",
     "deployFloor": "八楼",
     "deployGallery": "河南省商丘市睢阳区北海西路六号一号楼"
    }
   ],
   "idsIps_installationPosition": [
    {
-    "belongCabinet": "商丘市中支中心机房服务器机柜10",
+    "belongCabinet": "4c540523d7e4403590e06b7a5b62642e",
     "slotNo": "23"
    }
   ],
@@ -673,7 +717,11 @@
   "sellingLicense": "True",
   "supportIpv6": "True",
   "throughputRate": "01-大于100Mbps小于等于1Gbps",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "c4649c08e9084b12893fee95463ddd81",
@@ -703,7 +751,7 @@
    {
     "deployArea": "01-主机房-网络区",
     "deployComputerRoom": "信阳市中心支行中心机房",
-    "deployDb": "信阳市中支中心机房",
+    "deployDb": "eb8c6860e97d477090c2d80e059c2598",
     "deployFloor": "二楼",
     "deployGallery": "信阳市浉河区长安路133号"
    }
@@ -729,7 +777,11 @@
   "sellingLicense": "True",
   "supportIpv6": "True",
   "throughputRate": "01-大于100Mbps小于等于1Gbps",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "d5b570fb81f746808653373c5405bc7a",
@@ -759,7 +811,7 @@
    {
     "deployArea": "01-主机房-网络区",
     "deployComputerRoom": "网络机房",
-    "deployDb": "平顶山市中支中心机房",
+    "deployDb": "cef9b1d212644d818ae42965f7395b25",
     "deployFloor": "八层",
     "deployGallery": "办公楼"
    }
@@ -785,7 +837,11 @@
   "sellingLicense": "True",
   "supportIpv6": "True",
   "throughputRate": "01-大于100Mbps小于等于1Gbps",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "dc12ab6e2c334b15b716897270be0ca3",
@@ -815,7 +871,7 @@
    {
     "deployArea": "01-主机房-网络区",
     "deployComputerRoom": "许昌市中心支行中心机房",
-    "deployDb": "许昌市中支中心机房",
+    "deployDb": "2e8c7a9f7bbd43efbfd90baa81db0b2d",
     "deployFloor": "四楼",
     "deployGallery": "河南省许昌市建安区新东街571号办公楼"
    }
@@ -841,7 +897,11 @@
   "sellingLicense": "True",
   "supportIpv6": "True",
   "throughputRate": "01-大于100Mbps小于等于1Gbps",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "e0ada0b7670047d88a977eca4f60a635",
@@ -871,7 +931,7 @@
    {
     "deployArea": "01-主机房-网络区",
     "deployComputerRoom": "服务器机房",
-    "deployDb": "郑州中支主中心机房",
+    "deployDb": "77e1d9d6869044889909f41f30517418",
     "deployFloor": "11层",
     "deployGallery": "中国人民银行郑州中心支行办公大楼"
    }
@@ -897,7 +957,11 @@
   "sellingLicense": "True",
   "supportIpv6": "True",
   "throughputRate": "01-大于100Mbps小于等于1Gbps",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "f2ed54702a5b4573949e4c6e9deefee7",
@@ -927,7 +991,7 @@
    {
     "deployArea": "01-主机房-网络区",
     "deployComputerRoom": "服务器机房",
-    "deployDb": "郑州中支主中心机房",
+    "deployDb": "77e1d9d6869044889909f41f30517418",
     "deployFloor": "11层",
     "deployGallery": "中国人民银行郑州中心支行办公大楼"
    }
@@ -953,7 +1017,11 @@
   "sellingLicense": "True",
   "supportIpv6": "True",
   "throughputRate": "01-大于100Mbps小于等于1Gbps",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "f72539a441e5400f93783c4f546a4083",
@@ -983,14 +1051,14 @@
    {
     "deployArea": "01-主机房-网络区",
     "deployComputerRoom": "网络机房",
-    "deployDb": "南阳市中支中心机房",
+    "deployDb": "870c4c17bebb4734baff5104d4f0f3fb",
     "deployFloor": "十二层",
     "deployGallery": "办公楼"
    }
   ],
   "idsIps_installationPosition": [
    {
-    "belongCabinet": "南阳市市中支网络机房机柜04",
+    "belongCabinet": "9132ba269b83443ca9ef4d82376f25d8",
     "slotNo": "8"
    }
   ],
@@ -1010,7 +1078,11 @@
   "sellingLicense": "True",
   "supportIpv6": "True",
   "throughputRate": "01-大于100Mbps小于等于1Gbps",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "fa95dd169cc44bf7a10ad1db6578f56c",
@@ -1040,14 +1112,14 @@
    {
     "deployArea": "01-主机房-网络区",
     "deployComputerRoom": "网络机房",
-    "deployDb": "鹤壁市中支中心机房",
+    "deployDb": "92c1063572d5431784306d4b5258830d",
     "deployFloor": "七层",
     "deployGallery": "办公楼"
    }
   ],
   "idsIps_installationPosition": [
    {
-    "belongCabinet": "鹤壁市中支网络机房机柜03",
+    "belongCabinet": "c1e0452b308247489c2cdf25da4776b2",
     "slotNo": "35"
    }
   ],
@@ -1067,6 +1139,10 @@
   "sellingLicense": "True",
   "supportIpv6": "True",
   "throughputRate": "01-大于100Mbps小于等于1Gbps",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "deployComputerRoom": "未知"
  }
 ]

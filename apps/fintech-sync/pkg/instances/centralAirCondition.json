@@ -9,7 +9,7 @@
    {
     "deployArea": "31-行政管理区-值班室",
     "deployComputerRoom": "主中心机房",
-    "deployDb": "郑州中支主中心机房",
+    "deployDb": "77e1d9d6869044889909f41f30517418",
     "deployFloor": "十一层",
     "deployGallery": "商务外环路21号"
    }
@@ -33,7 +33,12 @@
   "facilityUseState": "00-设施在用",
   "ratedPower": 23.0,
   "refrigeratingCapacity": "40",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "d356c37ef8d74d37937c7b5c8ce9a0ca",
@@ -45,7 +50,7 @@
    {
     "deployArea": "31-行政管理区-值班室",
     "deployComputerRoom": "主中心机房",
-    "deployDb": "郑州中支主中心机房",
+    "deployDb": "77e1d9d6869044889909f41f30517418",
     "deployFloor": "十一层",
     "deployGallery": "商务外环路21号"
    }
@@ -69,6 +74,11 @@
   "facilityUseState": "00-设施在用",
   "ratedPower": 23.0,
   "refrigeratingCapacity": "40",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  }
 ]

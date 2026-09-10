@@ -10,7 +10,7 @@
    {
     "deployArea": "23-支持区-电池室",
     "deployComputerRoom": "转接中心电池间",
-    "deployDb": "郑州中支转接中心机房",
+    "deployDb": "96f680d2b4f348a198a690325356a7c4",
     "deployFloor": "一层",
     "deployGallery": "转接中心综合楼"
    }
@@ -31,6 +31,11 @@
   "facilityUseDate": "2018-01-01",
   "facilityUseState": "00-设施在用",
   "ratedPower": 3.5,
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  }
 ]

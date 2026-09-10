@@ -18,7 +18,7 @@
    {
     "deployArea": "16-辅助区-新风区",
     "deployComputerRoom": "濮阳市中支中心机房",
-    "deployDb": "濮阳市中支中心机房",
+    "deployDb": "a0172c84ea0e4d399267a75c2449a054",
     "deployFloor": "六层",
     "deployGallery": "办公楼"
    }
@@ -36,7 +36,12 @@
   "performanceOfFreshAirFilter": "01-中效过滤器",
   "ratedPower": 1.1,
   "remarksInformation": "新风",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "25810344b797443b9e10084110df9a03",
@@ -56,7 +61,7 @@
    {
     "deployArea": "16-辅助区-新风区",
     "deployComputerRoom": "商丘市中心支行中心机房",
-    "deployDb": "商丘市中支中心机房",
+    "deployDb": "fdddc1be23854dbc898a91708ca50080",
     "deployFloor": "八层",
     "deployGallery": "商丘中支1号楼"
    }
@@ -74,7 +79,12 @@
   "performanceOfFreshAirFilter": "01-中效过滤器",
   "ratedPower": 1000.0,
   "remarksInformation": "新风",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "2efb51bb6eef49b0a9b6acdec0023b88",
@@ -94,7 +104,7 @@
    {
     "deployArea": "03-主机房-其它区",
     "deployComputerRoom": "主中心机房",
-    "deployDb": "郑州中支主中心机房",
+    "deployDb": "77e1d9d6869044889909f41f30517418",
     "deployFloor": "十一层",
     "deployGallery": "商务外环路21号"
    }
@@ -112,7 +122,12 @@
   "performanceOfFreshAirFilter": "00-粗效过滤器",
   "ratedPower": 0.64,
   "remarksInformation": "新风",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "4bc8a3f5a0aa45f5a0c9303e203bd491",
@@ -133,7 +148,7 @@
    {
     "deployArea": "16-辅助区-新风区",
     "deployComputerRoom": "开封市中心机房",
-    "deployDb": "开封市中支中心机房",
+    "deployDb": "bc868096be7647988f5c29d1f1b04036",
     "deployFloor": "三层",
     "deployGallery": "开封市龙亭区晋安路60号办公楼"
    }
@@ -151,7 +166,12 @@
   "performanceOfFreshAirFilter": "02-高中效过滤器",
   "ratedPower": 300.0,
   "remarksInformation": "新风",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "52b2b86c97c0413bb5a9cc5649d8e4c8",
@@ -171,7 +191,7 @@
    {
     "deployArea": "03-主机房-其它区",
     "deployComputerRoom": "主中心机房",
-    "deployDb": "郑州中支主中心机房",
+    "deployDb": "77e1d9d6869044889909f41f30517418",
     "deployFloor": "十一层",
     "deployGallery": "商务外环路21号"
    }
@@ -189,7 +209,12 @@
   "performanceOfFreshAirFilter": "00-粗效过滤器",
   "ratedPower": 0.64,
   "remarksInformation": "新风",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "698ef49c5cc7421ba0003e251b3092a9",
@@ -210,7 +235,7 @@
    {
     "deployArea": "30-行政管理区-办公区",
     "deployComputerRoom": "安阳市中心支行中心机房",
-    "deployDb": "安阳市中支中心机房",
+    "deployDb": "5289a14829ef427b8c5ef3bfd01f28aa",
     "deployFloor": "八楼",
     "deployGallery": "河南省安阳市开发区金融大厦"
    }
@@ -228,7 +253,12 @@
   "performanceOfFreshAirFilter": "01-中效过滤器",
   "ratedPower": 1100.0,
   "remarksInformation": "新风",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "709816122c0946d89c10532871ceaffb",
@@ -248,7 +278,7 @@
    {
     "deployArea": "30-行政管理区-办公区",
     "deployComputerRoom": "中心机房",
-    "deployDb": "平顶山市中支中心机房",
+    "deployDb": "cef9b1d212644d818ae42965f7395b25",
     "deployFloor": "八层",
     "deployGallery": "办公楼"
    }
@@ -266,7 +296,12 @@
   "performanceOfFreshAirFilter": "01-中效过滤器",
   "ratedPower": 300.0,
   "remarksInformation": "新风",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "7b7a1fdaa19944709f103e916ab4de8d",
@@ -287,7 +322,7 @@
    {
     "deployArea": "16-辅助区-新风区",
     "deployComputerRoom": "焦作市中心支行中心机房",
-    "deployDb": "焦作市中支中心机房",
+    "deployDb": "26783106134c4a1fabeb4616468578fb",
     "deployFloor": "四楼",
     "deployGallery": "焦作市山阳区世纪路1355号"
    }
@@ -305,7 +340,12 @@
   "performanceOfFreshAirFilter": "01-中效过滤器",
   "ratedPower": 1000.0,
   "remarksInformation": "新风",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "8220a19524a9453da87b71a8e7e5c976",
@@ -326,7 +366,7 @@
    {
     "deployArea": "90-屏蔽机房区",
     "deployComputerRoom": "中心机房",
-    "deployDb": "新乡市中支中心机房",
+    "deployDb": "a2cb90d474104946a0238306baa08672",
     "deployFloor": "十五层",
     "deployGallery": "办公楼"
    }
@@ -344,7 +384,12 @@
   "performanceOfFreshAirFilter": "01-中效过滤器",
   "ratedPower": 500.0,
   "remarksInformation": "新风",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "8275aeb1226a4f5f8ff3a4b6076e96af",
@@ -365,7 +410,7 @@
    {
     "deployArea": "00-主机房-服务器区",
     "deployComputerRoom": "中心机房",
-    "deployDb": "新乡市中支中心机房",
+    "deployDb": "a2cb90d474104946a0238306baa08672",
     "deployFloor": "十五层",
     "deployGallery": "办公楼"
    }
@@ -383,7 +428,12 @@
   "performanceOfFreshAirFilter": "01-中效过滤器",
   "ratedPower": 500.0,
   "remarksInformation": "新风",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "9bf6efcde2664ae6801cb2bbe05398fb",
@@ -403,7 +453,7 @@
    {
     "deployArea": "03-主机房-其它区",
     "deployComputerRoom": "主中心机房",
-    "deployDb": "郑州中支主中心机房",
+    "deployDb": "77e1d9d6869044889909f41f30517418",
     "deployFloor": "十一层",
     "deployGallery": "商务外环路21号"
    }
@@ -421,7 +471,12 @@
   "performanceOfFreshAirFilter": "00-粗效过滤器",
   "ratedPower": 0.64,
   "remarksInformation": "新风",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "9d28062e36d248b2adb44cdf44d2966c",
@@ -442,7 +497,7 @@
    {
     "deployArea": "01-主机房-网络区",
     "deployComputerRoom": "许昌市中心支行中心机房",
-    "deployDb": "许昌市中支中心机房",
+    "deployDb": "2e8c7a9f7bbd43efbfd90baa81db0b2d",
     "deployFloor": "四楼",
     "deployGallery": "河南省许昌市建安区新东街571号办公楼"
    }
@@ -460,7 +515,12 @@
   "performanceOfFreshAirFilter": "01-中效过滤器",
   "ratedPower": 600.0,
   "remarksInformation": "新风",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "a5a4d632d22a45508229ca4d66080121",
@@ -481,7 +541,7 @@
    {
     "deployArea": "24-支持区-空调区",
     "deployComputerRoom": "洛阳市中支中心机房",
-    "deployDb": "焦作市中支中心机房",
+    "deployDb": "26783106134c4a1fabeb4616468578fb",
     "deployFloor": "三层",
     "deployGallery": "洛阳市中支办公大楼"
    }
@@ -499,7 +559,12 @@
   "performanceOfFreshAirFilter": "00-粗效过滤器",
   "ratedPower": 0.4,
   "remarksInformation": "新风",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "b450aac194af4575bfba815b14d707a0",
@@ -519,7 +584,7 @@
    {
     "deployArea": "03-主机房-其它区",
     "deployComputerRoom": "主中心机房",
-    "deployDb": "郑州中支主中心机房",
+    "deployDb": "77e1d9d6869044889909f41f30517418",
     "deployFloor": "十一层",
     "deployGallery": "商务外环路21号"
    }
@@ -537,7 +602,12 @@
   "performanceOfFreshAirFilter": "00-粗效过滤器",
   "ratedPower": 0.89,
   "remarksInformation": "新风",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "b68013c3a0684e5a9181a30f03b23caa",
@@ -558,7 +628,7 @@
    {
     "deployArea": "16-辅助区-新风区",
     "deployComputerRoom": "信阳市中心支行中心机房",
-    "deployDb": "信阳市中支中心机房",
+    "deployDb": "eb8c6860e97d477090c2d80e059c2598",
     "deployFloor": "二层",
     "deployGallery": "信阳市浉河区长安路133号"
    }
@@ -576,7 +646,12 @@
   "performanceOfFreshAirFilter": "01-中效过滤器",
   "ratedPower": 1000.0,
   "remarksInformation": "新风",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "c2b108fc73a14a5ca9deacb4c165e08a",
@@ -597,7 +672,7 @@
    {
     "deployArea": "16-辅助区-新风区",
     "deployComputerRoom": "周口市中心支行中心机房",
-    "deployDb": "周口市中支中心机房",
+    "deployDb": "2952ee20d75547eaa9a1cb873e96f60e",
     "deployFloor": "二层",
     "deployGallery": "周口市川汇区七一路中段1号A楼"
    }
@@ -615,7 +690,12 @@
   "performanceOfFreshAirFilter": "02-高中效过滤器",
   "ratedPower": 0.3,
   "remarksInformation": "新风",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "c8e966c7b99b4682b1707dbba8312f3c",
@@ -636,7 +716,7 @@
    {
     "deployArea": "00-主机房-服务器区",
     "deployComputerRoom": "漯河市中支中心机房",
-    "deployDb": "漯河市中支中心机房",
+    "deployDb": "ef79accbafa44c6298104908bbf8202d",
     "deployFloor": "五层",
     "deployGallery": "漯河市郾城区嵩山东支路1号"
    }
@@ -654,7 +734,12 @@
   "performanceOfFreshAirFilter": "01-中效过滤器",
   "ratedPower": 1100.0,
   "remarksInformation": "新风",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "d13c80b2cecb4ac48f138aa304adddab",
@@ -675,7 +760,7 @@
    {
     "deployArea": "30-行政管理区-办公区",
     "deployComputerRoom": "中心机房",
-    "deployDb": "鹤壁市中支中心机房",
+    "deployDb": "92c1063572d5431784306d4b5258830d",
     "deployFloor": "七层",
     "deployGallery": "办公楼"
    }
@@ -693,7 +778,12 @@
   "performanceOfFreshAirFilter": "01-中效过滤器",
   "ratedPower": 1100.0,
   "remarksInformation": "新风",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "d5c296108ec049dd89841f19b53749c6",
@@ -714,7 +804,7 @@
    {
     "deployArea": "20-支持区-变配电室",
     "deployComputerRoom": "中心机房",
-    "deployDb": "三门峡市中支中心机房",
+    "deployDb": "9894dd4c692d4aef8a77fd532decde7b",
     "deployFloor": "六层",
     "deployGallery": "办公大楼"
    }
@@ -732,7 +822,12 @@
   "performanceOfFreshAirFilter": "02-高中效过滤器",
   "ratedPower": 120.0,
   "remarksInformation": "新风",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "edccca3ff8f14d1b853bfb8fdb6410f8",
@@ -753,7 +848,7 @@
    {
     "deployArea": "16-辅助区-新风区",
     "deployComputerRoom": "中心机房",
-    "deployDb": "南阳市中支中心机房",
+    "deployDb": "870c4c17bebb4734baff5104d4f0f3fb",
     "deployFloor": "十二层",
     "deployGallery": "办公楼"
    }
@@ -771,7 +866,12 @@
   "performanceOfFreshAirFilter": "01-中效过滤器",
   "ratedPower": 1100.0,
   "remarksInformation": "新风",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "edd6529e6c5f45ea84b466b4c38eb7f2",
@@ -792,7 +892,7 @@
    {
     "deployArea": "00-主机房-服务器区",
     "deployComputerRoom": "中心机房",
-    "deployDb": "济源市中支中心机房",
+    "deployDb": "9b823d05699e4a2e85f226f1f815849d",
     "deployFloor": "二层",
     "deployGallery": "办公楼"
    }
@@ -810,6 +910,11 @@
   "performanceOfFreshAirFilter": "01-中效过滤器",
   "ratedPower": 300.0,
   "remarksInformation": "新风",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  }
 ]

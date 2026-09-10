@@ -28,7 +28,7 @@
    {
     "deployArea": "00-主机房-服务器区",
     "deployComputerRoom": "服务器机房",
-    "deployDb": "郑州中支主中心机房",
+    "deployDb": "77e1d9d6869044889909f41f30517418",
     "deployFloor": "13层",
     "deployGallery": "中国人民银行郑州中心支行办公大楼"
    }
@@ -52,7 +52,11 @@
   "sellingLicense": "True",
   "supportIpv6": "True",
   "throughputRate": "01-大于100Mbps小于等于1Gbps",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "d23b20ff1e1c43049e0665979c9816f2",
@@ -83,7 +87,7 @@
    {
     "deployArea": "00-主机房-服务器区",
     "deployComputerRoom": "服务器机房",
-    "deployDb": "郑州中支主中心机房",
+    "deployDb": "77e1d9d6869044889909f41f30517418",
     "deployFloor": "13层",
     "deployGallery": "中国人民银行郑州中心支行办公大楼"
    }
@@ -107,6 +111,10 @@
   "sellingLicense": "True",
   "supportIpv6": "True",
   "throughputRate": "01-大于100Mbps小于等于1Gbps",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "deployComputerRoom": "未知"
  }
 ]

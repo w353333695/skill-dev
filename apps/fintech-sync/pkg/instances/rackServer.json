@@ -22,21 +22,22 @@
     "cpuFrequency": 2.2,
     "productArchitecture": "00-X86架构",
     "totalNumberOfCpu": "8",
-    "totalNumberOfCpuNuclear": "80"
+    "totalNumberOfCpuNuclear": "80",
+    "brandLand": "00-国内"
    }
   ],
   "rackServer_deployment": [
    {
     "deployArea": "00-主机房-服务器区",
     "deployComputerRoom": "中心机房",
-    "deployDb": "三门峡市中支中心机房",
+    "deployDb": "9894dd4c692d4aef8a77fd532decde7b",
     "deployFloor": "六楼",
     "deployGallery": "办公大楼"
    }
   ],
   "rackServer_installationPosition": [
    {
-    "belongCabinet": "中国人民银行三门峡市中心支行 机柜6",
+    "belongCabinet": "ee412c61efd7490aa67fa2cf9ebaa2a9",
     "slotNo": "15"
    }
   ],
@@ -63,7 +64,11 @@
   ],
   "supportIpv6": "True",
   "systemInformation": "云桌面系统",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "0028a582e473441fb7f8a727dac254ae",
@@ -89,21 +94,22 @@
     "cpuFrequency": 2.27,
     "productArchitecture": "00-X86架构",
     "totalNumberOfCpu": "1",
-    "totalNumberOfCpuNuclear": "4"
+    "totalNumberOfCpuNuclear": "4",
+    "brandLand": "01-国外"
    }
   ],
   "rackServer_deployment": [
    {
     "deployArea": "00-主机房-服务器区",
     "deployComputerRoom": "许昌市中心支行中心机房",
-    "deployDb": "许昌市中支中心机房",
+    "deployDb": "2e8c7a9f7bbd43efbfd90baa81db0b2d",
     "deployFloor": "四楼",
     "deployGallery": "河南省许昌市建安区新东街571号办公楼"
    }
   ],
   "rackServer_installationPosition": [
    {
-    "belongCabinet": "许昌市中支中心机房服务器机柜B02",
+    "belongCabinet": "300190eb83e7447ba0bd8eaa5a8d6ca8",
     "slotNo": "25"
    }
   ],
@@ -130,7 +136,11 @@
   ],
   "supportIpv6": "True",
   "systemInformation": "IT运维系统",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "024fe59be77d4db49059110273e4268c",
@@ -155,21 +165,22 @@
     "cpuFrequency": 2.4,
     "productArchitecture": "00-X86架构",
     "totalNumberOfCpu": "1",
-    "totalNumberOfCpuNuclear": "4"
+    "totalNumberOfCpuNuclear": "4",
+    "brandLand": "00-国内"
    }
   ],
   "rackServer_deployment": [
    {
     "deployArea": "00-主机房-服务器区",
     "deployComputerRoom": "服务器机房",
-    "deployDb": "鹤壁市中支中心机房",
+    "deployDb": "92c1063572d5431784306d4b5258830d",
     "deployFloor": "七层",
     "deployGallery": "办公楼"
    }
   ],
   "rackServer_installationPosition": [
    {
-    "belongCabinet": "鹤壁市中支服务器机房机柜07",
+    "belongCabinet": "772a93ba88454fe3b138a3c7427b4185",
     "slotNo": "4"
    }
   ],
@@ -196,7 +207,11 @@
   ],
   "supportIpv6": "False",
   "systemInformation": "课程分发",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "0304093572d6429081cc5f4dfa91fbf9",
@@ -221,21 +236,22 @@
     "cpuFrequency": 2.8,
     "productArchitecture": "00-X86架构",
     "totalNumberOfCpu": "2",
-    "totalNumberOfCpuNuclear": "20"
+    "totalNumberOfCpuNuclear": "20",
+    "brandLand": "00-国内"
    }
   ],
   "rackServer_deployment": [
    {
     "deployArea": "00-主机房-服务器区",
     "deployComputerRoom": "信阳市中心支行中心机房",
-    "deployDb": "信阳市中支中心机房",
+    "deployDb": "eb8c6860e97d477090c2d80e059c2598",
     "deployFloor": "二楼",
     "deployGallery": "信阳市浉河区长安路133号"
    }
   ],
   "rackServer_installationPosition": [
    {
-    "belongCabinet": "许昌市中支中心机房服务器机柜B04",
+    "belongCabinet": "8297ba18956a4dbbb07ab6b5016d45d1",
     "slotNo": "17"
    }
   ],
@@ -262,7 +278,11 @@
   ],
   "supportIpv6": "True",
   "systemInformation": "学习园地",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "03768119edbf4063bc4e1b1bb8199cc6",
@@ -287,21 +307,22 @@
     "cpuFrequency": 2.4,
     "productArchitecture": "00-X86架构",
     "totalNumberOfCpu": "1",
-    "totalNumberOfCpuNuclear": "4"
+    "totalNumberOfCpuNuclear": "4",
+    "brandLand": "00-国内"
    }
   ],
   "rackServer_deployment": [
    {
     "deployArea": "00-主机房-服务器区",
     "deployComputerRoom": "服务器机房",
-    "deployDb": "鹤壁市中支中心机房",
+    "deployDb": "92c1063572d5431784306d4b5258830d",
     "deployFloor": "七层",
     "deployGallery": "办公楼"
    }
   ],
   "rackServer_installationPosition": [
    {
-    "belongCabinet": "鹤壁市中支服务器机房机柜08",
+    "belongCabinet": "85a64e80f8814319be4f529c93dd31c6",
     "slotNo": "21"
    }
   ],
@@ -328,7 +349,11 @@
   ],
   "supportIpv6": "False",
   "systemInformation": "云桌面",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "0460f6f971de4cfdb845bec92b1beabe",
@@ -354,21 +379,22 @@
     "cpuFrequency": 4.2,
     "productArchitecture": "00-X86架构",
     "totalNumberOfCpu": "2",
-    "totalNumberOfCpuNuclear": "10"
+    "totalNumberOfCpuNuclear": "10",
+    "brandLand": "01-国外"
    }
   ],
   "rackServer_deployment": [
    {
     "deployArea": "00-主机房-服务器区",
     "deployComputerRoom": "郑州中支主中心机房",
-    "deployDb": "郑州中支主中心机房",
+    "deployDb": "77e1d9d6869044889909f41f30517418",
     "deployFloor": "十一层",
     "deployGallery": "河南省郑州市郑东新区商务外环路21号"
    }
   ],
   "rackServer_installationPosition": [
    {
-    "belongCabinet": "郑州中支主中心服务器机房预留机柜4",
+    "belongCabinet": "c2e5fea3c9e9429bb23ef997809e4800",
     "slotNo": "35"
    }
   ],
@@ -395,7 +421,11 @@
   ],
   "supportIpv6": "False",
   "systemInformation": "国库集中支付电子化管理系统",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "06c1b2f628a74fecb035c9848032c6a2",
@@ -420,21 +450,22 @@
     "cpuFrequency": 2.0,
     "productArchitecture": "00-X86架构",
     "totalNumberOfCpu": "1",
-    "totalNumberOfCpuNuclear": "4"
+    "totalNumberOfCpuNuclear": "4",
+    "brandLand": "00-国内"
    }
   ],
   "rackServer_deployment": [
    {
     "deployArea": "00-主机房-服务器区",
     "deployComputerRoom": "中心机房",
-    "deployDb": "三门峡市中支中心机房",
+    "deployDb": "9894dd4c692d4aef8a77fd532decde7b",
     "deployFloor": "六楼",
     "deployGallery": "办公大楼"
    }
   ],
   "rackServer_installationPosition": [
    {
-    "belongCabinet": "中国人民银行三门峡市中心支行 机柜12",
+    "belongCabinet": "e25651e7445e44169fb3400b709d0184",
     "slotNo": "21"
    }
   ],
@@ -461,7 +492,11 @@
   ],
   "supportIpv6": "True",
   "systemInformation": "FTP文件存储系统",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "0b6329462123425eb07bf12e32ca5be0",
@@ -487,21 +522,22 @@
     "cpuFrequency": 4.2,
     "productArchitecture": "00-X86架构",
     "totalNumberOfCpu": "2",
-    "totalNumberOfCpuNuclear": "10"
+    "totalNumberOfCpuNuclear": "10",
+    "brandLand": "01-国外"
    }
   ],
   "rackServer_deployment": [
    {
     "deployArea": "00-主机房-服务器区",
     "deployComputerRoom": "郑州中支主中心机房",
-    "deployDb": "郑州中支主中心机房",
+    "deployDb": "77e1d9d6869044889909f41f30517418",
     "deployFloor": "十一层",
     "deployGallery": "河南省郑州市郑东新区商务外环路21号"
    }
   ],
   "rackServer_installationPosition": [
    {
-    "belongCabinet": "郑州中支主中心服务器机房E-03",
+    "belongCabinet": "864924fe6e8645d0bba9d231af913635",
     "slotNo": "15"
    }
   ],
@@ -528,7 +564,11 @@
   ],
   "supportIpv6": "False",
   "systemInformation": "云桌面系统",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "0b77ce3d7ecd4989ac0d0403b85720aa",
@@ -553,21 +593,22 @@
     "cpuFrequency": 2.4,
     "productArchitecture": "00-X86架构",
     "totalNumberOfCpu": "1",
-    "totalNumberOfCpuNuclear": "4"
+    "totalNumberOfCpuNuclear": "4",
+    "brandLand": "00-国内"
    }
   ],
   "rackServer_deployment": [
    {
     "deployArea": "00-主机房-服务器区",
     "deployComputerRoom": "服务器机房",
-    "deployDb": "鹤壁市中支中心机房",
+    "deployDb": "92c1063572d5431784306d4b5258830d",
     "deployFloor": "七层",
     "deployGallery": "办公楼"
    }
   ],
   "rackServer_installationPosition": [
    {
-    "belongCabinet": "鹤壁市中支服务器机房机柜07",
+    "belongCabinet": "772a93ba88454fe3b138a3c7427b4185",
     "slotNo": "31"
    }
   ],
@@ -594,7 +635,11 @@
   ],
   "supportIpv6": "False",
   "systemInformation": "业务系统",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "0c8947518b7f478faf1ae78c3b0f2b69",
@@ -619,21 +664,22 @@
     "cpuFrequency": 2.4,
     "productArchitecture": "00-X86架构",
     "totalNumberOfCpu": "1",
-    "totalNumberOfCpuNuclear": "4"
+    "totalNumberOfCpuNuclear": "4",
+    "brandLand": "00-国内"
    }
   ],
   "rackServer_deployment": [
    {
     "deployArea": "00-主机房-服务器区",
     "deployComputerRoom": "中心机房",
-    "deployDb": "安阳市中支中心机房",
+    "deployDb": "5289a14829ef427b8c5ef3bfd01f28aa",
     "deployFloor": "八层",
     "deployGallery": "安阳市开发区金融大厦"
    }
   ],
   "rackServer_installationPosition": [
    {
-    "belongCabinet": "安阳市中支中心机房机柜10",
+    "belongCabinet": "10a788623f4740a2bf97113bcb249147",
     "slotNo": "24"
    }
   ],
@@ -660,7 +706,11 @@
   ],
   "supportIpv6": "False",
   "systemInformation": "远程培训",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "0caaec304ac245ecacbaf931f4dbfab4",
@@ -686,21 +736,22 @@
     "cpuFrequency": 2.8,
     "productArchitecture": "00-X86架构",
     "totalNumberOfCpu": "2",
-    "totalNumberOfCpuNuclear": "20"
+    "totalNumberOfCpuNuclear": "20",
+    "brandLand": "00-国内"
    }
   ],
   "rackServer_deployment": [
    {
     "deployArea": "00-主机房-服务器区",
     "deployComputerRoom": "许昌市中心支行中心机房",
-    "deployDb": "许昌市中支中心机房",
+    "deployDb": "2e8c7a9f7bbd43efbfd90baa81db0b2d",
     "deployFloor": "四楼",
     "deployGallery": "河南省许昌市建安区新东街571号办公楼"
    }
   ],
   "rackServer_installationPosition": [
    {
-    "belongCabinet": "许昌市中支中心机房服务器机柜B04",
+    "belongCabinet": "8297ba18956a4dbbb07ab6b5016d45d1",
     "slotNo": "17"
    }
   ],
@@ -727,7 +778,11 @@
   ],
   "supportIpv6": "True",
   "systemInformation": "FTP系统",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "0d5e602129214eb584251fc750389d01",
@@ -753,21 +808,22 @@
     "cpuFrequency": 4.2,
     "productArchitecture": "00-X86架构",
     "totalNumberOfCpu": "2",
-    "totalNumberOfCpuNuclear": "10"
+    "totalNumberOfCpuNuclear": "10",
+    "brandLand": "01-国外"
    }
   ],
   "rackServer_deployment": [
    {
     "deployArea": "00-主机房-服务器区",
     "deployComputerRoom": "郑州中支主中心机房",
-    "deployDb": "郑州中支主中心机房",
+    "deployDb": "77e1d9d6869044889909f41f30517418",
     "deployFloor": "十一层",
     "deployGallery": "河南省郑州市郑东新区商务外环路21号"
    }
   ],
   "rackServer_installationPosition": [
    {
-    "belongCabinet": "郑州中支主中心服务器机房E-03",
+    "belongCabinet": "864924fe6e8645d0bba9d231af913635",
     "slotNo": "12"
    }
   ],
@@ -794,7 +850,11 @@
   ],
   "supportIpv6": "False",
   "systemInformation": "云桌面系统",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "0e2be8d8ad21420d90a03f10f4737586",
@@ -820,21 +880,22 @@
     "cpuFrequency": 4.2,
     "productArchitecture": "00-X86架构",
     "totalNumberOfCpu": "2",
-    "totalNumberOfCpuNuclear": "10"
+    "totalNumberOfCpuNuclear": "10",
+    "brandLand": "01-国外"
    }
   ],
   "rackServer_deployment": [
    {
     "deployArea": "00-主机房-服务器区",
     "deployComputerRoom": "郑州中支主中心机房",
-    "deployDb": "郑州中支主中心机房",
+    "deployDb": "77e1d9d6869044889909f41f30517418",
     "deployFloor": "十一层",
     "deployGallery": "河南省郑州市郑东新区商务外环路21号"
    }
   ],
   "rackServer_installationPosition": [
    {
-    "belongCabinet": "郑州中支主中心服务器机房E-08",
+    "belongCabinet": "54cf176aaf47492ba1cb2681d3ac43e8",
     "slotNo": "35"
    }
   ],
@@ -861,7 +922,11 @@
   ],
   "supportIpv6": "False",
   "systemInformation": "NTP服务",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "0e4ddefc4c8e4f4d9f6e35602eb210a0",
@@ -887,21 +952,22 @@
     "cpuFrequency": 4.2,
     "productArchitecture": "00-X86架构",
     "totalNumberOfCpu": "2",
-    "totalNumberOfCpuNuclear": "10"
+    "totalNumberOfCpuNuclear": "10",
+    "brandLand": "00-国内"
    }
   ],
   "rackServer_deployment": [
    {
     "deployArea": "00-主机房-服务器区",
     "deployComputerRoom": "郑州中支主中心机房",
-    "deployDb": "郑州中支主中心机房",
+    "deployDb": "77e1d9d6869044889909f41f30517418",
     "deployFloor": "十一层",
     "deployGallery": "河南省郑州市郑东新区商务外环路21号"
    }
   ],
   "rackServer_installationPosition": [
    {
-    "belongCabinet": "郑州中支主中心服务器机房预留机柜3",
+    "belongCabinet": "fe87419e88e1400abccb2d966d994ea4",
     "slotNo": "18"
    }
   ],
@@ -928,7 +994,11 @@
   ],
   "supportIpv6": "False",
   "systemInformation": "国库集中支付电子化管理系统",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "11bd2474360a41a8b021cb8dbe9dd121",
@@ -954,21 +1024,22 @@
     "cpuFrequency": 2.26,
     "productArchitecture": "00-X86架构",
     "totalNumberOfCpu": "1",
-    "totalNumberOfCpuNuclear": "4"
+    "totalNumberOfCpuNuclear": "4",
+    "brandLand": "01-国外"
    }
   ],
   "rackServer_deployment": [
    {
     "deployArea": "00-主机房-服务器区",
     "deployComputerRoom": "新乡市中心支行中心机房",
-    "deployDb": "新乡市中支中心机房",
+    "deployDb": "a2cb90d474104946a0238306baa08672",
     "deployFloor": "十五层",
     "deployGallery": "新乡市中心支行办公楼"
    }
   ],
   "rackServer_installationPosition": [
    {
-    "belongCabinet": "新乡市中支服务器机房机柜04",
+    "belongCabinet": "d927390a651e4853b4214d8fb4ad4044",
     "slotNo": "32"
    }
   ],
@@ -995,7 +1066,11 @@
   ],
   "supportIpv6": "False",
   "systemInformation": "IT运维监控平台",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "13720c29c86d4162bea7fd2143bb4793",
@@ -1021,21 +1096,22 @@
     "cpuFrequency": 2.4,
     "productArchitecture": "00-X86架构",
     "totalNumberOfCpu": "2",
-    "totalNumberOfCpuNuclear": "20"
+    "totalNumberOfCpuNuclear": "20",
+    "brandLand": "00-国内"
    }
   ],
   "rackServer_deployment": [
    {
     "deployArea": "00-主机房-服务器区",
     "deployComputerRoom": "洛阳市中心支行中心机房",
-    "deployDb": "洛阳市中支中心机房",
+    "deployDb": "09fd31dac1a648c59cab24f486dd561c",
     "deployFloor": "三层",
     "deployGallery": "洛阳市中心支行办公大楼"
    }
   ],
   "rackServer_installationPosition": [
    {
-    "belongCabinet": "洛阳市中支中心机房机柜S4",
+    "belongCabinet": "459a2a3bb4344e499b662e3d720ba291",
     "slotNo": "11"
    }
   ],
@@ -1062,7 +1138,11 @@
   ],
   "supportIpv6": "True",
   "systemInformation": "机关云桌面系统",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "14ca7622c84644318a7149a9d34f6294",
@@ -1088,21 +1168,22 @@
     "cpuFrequency": 2.2,
     "productArchitecture": "00-X86架构",
     "totalNumberOfCpu": "2",
-    "totalNumberOfCpuNuclear": "32"
+    "totalNumberOfCpuNuclear": "32",
+    "brandLand": "00-国内"
    }
   ],
   "rackServer_deployment": [
    {
     "deployArea": "00-主机房-服务器区",
     "deployComputerRoom": "服务器机房",
-    "deployDb": "郑州中支主中心机房",
+    "deployDb": "77e1d9d6869044889909f41f30517418",
     "deployFloor": "13层",
     "deployGallery": "中国人民银行郑州中心支行办公大楼"
    }
   ],
   "rackServer_installationPosition": [
    {
-    "belongCabinet": "郑州中支主中心服务器机房图腾机柜",
+    "belongCabinet": "f82a3b27be614f68a392d5c26442b2ef",
     "slotNo": "9"
    }
   ],
@@ -1129,7 +1210,11 @@
   ],
   "supportIpv6": "True",
   "systemInformation": "大数据平台",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "15611ae15dbd414397f1c9e02ee4ec13",
@@ -1155,21 +1240,22 @@
     "cpuFrequency": 4.2,
     "productArchitecture": "00-X86架构",
     "totalNumberOfCpu": "2",
-    "totalNumberOfCpuNuclear": "10"
+    "totalNumberOfCpuNuclear": "10",
+    "brandLand": "01-国外"
    }
   ],
   "rackServer_deployment": [
    {
     "deployArea": "00-主机房-服务器区",
     "deployComputerRoom": "郑州中支主中心机房",
-    "deployDb": "郑州中支主中心机房",
+    "deployDb": "77e1d9d6869044889909f41f30517418",
     "deployFloor": "十一层",
     "deployGallery": "河南省郑州市郑东新区商务外环路21号"
    }
   ],
   "rackServer_installationPosition": [
    {
-    "belongCabinet": "郑州中支主中心服务器机房服务器机柜16",
+    "belongCabinet": "084b93fd8a5d42c088773564ab2ea061",
     "slotNo": "15"
    }
   ],
@@ -1196,7 +1282,11 @@
   ],
   "supportIpv6": "False",
   "systemInformation": "云桌面系统",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "184645a920704339afe07ccab1302efd",
@@ -1221,21 +1311,22 @@
     "cpuFrequency": 2.1,
     "productArchitecture": "00-X86架构",
     "totalNumberOfCpu": "1",
-    "totalNumberOfCpuNuclear": "8"
+    "totalNumberOfCpuNuclear": "8",
+    "brandLand": "00-国内"
    }
   ],
   "rackServer_deployment": [
    {
     "deployArea": "00-主机房-服务器区",
     "deployComputerRoom": "驻马店市中支中心机房",
-    "deployDb": "驻马店市中支中心机房",
+    "deployDb": "79a0df7c04154292ad5efcee3ce2b74f",
     "deployFloor": "四层",
     "deployGallery": "驻马店市驿城区泰山路567号办公楼"
    }
   ],
   "rackServer_installationPosition": [
    {
-    "belongCabinet": "驻马店市中支中心机房机柜A1",
+    "belongCabinet": "5b9de53323e54416937a8672788aae89",
     "slotNo": "33"
    }
   ],
@@ -1262,7 +1353,11 @@
   ],
   "supportIpv6": "False",
   "systemInformation": "保卫监控系统",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "185d2589308d443e840fd744b27fbc8e",
@@ -1288,21 +1383,22 @@
     "cpuFrequency": 2.2,
     "productArchitecture": "00-X86架构",
     "totalNumberOfCpu": "2",
-    "totalNumberOfCpuNuclear": "20"
+    "totalNumberOfCpuNuclear": "20",
+    "brandLand": "00-国内"
    }
   ],
   "rackServer_deployment": [
    {
     "deployArea": "00-主机房-服务器区",
     "deployComputerRoom": "周口市中心支行中心机房",
-    "deployDb": "周口市中支中心机房",
+    "deployDb": "2952ee20d75547eaa9a1cb873e96f60e",
     "deployFloor": "二层",
     "deployGallery": "周口市川汇区七一路中段1号A楼"
    }
   ],
   "rackServer_installationPosition": [
    {
-    "belongCabinet": "周口市中支中心机房服务器机柜C5",
+    "belongCabinet": "ccad2e24cd394e938788c6730a0ee314",
     "slotNo": "7"
    }
   ],
@@ -1329,7 +1425,11 @@
   ],
   "supportIpv6": "False",
   "systemInformation": "云桌面",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "1c2c7344038546d1a519a74c06d54e0d",
@@ -1354,21 +1454,22 @@
     "cpuFrequency": 2.4,
     "productArchitecture": "00-X86架构",
     "totalNumberOfCpu": "1",
-    "totalNumberOfCpuNuclear": "4"
+    "totalNumberOfCpuNuclear": "4",
+    "brandLand": "00-国内"
    }
   ],
   "rackServer_deployment": [
    {
     "deployArea": "00-主机房-服务器区",
     "deployComputerRoom": "服务器机房",
-    "deployDb": "鹤壁市中支中心机房",
+    "deployDb": "92c1063572d5431784306d4b5258830d",
     "deployFloor": "七层",
     "deployGallery": "办公楼"
    }
   ],
   "rackServer_installationPosition": [
    {
-    "belongCabinet": "鹤壁市中支服务器机房机柜08",
+    "belongCabinet": "85a64e80f8814319be4f529c93dd31c6",
     "slotNo": "23"
    }
   ],
@@ -1395,7 +1496,11 @@
   ],
   "supportIpv6": "False",
   "systemInformation": "云桌面",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "1c92d9b48dfb4f5d9ef55e62b5ae90bc",
@@ -1420,21 +1525,22 @@
     "cpuFrequency": 2.13,
     "productArchitecture": "00-X86架构",
     "totalNumberOfCpu": "1",
-    "totalNumberOfCpuNuclear": "8"
+    "totalNumberOfCpuNuclear": "8",
+    "brandLand": "00-国内"
    }
   ],
   "rackServer_deployment": [
    {
     "deployArea": "00-主机房-服务器区",
     "deployComputerRoom": "服务器机房",
-    "deployDb": "南阳市中支中心机房",
+    "deployDb": "870c4c17bebb4734baff5104d4f0f3fb",
     "deployFloor": "十二层",
     "deployGallery": "办公楼"
    }
   ],
   "rackServer_installationPosition": [
    {
-    "belongCabinet": "南阳市市中支网络机房机柜06",
+    "belongCabinet": "1bed074a22f34174835a310ee0af7947",
     "slotNo": "4"
    }
   ],
@@ -1461,7 +1567,11 @@
   ],
   "supportIpv6": "False",
   "systemInformation": "机房环境监控",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "1e88e0fcbe294ba8949a8d48037349d7",
@@ -1487,21 +1597,22 @@
     "cpuFrequency": 2.8,
     "productArchitecture": "00-X86架构",
     "totalNumberOfCpu": "2",
-    "totalNumberOfCpuNuclear": "20"
+    "totalNumberOfCpuNuclear": "20",
+    "brandLand": "00-国内"
    }
   ],
   "rackServer_deployment": [
    {
     "deployArea": "00-主机房-服务器区",
     "deployComputerRoom": "许昌市中心支行中心机房",
-    "deployDb": "许昌市中支中心机房",
+    "deployDb": "2e8c7a9f7bbd43efbfd90baa81db0b2d",
     "deployFloor": "四楼",
     "deployGallery": "河南省许昌市建安区新东街571号办公楼"
    }
   ],
   "rackServer_installationPosition": [
    {
-    "belongCabinet": "许昌市中支中心机房服务器机柜B04",
+    "belongCabinet": "8297ba18956a4dbbb07ab6b5016d45d1",
     "slotNo": "35"
    }
   ],
@@ -1528,7 +1639,11 @@
   ],
   "supportIpv6": "True",
   "systemInformation": "郑州大数据系统",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "1e9797a47e594641a38449b4b9e59d4b",
@@ -1554,21 +1669,22 @@
     "cpuFrequency": 2.2,
     "productArchitecture": "00-X86架构",
     "totalNumberOfCpu": "2",
-    "totalNumberOfCpuNuclear": "32"
+    "totalNumberOfCpuNuclear": "32",
+    "brandLand": "00-国内"
    }
   ],
   "rackServer_deployment": [
    {
     "deployArea": "00-主机房-服务器区",
     "deployComputerRoom": "服务器机房",
-    "deployDb": "郑州中支主中心机房",
+    "deployDb": "77e1d9d6869044889909f41f30517418",
     "deployFloor": "13层",
     "deployGallery": "中国人民银行郑州中心支行办公大楼"
    }
   ],
   "rackServer_installationPosition": [
    {
-    "belongCabinet": "郑州中支主中心服务器机房图腾机柜",
+    "belongCabinet": "f82a3b27be614f68a392d5c26442b2ef",
     "slotNo": "21"
    }
   ],
@@ -1595,7 +1711,11 @@
   ],
   "supportIpv6": "True",
   "systemInformation": "大数据平台",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "20835662cfdf4ab49526cd09ee2722f9",
@@ -1620,21 +1740,22 @@
     "cpuFrequency": 2.4,
     "productArchitecture": "00-X86架构",
     "totalNumberOfCpu": "1",
-    "totalNumberOfCpuNuclear": "4"
+    "totalNumberOfCpuNuclear": "4",
+    "brandLand": "00-国内"
    }
   ],
   "rackServer_deployment": [
    {
     "deployArea": "00-主机房-服务器区",
     "deployComputerRoom": "服务器机房",
-    "deployDb": "鹤壁市中支中心机房",
+    "deployDb": "92c1063572d5431784306d4b5258830d",
     "deployFloor": "七层",
     "deployGallery": "办公楼"
    }
   ],
   "rackServer_installationPosition": [
    {
-    "belongCabinet": "鹤壁市中支服务器机房机柜08",
+    "belongCabinet": "85a64e80f8814319be4f529c93dd31c6",
     "slotNo": "27"
    }
   ],
@@ -1661,7 +1782,11 @@
   ],
   "supportIpv6": "False",
   "systemInformation": "云桌面",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "20f4be5134774dc5b14ddeb9c7391a18",
@@ -1687,21 +1812,22 @@
     "cpuFrequency": 2.2,
     "productArchitecture": "00-X86架构",
     "totalNumberOfCpu": "2",
-    "totalNumberOfCpuNuclear": "32"
+    "totalNumberOfCpuNuclear": "32",
+    "brandLand": "00-国内"
    }
   ],
   "rackServer_deployment": [
    {
     "deployArea": "00-主机房-服务器区",
     "deployComputerRoom": "服务器机房",
-    "deployDb": "郑州中支主中心机房",
+    "deployDb": "77e1d9d6869044889909f41f30517418",
     "deployFloor": "13层",
     "deployGallery": "中国人民银行郑州中心支行办公大楼"
    }
   ],
   "rackServer_installationPosition": [
    {
-    "belongCabinet": "郑州中支主中心服务器机房图腾机柜",
+    "belongCabinet": "f82a3b27be614f68a392d5c26442b2ef",
     "slotNo": "17"
    }
   ],
@@ -1728,7 +1854,11 @@
   ],
   "supportIpv6": "True",
   "systemInformation": "大数据平台",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "224f854d388f44d29f978d3ec853ba17",
@@ -1752,21 +1882,22 @@
     "cpuFrequency": 2.4,
     "productArchitecture": "00-X86架构",
     "totalNumberOfCpu": "2",
-    "totalNumberOfCpuNuclear": "8"
+    "totalNumberOfCpuNuclear": "8",
+    "brandLand": "00-国内"
    }
   ],
   "rackServer_deployment": [
    {
     "deployArea": "00-主机房-服务器区",
     "deployComputerRoom": "洛阳市中心支行中心机房",
-    "deployDb": "洛阳市中支中心机房",
+    "deployDb": "09fd31dac1a648c59cab24f486dd561c",
     "deployFloor": "三层",
     "deployGallery": "洛阳市中心支行办公大楼"
    }
   ],
   "rackServer_installationPosition": [
    {
-    "belongCabinet": "洛阳市中支中心机房机柜S2",
+    "belongCabinet": "6929a86521e644e1a858784b84112ac5",
     "slotNo": "37"
    }
   ],
@@ -1792,7 +1923,11 @@
   ],
   "supportIpv6": "True",
   "systemInformation": "vsphere虚拟化平台",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "246827166d104b33955a39f45dd1e13c",
@@ -1817,21 +1952,22 @@
     "cpuFrequency": 2.0,
     "productArchitecture": "00-X86架构",
     "totalNumberOfCpu": "1",
-    "totalNumberOfCpuNuclear": "4"
+    "totalNumberOfCpuNuclear": "4",
+    "brandLand": "00-国内"
    }
   ],
   "rackServer_deployment": [
    {
     "deployArea": "00-主机房-服务器区",
     "deployComputerRoom": "中心机房",
-    "deployDb": "三门峡市中支中心机房",
+    "deployDb": "9894dd4c692d4aef8a77fd532decde7b",
     "deployFloor": "六楼",
     "deployGallery": "办公大楼"
    }
   ],
   "rackServer_installationPosition": [
    {
-    "belongCabinet": "中国人民银行三门峡市中心支行 机柜9",
+    "belongCabinet": "d2aa5f0099e84350bea077a44e68f2ca",
     "slotNo": "16"
    }
   ],
@@ -1858,7 +1994,11 @@
   ],
   "supportIpv6": "True",
   "systemInformation": "中支web系统",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "258a95a470084167886053c4257ee2c9",
@@ -1884,21 +2024,22 @@
     "cpuFrequency": 4.2,
     "productArchitecture": "00-X86架构",
     "totalNumberOfCpu": "2",
-    "totalNumberOfCpuNuclear": "10"
+    "totalNumberOfCpuNuclear": "10",
+    "brandLand": "00-国内"
    }
   ],
   "rackServer_deployment": [
    {
     "deployArea": "00-主机房-服务器区",
     "deployComputerRoom": "郑州中支主中心机房",
-    "deployDb": "郑州中支主中心机房",
+    "deployDb": "77e1d9d6869044889909f41f30517418",
     "deployFloor": "十一层",
     "deployGallery": "河南省郑州市郑东新区商务外环路21号"
    }
   ],
   "rackServer_installationPosition": [
    {
-    "belongCabinet": "郑州中支主中心服务器机房服务器机柜13",
+    "belongCabinet": "3a30ad81025d4931ba67dfb71cf07232",
     "slotNo": "31"
    }
   ],
@@ -1925,7 +2066,11 @@
   ],
   "supportIpv6": "False",
   "systemInformation": "虚拟机",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "2b78f5320d344b9794a2adcc72b99872",
@@ -1951,21 +2096,22 @@
     "cpuFrequency": 2.4,
     "productArchitecture": "00-X86架构",
     "totalNumberOfCpu": "2",
-    "totalNumberOfCpuNuclear": "28"
+    "totalNumberOfCpuNuclear": "28",
+    "brandLand": "00-国内"
    }
   ],
   "rackServer_deployment": [
    {
     "deployArea": "00-主机房-服务器区",
     "deployComputerRoom": "许昌市中心支行中心机房",
-    "deployDb": "许昌市中支中心机房",
+    "deployDb": "2e8c7a9f7bbd43efbfd90baa81db0b2d",
     "deployFloor": "四楼",
     "deployGallery": "河南省许昌市建安区新东街571号办公楼"
    }
   ],
   "rackServer_installationPosition": [
    {
-    "belongCabinet": "许昌市中支中心机房服务器机柜B05",
+    "belongCabinet": "4f67b57b3ad34a4b9a435086c009dd0c",
     "slotNo": "14"
    }
   ],
@@ -1992,7 +2138,11 @@
   ],
   "supportIpv6": "True",
   "systemInformation": "桌面云系统",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "2b82a09523904390aa53f7064b5dc43a",
@@ -2016,21 +2166,22 @@
     "cpuFrequency": 2.4,
     "productArchitecture": "00-X86架构",
     "totalNumberOfCpu": "1",
-    "totalNumberOfCpuNuclear": "4"
+    "totalNumberOfCpuNuclear": "4",
+    "brandLand": "00-国内"
    }
   ],
   "rackServer_deployment": [
    {
     "deployArea": "00-主机房-服务器区",
     "deployComputerRoom": "驻马店市中支中心机房",
-    "deployDb": "驻马店市中支中心机房",
+    "deployDb": "79a0df7c04154292ad5efcee3ce2b74f",
     "deployFloor": "四层",
     "deployGallery": "驻马店市驿城区泰山路567号办公楼"
    }
   ],
   "rackServer_installationPosition": [
    {
-    "belongCabinet": "驻马店市中支中心机房机柜A6",
+    "belongCabinet": "daa1063942224249b9a55a7b01b5b9be",
     "slotNo": "17"
    }
   ],
@@ -2057,7 +2208,11 @@
   ],
   "supportIpv6": "False",
   "systemInformation": "中支信息网站",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "2cfcfc2d148547d191c30213d1c721b5",
@@ -2083,21 +2238,22 @@
     "cpuFrequency": 2.4,
     "productArchitecture": "00-X86架构",
     "totalNumberOfCpu": "2",
-    "totalNumberOfCpuNuclear": "20"
+    "totalNumberOfCpuNuclear": "20",
+    "brandLand": "00-国内"
    }
   ],
   "rackServer_deployment": [
    {
     "deployArea": "00-主机房-服务器区",
     "deployComputerRoom": "洛阳市中心支行中心机房",
-    "deployDb": "洛阳市中支中心机房",
+    "deployDb": "09fd31dac1a648c59cab24f486dd561c",
     "deployFloor": "三层",
     "deployGallery": "洛阳市中心支行办公大楼"
    }
   ],
   "rackServer_installationPosition": [
    {
-    "belongCabinet": "洛阳市中支中心机房机柜S4",
+    "belongCabinet": "459a2a3bb4344e499b662e3d720ba291",
     "slotNo": "4"
    }
   ],
@@ -2124,7 +2280,11 @@
   ],
   "supportIpv6": "True",
   "systemInformation": "机关云桌面系统",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "2dec3fd370eb4ea293ee6f33ab5caa17",
@@ -2150,21 +2310,22 @@
     "cpuFrequency": 4.2,
     "productArchitecture": "00-X86架构",
     "totalNumberOfCpu": "2",
-    "totalNumberOfCpuNuclear": "10"
+    "totalNumberOfCpuNuclear": "10",
+    "brandLand": "01-国外"
    }
   ],
   "rackServer_deployment": [
    {
     "deployArea": "00-主机房-服务器区",
     "deployComputerRoom": "郑州中支主中心机房",
-    "deployDb": "郑州中支主中心机房",
+    "deployDb": "77e1d9d6869044889909f41f30517418",
     "deployFloor": "十一层",
     "deployGallery": "河南省郑州市郑东新区商务外环路21号"
    }
   ],
   "rackServer_installationPosition": [
    {
-    "belongCabinet": "郑州中支主中心服务器机房E-08",
+    "belongCabinet": "54cf176aaf47492ba1cb2681d3ac43e8",
     "slotNo": "27"
    }
   ],
@@ -2191,7 +2352,11 @@
   ],
   "supportIpv6": "False",
   "systemInformation": "NTP服务",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "2fa41633d5604702b4e8cd0990b042e5",
@@ -2217,21 +2382,22 @@
     "cpuFrequency": 4.2,
     "productArchitecture": "00-X86架构",
     "totalNumberOfCpu": "2",
-    "totalNumberOfCpuNuclear": "10"
+    "totalNumberOfCpuNuclear": "10",
+    "brandLand": "01-国外"
    }
   ],
   "rackServer_deployment": [
    {
     "deployArea": "00-主机房-服务器区",
     "deployComputerRoom": "郑州中支主中心机房",
-    "deployDb": "郑州中支主中心机房",
+    "deployDb": "77e1d9d6869044889909f41f30517418",
     "deployFloor": "十一层",
     "deployGallery": "河南省郑州市郑东新区商务外环路21号"
    }
   ],
   "rackServer_installationPosition": [
    {
-    "belongCabinet": "郑州中支主中心服务器机房服务器机柜8",
+    "belongCabinet": "b0f0db73a9924e52ae357c4c05128049",
     "slotNo": "27"
    }
   ],
@@ -2258,7 +2424,11 @@
   ],
   "supportIpv6": "False",
   "systemInformation": "虚拟化平台备份服务器Avamar",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "31396e19da634e3abfbd1e3ba954fafb",
@@ -2284,21 +2454,22 @@
     "cpuFrequency": 4.2,
     "productArchitecture": "00-X86架构",
     "totalNumberOfCpu": "2",
-    "totalNumberOfCpuNuclear": "10"
+    "totalNumberOfCpuNuclear": "10",
+    "brandLand": "01-国外"
    }
   ],
   "rackServer_deployment": [
    {
     "deployArea": "00-主机房-服务器区",
     "deployComputerRoom": "郑州中支主中心机房",
-    "deployDb": "郑州中支主中心机房",
+    "deployDb": "77e1d9d6869044889909f41f30517418",
     "deployFloor": "十一层",
     "deployGallery": "河南省郑州市郑东新区商务外环路21号"
    }
   ],
   "rackServer_installationPosition": [
    {
-    "belongCabinet": "郑州中支主中心服务器机房E-08",
+    "belongCabinet": "54cf176aaf47492ba1cb2681d3ac43e8",
     "slotNo": "39"
    }
   ],
@@ -2325,7 +2496,11 @@
   ],
   "supportIpv6": "False",
   "systemInformation": "NTP服务",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "31e90b2510f145ce8bdfaebee94961c0",
@@ -2350,21 +2525,22 @@
     "cpuFrequency": 2.26,
     "productArchitecture": "00-X86架构",
     "totalNumberOfCpu": "1",
-    "totalNumberOfCpuNuclear": "4"
+    "totalNumberOfCpuNuclear": "4",
+    "brandLand": "01-国外"
    }
   ],
   "rackServer_deployment": [
    {
     "deployArea": "00-主机房-服务器区",
     "deployComputerRoom": "中心机房",
-    "deployDb": "三门峡市中支中心机房",
+    "deployDb": "9894dd4c692d4aef8a77fd532decde7b",
     "deployFloor": "六楼",
     "deployGallery": "办公大楼"
    }
   ],
   "rackServer_installationPosition": [
    {
-    "belongCabinet": "中国人民银行三门峡市中心支行 机柜10",
+    "belongCabinet": "0ba966be4f6a470bbbb4d9f582be57cc",
     "slotNo": "12"
    }
   ],
@@ -2391,7 +2567,11 @@
   ],
   "supportIpv6": "True",
   "systemInformation": "IT运维系统",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "32d99a0814d84487b146c387a14188d5",
@@ -2417,21 +2597,22 @@
     "cpuFrequency": 2.81,
     "productArchitecture": "00-X86架构",
     "totalNumberOfCpu": "2",
-    "totalNumberOfCpuNuclear": "16"
+    "totalNumberOfCpuNuclear": "16",
+    "brandLand": "00-国内"
    }
   ],
   "rackServer_deployment": [
    {
     "deployArea": "00-主机房-服务器区",
     "deployComputerRoom": "洛阳市中心支行中心机房",
-    "deployDb": "洛阳市中支中心机房",
+    "deployDb": "09fd31dac1a648c59cab24f486dd561c",
     "deployFloor": "三层",
     "deployGallery": "洛阳市中心支行办公大楼"
    }
   ],
   "rackServer_installationPosition": [
    {
-    "belongCabinet": "洛阳市中支中心机房机柜S3",
+    "belongCabinet": "eb699807238743ac8b6820a492c79dbd",
     "slotNo": "23"
    }
   ],
@@ -2458,7 +2639,11 @@
   ],
   "supportIpv6": "True",
   "systemInformation": "云计算平台",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "3511aed337b046b0a7aac718ac1181f6",
@@ -2484,21 +2669,22 @@
     "cpuFrequency": 4.2,
     "productArchitecture": "00-X86架构",
     "totalNumberOfCpu": "2",
-    "totalNumberOfCpuNuclear": "10"
+    "totalNumberOfCpuNuclear": "10",
+    "brandLand": "01-国外"
    }
   ],
   "rackServer_deployment": [
    {
     "deployArea": "00-主机房-服务器区",
     "deployComputerRoom": "郑州中支主中心机房",
-    "deployDb": "郑州中支主中心机房",
+    "deployDb": "77e1d9d6869044889909f41f30517418",
     "deployFloor": "十一层",
     "deployGallery": "河南省郑州市郑东新区商务外环路21号"
    }
   ],
   "rackServer_installationPosition": [
    {
-    "belongCabinet": "郑州中支主中心服务器机房预留机柜4",
+    "belongCabinet": "c2e5fea3c9e9429bb23ef997809e4800",
     "slotNo": "38"
    }
   ],
@@ -2525,7 +2711,11 @@
   ],
   "supportIpv6": "False",
   "systemInformation": "国库集中支付电子化管理系统",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "38bf3e09b93b4a0b84e45a874aeab592",
@@ -2551,21 +2741,22 @@
     "cpuFrequency": 4.2,
     "productArchitecture": "00-X86架构",
     "totalNumberOfCpu": "2",
-    "totalNumberOfCpuNuclear": "10"
+    "totalNumberOfCpuNuclear": "10",
+    "brandLand": "00-国内"
    }
   ],
   "rackServer_deployment": [
    {
     "deployArea": "00-主机房-服务器区",
     "deployComputerRoom": "郑州中支主中心机房",
-    "deployDb": "郑州中支主中心机房",
+    "deployDb": "77e1d9d6869044889909f41f30517418",
     "deployFloor": "十一层",
     "deployGallery": "河南省郑州市郑东新区商务外环路21号"
    }
   ],
   "rackServer_installationPosition": [
    {
-    "belongCabinet": "郑州中支主中心服务器机房预留机柜3",
+    "belongCabinet": "fe87419e88e1400abccb2d966d994ea4",
     "slotNo": "16"
    }
   ],
@@ -2592,7 +2783,11 @@
   ],
   "supportIpv6": "False",
   "systemInformation": "国库集中支付电子化管理系统",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "396a783948d34c5aa208b32edb167778",
@@ -2618,21 +2813,22 @@
     "cpuFrequency": 4.2,
     "productArchitecture": "00-X86架构",
     "totalNumberOfCpu": "2",
-    "totalNumberOfCpuNuclear": "10"
+    "totalNumberOfCpuNuclear": "10",
+    "brandLand": "01-国外"
    }
   ],
   "rackServer_deployment": [
    {
     "deployArea": "00-主机房-服务器区",
     "deployComputerRoom": "郑州中支主中心机房",
-    "deployDb": "郑州中支主中心机房",
+    "deployDb": "77e1d9d6869044889909f41f30517418",
     "deployFloor": "十一层",
     "deployGallery": "河南省郑州市郑东新区商务外环路21号"
    }
   ],
   "rackServer_installationPosition": [
    {
-    "belongCabinet": "郑州中支主中心服务器机房预留机柜4",
+    "belongCabinet": "c2e5fea3c9e9429bb23ef997809e4800",
     "slotNo": "32"
    }
   ],
@@ -2659,7 +2855,11 @@
   ],
   "supportIpv6": "False",
   "systemInformation": "国库集中支付电子化管理系统",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "3b787c14bb8d466a948e02d00e95d112",
@@ -2685,21 +2885,22 @@
     "cpuFrequency": 2.4,
     "productArchitecture": "00-X86架构",
     "totalNumberOfCpu": "2",
-    "totalNumberOfCpuNuclear": "8"
+    "totalNumberOfCpuNuclear": "8",
+    "brandLand": "00-国内"
    }
   ],
   "rackServer_deployment": [
    {
     "deployArea": "00-主机房-服务器区",
     "deployComputerRoom": "许昌市中心支行中心机房",
-    "deployDb": "许昌市中支中心机房",
+    "deployDb": "2e8c7a9f7bbd43efbfd90baa81db0b2d",
     "deployFloor": "四楼",
     "deployGallery": "河南省许昌市建安区新东街571号办公楼"
    }
   ],
   "rackServer_installationPosition": [
    {
-    "belongCabinet": "许昌市中支中心机房服务器机柜B04",
+    "belongCabinet": "8297ba18956a4dbbb07ab6b5016d45d1",
     "slotNo": "26"
    }
   ],
@@ -2726,7 +2927,11 @@
   ],
   "supportIpv6": "True",
   "systemInformation": "远程培训系统",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "3e00fe1f071340f0a8424ee0cd01b06d",
@@ -2752,21 +2957,22 @@
     "cpuFrequency": 4.2,
     "productArchitecture": "00-X86架构",
     "totalNumberOfCpu": "2",
-    "totalNumberOfCpuNuclear": "10"
+    "totalNumberOfCpuNuclear": "10",
+    "brandLand": "01-国外"
    }
   ],
   "rackServer_deployment": [
    {
     "deployArea": "00-主机房-服务器区",
     "deployComputerRoom": "郑州中支主中心机房",
-    "deployDb": "郑州中支主中心机房",
+    "deployDb": "77e1d9d6869044889909f41f30517418",
     "deployFloor": "十一层",
     "deployGallery": "河南省郑州市郑东新区商务外环路21号"
    }
   ],
   "rackServer_installationPosition": [
    {
-    "belongCabinet": "郑州中支主中心服务器机房服务器机柜16",
+    "belongCabinet": "084b93fd8a5d42c088773564ab2ea061",
     "slotNo": "25"
    }
   ],
@@ -2793,7 +2999,11 @@
   ],
   "supportIpv6": "False",
   "systemInformation": "云桌面系统",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "3fbb7efc88a440cabb6cd2a1e5e227bd",
@@ -2819,21 +3029,22 @@
     "cpuFrequency": 2.4,
     "productArchitecture": "00-X86架构",
     "totalNumberOfCpu": "1",
-    "totalNumberOfCpuNuclear": "4"
+    "totalNumberOfCpuNuclear": "4",
+    "brandLand": "00-国内"
    }
   ],
   "rackServer_deployment": [
    {
     "deployArea": "00-主机房-服务器区",
     "deployComputerRoom": "服务器机房",
-    "deployDb": "漯河市中支中心机房",
+    "deployDb": "ef79accbafa44c6298104908bbf8202d",
     "deployFloor": "五层",
     "deployGallery": "漯河市郾城区嵩山东支路1号"
    }
   ],
   "rackServer_installationPosition": [
    {
-    "belongCabinet": "漯河市中支网络机房机柜11",
+    "belongCabinet": "a8f6aadb9ae744169a7a579fc3b4478d",
     "slotNo": "9"
    }
   ],
@@ -2859,7 +3070,11 @@
   ],
   "supportIpv6": "False",
   "systemInformation": "深信服云桌面",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "44230580cf4443a9ad7d12a1b5a1bbf0",
@@ -2884,21 +3099,22 @@
     "cpuFrequency": 2.66,
     "productArchitecture": "00-X86架构",
     "totalNumberOfCpu": "2",
-    "totalNumberOfCpuNuclear": "8"
+    "totalNumberOfCpuNuclear": "8",
+    "brandLand": "00-国内"
    }
   ],
   "rackServer_deployment": [
    {
     "deployArea": "00-主机房-服务器区",
     "deployComputerRoom": "洛阳市中心支行中心机房",
-    "deployDb": "洛阳市中支中心机房",
+    "deployDb": "09fd31dac1a648c59cab24f486dd561c",
     "deployFloor": "三层",
     "deployGallery": "洛阳市中心支行办公大楼"
    }
   ],
   "rackServer_installationPosition": [
    {
-    "belongCabinet": "洛阳市中支中心机房机柜S1",
+    "belongCabinet": "bd832d73dc824de787de391002a9ff8f",
     "slotNo": "25"
    }
   ],
@@ -2924,7 +3140,11 @@
   ],
   "supportIpv6": "True",
   "systemInformation": "中心机房动环监控系统，中心机房门禁管理系统",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "47b4038e244544c0899d3c48150da1dc",
@@ -2950,21 +3170,22 @@
     "cpuFrequency": 4.2,
     "productArchitecture": "00-X86架构",
     "totalNumberOfCpu": "2",
-    "totalNumberOfCpuNuclear": "10"
+    "totalNumberOfCpuNuclear": "10",
+    "brandLand": "01-国外"
    }
   ],
   "rackServer_deployment": [
    {
     "deployArea": "00-主机房-服务器区",
     "deployComputerRoom": "郑州中支主中心机房",
-    "deployDb": "郑州中支主中心机房",
+    "deployDb": "77e1d9d6869044889909f41f30517418",
     "deployFloor": "十一层",
     "deployGallery": "河南省郑州市郑东新区商务外环路21号"
    }
   ],
   "rackServer_installationPosition": [
    {
-    "belongCabinet": "郑州中支主中心服务器机房预留机柜4",
+    "belongCabinet": "c2e5fea3c9e9429bb23ef997809e4800",
     "slotNo": "23"
    }
   ],
@@ -2991,7 +3212,11 @@
   ],
   "supportIpv6": "False",
   "systemInformation": "国库集中支付电子化管理系统",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "4a92eddbc7384ad495fbfbc344b6cad4",
@@ -3017,21 +3242,22 @@
     "cpuFrequency": 2.3,
     "productArchitecture": "00-X86架构",
     "totalNumberOfCpu": "2",
-    "totalNumberOfCpuNuclear": "12"
+    "totalNumberOfCpuNuclear": "12",
+    "brandLand": "00-国内"
    }
   ],
   "rackServer_deployment": [
    {
     "deployArea": "00-主机房-服务器区",
     "deployComputerRoom": "洛阳市中心支行中心机房",
-    "deployDb": "洛阳市中支中心机房",
+    "deployDb": "09fd31dac1a648c59cab24f486dd561c",
     "deployFloor": "三层",
     "deployGallery": "洛阳市中心支行办公大楼"
    }
   ],
   "rackServer_installationPosition": [
    {
-    "belongCabinet": "洛阳市中支中心机房机柜S2",
+    "belongCabinet": "6929a86521e644e1a858784b84112ac5",
     "slotNo": "35"
    }
   ],
@@ -3057,7 +3283,11 @@
   ],
   "supportIpv6": "True",
   "systemInformation": "vsphere虚拟化平台",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "4cc9225ebb3646198a175b91d8e6d77d",
@@ -3083,21 +3313,22 @@
     "cpuFrequency": 2.4,
     "productArchitecture": "00-X86架构",
     "totalNumberOfCpu": "1",
-    "totalNumberOfCpuNuclear": "4"
+    "totalNumberOfCpuNuclear": "4",
+    "brandLand": "00-国内"
    }
   ],
   "rackServer_deployment": [
    {
     "deployArea": "00-主机房-服务器区",
     "deployComputerRoom": "服务器机房",
-    "deployDb": "漯河市中支中心机房",
+    "deployDb": "ef79accbafa44c6298104908bbf8202d",
     "deployFloor": "五层",
     "deployGallery": "漯河市郾城区嵩山东支路1号"
    }
   ],
   "rackServer_installationPosition": [
    {
-    "belongCabinet": "漯河市中支网络机房机柜11",
+    "belongCabinet": "a8f6aadb9ae744169a7a579fc3b4478d",
     "slotNo": "5"
    }
   ],
@@ -3123,7 +3354,11 @@
   ],
   "supportIpv6": "False",
   "systemInformation": "中支网站",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "4df7d7e6afc54792a89f994df6566929",
@@ -3148,21 +3383,22 @@
     "cpuFrequency": 2.4,
     "productArchitecture": "00-X86架构",
     "totalNumberOfCpu": "1",
-    "totalNumberOfCpuNuclear": "4"
+    "totalNumberOfCpuNuclear": "4",
+    "brandLand": "00-国内"
    }
   ],
   "rackServer_deployment": [
    {
     "deployArea": "00-主机房-服务器区",
     "deployComputerRoom": "商丘中支中心机房",
-    "deployDb": "商丘市中支中心机房",
+    "deployDb": "fdddc1be23854dbc898a91708ca50080",
     "deployFloor": "八楼",
     "deployGallery": "商丘中支办公楼1号楼"
    }
   ],
   "rackServer_installationPosition": [
    {
-    "belongCabinet": "商丘市中支中心机房服务器机柜4",
+    "belongCabinet": "b808079fbe1f4f5f892d5613d82208cb",
     "slotNo": "8"
    }
   ],
@@ -3189,7 +3425,11 @@
   ],
   "supportIpv6": "False",
   "systemInformation": "商丘中支云桌面系统服务器",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "550d0a0db51b476da93e87130f43448e",
@@ -3214,21 +3454,22 @@
     "cpuFrequency": 2.4,
     "productArchitecture": "00-X86架构",
     "totalNumberOfCpu": "2",
-    "totalNumberOfCpuNuclear": "8"
+    "totalNumberOfCpuNuclear": "8",
+    "brandLand": "00-国内"
    }
   ],
   "rackServer_deployment": [
    {
     "deployArea": "00-主机房-服务器区",
     "deployComputerRoom": "中心机房",
-    "deployDb": "济源市中支中心机房",
+    "deployDb": "9b823d05699e4a2e85f226f1f815849d",
     "deployFloor": "二层",
     "deployGallery": "办公楼"
    }
   ],
   "rackServer_installationPosition": [
    {
-    "belongCabinet": "济源市中支中心机房机柜01",
+    "belongCabinet": "b55f1eacde614a28908f23b623eaefd1",
     "slotNo": "25"
    }
   ],
@@ -3254,7 +3495,11 @@
   ],
   "supportIpv6": "True",
   "systemInformation": "课程分发",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "5585d970f49e4c38b5e6149c70c647cc",
@@ -3280,21 +3525,22 @@
     "cpuFrequency": 0.0,
     "productArchitecture": "00-X86架构",
     "totalNumberOfCpu": "0",
-    "totalNumberOfCpuNuclear": "0"
+    "totalNumberOfCpuNuclear": "0",
+    "brandLand": "01-国外"
    }
   ],
   "rackServer_deployment": [
    {
     "deployArea": "00-主机房-服务器区",
     "deployComputerRoom": "许昌市中心支行中心机房",
-    "deployDb": "许昌市中支中心机房",
+    "deployDb": "2e8c7a9f7bbd43efbfd90baa81db0b2d",
     "deployFloor": "四楼",
     "deployGallery": "河南省许昌市建安区新东街571号办公楼"
    }
   ],
   "rackServer_installationPosition": [
    {
-    "belongCabinet": "许昌市中支中心机房服务器机柜B05",
+    "belongCabinet": "4f67b57b3ad34a4b9a435086c009dd0c",
     "slotNo": "35"
    }
   ],
@@ -3321,7 +3567,11 @@
   ],
   "supportIpv6": "False",
   "systemInformation": "视频会议系统",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "57af28645c9547d7b798b014e9f332d5",
@@ -3346,21 +3596,22 @@
     "cpuFrequency": 2.26,
     "productArchitecture": "00-X86架构",
     "totalNumberOfCpu": "1",
-    "totalNumberOfCpuNuclear": "4"
+    "totalNumberOfCpuNuclear": "4",
+    "brandLand": "01-国外"
    }
   ],
   "rackServer_deployment": [
    {
     "deployArea": "00-主机房-服务器区",
     "deployComputerRoom": "焦作市中心支行中心机房",
-    "deployDb": "焦作市中支中心机房",
+    "deployDb": "26783106134c4a1fabeb4616468578fb",
     "deployFloor": "四层",
     "deployGallery": "焦作市中心支行办公楼"
    }
   ],
   "rackServer_installationPosition": [
    {
-    "belongCabinet": "焦作市中支中心机房服务器机柜7",
+    "belongCabinet": "3507e48ebd6b42e7897ed779d14348c8",
     "slotNo": "20"
    }
   ],
@@ -3387,7 +3638,11 @@
   ],
   "supportIpv6": "False",
   "systemInformation": "IT运维监控平台",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "5a544c7a15a54b388e2c6bcb4e13ac49",
@@ -3411,21 +3666,22 @@
     "cpuFrequency": 2.1,
     "productArchitecture": "00-X86架构",
     "totalNumberOfCpu": "2",
-    "totalNumberOfCpuNuclear": "20"
+    "totalNumberOfCpuNuclear": "20",
+    "brandLand": "00-国内"
    }
   ],
   "rackServer_deployment": [
    {
     "deployArea": "00-主机房-服务器区",
     "deployComputerRoom": "驻马店市中支中心机房",
-    "deployDb": "驻马店市中支中心机房",
+    "deployDb": "79a0df7c04154292ad5efcee3ce2b74f",
     "deployFloor": "四层",
     "deployGallery": "驻马店市驿城区泰山路567号办公楼"
    }
   ],
   "rackServer_installationPosition": [
    {
-    "belongCabinet": "驻马店市中支中心机房机柜A3",
+    "belongCabinet": "90e67da0d61542a0bc23a49fe7ee0e65",
     "slotNo": "30"
    }
   ],
@@ -3452,7 +3708,11 @@
   ],
   "supportIpv6": "False",
   "systemInformation": "业务网云桌面",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "5f03228324534812a20f377ddad125b7",
@@ -3478,21 +3738,22 @@
     "cpuFrequency": 4.2,
     "productArchitecture": "00-X86架构",
     "totalNumberOfCpu": "2",
-    "totalNumberOfCpuNuclear": "10"
+    "totalNumberOfCpuNuclear": "10",
+    "brandLand": "00-国内"
    }
   ],
   "rackServer_deployment": [
    {
     "deployArea": "00-主机房-服务器区",
     "deployComputerRoom": "郑州中支主中心机房",
-    "deployDb": "郑州中支主中心机房",
+    "deployDb": "77e1d9d6869044889909f41f30517418",
     "deployFloor": "十一层",
     "deployGallery": "河南省郑州市郑东新区商务外环路21号"
    }
   ],
   "rackServer_installationPosition": [
    {
-    "belongCabinet": "郑州中支主中心服务器机房服务器机柜11",
+    "belongCabinet": "1340f51c47704bd58bb434de8b9bffa1",
     "slotNo": "23"
    }
   ],
@@ -3519,7 +3780,11 @@
   ],
   "supportIpv6": "False",
   "systemInformation": "虚拟机",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "5f924e38677149d2a9b7661bd71bcd22",
@@ -3545,21 +3810,22 @@
     "cpuFrequency": 2.4,
     "productArchitecture": "00-X86架构",
     "totalNumberOfCpu": "2",
-    "totalNumberOfCpuNuclear": "20"
+    "totalNumberOfCpuNuclear": "20",
+    "brandLand": "00-国内"
    }
   ],
   "rackServer_deployment": [
    {
     "deployArea": "00-主机房-服务器区",
     "deployComputerRoom": "许昌市中心支行中心机房",
-    "deployDb": "许昌市中支中心机房",
+    "deployDb": "2e8c7a9f7bbd43efbfd90baa81db0b2d",
     "deployFloor": "四楼",
     "deployGallery": "河南省许昌市建安区新东街571号办公楼"
    }
   ],
   "rackServer_installationPosition": [
    {
-    "belongCabinet": "许昌市中支中心机房服务器机柜B05",
+    "belongCabinet": "4f67b57b3ad34a4b9a435086c009dd0c",
     "slotNo": "30"
    }
   ],
@@ -3586,7 +3852,11 @@
   ],
   "supportIpv6": "True",
   "systemInformation": "桌面云系统",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "613e4ef2a6e14f82aaeee1d5e009484d",
@@ -3610,21 +3880,22 @@
     "cpuFrequency": 2.1,
     "productArchitecture": "00-X86架构",
     "totalNumberOfCpu": "2",
-    "totalNumberOfCpuNuclear": "20"
+    "totalNumberOfCpuNuclear": "20",
+    "brandLand": "00-国内"
    }
   ],
   "rackServer_deployment": [
    {
     "deployArea": "00-主机房-服务器区",
     "deployComputerRoom": "驻马店市中支中心机房",
-    "deployDb": "驻马店市中支中心机房",
+    "deployDb": "79a0df7c04154292ad5efcee3ce2b74f",
     "deployFloor": "四层",
     "deployGallery": "驻马店市驿城区泰山路567号办公楼"
    }
   ],
   "rackServer_installationPosition": [
    {
-    "belongCabinet": "驻马店市中支中心机房机柜A3",
+    "belongCabinet": "90e67da0d61542a0bc23a49fe7ee0e65",
     "slotNo": "24"
    }
   ],
@@ -3651,7 +3922,11 @@
   ],
   "supportIpv6": "False",
   "systemInformation": "业务网云桌面",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "623528d8d940415da8fe92be95feeb50",
@@ -3676,21 +3951,22 @@
     "cpuFrequency": 2.4,
     "productArchitecture": "00-X86架构",
     "totalNumberOfCpu": "1",
-    "totalNumberOfCpuNuclear": "4"
+    "totalNumberOfCpuNuclear": "4",
+    "brandLand": "00-国内"
    }
   ],
   "rackServer_deployment": [
    {
     "deployArea": "00-主机房-服务器区",
     "deployComputerRoom": "服务器机房",
-    "deployDb": "鹤壁市中支中心机房",
+    "deployDb": "92c1063572d5431784306d4b5258830d",
     "deployFloor": "七层",
     "deployGallery": "办公楼"
    }
   ],
   "rackServer_installationPosition": [
    {
-    "belongCabinet": "鹤壁市中支服务器机房机柜07",
+    "belongCabinet": "772a93ba88454fe3b138a3c7427b4185",
     "slotNo": "25"
    }
   ],
@@ -3717,7 +3993,11 @@
   ],
   "supportIpv6": "False",
   "systemInformation": "业务系统",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "62adbe07074b48f0a544c4802ff6c0e7",
@@ -3743,21 +4023,22 @@
     "cpuFrequency": 2.4,
     "productArchitecture": "00-X86架构",
     "totalNumberOfCpu": "2",
-    "totalNumberOfCpuNuclear": "20"
+    "totalNumberOfCpuNuclear": "20",
+    "brandLand": "00-国内"
    }
   ],
   "rackServer_deployment": [
    {
     "deployArea": "00-主机房-服务器区",
     "deployComputerRoom": "洛阳市中心支行中心机房",
-    "deployDb": "洛阳市中支中心机房",
+    "deployDb": "09fd31dac1a648c59cab24f486dd561c",
     "deployFloor": "三层",
     "deployGallery": "洛阳市中心支行办公大楼"
    }
   ],
   "rackServer_installationPosition": [
    {
-    "belongCabinet": "洛阳市中支中心机房机柜S4",
+    "belongCabinet": "459a2a3bb4344e499b662e3d720ba291",
     "slotNo": "9"
    }
   ],
@@ -3784,7 +4065,11 @@
   ],
   "supportIpv6": "True",
   "systemInformation": "机关云桌面系统",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "62e638cc73a345b1856276dd83bfdd13",
@@ -3810,21 +4095,22 @@
     "cpuFrequency": 2.2,
     "productArchitecture": "00-X86架构",
     "totalNumberOfCpu": "2",
-    "totalNumberOfCpuNuclear": "32"
+    "totalNumberOfCpuNuclear": "32",
+    "brandLand": "00-国内"
    }
   ],
   "rackServer_deployment": [
    {
     "deployArea": "00-主机房-服务器区",
     "deployComputerRoom": "服务器机房",
-    "deployDb": "郑州中支主中心机房",
+    "deployDb": "77e1d9d6869044889909f41f30517418",
     "deployFloor": "13层",
     "deployGallery": "中国人民银行郑州中心支行办公大楼"
    }
   ],
   "rackServer_installationPosition": [
    {
-    "belongCabinet": "郑州中支主中心服务器机房图腾机柜",
+    "belongCabinet": "f82a3b27be614f68a392d5c26442b2ef",
     "slotNo": "3"
    }
   ],
@@ -3851,7 +4137,11 @@
   ],
   "supportIpv6": "True",
   "systemInformation": "大数据平台",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "687f787334b2462ca6c5a1f030f687e5",
@@ -3877,21 +4167,22 @@
     "cpuFrequency": 4.2,
     "productArchitecture": "00-X86架构",
     "totalNumberOfCpu": "2",
-    "totalNumberOfCpuNuclear": "10"
+    "totalNumberOfCpuNuclear": "10",
+    "brandLand": "01-国外"
    }
   ],
   "rackServer_deployment": [
    {
     "deployArea": "00-主机房-服务器区",
     "deployComputerRoom": "郑州中支主中心机房",
-    "deployDb": "郑州中支主中心机房",
+    "deployDb": "77e1d9d6869044889909f41f30517418",
     "deployFloor": "十一层",
     "deployGallery": "河南省郑州市郑东新区商务外环路21号"
    }
   ],
   "rackServer_installationPosition": [
    {
-    "belongCabinet": "郑州中支主中心服务器机房预留机柜1",
+    "belongCabinet": "45e44930c0c64b169ad036b670822cf8",
     "slotNo": "31"
    }
   ],
@@ -3918,7 +4209,11 @@
   ],
   "supportIpv6": "False",
   "systemInformation": "异地备份服务器（B机）",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "6953c5a6c90444789dda480504e1f25b",
@@ -3944,21 +4239,22 @@
     "cpuFrequency": 4.2,
     "productArchitecture": "00-X86架构",
     "totalNumberOfCpu": "2",
-    "totalNumberOfCpuNuclear": "10"
+    "totalNumberOfCpuNuclear": "10",
+    "brandLand": "01-国外"
    }
   ],
   "rackServer_deployment": [
    {
     "deployArea": "00-主机房-服务器区",
     "deployComputerRoom": "郑州中支主中心机房",
-    "deployDb": "郑州中支主中心机房",
+    "deployDb": "77e1d9d6869044889909f41f30517418",
     "deployFloor": "十一层",
     "deployGallery": "河南省郑州市郑东新区商务外环路21号"
    }
   ],
   "rackServer_installationPosition": [
    {
-    "belongCabinet": "郑州中支主中心服务器机房E-06",
+    "belongCabinet": "31808957e5d8488782d21bc2805b5d9a",
     "slotNo": "29"
    }
   ],
@@ -3985,7 +4281,11 @@
   ],
   "supportIpv6": "False",
   "systemInformation": "省级数据中心DB",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "69b2d94024eb4bf88f95105c1eaee4bd",
@@ -4011,21 +4311,22 @@
     "cpuFrequency": 4.2,
     "productArchitecture": "00-X86架构",
     "totalNumberOfCpu": "2",
-    "totalNumberOfCpuNuclear": "10"
+    "totalNumberOfCpuNuclear": "10",
+    "brandLand": "01-国外"
    }
   ],
   "rackServer_deployment": [
    {
     "deployArea": "00-主机房-服务器区",
     "deployComputerRoom": "郑州中支主中心机房",
-    "deployDb": "郑州中支主中心机房",
+    "deployDb": "77e1d9d6869044889909f41f30517418",
     "deployFloor": "十一层",
     "deployGallery": "河南省郑州市郑东新区商务外环路21号"
    }
   ],
   "rackServer_installationPosition": [
    {
-    "belongCabinet": "郑州中支主中心服务器机房预留机柜2",
+    "belongCabinet": "588559da2e504bb5b5192996aaeb7d10",
     "slotNo": "4"
    }
   ],
@@ -4052,7 +4353,11 @@
   ],
   "supportIpv6": "False",
   "systemInformation": "虚拟机",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "6d293bdf3b0744d49da7e9161c0455a2",
@@ -4077,21 +4382,22 @@
     "cpuFrequency": 2.1,
     "productArchitecture": "00-X86架构",
     "totalNumberOfCpu": "1",
-    "totalNumberOfCpuNuclear": "8"
+    "totalNumberOfCpuNuclear": "8",
+    "brandLand": "00-国内"
    }
   ],
   "rackServer_deployment": [
    {
     "deployArea": "00-主机房-服务器区",
     "deployComputerRoom": "驻马店市中支中心机房",
-    "deployDb": "驻马店市中支中心机房",
+    "deployDb": "79a0df7c04154292ad5efcee3ce2b74f",
     "deployFloor": "四层",
     "deployGallery": "驻马店市驿城区泰山路567号办公楼"
    }
   ],
   "rackServer_installationPosition": [
    {
-    "belongCabinet": "驻马店市中支中心机房机柜A1",
+    "belongCabinet": "5b9de53323e54416937a8672788aae89",
     "slotNo": "30"
    }
   ],
@@ -4118,7 +4424,11 @@
   ],
   "supportIpv6": "False",
   "systemInformation": "保卫监控系统",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "6f92a7fef5e947cf898dbc8879d33df2",
@@ -4144,21 +4454,22 @@
     "cpuFrequency": 2.4,
     "productArchitecture": "00-X86架构",
     "totalNumberOfCpu": "2",
-    "totalNumberOfCpuNuclear": "4"
+    "totalNumberOfCpuNuclear": "4",
+    "brandLand": "00-国内"
    }
   ],
   "rackServer_deployment": [
    {
     "deployArea": "00-主机房-服务器区",
     "deployComputerRoom": "濮阳市中支中心机房",
-    "deployDb": "濮阳市中支中心机房",
+    "deployDb": "a0172c84ea0e4d399267a75c2449a054",
     "deployFloor": "六层",
     "deployGallery": "办公楼"
    }
   ],
   "rackServer_installationPosition": [
    {
-    "belongCabinet": "濮阳市中支中心机房服务器机柜3",
+    "belongCabinet": "bf0a2416e766426ab89f38b4f25ab27a",
     "slotNo": "27"
    }
   ],
@@ -4185,7 +4496,11 @@
   ],
   "supportIpv6": "False",
   "systemInformation": "远程培训课程分发子系统",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "6fd9cb02e0c341a8a8947b793902078f",
@@ -4211,21 +4526,22 @@
     "cpuFrequency": 4.2,
     "productArchitecture": "00-X86架构",
     "totalNumberOfCpu": "2",
-    "totalNumberOfCpuNuclear": "10"
+    "totalNumberOfCpuNuclear": "10",
+    "brandLand": "00-国内"
    }
   ],
   "rackServer_deployment": [
    {
     "deployArea": "00-主机房-服务器区",
     "deployComputerRoom": "郑州中支主中心机房",
-    "deployDb": "郑州中支主中心机房",
+    "deployDb": "77e1d9d6869044889909f41f30517418",
     "deployFloor": "十一层",
     "deployGallery": "河南省郑州市郑东新区商务外环路21号"
    }
   ],
   "rackServer_installationPosition": [
    {
-    "belongCabinet": "郑州中支主中心服务器机房服务器机柜5",
+    "belongCabinet": "70668f6eff7d456cb9f90390351fc00b",
     "slotNo": "10"
    }
   ],
@@ -4252,7 +4568,11 @@
   ],
   "supportIpv6": "False",
   "systemInformation": "DMZ虚拟化",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "7194a019077a4b1b97097a18329ee086",
@@ -4278,21 +4598,22 @@
     "cpuFrequency": 2.2,
     "productArchitecture": "00-X86架构",
     "totalNumberOfCpu": "2",
-    "totalNumberOfCpuNuclear": "32"
+    "totalNumberOfCpuNuclear": "32",
+    "brandLand": "00-国内"
    }
   ],
   "rackServer_deployment": [
    {
     "deployArea": "00-主机房-服务器区",
     "deployComputerRoom": "服务器机房",
-    "deployDb": "郑州中支主中心机房",
+    "deployDb": "77e1d9d6869044889909f41f30517418",
     "deployFloor": "13层",
     "deployGallery": "中国人民银行郑州中心支行办公大楼"
    }
   ],
   "rackServer_installationPosition": [
    {
-    "belongCabinet": "郑州中支主中心服务器机房图腾机柜",
+    "belongCabinet": "f82a3b27be614f68a392d5c26442b2ef",
     "slotNo": "15"
    }
   ],
@@ -4319,7 +4640,11 @@
   ],
   "supportIpv6": "True",
   "systemInformation": "大数据平台",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "720c35c651f548eeb2f72f5ec53fe020",
@@ -4345,21 +4670,22 @@
     "cpuFrequency": 2.6,
     "productArchitecture": "00-X86架构",
     "totalNumberOfCpu": "2",
-    "totalNumberOfCpuNuclear": "28"
+    "totalNumberOfCpuNuclear": "28",
+    "brandLand": "00-国内"
    }
   ],
   "rackServer_deployment": [
    {
     "deployArea": "00-主机房-服务器区",
     "deployComputerRoom": "新乡市中心支行中心机房",
-    "deployDb": "新乡市中支中心机房",
+    "deployDb": "a2cb90d474104946a0238306baa08672",
     "deployFloor": "十五层",
     "deployGallery": "新乡市中心支行办公楼"
    }
   ],
   "rackServer_installationPosition": [
    {
-    "belongCabinet": "新乡市中支服务器机房机柜04",
+    "belongCabinet": "d927390a651e4853b4214d8fb4ad4044",
     "slotNo": "17"
    }
   ],
@@ -4386,7 +4712,11 @@
   ],
   "supportIpv6": "False",
   "systemInformation": "云桌面",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "73470c02ecd9428898febdbd23f04207",
@@ -4412,21 +4742,22 @@
     "cpuFrequency": 2.4,
     "productArchitecture": "00-X86架构",
     "totalNumberOfCpu": "1",
-    "totalNumberOfCpuNuclear": "4"
+    "totalNumberOfCpuNuclear": "4",
+    "brandLand": "00-国内"
    }
   ],
   "rackServer_deployment": [
    {
     "deployArea": "00-主机房-服务器区",
     "deployComputerRoom": "新乡市中心支行中心机房",
-    "deployDb": "新乡市中支中心机房",
+    "deployDb": "a2cb90d474104946a0238306baa08672",
     "deployFloor": "十五层",
     "deployGallery": "新乡市中心支行办公楼"
    }
   ],
   "rackServer_installationPosition": [
    {
-    "belongCabinet": "新乡市中支服务器机房机柜05",
+    "belongCabinet": "f9af0c380a0a4d33b84160366b697446",
     "slotNo": "31"
    }
   ],
@@ -4453,7 +4784,11 @@
   ],
   "supportIpv6": "False",
   "systemInformation": "央行网络学院",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "735a0e374419478f80dfd5d2a5662754",
@@ -4478,21 +4813,22 @@
     "cpuFrequency": 2.26,
     "productArchitecture": "00-X86架构",
     "totalNumberOfCpu": "1",
-    "totalNumberOfCpuNuclear": "4"
+    "totalNumberOfCpuNuclear": "4",
+    "brandLand": "01-国外"
    }
   ],
   "rackServer_deployment": [
    {
     "deployArea": "00-主机房-服务器区",
     "deployComputerRoom": "中心机房",
-    "deployDb": "安阳市中支中心机房",
+    "deployDb": "5289a14829ef427b8c5ef3bfd01f28aa",
     "deployFloor": "八层",
     "deployGallery": "安阳市开发区金融大厦"
    }
   ],
   "rackServer_installationPosition": [
    {
-    "belongCabinet": "安阳市中支中心机房机柜08",
+    "belongCabinet": "40dd6ce7ab0b4a99a850bac94d13ff32",
     "slotNo": "24"
    }
   ],
@@ -4519,7 +4855,11 @@
   ],
   "supportIpv6": "False",
   "systemInformation": "运维监控",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "77a82d77384d449e8bc105fc2cb810cd",
@@ -4544,21 +4884,22 @@
     "cpuFrequency": 2.4,
     "productArchitecture": "00-X86架构",
     "totalNumberOfCpu": "1",
-    "totalNumberOfCpuNuclear": "4"
+    "totalNumberOfCpuNuclear": "4",
+    "brandLand": "01-国外"
    }
   ],
   "rackServer_deployment": [
    {
     "deployArea": "00-主机房-服务器区",
     "deployComputerRoom": "洛阳市中心支行中心机房",
-    "deployDb": "洛阳市中支中心机房",
+    "deployDb": "09fd31dac1a648c59cab24f486dd561c",
     "deployFloor": "三层",
     "deployGallery": "洛阳市中心支行办公大楼"
    }
   ],
   "rackServer_installationPosition": [
    {
-    "belongCabinet": "洛阳市中支中心机房机柜S2",
+    "belongCabinet": "6929a86521e644e1a858784b84112ac5",
     "slotNo": "33"
    }
   ],
@@ -4584,7 +4925,11 @@
   ],
   "supportIpv6": "True",
   "systemInformation": "IT运维监控平台",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "79276f6d4e9041d9844cbca0755fd642",
@@ -4610,21 +4955,22 @@
     "cpuFrequency": 4.2,
     "productArchitecture": "00-X86架构",
     "totalNumberOfCpu": "2",
-    "totalNumberOfCpuNuclear": "10"
+    "totalNumberOfCpuNuclear": "10",
+    "brandLand": "01-国外"
    }
   ],
   "rackServer_deployment": [
    {
     "deployArea": "00-主机房-服务器区",
     "deployComputerRoom": "郑州中支主中心机房",
-    "deployDb": "郑州中支主中心机房",
+    "deployDb": "77e1d9d6869044889909f41f30517418",
     "deployFloor": "十一层",
     "deployGallery": "河南省郑州市郑东新区商务外环路21号"
    }
   ],
   "rackServer_installationPosition": [
    {
-    "belongCabinet": "郑州中支主中心服务器机房预留机柜2",
+    "belongCabinet": "588559da2e504bb5b5192996aaeb7d10",
     "slotNo": "27"
    }
   ],
@@ -4651,7 +4997,11 @@
   ],
   "supportIpv6": "False",
   "systemInformation": "运维监控系统",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "7a2948ccce604606950fbc99eaeb539a",
@@ -4676,21 +5026,22 @@
     "cpuFrequency": 2.0,
     "productArchitecture": "00-X86架构",
     "totalNumberOfCpu": "1",
-    "totalNumberOfCpuNuclear": "4"
+    "totalNumberOfCpuNuclear": "4",
+    "brandLand": "00-国内"
    }
   ],
   "rackServer_deployment": [
    {
     "deployArea": "00-主机房-服务器区",
     "deployComputerRoom": "中心机房",
-    "deployDb": "三门峡市中支中心机房",
+    "deployDb": "9894dd4c692d4aef8a77fd532decde7b",
     "deployFloor": "六楼",
     "deployGallery": "办公大楼"
    }
   ],
   "rackServer_installationPosition": [
    {
-    "belongCabinet": "中国人民银行三门峡市中心支行 机柜7",
+    "belongCabinet": "71d2d040255d42c9b63fe51a3e54ecad",
     "slotNo": "15"
    }
   ],
@@ -4717,7 +5068,11 @@
   ],
   "supportIpv6": "True",
   "systemInformation": "云教室",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "7cb8de1aa22e45a49ea624a7815792ce",
@@ -4743,21 +5098,22 @@
     "cpuFrequency": 2.2,
     "productArchitecture": "00-X86架构",
     "totalNumberOfCpu": "2",
-    "totalNumberOfCpuNuclear": "32"
+    "totalNumberOfCpuNuclear": "32",
+    "brandLand": "00-国内"
    }
   ],
   "rackServer_deployment": [
    {
     "deployArea": "00-主机房-服务器区",
     "deployComputerRoom": "服务器机房",
-    "deployDb": "郑州中支主中心机房",
+    "deployDb": "77e1d9d6869044889909f41f30517418",
     "deployFloor": "13层",
     "deployGallery": "中国人民银行郑州中心支行办公大楼"
    }
   ],
   "rackServer_installationPosition": [
    {
-    "belongCabinet": "郑州中支主中心服务器机房图腾机柜",
+    "belongCabinet": "f82a3b27be614f68a392d5c26442b2ef",
     "slotNo": "5"
    }
   ],
@@ -4784,7 +5140,11 @@
   ],
   "supportIpv6": "True",
   "systemInformation": "大数据平台",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "7e222ef1ef654175a112f90482388be0",
@@ -4809,21 +5169,22 @@
     "cpuFrequency": 2.2,
     "productArchitecture": "00-X86架构",
     "totalNumberOfCpu": "2",
-    "totalNumberOfCpuNuclear": "10"
+    "totalNumberOfCpuNuclear": "10",
+    "brandLand": "00-国内"
    }
   ],
   "rackServer_deployment": [
    {
     "deployArea": "00-主机房-服务器区",
     "deployComputerRoom": "开封市中心支行中心机房",
-    "deployDb": "开封市中支中心机房",
+    "deployDb": "bc868096be7647988f5c29d1f1b04036",
     "deployFloor": "三层",
     "deployGallery": "开封市龙亭区晋安路62号办公楼"
    }
   ],
   "rackServer_installationPosition": [
    {
-    "belongCabinet": "开封市中支中心机房机柜2",
+    "belongCabinet": "d699c42375bb4a5c9e2771d070a9b8be",
     "slotNo": "12"
    }
   ],
@@ -4850,7 +5211,11 @@
   ],
   "supportIpv6": "True",
   "systemInformation": "桌面云平台系统",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "7ea8c45a6ae048dd8bd642b8d0336a24",
@@ -4876,21 +5241,22 @@
     "cpuFrequency": 3.3,
     "productArchitecture": "00-X86架构",
     "totalNumberOfCpu": "1",
-    "totalNumberOfCpuNuclear": "4"
+    "totalNumberOfCpuNuclear": "4",
+    "brandLand": "00-国内"
    }
   ],
   "rackServer_deployment": [
    {
     "deployArea": "00-主机房-服务器区",
     "deployComputerRoom": "服务器机房",
-    "deployDb": "漯河市中支中心机房",
+    "deployDb": "ef79accbafa44c6298104908bbf8202d",
     "deployFloor": "五层",
     "deployGallery": "漯河市郾城区嵩山东支路1号"
    }
   ],
   "rackServer_installationPosition": [
    {
-    "belongCabinet": "漯河市中支网络机房机柜11",
+    "belongCabinet": "a8f6aadb9ae744169a7a579fc3b4478d",
     "slotNo": "13"
    }
   ],
@@ -4916,7 +5282,11 @@
   ],
   "supportIpv6": "False",
   "systemInformation": "网络存储",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "80caf296f36a4ebdaf406be304e1ffb8",
@@ -4942,21 +5312,22 @@
     "cpuFrequency": 4.2,
     "productArchitecture": "00-X86架构",
     "totalNumberOfCpu": "2",
-    "totalNumberOfCpuNuclear": "10"
+    "totalNumberOfCpuNuclear": "10",
+    "brandLand": "00-国内"
    }
   ],
   "rackServer_deployment": [
    {
     "deployArea": "00-主机房-服务器区",
     "deployComputerRoom": "郑州中支主中心机房",
-    "deployDb": "郑州中支主中心机房",
+    "deployDb": "77e1d9d6869044889909f41f30517418",
     "deployFloor": "十一层",
     "deployGallery": "河南省郑州市郑东新区商务外环路21号"
    }
   ],
   "rackServer_installationPosition": [
    {
-    "belongCabinet": "郑州中支主中心服务器机房预留机柜1",
+    "belongCabinet": "45e44930c0c64b169ad036b670822cf8",
     "slotNo": "36"
    }
   ],
@@ -4983,7 +5354,11 @@
   ],
   "supportIpv6": "False",
   "systemInformation": "远程培训课程分发子系统",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "82f3399f8e584331bf58bcbcce1e2c9c",
@@ -5008,21 +5383,22 @@
     "cpuFrequency": 2.4,
     "productArchitecture": "00-X86架构",
     "totalNumberOfCpu": "1",
-    "totalNumberOfCpuNuclear": "4"
+    "totalNumberOfCpuNuclear": "4",
+    "brandLand": "00-国内"
    }
   ],
   "rackServer_deployment": [
    {
     "deployArea": "00-主机房-服务器区",
     "deployComputerRoom": "服务器机房",
-    "deployDb": "鹤壁市中支中心机房",
+    "deployDb": "92c1063572d5431784306d4b5258830d",
     "deployFloor": "七层",
     "deployGallery": "办公楼"
    }
   ],
   "rackServer_installationPosition": [
    {
-    "belongCabinet": "鹤壁市中支服务器机房机柜06",
+    "belongCabinet": "71c48e88dd344c60a00761bbaa0b53d3",
     "slotNo": "25"
    }
   ],
@@ -5049,7 +5425,11 @@
   ],
   "supportIpv6": "False",
   "systemInformation": "TBS",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "85bc388099d946618a73517f8c065bfd",
@@ -5075,21 +5455,22 @@
     "cpuFrequency": 4.2,
     "productArchitecture": "00-X86架构",
     "totalNumberOfCpu": "2",
-    "totalNumberOfCpuNuclear": "10"
+    "totalNumberOfCpuNuclear": "10",
+    "brandLand": "01-国外"
    }
   ],
   "rackServer_deployment": [
    {
     "deployArea": "00-主机房-服务器区",
     "deployComputerRoom": "郑州中支主中心机房",
-    "deployDb": "郑州中支主中心机房",
+    "deployDb": "77e1d9d6869044889909f41f30517418",
     "deployFloor": "十一层",
     "deployGallery": "河南省郑州市郑东新区商务外环路21号"
    }
   ],
   "rackServer_installationPosition": [
    {
-    "belongCabinet": "郑州中支主中心服务器机房预留机柜2",
+    "belongCabinet": "588559da2e504bb5b5192996aaeb7d10",
     "slotNo": "33"
    }
   ],
@@ -5116,7 +5497,11 @@
   ],
   "supportIpv6": "False",
   "systemInformation": "运维监控系统",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "86e4d7a2ad8b428185e957e8101ff576",
@@ -5140,21 +5525,22 @@
     "cpuFrequency": 2.4,
     "productArchitecture": "00-X86架构",
     "totalNumberOfCpu": "1",
-    "totalNumberOfCpuNuclear": "4"
+    "totalNumberOfCpuNuclear": "4",
+    "brandLand": "00-国内"
    }
   ],
   "rackServer_deployment": [
    {
     "deployArea": "00-主机房-服务器区",
     "deployComputerRoom": "商丘中支中心机房",
-    "deployDb": "商丘市中支中心机房",
+    "deployDb": "fdddc1be23854dbc898a91708ca50080",
     "deployFloor": "八楼",
     "deployGallery": "商丘中支办公楼1号楼"
    }
   ],
   "rackServer_installationPosition": [
    {
-    "belongCabinet": "商丘市中支中心机房服务器机柜15",
+    "belongCabinet": "a816dfa9cb6d43e6b8e632ed53af42a5",
     "slotNo": "29"
    }
   ],
@@ -5181,7 +5567,11 @@
   ],
   "supportIpv6": "False",
   "systemInformation": "总行远程培训系统本地存储服务器",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "8ab0188c2ad94151a3242ec036ed71b0",
@@ -5207,21 +5597,22 @@
     "cpuFrequency": 4.2,
     "productArchitecture": "00-X86架构",
     "totalNumberOfCpu": "2",
-    "totalNumberOfCpuNuclear": "10"
+    "totalNumberOfCpuNuclear": "10",
+    "brandLand": "01-国外"
    }
   ],
   "rackServer_deployment": [
    {
     "deployArea": "00-主机房-服务器区",
     "deployComputerRoom": "郑州中支主中心机房",
-    "deployDb": "郑州中支主中心机房",
+    "deployDb": "77e1d9d6869044889909f41f30517418",
     "deployFloor": "十一层",
     "deployGallery": "河南省郑州市郑东新区商务外环路21号"
    }
   ],
   "rackServer_installationPosition": [
    {
-    "belongCabinet": "郑州中支主中心服务器机房服务器机柜13",
+    "belongCabinet": "3a30ad81025d4931ba67dfb71cf07232",
     "slotNo": "19"
    }
   ],
@@ -5248,7 +5639,11 @@
   ],
   "supportIpv6": "False",
   "systemInformation": "账户CDP",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "8b265d92557f4420ba064fe2eeb790f3",
@@ -5274,21 +5669,22 @@
     "cpuFrequency": 2.4,
     "productArchitecture": "00-X86架构",
     "totalNumberOfCpu": "2",
-    "totalNumberOfCpuNuclear": "28"
+    "totalNumberOfCpuNuclear": "28",
+    "brandLand": "00-国内"
    }
   ],
   "rackServer_deployment": [
    {
     "deployArea": "00-主机房-服务器区",
     "deployComputerRoom": "许昌市中心支行中心机房",
-    "deployDb": "许昌市中支中心机房",
+    "deployDb": "2e8c7a9f7bbd43efbfd90baa81db0b2d",
     "deployFloor": "四楼",
     "deployGallery": "河南省许昌市建安区新东街571号办公楼"
    }
   ],
   "rackServer_installationPosition": [
    {
-    "belongCabinet": "许昌市中支中心机房服务器机柜B05",
+    "belongCabinet": "4f67b57b3ad34a4b9a435086c009dd0c",
     "slotNo": "11"
    }
   ],
@@ -5315,7 +5711,11 @@
   ],
   "supportIpv6": "True",
   "systemInformation": "桌面云系统",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "8bd9707b0f5848d9863e5f6d93dd7e2c",
@@ -5341,21 +5741,22 @@
     "cpuFrequency": 2.1,
     "productArchitecture": "00-X86架构",
     "totalNumberOfCpu": "2",
-    "totalNumberOfCpuNuclear": "12"
+    "totalNumberOfCpuNuclear": "12",
+    "brandLand": "00-国内"
    }
   ],
   "rackServer_deployment": [
    {
     "deployArea": "00-主机房-服务器区",
     "deployComputerRoom": "许昌市中心支行中心机房",
-    "deployDb": "许昌市中支中心机房",
+    "deployDb": "2e8c7a9f7bbd43efbfd90baa81db0b2d",
     "deployFloor": "四楼",
     "deployGallery": "河南省许昌市建安区新东街571号办公楼"
    }
   ],
   "rackServer_installationPosition": [
    {
-    "belongCabinet": "许昌市中支中心机房服务器机柜B05",
+    "belongCabinet": "4f67b57b3ad34a4b9a435086c009dd0c",
     "slotNo": "2"
    }
   ],
@@ -5382,7 +5783,11 @@
   ],
   "supportIpv6": "False",
   "systemInformation": "桌面云系统",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "92bfc96117c1409db237b04028ac6889",
@@ -5408,21 +5813,22 @@
     "cpuFrequency": 4.2,
     "productArchitecture": "00-X86架构",
     "totalNumberOfCpu": "2",
-    "totalNumberOfCpuNuclear": "10"
+    "totalNumberOfCpuNuclear": "10",
+    "brandLand": "01-国外"
    }
   ],
   "rackServer_deployment": [
    {
     "deployArea": "00-主机房-服务器区",
     "deployComputerRoom": "郑州中支主中心机房",
-    "deployDb": "郑州中支主中心机房",
+    "deployDb": "77e1d9d6869044889909f41f30517418",
     "deployFloor": "十一层",
     "deployGallery": "河南省郑州市郑东新区商务外环路21号"
    }
   ],
   "rackServer_installationPosition": [
    {
-    "belongCabinet": "郑州中支主中心服务器机房预留机柜2",
+    "belongCabinet": "588559da2e504bb5b5192996aaeb7d10",
     "slotNo": "31"
    }
   ],
@@ -5449,7 +5855,11 @@
   ],
   "supportIpv6": "False",
   "systemInformation": "运维监控系统",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "92d857cb1d034d0dbbb500887b009db0",
@@ -5475,21 +5885,22 @@
     "cpuFrequency": 4.2,
     "productArchitecture": "00-X86架构",
     "totalNumberOfCpu": "2",
-    "totalNumberOfCpuNuclear": "10"
+    "totalNumberOfCpuNuclear": "10",
+    "brandLand": "01-国外"
    }
   ],
   "rackServer_deployment": [
    {
     "deployArea": "00-主机房-服务器区",
     "deployComputerRoom": "郑州中支主中心机房",
-    "deployDb": "郑州中支主中心机房",
+    "deployDb": "77e1d9d6869044889909f41f30517418",
     "deployFloor": "十一层",
     "deployGallery": "河南省郑州市郑东新区商务外环路21号"
    }
   ],
   "rackServer_installationPosition": [
    {
-    "belongCabinet": "郑州中支主中心服务器机房服务器机柜16",
+    "belongCabinet": "084b93fd8a5d42c088773564ab2ea061",
     "slotNo": "18"
    }
   ],
@@ -5516,7 +5927,11 @@
   ],
   "supportIpv6": "False",
   "systemInformation": "云桌面系统",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "9370190da4784640ad98286e03bdbf8f",
@@ -5542,21 +5957,22 @@
     "cpuFrequency": 4.2,
     "productArchitecture": "00-X86架构",
     "totalNumberOfCpu": "2",
-    "totalNumberOfCpuNuclear": "10"
+    "totalNumberOfCpuNuclear": "10",
+    "brandLand": "00-国内"
    }
   ],
   "rackServer_deployment": [
    {
     "deployArea": "00-主机房-服务器区",
     "deployComputerRoom": "郑州中支转接中心机房",
-    "deployDb": "郑州中支转接中心机房",
+    "deployDb": "96f680d2b4f348a198a690325356a7c4",
     "deployFloor": "二层",
     "deployGallery": "河南省郑州市经开区第三大街与经北二路东北办公楼"
    }
   ],
   "rackServer_installationPosition": [
    {
-    "belongCabinet": "郑州中支主中心服务器机房服务器机柜13",
+    "belongCabinet": "3a30ad81025d4931ba67dfb71cf07232",
     "slotNo": "5"
    }
   ],
@@ -5583,7 +5999,11 @@
   ],
   "supportIpv6": "False",
   "systemInformation": "虚拟机",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "9426cfc919574ad68657269d11c2b644",
@@ -5608,21 +6028,22 @@
     "cpuFrequency": 2.4,
     "productArchitecture": "00-X86架构",
     "totalNumberOfCpu": "1",
-    "totalNumberOfCpuNuclear": "4"
+    "totalNumberOfCpuNuclear": "4",
+    "brandLand": "00-国内"
    }
   ],
   "rackServer_deployment": [
    {
     "deployArea": "00-主机房-服务器区",
     "deployComputerRoom": "驻马店市中支中心机房",
-    "deployDb": "驻马店市中支中心机房",
+    "deployDb": "79a0df7c04154292ad5efcee3ce2b74f",
     "deployFloor": "四层",
     "deployGallery": "驻马店市驿城区泰山路567号办公楼"
    }
   ],
   "rackServer_installationPosition": [
    {
-    "belongCabinet": "驻马店市中支中心机房机柜A6",
+    "belongCabinet": "daa1063942224249b9a55a7b01b5b9be",
     "slotNo": "14"
    }
   ],
@@ -5649,7 +6070,11 @@
   ],
   "supportIpv6": "False",
   "systemInformation": "课程分发",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "95ecab20e73643ec9f9533d0193ab470",
@@ -5675,21 +6100,22 @@
     "cpuFrequency": 4.2,
     "productArchitecture": "00-X86架构",
     "totalNumberOfCpu": "2",
-    "totalNumberOfCpuNuclear": "10"
+    "totalNumberOfCpuNuclear": "10",
+    "brandLand": "01-国外"
    }
   ],
   "rackServer_deployment": [
    {
     "deployArea": "00-主机房-服务器区",
     "deployComputerRoom": "郑州中支主中心机房",
-    "deployDb": "郑州中支主中心机房",
+    "deployDb": "77e1d9d6869044889909f41f30517418",
     "deployFloor": "十一层",
     "deployGallery": "河南省郑州市郑东新区商务外环路21号"
    }
   ],
   "rackServer_installationPosition": [
    {
-    "belongCabinet": "郑州中支主中心服务器机房服务器机柜16",
+    "belongCabinet": "084b93fd8a5d42c088773564ab2ea061",
     "slotNo": "31"
    }
   ],
@@ -5716,7 +6142,11 @@
   ],
   "supportIpv6": "False",
   "systemInformation": "云桌面系统",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "96290418e4ac41939280f46321023234",
@@ -5742,21 +6172,22 @@
     "cpuFrequency": 2.3,
     "productArchitecture": "00-X86架构",
     "totalNumberOfCpu": "2",
-    "totalNumberOfCpuNuclear": "24"
+    "totalNumberOfCpuNuclear": "24",
+    "brandLand": "00-国内"
    }
   ],
   "rackServer_deployment": [
    {
     "deployArea": "00-主机房-服务器区",
     "deployComputerRoom": "服务器机房",
-    "deployDb": "郑州中支主中心机房",
+    "deployDb": "77e1d9d6869044889909f41f30517418",
     "deployFloor": "13层",
     "deployGallery": "中国人民银行郑州中心支行办公大楼"
    }
   ],
   "rackServer_installationPosition": [
    {
-    "belongCabinet": "郑州中支主中心服务器机房预留机柜1",
+    "belongCabinet": "45e44930c0c64b169ad036b670822cf8",
     "slotNo": "17"
    }
   ],
@@ -5783,7 +6214,11 @@
   ],
   "supportIpv6": "True",
   "systemInformation": "大数据独立应用服务器",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "9d1c0dadabf04d8ca548bc5072fe1c6b",
@@ -5809,21 +6244,22 @@
     "cpuFrequency": 4.2,
     "productArchitecture": "00-X86架构",
     "totalNumberOfCpu": "2",
-    "totalNumberOfCpuNuclear": "10"
+    "totalNumberOfCpuNuclear": "10",
+    "brandLand": "00-国内"
    }
   ],
   "rackServer_deployment": [
    {
     "deployArea": "00-主机房-服务器区",
     "deployComputerRoom": "郑州中支主中心机房",
-    "deployDb": "郑州中支主中心机房",
+    "deployDb": "77e1d9d6869044889909f41f30517418",
     "deployFloor": "十一层",
     "deployGallery": "河南省郑州市郑东新区商务外环路21号"
    }
   ],
   "rackServer_installationPosition": [
    {
-    "belongCabinet": "郑州中支主中心服务器机房服务器机柜11",
+    "belongCabinet": "1340f51c47704bd58bb434de8b9bffa1",
     "slotNo": "28"
    }
   ],
@@ -5850,7 +6286,11 @@
   ],
   "supportIpv6": "False",
   "systemInformation": "虚拟机",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "9d6520b833d547ee850b5c2aa33f1fc3",
@@ -5874,21 +6314,22 @@
     "cpuFrequency": 2.66,
     "productArchitecture": "00-X86架构",
     "totalNumberOfCpu": "2",
-    "totalNumberOfCpuNuclear": "8"
+    "totalNumberOfCpuNuclear": "8",
+    "brandLand": "00-国内"
    }
   ],
   "rackServer_deployment": [
    {
     "deployArea": "00-主机房-服务器区",
     "deployComputerRoom": "洛阳市中心支行中心机房",
-    "deployDb": "洛阳市中支中心机房",
+    "deployDb": "09fd31dac1a648c59cab24f486dd561c",
     "deployFloor": "三层",
     "deployGallery": "洛阳市中心支行办公大楼"
    }
   ],
   "rackServer_installationPosition": [
    {
-    "belongCabinet": "洛阳市中支中心机房机柜S1",
+    "belongCabinet": "bd832d73dc824de787de391002a9ff8f",
     "slotNo": "29"
    }
   ],
@@ -5914,7 +6355,11 @@
   ],
   "supportIpv6": "True",
   "systemInformation": "vsphere虚拟化平台",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "a201134fe19242b2a605581412d20c84",
@@ -5940,21 +6385,22 @@
     "cpuFrequency": 4.2,
     "productArchitecture": "00-X86架构",
     "totalNumberOfCpu": "2",
-    "totalNumberOfCpuNuclear": "10"
+    "totalNumberOfCpuNuclear": "10",
+    "brandLand": "00-国内"
    }
   ],
   "rackServer_deployment": [
    {
     "deployArea": "00-主机房-服务器区",
     "deployComputerRoom": "郑州中支主中心机房",
-    "deployDb": "郑州中支主中心机房",
+    "deployDb": "77e1d9d6869044889909f41f30517418",
     "deployFloor": "十一层",
     "deployGallery": "河南省郑州市郑东新区商务外环路21号"
    }
   ],
   "rackServer_installationPosition": [
    {
-    "belongCabinet": "郑州中支主中心服务器机房服务器机柜4",
+    "belongCabinet": "f3d7cdc3b3f24c73b4a967836d2416fe",
     "slotNo": "11"
    }
   ],
@@ -5981,7 +6427,11 @@
   ],
   "supportIpv6": "False",
   "systemInformation": "DMZ虚拟化",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "a2c95b0b8c38499c8016fb99afe6eceb",
@@ -6007,21 +6457,22 @@
     "cpuFrequency": 2.2,
     "productArchitecture": "00-X86架构",
     "totalNumberOfCpu": "2",
-    "totalNumberOfCpuNuclear": "10"
+    "totalNumberOfCpuNuclear": "10",
+    "brandLand": "00-国内"
    }
   ],
   "rackServer_deployment": [
    {
     "deployArea": "00-主机房-服务器区",
     "deployComputerRoom": "开封市中心支行中心机房",
-    "deployDb": "开封市中支中心机房",
+    "deployDb": "bc868096be7647988f5c29d1f1b04036",
     "deployFloor": "三层",
     "deployGallery": "开封市龙亭区晋安路66号办公楼"
    }
   ],
   "rackServer_installationPosition": [
    {
-    "belongCabinet": "开封市中支中心机房机柜1",
+    "belongCabinet": "31ff566e877f46e5b730bf19cc528b29",
     "slotNo": "15"
    }
   ],
@@ -6048,7 +6499,11 @@
   ],
   "supportIpv6": "True",
   "systemInformation": "桌面云超融合系统",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "a4cfed46892646b3a368f9ab46350454",
@@ -6072,21 +6527,22 @@
     "cpuFrequency": 2.1,
     "productArchitecture": "00-X86架构",
     "totalNumberOfCpu": "2",
-    "totalNumberOfCpuNuclear": "20"
+    "totalNumberOfCpuNuclear": "20",
+    "brandLand": "00-国内"
    }
   ],
   "rackServer_deployment": [
    {
     "deployArea": "00-主机房-服务器区",
     "deployComputerRoom": "驻马店市中支中心机房",
-    "deployDb": "驻马店市中支中心机房",
+    "deployDb": "79a0df7c04154292ad5efcee3ce2b74f",
     "deployFloor": "四层",
     "deployGallery": "驻马店市驿城区泰山路567号办公楼"
    }
   ],
   "rackServer_installationPosition": [
    {
-    "belongCabinet": "驻马店市中支中心机房机柜A3",
+    "belongCabinet": "90e67da0d61542a0bc23a49fe7ee0e65",
     "slotNo": "27"
    }
   ],
@@ -6113,7 +6569,11 @@
   ],
   "supportIpv6": "False",
   "systemInformation": "业务网云桌面",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "a582e7d95cd944a5a5ea935d800033dc",
@@ -6138,21 +6598,22 @@
     "cpuFrequency": 2.2,
     "productArchitecture": "00-X86架构",
     "totalNumberOfCpu": "1",
-    "totalNumberOfCpuNuclear": "4"
+    "totalNumberOfCpuNuclear": "4",
+    "brandLand": "00-国内"
    }
   ],
   "rackServer_deployment": [
    {
     "deployArea": "00-主机房-服务器区",
     "deployComputerRoom": "中心机房",
-    "deployDb": "三门峡市中支中心机房",
+    "deployDb": "9894dd4c692d4aef8a77fd532decde7b",
     "deployFloor": "六楼",
     "deployGallery": "办公大楼"
    }
   ],
   "rackServer_installationPosition": [
    {
-    "belongCabinet": "中国人民银行三门峡市中心支行 机柜11",
+    "belongCabinet": "47dec66b2d4a4ebaa998be3ef12329b2",
     "slotNo": "25"
    }
   ],
@@ -6179,7 +6640,11 @@
   ],
   "supportIpv6": "True",
   "systemInformation": "FTP文件存储系统",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "a761d122e3ce4318a23f8af8d0b5a57e",
@@ -6204,21 +6669,22 @@
     "cpuFrequency": 2.4,
     "productArchitecture": "00-X86架构",
     "totalNumberOfCpu": "1",
-    "totalNumberOfCpuNuclear": "6"
+    "totalNumberOfCpuNuclear": "6",
+    "brandLand": "00-国内"
    }
   ],
   "rackServer_deployment": [
    {
     "deployArea": "00-主机房-服务器区",
     "deployComputerRoom": "中心机房",
-    "deployDb": "安阳市中支中心机房",
+    "deployDb": "5289a14829ef427b8c5ef3bfd01f28aa",
     "deployFloor": "八层",
     "deployGallery": "安阳市开发区金融大厦"
    }
   ],
   "rackServer_installationPosition": [
    {
-    "belongCabinet": "安阳市中支中心机房机柜08",
+    "belongCabinet": "40dd6ce7ab0b4a99a850bac94d13ff32",
     "slotNo": "24"
    }
   ],
@@ -6245,7 +6711,11 @@
   ],
   "supportIpv6": "False",
   "systemInformation": "协同办公",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "a9bf89438f6c4688920068b2db25185a",
@@ -6271,21 +6741,22 @@
     "cpuFrequency": 1.9,
     "productArchitecture": "00-X86架构",
     "totalNumberOfCpu": "2",
-    "totalNumberOfCpuNuclear": "12"
+    "totalNumberOfCpuNuclear": "12",
+    "brandLand": "01-国外"
    }
   ],
   "rackServer_deployment": [
    {
     "deployArea": "00-主机房-服务器区",
     "deployComputerRoom": "许昌市中心支行中心机房",
-    "deployDb": "许昌市中支中心机房",
+    "deployDb": "2e8c7a9f7bbd43efbfd90baa81db0b2d",
     "deployFloor": "四楼",
     "deployGallery": "河南省许昌市建安区新东街571号办公楼"
    }
   ],
   "rackServer_installationPosition": [
    {
-    "belongCabinet": "许昌市中支中心机房服务器机柜B03",
+    "belongCabinet": "f01e86fbade14bab897c1867956a0b31",
     "slotNo": "4"
    }
   ],
@@ -6312,7 +6783,11 @@
   ],
   "supportIpv6": "True",
   "systemInformation": "动环监控系统",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "aa9ba62333ff4bd88b86d6999d1f849b",
@@ -6338,21 +6813,22 @@
     "cpuFrequency": 2.2,
     "productArchitecture": "00-X86架构",
     "totalNumberOfCpu": "2",
-    "totalNumberOfCpuNuclear": "20"
+    "totalNumberOfCpuNuclear": "20",
+    "brandLand": "00-国内"
    }
   ],
   "rackServer_deployment": [
    {
     "deployArea": "00-主机房-服务器区",
     "deployComputerRoom": "周口市中心支行中心机房",
-    "deployDb": "周口市中支中心机房",
+    "deployDb": "2952ee20d75547eaa9a1cb873e96f60e",
     "deployFloor": "二层",
     "deployGallery": "周口市川汇区七一路中段1号A楼"
    }
   ],
   "rackServer_installationPosition": [
    {
-    "belongCabinet": "周口市中支中心机房服务器机柜C5",
+    "belongCabinet": "ccad2e24cd394e938788c6730a0ee314",
     "slotNo": "16"
    }
   ],
@@ -6379,7 +6855,11 @@
   ],
   "supportIpv6": "False",
   "systemInformation": "云桌面",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "ab9c6fced45246cca876f0fecf83c450",
@@ -6403,21 +6883,22 @@
     "cpuFrequency": 2.4,
     "productArchitecture": "00-X86架构",
     "totalNumberOfCpu": "1",
-    "totalNumberOfCpuNuclear": "4"
+    "totalNumberOfCpuNuclear": "4",
+    "brandLand": "01-国外"
    }
   ],
   "rackServer_deployment": [
    {
     "deployArea": "00-主机房-服务器区",
     "deployComputerRoom": "商丘中支中心机房",
-    "deployDb": "商丘市中支中心机房",
+    "deployDb": "fdddc1be23854dbc898a91708ca50080",
     "deployFloor": "八楼",
     "deployGallery": "商丘中支办公楼1号楼"
    }
   ],
   "rackServer_installationPosition": [
    {
-    "belongCabinet": "商丘市中支中心机房服务器机柜13",
+    "belongCabinet": "660343cb986741508595b01ab722be31",
     "slotNo": "21"
    }
   ],
@@ -6444,7 +6925,11 @@
   ],
   "supportIpv6": "False",
   "systemInformation": "郑州中支IT运维系统本地服务器",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "ad8fe3f1d41448c285f62dddd7ef9f4e",
@@ -6470,21 +6955,22 @@
     "cpuFrequency": 4.2,
     "productArchitecture": "00-X86架构",
     "totalNumberOfCpu": "2",
-    "totalNumberOfCpuNuclear": "10"
+    "totalNumberOfCpuNuclear": "10",
+    "brandLand": "01-国外"
    }
   ],
   "rackServer_deployment": [
    {
     "deployArea": "00-主机房-服务器区",
     "deployComputerRoom": "郑州中支主中心机房",
-    "deployDb": "郑州中支主中心机房",
+    "deployDb": "77e1d9d6869044889909f41f30517418",
     "deployFloor": "十一层",
     "deployGallery": "河南省郑州市郑东新区商务外环路21号"
    }
   ],
   "rackServer_installationPosition": [
    {
-    "belongCabinet": "郑州中支主中心服务器机房预留机柜4",
+    "belongCabinet": "c2e5fea3c9e9429bb23ef997809e4800",
     "slotNo": "30"
    }
   ],
@@ -6511,7 +6997,11 @@
   ],
   "supportIpv6": "False",
   "systemInformation": "国库集中支付电子化管理系统",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "af22e9e58d10414c8a743900003bf77e",
@@ -6536,21 +7026,22 @@
     "cpuFrequency": 3.9,
     "productArchitecture": "00-X86架构",
     "totalNumberOfCpu": "4",
-    "totalNumberOfCpuNuclear": "32"
+    "totalNumberOfCpuNuclear": "32",
+    "brandLand": "00-国内"
    }
   ],
   "rackServer_deployment": [
    {
     "deployArea": "00-主机房-服务器区",
     "deployComputerRoom": "焦作市中心支行中心机房",
-    "deployDb": "焦作市中支中心机房",
+    "deployDb": "26783106134c4a1fabeb4616468578fb",
     "deployFloor": "四层",
     "deployGallery": "焦作市中心支行办公楼"
    }
   ],
   "rackServer_installationPosition": [
    {
-    "belongCabinet": "焦作市中支中心机房服务器机柜8",
+    "belongCabinet": "aef13a268df14b049a3e4ec0e2227dbd",
     "slotNo": "32"
    }
   ],
@@ -6577,7 +7068,11 @@
   ],
   "supportIpv6": "False",
   "systemInformation": "云桌面",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "b0148d0a9401424b9ca24b31c09c1b86",
@@ -6603,21 +7098,22 @@
     "cpuFrequency": 4.2,
     "productArchitecture": "00-X86架构",
     "totalNumberOfCpu": "2",
-    "totalNumberOfCpuNuclear": "10"
+    "totalNumberOfCpuNuclear": "10",
+    "brandLand": "01-国外"
    }
   ],
   "rackServer_deployment": [
    {
     "deployArea": "00-主机房-服务器区",
     "deployComputerRoom": "郑州中支主中心机房",
-    "deployDb": "郑州中支主中心机房",
+    "deployDb": "77e1d9d6869044889909f41f30517418",
     "deployFloor": "十一层",
     "deployGallery": "河南省郑州市郑东新区商务外环路21号"
    }
   ],
   "rackServer_installationPosition": [
    {
-    "belongCabinet": "郑州中支主中心服务器机房预留机柜4",
+    "belongCabinet": "c2e5fea3c9e9429bb23ef997809e4800",
     "slotNo": "18"
    }
   ],
@@ -6644,7 +7140,11 @@
   ],
   "supportIpv6": "False",
   "systemInformation": "国库集中支付电子化管理系统",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "b4115a0983a24124b4e2e76d70fe0eda",
@@ -6669,21 +7169,22 @@
     "cpuFrequency": 3.9,
     "productArchitecture": "00-X86架构",
     "totalNumberOfCpu": "4",
-    "totalNumberOfCpuNuclear": "32"
+    "totalNumberOfCpuNuclear": "32",
+    "brandLand": "00-国内"
    }
   ],
   "rackServer_deployment": [
    {
     "deployArea": "00-主机房-服务器区",
     "deployComputerRoom": "焦作市中心支行中心机房",
-    "deployDb": "焦作市中支中心机房",
+    "deployDb": "26783106134c4a1fabeb4616468578fb",
     "deployFloor": "四层",
     "deployGallery": "焦作市中心支行办公楼"
    }
   ],
   "rackServer_installationPosition": [
    {
-    "belongCabinet": "焦作市中支中心机房服务器机柜8",
+    "belongCabinet": "aef13a268df14b049a3e4ec0e2227dbd",
     "slotNo": "22"
    }
   ],
@@ -6710,7 +7211,11 @@
   ],
   "supportIpv6": "False",
   "systemInformation": "云桌面",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "b50e07fdf3754b8d82d67e4a04567581",
@@ -6736,21 +7241,22 @@
     "cpuFrequency": 4.2,
     "productArchitecture": "00-X86架构",
     "totalNumberOfCpu": "2",
-    "totalNumberOfCpuNuclear": "10"
+    "totalNumberOfCpuNuclear": "10",
+    "brandLand": "01-国外"
    }
   ],
   "rackServer_deployment": [
    {
     "deployArea": "00-主机房-服务器区",
     "deployComputerRoom": "郑州中支主中心机房",
-    "deployDb": "郑州中支主中心机房",
+    "deployDb": "77e1d9d6869044889909f41f30517418",
     "deployFloor": "十一层",
     "deployGallery": "河南省郑州市郑东新区商务外环路21号"
    }
   ],
   "rackServer_installationPosition": [
    {
-    "belongCabinet": "郑州中支主中心服务器机房预留机柜2",
+    "belongCabinet": "588559da2e504bb5b5192996aaeb7d10",
     "slotNo": "29"
    }
   ],
@@ -6777,7 +7283,11 @@
   ],
   "supportIpv6": "False",
   "systemInformation": "运维监控系统",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "b581981471d44a56ba352598a7c9fbff",
@@ -6803,21 +7313,22 @@
     "cpuFrequency": 4.2,
     "productArchitecture": "00-X86架构",
     "totalNumberOfCpu": "2",
-    "totalNumberOfCpuNuclear": "10"
+    "totalNumberOfCpuNuclear": "10",
+    "brandLand": "01-国外"
    }
   ],
   "rackServer_deployment": [
    {
     "deployArea": "00-主机房-服务器区",
     "deployComputerRoom": "郑州中支主中心机房",
-    "deployDb": "郑州中支主中心机房",
+    "deployDb": "77e1d9d6869044889909f41f30517418",
     "deployFloor": "十一层",
     "deployGallery": "河南省郑州市郑东新区商务外环路21号"
    }
   ],
   "rackServer_installationPosition": [
    {
-    "belongCabinet": "郑州中支主中心服务器机房预留机柜4",
+    "belongCabinet": "c2e5fea3c9e9429bb23ef997809e4800",
     "slotNo": "26"
    }
   ],
@@ -6844,7 +7355,11 @@
   ],
   "supportIpv6": "False",
   "systemInformation": "国库集中支付电子化管理系统",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "b5ae9dbf4d9a41ba92f411128923c08f",
@@ -6869,21 +7384,22 @@
     "cpuFrequency": 2.2,
     "productArchitecture": "00-X86架构",
     "totalNumberOfCpu": "2",
-    "totalNumberOfCpuNuclear": "10"
+    "totalNumberOfCpuNuclear": "10",
+    "brandLand": "00-国内"
    }
   ],
   "rackServer_deployment": [
    {
     "deployArea": "00-主机房-服务器区",
     "deployComputerRoom": "开封市中心支行中心机房",
-    "deployDb": "开封市中支中心机房",
+    "deployDb": "bc868096be7647988f5c29d1f1b04036",
     "deployFloor": "三层",
     "deployGallery": "开封市龙亭区晋安路65号办公楼"
    }
   ],
   "rackServer_installationPosition": [
    {
-    "belongCabinet": "开封市中支中心机房机柜2",
+    "belongCabinet": "d699c42375bb4a5c9e2771d070a9b8be",
     "slotNo": "7"
    }
   ],
@@ -6910,7 +7426,11 @@
   ],
   "supportIpv6": "True",
   "systemInformation": "桌面云平台系统",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "b6ebe51606144b4baf5f97a291a44846",
@@ -6936,21 +7456,22 @@
     "cpuFrequency": 2.2,
     "productArchitecture": "00-X86架构",
     "totalNumberOfCpu": "2",
-    "totalNumberOfCpuNuclear": "20"
+    "totalNumberOfCpuNuclear": "20",
+    "brandLand": "00-国内"
    }
   ],
   "rackServer_deployment": [
    {
     "deployArea": "00-主机房-服务器区",
     "deployComputerRoom": "周口市中心支行中心机房",
-    "deployDb": "周口市中支中心机房",
+    "deployDb": "2952ee20d75547eaa9a1cb873e96f60e",
     "deployFloor": "二层",
     "deployGallery": "周口市川汇区七一路中段1号A楼"
    }
   ],
   "rackServer_installationPosition": [
    {
-    "belongCabinet": "周口市中支中心机房服务器机柜C5",
+    "belongCabinet": "ccad2e24cd394e938788c6730a0ee314",
     "slotNo": "13"
    }
   ],
@@ -6977,7 +7498,11 @@
   ],
   "supportIpv6": "False",
   "systemInformation": "云桌面",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "b734bc454f3b43358269b9e3d3f58870",
@@ -7003,21 +7528,22 @@
     "cpuFrequency": 4.2,
     "productArchitecture": "00-X86架构",
     "totalNumberOfCpu": "2",
-    "totalNumberOfCpuNuclear": "10"
+    "totalNumberOfCpuNuclear": "10",
+    "brandLand": "00-国内"
    }
   ],
   "rackServer_deployment": [
    {
     "deployArea": "00-主机房-服务器区",
     "deployComputerRoom": "郑州中支主中心机房",
-    "deployDb": "郑州中支主中心机房",
+    "deployDb": "77e1d9d6869044889909f41f30517418",
     "deployFloor": "十一层",
     "deployGallery": "河南省郑州市郑东新区商务外环路21号"
    }
   ],
   "rackServer_installationPosition": [
    {
-    "belongCabinet": "郑州中支主中心服务器机房服务器机柜11",
+    "belongCabinet": "1340f51c47704bd58bb434de8b9bffa1",
     "slotNo": "36"
    }
   ],
@@ -7044,7 +7570,11 @@
   ],
   "supportIpv6": "False",
   "systemInformation": "虚拟机",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "b74e0a6a26e8494291560d60bddab1b6",
@@ -7068,21 +7598,22 @@
     "cpuFrequency": 2.1,
     "productArchitecture": "00-X86架构",
     "totalNumberOfCpu": "2",
-    "totalNumberOfCpuNuclear": "20"
+    "totalNumberOfCpuNuclear": "20",
+    "brandLand": "00-国内"
    }
   ],
   "rackServer_deployment": [
    {
     "deployArea": "00-主机房-服务器区",
     "deployComputerRoom": "驻马店市中支中心机房",
-    "deployDb": "驻马店市中支中心机房",
+    "deployDb": "79a0df7c04154292ad5efcee3ce2b74f",
     "deployFloor": "四层",
     "deployGallery": "驻马店市驿城区泰山路567号办公楼"
    }
   ],
   "rackServer_installationPosition": [
    {
-    "belongCabinet": "驻马店市中支中心机房机柜A3",
+    "belongCabinet": "90e67da0d61542a0bc23a49fe7ee0e65",
     "slotNo": "33"
    }
   ],
@@ -7109,7 +7640,11 @@
   ],
   "supportIpv6": "False",
   "systemInformation": "业务网云桌面",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "b909c226932b474dbd7640d9c4715362",
@@ -7134,21 +7669,22 @@
     "cpuFrequency": 2.2,
     "productArchitecture": "00-X86架构",
     "totalNumberOfCpu": "2",
-    "totalNumberOfCpuNuclear": "10"
+    "totalNumberOfCpuNuclear": "10",
+    "brandLand": "00-国内"
    }
   ],
   "rackServer_deployment": [
    {
     "deployArea": "00-主机房-服务器区",
     "deployComputerRoom": "开封市中心支行中心机房",
-    "deployDb": "开封市中支中心机房",
+    "deployDb": "bc868096be7647988f5c29d1f1b04036",
     "deployFloor": "三层",
     "deployGallery": "开封市龙亭区晋安路61号办公楼"
    }
   ],
   "rackServer_installationPosition": [
    {
-    "belongCabinet": "开封市中支中心机房机柜1",
+    "belongCabinet": "31ff566e877f46e5b730bf19cc528b29",
     "slotNo": "13"
    }
   ],
@@ -7175,7 +7711,11 @@
   ],
   "supportIpv6": "True",
   "systemInformation": "桌面云平台系统",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "bc5daf11431c44bcbeca9af6577bff22",
@@ -7201,21 +7741,22 @@
     "cpuFrequency": 4.2,
     "productArchitecture": "00-X86架构",
     "totalNumberOfCpu": "2",
-    "totalNumberOfCpuNuclear": "10"
+    "totalNumberOfCpuNuclear": "10",
+    "brandLand": "00-国内"
    }
   ],
   "rackServer_deployment": [
    {
     "deployArea": "00-主机房-服务器区",
     "deployComputerRoom": "郑州中支主中心机房",
-    "deployDb": "郑州中支主中心机房",
+    "deployDb": "77e1d9d6869044889909f41f30517418",
     "deployFloor": "十一层",
     "deployGallery": "河南省郑州市郑东新区商务外环路21号"
    }
   ],
   "rackServer_installationPosition": [
    {
-    "belongCabinet": "郑州中支主中心服务器机房预留机柜3",
+    "belongCabinet": "fe87419e88e1400abccb2d966d994ea4",
     "slotNo": "13"
    }
   ],
@@ -7242,7 +7783,11 @@
   ],
   "supportIpv6": "False",
   "systemInformation": "国库集中支付电子化管理系统",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "bca971c89d2a4477bd5582be0e8feb68",
@@ -7267,21 +7812,22 @@
     "cpuFrequency": 2.4,
     "productArchitecture": "00-X86架构",
     "totalNumberOfCpu": "1",
-    "totalNumberOfCpuNuclear": "4"
+    "totalNumberOfCpuNuclear": "4",
+    "brandLand": "00-国内"
    }
   ],
   "rackServer_deployment": [
    {
     "deployArea": "00-主机房-服务器区",
     "deployComputerRoom": "服务器机房",
-    "deployDb": "鹤壁市中支中心机房",
+    "deployDb": "92c1063572d5431784306d4b5258830d",
     "deployFloor": "七层",
     "deployGallery": "办公楼"
    }
   ],
   "rackServer_installationPosition": [
    {
-    "belongCabinet": "鹤壁市中支服务器机房机柜08",
+    "belongCabinet": "85a64e80f8814319be4f529c93dd31c6",
     "slotNo": "25"
    }
   ],
@@ -7308,7 +7854,11 @@
   ],
   "supportIpv6": "False",
   "systemInformation": "云桌面",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "bce3c54519164e02b5471189b126c47a",
@@ -7332,21 +7882,22 @@
     "cpuFrequency": 2.1,
     "productArchitecture": "00-X86架构",
     "totalNumberOfCpu": "2",
-    "totalNumberOfCpuNuclear": "20"
+    "totalNumberOfCpuNuclear": "20",
+    "brandLand": "00-国内"
    }
   ],
   "rackServer_deployment": [
    {
     "deployArea": "00-主机房-服务器区",
     "deployComputerRoom": "驻马店市中支中心机房",
-    "deployDb": "驻马店市中支中心机房",
+    "deployDb": "79a0df7c04154292ad5efcee3ce2b74f",
     "deployFloor": "四层",
     "deployGallery": "驻马店市驿城区泰山路567号办公楼"
    }
   ],
   "rackServer_installationPosition": [
    {
-    "belongCabinet": "驻马店市中支中心机房机柜B1",
+    "belongCabinet": "1f5063d8a83d491d9bf241cef05a0968",
     "slotNo": "37"
    }
   ],
@@ -7373,7 +7924,11 @@
   ],
   "supportIpv6": "False",
   "systemInformation": "互联网云桌面",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "bfb688635748488ebb7c8d4fb1a5a301",
@@ -7398,21 +7953,22 @@
     "cpuFrequency": 2.4,
     "productArchitecture": "00-X86架构",
     "totalNumberOfCpu": "1",
-    "totalNumberOfCpuNuclear": "4"
+    "totalNumberOfCpuNuclear": "4",
+    "brandLand": "01-国外"
    }
   ],
   "rackServer_deployment": [
    {
     "deployArea": "00-主机房-服务器区",
     "deployComputerRoom": "商丘中支中心机房",
-    "deployDb": "商丘市中支中心机房",
+    "deployDb": "fdddc1be23854dbc898a91708ca50080",
     "deployFloor": "八楼",
     "deployGallery": "商丘中支办公楼1号楼"
    }
   ],
   "rackServer_installationPosition": [
    {
-    "belongCabinet": "商丘市中支中心机房服务器机柜1",
+    "belongCabinet": "29b68a4b6f8947dd8cabc66ad5019153",
     "slotNo": "7"
    }
   ],
@@ -7439,7 +7995,11 @@
   ],
   "supportIpv6": "False",
   "systemInformation": "机房场地运维监控服务器",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "c115c0ddbed047afb0bdcd45e523b68d",
@@ -7465,21 +8025,22 @@
     "cpuFrequency": 4.2,
     "productArchitecture": "00-X86架构",
     "totalNumberOfCpu": "2",
-    "totalNumberOfCpuNuclear": "10"
+    "totalNumberOfCpuNuclear": "10",
+    "brandLand": "01-国外"
    }
   ],
   "rackServer_deployment": [
    {
     "deployArea": "00-主机房-服务器区",
     "deployComputerRoom": "郑州中支主中心机房",
-    "deployDb": "郑州中支主中心机房",
+    "deployDb": "77e1d9d6869044889909f41f30517418",
     "deployFloor": "十一层",
     "deployGallery": "河南省郑州市郑东新区商务外环路21号"
    }
   ],
   "rackServer_installationPosition": [
    {
-    "belongCabinet": "郑州中支主中心服务器机房预留机柜2",
+    "belongCabinet": "588559da2e504bb5b5192996aaeb7d10",
     "slotNo": "35"
    }
   ],
@@ -7506,7 +8067,11 @@
   ],
   "supportIpv6": "False",
   "systemInformation": "运维监控系统",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "c31aade8eb184d438d3d323ef0fdfca4",
@@ -7532,21 +8097,22 @@
     "cpuFrequency": 2.3,
     "productArchitecture": "00-X86架构",
     "totalNumberOfCpu": "2",
-    "totalNumberOfCpuNuclear": "24"
+    "totalNumberOfCpuNuclear": "24",
+    "brandLand": "00-国内"
    }
   ],
   "rackServer_deployment": [
    {
     "deployArea": "00-主机房-服务器区",
     "deployComputerRoom": "服务器机房",
-    "deployDb": "郑州中支主中心机房",
+    "deployDb": "77e1d9d6869044889909f41f30517418",
     "deployFloor": "13层",
     "deployGallery": "中国人民银行郑州中心支行办公大楼"
    }
   ],
   "rackServer_installationPosition": [
    {
-    "belongCabinet": "郑州中支主中心服务器机房预留机柜1",
+    "belongCabinet": "45e44930c0c64b169ad036b670822cf8",
     "slotNo": "13"
    }
   ],
@@ -7573,7 +8139,11 @@
   ],
   "supportIpv6": "True",
   "systemInformation": "FineBI测试服务器",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "c3bcb6cbfff7486e8a970af4b532cfac",
@@ -7599,21 +8169,22 @@
     "cpuFrequency": 4.2,
     "productArchitecture": "00-X86架构",
     "totalNumberOfCpu": "2",
-    "totalNumberOfCpuNuclear": "10"
+    "totalNumberOfCpuNuclear": "10",
+    "brandLand": "01-国外"
    }
   ],
   "rackServer_deployment": [
    {
     "deployArea": "00-主机房-服务器区",
     "deployComputerRoom": "郑州中支主中心机房",
-    "deployDb": "郑州中支主中心机房",
+    "deployDb": "77e1d9d6869044889909f41f30517418",
     "deployFloor": "十一层",
     "deployGallery": "河南省郑州市郑东新区商务外环路21号"
    }
   ],
   "rackServer_installationPosition": [
    {
-    "belongCabinet": "郑州中支主中心服务器机房E-08",
+    "belongCabinet": "54cf176aaf47492ba1cb2681d3ac43e8",
     "slotNo": "24"
    }
   ],
@@ -7640,7 +8211,11 @@
   ],
   "supportIpv6": "False",
   "systemInformation": "门禁系统",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "c4692b6279f24d19ba5738ee736751f5",
@@ -7666,21 +8241,22 @@
     "cpuFrequency": 4.2,
     "productArchitecture": "00-X86架构",
     "totalNumberOfCpu": "2",
-    "totalNumberOfCpuNuclear": "10"
+    "totalNumberOfCpuNuclear": "10",
+    "brandLand": "01-国外"
    }
   ],
   "rackServer_deployment": [
    {
     "deployArea": "00-主机房-服务器区",
     "deployComputerRoom": "郑州中支主中心机房",
-    "deployDb": "郑州中支主中心机房",
+    "deployDb": "77e1d9d6869044889909f41f30517418",
     "deployFloor": "十一层",
     "deployGallery": "河南省郑州市郑东新区商务外环路21号"
    }
   ],
   "rackServer_installationPosition": [
    {
-    "belongCabinet": "郑州中支主中心服务器机房预留机柜1",
+    "belongCabinet": "45e44930c0c64b169ad036b670822cf8",
     "slotNo": "33"
    }
   ],
@@ -7707,7 +8283,11 @@
   ],
   "supportIpv6": "False",
   "systemInformation": "异地备份服务器（A机）",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "c5074bf313f542618d2a013cf4a9d40f",
@@ -7732,21 +8312,22 @@
     "cpuFrequency": 2.2,
     "productArchitecture": "00-X86架构",
     "totalNumberOfCpu": "2",
-    "totalNumberOfCpuNuclear": "10"
+    "totalNumberOfCpuNuclear": "10",
+    "brandLand": "00-国内"
    }
   ],
   "rackServer_deployment": [
    {
     "deployArea": "00-主机房-服务器区",
     "deployComputerRoom": "开封市中心支行中心机房",
-    "deployDb": "开封市中支中心机房",
+    "deployDb": "bc868096be7647988f5c29d1f1b04036",
     "deployFloor": "三层",
     "deployGallery": "开封市龙亭区晋安路64号办公楼"
    }
   ],
   "rackServer_installationPosition": [
    {
-    "belongCabinet": "开封市中支中心机房机柜2",
+    "belongCabinet": "d699c42375bb4a5c9e2771d070a9b8be",
     "slotNo": "8"
    }
   ],
@@ -7773,7 +8354,11 @@
   ],
   "supportIpv6": "True",
   "systemInformation": "桌面云平台系统",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "c517abdb06944183af69346502c85ce4",
@@ -7799,21 +8384,22 @@
     "cpuFrequency": 2.81,
     "productArchitecture": "00-X86架构",
     "totalNumberOfCpu": "2",
-    "totalNumberOfCpuNuclear": "16"
+    "totalNumberOfCpuNuclear": "16",
+    "brandLand": "00-国内"
    }
   ],
   "rackServer_deployment": [
    {
     "deployArea": "00-主机房-服务器区",
     "deployComputerRoom": "洛阳市中心支行中心机房",
-    "deployDb": "洛阳市中支中心机房",
+    "deployDb": "09fd31dac1a648c59cab24f486dd561c",
     "deployFloor": "三层",
     "deployGallery": "洛阳市中心支行办公大楼"
    }
   ],
   "rackServer_installationPosition": [
    {
-    "belongCabinet": "洛阳市中支中心机房机柜S3",
+    "belongCabinet": "eb699807238743ac8b6820a492c79dbd",
     "slotNo": "26"
    }
   ],
@@ -7840,7 +8426,11 @@
   ],
   "supportIpv6": "True",
   "systemInformation": "云计算平台",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "c656c5dd809a4af5aec7f74b8334c0f4",
@@ -7866,21 +8456,22 @@
     "cpuFrequency": 4.2,
     "productArchitecture": "00-X86架构",
     "totalNumberOfCpu": "2",
-    "totalNumberOfCpuNuclear": "10"
+    "totalNumberOfCpuNuclear": "10",
+    "brandLand": "00-国内"
    }
   ],
   "rackServer_deployment": [
    {
     "deployArea": "00-主机房-服务器区",
     "deployComputerRoom": "郑州中支主中心机房",
-    "deployDb": "郑州中支主中心机房",
+    "deployDb": "77e1d9d6869044889909f41f30517418",
     "deployFloor": "十一层",
     "deployGallery": "河南省郑州市郑东新区商务外环路21号"
    }
   ],
   "rackServer_installationPosition": [
    {
-    "belongCabinet": "郑州中支主中心服务器机房预留机柜3",
+    "belongCabinet": "fe87419e88e1400abccb2d966d994ea4",
     "slotNo": "21"
    }
   ],
@@ -7907,7 +8498,11 @@
   ],
   "supportIpv6": "False",
   "systemInformation": "国库集中支付电子化管理系统",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "c722966412534728b302f440945aa02f",
@@ -7933,21 +8528,22 @@
     "cpuFrequency": 4.2,
     "productArchitecture": "00-X86架构",
     "totalNumberOfCpu": "2",
-    "totalNumberOfCpuNuclear": "10"
+    "totalNumberOfCpuNuclear": "10",
+    "brandLand": "01-国外"
    }
   ],
   "rackServer_deployment": [
    {
     "deployArea": "00-主机房-服务器区",
     "deployComputerRoom": "郑州中支主中心机房",
-    "deployDb": "郑州中支主中心机房",
+    "deployDb": "77e1d9d6869044889909f41f30517418",
     "deployFloor": "十一层",
     "deployGallery": "河南省郑州市郑东新区商务外环路21号"
    }
   ],
   "rackServer_installationPosition": [
    {
-    "belongCabinet": "郑州中支主中心服务器机房服务器机柜16",
+    "belongCabinet": "084b93fd8a5d42c088773564ab2ea061",
     "slotNo": "28"
    }
   ],
@@ -7974,7 +8570,11 @@
   ],
   "supportIpv6": "False",
   "systemInformation": "云桌面系统",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "c78a451a8c9b4d36a96d966192da68c6",
@@ -8000,21 +8600,22 @@
     "cpuFrequency": 2.2,
     "productArchitecture": "00-X86架构",
     "totalNumberOfCpu": "2",
-    "totalNumberOfCpuNuclear": "10"
+    "totalNumberOfCpuNuclear": "10",
+    "brandLand": "00-国内"
    }
   ],
   "rackServer_deployment": [
    {
     "deployArea": "00-主机房-服务器区",
     "deployComputerRoom": "开封市中心支行中心机房",
-    "deployDb": "开封市中支中心机房",
+    "deployDb": "bc868096be7647988f5c29d1f1b04036",
     "deployFloor": "三层",
     "deployGallery": "开封市龙亭区晋安路67号办公楼"
    }
   ],
   "rackServer_installationPosition": [
    {
-    "belongCabinet": "开封市中支中心机房机柜2",
+    "belongCabinet": "d699c42375bb4a5c9e2771d070a9b8be",
     "slotNo": "15"
    }
   ],
@@ -8041,7 +8642,11 @@
   ],
   "supportIpv6": "True",
   "systemInformation": "桌面云超融合系统",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "c8d37d1a65b44f529fab21beefbca275",
@@ -8067,21 +8672,22 @@
     "cpuFrequency": 1.9,
     "productArchitecture": "00-X86架构",
     "totalNumberOfCpu": "2",
-    "totalNumberOfCpuNuclear": "12"
+    "totalNumberOfCpuNuclear": "12",
+    "brandLand": "01-国外"
    }
   ],
   "rackServer_deployment": [
    {
     "deployArea": "00-主机房-服务器区",
     "deployComputerRoom": "许昌市中心支行中心机房",
-    "deployDb": "许昌市中支中心机房",
+    "deployDb": "2e8c7a9f7bbd43efbfd90baa81db0b2d",
     "deployFloor": "四楼",
     "deployGallery": "河南省许昌市建安区新东街571号办公楼"
    }
   ],
   "rackServer_installationPosition": [
    {
-    "belongCabinet": "许昌市中支中心机房服务器机柜B03",
+    "belongCabinet": "f01e86fbade14bab897c1867956a0b31",
     "slotNo": "7"
    }
   ],
@@ -8108,7 +8714,11 @@
   ],
   "supportIpv6": "True",
   "systemInformation": "动环监控系统",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "cb40eab75e184e3ab4fbfb9219a026bd",
@@ -8134,21 +8744,22 @@
     "cpuFrequency": 4.2,
     "productArchitecture": "00-X86架构",
     "totalNumberOfCpu": "2",
-    "totalNumberOfCpuNuclear": "10"
+    "totalNumberOfCpuNuclear": "10",
+    "brandLand": "01-国外"
    }
   ],
   "rackServer_deployment": [
    {
     "deployArea": "00-主机房-服务器区",
     "deployComputerRoom": "郑州中支主中心机房",
-    "deployDb": "郑州中支主中心机房",
+    "deployDb": "77e1d9d6869044889909f41f30517418",
     "deployFloor": "十一层",
     "deployGallery": "河南省郑州市郑东新区商务外环路21号"
    }
   ],
   "rackServer_installationPosition": [
    {
-    "belongCabinet": "郑州中支主中心服务器机房服务器机柜16",
+    "belongCabinet": "084b93fd8a5d42c088773564ab2ea061",
     "slotNo": "12"
    }
   ],
@@ -8175,7 +8786,11 @@
   ],
   "supportIpv6": "False",
   "systemInformation": "云桌面系统",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "ce7b631a89b34764b6d4482c6335a240",
@@ -8201,21 +8816,22 @@
     "cpuFrequency": 4.2,
     "productArchitecture": "00-X86架构",
     "totalNumberOfCpu": "2",
-    "totalNumberOfCpuNuclear": "10"
+    "totalNumberOfCpuNuclear": "10",
+    "brandLand": "00-国内"
    }
   ],
   "rackServer_deployment": [
    {
     "deployArea": "00-主机房-服务器区",
     "deployComputerRoom": "郑州中支主中心机房",
-    "deployDb": "郑州中支主中心机房",
+    "deployDb": "77e1d9d6869044889909f41f30517418",
     "deployFloor": "十一层",
     "deployGallery": "河南省郑州市郑东新区商务外环路21号"
    }
   ],
   "rackServer_installationPosition": [
    {
-    "belongCabinet": "郑州中支主中心服务器机房预留机柜3",
+    "belongCabinet": "fe87419e88e1400abccb2d966d994ea4",
     "slotNo": "5"
    }
   ],
@@ -8242,7 +8858,11 @@
   ],
   "supportIpv6": "False",
   "systemInformation": "国库集中支付电子化管理系统",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "cedb078c64cf40bc83c45a7fb686ae7a",
@@ -8268,21 +8888,22 @@
     "cpuFrequency": 4.2,
     "productArchitecture": "00-X86架构",
     "totalNumberOfCpu": "2",
-    "totalNumberOfCpuNuclear": "10"
+    "totalNumberOfCpuNuclear": "10",
+    "brandLand": "01-国外"
    }
   ],
   "rackServer_deployment": [
    {
     "deployArea": "00-主机房-服务器区",
     "deployComputerRoom": "郑州中支主中心机房",
-    "deployDb": "郑州中支主中心机房",
+    "deployDb": "77e1d9d6869044889909f41f30517418",
     "deployFloor": "十一层",
     "deployGallery": "河南省郑州市郑东新区商务外环路21号"
    }
   ],
   "rackServer_installationPosition": [
    {
-    "belongCabinet": "郑州中支主中心服务器机房服务器机柜8",
+    "belongCabinet": "b0f0db73a9924e52ae357c4c05128049",
     "slotNo": "25"
    }
   ],
@@ -8309,7 +8930,11 @@
   ],
   "supportIpv6": "False",
   "systemInformation": "虚拟化平台存储服务器DD2500",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "d01151835fa545269efb7fd0e4fd7c39",
@@ -8334,21 +8959,22 @@
     "cpuFrequency": 2.27,
     "productArchitecture": "00-X86架构",
     "totalNumberOfCpu": "1",
-    "totalNumberOfCpuNuclear": "4"
+    "totalNumberOfCpuNuclear": "4",
+    "brandLand": "01-国外"
    }
   ],
   "rackServer_deployment": [
    {
     "deployArea": "00-主机房-服务器区",
     "deployComputerRoom": "信阳市中心支行中心机房",
-    "deployDb": "信阳市中支中心机房",
+    "deployDb": "eb8c6860e97d477090c2d80e059c2598",
     "deployFloor": "二楼",
     "deployGallery": "信阳市浉河区长安路133号"
    }
   ],
   "rackServer_installationPosition": [
    {
-    "belongCabinet": "许昌市中支中心机房服务器机柜B02",
+    "belongCabinet": "300190eb83e7447ba0bd8eaa5a8d6ca8",
     "slotNo": "25"
    }
   ],
@@ -8375,7 +9001,11 @@
   ],
   "supportIpv6": "True",
   "systemInformation": "IT运维系统",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "d0a6a6f558ae41c9bbb2bc9958d5ba8d",
@@ -8401,21 +9031,22 @@
     "cpuFrequency": 2.4,
     "productArchitecture": "00-X86架构",
     "totalNumberOfCpu": "2",
-    "totalNumberOfCpuNuclear": "20"
+    "totalNumberOfCpuNuclear": "20",
+    "brandLand": "00-国内"
    }
   ],
   "rackServer_deployment": [
    {
     "deployArea": "00-主机房-服务器区",
     "deployComputerRoom": "洛阳市中心支行中心机房",
-    "deployDb": "洛阳市中支中心机房",
+    "deployDb": "09fd31dac1a648c59cab24f486dd561c",
     "deployFloor": "三层",
     "deployGallery": "洛阳市中心支行办公大楼"
    }
   ],
   "rackServer_installationPosition": [
    {
-    "belongCabinet": "洛阳市中支中心机房机柜S4",
+    "belongCabinet": "459a2a3bb4344e499b662e3d720ba291",
     "slotNo": "6"
    }
   ],
@@ -8442,7 +9073,11 @@
   ],
   "supportIpv6": "True",
   "systemInformation": "机关云桌面系统",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "d12f062fb42f49d68d826f93a90e3e36",
@@ -8467,21 +9102,22 @@
     "cpuFrequency": 2.4,
     "productArchitecture": "00-X86架构",
     "totalNumberOfCpu": "1",
-    "totalNumberOfCpuNuclear": "6"
+    "totalNumberOfCpuNuclear": "6",
+    "brandLand": "00-国内"
    }
   ],
   "rackServer_deployment": [
    {
     "deployArea": "00-主机房-服务器区",
     "deployComputerRoom": "焦作市中心支行中心机房",
-    "deployDb": "焦作市中支中心机房",
+    "deployDb": "26783106134c4a1fabeb4616468578fb",
     "deployFloor": "四层",
     "deployGallery": "焦作市中心支行办公楼"
    }
   ],
   "rackServer_installationPosition": [
    {
-    "belongCabinet": "焦作市中支中心机房服务器机柜3",
+    "belongCabinet": "c4fc48a9c31443349a90ff5d9d858987",
     "slotNo": "17"
    }
   ],
@@ -8508,7 +9144,11 @@
   ],
   "supportIpv6": "False",
   "systemInformation": "协同办公系统",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "d1576fd22e52494f9daeebf967c49e41",
@@ -8534,21 +9174,22 @@
     "cpuFrequency": 2.4,
     "productArchitecture": "00-X86架构",
     "totalNumberOfCpu": "1",
-    "totalNumberOfCpuNuclear": "8"
+    "totalNumberOfCpuNuclear": "8",
+    "brandLand": "00-国内"
    }
   ],
   "rackServer_deployment": [
    {
     "deployArea": "00-主机房-服务器区",
     "deployComputerRoom": "周口市中心支行中心机房",
-    "deployDb": "周口市中支中心机房",
+    "deployDb": "2952ee20d75547eaa9a1cb873e96f60e",
     "deployFloor": "二层",
     "deployGallery": "周口市川汇区七一路中段1号A楼"
    }
   ],
   "rackServer_installationPosition": [
    {
-    "belongCabinet": "周口市中支中心机房服务器机柜C2",
+    "belongCabinet": "8369ae00fa454c1a810f01aaf1708b8c",
     "slotNo": "13"
    }
   ],
@@ -8575,7 +9216,11 @@
   ],
   "supportIpv6": "False",
   "systemInformation": "央行网络学院",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "d5dd85e823334152ae7285ab7a135961",
@@ -8601,21 +9246,22 @@
     "cpuFrequency": 4.2,
     "productArchitecture": "00-X86架构",
     "totalNumberOfCpu": "2",
-    "totalNumberOfCpuNuclear": "10"
+    "totalNumberOfCpuNuclear": "10",
+    "brandLand": "01-国外"
    }
   ],
   "rackServer_deployment": [
    {
     "deployArea": "00-主机房-服务器区",
     "deployComputerRoom": "郑州中支主中心机房",
-    "deployDb": "郑州中支主中心机房",
+    "deployDb": "77e1d9d6869044889909f41f30517418",
     "deployFloor": "十一层",
     "deployGallery": "河南省郑州市郑东新区商务外环路21号"
    }
   ],
   "rackServer_installationPosition": [
    {
-    "belongCabinet": "郑州中支主中心服务器机房E-06",
+    "belongCabinet": "31808957e5d8488782d21bc2805b5d9a",
     "slotNo": "35"
    }
   ],
@@ -8642,7 +9288,11 @@
   ],
   "supportIpv6": "False",
   "systemInformation": "省级数据中心DB",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "d9d2e516d9534e41a08291715083073f",
@@ -8667,21 +9317,22 @@
     "cpuFrequency": 2.2,
     "productArchitecture": "00-X86架构",
     "totalNumberOfCpu": "1",
-    "totalNumberOfCpuNuclear": "4"
+    "totalNumberOfCpuNuclear": "4",
+    "brandLand": "00-国内"
    }
   ],
   "rackServer_deployment": [
    {
     "deployArea": "00-主机房-服务器区",
     "deployComputerRoom": "中心机房",
-    "deployDb": "三门峡市中支中心机房",
+    "deployDb": "9894dd4c692d4aef8a77fd532decde7b",
     "deployFloor": "六楼",
     "deployGallery": "办公大楼"
    }
   ],
   "rackServer_installationPosition": [
    {
-    "belongCabinet": "中国人民银行三门峡市中心支行 机柜8",
+    "belongCabinet": "2f1443deb6f445e48389534e827b1984",
     "slotNo": "13"
    }
   ],
@@ -8708,7 +9359,11 @@
   ],
   "supportIpv6": "True",
   "systemInformation": "中支web系统",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "daa45caed25040c3ac77e20304de0ffe",
@@ -8733,21 +9388,22 @@
     "cpuFrequency": 2.4,
     "productArchitecture": "00-X86架构",
     "totalNumberOfCpu": "2",
-    "totalNumberOfCpuNuclear": "8"
+    "totalNumberOfCpuNuclear": "8",
+    "brandLand": "00-国内"
    }
   ],
   "rackServer_deployment": [
    {
     "deployArea": "00-主机房-服务器区",
     "deployComputerRoom": "信阳市中心支行中心机房",
-    "deployDb": "信阳市中支中心机房",
+    "deployDb": "eb8c6860e97d477090c2d80e059c2598",
     "deployFloor": "二楼",
     "deployGallery": "信阳市浉河区长安路133号"
    }
   ],
   "rackServer_installationPosition": [
    {
-    "belongCabinet": "许昌市中支中心机房服务器机柜B04",
+    "belongCabinet": "8297ba18956a4dbbb07ab6b5016d45d1",
     "slotNo": "16"
    }
   ],
@@ -8774,7 +9430,11 @@
   ],
   "supportIpv6": "True",
   "systemInformation": "远程培训系统",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "dba80106f2ab433bacb571526098cfd1",
@@ -8799,21 +9459,22 @@
     "cpuFrequency": 2.8,
     "productArchitecture": "00-X86架构",
     "totalNumberOfCpu": "2",
-    "totalNumberOfCpuNuclear": "20"
+    "totalNumberOfCpuNuclear": "20",
+    "brandLand": "00-国内"
    }
   ],
   "rackServer_deployment": [
    {
     "deployArea": "00-主机房-服务器区",
     "deployComputerRoom": "信阳市中心支行中心机房",
-    "deployDb": "信阳市中支中心机房",
+    "deployDb": "eb8c6860e97d477090c2d80e059c2598",
     "deployFloor": "二楼",
     "deployGallery": "信阳市浉河区长安路133号"
    }
   ],
   "rackServer_installationPosition": [
    {
-    "belongCabinet": "许昌市中支中心机房服务器机柜B04",
+    "belongCabinet": "8297ba18956a4dbbb07ab6b5016d45d1",
     "slotNo": "12"
    }
   ],
@@ -8840,7 +9501,11 @@
   ],
   "supportIpv6": "True",
   "systemInformation": "FTP系统",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "dd054e1c9bfc4250a99b37e5ed5d4fcd",
@@ -8865,21 +9530,22 @@
     "cpuFrequency": 2.4,
     "productArchitecture": "00-X86架构",
     "totalNumberOfCpu": "1",
-    "totalNumberOfCpuNuclear": "6"
+    "totalNumberOfCpuNuclear": "6",
+    "brandLand": "00-国内"
    }
   ],
   "rackServer_deployment": [
    {
     "deployArea": "00-主机房-服务器区",
     "deployComputerRoom": "焦作市中心支行中心机房",
-    "deployDb": "焦作市中支中心机房",
+    "deployDb": "26783106134c4a1fabeb4616468578fb",
     "deployFloor": "四层",
     "deployGallery": "焦作市中心支行办公楼"
    }
   ],
   "rackServer_installationPosition": [
    {
-    "belongCabinet": "焦作市中支中心机房服务器机柜5",
+    "belongCabinet": "c13bfcd65b4141d7b669f7ec2ba6a0df",
     "slotNo": "18"
    }
   ],
@@ -8906,7 +9572,11 @@
   ],
   "supportIpv6": "False",
   "systemInformation": "OA系统",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "dd3290b702514eee8b9a21a9bf715acf",
@@ -8932,21 +9602,22 @@
     "cpuFrequency": 4.2,
     "productArchitecture": "00-X86架构",
     "totalNumberOfCpu": "2",
-    "totalNumberOfCpuNuclear": "10"
+    "totalNumberOfCpuNuclear": "10",
+    "brandLand": "01-国外"
    }
   ],
   "rackServer_deployment": [
    {
     "deployArea": "00-主机房-服务器区",
     "deployComputerRoom": "郑州中支主中心机房",
-    "deployDb": "郑州中支主中心机房",
+    "deployDb": "77e1d9d6869044889909f41f30517418",
     "deployFloor": "十一层",
     "deployGallery": "河南省郑州市郑东新区商务外环路21号"
    }
   ],
   "rackServer_installationPosition": [
    {
-    "belongCabinet": "郑州中支主中心服务器机房E-03",
+    "belongCabinet": "864924fe6e8645d0bba9d231af913635",
     "slotNo": "21"
    }
   ],
@@ -8973,7 +9644,11 @@
   ],
   "supportIpv6": "False",
   "systemInformation": "云桌面系统",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "de32019a15384c45972dfe66fd918d26",
@@ -8999,21 +9674,22 @@
     "cpuFrequency": 4.2,
     "productArchitecture": "00-X86架构",
     "totalNumberOfCpu": "2",
-    "totalNumberOfCpuNuclear": "10"
+    "totalNumberOfCpuNuclear": "10",
+    "brandLand": "01-国外"
    }
   ],
   "rackServer_deployment": [
    {
     "deployArea": "00-主机房-服务器区",
     "deployComputerRoom": "郑州中支主中心机房",
-    "deployDb": "郑州中支主中心机房",
+    "deployDb": "77e1d9d6869044889909f41f30517418",
     "deployFloor": "十一层",
     "deployGallery": "河南省郑州市郑东新区商务外环路21号"
    }
   ],
   "rackServer_installationPosition": [
    {
-    "belongCabinet": "郑州中支主中心服务器机房预留机柜4",
+    "belongCabinet": "c2e5fea3c9e9429bb23ef997809e4800",
     "slotNo": "13"
    }
   ],
@@ -9040,7 +9716,11 @@
   ],
   "supportIpv6": "False",
   "systemInformation": "国库集中支付电子化管理系统",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "df0be20fce7740c1aaa0a401dc38f199",
@@ -9066,21 +9746,22 @@
     "cpuFrequency": 4.2,
     "productArchitecture": "00-X86架构",
     "totalNumberOfCpu": "2",
-    "totalNumberOfCpuNuclear": "10"
+    "totalNumberOfCpuNuclear": "10",
+    "brandLand": "00-国内"
    }
   ],
   "rackServer_deployment": [
    {
     "deployArea": "00-主机房-服务器区",
     "deployComputerRoom": "郑州中支主中心机房",
-    "deployDb": "郑州中支主中心机房",
+    "deployDb": "77e1d9d6869044889909f41f30517418",
     "deployFloor": "十一层",
     "deployGallery": "河南省郑州市郑东新区商务外环路21号"
    }
   ],
   "rackServer_installationPosition": [
    {
-    "belongCabinet": "郑州中支主中心服务器机房服务器机柜4",
+    "belongCabinet": "f3d7cdc3b3f24c73b4a967836d2416fe",
     "slotNo": "19"
    }
   ],
@@ -9107,7 +9788,11 @@
   ],
   "supportIpv6": "False",
   "systemInformation": "DMZ虚拟化",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "dfbf5bd148014cfdadc3817a8054f808",
@@ -9133,21 +9818,22 @@
     "cpuFrequency": 2.4,
     "productArchitecture": "00-X86架构",
     "totalNumberOfCpu": "2",
-    "totalNumberOfCpuNuclear": "28"
+    "totalNumberOfCpuNuclear": "28",
+    "brandLand": "00-国内"
    }
   ],
   "rackServer_deployment": [
    {
     "deployArea": "00-主机房-服务器区",
     "deployComputerRoom": "许昌市中心支行中心机房",
-    "deployDb": "许昌市中支中心机房",
+    "deployDb": "2e8c7a9f7bbd43efbfd90baa81db0b2d",
     "deployFloor": "四楼",
     "deployGallery": "河南省许昌市建安区新东街571号办公楼"
    }
   ],
   "rackServer_installationPosition": [
    {
-    "belongCabinet": "许昌市中支中心机房服务器机柜B05",
+    "belongCabinet": "4f67b57b3ad34a4b9a435086c009dd0c",
     "slotNo": "8"
    }
   ],
@@ -9174,7 +9860,11 @@
   ],
   "supportIpv6": "True",
   "systemInformation": "桌面云系统",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "e38b3c9855a14c8b9094137241d97517",
@@ -9199,21 +9889,22 @@
     "cpuFrequency": 2.4,
     "productArchitecture": "00-X86架构",
     "totalNumberOfCpu": "1",
-    "totalNumberOfCpuNuclear": "4"
+    "totalNumberOfCpuNuclear": "4",
+    "brandLand": "00-国内"
    }
   ],
   "rackServer_deployment": [
    {
     "deployArea": "00-主机房-服务器区",
     "deployComputerRoom": "焦作市中心支行中心机房",
-    "deployDb": "焦作市中支中心机房",
+    "deployDb": "26783106134c4a1fabeb4616468578fb",
     "deployFloor": "四层",
     "deployGallery": "焦作市中心支行办公楼"
    }
   ],
   "rackServer_installationPosition": [
    {
-    "belongCabinet": "焦作市中支中心机房服务器机柜8",
+    "belongCabinet": "aef13a268df14b049a3e4ec0e2227dbd",
     "slotNo": "14"
    }
   ],
@@ -9240,7 +9931,11 @@
   ],
   "supportIpv6": "False",
   "systemInformation": "央行网络学院",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "ecee39ec7b3640be9d37742317c6150f",
@@ -9266,21 +9961,22 @@
     "cpuFrequency": 2.4,
     "productArchitecture": "00-X86架构",
     "totalNumberOfCpu": "1",
-    "totalNumberOfCpuNuclear": "6"
+    "totalNumberOfCpuNuclear": "6",
+    "brandLand": "00-国内"
    }
   ],
   "rackServer_deployment": [
    {
     "deployArea": "00-主机房-服务器区",
     "deployComputerRoom": "商丘中支中心机房",
-    "deployDb": "商丘市中支中心机房",
+    "deployDb": "fdddc1be23854dbc898a91708ca50080",
     "deployFloor": "八楼",
     "deployGallery": "商丘中支办公楼1号楼"
    }
   ],
   "rackServer_installationPosition": [
    {
-    "belongCabinet": "商丘市中支中心机房服务器机柜5",
+    "belongCabinet": "ca8d600c49be4688be00d31c49ca6984",
     "slotNo": "21"
    }
   ],
@@ -9307,7 +10003,11 @@
   ],
   "supportIpv6": "False",
   "systemInformation": "商丘市中支内网综合信息网站服务器",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "eee10dd747c049f9961193af4bbfac79",
@@ -9333,21 +10033,22 @@
     "cpuFrequency": 4.2,
     "productArchitecture": "00-X86架构",
     "totalNumberOfCpu": "2",
-    "totalNumberOfCpuNuclear": "10"
+    "totalNumberOfCpuNuclear": "10",
+    "brandLand": "00-国内"
    }
   ],
   "rackServer_deployment": [
    {
     "deployArea": "00-主机房-服务器区",
     "deployComputerRoom": "郑州中支转接中心机房",
-    "deployDb": "郑州中支转接中心机房",
+    "deployDb": "96f680d2b4f348a198a690325356a7c4",
     "deployFloor": "二层",
     "deployGallery": "河南省郑州市经开区第三大街与经北二路东北办公楼"
    }
   ],
   "rackServer_installationPosition": [
    {
-    "belongCabinet": "郑州中支主中心服务器机房服务器机柜13",
+    "belongCabinet": "3a30ad81025d4931ba67dfb71cf07232",
     "slotNo": "8"
    }
   ],
@@ -9374,7 +10075,11 @@
   ],
   "supportIpv6": "False",
   "systemInformation": "虚拟机",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "ef1537f94f894c9b86de0fde332f41ca",
@@ -9400,21 +10105,22 @@
     "cpuFrequency": 0.0,
     "productArchitecture": "00-X86架构",
     "totalNumberOfCpu": "0",
-    "totalNumberOfCpuNuclear": "0"
+    "totalNumberOfCpuNuclear": "0",
+    "brandLand": "00-国内"
    }
   ],
   "rackServer_deployment": [
    {
     "deployArea": "00-主机房-服务器区",
     "deployComputerRoom": "许昌市中心支行中心机房",
-    "deployDb": "许昌市中支中心机房",
+    "deployDb": "2e8c7a9f7bbd43efbfd90baa81db0b2d",
     "deployFloor": "四楼",
     "deployGallery": "河南省许昌市建安区新东街571号办公楼"
    }
   ],
   "rackServer_installationPosition": [
    {
-    "belongCabinet": "许昌市中支中心机房服务器机柜B05",
+    "belongCabinet": "4f67b57b3ad34a4b9a435086c009dd0c",
     "slotNo": "5"
    }
   ],
@@ -9441,7 +10147,11 @@
   ],
   "supportIpv6": "False",
   "systemInformation": "桌面云系统",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "f0ab4fcd2bde4a6c9b6944b54a7f3baf",
@@ -9467,21 +10177,22 @@
     "cpuFrequency": 2.4,
     "productArchitecture": "00-X86架构",
     "totalNumberOfCpu": "1",
-    "totalNumberOfCpuNuclear": "8"
+    "totalNumberOfCpuNuclear": "8",
+    "brandLand": "00-国内"
    }
   ],
   "rackServer_deployment": [
    {
     "deployArea": "00-主机房-服务器区",
     "deployComputerRoom": "服务器机房",
-    "deployDb": "漯河市中支中心机房",
+    "deployDb": "ef79accbafa44c6298104908bbf8202d",
     "deployFloor": "五层",
     "deployGallery": "漯河市郾城区嵩山东支路1号"
    }
   ],
   "rackServer_installationPosition": [
    {
-    "belongCabinet": "漯河市中支网络机房机柜11",
+    "belongCabinet": "a8f6aadb9ae744169a7a579fc3b4478d",
     "slotNo": "2"
    }
   ],
@@ -9507,7 +10218,11 @@
   ],
   "supportIpv6": "False",
   "systemInformation": "央行网络学院",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "f23c011eb37448629a876778781bece1",
@@ -9532,21 +10247,22 @@
     "cpuFrequency": 2.4,
     "productArchitecture": "00-X86架构",
     "totalNumberOfCpu": "1",
-    "totalNumberOfCpuNuclear": "4"
+    "totalNumberOfCpuNuclear": "4",
+    "brandLand": "00-国内"
    }
   ],
   "rackServer_deployment": [
    {
     "deployArea": "00-主机房-服务器区",
     "deployComputerRoom": "服务器机房",
-    "deployDb": "鹤壁市中支中心机房",
+    "deployDb": "92c1063572d5431784306d4b5258830d",
     "deployFloor": "七层",
     "deployGallery": "办公楼"
    }
   ],
   "rackServer_installationPosition": [
    {
-    "belongCabinet": "鹤壁市中支服务器机房机柜06",
+    "belongCabinet": "71c48e88dd344c60a00761bbaa0b53d3",
     "slotNo": "31"
    }
   ],
@@ -9573,7 +10289,11 @@
   ],
   "supportIpv6": "False",
   "systemInformation": "TBS",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "f2d02c84f5e24ae8869c6e3aab64038e",
@@ -9598,21 +10318,22 @@
     "cpuFrequency": 2.4,
     "productArchitecture": "00-X86架构",
     "totalNumberOfCpu": "1",
-    "totalNumberOfCpuNuclear": "4"
+    "totalNumberOfCpuNuclear": "4",
+    "brandLand": "01-国外"
    }
   ],
   "rackServer_deployment": [
    {
     "deployArea": "00-主机房-服务器区",
     "deployComputerRoom": "服务器机房",
-    "deployDb": "南阳市中支中心机房",
+    "deployDb": "870c4c17bebb4734baff5104d4f0f3fb",
     "deployFloor": "十二层",
     "deployGallery": "办公楼"
    }
   ],
   "rackServer_installationPosition": [
    {
-    "belongCabinet": "南阳市市中支网络机房机柜10",
+    "belongCabinet": "67597a78f088470cafcb4aeb0f665129",
     "slotNo": "11"
    }
   ],
@@ -9639,7 +10360,11 @@
   ],
   "supportIpv6": "False",
   "systemInformation": "FTP",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "f6788b91e926457b81cf73eface6eaf9",
@@ -9664,21 +10389,22 @@
     "cpuFrequency": 2.4,
     "productArchitecture": "00-X86架构",
     "totalNumberOfCpu": "1",
-    "totalNumberOfCpuNuclear": "4"
+    "totalNumberOfCpuNuclear": "4",
+    "brandLand": "00-国内"
    }
   ],
   "rackServer_deployment": [
    {
     "deployArea": "00-主机房-服务器区",
     "deployComputerRoom": "服务器机房",
-    "deployDb": "南阳市中支中心机房",
+    "deployDb": "870c4c17bebb4734baff5104d4f0f3fb",
     "deployFloor": "十二层",
     "deployGallery": "办公楼"
    }
   ],
   "rackServer_installationPosition": [
    {
-    "belongCabinet": "南阳市市中支网络机房机柜07",
+    "belongCabinet": "5e71c1290bb6443d8e2315324fa6d718",
     "slotNo": "8"
    }
   ],
@@ -9705,7 +10431,11 @@
   ],
   "supportIpv6": "False",
   "systemInformation": "课程分发",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "f6b26df6def44dcb98ba8a06b13eacee",
@@ -9730,21 +10460,22 @@
     "cpuFrequency": 2.4,
     "productArchitecture": "00-X86架构",
     "totalNumberOfCpu": "1",
-    "totalNumberOfCpuNuclear": "4"
+    "totalNumberOfCpuNuclear": "4",
+    "brandLand": "00-国内"
    }
   ],
   "rackServer_deployment": [
    {
     "deployArea": "00-主机房-服务器区",
     "deployComputerRoom": "中心机房",
-    "deployDb": "平顶山市中支中心机房",
+    "deployDb": "cef9b1d212644d818ae42965f7395b25",
     "deployFloor": "八层",
     "deployGallery": "办公楼"
    }
   ],
   "rackServer_installationPosition": [
    {
-    "belongCabinet": "平顶山市中支中心机房机柜14",
+    "belongCabinet": "d07c24b7b1094dae8fd9eba239f8b9eb",
     "slotNo": "21"
    }
   ],
@@ -9771,7 +10502,11 @@
   ],
   "supportIpv6": "False",
   "systemInformation": "课程分发",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "f6e1bb5c8679423f8d8a325007fc70fc",
@@ -9797,21 +10532,22 @@
     "cpuFrequency": 2.2,
     "productArchitecture": "00-X86架构",
     "totalNumberOfCpu": "2",
-    "totalNumberOfCpuNuclear": "20"
+    "totalNumberOfCpuNuclear": "20",
+    "brandLand": "00-国内"
    }
   ],
   "rackServer_deployment": [
    {
     "deployArea": "00-主机房-服务器区",
     "deployComputerRoom": "周口市中心支行中心机房",
-    "deployDb": "周口市中支中心机房",
+    "deployDb": "2952ee20d75547eaa9a1cb873e96f60e",
     "deployFloor": "二层",
     "deployGallery": "周口市川汇区七一路中段1号A楼"
    }
   ],
   "rackServer_installationPosition": [
    {
-    "belongCabinet": "周口市中支中心机房服务器机柜C5",
+    "belongCabinet": "ccad2e24cd394e938788c6730a0ee314",
     "slotNo": "10"
    }
   ],
@@ -9838,7 +10574,11 @@
   ],
   "supportIpv6": "False",
   "systemInformation": "云桌面",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "f7578d0f4dd8443d8dd0ee2f461267df",
@@ -9864,21 +10604,22 @@
     "cpuFrequency": 2.26,
     "productArchitecture": "00-X86架构",
     "totalNumberOfCpu": "1",
-    "totalNumberOfCpuNuclear": "4"
+    "totalNumberOfCpuNuclear": "4",
+    "brandLand": "01-国外"
    }
   ],
   "rackServer_deployment": [
    {
     "deployArea": "00-主机房-服务器区",
     "deployComputerRoom": "濮阳市中支中心机房",
-    "deployDb": "濮阳市中支中心机房",
+    "deployDb": "a0172c84ea0e4d399267a75c2449a054",
     "deployFloor": "六层",
     "deployGallery": "办公楼"
    }
   ],
   "rackServer_installationPosition": [
    {
-    "belongCabinet": "濮阳市中支中心机房服务器机柜2",
+    "belongCabinet": "5c0129c43a244299b534e160c83b6d3f",
     "slotNo": "13"
    }
   ],
@@ -9905,7 +10646,11 @@
   ],
   "supportIpv6": "False",
   "systemInformation": "IT运维系统",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "f95a1ff174bf4ae498d4f1a4e8a663c0",
@@ -9931,21 +10676,22 @@
     "cpuFrequency": 2.4,
     "productArchitecture": "00-X86架构",
     "totalNumberOfCpu": "2",
-    "totalNumberOfCpuNuclear": "20"
+    "totalNumberOfCpuNuclear": "20",
+    "brandLand": "00-国内"
    }
   ],
   "rackServer_deployment": [
    {
     "deployArea": "00-主机房-服务器区",
     "deployComputerRoom": "许昌市中心支行中心机房",
-    "deployDb": "许昌市中支中心机房",
+    "deployDb": "2e8c7a9f7bbd43efbfd90baa81db0b2d",
     "deployFloor": "四楼",
     "deployGallery": "河南省许昌市建安区新东街571号办公楼"
    }
   ],
   "rackServer_installationPosition": [
    {
-    "belongCabinet": "许昌市中支中心机房服务器机柜B05",
+    "belongCabinet": "4f67b57b3ad34a4b9a435086c009dd0c",
     "slotNo": "22"
    }
   ],
@@ -9972,7 +10718,11 @@
   ],
   "supportIpv6": "True",
   "systemInformation": "桌面云系统",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "f9859296eacd4aa68891d852c18c9183",
@@ -9998,21 +10748,22 @@
     "cpuFrequency": 4.2,
     "productArchitecture": "00-X86架构",
     "totalNumberOfCpu": "2",
-    "totalNumberOfCpuNuclear": "10"
+    "totalNumberOfCpuNuclear": "10",
+    "brandLand": "00-国内"
    }
   ],
   "rackServer_deployment": [
    {
     "deployArea": "00-主机房-服务器区",
     "deployComputerRoom": "郑州中支主中心机房",
-    "deployDb": "郑州中支主中心机房",
+    "deployDb": "77e1d9d6869044889909f41f30517418",
     "deployFloor": "十一层",
     "deployGallery": "河南省郑州市郑东新区商务外环路21号"
    }
   ],
   "rackServer_installationPosition": [
    {
-    "belongCabinet": "郑州中支主中心服务器机房服务器机柜4",
+    "belongCabinet": "f3d7cdc3b3f24c73b4a967836d2416fe",
     "slotNo": "15"
    }
   ],
@@ -10039,7 +10790,11 @@
   ],
   "supportIpv6": "False",
   "systemInformation": "DMZ虚拟化",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "f9e49156e0314190ac5c0959a47d7f0a",
@@ -10064,21 +10819,22 @@
     "cpuFrequency": 2.2,
     "productArchitecture": "00-X86架构",
     "totalNumberOfCpu": "2",
-    "totalNumberOfCpuNuclear": "10"
+    "totalNumberOfCpuNuclear": "10",
+    "brandLand": "00-国内"
    }
   ],
   "rackServer_deployment": [
    {
     "deployArea": "00-主机房-服务器区",
     "deployComputerRoom": "开封市中心支行中心机房",
-    "deployDb": "开封市中支中心机房",
+    "deployDb": "bc868096be7647988f5c29d1f1b04036",
     "deployFloor": "三层",
     "deployGallery": "开封市龙亭区晋安路63号办公楼"
    }
   ],
   "rackServer_installationPosition": [
    {
-    "belongCabinet": "开封市中支中心机房机柜1",
+    "belongCabinet": "31ff566e877f46e5b730bf19cc528b29",
     "slotNo": "10"
    }
   ],
@@ -10105,7 +10861,11 @@
   ],
   "supportIpv6": "True",
   "systemInformation": "桌面云平台系统",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "f9f7beb309c14f01a96148e128dc01ab",
@@ -10131,21 +10891,22 @@
     "cpuFrequency": 2.8,
     "productArchitecture": "00-X86架构",
     "totalNumberOfCpu": "2",
-    "totalNumberOfCpuNuclear": "20"
+    "totalNumberOfCpuNuclear": "20",
+    "brandLand": "00-国内"
    }
   ],
   "rackServer_deployment": [
    {
     "deployArea": "00-主机房-服务器区",
     "deployComputerRoom": "许昌市中心支行中心机房",
-    "deployDb": "许昌市中支中心机房",
+    "deployDb": "2e8c7a9f7bbd43efbfd90baa81db0b2d",
     "deployFloor": "四楼",
     "deployGallery": "河南省许昌市建安区新东街571号办公楼"
    }
   ],
   "rackServer_installationPosition": [
    {
-    "belongCabinet": "许昌市中支中心机房服务器机柜B04",
+    "belongCabinet": "8297ba18956a4dbbb07ab6b5016d45d1",
     "slotNo": "22"
    }
   ],
@@ -10172,7 +10933,11 @@
   ],
   "supportIpv6": "True",
   "systemInformation": "郑州大数据系统",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "fab0d8bb812e488f98ab984f6c1b97ee",
@@ -10198,21 +10963,22 @@
     "cpuFrequency": 2.4,
     "productArchitecture": "00-X86架构",
     "totalNumberOfCpu": "1",
-    "totalNumberOfCpuNuclear": "6"
+    "totalNumberOfCpuNuclear": "6",
+    "brandLand": "00-国内"
    }
   ],
   "rackServer_deployment": [
    {
     "deployArea": "00-主机房-服务器区",
     "deployComputerRoom": "周口市中心支行中心机房",
-    "deployDb": "周口市中支中心机房",
+    "deployDb": "2952ee20d75547eaa9a1cb873e96f60e",
     "deployFloor": "二层",
     "deployGallery": "周口市川汇区七一路中段1号A楼"
    }
   ],
   "rackServer_installationPosition": [
    {
-    "belongCabinet": "周口市中支中心机房服务器机柜C2",
+    "belongCabinet": "8369ae00fa454c1a810f01aaf1708b8c",
     "slotNo": "27"
    }
   ],
@@ -10239,7 +11005,11 @@
   ],
   "supportIpv6": "False",
   "systemInformation": "协同办公系统",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "fc7adf571c5c47a0ae8f11168a4ada07",
@@ -10265,21 +11035,22 @@
     "cpuFrequency": 2.6,
     "productArchitecture": "00-X86架构",
     "totalNumberOfCpu": "2",
-    "totalNumberOfCpuNuclear": "28"
+    "totalNumberOfCpuNuclear": "28",
+    "brandLand": "00-国内"
    }
   ],
   "rackServer_deployment": [
    {
     "deployArea": "00-主机房-服务器区",
     "deployComputerRoom": "新乡市中心支行中心机房",
-    "deployDb": "新乡市中支中心机房",
+    "deployDb": "a2cb90d474104946a0238306baa08672",
     "deployFloor": "十五层",
     "deployGallery": "新乡市中心支行办公楼"
    }
   ],
   "rackServer_installationPosition": [
    {
-    "belongCabinet": "新乡市中支服务器机房机柜05",
+    "belongCabinet": "f9af0c380a0a4d33b84160366b697446",
     "slotNo": "17"
    }
   ],
@@ -10306,7 +11077,11 @@
   ],
   "supportIpv6": "False",
   "systemInformation": "云桌面",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "fd8d652e54774c26b12ab37f58b89d8a",
@@ -10332,21 +11107,22 @@
     "cpuFrequency": 2.4,
     "productArchitecture": "00-X86架构",
     "totalNumberOfCpu": "2",
-    "totalNumberOfCpuNuclear": "20"
+    "totalNumberOfCpuNuclear": "20",
+    "brandLand": "00-国内"
    }
   ],
   "rackServer_deployment": [
    {
     "deployArea": "00-主机房-服务器区",
     "deployComputerRoom": "许昌市中心支行中心机房",
-    "deployDb": "许昌市中支中心机房",
+    "deployDb": "2e8c7a9f7bbd43efbfd90baa81db0b2d",
     "deployFloor": "四楼",
     "deployGallery": "河南省许昌市建安区新东街571号办公楼"
    }
   ],
   "rackServer_installationPosition": [
    {
-    "belongCabinet": "许昌市中支中心机房服务器机柜B05",
+    "belongCabinet": "4f67b57b3ad34a4b9a435086c009dd0c",
     "slotNo": "26"
    }
   ],
@@ -10373,7 +11149,11 @@
   ],
   "supportIpv6": "True",
   "systemInformation": "桌面云系统",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "ff485f3f98604915a5662c288cf1804c",
@@ -10399,21 +11179,22 @@
     "cpuFrequency": 2.81,
     "productArchitecture": "00-X86架构",
     "totalNumberOfCpu": "2",
-    "totalNumberOfCpuNuclear": "16"
+    "totalNumberOfCpuNuclear": "16",
+    "brandLand": "00-国内"
    }
   ],
   "rackServer_deployment": [
    {
     "deployArea": "00-主机房-服务器区",
     "deployComputerRoom": "洛阳市中心支行中心机房",
-    "deployDb": "洛阳市中支中心机房",
+    "deployDb": "09fd31dac1a648c59cab24f486dd561c",
     "deployFloor": "三层",
     "deployGallery": "洛阳市中心支行办公大楼"
    }
   ],
   "rackServer_installationPosition": [
    {
-    "belongCabinet": "洛阳市中支中心机房机柜S3",
+    "belongCabinet": "eb699807238743ac8b6820a492c79dbd",
     "slotNo": "29"
    }
   ],
@@ -10440,6 +11221,10 @@
   ],
   "supportIpv6": "True",
   "systemInformation": "云计算平台",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "deployComputerRoom": "未知"
  }
 ]

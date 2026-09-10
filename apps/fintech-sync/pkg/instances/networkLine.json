@@ -12,7 +12,13 @@
   "lineType": "99-其它",
   "lineUsage": "开封市中支互联网",
   "networkBandwidth": 100.0,
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "01c95c15d88a48458b43f8cbe68c3f78",
@@ -27,7 +33,13 @@
   "lineType": "99-其它",
   "lineUsage": "政务外网",
   "networkBandwidth": 100.0,
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "0222cb183c2a4aa08cf6c85bb637048e",
@@ -42,7 +54,13 @@
   "lineType": "00-MSTP",
   "lineUsage": "濮阳至郑州业务网备线",
   "networkBandwidth": 4.0,
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "0276bcb5f19d4d60bb9133541cd19117",
@@ -57,7 +75,13 @@
   "lineType": "00-MSTP",
   "lineUsage": "业务网备线路",
   "networkBandwidth": 4.0,
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "02b374e1a44e41aba19db097a03ab255",
@@ -72,7 +96,13 @@
   "lineType": "00-MSTP",
   "lineUsage": "业务网主线路",
   "networkBandwidth": 4.0,
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "04385f334b884222b1b9ba8235339840",
@@ -87,7 +117,13 @@
   "lineType": "00-MSTP",
   "lineUsage": "信阳市中支鄢陵县支行业务网主线",
   "networkBandwidth": 10.0,
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "0503adb1d3c443b6906d6fd72489aa8a",
@@ -102,7 +138,13 @@
   "lineType": "00-MSTP",
   "lineUsage": "安阳市中支-林州市支行业务网主线",
   "networkBandwidth": 10.0,
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "072a7a11b4904562a9179ff8cbbaad9b",
@@ -117,7 +159,13 @@
   "lineType": "00-MSTP",
   "lineUsage": "业务网备线路",
   "networkBandwidth": 4.0,
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "0826d340e26a45f7a92f2853db70b461",
@@ -132,7 +180,13 @@
   "lineType": "00-MSTP",
   "lineUsage": "新乡市中支至新乡县业务网主线",
   "networkBandwidth": 4.0,
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "09f0da9e03294e349716127ac24cdbfc",
@@ -147,7 +201,13 @@
   "lineType": "99-其它",
   "lineUsage": "互联网线路",
   "networkBandwidth": 200.0,
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "0b8d2bb9d20e476784edba274a628f0e",
@@ -162,7 +222,13 @@
   "lineType": "00-MSTP",
   "lineUsage": "业务网主线",
   "networkBandwidth": 10.0,
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "0b97b500cb87485a839e45d2c9bf3945",
@@ -177,7 +243,13 @@
   "lineType": "01-SDH",
   "lineUsage": "郑州中支—上海外管局外管网1",
   "networkBandwidth": 2.0,
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "0c262a1a9fe5442eb2cd9a83a76c56bd",
@@ -192,7 +264,13 @@
   "lineType": "01-SDH",
   "lineUsage": "业务网主线",
   "networkBandwidth": 4.0,
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "0c58a3d4492d43d2b45bc67e514ce6b3",
@@ -207,7 +285,13 @@
   "lineType": "00-MSTP",
   "lineUsage": "许昌市中支襄县支行业务网备线",
   "networkBandwidth": 10.0,
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "0cbf617624354efcaa5a76b16eb2442e",
@@ -222,7 +306,13 @@
   "lineType": "00-MSTP",
   "lineUsage": "信阳市中支长葛市支行业务网备线",
   "networkBandwidth": 10.0,
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "0dbb86858bf14f8ebc491c418c9f6ff9",
@@ -237,7 +327,13 @@
   "lineType": "00-MSTP",
   "lineUsage": "互联网",
   "networkBandwidth": 100.0,
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "11f12d77bb094e788a4b521f4c418904",
@@ -252,7 +348,13 @@
   "lineType": "01-SDH",
   "lineUsage": "办公网主线",
   "networkBandwidth": 2.0,
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "142ca8a8a54d4c8288b36835546a66bd",
@@ -267,7 +369,13 @@
   "lineType": "00-MSTP",
   "lineUsage": "许昌市中支长葛市支行业务网主线",
   "networkBandwidth": 10.0,
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "1447e852ff434b7e8c8801411848f785",
@@ -282,7 +390,13 @@
   "lineType": "00-MSTP",
   "lineUsage": "周口市中支至郸城县业务网备线",
   "networkBandwidth": 10.0,
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "1451e6d4c62d474a87c11b7f21981453",
@@ -297,7 +411,13 @@
   "lineType": "01-SDH",
   "lineUsage": "郑州中支—金秋公寓老干部处业务网",
   "networkBandwidth": 2.0,
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "16dfa2734fbf48cba7a913a1ce378c3a",
@@ -312,7 +432,13 @@
   "lineType": "00-MSTP",
   "lineUsage": "业务网主线路",
   "networkBandwidth": 4.0,
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "1772236534194bb38761f779ee140491",
@@ -327,7 +453,13 @@
   "lineType": "00-MSTP",
   "lineUsage": "安阳市中支-滑县支行业务网备线",
   "networkBandwidth": 10.0,
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "182f227515e54981a9873d14fc9b15a6",
@@ -342,7 +474,13 @@
   "lineType": "00-MSTP",
   "lineUsage": "业务网主线路",
   "networkBandwidth": 4.0,
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "193ef3404c8d47379df1074098e3f394",
@@ -357,7 +495,13 @@
   "lineType": "00-MSTP",
   "lineUsage": "焦作至沁阳业务网主线",
   "networkBandwidth": 10.0,
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "19c70d14713e4a919fc6dea12bd1a45e",
@@ -372,7 +516,13 @@
   "lineType": "99-其它",
   "lineUsage": "政务内网专线",
   "networkBandwidth": 10.0,
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "1c19f317bdd241e3b92acd1d0ca07afd",
@@ -387,7 +537,13 @@
   "lineType": "00-MSTP",
   "lineUsage": "业务网主线",
   "networkBandwidth": 10.0,
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "1cd9aa6973694349a24fd59558b9114f",
@@ -402,7 +558,13 @@
   "lineType": "00-MSTP",
   "lineUsage": "焦作至孟州业务网备线",
   "networkBandwidth": 10.0,
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "1d172f33940d43c68155d711e52c2a77",
@@ -417,7 +579,13 @@
   "lineType": "00-MSTP",
   "lineUsage": "安阳市中支-林州市支行业务网备线",
   "networkBandwidth": 10.0,
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "1d7b32145bb8400fb43c6297f462da15",
@@ -432,7 +600,13 @@
   "lineType": "00-MSTP",
   "lineUsage": "三门峡市至陕州主线",
   "networkBandwidth": 10.0,
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "1db1e3957b2f4e47af383947c5336c9f",
@@ -447,7 +621,13 @@
   "lineType": "00-MSTP",
   "lineUsage": "新乡市中支至封丘县业务网主线",
   "networkBandwidth": 4.0,
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "1e920c90b1d24abe9792ff7091436a42",
@@ -462,7 +642,13 @@
   "lineType": "99-其它",
   "lineUsage": "互联网备线",
   "networkBandwidth": 100.0,
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "212343c2fa59428b875f75198ec92b29",
@@ -477,7 +663,13 @@
   "lineType": "00-MSTP",
   "lineUsage": "业务网备线",
   "networkBandwidth": 4.0,
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "2277d9a9d47c47c2aac269d013c96418",
@@ -492,7 +684,13 @@
   "lineType": "00-MSTP",
   "lineUsage": "周口市中支至鹿邑县业务网备线",
   "networkBandwidth": 10.0,
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "2445fb94c16344a089678c42c7ead56a",
@@ -507,7 +705,13 @@
   "lineType": "00-MSTP",
   "lineUsage": "周口市中支至商水县业务网备线",
   "networkBandwidth": 10.0,
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "252f9ad2c3b047ab8cb955186625eb3a",
@@ -522,7 +726,13 @@
   "lineType": "00-MSTP",
   "lineUsage": "信阳市中支襄县支行业务网备线",
   "networkBandwidth": 10.0,
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "2600160c64564d49a639be6a8bd81145",
@@ -537,7 +747,13 @@
   "lineType": "99-其它",
   "lineUsage": "郑州中支—同城转接中心联通裸光纤",
   "networkBandwidth": 10.0,
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "2620716ba0064330913b523ad28da049",
@@ -552,7 +768,13 @@
   "lineType": "00-MSTP",
   "lineUsage": "三门峡市至卢氏备线",
   "networkBandwidth": 10.0,
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "27a3caa640164f0cbffa085906931082",
@@ -567,7 +789,13 @@
   "lineType": "00-MSTP",
   "lineUsage": "周口市中支至淮阳县业务网主线",
   "networkBandwidth": 10.0,
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "289fa4769c034683accefa4bc92a14d6",
@@ -582,7 +810,13 @@
   "lineType": "00-MSTP",
   "lineUsage": "业务网主线路",
   "networkBandwidth": 4.0,
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "28a9f9f0551c4499a116361f01bcbdcc",
@@ -597,7 +831,13 @@
   "lineType": "00-MSTP",
   "lineUsage": "业务网主线",
   "networkBandwidth": 10.0,
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "28b82f3dfc714d36b429d3f07c669a9f",
@@ -612,7 +852,13 @@
   "lineType": "00-MSTP",
   "lineUsage": "焦作至武陟业务网主线",
   "networkBandwidth": 10.0,
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "28d92639c0374537b41ce9cc475d4a13",
@@ -627,7 +873,13 @@
   "lineType": "00-MSTP",
   "lineUsage": "焦作至博爱业务网备线",
   "networkBandwidth": 10.0,
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "295e4d09a1c347b0828693d2e19ebb23",
@@ -642,7 +894,13 @@
   "lineType": "00-MSTP",
   "lineUsage": "业务网备线路",
   "networkBandwidth": 10.0,
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "2a2796464b32443886c0c5c55dca2213",
@@ -657,7 +915,13 @@
   "lineType": "99-其它",
   "lineUsage": "焦作电子政务外网",
   "networkBandwidth": 100.0,
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "2a2eacf74b2f4abaa79c30098b2e6931",
@@ -672,7 +936,13 @@
   "lineType": "00-MSTP",
   "lineUsage": "业务网主线路",
   "networkBandwidth": 10.0,
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "2a36ea1b695e4cd69f8393d4bf69261f",
@@ -687,7 +957,13 @@
   "lineType": "00-MSTP",
   "lineUsage": "业务网备线",
   "networkBandwidth": 10.0,
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "2bd69d5880c84cd2819d12e302105ba1",
@@ -702,7 +978,13 @@
   "lineType": "99-其它",
   "lineUsage": "信阳市中支互联网专线",
   "networkBandwidth": 100.0,
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "2c22a9d1e964462ba6eb8433fd316b12",
@@ -717,7 +999,13 @@
   "lineType": "00-MSTP",
   "lineUsage": "业务网主线",
   "networkBandwidth": 10.0,
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "2c6b9c2c9f004c47a52bce4f0af4ae53",
@@ -732,7 +1020,13 @@
   "lineType": "99-其它",
   "lineUsage": "郑州中支—同城转接中心电信裸光纤",
   "networkBandwidth": 10.0,
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "2c9a453b595440d7912014d56b580efc",
@@ -747,7 +1041,13 @@
   "lineType": "00-MSTP",
   "lineUsage": "业务网备线路",
   "networkBandwidth": 10.0,
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "2ccdce8d78b642909533169e46815449",
@@ -762,7 +1062,13 @@
   "lineType": "00-MSTP",
   "lineUsage": "业务网备线",
   "networkBandwidth": 10.0,
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "2d56d8372b9e4df9b0f8f18ad33d02af",
@@ -777,7 +1083,13 @@
   "lineType": "00-MSTP",
   "lineUsage": "许昌市中支建安区支行业务网主线",
   "networkBandwidth": 10.0,
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "2db148d3c3ae4540a81630a15e304cfe",
@@ -792,7 +1104,13 @@
   "lineType": "00-MSTP",
   "lineUsage": "业务网主线路",
   "networkBandwidth": 4.0,
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "2f36843657624225803693c9246b8d0f",
@@ -807,7 +1125,13 @@
   "lineType": "00-MSTP",
   "lineUsage": "新乡市中支至辉县市业务网备线",
   "networkBandwidth": 4.0,
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "2f3751bd445b4310993450c53ff5545d",
@@ -822,7 +1146,13 @@
   "lineType": "00-MSTP",
   "lineUsage": "周口至郑州业务网主线",
   "networkBandwidth": 4.0,
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "31ec6186640b462dbbb8dc68f3aeac23",
@@ -837,7 +1167,13 @@
   "lineType": "00-MSTP",
   "lineUsage": "业务网备线路",
   "networkBandwidth": 4.0,
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "31f1be934c694d7f8888dba02ed8c86e",
@@ -852,7 +1188,13 @@
   "lineType": "00-MSTP",
   "lineUsage": "业务网主线路",
   "networkBandwidth": 4.0,
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "32855941d57e4de986f6d10a3b17f3e4",
@@ -867,7 +1209,13 @@
   "lineType": "00-MSTP",
   "lineUsage": "业务网备线",
   "networkBandwidth": 10.0,
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "35f0a9f85dd042ac83ccd1b86828b354",
@@ -882,7 +1230,13 @@
   "lineType": "00-MSTP",
   "lineUsage": "业务网备线",
   "networkBandwidth": 4.0,
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "374e366fec374adf8ca40294a49eaee4",
@@ -897,7 +1251,13 @@
   "lineType": "99-其它",
   "lineUsage": "周口市中支电子政务外网",
   "networkBandwidth": 10.0,
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "384da2ecdc3a4ccdbba82e5785fb7a57",
@@ -912,7 +1272,13 @@
   "lineType": "00-MSTP",
   "lineUsage": "三门峡市至渑池主线",
   "networkBandwidth": 10.0,
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "3a6fc87d6fe244c09a9166a9a2b4d1b8",
@@ -927,7 +1293,13 @@
   "lineType": "00-MSTP",
   "lineUsage": "三门峡市政务外网",
   "networkBandwidth": 50.0,
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "3bc8114cb6ec4baf9c075bb3e55ff2e5",
@@ -942,7 +1314,13 @@
   "lineType": "00-MSTP",
   "lineUsage": "业务网备线路",
   "networkBandwidth": 4.0,
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "3fb32f41aeee4a64abd49607216dc84b",
@@ -957,7 +1335,13 @@
   "lineType": "00-MSTP",
   "lineUsage": "焦作至修武业务网主线",
   "networkBandwidth": 10.0,
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "4093e053e09b4bd088360085fb534eb0",
@@ -972,7 +1356,13 @@
   "lineType": "00-MSTP",
   "lineUsage": "濮阳县支行至濮阳中支业务网备线",
   "networkBandwidth": 10.0,
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "41e6ea89a8074921aa48772c7990270a",
@@ -987,7 +1377,13 @@
   "lineType": "00-MSTP",
   "lineUsage": "业务网备线路",
   "networkBandwidth": 4.0,
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "42b5fe415c9140938e989038cf4b87f8",
@@ -1002,7 +1398,13 @@
   "lineType": "01-SDH",
   "lineUsage": "办公网备线",
   "networkBandwidth": 2.0,
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "434722294f5e4b8792aa1145cbd4b142",
@@ -1017,7 +1419,13 @@
   "lineType": "00-MSTP",
   "lineUsage": "濮阳至台前业务网主线路",
   "networkBandwidth": 10.0,
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "43e3c0188639405a8811237ab7a62aea",
@@ -1032,7 +1440,13 @@
   "lineType": "00-MSTP",
   "lineUsage": "新乡市中支至原阳县业务网备线",
   "networkBandwidth": 4.0,
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "477a9b2b10234d4eaa639ebdf89b143b",
@@ -1047,7 +1461,13 @@
   "lineType": "00-MSTP",
   "lineUsage": "业务网主线路",
   "networkBandwidth": 10.0,
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "48986be1e81044e994caf1faf64edd20",
@@ -1062,7 +1482,13 @@
   "lineType": "00-MSTP",
   "lineUsage": "业务网备线",
   "networkBandwidth": 10.0,
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "499e9c064d7a44d483c7f08317c3f838",
@@ -1077,7 +1503,13 @@
   "lineType": "00-MSTP",
   "lineUsage": "新乡市中支至卫辉市业务网备线",
   "networkBandwidth": 4.0,
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "4ad7f6ca740e450eb17612cd52241f18",
@@ -1092,7 +1524,13 @@
   "lineType": "00-MSTP",
   "lineUsage": "业务网主线路",
   "networkBandwidth": 10.0,
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "4db1f5bb06e74290bd22f898ac08f0f5",
@@ -1107,7 +1545,13 @@
   "lineType": "00-MSTP",
   "lineUsage": "信阳市中支鄢陵县支行业务网主线",
   "networkBandwidth": 10.0,
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "4e30f99937844a39a0726f8a70ef81d4",
@@ -1122,7 +1566,13 @@
   "lineType": "00-MSTP",
   "lineUsage": "商丘市中支至柘城县支行业务网备线",
   "networkBandwidth": 10.0,
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "506c98e9e35b4c6d83050343630cf489",
@@ -1137,7 +1587,13 @@
   "lineType": "00-MSTP",
   "lineUsage": "三门峡市至义马备线",
   "networkBandwidth": 10.0,
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "5357fd86ce72446fb4c99baf92d7dd7e",
@@ -1152,7 +1608,13 @@
   "lineType": "00-MSTP",
   "lineUsage": "业务网主线",
   "networkBandwidth": 4.0,
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "53ded79970074a0ba4ab3602c4e42091",
@@ -1167,7 +1629,13 @@
   "lineType": "00-MSTP",
   "lineUsage": "新乡市中支至获嘉县业务网备线",
   "networkBandwidth": 4.0,
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "55214367c7ef4e8fae402ef089fc1e60",
@@ -1182,7 +1650,13 @@
   "lineType": "00-MSTP",
   "lineUsage": "业务网主线",
   "networkBandwidth": 10.0,
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "57bf775b41eb4b57a6d537efacddcfee",
@@ -1197,7 +1671,13 @@
   "lineType": "99-其它",
   "lineUsage": "商丘市中支—联通互联网",
   "networkBandwidth": 50.0,
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "596448b74df64bd793a09774e5895e7f",
@@ -1212,7 +1692,13 @@
   "lineType": "00-MSTP",
   "lineUsage": "业务网备线",
   "networkBandwidth": 10.0,
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "5ad3b29f81ef480696605d8482f9b4ef",
@@ -1227,7 +1713,13 @@
   "lineType": "00-MSTP",
   "lineUsage": "焦作至修武业务网备线",
   "networkBandwidth": 10.0,
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "5bbb36990d8144128ba1b90c3fc15c78",
@@ -1242,7 +1734,13 @@
   "lineType": "00-MSTP",
   "lineUsage": "焦作至温县业务网主线",
   "networkBandwidth": 10.0,
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "5c24b0b74d30407db0ba3b0ad8fdc768",
@@ -1257,7 +1755,13 @@
   "lineType": "00-MSTP",
   "lineUsage": "新乡市中支至延津县业务网主线",
   "networkBandwidth": 4.0,
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "5f1469eaa3ca4680be91c6dc34d9446b",
@@ -1272,7 +1776,13 @@
   "lineType": "00-MSTP",
   "lineUsage": "业务网备线路",
   "networkBandwidth": 4.0,
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "665aca138f22444a849e9f27119c7c50",
@@ -1287,7 +1797,13 @@
   "lineType": "00-MSTP",
   "lineUsage": "周口市中支至鹿邑县业务网主线",
   "networkBandwidth": 10.0,
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "66aef2e533f2442db7125adcc758dbe5",
@@ -1302,7 +1818,13 @@
   "lineType": "00-MSTP",
   "lineUsage": "业务网备线",
   "networkBandwidth": 4.0,
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "67849d2a6f8446bf8c5a4ecf1e893c5b",
@@ -1317,7 +1839,13 @@
   "lineType": "00-MSTP",
   "lineUsage": "周口市中支至太康县业务网备线",
   "networkBandwidth": 10.0,
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "69bd32de0a6a4cd1a5e89ad6cd091ae3",
@@ -1332,7 +1860,13 @@
   "lineType": "00-MSTP",
   "lineUsage": "商丘市中支至永城市支行业务网主线",
   "networkBandwidth": 10.0,
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "69bf21b578e04fa6a72a583cc3a57e1e",
@@ -1347,7 +1881,13 @@
   "lineType": "00-MSTP",
   "lineUsage": "三门峡市至渑池备线",
   "networkBandwidth": 10.0,
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "6a7d411b146f48a38786b3fd6ed816df",
@@ -1362,7 +1902,13 @@
   "lineType": "00-MSTP",
   "lineUsage": "杞县支行-开封市中支业务网备线",
   "networkBandwidth": 10.0,
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "6c78db03c384488480f12d7477a22402",
@@ -1377,7 +1923,13 @@
   "lineType": "00-MSTP",
   "lineUsage": "业务网备线路",
   "networkBandwidth": 4.0,
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "6dafd2b698614d829634c976e9f821f3",
@@ -1392,7 +1944,13 @@
   "lineType": "00-MSTP",
   "lineUsage": "信阳市中支长葛市支行业务网备线",
   "networkBandwidth": 10.0,
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "6de82dafe95f471fb39dfbcd8d2b9ffb",
@@ -1407,7 +1965,13 @@
   "lineType": "01-SDH",
   "lineUsage": "业务网主线",
   "networkBandwidth": 2.0,
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "7055ecc6cc894ca5bc7cb30fc5472763",
@@ -1422,7 +1986,13 @@
   "lineType": "00-MSTP",
   "lineUsage": "业务网主线",
   "networkBandwidth": 10.0,
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "708fef476a7649a4b0c51afef0fb3ff2",
@@ -1437,7 +2007,13 @@
   "lineType": "00-MSTP",
   "lineUsage": "业务网备线路",
   "networkBandwidth": 4.0,
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "723ccccd8a2740f8b07a249d6d3d11c3",
@@ -1452,7 +2028,13 @@
   "lineType": "00-MSTP",
   "lineUsage": "业务网备线",
   "networkBandwidth": 10.0,
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "728035f771a843fc97268582d0e957ee",
@@ -1467,7 +2049,13 @@
   "lineType": "00-MSTP",
   "lineUsage": "杞县支行-开封市中支业务网主线",
   "networkBandwidth": 10.0,
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "72e43297578941ec86cd1dcd31ca58dd",
@@ -1482,7 +2070,13 @@
   "lineType": "00-MSTP",
   "lineUsage": "濮阳至南乐县业务网主线路",
   "networkBandwidth": 10.0,
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "73e5d9e0a2c84e8bb843a76c810b5d3f",
@@ -1497,7 +2091,13 @@
   "lineType": "01-SDH",
   "lineUsage": "办公网主线",
   "networkBandwidth": 2.0,
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "75a32fe42fbf4f75a461b29c0eabce25",
@@ -1512,7 +2112,13 @@
   "lineType": "00-MSTP",
   "lineUsage": "祥符支行-开封市中支业务网主线",
   "networkBandwidth": 10.0,
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "76373d600f1a403687da5c79b5c9e0c6",
@@ -1527,7 +2133,13 @@
   "lineType": "99-其它",
   "lineUsage": "互联网",
   "networkBandwidth": 100.0,
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "77506ff7522545b394c22235457aecda",
@@ -1542,7 +2154,13 @@
   "lineType": "00-MSTP",
   "lineUsage": "商丘市中支至夏邑县支行业务网备线",
   "networkBandwidth": 10.0,
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "78a49a8696a74cd89c5aef33dc44c55a",
@@ -1557,7 +2175,13 @@
   "lineType": "00-MSTP",
   "lineUsage": "信阳市中支鄢陵县支行业务网备线",
   "networkBandwidth": 10.0,
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "78e40134b87f4940a8e4d9b74d7eddf5",
@@ -1572,7 +2196,13 @@
   "lineType": "00-MSTP",
   "lineUsage": "安阳市中支-滑县支行业务网主线",
   "networkBandwidth": 10.0,
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "7c4cb8100fe146f7a5976f20125a50e9",
@@ -1587,7 +2217,13 @@
   "lineType": "99-其它",
   "lineUsage": "互联网专线",
   "networkBandwidth": 100.0,
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "7cf5e91236114a67a3d1232a4d313782",
@@ -1602,7 +2238,13 @@
   "lineType": "00-MSTP",
   "lineUsage": "商丘市中支至虞城县支行业务网主线",
   "networkBandwidth": 10.0,
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "7dedf53230394a169d600f234846ae11",
@@ -1617,7 +2259,13 @@
   "lineType": "00-MSTP",
   "lineUsage": "新乡市中支至获嘉县业务网主线",
   "networkBandwidth": 4.0,
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "7f2bcea46d3c460abacc1708a19180b3",
@@ -1632,7 +2280,13 @@
   "lineType": "99-其它",
   "lineUsage": "漯河市中支电信互联网",
   "networkBandwidth": 500.0,
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "82129a1ec96a487bbeb5d7f2f177ade2",
@@ -1647,7 +2301,13 @@
   "lineType": "00-MSTP",
   "lineUsage": "业务网备线路",
   "networkBandwidth": 4.0,
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "85b7383d847e4561a2dad1a328c650bb",
@@ -1662,7 +2322,13 @@
   "lineType": "00-MSTP",
   "lineUsage": "业务网主线路",
   "networkBandwidth": 4.0,
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "863941fcc9e64644a5462d091ac80d18",
@@ -1677,7 +2343,13 @@
   "lineType": "00-MSTP",
   "lineUsage": "周口市中支至太康县业务网主线",
   "networkBandwidth": 10.0,
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "87a44b84c55d44f0aebcc70200762eda",
@@ -1692,7 +2364,13 @@
   "lineType": "00-MSTP",
   "lineUsage": "信阳市中支至郑州中支业务网备线",
   "networkBandwidth": 4.0,
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "87f1d80b792c418fbe21e42fad86bacb",
@@ -1707,7 +2385,13 @@
   "lineType": "00-MSTP",
   "lineUsage": "业务网主线路",
   "networkBandwidth": 4.0,
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "882472563b7b4e488c67bcd64bf44e70",
@@ -1722,7 +2406,13 @@
   "lineType": "00-MSTP",
   "lineUsage": "安阳至郑州业务网备线",
   "networkBandwidth": 4.0,
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "8bdde9e9b9c848cf94de91e6bb3d54c8",
@@ -1737,7 +2427,13 @@
   "lineType": "00-MSTP",
   "lineUsage": "业务网主线",
   "networkBandwidth": 10.0,
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "8c9306a61823491dbfe2a402c0ee2937",
@@ -1752,7 +2448,13 @@
   "lineType": "00-MSTP",
   "lineUsage": "周口市中支至西华县业务网备线",
   "networkBandwidth": 10.0,
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "8d564f789f954c7294499862b8a06224",
@@ -1767,7 +2469,13 @@
   "lineType": "00-MSTP",
   "lineUsage": "业务网备线",
   "networkBandwidth": 10.0,
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "8dbc046288f04af8805b98e2ba8d3250",
@@ -1782,7 +2490,13 @@
   "lineType": "00-MSTP",
   "lineUsage": "业务网备线",
   "networkBandwidth": 10.0,
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "8df52dcd7c1a4ea5b43e3652b92e846c",
@@ -1797,7 +2511,13 @@
   "lineType": "00-MSTP",
   "lineUsage": "周口市中支至沈丘县业务网备线",
   "networkBandwidth": 10.0,
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "8eb4d55279f04e719a2518d87f588315",
@@ -1812,7 +2532,13 @@
   "lineType": "00-MSTP",
   "lineUsage": "业务网主线路",
   "networkBandwidth": 4.0,
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "8f48a74927bf4deeb00634f5257c7747",
@@ -1827,7 +2553,13 @@
   "lineType": "00-MSTP",
   "lineUsage": "业务网主线路",
   "networkBandwidth": 4.0,
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "9048970b9e724d05a14c55a3864beaac",
@@ -1842,7 +2574,13 @@
   "lineType": "99-其它",
   "lineUsage": "许昌市中支互联网专线",
   "networkBandwidth": 100.0,
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "904f6634563e43bebeaa2c2032944be4",
@@ -1857,7 +2595,13 @@
   "lineType": "00-MSTP",
   "lineUsage": "三门峡市至灵宝备线",
   "networkBandwidth": 10.0,
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "907613b5498b4e23abfe0fe3b1fa24c8",
@@ -1872,7 +2616,13 @@
   "lineType": "00-MSTP",
   "lineUsage": "业务网主线",
   "networkBandwidth": 4.0,
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "914eafc2798c4520b93dae8f7fcf4a11",
@@ -1887,7 +2637,13 @@
   "lineType": "00-MSTP",
   "lineUsage": "业务网备线路",
   "networkBandwidth": 4.0,
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "915a919fb3cb426382f23062eeb31ed3",
@@ -1902,7 +2658,13 @@
   "lineType": "00-MSTP",
   "lineUsage": "新乡市中支至封丘县业务网备线",
   "networkBandwidth": 4.0,
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "91ee7d3aec404bb8977561f14c55de09",
@@ -1917,7 +2679,13 @@
   "lineType": "00-MSTP",
   "lineUsage": "安阳市中支-内黄县支行业务网主线",
   "networkBandwidth": 10.0,
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "91f7131ce4c84d42941f4b2cc42fc15b",
@@ -1932,7 +2700,13 @@
   "lineType": "00-MSTP",
   "lineUsage": "祥符支行-开封市中支业务网备线",
   "networkBandwidth": 10.0,
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "92d77fbca30f4f11a37fd3bbb0c99e51",
@@ -1947,7 +2721,13 @@
   "lineType": "00-MSTP",
   "lineUsage": "商丘市中支至宁陵县支行业务网备线",
   "networkBandwidth": 10.0,
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "9317862821694e1aa8c3c9b4ffb2389c",
@@ -1962,7 +2742,13 @@
   "lineType": "00-MSTP",
   "lineUsage": "濮阳至郑州业务网主线",
   "networkBandwidth": 4.0,
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "93516b607330465cbc77d724af107fdf",
@@ -1977,7 +2763,13 @@
   "lineType": "00-MSTP",
   "lineUsage": "焦作至郑州业务网备线",
   "networkBandwidth": 4.0,
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "93b1e01f32724193a49dfa09827a52e1",
@@ -1992,7 +2784,13 @@
   "lineType": "00-MSTP",
   "lineUsage": "安阳市中支-安阳县支行业务网主线",
   "networkBandwidth": 10.0,
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "94beec189cbf4e36b1aab624f13f70c5",
@@ -2007,7 +2805,13 @@
   "lineType": "01-SDH",
   "lineUsage": "办公网备线",
   "networkBandwidth": 2.0,
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "94bfce59817f462e8ded6d25e6e672bc",
@@ -2022,7 +2826,13 @@
   "lineType": "00-MSTP",
   "lineUsage": "业务网备线路",
   "networkBandwidth": 4.0,
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "94f6caf046da4da781d6ff6c5194944a",
@@ -2037,7 +2847,13 @@
   "lineType": "01-SDH",
   "lineUsage": "郑州中支—北京外管局外管网1",
   "networkBandwidth": 2.0,
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "94fe47cc3bfd455180d09467d80157ce",
@@ -2052,7 +2868,13 @@
   "lineType": "00-MSTP",
   "lineUsage": "信阳市中支襄县支行业务网备线",
   "networkBandwidth": 10.0,
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "95807f7ec32e45fa912a2261ac8866be",
@@ -2067,7 +2889,13 @@
   "lineType": "00-MSTP",
   "lineUsage": "周口市中支至项城市业务网主线",
   "networkBandwidth": 10.0,
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "975835a1a0f84f2d84c22a1f910c7d82",
@@ -2082,7 +2910,13 @@
   "lineType": "00-MSTP",
   "lineUsage": "信阳市中支长葛市支行业务网主线",
   "networkBandwidth": 10.0,
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "9844a1f304f6438091aa9cd098afb23e",
@@ -2097,7 +2931,13 @@
   "lineType": "00-MSTP",
   "lineUsage": "三门峡市至灵宝主线",
   "networkBandwidth": 10.0,
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "99458d892a2543ac959e5fc01c2ef3f0",
@@ -2112,7 +2952,13 @@
   "lineType": "00-MSTP",
   "lineUsage": "业务网主线路",
   "networkBandwidth": 4.0,
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "9aad59f6da4949f2958b29b1df5b99bf",
@@ -2127,7 +2973,13 @@
   "lineType": "99-其它",
   "lineUsage": "周口市中支互联网专线",
   "networkBandwidth": 200.0,
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "9b3f8d9b3a2b410ebe3e50268cdd8027",
@@ -2142,7 +2994,13 @@
   "lineType": "01-SDH",
   "lineUsage": "郑州中支—联通电子政务网",
   "networkBandwidth": 2.0,
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "9d3cf2c820b14c8c9957c31c948cf45c",
@@ -2157,7 +3015,13 @@
   "lineType": "00-MSTP",
   "lineUsage": "商丘市中支至宁陵县支行业务网主线",
   "networkBandwidth": 10.0,
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "9de0d2df5bd54c81a201b19574624fcc",
@@ -2172,7 +3036,13 @@
   "lineType": "00-MSTP",
   "lineUsage": "三门峡市至义马主线",
   "networkBandwidth": 10.0,
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "9e180e00f26745eba0127e1fcbbfdecd",
@@ -2187,7 +3057,13 @@
   "lineType": "00-MSTP",
   "lineUsage": "焦作至温县业务网备线",
   "networkBandwidth": 10.0,
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "a23d1d7b197a4528bd30a0a2c0c90ff9",
@@ -2202,7 +3078,13 @@
   "lineType": "00-MSTP",
   "lineUsage": "信阳市中支长葛市支行业务网主线",
   "networkBandwidth": 10.0,
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "a57e13d7351c4a9a95b651f0344c64cc",
@@ -2217,7 +3099,13 @@
   "lineType": "00-MSTP",
   "lineUsage": "信阳市中支鄢陵县支行业务网备线",
   "networkBandwidth": 10.0,
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "a67e5f69a56d42b0a0ddf493c1b0f3de",
@@ -2232,7 +3120,13 @@
   "lineType": "01-SDH",
   "lineUsage": "办公网备线",
   "networkBandwidth": 2.0,
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "a69eac73edfa44e99347766afbc56d3f",
@@ -2247,7 +3141,13 @@
   "lineType": "01-SDH",
   "lineUsage": "业务网北线",
   "networkBandwidth": 2.0,
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "a775891609c14482a34c1e5b661014bf",
@@ -2262,7 +3162,13 @@
   "lineType": "00-MSTP",
   "lineUsage": "新乡市中支至长垣县业务网备线",
   "networkBandwidth": 4.0,
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "a7880906cd6349949bd3974d57eb822d",
@@ -2277,7 +3183,13 @@
   "lineType": "00-MSTP",
   "lineUsage": "三门峡市至陕州备线",
   "networkBandwidth": 10.0,
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "a7923fced3b745ff8fb42fffb0bf391c",
@@ -2292,7 +3204,13 @@
   "lineType": "00-MSTP",
   "lineUsage": "业务网备线",
   "networkBandwidth": 10.0,
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "a7a6c9e99f724ca7a1059803e6a3a270",
@@ -2307,7 +3225,13 @@
   "lineType": "00-MSTP",
   "lineUsage": "焦作至博爱业务网主线",
   "networkBandwidth": 10.0,
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "a7dc5ae3042e48778fc9f72bb1ccc01b",
@@ -2322,7 +3246,13 @@
   "lineType": "00-MSTP",
   "lineUsage": "周口至郑州业务网备线",
   "networkBandwidth": 4.0,
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "a857af4fed694b49ad8caaed4ab2b3f2",
@@ -2337,7 +3267,13 @@
   "lineType": "00-MSTP",
   "lineUsage": "商丘市中支至夏邑县支行业务网主线",
   "networkBandwidth": 10.0,
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "a8d24de50cb64b2dab461dd68189d88b",
@@ -2352,7 +3288,13 @@
   "lineType": "00-MSTP",
   "lineUsage": "业务网备线路",
   "networkBandwidth": 4.0,
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "a90ef3d8c9944958a8c3fb9c1c3191dc",
@@ -2367,7 +3309,13 @@
   "lineType": "00-MSTP",
   "lineUsage": "业务网备线",
   "networkBandwidth": 10.0,
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "aadf5773a68c4cdd9ddb4267c53434ea",
@@ -2382,7 +3330,13 @@
   "lineType": "00-MSTP",
   "lineUsage": "漯河至郑州业务网备线",
   "networkBandwidth": 4.0,
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "ab2081c229c1410eb30670c2c4999780",
@@ -2397,7 +3351,13 @@
   "lineType": "00-MSTP",
   "lineUsage": "业务网主线路",
   "networkBandwidth": 4.0,
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "adf726c4e4e940c9a9f1399ed7727960",
@@ -2412,7 +3372,13 @@
   "lineType": "00-MSTP",
   "lineUsage": "业务网备线路",
   "networkBandwidth": 4.0,
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "af3bc6083e184e6387da5b39f2c38ff2",
@@ -2427,7 +3393,13 @@
   "lineType": "00-MSTP",
   "lineUsage": "新乡市中支至卫辉市业务网主线",
   "networkBandwidth": 4.0,
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "af6ffe8be6154410836035d729e62cfc",
@@ -2442,7 +3414,13 @@
   "lineType": "00-MSTP",
   "lineUsage": "业务网备线",
   "networkBandwidth": 10.0,
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "af8c1162a79e464d9a9fe539b4702de7",
@@ -2457,7 +3435,13 @@
   "lineType": "99-其它",
   "lineUsage": "互联网",
   "networkBandwidth": 50.0,
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "affc08dd60f14fe49482629d0338e01c",
@@ -2472,7 +3456,13 @@
   "lineType": "00-MSTP",
   "lineUsage": "焦作至武陟业务网备线",
   "networkBandwidth": 10.0,
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "b095014c6bb142458ce52aadf667fc37",
@@ -2487,7 +3477,13 @@
   "lineType": "01-SDH",
   "lineUsage": "业务网备线",
   "networkBandwidth": 4.0,
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "b1bcd004d32e4c8392f735942d1d1c72",
@@ -2502,7 +3498,13 @@
   "lineType": "00-MSTP",
   "lineUsage": "信阳市中支至郑州中支业务网主线",
   "networkBandwidth": 4.0,
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "b1efb4541a0745fda8e11c116a3686c9",
@@ -2517,7 +3519,13 @@
   "lineType": "00-MSTP",
   "lineUsage": "业务网主线",
   "networkBandwidth": 4.0,
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "b43bea3e4bbe4ebfabc98f84b0f003ae",
@@ -2532,7 +3540,13 @@
   "lineType": "00-MSTP",
   "lineUsage": "信阳市中支长葛市支行业务网备线",
   "networkBandwidth": 10.0,
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "b4644f271a6f40ef9a672e063a3b7858",
@@ -2547,7 +3561,13 @@
   "lineType": "00-MSTP",
   "lineUsage": "业务网备线路",
   "networkBandwidth": 4.0,
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "b56f6ebe12d742eab036877d8489cdc3",
@@ -2562,7 +3582,13 @@
   "lineType": "00-MSTP",
   "lineUsage": "许昌市中支至郑州中支业务网备线",
   "networkBandwidth": 4.0,
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "b5dc60fdcd534a8d95718be1cbd5131c",
@@ -2577,7 +3603,13 @@
   "lineType": "00-MSTP",
   "lineUsage": "商丘市中支至睢县支行业务网主线",
   "networkBandwidth": 10.0,
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "b64840868fb94c4f8f0d6599e227196e",
@@ -2592,7 +3624,13 @@
   "lineType": "00-MSTP",
   "lineUsage": "焦作至郑州业务网主线",
   "networkBandwidth": 4.0,
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "b67f8de940914335b1d5c27352d829db",
@@ -2607,7 +3645,13 @@
   "lineType": "01-SDH",
   "lineUsage": "郑州中支—北京外管局外管网2",
   "networkBandwidth": 2.0,
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "b7aaf069fc224d3eb06b1e7b3d039386",
@@ -2622,7 +3666,13 @@
   "lineType": "99-其它",
   "lineUsage": "互联网主线",
   "networkBandwidth": 100.0,
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "b803cd648a214c579a56495f9c897df7",
@@ -2637,7 +3687,13 @@
   "lineType": "00-MSTP",
   "lineUsage": "业务网主线",
   "networkBandwidth": 10.0,
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "b9c10b2eb059483e99d0e3abc24eb555",
@@ -2652,7 +3708,13 @@
   "lineType": "00-MSTP",
   "lineUsage": "业务网主线",
   "networkBandwidth": 10.0,
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "baf0bee85e6e46f5807dc01d992fe146",
@@ -2667,7 +3729,13 @@
   "lineType": "00-MSTP",
   "lineUsage": "商丘至郑州业务网备线",
   "networkBandwidth": 4.0,
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "baf8a70e3c7c4bcebd917c3c0bbfda4e",
@@ -2682,7 +3750,13 @@
   "lineType": "99-其它",
   "lineUsage": "开封市中支互联网保卫押运",
   "networkBandwidth": 200.0,
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "bc3a7dca85184362afa9d201a1d4f5d8",
@@ -2697,7 +3771,13 @@
   "lineType": "00-MSTP",
   "lineUsage": "安阳市中支-内黄县支行业务网备线",
   "networkBandwidth": 10.0,
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "bc5edf2370934157adff0b8d68c10dec",
@@ -2712,7 +3792,13 @@
   "lineType": "01-SDH",
   "lineUsage": "办公网主线",
   "networkBandwidth": 2.0,
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "bd7737e0dafd45b08f3e31c19e50a557",
@@ -2727,7 +3813,13 @@
   "lineType": "00-MSTP",
   "lineUsage": "安阳市中支-安阳县支行业务网备线",
   "networkBandwidth": 10.0,
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "be1379a6a1864b94a4849b92ff5fd1a7",
@@ -2742,7 +3834,13 @@
   "lineType": "00-MSTP",
   "lineUsage": "商丘至郑州业务网主线",
   "networkBandwidth": 4.0,
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "bf120c0671df423fb65571848908d498",
@@ -2757,7 +3855,13 @@
   "lineType": "99-其它",
   "lineUsage": "焦作市中支互联网",
   "networkBandwidth": 100.0,
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "bf404821fdb0466cb7db9c2e0e2e0d91",
@@ -2772,7 +3876,13 @@
   "lineType": "00-MSTP",
   "lineUsage": "业务网备线路",
   "networkBandwidth": 4.0,
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "c0d2010a113e44d49c0c63b46221285d",
@@ -2787,7 +3897,13 @@
   "lineType": "00-MSTP",
   "lineUsage": "业务网备用线路",
   "networkBandwidth": 10.0,
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "c218acb7a79f4c42bc173d9d8d453cbd",
@@ -2802,7 +3918,13 @@
   "lineType": "00-MSTP",
   "lineUsage": "安阳至郑州业务网主线",
   "networkBandwidth": 4.0,
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "c2935149a6974ee4b3baddfbe88f5894",
@@ -2817,7 +3939,13 @@
   "lineType": "00-MSTP",
   "lineUsage": "业务网主线",
   "networkBandwidth": 10.0,
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "c2b262429ed6492ea7d7a479deafdb16",
@@ -2832,7 +3960,13 @@
   "lineType": "00-MSTP",
   "lineUsage": "业务网备线",
   "networkBandwidth": 10.0,
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "c3af6a02db0e4aef8c36bc60306bb740",
@@ -2847,7 +3981,13 @@
   "lineType": "99-其它",
   "lineUsage": "三门峡市中支互联网备线",
   "networkBandwidth": 100.0,
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "c51a4fa77afe4adb8cbceadbe3071812",
@@ -2862,7 +4002,13 @@
   "lineType": "00-MSTP",
   "lineUsage": "信阳市中支长葛市支行业务网主线",
   "networkBandwidth": 10.0,
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "c582fd9f68e54391a3e058fa3ac1c94e",
@@ -2877,7 +4023,13 @@
   "lineType": "00-MSTP",
   "lineUsage": "安阳市中支-汤阴县支行业务网备线",
   "networkBandwidth": 10.0,
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "c71d3dd6ae7144129c3224ce906f043a",
@@ -2892,7 +4044,13 @@
   "lineType": "00-MSTP",
   "lineUsage": "周口市中支至扶沟县业务网备线",
   "networkBandwidth": 10.0,
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "c89764ac2d7c44edacd51de73ab28fb5",
@@ -2907,7 +4065,13 @@
   "lineType": "00-MSTP",
   "lineUsage": "业务网主线路",
   "networkBandwidth": 4.0,
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "c8dd4cc168f549f6b155883d47914697",
@@ -2922,7 +4086,13 @@
   "lineType": "00-MSTP",
   "lineUsage": "新乡市中支至新乡县业务网备线",
   "networkBandwidth": 4.0,
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "c9fbc5658d9e4f07b1c7682d71f1d3f8",
@@ -2937,7 +4107,13 @@
   "lineType": "00-MSTP",
   "lineUsage": "商丘市中支至民权县支行业务网备线",
   "networkBandwidth": 10.0,
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "cb72ef517c97490594bbd5ba310d26b9",
@@ -2952,7 +4128,13 @@
   "lineType": "00-MSTP",
   "lineUsage": "业务网备线路",
   "networkBandwidth": 4.0,
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "ccfc029c6ce54cff99dca8c0fcbccea4",
@@ -2967,7 +4149,13 @@
   "lineType": "00-MSTP",
   "lineUsage": "焦作至孟州业务网主线",
   "networkBandwidth": 10.0,
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "cd3f2800348741a2ba761cf0feb549ec",
@@ -2982,7 +4170,13 @@
   "lineType": "00-MSTP",
   "lineUsage": "周口市中支至淮阳县业务网备线",
   "networkBandwidth": 10.0,
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "cd58d8d77246494ab46edb3f6a4030ec",
@@ -2997,7 +4191,13 @@
   "lineType": "00-MSTP",
   "lineUsage": "商丘市中支至民权县支行业务网主线",
   "networkBandwidth": 10.0,
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "cd9df2e2f1104b099c8d7e05d2eb2ff2",
@@ -3012,7 +4212,13 @@
   "lineType": "00-MSTP",
   "lineUsage": "三门峡市至卢氏主线",
   "networkBandwidth": 10.0,
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "ce0b4f308fbe40ea98569b021585df89",
@@ -3027,7 +4233,13 @@
   "lineType": "00-MSTP",
   "lineUsage": "周口市中支至沈丘县业务网主线",
   "networkBandwidth": 10.0,
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "ce58f94d13df41e08f6c70d9eb8f13ca",
@@ -3042,7 +4254,13 @@
   "lineType": "99-其它",
   "lineUsage": "郑州中支—联通互联网",
   "networkBandwidth": 100.0,
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "cfd02e1ae34849758109f7465c8faa1c",
@@ -3057,7 +4275,13 @@
   "lineType": "00-MSTP",
   "lineUsage": "周口市中支至郸城县业务网主线",
   "networkBandwidth": 10.0,
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "d347521cb8724819bee072b86bbca9ff",
@@ -3072,7 +4296,13 @@
   "lineType": "00-MSTP",
   "lineUsage": "业务网主线路",
   "networkBandwidth": 4.0,
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "d3523275a7d34a7bb9eadd6237e0fedd",
@@ -3087,7 +4317,13 @@
   "lineType": "00-MSTP",
   "lineUsage": "商丘市中支至柘城县支行业务网主线",
   "networkBandwidth": 10.0,
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "d3d3098651f245c69cb4e096cd019cc4",
@@ -3102,7 +4338,13 @@
   "lineType": "00-MSTP",
   "lineUsage": "濮阳县支行至濮阳中支业务网主线",
   "networkBandwidth": 10.0,
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "d43115d76a424e9fb0db098b2dc04918",
@@ -3117,7 +4359,13 @@
   "lineType": "99-其它",
   "lineUsage": "濮阳市中支互联网",
   "networkBandwidth": 100.0,
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "d45c886698f9448dadf9881d2464b69a",
@@ -3132,7 +4380,13 @@
   "lineType": "00-MSTP",
   "lineUsage": "业务网主线",
   "networkBandwidth": 10.0,
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "d4c944068c3c421aa631e6d8633cc9b9",
@@ -3147,7 +4401,13 @@
   "lineType": "00-MSTP",
   "lineUsage": "新乡市中支至延津县业务网备线",
   "networkBandwidth": 4.0,
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "d549cdc1a0714168a7e956f943177e92",
@@ -3162,7 +4422,13 @@
   "lineType": "00-MSTP",
   "lineUsage": "业务网备线",
   "networkBandwidth": 4.0,
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "d579e1c53a1d4c38b71a717f8f083142",
@@ -3177,7 +4443,13 @@
   "lineType": "00-MSTP",
   "lineUsage": "业务网备线",
   "networkBandwidth": 10.0,
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "d67886fe23024522aa727870b7c26399",
@@ -3192,7 +4464,13 @@
   "lineType": "00-MSTP",
   "lineUsage": "郑州中支-三门峡市中支备线",
   "networkBandwidth": 4.0,
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "d6cd362a87924a9eade9f133529ec9b4",
@@ -3207,7 +4485,13 @@
   "lineType": "00-MSTP",
   "lineUsage": "周口市中支至西华县业务网主线",
   "networkBandwidth": 10.0,
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "d75d456c0f594a6b810ae7ce5e7d59b7",
@@ -3222,7 +4506,13 @@
   "lineType": "01-SDH",
   "lineUsage": "办公网主线",
   "networkBandwidth": 2.0,
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "d7e499454c3a4ed7a8a41c042e0045c3",
@@ -3237,7 +4527,13 @@
   "lineType": "00-MSTP",
   "lineUsage": "漯河至郑州业务网主线",
   "networkBandwidth": 4.0,
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "d821fdd6e85e42f58ace7f3070fb9ab1",
@@ -3252,7 +4548,13 @@
   "lineType": "00-MSTP",
   "lineUsage": "业务网主线",
   "networkBandwidth": 10.0,
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "d92e7d72751b4f94abd68793a5ce76f6",
@@ -3267,7 +4569,13 @@
   "lineType": "00-MSTP",
   "lineUsage": "业务网备线路",
   "networkBandwidth": 4.0,
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "dab0e71065d0453fb2badebf087c57ea",
@@ -3282,7 +4590,13 @@
   "lineType": "00-MSTP",
   "lineUsage": "新乡市中支至原阳县业务网主线",
   "networkBandwidth": 4.0,
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "dafa743b6c344c45ba2a2f6056d7ec40",
@@ -3297,7 +4611,13 @@
   "lineType": "00-MSTP",
   "lineUsage": "业务网主线",
   "networkBandwidth": 4.0,
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "dbba0ceb2a1546759669b4f5cf6efa00",
@@ -3312,7 +4632,13 @@
   "lineType": "00-MSTP",
   "lineUsage": "业务网主线",
   "networkBandwidth": 10.0,
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "dc8ecef20144450b9ac1b58db00e1807",
@@ -3327,7 +4653,13 @@
   "lineType": "00-MSTP",
   "lineUsage": "业务网主线",
   "networkBandwidth": 10.0,
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "dcbb3041a65d4323b0d0999d4cc2efb8",
@@ -3342,7 +4674,13 @@
   "lineType": "00-MSTP",
   "lineUsage": "郑州中支-开封市中支业务网主线",
   "networkBandwidth": 4.0,
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "de3c3b75eeb543e9852a0aea5031d6e8",
@@ -3357,7 +4695,13 @@
   "lineType": "00-MSTP",
   "lineUsage": "业务网主线路",
   "networkBandwidth": 4.0,
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "deff149216724bcca272c7239a7e6359",
@@ -3372,7 +4716,13 @@
   "lineType": "00-MSTP",
   "lineUsage": "濮阳至台前业务网备线路",
   "networkBandwidth": 10.0,
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "df3d1de677cf427a9df99a3d7faf95ba",
@@ -3387,7 +4737,13 @@
   "lineType": "00-MSTP",
   "lineUsage": "周口市中支至项城市业务网备线",
   "networkBandwidth": 10.0,
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "df4b865544384498a7f33839c3450e48",
@@ -3402,7 +4758,13 @@
   "lineType": "00-MSTP",
   "lineUsage": "许昌市中支襄县支行业务网主线",
   "networkBandwidth": 10.0,
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "dfd88e3cd32f4e63a7ee22869287aa34",
@@ -3417,7 +4779,13 @@
   "lineType": "99-其它",
   "lineUsage": "商丘市中支—电信互联网",
   "networkBandwidth": 100.0,
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "e0df999248e94baf822a135dfba0b57f",
@@ -3432,7 +4800,13 @@
   "lineType": "00-MSTP",
   "lineUsage": "许昌市中支禹州市支行业务网主线",
   "networkBandwidth": 10.0,
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "e15af1a6a55443a4865b654fabedbd67",
@@ -3447,7 +4821,13 @@
   "lineType": "00-MSTP",
   "lineUsage": "郑州中支-三门峡市中支主线",
   "networkBandwidth": 4.0,
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "e4b8fb02c7bd41b790c3b759f5851181",
@@ -3462,7 +4842,13 @@
   "lineType": "00-MSTP",
   "lineUsage": "商丘市中支至睢县支行业务网备线",
   "networkBandwidth": 10.0,
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "e66fa03b9c3546bab54e0dd250f94cc9",
@@ -3477,7 +4863,13 @@
   "lineType": "00-MSTP",
   "lineUsage": "郑州中支-开封市中支业务网主线",
   "networkBandwidth": 4.0,
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "e6ed5218143547a09e4dc436a9907d7a",
@@ -3492,7 +4884,13 @@
   "lineType": "00-MSTP",
   "lineUsage": "许昌市中支鄢陵县支行业务网备线",
   "networkBandwidth": 10.0,
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "e74a5fa2c236456e97fc4260e6df3d9a",
@@ -3507,7 +4905,13 @@
   "lineType": "00-MSTP",
   "lineUsage": "信阳市中支襄县支行业务网主线",
   "networkBandwidth": 10.0,
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "e79529a4f7964e0893b8c6576b7b2598",
@@ -3522,7 +4926,13 @@
   "lineType": "00-MSTP",
   "lineUsage": "许昌市中支禹州市支行业务网备线",
   "networkBandwidth": 10.0,
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "e8460c0f9a7b4795b4b327ea35a5ff31",
@@ -3537,7 +4947,13 @@
   "lineType": "00-MSTP",
   "lineUsage": "漯河市中支联通电子政务外网",
   "networkBandwidth": 10.0,
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "e9b70b6b34f84f7680f8e94ceed936de",
@@ -3552,7 +4968,13 @@
   "lineType": "00-MSTP",
   "lineUsage": "许昌市中支长葛市支行业务网备线",
   "networkBandwidth": 10.0,
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "ebcc2e74ac96493a8882d5382bc54bc5",
@@ -3567,7 +4989,13 @@
   "lineType": "00-MSTP",
   "lineUsage": "安阳市中支-汤阴县支行业务网主线",
   "networkBandwidth": 10.0,
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "eebb1c42f1884a09ab42c5a4b80ba996",
@@ -3582,7 +5010,13 @@
   "lineType": "00-MSTP",
   "lineUsage": "业务网主线路",
   "networkBandwidth": 4.0,
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "ef083c212cce468c9f60bcdb2a93e3cd",
@@ -3597,7 +5031,13 @@
   "lineType": "00-MSTP",
   "lineUsage": "商丘市中支至永城市支行业务网备线",
   "networkBandwidth": 10.0,
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "ef959579800041cbb5d4f668d1a97baf",
@@ -3612,7 +5052,13 @@
   "lineType": "00-MSTP",
   "lineUsage": "许昌市中支建安区支行业务网备线",
   "networkBandwidth": 10.0,
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "efcce2e38d8546b586170908886bbede",
@@ -3627,7 +5073,13 @@
   "lineType": "99-其它",
   "lineUsage": "三门峡市中支互联网主线",
   "networkBandwidth": 100.0,
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "f0ba366357334e60b4c8477ef7e4ae2b",
@@ -3642,7 +5094,13 @@
   "lineType": "00-MSTP",
   "lineUsage": "信阳市中支长葛市支行业务网主线",
   "networkBandwidth": 10.0,
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "f0f6b5e58b524962b94dca8d887c29ed",
@@ -3657,7 +5115,13 @@
   "lineType": "00-MSTP",
   "lineUsage": "业务网主线路",
   "networkBandwidth": 4.0,
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "f17cf69b14614d368a9682e2566904fe",
@@ -3672,7 +5136,13 @@
   "lineType": "00-MSTP",
   "lineUsage": "信阳市中支襄县支行业务网主线",
   "networkBandwidth": 10.0,
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "f1bb9f625a5c4f25bce4f32d3afff89d",
@@ -3687,7 +5157,13 @@
   "lineType": "00-MSTP",
   "lineUsage": "周口市中支至扶沟县业务网主线",
   "networkBandwidth": 10.0,
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "f1ef4c1dbd4e43859b3c4b10ec187f35",
@@ -3702,7 +5178,13 @@
   "lineType": "00-MSTP",
   "lineUsage": "业务网备线路",
   "networkBandwidth": 4.0,
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "f3cd1a4e060b4f93adf638ae9ab8080b",
@@ -3717,7 +5199,13 @@
   "lineType": "00-MSTP",
   "lineUsage": "业务网备线",
   "networkBandwidth": 10.0,
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "f3dd0d3105554bf1a1af44e65f54c604",
@@ -3732,7 +5220,13 @@
   "lineType": "00-MSTP",
   "lineUsage": "业务网主线",
   "networkBandwidth": 4.0,
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "f4313e2a39d0456a97731ab62d7995af",
@@ -3747,7 +5241,13 @@
   "lineType": "00-MSTP",
   "lineUsage": "业务网主线路",
   "networkBandwidth": 4.0,
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "f5010dbb74974c81babf3a03d2071f80",
@@ -3762,7 +5262,13 @@
   "lineType": "00-MSTP",
   "lineUsage": "许昌市中支至郑州中支业务网主线",
   "networkBandwidth": 4.0,
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "f5bb91b302fb40c3b7883fa00012d6f7",
@@ -3777,7 +5283,13 @@
   "lineType": "00-MSTP",
   "lineUsage": "业务网备线路",
   "networkBandwidth": 4.0,
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "f61b5d11bc96475ca4ed7672eedb21fd",
@@ -3792,7 +5304,13 @@
   "lineType": "00-MSTP",
   "lineUsage": "业务网备线",
   "networkBandwidth": 10.0,
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "f65a20c839aa4c1a9142610e17617e18",
@@ -3807,7 +5325,13 @@
   "lineType": "00-MSTP",
   "lineUsage": "新乡市中支至长垣县业务网主线",
   "networkBandwidth": 4.0,
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "f849fb1e4572478c96215481c11474c9",
@@ -3822,7 +5346,13 @@
   "lineType": "00-MSTP",
   "lineUsage": "业务网主线",
   "networkBandwidth": 10.0,
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "f893fbff99bd46c5b56031a800abe2d7",
@@ -3837,7 +5367,13 @@
   "lineType": "00-MSTP",
   "lineUsage": "业务网主线路",
   "networkBandwidth": 4.0,
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "f8a689ea5712432b80d6440af8e7cffc",
@@ -3852,7 +5388,13 @@
   "lineType": "00-MSTP",
   "lineUsage": "信阳市中支长葛市支行业务网备线",
   "networkBandwidth": 10.0,
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "f93a2f804e9441d19e1f4c45cd47bd8d",
@@ -3867,7 +5409,13 @@
   "lineType": "00-MSTP",
   "lineUsage": "濮阳至南乐县业务网备线路",
   "networkBandwidth": 10.0,
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "f9df073141ca4cf58d1c9c06af7e58c9",
@@ -3882,7 +5430,13 @@
   "lineType": "00-MSTP",
   "lineUsage": "业务网备线",
   "networkBandwidth": 10.0,
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "faad029616974e5d8a5f69645dfa8961",
@@ -3897,7 +5451,13 @@
   "lineType": "00-MSTP",
   "lineUsage": "业务网主线",
   "networkBandwidth": 10.0,
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "fc4b718a5c0f405eb069fbae5df666a1",
@@ -3912,7 +5472,13 @@
   "lineType": "01-SDH",
   "lineUsage": "办公网备线",
   "networkBandwidth": 2.0,
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "fcd12a225dc7419388869dfee0677e60",
@@ -3927,7 +5493,13 @@
   "lineType": "00-MSTP",
   "lineUsage": "新乡市中支至辉县市业务网主线",
   "networkBandwidth": 4.0,
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "fcea60e811c148eda13c90d8e420943d",
@@ -3942,7 +5514,13 @@
   "lineType": "00-MSTP",
   "lineUsage": "许昌市中支鄢陵县支行业务网主线",
   "networkBandwidth": 10.0,
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "fd50fddfe9e54b568a25805219750603",
@@ -3957,7 +5535,13 @@
   "lineType": "00-MSTP",
   "lineUsage": "周口市中支至商水县业务网主线",
   "networkBandwidth": 10.0,
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "fdf92cbec63a49a491bbe1f3e9b6bc78",
@@ -3972,7 +5556,13 @@
   "lineType": "99-其它",
   "lineUsage": "安阳中支-电子政务外网",
   "networkBandwidth": 30.0,
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "fe7e333654734ea39e769c50568702ec",
@@ -3987,7 +5577,13 @@
   "lineType": "00-MSTP",
   "lineUsage": "商丘市中支至虞城县支行业务网备线",
   "networkBandwidth": 10.0,
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "ff7700ef454b46e091f380d2ca7d8b80",
@@ -4002,7 +5598,13 @@
   "lineType": "99-其它",
   "lineUsage": "安阳中支—联通互联网",
   "networkBandwidth": 200.0,
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "ffe2d446cb9d4e5b8543626540fcbd41",
@@ -4017,7 +5619,13 @@
   "lineType": "00-MSTP",
   "lineUsage": "业务网备线",
   "networkBandwidth": 4.0,
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "fff2ccec07694f299c79b40a5bead016",
@@ -4032,6 +5640,12 @@
   "lineType": "00-MSTP",
   "lineUsage": "焦作至沁阳业务网备线",
   "networkBandwidth": 10.0,
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  }
 ]

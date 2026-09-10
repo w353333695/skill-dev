@@ -19,14 +19,14 @@
    {
     "deployArea": "01-主机房-网络区",
     "deployComputerRoom": "中心机房",
-    "deployDb": "济源市中支中心机房",
+    "deployDb": "9b823d05699e4a2e85f226f1f815849d",
     "deployFloor": "二层",
     "deployGallery": "办公楼"
    }
   ],
   "firewall_installationPosition": [
    {
-    "belongCabinet": "济源市中支中心机房机柜04",
+    "belongCabinet": "ea57e389eac6474d9329b60489287b46",
     "slotNo": "15"
    }
   ],
@@ -67,7 +67,11 @@
   "securityFunction": "01-四层控制",
   "supportIpv6": "True",
   "wirelessFunction": "False",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "0b7e787a78014b558778f3a66d80c209",
@@ -89,14 +93,14 @@
    {
     "deployArea": "01-主机房-网络区",
     "deployComputerRoom": "新乡市中心支行中心机房",
-    "deployDb": "新乡市中支中心机房",
+    "deployDb": "a2cb90d474104946a0238306baa08672",
     "deployFloor": "十五层",
     "deployGallery": "新乡市红旗区向阳路9号"
    }
   ],
   "firewall_installationPosition": [
    {
-    "belongCabinet": "新乡市中支网路机房机柜09",
+    "belongCabinet": "d11dec7e9d1944179e0f74ef0d439fc3",
     "slotNo": "39"
    }
   ],
@@ -137,7 +141,11 @@
   "securityFunction": "01-四层控制",
   "supportIpv6": "True",
   "wirelessFunction": "False",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "0b9ecb1859b5443c922d7091bd4e22ad",
@@ -159,14 +167,14 @@
    {
     "deployArea": "01-主机房-网络区",
     "deployComputerRoom": "安阳市中支中心机房",
-    "deployDb": "安阳市中支中心机房",
+    "deployDb": "5289a14829ef427b8c5ef3bfd01f28aa",
     "deployFloor": "八层",
     "deployGallery": "安阳市开发区金融大厦"
    }
   ],
   "firewall_installationPosition": [
    {
-    "belongCabinet": "安阳市中支中心机房机柜06",
+    "belongCabinet": "2b05b481516f482eadaf39500c5d434a",
     "slotNo": "38"
    }
   ],
@@ -207,7 +215,11 @@
   "securityFunction": "00-三层控制",
   "supportIpv6": "False",
   "wirelessFunction": "False",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "12c950b6c0954efbbc6e1b1d2df2728d",
@@ -229,14 +241,14 @@
    {
     "deployArea": "01-主机房-网络区",
     "deployComputerRoom": "5楼设备间",
-    "deployDb": "鹤壁市中支中心机房",
+    "deployDb": "92c1063572d5431784306d4b5258830d",
     "deployFloor": "五层",
     "deployGallery": "办公楼"
    }
   ],
   "firewall_installationPosition": [
    {
-    "belongCabinet": "鹤壁市中支五楼设备间机柜11",
+    "belongCabinet": "c4e215ca5bca4c7d8a444eaaf8aa66d9",
     "slotNo": "21"
    }
   ],
@@ -277,7 +289,11 @@
   "securityFunction": "01-四层控制",
   "supportIpv6": "True",
   "wirelessFunction": "False",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "1c6ac92268df4014880478a4fafc3b8a",
@@ -299,14 +315,14 @@
    {
     "deployArea": "00-主机房-服务器区",
     "deployComputerRoom": "信阳市中心支行中心机房",
-    "deployDb": "信阳市中支中心机房",
+    "deployDb": "eb8c6860e97d477090c2d80e059c2598",
     "deployFloor": "二楼",
     "deployGallery": "信阳市浉河区长安路133号"
    }
   ],
   "firewall_installationPosition": [
    {
-    "belongCabinet": "信阳市中支中心机房服务器机柜A08",
+    "belongCabinet": "559bab00fe314892bb0491a8ab6a72c5",
     "slotNo": "14"
    }
   ],
@@ -347,7 +363,11 @@
   "securityFunction": "01-四层控制",
   "supportIpv6": "True",
   "wirelessFunction": "False",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "3580cbe6d5a04beaaf999a4f361cfb32",
@@ -369,14 +389,14 @@
    {
     "deployArea": "01-主机房-网络区",
     "deployComputerRoom": "中心机房",
-    "deployDb": "三门峡市中支中心机房",
+    "deployDb": "9894dd4c692d4aef8a77fd532decde7b",
     "deployFloor": "六楼",
     "deployGallery": "办公大楼"
    }
   ],
   "firewall_installationPosition": [
    {
-    "belongCabinet": "中国人民银行三门峡市中心支行 机柜9",
+    "belongCabinet": "d2aa5f0099e84350bea077a44e68f2ca",
     "slotNo": "22"
    }
   ],
@@ -417,7 +437,11 @@
   "securityFunction": "01-四层控制",
   "supportIpv6": "True",
   "wirelessFunction": "False",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "39100fa0cb1544d8b92378caae16f2b7",
@@ -439,14 +463,14 @@
    {
     "deployArea": "01-主机房-网络区",
     "deployComputerRoom": "周口市中心支行中心机房",
-    "deployDb": "周口市中支中心机房",
+    "deployDb": "2952ee20d75547eaa9a1cb873e96f60e",
     "deployFloor": "二层",
     "deployGallery": "周口市川汇区七一路中段1号A楼"
    }
   ],
   "firewall_installationPosition": [
    {
-    "belongCabinet": "周口市中支中心机房网络机柜B3",
+    "belongCabinet": "f36a240d786a4a8c99b2a3ba370d5a6d",
     "slotNo": "33"
    }
   ],
@@ -487,7 +511,11 @@
   "securityFunction": "01-四层控制",
   "supportIpv6": "True",
   "wirelessFunction": "False",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "40daf4d31e3f4e4fa6184fc83bd92f19",
@@ -509,14 +537,14 @@
    {
     "deployArea": "01-主机房-网络区",
     "deployComputerRoom": "焦作市中心支行中心机房",
-    "deployDb": "焦作市中支中心机房",
+    "deployDb": "26783106134c4a1fabeb4616468578fb",
     "deployFloor": "四楼",
     "deployGallery": "焦作市山阳区世纪路1355号"
    }
   ],
   "firewall_installationPosition": [
    {
-    "belongCabinet": "焦作市中支中心机房网络机柜2",
+    "belongCabinet": "c1cea1aa16f4409db16d9974f2299146",
     "slotNo": "29"
    }
   ],
@@ -557,7 +585,11 @@
   "securityFunction": "01-四层控制",
   "supportIpv6": "True",
   "wirelessFunction": "False",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "40f390fbcdd44b0c91575252d4fda772",
@@ -579,14 +611,14 @@
    {
     "deployArea": "01-主机房-网络区",
     "deployComputerRoom": "洛阳市中支中心机房",
-    "deployDb": "洛阳市中支中心机房",
+    "deployDb": "09fd31dac1a648c59cab24f486dd561c",
     "deployFloor": "三层",
     "deployGallery": "洛阳市中支办公大楼"
    }
   ],
   "firewall_installationPosition": [
    {
-    "belongCabinet": "洛阳市中支中心机房机柜N3",
+    "belongCabinet": "b4ba1ca83e8e4d648225243bd1bc2f00",
     "slotNo": "20"
    }
   ],
@@ -627,7 +659,11 @@
   "securityFunction": "01-四层控制",
   "supportIpv6": "True",
   "wirelessFunction": "False",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "410fd82512e54f949b5066bd83b5ca5a",
@@ -648,14 +684,14 @@
    {
     "deployArea": "01-主机房-网络区",
     "deployComputerRoom": "主中心网络机房",
-    "deployDb": "郑州中支主中心机房",
+    "deployDb": "77e1d9d6869044889909f41f30517418",
     "deployFloor": "十一层",
     "deployGallery": "主中心办公楼"
    }
   ],
   "firewall_installationPosition": [
    {
-    "belongCabinet": "郑州中支主中心网络机房小微平台柜",
+    "belongCabinet": "e254d904700f4f5fbf639202804e1b9e",
     "slotNo": "19"
    }
   ],
@@ -695,7 +731,11 @@
   "securityFunction": "01-四层控制",
   "supportIpv6": "True",
   "wirelessFunction": "False",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "44e348a28b4745379d60dccc4419910c",
@@ -717,14 +757,14 @@
    {
     "deployArea": "01-主机房-网络区",
     "deployComputerRoom": "网络机房",
-    "deployDb": "平顶山市中支中心机房",
+    "deployDb": "cef9b1d212644d818ae42965f7395b25",
     "deployFloor": "八层",
     "deployGallery": "办公楼"
    }
   ],
   "firewall_installationPosition": [
    {
-    "belongCabinet": "平顶山市中支中心机房机柜09",
+    "belongCabinet": "3dca1848122843529fbb06bd4f2ad8d8",
     "slotNo": "2"
    }
   ],
@@ -765,7 +805,11 @@
   "securityFunction": "01-四层控制",
   "supportIpv6": "True",
   "wirelessFunction": "False",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "4c0cc65ff6bb4ff69ffb9782a017d4f6",
@@ -787,14 +831,14 @@
    {
     "deployArea": "01-主机房-网络区",
     "deployComputerRoom": "开封市中心支行中心机房",
-    "deployDb": "开封市中支中心机房",
+    "deployDb": "bc868096be7647988f5c29d1f1b04036",
     "deployFloor": "三层",
     "deployGallery": "开封市龙亭区晋安路60号办公楼"
    }
   ],
   "firewall_installationPosition": [
    {
-    "belongCabinet": "开封市中支中心机房机柜2",
+    "belongCabinet": "d699c42375bb4a5c9e2771d070a9b8be",
     "slotNo": "22"
    }
   ],
@@ -835,7 +879,11 @@
   "securityFunction": "01-四层控制",
   "supportIpv6": "True",
   "wirelessFunction": "False",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "4d25c6b7d66d4ec08fa7dcaa53760e16",
@@ -857,14 +905,14 @@
    {
     "deployArea": "01-主机房-网络区",
     "deployComputerRoom": "网络机房",
-    "deployDb": "平顶山市中支中心机房",
+    "deployDb": "cef9b1d212644d818ae42965f7395b25",
     "deployFloor": "八层",
     "deployGallery": "办公楼"
    }
   ],
   "firewall_installationPosition": [
    {
-    "belongCabinet": "平顶山市中支中心机房机柜09",
+    "belongCabinet": "3dca1848122843529fbb06bd4f2ad8d8",
     "slotNo": "6"
    }
   ],
@@ -905,7 +953,11 @@
   "securityFunction": "01-四层控制",
   "supportIpv6": "True",
   "wirelessFunction": "False",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "5cbd390ad4184138aec23ebf11d83f2d",
@@ -926,14 +978,14 @@
    {
     "deployArea": "01-主机房-网络区",
     "deployComputerRoom": "转接中心机房",
-    "deployDb": "郑州中支转接中心机房",
+    "deployDb": "96f680d2b4f348a198a690325356a7c4",
     "deployFloor": "二层",
     "deployGallery": "转接中心综合楼"
    }
   ],
   "firewall_installationPosition": [
    {
-    "belongCabinet": "郑州中支转接中心机房机柜3",
+    "belongCabinet": "5e27f1586f1542bbb91f892dcb2a64bb",
     "slotNo": "31"
    }
   ],
@@ -974,7 +1026,11 @@
   "securityFunction": "01-四层控制",
   "supportIpv6": "True",
   "wirelessFunction": "False",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "61cac8fad71747ee806f848ad2747ca0",
@@ -996,14 +1052,14 @@
    {
     "deployArea": "01-主机房-网络区",
     "deployComputerRoom": "新乡市中心支行中心机房",
-    "deployDb": "新乡市中支中心机房",
+    "deployDb": "a2cb90d474104946a0238306baa08672",
     "deployFloor": "十五层",
     "deployGallery": "新乡市红旗区向阳路9号"
    }
   ],
   "firewall_installationPosition": [
    {
-    "belongCabinet": "新乡市中支网路机房机柜08",
+    "belongCabinet": "b4dcc4e9e5df48e2b58960be5308c8e9",
     "slotNo": "39"
    }
   ],
@@ -1044,7 +1100,11 @@
   "securityFunction": "01-四层控制",
   "supportIpv6": "True",
   "wirelessFunction": "False",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "675b5a6386a9494e8344345ef08f08c9",
@@ -1066,14 +1126,14 @@
    {
     "deployArea": "01-主机房-网络区",
     "deployComputerRoom": "开封市中心支行中心机房",
-    "deployDb": "开封市中支中心机房",
+    "deployDb": "bc868096be7647988f5c29d1f1b04036",
     "deployFloor": "三层",
     "deployGallery": "开封市龙亭区晋安路60号办公楼"
    }
   ],
   "firewall_installationPosition": [
    {
-    "belongCabinet": "开封市中支中心机房机柜2",
+    "belongCabinet": "d699c42375bb4a5c9e2771d070a9b8be",
     "slotNo": "23"
    }
   ],
@@ -1114,7 +1174,11 @@
   "securityFunction": "01-四层控制",
   "supportIpv6": "True",
   "wirelessFunction": "False",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "71ae66a2df3b4b6e9938f47004828ac5",
@@ -1135,14 +1199,14 @@
    {
     "deployArea": "01-主机房-网络区",
     "deployComputerRoom": "主中心网络机房",
-    "deployDb": "郑州中支主中心机房",
+    "deployDb": "77e1d9d6869044889909f41f30517418",
     "deployFloor": "十一层",
     "deployGallery": "主中心办公楼"
    }
   ],
   "firewall_installationPosition": [
    {
-    "belongCabinet": "郑州中支主中心网络机房网络柜3",
+    "belongCabinet": "d680d9296dae4b22a5dc347851fe5b83",
     "slotNo": "22"
    }
   ],
@@ -1183,7 +1247,11 @@
   "securityFunction": "01-四层控制",
   "supportIpv6": "True",
   "wirelessFunction": "False",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "73e8384bf39348f09617e23bcb7df8ff",
@@ -1205,14 +1273,14 @@
    {
     "deployArea": "01-主机房-网络区",
     "deployComputerRoom": "中心机房",
-    "deployDb": "三门峡市中支中心机房",
+    "deployDb": "9894dd4c692d4aef8a77fd532decde7b",
     "deployFloor": "六楼",
     "deployGallery": "办公大楼"
    }
   ],
   "firewall_installationPosition": [
    {
-    "belongCabinet": "中国人民银行三门峡市中心支行 机柜9",
+    "belongCabinet": "d2aa5f0099e84350bea077a44e68f2ca",
     "slotNo": "12"
    }
   ],
@@ -1253,7 +1321,11 @@
   "securityFunction": "01-四层控制",
   "supportIpv6": "True",
   "wirelessFunction": "False",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "811e64b9610a4d778afaf9a0fef7533a",
@@ -1274,14 +1346,14 @@
    {
     "deployArea": "01-主机房-网络区",
     "deployComputerRoom": "洛阳市中支中心机房",
-    "deployDb": "洛阳市中支中心机房",
+    "deployDb": "09fd31dac1a648c59cab24f486dd561c",
     "deployFloor": "三层",
     "deployGallery": "洛阳市中支办公大楼"
    }
   ],
   "firewall_installationPosition": [
    {
-    "belongCabinet": "洛阳市中支中心机房机柜N3",
+    "belongCabinet": "b4ba1ca83e8e4d648225243bd1bc2f00",
     "slotNo": "13"
    }
   ],
@@ -1322,7 +1394,11 @@
   "securityFunction": "01-四层控制",
   "supportIpv6": "True",
   "wirelessFunction": "False",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "87d5298133a343f88913971600956be9",
@@ -1344,14 +1420,14 @@
    {
     "deployArea": "01-主机房-网络区",
     "deployComputerRoom": "中心机房",
-    "deployDb": "三门峡市中支中心机房",
+    "deployDb": "9894dd4c692d4aef8a77fd532decde7b",
     "deployFloor": "六楼",
     "deployGallery": "办公大楼"
    }
   ],
   "firewall_installationPosition": [
    {
-    "belongCabinet": "中国人民银行三门峡市中心支行 机柜10",
+    "belongCabinet": "0ba966be4f6a470bbbb4d9f582be57cc",
     "slotNo": "22"
    }
   ],
@@ -1392,7 +1468,11 @@
   "securityFunction": "01-四层控制",
   "supportIpv6": "True",
   "wirelessFunction": "False",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "8d81322c6ac9454fb39790c614f2115a",
@@ -1413,14 +1493,14 @@
    {
     "deployArea": "01-主机房-网络区",
     "deployComputerRoom": "洛阳市中支中心机房",
-    "deployDb": "洛阳市中支中心机房",
+    "deployDb": "09fd31dac1a648c59cab24f486dd561c",
     "deployFloor": "三层",
     "deployGallery": "洛阳市中支办公大楼"
    }
   ],
   "firewall_installationPosition": [
    {
-    "belongCabinet": "洛阳市中支中心机房机柜N3",
+    "belongCabinet": "b4ba1ca83e8e4d648225243bd1bc2f00",
     "slotNo": "15"
    }
   ],
@@ -1461,7 +1541,11 @@
   "securityFunction": "01-四层控制",
   "supportIpv6": "True",
   "wirelessFunction": "False",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "9d7be60207ab4ba4b9a78c52bf6868ce",
@@ -1482,14 +1566,14 @@
    {
     "deployArea": "01-主机房-网络区",
     "deployComputerRoom": "主中心网络机房",
-    "deployDb": "郑州中支主中心机房",
+    "deployDb": "77e1d9d6869044889909f41f30517418",
     "deployFloor": "十一层",
     "deployGallery": "主中心办公楼"
    }
   ],
   "firewall_installationPosition": [
    {
-    "belongCabinet": "郑州中支主中心网络机房网络柜5",
+    "belongCabinet": "90da0d6360734b9aaa25d228a992ee7e",
     "slotNo": "12"
    }
   ],
@@ -1530,7 +1614,11 @@
   "securityFunction": "01-四层控制",
   "supportIpv6": "True",
   "wirelessFunction": "False",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "a082aaddf1d94aec975d9b4376b7ba49",
@@ -1551,14 +1639,14 @@
    {
     "deployArea": "01-主机房-网络区",
     "deployComputerRoom": "主中心网络机房",
-    "deployDb": "郑州中支主中心机房",
+    "deployDb": "77e1d9d6869044889909f41f30517418",
     "deployFloor": "十一层",
     "deployGallery": "主中心办公楼"
    }
   ],
   "firewall_installationPosition": [
    {
-    "belongCabinet": "郑州中支主中心网络机房网络柜5",
+    "belongCabinet": "90da0d6360734b9aaa25d228a992ee7e",
     "slotNo": "9"
    }
   ],
@@ -1599,7 +1687,11 @@
   "securityFunction": "01-四层控制",
   "supportIpv6": "True",
   "wirelessFunction": "False",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "b0f0bbc228e64f0990a8e61054e2d371",
@@ -1621,14 +1713,14 @@
    {
     "deployArea": "00-主机房-服务器区",
     "deployComputerRoom": "驻马店市中支中心机房",
-    "deployDb": "驻马店市中支中心机房",
+    "deployDb": "79a0df7c04154292ad5efcee3ce2b74f",
     "deployFloor": "四层",
     "deployGallery": "驻马店市驿城区泰山路567号办公楼"
    }
   ],
   "firewall_installationPosition": [
    {
-    "belongCabinet": "驻马店市中支中心机房机柜A1",
+    "belongCabinet": "5b9de53323e54416937a8672788aae89",
     "slotNo": "37"
    }
   ],
@@ -1669,7 +1761,11 @@
   "securityFunction": "01-四层控制",
   "supportIpv6": "True",
   "wirelessFunction": "False",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "b67dbbdaaf20407982e344a4f95fbacd",
@@ -1691,14 +1787,14 @@
    {
     "deployArea": "00-主机房-服务器区",
     "deployComputerRoom": "信阳市中心支行中心机房",
-    "deployDb": "信阳市中支中心机房",
+    "deployDb": "eb8c6860e97d477090c2d80e059c2598",
     "deployFloor": "二楼",
     "deployGallery": "信阳市浉河区长安路133号"
    }
   ],
   "firewall_installationPosition": [
    {
-    "belongCabinet": "信阳市中支中心机房服务器机柜A08",
+    "belongCabinet": "559bab00fe314892bb0491a8ab6a72c5",
     "slotNo": "12"
    }
   ],
@@ -1739,7 +1835,11 @@
   "securityFunction": "01-四层控制",
   "supportIpv6": "True",
   "wirelessFunction": "False",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "c1d5b5453ee941aa8ab24c837cbfc6f8",
@@ -1761,14 +1861,14 @@
    {
     "deployArea": "90-屏蔽机房区",
     "deployComputerRoom": "南阳市中心支行中心机房",
-    "deployDb": "南阳市中支中心机房",
+    "deployDb": "870c4c17bebb4734baff5104d4f0f3fb",
     "deployFloor": "十二楼",
     "deployGallery": "南阳市新华西路178号"
    }
   ],
   "firewall_installationPosition": [
    {
-    "belongCabinet": "南阳市市中支网络机房机柜03",
+    "belongCabinet": "61e7813087e548bb889c64b16ba7f6d2",
     "slotNo": "12"
    }
   ],
@@ -1808,7 +1908,11 @@
   "securityFunction": "01-四层控制",
   "supportIpv6": "True",
   "wirelessFunction": "False",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "cb71dce19efd49aab3bf1693d25dcb3f",
@@ -1830,14 +1934,14 @@
    {
     "deployArea": "01-主机房-网络区",
     "deployComputerRoom": "安阳市中支中心机房",
-    "deployDb": "安阳市中支中心机房",
+    "deployDb": "5289a14829ef427b8c5ef3bfd01f28aa",
     "deployFloor": "八层",
     "deployGallery": "安阳市开发区金融大厦"
    }
   ],
   "firewall_installationPosition": [
    {
-    "belongCabinet": "安阳市中支中心机房机柜06",
+    "belongCabinet": "2b05b481516f482eadaf39500c5d434a",
     "slotNo": "36"
    }
   ],
@@ -1878,7 +1982,11 @@
   "securityFunction": "00-三层控制",
   "supportIpv6": "False",
   "wirelessFunction": "False",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "ccdacb087b3c43dd8152b00d7c22ae80",
@@ -1900,14 +2008,14 @@
    {
     "deployArea": "01-主机房-网络区",
     "deployComputerRoom": "商丘市中心支行中心机房",
-    "deployDb": "商丘市中支中心机房",
+    "deployDb": "fdddc1be23854dbc898a91708ca50080",
     "deployFloor": "八层",
     "deployGallery": "商丘市睢阳区北海西路六号"
    }
   ],
   "firewall_installationPosition": [
    {
-    "belongCabinet": "商丘市中支保卫科机柜1",
+    "belongCabinet": "d7dc4024d873448db5f27d5a7775e4b6",
     "slotNo": "22"
    }
   ],
@@ -1948,7 +2056,11 @@
   "securityFunction": "01-四层控制",
   "supportIpv6": "True",
   "wirelessFunction": "False",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "assetBrand": "天融信",
@@ -1969,14 +2081,14 @@
    {
     "deployArea": "01-主机房-网络区",
     "deployComputerRoom": "漯河市中支中心机房",
-    "deployDb": "漯河市中支中心机房",
+    "deployDb": "ef79accbafa44c6298104908bbf8202d",
     "deployFloor": "五层",
     "deployGallery": "漯河市中支办公楼"
    }
   ],
   "firewall_installationPosition": [
    {
-    "belongCabinet": "漯河市中支网络机房屏蔽机柜",
+    "belongCabinet": "1532c9f97342413b9b86e75f83dbddd6",
     "slotNo": "1"
    }
   ],
@@ -2017,7 +2129,11 @@
   "securityFunction": "01-四层控制",
   "supportIpv6": "True",
   "wirelessFunction": "False",
-  "_dataSource": "上报"
+  "_dataSource": "上报",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "d79653f4b7c84aacbd186bd0196c6d11",
@@ -2038,14 +2154,14 @@
    {
     "deployArea": "01-主机房-网络区",
     "deployComputerRoom": "主中心网络机房",
-    "deployDb": "郑州中支主中心机房",
+    "deployDb": "77e1d9d6869044889909f41f30517418",
     "deployFloor": "十一层",
     "deployGallery": "主中心办公楼"
    }
   ],
   "firewall_installationPosition": [
    {
-    "belongCabinet": "郑州中支主中心网络机房网络柜1",
+    "belongCabinet": "781c0c13551340f29840a24c448b223c",
     "slotNo": "33"
    }
   ],
@@ -2085,7 +2201,11 @@
   "securityFunction": "01-四层控制",
   "supportIpv6": "True",
   "wirelessFunction": "False",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "d7b467eaa1a94a8397be609f40733686",
@@ -2107,14 +2227,14 @@
    {
     "deployArea": "01-主机房-网络区",
     "deployComputerRoom": "焦作市中心支行中心机房",
-    "deployDb": "焦作市中支中心机房",
+    "deployDb": "26783106134c4a1fabeb4616468578fb",
     "deployFloor": "四楼",
     "deployGallery": "焦作市山阳区世纪路1355号"
    }
   ],
   "firewall_installationPosition": [
    {
-    "belongCabinet": "焦作市中支中心机房网络机柜2",
+    "belongCabinet": "c1cea1aa16f4409db16d9974f2299146",
     "slotNo": "31"
    }
   ],
@@ -2155,7 +2275,11 @@
   "securityFunction": "01-四层控制",
   "supportIpv6": "True",
   "wirelessFunction": "False",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "da190919501d4b2dbb4991f57ddcfab2",
@@ -2176,14 +2300,14 @@
    {
     "deployArea": "01-主机房-网络区",
     "deployComputerRoom": "主中心网络机房",
-    "deployDb": "郑州中支主中心机房",
+    "deployDb": "77e1d9d6869044889909f41f30517418",
     "deployFloor": "十一层",
     "deployGallery": "主中心办公楼"
    }
   ],
   "firewall_installationPosition": [
    {
-    "belongCabinet": "郑州中支主中心网络机房网络柜2",
+    "belongCabinet": "a0b3c6e2691f4637804dfc77f7e19466",
     "slotNo": "12"
    }
   ],
@@ -2224,7 +2348,11 @@
   "securityFunction": "01-四层控制",
   "supportIpv6": "True",
   "wirelessFunction": "False",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "ecf0639f69b24df6b718959585259ca0",
@@ -2246,14 +2374,14 @@
    {
     "deployArea": "01-主机房-网络区",
     "deployComputerRoom": "信阳市中心支行中心机房",
-    "deployDb": "信阳市中支中心机房",
+    "deployDb": "eb8c6860e97d477090c2d80e059c2598",
     "deployFloor": "二楼",
     "deployGallery": "信阳市浉河区长安路133号"
    }
   ],
   "firewall_installationPosition": [
    {
-    "belongCabinet": "信阳市中支中心机房服务器机柜A08",
+    "belongCabinet": "559bab00fe314892bb0491a8ab6a72c5",
     "slotNo": "35"
    }
   ],
@@ -2294,7 +2422,11 @@
   "securityFunction": "01-四层控制",
   "supportIpv6": "True",
   "wirelessFunction": "False",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "f0e9658a4ed04690b6b8368ba1756016",
@@ -2316,14 +2448,14 @@
    {
     "deployArea": "01-主机房-网络区",
     "deployComputerRoom": "网络机房",
-    "deployDb": "平顶山市中支中心机房",
+    "deployDb": "cef9b1d212644d818ae42965f7395b25",
     "deployFloor": "八层",
     "deployGallery": "办公楼"
    }
   ],
   "firewall_installationPosition": [
    {
-    "belongCabinet": "平顶山市中支中心机房机柜02",
+    "belongCabinet": "79d978a4f6a54c5e861bb3fecc58d9bd",
     "slotNo": "7"
    }
   ],
@@ -2364,7 +2496,11 @@
   "securityFunction": "01-四层控制",
   "supportIpv6": "True",
   "wirelessFunction": "False",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "f3e9f4978c8046c5a56b1610cb0a69c7",
@@ -2385,14 +2521,14 @@
    {
     "deployArea": "01-主机房-网络区",
     "deployComputerRoom": "转接中心机房",
-    "deployDb": "郑州中支转接中心机房",
+    "deployDb": "96f680d2b4f348a198a690325356a7c4",
     "deployFloor": "二层",
     "deployGallery": "转接中心综合楼"
    }
   ],
   "firewall_installationPosition": [
    {
-    "belongCabinet": "郑州中支转接中心机房机柜3",
+    "belongCabinet": "5e27f1586f1542bbb91f892dcb2a64bb",
     "slotNo": "34"
    }
   ],
@@ -2433,7 +2569,11 @@
   "securityFunction": "01-四层控制",
   "supportIpv6": "True",
   "wirelessFunction": "False",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "f5e20a9bcf954e9a9ee3e58568ebffcb",
@@ -2455,14 +2595,14 @@
    {
     "deployArea": "01-主机房-网络区",
     "deployComputerRoom": "洛阳市中支中心机房",
-    "deployDb": "洛阳市中支中心机房",
+    "deployDb": "09fd31dac1a648c59cab24f486dd561c",
     "deployFloor": "三层",
     "deployGallery": "洛阳市中支办公大楼"
    }
   ],
   "firewall_installationPosition": [
    {
-    "belongCabinet": "洛阳市中支中心机房机柜N3",
+    "belongCabinet": "b4ba1ca83e8e4d648225243bd1bc2f00",
     "slotNo": "18"
    }
   ],
@@ -2503,6 +2643,10 @@
   "securityFunction": "01-四层控制",
   "supportIpv6": "True",
   "wirelessFunction": "False",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "deployComputerRoom": "未知"
  }
 ]

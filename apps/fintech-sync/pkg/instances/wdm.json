@@ -30,14 +30,14 @@
    {
     "deployArea": "01-主机房-网络区",
     "deployComputerRoom": "主中心机房",
-    "deployDb": "郑州中支主中心机房",
+    "deployDb": "77e1d9d6869044889909f41f30517418",
     "deployFloor": "十一层",
     "deployGallery": "主中心办公楼"
    }
   ],
   "wdm_installationPosition": [
    {
-    "belongCabinet": "郑州中支主中心网络机房网络柜14",
+    "belongCabinet": "696f17e863ff4542878e9a9d7b124fd4",
     "slotNo": "21"
    }
   ],
@@ -51,7 +51,11 @@
     "serviceStartTime": "2020-11-01"
    }
   ],
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "c5cd2e298de9454b830e86db6664bb70",
@@ -84,14 +88,14 @@
    {
     "deployArea": "01-主机房-网络区",
     "deployComputerRoom": "转接中心机房",
-    "deployDb": "郑州中支转接中心机房",
+    "deployDb": "96f680d2b4f348a198a690325356a7c4",
     "deployFloor": "二层",
     "deployGallery": "转接中心综合楼"
    }
   ],
   "wdm_installationPosition": [
    {
-    "belongCabinet": "郑州中支转接中心机房机柜8",
+    "belongCabinet": "c78764c66a564c468e53bcdd58d37e95",
     "slotNo": "12"
    }
   ],
@@ -105,6 +109,10 @@
     "serviceStartTime": "2020-11-01"
    }
   ],
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "deployComputerRoom": "未知"
  }
 ]

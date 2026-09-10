@@ -19,6 +19,12 @@
     "reportValue": "郑州中支转接中心机房",
     "mgmtValue": "96f680d2b4f348a198a690325356a7c4"
    }
-  ]
+  ],
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  }
 ]

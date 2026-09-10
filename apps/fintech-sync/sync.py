@@ -529,7 +529,7 @@ FIELD_MAP = {
         ("应用系统名称", None, "softwareName"),
         ("应用系统名称", "软件名称", "softwareName"),
         ("应用所属机构", None, "softwareOwnershipAgency"),
-        ("应用所属机构", "软件所属机构名称", "softwareOwnershipAgency"),
+        ("应用所属机构", "软件所属机构", "softwareOwnershipAgency"),   # 管理列=编码列(14位)，名称列不可用(上报要求机构编码)
         ("是否采用分布式技术", "是否采用分布式技术", "supportDistributed"),
         ("IPV6支持", "IPV6支持", "supportIpv6"),
     ],
@@ -1207,6 +1207,30 @@ ORG_CODE_MAP = {
     '中国人民银行河南省分行': 'A1000141000266',
 }
 
+
+# ============================== 上报错误修复配置（2026-09-10 方案，用户已审） ==============================
+# A类-引用字段：上报端要求 32 位设施标识符。列出的(模型,字段)做 名称→库内hex 替换；悬空保留原值并记 unresolved。
+#   覆盖 <model>.<field> 与 <model>__struct.<struct>.<subfield>（structs 子字段）。
+REFERENCE_FIELDS = {
+    ('*', 'deployDb'),                                    # 部署数据中心 → dataCenter（通用：全部 *_deployment.deployDb）
+    ('*', 'belongCabinet'),                               # 所属机柜
+    ('virtualMachine', 'belongsServer'),                  # 虚拟机宿主机
+    ('powerSupplyRelation', 'powerSupplyAsset'), ('powerSupplyRelation', 'powerUsedAsset'),
+    ('networkRelation', 'directConnectionNetAsset'), ('networkRelation', 'localItAsset'),
+    ('applicationRelation', 'applicationSystemAssociatedServer'),
+    ('applicationSoftRelation', 'applicationSystemAssociatedServer'),
+    ('softwareRelation', 'FacilityDescriptor'),
+}
+# B类-编码敏感字段：merge 优先侧若非编码形态而另一侧是，取编码侧（开发语言/业务领域特征/分类标识符/机构编码）。
+CODE_FORMAT_ATTRS = {'developmentLanguage', 'domainCharacteristics', 'softwareCategory',
+                     'softwareOwnershipAgency', 'facilityCategory'}
+_CODE_PAT = re.compile(r'^(\d{2}-.+|[A-Z]{2,}[A-Z0-9]{6,}|A\d{13})$')
+# C类-空值填充（默认值；str 纯文本字段填中文"未知"）。特殊：rackServer_cpu.brandLand 沿用顶层 brandLand（用户决策）。
+DEFAULT_FILL = {'serviceProvider': '未知', 'softwareInstallationConditions': '未知',
+                'otherSystems': '未知', 'assetType': '未知',
+                'operatingSystemVersionInformation': '未知', 'deployComputerRoom': '未知',
+                'assetSerialNumber': None}                # None=不填（唯一性校验，人工处理）
+
 RUN_SH     = '/workspace/.claude/skills/api-orchestrator/scripts/run.sh'
 CMDB_SPEC  = '/workspace/.api-orchestrator/platforms/easyops/easyops-cmdb.yaml'
 OUT        = Path(__file__).resolve().parent / 'out'
@@ -1450,7 +1474,7 @@ def clean_value(v, attr_id, attr_def, ctx):
     s = str(v).strip()
     if s in ctx['invalid'] or s == '' or s == '无':
         return None
-    if attr_id == 'facilityOwnershipAgency':                 # 机构统一换编号（用户决策）
+    if attr_id in ('facilityOwnershipAgency', 'softwareOwnershipAgency'):   # 机构统一换编号（用户决策）
         if s in ORG_CODE_MAP:
             return ORG_CODE_MAP[s]
         ctx['errors'].append(f'{attr_id}: 机构「{s}」不在 ORG_CODE_MAP，保留原值')
@@ -1696,6 +1720,153 @@ def _assemble(row, structs_attrs):
             out[k] = v
     return out
 
+
+# ============================== fix 阶段：上报错误修复（compare 后、import 前） ==============================
+def _load_instances():
+    """merged 全量 → 库内名称→hex 索引 + 库内 hex 集。"""
+    name2fd, fd_set = {}, set()
+    for f in sorted((OUT / 'merged').glob('*.json')):
+        for r in json.loads(f.read_text()):
+            fd = r.get('facilityDescriptor')
+            if fd:
+                fd_set.add(fd)
+                nm = r.get('facilityName')
+                if nm:
+                    name2fd[nm] = fd
+    return name2fd, fd_set
+
+_HEX32 = re.compile(r'[0-9a-f]{32}').fullmatch
+
+def _load_transformed(side, stem):
+    p = OUT / 'transformed' / side / f'{stem}.json'
+    if not p.exists():
+        return {}
+    rows = json.loads(p.read_text())
+    out = {}
+    for r in rows:
+        for k in ('facilityDescriptor', 'relationalIdentifier', 'applySystemIdentifiers',
+                  'softwareDescriptor', 'applicationIdentifier'):
+            if r.get(k):
+                out[r[k]] = r
+                break
+    return out
+
+def _key_attr_of(stem):
+    for cfg in MODEL_MAP.values():
+        if cfg['model_id'].split('@')[0] == stem:
+            return {'软件标识符': 'softwareDescriptor', '应用系统标识符': 'applySystemIdentifiers',
+                    '关系标识符': 'relationalIdentifier'}.get(cfg['key'], 'facilityDescriptor')
+    return 'facilityDescriptor'
+
+def _ref_fields_for(model_stem):
+    return {f for (m, f) in REFERENCE_FIELDS if m in ('*', model_stem)}
+
+def _fix_refs_in_rows(rows, name2fd, ref_fields, fd_set=frozenset()):
+    """引用字段值：名称→hex；32hex 保持原值（不在库内的记悬空清单）。返回 (fixed_rows, unresolved)。"""
+    fixed, unresolved = [], []
+    for idx, row in enumerate(rows):
+        nrow = dict(row)
+        for k in ref_fields:
+            v = nrow.get(k)
+            if isinstance(v, str) and v:
+                if v in name2fd:
+                    nrow[k] = name2fd[v]                # 名称→库内hex
+                elif _HEX32(v):
+                    if v not in fd_set:
+                        unresolved.append({'row': idx, 'field': k, 'value': v, 'kind': 'dangling-hex'})
+                else:
+                    unresolved.append({'row': idx, 'field': k, 'value': v, 'kind': 'unmapped-name'})
+        fixed.append(nrow)
+    return fixed, unresolved
+
+def _fix_refs_in_structs(rows, name2fd, ref_fields, fd_set=frozenset()):
+    """structs 子字段引用（deployDb/belongCabinet 在 *_deployment/*_installationPosition 内）。"""
+    unresolved = []
+    for row in rows:
+        for k, v in list(row.items()):
+            items = v if isinstance(v, list) else ([v] if isinstance(v, dict) else [])
+            for item in items:
+                if not isinstance(item, dict): continue
+                for sub in ref_fields:
+                        s = item.get(sub)
+                        if isinstance(s, str) and s:
+                            if s in name2fd:
+                                item[sub] = name2fd[s]
+                            elif _HEX32(s) and s not in fd_set:
+                                unresolved.append({'field': f'{k}.{sub}', 'value': s, 'kind': 'dangling-hex'})
+                            elif not _HEX32(s):
+                                unresolved.append({'field': f'{k}.{sub}', 'value': s, 'kind': 'unmapped-name'})
+    return unresolved
+
+def _pick_coded(a, b):
+    """编码敏感字段择值：一侧符合编码形态另一侧不符合→取符合侧；都符合/都不符合→None（不动）。"""
+    ca, cb = bool(_CODE_PAT.match(a or '')), bool(_CODE_PAT.match(b or ''))
+    if ca and not cb: return a
+    if cb and not ca: return b
+    return None
+
+def _apply_default_fill(model_stem, row):
+    """空值填充（只填 None/空，不清已有值）；rackServer_cpu.brandLand 沿用顶层 brandLand。"""
+    nrow = dict(row)
+    for f, dv in DEFAULT_FILL.items():
+        if dv and (nrow.get(f) is None or nrow.get(f) == ''):
+            nrow[f] = dv
+    for k, v in list(nrow.items()):
+        items = v if isinstance(v, list) else ([v] if isinstance(v, dict) else [])
+        for item in items:
+            for f, dv in DEFAULT_FILL.items():
+                if dv and isinstance(item, dict) and f in item and (item[f] is None or item[f] == ''):
+                    item[f] = dv
+    if model_stem == 'rackServer':
+        top = nrow.get('brandLand')
+        cpu = nrow.get('rackServer_cpu')
+        cpu_items = cpu if isinstance(cpu, list) else ([cpu] if isinstance(cpu, dict) else [])
+        for st in cpu_items:
+            if isinstance(st, dict) and not st.get('brandLand') and top:
+                st['brandLand'] = top                    # 用户决策：CPU品牌属地沿用顶层
+        nrow['rackServer_cpu'] = cpu
+    return nrow
+
+def fix_stage():
+    """三步修复：①编码保真（merge 后回退 B 类字段）②引用换 hex ③空值填充。产出 unresolved-references.json + fix-report.md。"""
+    mdir = OUT / 'merged'
+    name2fd, fd_set = _load_instances()
+    stats, unresolved_all = {}, []
+    for f in sorted(mdir.glob('*.json')):
+        stem = f.stem
+        rows = json.loads(f.read_text())
+        # ① 编码保真：值非编码形态时取另一侧（豁免字段无 diffDetail，从 transformed 两侧直接比对）
+        n_code = 0
+        tr_r = _load_transformed('report', stem)
+        tr_m = _load_transformed('mgmt', stem)
+        key_a = _key_attr_of(stem)
+        for r in rows:
+            k = r.get(key_a)
+            for a in CODE_FORMAT_ATTRS:
+                cur = r.get(a)
+                if cur is None or _CODE_PAT.match(str(cur)):
+                    continue                              # 空或已是编码形态，不动
+                other = (tr_m.get(k, {}).get(a) if tr_r.get(k, {}).get(a) == cur
+                         else tr_r.get(k, {}).get(a))
+                pick = _pick_coded(str(cur), str(other) if other is not None else '')
+                if pick and pick != cur:
+                    r[a] = pick; n_code += 1
+        # ② 引用换 hex（顶层字段 + structs 子字段）
+        rf = _ref_fields_for(stem)
+        rows, un1 = _fix_refs_in_rows(rows, name2fd, rf, fd_set)
+        un2 = _fix_refs_in_structs(rows, name2fd, rf, fd_set)
+        # ③ 空值填充
+        rows = [_apply_default_fill(stem, r) for r in rows]
+        f.write_text(json.dumps(rows, ensure_ascii=False, indent=1))
+        unresolved_all += [{'model': stem, **u} for u in un1 + un2]
+        stats[stem] = {'code_restored': n_code, 'unresolved_refs': len(un1) + len(un2)}
+    (OUT / 'unresolved-references.json').write_text(json.dumps(unresolved_all, ensure_ascii=False, indent=1))
+    (OUT / 'fix-report.md').write_text(
+        '# 修复统计\n\n| 模型 | 编码保真回退 | 悬空引用 |\n|---|---|---|\n' +
+        '\n'.join(f'| {m} | {s["code_restored"]} | {s["unresolved_refs"]} |' for m, s in stats.items()))
+    print('fix 完成: 编码回退', sum(s['code_restored'] for s in stats.values()),
+          '悬空', len(unresolved_all), '→', OUT / 'unresolved-references.json')
+
 def build_import_body(key_attr, rows, structs_attrs=()):
     datas = [{k: v for k, v in _assemble(r, structs_attrs).items() if v not in (None, '', [], {})} for r in rows]
     return {'keys': [key_attr], 'datas': datas}
@@ -1745,5 +1916,6 @@ if __name__ == '__main__':
     if stage == 'investigate': investigate()
     elif stage == 'transform': transform('report'); transform('mgmt')
     elif stage == 'compare':   compare()
+    elif stage == 'fix':       fix_stage()
     elif stage == 'import':    import_cmdb(only=only)
-    else: print('usage: sync.py --stage investigate|transform|compare|import [--only <model_id>]')
+    else: print('usage: sync.py --stage investigate|transform|compare|fix|import [--only <model_id>]')

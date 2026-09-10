@@ -1,0 +1,40 @@
+# 修复统计
+
+| 模型 | 编码保真回退 | 悬空引用 |
+|---|---|---|
+| application | 129 | 0 |
+| applicationRelation | 0 | 0 |
+| applicationSoftRelation | 0 | 0 |
+| basedSoftware | 0 | 0 |
+| centralAirCondition | 0 | 0 |
+| commonAirCondition | 0 | 0 |
+| commonCabinet | 0 | 0 |
+| dataCenter | 0 | 0 |
+| dataCenterSpacing | 0 | 0 |
+| entranceGuard | 0 | 0 |
+| environmentalMonitoring | 0 | 0 |
+| fiberSwitch | 0 | 0 |
+| fireProtection | 0 | 0 |
+| firewall | 0 | 0 |
+| freshAir | 0 | 0 |
+| generator | 0 | 0 |
+| highVoltage | 0 | 0 |
+| humidification | 0 | 0 |
+| idsIps | 0 | 0 |
+| lowVoltage | 0 | 0 |
+| networkLine | 0 | 0 |
+| networkRelation | 0 | 128 |
+| onlineBehavior | 0 | 0 |
+| opsAudit | 0 | 0 |
+| powerSupplyRelation | 0 | 306 |
+| precisionAirCondition | 0 | 0 |
+| precisionPower | 0 | 0 |
+| rackServer | 0 | 0 |
+| router | 0 | 0 |
+| softwareRelation | 0 | 0 |
+| switches | 0 | 0 |
+| transformer | 0 | 0 |
+| uninterrupted | 0 | 0 |
+| videoMonitoring | 0 | 0 |
+| virtualMachine | 0 | 0 |
+| wdm | 0 | 0 |

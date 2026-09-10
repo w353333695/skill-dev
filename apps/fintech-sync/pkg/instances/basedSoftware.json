@@ -15,10 +15,16 @@
   "softwareCategory": "YYTYOFFWPR",
   "softwareManufacturer": "北京金山办公软件股份有限公司",
   "softwareName": "商丘市中支基础软件WPS OFFICE",
-  "softwareOwnershipAgency": "中国人民银行河南省分行",
+  "softwareOwnershipAgency": "A1000141000266",
   "softwareSource": "01-其它机构提供",
   "softwareVersionInformation": "9.1.0.4895",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "softwareDescriptor": "08071af16f134ca8b3327d5870c3a203",
@@ -36,10 +42,16 @@
   "softwareCategory": "XTOSFOSLNX",
   "softwareManufacturer": "红帽软件",
   "softwareName": "周口市中支服务器操作系统2",
-  "softwareOwnershipAgency": "中国人民银行河南省分行",
+  "softwareOwnershipAgency": "A1000141000266",
   "softwareSource": "03-开源软件",
   "softwareVersionInformation": "CentOS Linux release 7.3.1611",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "softwareDescriptor": "0c13385d4599417cb9ecfe308c061297",
@@ -56,10 +68,16 @@
   "softwareCategory": "XTOSFOSLNX",
   "softwareManufacturer": "Red Hat",
   "softwareName": "中国人民银行三门峡市中心支行 操作系统1",
-  "softwareOwnershipAgency": "中国人民银行河南省分行",
+  "softwareOwnershipAgency": "A1000141000266",
   "softwareSource": "02-硬件设备自带",
   "softwareVersionInformation": "Linnux 5 Enterprise",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "softwareDescriptor": "0d54c7a97a09402cadbfc6e2809d1705",
@@ -77,10 +95,16 @@
   "softwareCategory": "YYTYOFFWPR",
   "softwareManufacturer": "北京金山办公软件股份有限公司",
   "softwareName": "中国人民银行南阳市中心支行基础软件WPS OFFICE",
-  "softwareOwnershipAgency": "中国人民银行河南省分行",
+  "softwareOwnershipAgency": "A1000141000266",
   "softwareSource": "01-其它机构提供",
   "softwareVersionInformation": "9.1.0.4895",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "softwareDescriptor": "0e380699e42b4fa6a1a15c19eea981e8",
@@ -97,10 +121,16 @@
   "softwareCategory": "XTOSFOSLNX",
   "softwareManufacturer": "红帽软件",
   "softwareName": "郑州中支CentOS 4/5/6/7 (64 位)",
-  "softwareOwnershipAgency": "中国人民银行河南省分行",
+  "softwareOwnershipAgency": "A1000141000266",
   "softwareSource": "03-开源软件",
   "softwareVersionInformation": "CentOS 4/5/6/7 (64 位)",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "softwareDescriptor": "0e5ab4b26e004c398314c52a6d836717",
@@ -118,10 +148,16 @@
   "softwareCategory": "ZCZJLLZ000",
   "softwareManufacturer": "威睿信息技术（中国）有限公司",
   "softwareName": "焦作市中支VMWare虚拟化操作系统",
-  "softwareOwnershipAgency": "中国人民银行河南省分行",
+  "softwareOwnershipAgency": "A1000141000266",
   "softwareSource": "01-其它机构提供",
   "softwareVersionInformation": "ESXi-6.5.0",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "softwareDescriptor": "111ffd71e5944c41a4332c730c60f2cb",
@@ -139,10 +175,16 @@
   "softwareCategory": "YYTYOFFPDF",
   "softwareManufacturer": "微软公司",
   "softwareName": "中国人民银行三门峡市中心支行 Visio绘图软件",
-  "softwareOwnershipAgency": "中国人民银行河南省分行",
+  "softwareOwnershipAgency": "A1000141000266",
   "softwareSource": "02-硬件设备自带",
   "softwareVersionInformation": "Office Visio2016",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "softwareDescriptor": "167bcc473fb04012a66ab56e434cca1a",
@@ -160,10 +202,16 @@
   "softwareCategory": "XTOSFOSWDS",
   "softwareManufacturer": "微软公司",
   "softwareName": "许昌市中支动环Sql server数据库",
-  "softwareOwnershipAgency": "中国人民银行河南省分行",
+  "softwareOwnershipAgency": "A1000141000266",
   "softwareSource": "01-其它机构提供",
   "softwareVersionInformation": "Sql server 2008 R2",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "softwareDescriptor": "16f89011d68e4e698cc84e161b4833f1",
@@ -181,10 +229,16 @@
   "softwareCategory": "XTOSFOSLNX",
   "softwareManufacturer": "Red Hat",
   "softwareName": "焦作市中支服务器操作系统1",
-  "softwareOwnershipAgency": "中国人民银行河南省分行",
+  "softwareOwnershipAgency": "A1000141000266",
   "softwareSource": "03-开源软件",
   "softwareVersionInformation": "Red Hat Enterprise Linux Server release 5.3",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "softwareDescriptor": "19999c65df134a7e97841afa78435956",
@@ -201,10 +255,16 @@
   "softwareCategory": "ZCZJLLZ000",
   "softwareManufacturer": "威睿信息技术（中国）有限公司",
   "softwareName": "郑州中支ESXI",
-  "softwareOwnershipAgency": "中国人民银行河南省分行",
+  "softwareOwnershipAgency": "A1000141000266",
   "softwareSource": "01-其它机构提供",
   "softwareVersionInformation": "6.5",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "softwareDescriptor": "1ab8419ffab34507893bba1ab2e05487",
@@ -221,10 +281,16 @@
   "softwareCategory": "XTOSFOSWDS",
   "softwareManufacturer": "微软",
   "softwareName": "郑州中支Microsoft Windows Server 2008 R2 (64 位)",
-  "softwareOwnershipAgency": "中国人民银行河南省分行",
+  "softwareOwnershipAgency": "A1000141000266",
   "softwareSource": "02-硬件设备自带",
   "softwareVersionInformation": "Microsoft Windows Server 2008 R2 (64 位)",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "softwareDescriptor": "1e14e8c10fa14dafaf8f728cf2bc87d8",
@@ -241,10 +307,16 @@
   "softwareCategory": "XTOSFOSLNX",
   "softwareManufacturer": "Debian",
   "softwareName": "郑州中支Debian GNU/Linux 8 (64 位)",
-  "softwareOwnershipAgency": "中国人民银行河南省分行",
+  "softwareOwnershipAgency": "A1000141000266",
   "softwareSource": "03-开源软件",
   "softwareVersionInformation": "Debian GNU/Linux 8 (64 位)",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "softwareDescriptor": "1e7f015b15144a06ac0d7e74d88c0c27",
@@ -262,10 +334,16 @@
   "softwareCategory": "XTOSFOSWDS",
   "softwareManufacturer": "微软公司",
   "softwareName": "焦作市中支服务器操作系统2",
-  "softwareOwnershipAgency": "中国人民银行河南省分行",
+  "softwareOwnershipAgency": "A1000141000266",
   "softwareSource": "01-其它机构提供",
   "softwareVersionInformation": "Windows Server 2003 Enterprise Editon",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "softwareDescriptor": "202e638f811c4578b1a6d0a00ce3e936",
@@ -282,10 +360,16 @@
   "softwareCategory": "XTOSFOSLNX",
   "softwareManufacturer": "SuSE Linux AG公司",
   "softwareName": "郑州中支SUSE Linux Enterprise 10 (64 位)",
-  "softwareOwnershipAgency": "中国人民银行河南省分行",
+  "softwareOwnershipAgency": "A1000141000266",
   "softwareSource": "03-开源软件",
   "softwareVersionInformation": "SUSE Linux Enterprise 10 (64 位)",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "softwareDescriptor": "246364c46d644fce9fa477e01d448908",
@@ -302,10 +386,16 @@
   "softwareCategory": "XTOSFOSLNX",
   "softwareManufacturer": "Debian",
   "softwareName": "郑州中支Debian GNU/Linux 6 (64 位)",
-  "softwareOwnershipAgency": "中国人民银行河南省分行",
+  "softwareOwnershipAgency": "A1000141000266",
   "softwareSource": "03-开源软件",
   "softwareVersionInformation": "Debian GNU/Linux 6 (64 位)",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "softwareDescriptor": "28947cdc58e54a8c86582a1a19d77786",
@@ -322,10 +412,16 @@
   "softwareCategory": "XTOSFOSWDS",
   "softwareManufacturer": "微软公司",
   "softwareName": "许昌市中支win2008操作系统",
-  "softwareOwnershipAgency": "中国人民银行河南省分行",
+  "softwareOwnershipAgency": "A1000141000266",
   "softwareSource": "00-自购软件",
   "softwareVersionInformation": "win2008 server R2",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "softwareDescriptor": "2a737ed292a24f5ab92f1bdbb46821e6",
@@ -343,10 +439,16 @@
   "softwareCategory": "XTOSFOSWDS",
   "softwareManufacturer": "微软",
   "softwareName": "周口市中支服务器操作系统1",
-  "softwareOwnershipAgency": "中国人民银行河南省分行",
+  "softwareOwnershipAgency": "A1000141000266",
   "softwareSource": "01-其它机构提供",
   "softwareVersionInformation": "Windows Server 2003 Enterprise X64 Editon",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "softwareDescriptor": "2b77327da8984b72af65e178146e6d7d",
@@ -363,10 +465,16 @@
   "softwareCategory": "XTOSFOSWDS",
   "softwareManufacturer": "微软",
   "softwareName": "郑州中支Microsoft Windows Server 2003 Standard (64 位)",
-  "softwareOwnershipAgency": "中国人民银行河南省分行",
+  "softwareOwnershipAgency": "A1000141000266",
   "softwareSource": "02-硬件设备自带",
   "softwareVersionInformation": "Microsoft Windows Server 2003 Standard (64 位)",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "softwareDescriptor": "2ef20e721d504ef5a580d42fbf008eb5",
@@ -383,10 +491,16 @@
   "softwareCategory": "ZCZJJCLTMC",
   "softwareManufacturer": "Apache公司",
   "softwareName": "郑州中支Tomcat",
-  "softwareOwnershipAgency": "中国人民银行河南省分行",
+  "softwareOwnershipAgency": "A1000141000266",
   "softwareSource": "00-自购软件",
   "softwareVersionInformation": "7",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "softwareDescriptor": "322afcf710754375adefd775a46ead6d",
@@ -403,10 +517,16 @@
   "softwareCategory": "XTDBSQS000",
   "softwareManufacturer": "微软",
   "softwareName": "郑州中支SQL Server",
-  "softwareOwnershipAgency": "中国人民银行河南省分行",
+  "softwareOwnershipAgency": "A1000141000266",
   "softwareSource": "00-自购软件",
   "softwareVersionInformation": "v2014",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "softwareDescriptor": "3314f8117a5440a79a30c38a4c85b82c",
@@ -423,10 +543,16 @@
   "softwareCategory": "XTOSFOSLNX",
   "softwareManufacturer": "红帽软件",
   "softwareName": "郑州中支CentOS 8 (64 位)",
-  "softwareOwnershipAgency": "中国人民银行河南省分行",
+  "softwareOwnershipAgency": "A1000141000266",
   "softwareSource": "03-开源软件",
   "softwareVersionInformation": "CentOS 8 (64 位)",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "softwareDescriptor": "3383c3498804410887ad201ea145b909",
@@ -443,10 +569,16 @@
   "softwareCategory": "XTOSFOSWDS",
   "softwareManufacturer": "微软",
   "softwareName": "郑州中支Microsoft Windows Server 2003 Standard (32 位)",
-  "softwareOwnershipAgency": "中国人民银行河南省分行",
+  "softwareOwnershipAgency": "A1000141000266",
   "softwareSource": "02-硬件设备自带",
   "softwareVersionInformation": "Microsoft Windows Server 2003 Standard (32 位)",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "softwareDescriptor": "33a00711bd194bc987cf94ae1b1cdf24",
@@ -463,10 +595,16 @@
   "softwareCategory": "XTOSFOSLNX",
   "softwareManufacturer": "红帽软件",
   "softwareName": "郑州中支Red Hat Enterprise Linux 6 (64 位)",
-  "softwareOwnershipAgency": "中国人民银行河南省分行",
+  "softwareOwnershipAgency": "A1000141000266",
   "softwareSource": "03-开源软件",
   "softwareVersionInformation": "Red Hat Enterprise Linux 6 (64 位)",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "softwareDescriptor": "33a50f6d094247ebb8bb862c6277a314",
@@ -484,10 +622,16 @@
   "softwareCategory": "YYTYWLP000",
   "softwareManufacturer": "北京金山办公软件股份有限公司",
   "softwareName": "鹤壁市中支基础软件WPS OFFICE",
-  "softwareOwnershipAgency": "中国人民银行河南省分行",
+  "softwareOwnershipAgency": "A1000141000266",
   "softwareSource": "01-其它机构提供",
   "softwareVersionInformation": "9.1.0.4895",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "softwareDescriptor": "34a9346b442046628cf0c14094da3c0e",
@@ -504,10 +648,16 @@
   "softwareCategory": "ZCZJLLZ000",
   "softwareManufacturer": "南昌蓝智科技有限公司",
   "softwareName": "郑州中支JspxCMS",
-  "softwareOwnershipAgency": "中国人民银行河南省分行",
+  "softwareOwnershipAgency": "A1000141000266",
   "softwareSource": "00-自购软件",
   "softwareVersionInformation": "10.1",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "softwareDescriptor": "38b15d7aae8e411a97c7448887b08c9d",
@@ -524,10 +674,16 @@
   "softwareCategory": "XTOSFOSWDS",
   "softwareManufacturer": "微软公司",
   "softwareName": "平顶山市中支服务器操作系统",
-  "softwareOwnershipAgency": "中国人民银行河南省分行",
+  "softwareOwnershipAgency": "A1000141000266",
   "softwareSource": "02-硬件设备自带",
   "softwareVersionInformation": "Windows Server 2012 R2 Standard",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "softwareDescriptor": "39d2a7c1d21f49d48373c682211fc80a",
@@ -545,10 +701,16 @@
   "softwareCategory": "YYHY000000",
   "softwareManufacturer": "宝利通中国",
   "softwareName": "许昌市中支机房多点控制单元服务器（MCU）操作系统",
-  "softwareOwnershipAgency": "中国人民银行河南省分行",
+  "softwareOwnershipAgency": "A1000141000266",
   "softwareSource": "01-其它机构提供",
   "softwareVersionInformation": "V2.5.1-Aug 06,2012 rew.33387",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "softwareDescriptor": "3a1fd9ab566a4adf88998af563ada0f4",
@@ -566,10 +728,16 @@
   "softwareCategory": "YYTYOFFWPR",
   "softwareManufacturer": "金山办公软件股份有限公司",
   "softwareName": "漯河市中支基础软件WPS OFFICE",
-  "softwareOwnershipAgency": "中国人民银行河南省分行",
+  "softwareOwnershipAgency": "A1000141000266",
   "softwareSource": "01-其它机构提供",
   "softwareVersionInformation": "9.1.0.4895",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "softwareDescriptor": "3f9389d0a8374dc89847dbd3c0122c33",
@@ -587,10 +755,16 @@
   "softwareCategory": "XTOSFOSWDS",
   "softwareManufacturer": "微软公司",
   "softwareName": "漯河市中支终端Windows7操作系统",
-  "softwareOwnershipAgency": "中国人民银行河南省分行",
+  "softwareOwnershipAgency": "A1000141000266",
   "softwareSource": "01-其它机构提供",
   "softwareVersionInformation": "Windows 7专业版",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "softwareDescriptor": "3fa28e817c6843b1ac983806fac719cf",
@@ -607,10 +781,16 @@
   "softwareCategory": "XTOSFOSLNX",
   "softwareManufacturer": "红帽软件（北京）有限公司",
   "softwareName": "许昌市中支IT运维监控操作系统",
-  "softwareOwnershipAgency": "中国人民银行河南省分行",
+  "softwareOwnershipAgency": "A1000141000266",
   "softwareSource": "01-其它机构提供",
   "softwareVersionInformation": "Red Hat Enterprise Linux Server5.3",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "softwareDescriptor": "41c43981963448e6974d90d7b258f0d4",
@@ -628,10 +808,16 @@
   "softwareCategory": "ZCXNJSZ000",
   "softwareManufacturer": "深信服科技",
   "softwareName": "驻马店市中支虚拟桌面接入管理系统",
-  "softwareOwnershipAgency": "中国人民银行河南省分行",
+  "softwareOwnershipAgency": "A1000141000266",
   "softwareSource": "00-自购软件",
   "softwareVersionInformation": "VDI5.38R2",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "softwareDescriptor": "428c9c8de3aa414484a880e1a438a7fa",
@@ -648,10 +834,16 @@
   "softwareCategory": "XTOSFOSWDS",
   "softwareManufacturer": "微软公司",
   "softwareName": "许昌市中支win2012操作系统",
-  "softwareOwnershipAgency": "中国人民银行河南省分行",
+  "softwareOwnershipAgency": "A1000141000266",
   "softwareSource": "00-自购软件",
   "softwareVersionInformation": "win2012 server R2",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "softwareDescriptor": "432dfccfda4549478ce1b376b3783bc0",
@@ -668,10 +860,16 @@
   "softwareCategory": "XTOSFOSUNX",
   "softwareManufacturer": "SCO公司",
   "softwareName": "郑州中支SCO OpenServer 5",
-  "softwareOwnershipAgency": "中国人民银行河南省分行",
+  "softwareOwnershipAgency": "A1000141000266",
   "softwareSource": "02-硬件设备自带",
   "softwareVersionInformation": "SCO OpenServer 5",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "softwareDescriptor": "442fb8a8cffd4e628cfb05d834c695e1",
@@ -689,10 +887,16 @@
   "softwareCategory": "XTOSFOSWDS",
   "softwareManufacturer": "微软公司",
   "softwareName": "中国人民银行南阳市中心支行 操作系统1",
-  "softwareOwnershipAgency": "中国人民银行河南省分行",
+  "softwareOwnershipAgency": "A1000141000266",
   "softwareSource": "02-硬件设备自带",
   "softwareVersionInformation": "Win2003 Server",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "softwareDescriptor": "44cf3e274d2a419899237c876e0d9233",
@@ -710,10 +914,16 @@
   "softwareCategory": "XTOSFOSLNX",
   "softwareManufacturer": "开源软件",
   "softwareName": "安阳市中支服务器操作系统3",
-  "softwareOwnershipAgency": "中国人民银行河南省分行",
+  "softwareOwnershipAgency": "A1000141000266",
   "softwareSource": "03-开源软件",
   "softwareVersionInformation": "Centos7",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "softwareDescriptor": "455d4dff6bc4448faa19b80ce791870c",
@@ -731,10 +941,16 @@
   "softwareCategory": "XTOSFOSWDS",
   "softwareManufacturer": "微软公司",
   "softwareName": "漯河市中支终端WindowsXP操作系统",
-  "softwareOwnershipAgency": "中国人民银行河南省分行",
+  "softwareOwnershipAgency": "A1000141000266",
   "softwareSource": "01-其它机构提供",
   "softwareVersionInformation": "windows XP专业版",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "softwareDescriptor": "45925d1072784d9f8aafc20966a63d2d",
@@ -752,10 +968,16 @@
   "softwareCategory": "YYTYOFFWPR",
   "softwareManufacturer": "北京金山办公软件股份有限公司",
   "softwareName": "濮阳市中支基础软件WPS OFFICE",
-  "softwareOwnershipAgency": "中国人民银行河南省分行",
+  "softwareOwnershipAgency": "A1000141000266",
   "softwareSource": "01-其它机构提供",
   "softwareVersionInformation": "9.1.0.4895",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "softwareDescriptor": "489a3ee5ad424de6920814ef58e4cfa0",
@@ -773,10 +995,16 @@
   "softwareCategory": "YYTYOFFWPR",
   "softwareManufacturer": "北京金山办公软件股份有限公司",
   "softwareName": "济源市中支基础软件WPS OFFICE",
-  "softwareOwnershipAgency": "中国人民银行河南省分行",
+  "softwareOwnershipAgency": "A1000141000266",
   "softwareSource": "01-其它机构提供",
   "softwareVersionInformation": "9.1.0.4895",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "softwareDescriptor": "4a06ddc2240b4061894cf416ff68f158",
@@ -794,10 +1022,16 @@
   "softwareCategory": "ZCZJIHT000",
   "softwareManufacturer": "威睿信息技术（中国）有限公司",
   "softwareName": "许昌市中支VMWare虚拟化操作系统",
-  "softwareOwnershipAgency": "中国人民银行河南省分行",
+  "softwareOwnershipAgency": "A1000141000266",
   "softwareSource": "01-其它机构提供",
   "softwareVersionInformation": "ESXi-6.5.0",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "softwareDescriptor": "4c0eb25d119744c1903dca324b6c214b",
@@ -814,10 +1048,16 @@
   "softwareCategory": "XTOSFOSLNX",
   "softwareManufacturer": "红帽软件",
   "softwareName": "郑州中支Red Hat Enterprise Linux 7 (64 位)",
-  "softwareOwnershipAgency": "中国人民银行河南省分行",
+  "softwareOwnershipAgency": "A1000141000266",
   "softwareSource": "03-开源软件",
   "softwareVersionInformation": "Red Hat Enterprise Linux 7 (64 位)",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "softwareDescriptor": "4e9a66ec25c94824b38be54124466b04",
@@ -835,10 +1075,16 @@
   "softwareCategory": "YYTYOFFWPR",
   "softwareManufacturer": "北京金山办公软件股份有限公司",
   "softwareName": "开封市中支基础软件WPS OFFICE",
-  "softwareOwnershipAgency": "中国人民银行河南省分行",
+  "softwareOwnershipAgency": "A1000141000266",
   "softwareSource": "01-其它机构提供",
   "softwareVersionInformation": "9.1.0.4833",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "softwareDescriptor": "5066cee896054cbd9faa7c4511e01977",
@@ -856,10 +1102,16 @@
   "softwareCategory": "ZCXNJSZ000",
   "softwareManufacturer": "深信服科技",
   "softwareName": "驻马店市中支虚拟化管理平台",
-  "softwareOwnershipAgency": "中国人民银行河南省分行",
+  "softwareOwnershipAgency": "A1000141000266",
   "softwareSource": "00-自购软件",
   "softwareVersionInformation": "VMP5.3.8R2",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "softwareDescriptor": "5429a70fe28f43dd8679dfe284bdb4b0",
@@ -876,10 +1128,16 @@
   "softwareCategory": "ZCZJLLZ000",
   "softwareManufacturer": "北京东方通技术有限公司",
   "softwareName": "郑州中支TLQ",
-  "softwareOwnershipAgency": "中国人民银行河南省分行",
+  "softwareOwnershipAgency": "A1000141000266",
   "softwareSource": "00-自购软件",
   "softwareVersionInformation": "8",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "softwareDescriptor": "5644ee3342ee45899bfa625f317f0813",
@@ -896,10 +1154,16 @@
   "softwareCategory": "XTOSFOSLNX",
   "softwareManufacturer": "SuSE Linux AG公司",
   "softwareName": "郑州中支SUSE Linux Enterprise 11 (64 位)",
-  "softwareOwnershipAgency": "中国人民银行河南省分行",
+  "softwareOwnershipAgency": "A1000141000266",
   "softwareSource": "03-开源软件",
   "softwareVersionInformation": "SUSE Linux Enterprise 11 (64 位)",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "softwareDescriptor": "567f9494a80e449f8d8c227012774564",
@@ -917,10 +1181,16 @@
   "softwareCategory": "XTOSFOSWDS",
   "softwareManufacturer": "微软公司",
   "softwareName": "焦作市中支服务器操作系统3",
-  "softwareOwnershipAgency": "中国人民银行河南省分行",
+  "softwareOwnershipAgency": "A1000141000266",
   "softwareSource": "01-其它机构提供",
   "softwareVersionInformation": "Windows Server 2012 R2 Standard",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "softwareDescriptor": "5a38552a5c2a4c358ef62efa1eaf6ff6",
@@ -938,10 +1208,16 @@
   "softwareCategory": "XTOSFOSLNX",
   "softwareManufacturer": "红帽公司",
   "softwareName": "濮阳市中支基础软件操作系统1",
-  "softwareOwnershipAgency": "中国人民银行河南省分行",
+  "softwareOwnershipAgency": "A1000141000266",
   "softwareSource": "03-开源软件",
   "softwareVersionInformation": "Red Hat Enterprise Linux Server release 5.3",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "softwareDescriptor": "5e1170f752554b9282efe5e36fdb8dd5",
@@ -958,10 +1234,16 @@
   "softwareCategory": "XTOSFOSWDS",
   "softwareManufacturer": "微软公司",
   "softwareName": "中国人民银行三门峡市中心支行 操作系统5",
-  "softwareOwnershipAgency": "中国人民银行河南省分行",
+  "softwareOwnershipAgency": "A1000141000266",
   "softwareSource": "02-硬件设备自带",
   "softwareVersionInformation": "Win XP",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "softwareDescriptor": "5e30589357b6440291f592c700b8d88b",
@@ -978,10 +1260,16 @@
   "softwareCategory": "XTOSFOSWDS",
   "softwareManufacturer": "微软",
   "softwareName": "郑州中支Microsoft Windows Server 2003 (32 位)",
-  "softwareOwnershipAgency": "中国人民银行河南省分行",
+  "softwareOwnershipAgency": "A1000141000266",
   "softwareSource": "02-硬件设备自带",
   "softwareVersionInformation": "Microsoft Windows Server 2003 (32 位)",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "softwareDescriptor": "6119911524bb43498ab0a5124c7b4fad",
@@ -998,10 +1286,16 @@
   "softwareCategory": "XTOSFOSWDS",
   "softwareManufacturer": "微软公司",
   "softwareName": "信阳市中支server2008操作系统",
-  "softwareOwnershipAgency": "中国人民银行河南省分行",
+  "softwareOwnershipAgency": "A1000141000266",
   "softwareSource": "00-自购软件",
   "softwareVersionInformation": "win2008 server R2",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "softwareDescriptor": "6456cd33efc14430a35509da6beb41b6",
@@ -1018,10 +1312,16 @@
   "softwareCategory": "ZCZJLLZ000",
   "softwareManufacturer": "国际商业机器公司",
   "softwareName": "郑州中支Domino",
-  "softwareOwnershipAgency": "中国人民银行河南省分行",
+  "softwareOwnershipAgency": "A1000141000266",
   "softwareSource": "00-自购软件",
   "softwareVersionInformation": "6",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "softwareDescriptor": "67c47bdb0e044766a19c07bbd33b7d93",
@@ -1039,10 +1339,16 @@
   "softwareCategory": "XTOSFOSWDS",
   "softwareManufacturer": "微软公司",
   "softwareName": "中国人民银行南阳市中心支行 操作系统2",
-  "softwareOwnershipAgency": "中国人民银行河南省分行",
+  "softwareOwnershipAgency": "A1000141000266",
   "softwareSource": "02-硬件设备自带",
   "softwareVersionInformation": "Win 7",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "softwareDescriptor": "6b64d86c0d474230ad7d432530992fc2",
@@ -1060,10 +1366,16 @@
   "softwareCategory": "XTOSFOSWDS",
   "softwareManufacturer": "微软公司",
   "softwareName": "濮阳市中支基础软件操作系统2",
-  "softwareOwnershipAgency": "中国人民银行河南省分行",
+  "softwareOwnershipAgency": "A1000141000266",
   "softwareSource": "01-其它机构提供",
   "softwareVersionInformation": "Windows Server 2003 Enterprise x64 Edition",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "softwareDescriptor": "6ec53a0736d443a0959768a7dd28c1ff",
@@ -1080,10 +1392,16 @@
   "softwareCategory": "XTOSFOSWDS",
   "softwareManufacturer": "微软",
   "softwareName": "郑州中支Microsoft Windows 7 (32 位)",
-  "softwareOwnershipAgency": "中国人民银行河南省分行",
+  "softwareOwnershipAgency": "A1000141000266",
   "softwareSource": "02-硬件设备自带",
   "softwareVersionInformation": "Microsoft Windows 7 (32 位)",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "softwareDescriptor": "715a3194117d4417a6ba7b25817793f6",
@@ -1101,10 +1419,16 @@
   "softwareCategory": "YYTYOFFPPT",
   "softwareManufacturer": "北京书生公司",
   "softwareName": "中国人民银行南阳市中心支行 书生阅览器",
-  "softwareOwnershipAgency": "中国人民银行河南省分行",
+  "softwareOwnershipAgency": "A1000141000266",
   "softwareSource": "00-自购软件",
   "softwareVersionInformation": "Sursen Reader 7.2.1347.4299",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "softwareDescriptor": "75293e41173340fd9e862ea132dd0d90",
@@ -1121,10 +1445,16 @@
   "softwareCategory": "ZCZJLLZ000",
   "softwareManufacturer": "国际商业机器公司",
   "softwareName": "郑州中支MQ2",
-  "softwareOwnershipAgency": "中国人民银行河南省分行",
+  "softwareOwnershipAgency": "A1000141000266",
   "softwareSource": "00-自购软件",
   "softwareVersionInformation": "8",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "softwareDescriptor": "795da59bb3514df197839793d4521620",
@@ -1141,10 +1471,16 @@
   "softwareCategory": "XTOSFOSWDS",
   "softwareManufacturer": "微软公司",
   "softwareName": "鹤壁市中支服务器操作系统3",
-  "softwareOwnershipAgency": "中国人民银行河南省分行",
+  "softwareOwnershipAgency": "A1000141000266",
   "softwareSource": "01-其它机构提供",
   "softwareVersionInformation": "Windows Server 2012 R2 Standard",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "softwareDescriptor": "7efbf6e3b2d849a5a9eec1e628baae73",
@@ -1162,10 +1498,16 @@
   "softwareCategory": "XTOSFOSLNX",
   "softwareManufacturer": "红帽公司",
   "softwareName": "新乡市中支服务器操作系统2",
-  "softwareOwnershipAgency": "中国人民银行河南省分行",
+  "softwareOwnershipAgency": "A1000141000266",
   "softwareSource": "03-开源软件",
   "softwareVersionInformation": "Red Hat Enterprise Linux Server release 5.3",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "softwareDescriptor": "805733e242324a2c951d3a6866cdc561",
@@ -1182,10 +1524,16 @@
   "softwareCategory": "ZCZJLLZ000",
   "softwareManufacturer": "国际商业机器公司",
   "softwareName": "郑州中支WAS",
-  "softwareOwnershipAgency": "中国人民银行河南省分行",
+  "softwareOwnershipAgency": "A1000141000266",
   "softwareSource": "00-自购软件",
   "softwareVersionInformation": "7",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "softwareDescriptor": "81c3977d8f334b2ebac9d98e99fed1cf",
@@ -1203,10 +1551,16 @@
   "softwareCategory": "XTOSFOSWDS",
   "softwareManufacturer": "微软公司",
   "softwareName": "新乡市中支服务器操作系统1",
-  "softwareOwnershipAgency": "中国人民银行河南省分行",
+  "softwareOwnershipAgency": "A1000141000266",
   "softwareSource": "01-其它机构提供",
   "softwareVersionInformation": "Windows Server 2003 Enterprise Editon",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "softwareDescriptor": "81d039e9725e4960ae47aaab78118ac6",
@@ -1223,10 +1577,16 @@
   "softwareCategory": "XTOSFOSWDS",
   "softwareManufacturer": "微软公司",
   "softwareName": "鹤壁市中支服务器操作系统2",
-  "softwareOwnershipAgency": "中国人民银行河南省分行",
+  "softwareOwnershipAgency": "A1000141000266",
   "softwareSource": "01-其它机构提供",
   "softwareVersionInformation": "Windows Server 2003 Enterprise Editon",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "softwareDescriptor": "84faa0212a294544af9c0bdb32f3d7b0",
@@ -1243,10 +1603,16 @@
   "softwareCategory": "XTOSFOSLNX",
   "softwareManufacturer": "SuSE Linux AG公司",
   "softwareName": "郑州中支SUSE Linux Enterprise 8/9 (32 位)",
-  "softwareOwnershipAgency": "中国人民银行河南省分行",
+  "softwareOwnershipAgency": "A1000141000266",
   "softwareSource": "03-开源软件",
   "softwareVersionInformation": "SUSE Linux Enterprise 8/9 (32 位)",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "softwareDescriptor": "854f608c8ae1465b97bc5521f5d8bc77",
@@ -1264,10 +1630,16 @@
   "softwareCategory": "YYTYOFFPPT",
   "softwareManufacturer": "北京书生公司",
   "softwareName": "中国人民银行三门峡市中心支行 书生阅览器",
-  "softwareOwnershipAgency": "中国人民银行河南省分行",
+  "softwareOwnershipAgency": "A1000141000266",
   "softwareSource": "00-自购软件",
   "softwareVersionInformation": "Sursen Reader 7.2.1347.4299",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "softwareDescriptor": "870677e6796c4f4dadda9a24b550bc55",
@@ -1284,10 +1656,16 @@
   "softwareCategory": "XTOSFOSWDS",
   "softwareManufacturer": "微软",
   "softwareName": "郑州中支Microsoft Windows Server 2003 (64 位)",
-  "softwareOwnershipAgency": "中国人民银行河南省分行",
+  "softwareOwnershipAgency": "A1000141000266",
   "softwareSource": "02-硬件设备自带",
   "softwareVersionInformation": "Microsoft Windows Server 2003 (64 位)",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "softwareDescriptor": "8736595dde5049488a65c90cf9f6b7b1",
@@ -1304,10 +1682,16 @@
   "softwareCategory": "XTOSFOSLNX",
   "softwareManufacturer": "Debian",
   "softwareName": "郑州中支Debian GNU/Linux 7 (64 位)",
-  "softwareOwnershipAgency": "中国人民银行河南省分行",
+  "softwareOwnershipAgency": "A1000141000266",
   "softwareSource": "03-开源软件",
   "softwareVersionInformation": "Debian GNU/Linux 7 (64 位)",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "softwareDescriptor": "8b9637611fd24d4aa5e64969f3e94384",
@@ -1324,10 +1708,16 @@
   "softwareCategory": "ZCZJLLZ000",
   "softwareManufacturer": "国际商业机器公司",
   "softwareName": "郑州中支MQ1",
-  "softwareOwnershipAgency": "中国人民银行河南省分行",
+  "softwareOwnershipAgency": "A1000141000266",
   "softwareSource": "00-自购软件",
   "softwareVersionInformation": "6",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "softwareDescriptor": "919202246763449fa435f7cb3536bda3",
@@ -1345,10 +1735,16 @@
   "softwareCategory": "YYTYOFFWPR",
   "softwareManufacturer": "金山办公软件有限公司",
   "softwareName": "中国人民银行三门峡市中心支行 WPS Office",
-  "softwareOwnershipAgency": "中国人民银行河南省分行",
+  "softwareOwnershipAgency": "A1000141000266",
   "softwareSource": "00-自购软件",
   "softwareVersionInformation": "WPS_2052_9.1.0.4895_Professional_VBA_RMYH_M5",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "softwareDescriptor": "97780e78854a48e38896d99ddba0e420",
@@ -1365,10 +1761,16 @@
   "softwareCategory": "XTOSFOSWDS",
   "softwareManufacturer": "微软公司",
   "softwareName": "信阳市中支server2012操作系统",
-  "softwareOwnershipAgency": "中国人民银行河南省分行",
+  "softwareOwnershipAgency": "A1000141000266",
   "softwareSource": "00-自购软件",
   "softwareVersionInformation": "win2012 server R2",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "softwareDescriptor": "9a853c0c0dea40d0be11143062f5d0c6",
@@ -1385,10 +1787,16 @@
   "softwareCategory": "XTOSFOSWDS",
   "softwareManufacturer": "微软",
   "softwareName": "郑州中支Microsoft Windows XP Professional (32 位)",
-  "softwareOwnershipAgency": "中国人民银行河南省分行",
+  "softwareOwnershipAgency": "A1000141000266",
   "softwareSource": "02-硬件设备自带",
   "softwareVersionInformation": "Microsoft Windows XP Professional (32 位)",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "softwareDescriptor": "9e26bdd715d841d49abba437d01cdd68",
@@ -1405,10 +1813,16 @@
   "softwareCategory": "ZCZJLLZ000",
   "softwareManufacturer": "微软",
   "softwareName": "郑州中支IIS",
-  "softwareOwnershipAgency": "中国人民银行河南省分行",
+  "softwareOwnershipAgency": "A1000141000266",
   "softwareSource": "00-自购软件",
   "softwareVersionInformation": "7",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "softwareDescriptor": "a3410d75d3dd4e639da6c2b98cd79e56",
@@ -1426,10 +1840,16 @@
   "softwareCategory": "XTOSFOSWDS",
   "softwareManufacturer": "微软公司",
   "softwareName": "中国人民银行南阳市中心支行 操作系统3",
-  "softwareOwnershipAgency": "中国人民银行河南省分行",
+  "softwareOwnershipAgency": "A1000141000266",
   "softwareSource": "02-硬件设备自带",
   "softwareVersionInformation": "Win XP",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "softwareDescriptor": "a4eaa9a0f4e34c32aa56c76785a21214",
@@ -1447,10 +1867,16 @@
   "softwareCategory": "XTOSFOSLNX",
   "softwareManufacturer": "华为技术有限公司",
   "softwareName": "许昌市中支机房桌面云集群1服务器操作系统",
-  "softwareOwnershipAgency": "中国人民银行河南省分行",
+  "softwareOwnershipAgency": "A1000141000266",
   "softwareSource": "01-其它机构提供",
   "softwareVersionInformation": "Linux version 3.0.93-0.8-xen",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "softwareDescriptor": "ab2fecdef26e41e88458d25290f1ba3a",
@@ -1467,10 +1893,16 @@
   "softwareCategory": "ZCZJLLZ000",
   "softwareManufacturer": "威睿信息技术（中国）有限公司",
   "softwareName": "郑州中支VMware Esxi",
-  "softwareOwnershipAgency": "中国人民银行河南省分行",
+  "softwareOwnershipAgency": "A1000141000266",
   "softwareSource": "00-自购软件",
   "softwareVersionInformation": "6",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "softwareDescriptor": "ab42b9f7fe22442b922743f7ca8064ea",
@@ -1487,10 +1919,16 @@
   "softwareCategory": "XTOSFOSLNX",
   "softwareManufacturer": "SuSE Linux AG公司",
   "softwareName": "郑州中支SUSE Linux Enterprise 10 (32 位)",
-  "softwareOwnershipAgency": "中国人民银行河南省分行",
+  "softwareOwnershipAgency": "A1000141000266",
   "softwareSource": "03-开源软件",
   "softwareVersionInformation": "SUSE Linux Enterprise 10 (32 位)",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "softwareDescriptor": "bd3a2370221345cc908903d43398ea13",
@@ -1507,10 +1945,16 @@
   "softwareCategory": "XTOSFOSWDS",
   "softwareManufacturer": "微软公司",
   "softwareName": "中国人民银行三门峡市中心支行 操作系统4",
-  "softwareOwnershipAgency": "中国人民银行河南省分行",
+  "softwareOwnershipAgency": "A1000141000266",
   "softwareSource": "02-硬件设备自带",
   "softwareVersionInformation": "Win 7",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "softwareDescriptor": "c20209a62b2f480682927787c7edcbe7",
@@ -1527,10 +1971,16 @@
   "softwareCategory": "ZCZJLLZ000",
   "softwareManufacturer": "戴尔公司",
   "softwareName": "郑州中支Avamar",
-  "softwareOwnershipAgency": "中国人民银行河南省分行",
+  "softwareOwnershipAgency": "A1000141000266",
   "softwareSource": "00-自购软件",
   "softwareVersionInformation": "7.3",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "softwareDescriptor": "ca6c2e8dc11c497ca43b28d86843c350",
@@ -1548,10 +1998,16 @@
   "softwareCategory": "XTOSFOSWDS",
   "softwareManufacturer": "微软公司",
   "softwareName": "焦作市中支win2008操作系统",
-  "softwareOwnershipAgency": "中国人民银行河南省分行",
+  "softwareOwnershipAgency": "A1000141000266",
   "softwareSource": "00-自购软件",
   "softwareVersionInformation": "Windows 2008 server R2",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "softwareDescriptor": "cd7f79d7468f4700a6f60d715d57e177",
@@ -1569,10 +2025,16 @@
   "softwareCategory": "XTOSFOSLNX",
   "softwareManufacturer": "华为技术有限公司",
   "softwareName": "许昌市中支机房桌面云集群2服务器操作系统",
-  "softwareOwnershipAgency": "中国人民银行河南省分行",
+  "softwareOwnershipAgency": "A1000141000266",
   "softwareSource": "01-其它机构提供",
   "softwareVersionInformation": "Linux version 3.10.0",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "softwareDescriptor": "d5339d820d8d430388bb2bf586bf52e9",
@@ -1589,10 +2051,16 @@
   "softwareCategory": "XTOSFOSLNX",
   "softwareManufacturer": "Ubuntu",
   "softwareName": "郑州中支Ubuntu Linux (64 位)",
-  "softwareOwnershipAgency": "中国人民银行河南省分行",
+  "softwareOwnershipAgency": "A1000141000266",
   "softwareSource": "03-开源软件",
   "softwareVersionInformation": "Ubuntu Linux (64 位)",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "softwareDescriptor": "d59ff6a4283a4dfe9897cb49735facc9",
@@ -1609,10 +2077,16 @@
   "softwareCategory": "XTOSFOSWDS",
   "softwareManufacturer": "微软",
   "softwareName": "郑州中支Microsoft Windows 2000 Server",
-  "softwareOwnershipAgency": "中国人民银行河南省分行",
+  "softwareOwnershipAgency": "A1000141000266",
   "softwareSource": "02-硬件设备自带",
   "softwareVersionInformation": "Microsoft Windows 2000 Server",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "softwareDescriptor": "d95e002de13249d1b3f6597ec803b129",
@@ -1629,10 +2103,16 @@
   "softwareCategory": "XTDBDB2000",
   "softwareManufacturer": "国际商业机器公司",
   "softwareName": "郑州中支DB2",
-  "softwareOwnershipAgency": "中国人民银行河南省分行",
+  "softwareOwnershipAgency": "A1000141000266",
   "softwareSource": "00-自购软件",
   "softwareVersionInformation": "9",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "softwareDescriptor": "db628742d4bb420e81784c72d568428c",
@@ -1649,10 +2129,16 @@
   "softwareCategory": "XTOSFOSWDS",
   "softwareManufacturer": "微软公司",
   "softwareName": "中国人民银行三门峡市中心支行 操作系统3",
-  "softwareOwnershipAgency": "中国人民银行河南省分行",
+  "softwareOwnershipAgency": "A1000141000266",
   "softwareSource": "02-硬件设备自带",
   "softwareVersionInformation": "Win2003 Server",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "softwareDescriptor": "e1d2d9bce100464991df91faae49a6eb",
@@ -1670,10 +2156,16 @@
   "softwareCategory": "XTOSFOSWDS",
   "softwareManufacturer": "微软公司",
   "softwareName": "安阳市中支服务器操作系统1",
-  "softwareOwnershipAgency": "中国人民银行河南省分行",
+  "softwareOwnershipAgency": "A1000141000266",
   "softwareSource": "01-其它机构提供",
   "softwareVersionInformation": "Windows Server 2003 Enterprise Editon",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "softwareDescriptor": "e2b3be2a4bf44e7ba4bc201c1e7ceaa9",
@@ -1691,10 +2183,16 @@
   "softwareCategory": "XTOSFOSLNX",
   "softwareManufacturer": "红帽公司",
   "softwareName": "安阳市中支服务器操作系统2",
-  "softwareOwnershipAgency": "中国人民银行河南省分行",
+  "softwareOwnershipAgency": "A1000141000266",
   "softwareSource": "03-开源软件",
   "softwareVersionInformation": "Red Hat Enterprise Linux Server release 5.3",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "softwareDescriptor": "e2d63574bf6445a791d3d268abf5d311",
@@ -1711,10 +2209,16 @@
   "softwareCategory": "XTOSFOSWDS",
   "softwareManufacturer": "微软",
   "softwareName": "郑州中支Microsoft Windows Server 2012 (64 位)",
-  "softwareOwnershipAgency": "中国人民银行河南省分行",
+  "softwareOwnershipAgency": "A1000141000266",
   "softwareSource": "02-硬件设备自带",
   "softwareVersionInformation": "Microsoft Windows Server 2012 (64 位)",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "softwareDescriptor": "e40c1008aa794b268463b381aa708cbe",
@@ -1731,10 +2235,16 @@
   "softwareCategory": "XTOSFOSLNX",
   "softwareManufacturer": "红帽公司",
   "softwareName": "鹤壁市中支服务器操作系统1",
-  "softwareOwnershipAgency": "中国人民银行河南省分行",
+  "softwareOwnershipAgency": "A1000141000266",
   "softwareSource": "03-开源软件",
   "softwareVersionInformation": "Red Hat Enterprise Linux Server release 5.3",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "softwareDescriptor": "e6530f930cc140f294109bdab8cd6e6b",
@@ -1751,10 +2261,16 @@
   "softwareCategory": "XTOSFOSWDS",
   "softwareManufacturer": "微软公司",
   "softwareName": "中国人民银行三门峡市中心支行 操作系统2",
-  "softwareOwnershipAgency": "中国人民银行河南省分行",
+  "softwareOwnershipAgency": "A1000141000266",
   "softwareSource": "02-硬件设备自带",
   "softwareVersionInformation": "Win2012 Server",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "softwareDescriptor": "e8689acc76ba43b0b44064fb961c9b3d",
@@ -1771,10 +2287,16 @@
   "softwareCategory": "XTOSFOSWDS",
   "softwareManufacturer": "微软",
   "softwareName": "郑州中支Microsoft Windows 7 (64 位)",
-  "softwareOwnershipAgency": "中国人民银行河南省分行",
+  "softwareOwnershipAgency": "A1000141000266",
   "softwareSource": "02-硬件设备自带",
   "softwareVersionInformation": "Microsoft Windows 7 (64 位)",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "softwareDescriptor": "e888f8aa60e6479e8389a4a420e5e272",
@@ -1792,10 +2314,16 @@
   "softwareCategory": "YYHY000000",
   "softwareManufacturer": "IBM",
   "softwareName": "商丘中支数据库软件",
-  "softwareOwnershipAgency": "中国人民银行河南省分行",
+  "softwareOwnershipAgency": "A1000141000266",
   "softwareSource": "01-其它机构提供",
   "softwareVersionInformation": "Lotus Notes 6.0.5 zh-CN",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "softwareDescriptor": "e9e85eb5badf433b917134b3a287045c",
@@ -1813,10 +2341,16 @@
   "softwareCategory": "YYTYOFFWPR",
   "softwareManufacturer": "北京金山办公软件股份有限公司",
   "softwareName": "新乡市中支基础软件WPS OFFICE",
-  "softwareOwnershipAgency": "中国人民银行河南省分行",
+  "softwareOwnershipAgency": "A1000141000266",
   "softwareSource": "01-其它机构提供",
   "softwareVersionInformation": "9.1.0.4895",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "softwareDescriptor": "ee243b4cd39243c2ae6087707138122f",
@@ -1833,10 +2367,16 @@
   "softwareCategory": "XTOSFOSWDS",
   "softwareManufacturer": "微软公司",
   "softwareName": "洛阳市中支服务器操作系统2",
-  "softwareOwnershipAgency": "中国人民银行河南省分行",
+  "softwareOwnershipAgency": "A1000141000266",
   "softwareSource": "01-其它机构提供",
   "softwareVersionInformation": "Windows Server 2003 Enterprise Editon",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "softwareDescriptor": "f09b2fff67d144faa0d1e20a0e97847b",
@@ -1853,10 +2393,16 @@
   "softwareCategory": "XTOSFOSLNX",
   "softwareManufacturer": "Ubuntu",
   "softwareName": "郑州中支Ubuntu Linux (32 位)",
-  "softwareOwnershipAgency": "中国人民银行河南省分行",
+  "softwareOwnershipAgency": "A1000141000266",
   "softwareSource": "03-开源软件",
   "softwareVersionInformation": "Ubuntu Linux (32 位)",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "softwareDescriptor": "f7db704baaff4d6899615f8e5bad5c3b",
@@ -1874,10 +2420,16 @@
   "softwareCategory": "XTOSFOSWDS",
   "softwareManufacturer": "微软公司",
   "softwareName": "商丘市中支服务器操作系统",
-  "softwareOwnershipAgency": "中国人民银行河南省分行",
+  "softwareOwnershipAgency": "A1000141000266",
   "softwareSource": "01-其它机构提供",
   "softwareVersionInformation": "Windows Server 2003",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "softwareDescriptor": "f8407ba0fec346dd94724a4ccbc63b2a",
@@ -1894,10 +2446,16 @@
   "softwareCategory": "XTOSFOSWDS",
   "softwareManufacturer": "微软公司",
   "softwareName": "许昌市中支动环服务器操作系统",
-  "softwareOwnershipAgency": "中国人民银行河南省分行",
+  "softwareOwnershipAgency": "A1000141000266",
   "softwareSource": "01-其它机构提供",
   "softwareVersionInformation": "win2008 server R2",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "softwareDescriptor": "f84f7e2167d64511b804b5d3a1b94d24",
@@ -1914,10 +2472,16 @@
   "softwareCategory": "XTDBMSQ000",
   "softwareManufacturer": "MYSQL AB公司",
   "softwareName": "郑州中支Mysql",
-  "softwareOwnershipAgency": "中国人民银行河南省分行",
+  "softwareOwnershipAgency": "A1000141000266",
   "softwareSource": "00-自购软件",
   "softwareVersionInformation": "5",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "softwareDescriptor": "fcced36ca8c1426d8387e6a8f7c73020",
@@ -1934,9 +2498,15 @@
   "softwareCategory": "XTOSFOSLNX",
   "softwareManufacturer": "红帽公司",
   "softwareName": "洛阳市中支服务器操作系统1",
-  "softwareOwnershipAgency": "中国人民银行河南省分行",
+  "softwareOwnershipAgency": "A1000141000266",
   "softwareSource": "03-开源软件",
   "softwareVersionInformation": "Red Hat Enterprise Linux Server release 5.3",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  }
 ]

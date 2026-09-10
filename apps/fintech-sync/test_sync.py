@@ -327,3 +327,38 @@ def test_merge_model_mgmt_priority_fallback():
         assert row['_dataSource'] == '双源'                      # 无效值不算差异
     finally:
         sync.MERGE_PRIORITY = 'report'
+
+# ---------------- 上报错误修复（fix 阶段） ----------------
+def test_fix_references_name_to_hex():
+    """引用字段名称→库内 facilityDescriptor hex；库内 hex 保持；悬空保留原值并记录。"""
+    name2fd = {'S1': 'aaaa1111aaaa1111aaaa1111aaaa1111', 'S2': 'bbbb2222bbbb2222bbbb2222bbbb2222'}
+    rows = [{'deployDb': 'S1', 'belongCabinet': 'S2', 'other': 'S1'},        # 前两个修，other 不在引用清单
+            {'deployDb': 'aaaa1111aaaa1111aaaa1111aaaa1111'},                # 已是 32hex 保持
+            {'deployDb': '悬空名称'}]                                          # 查不到保留
+    fixed, unresolved = sync._fix_refs_in_rows(rows, name2fd, {'deployDb', 'belongCabinet'},
+                                                fd_set={'aaaa1111aaaa1111aaaa1111aaaa1111'})
+    assert fixed[0]['deployDb'] == 'aaaa1111aaaa1111aaaa1111aaaa1111'
+    assert fixed[0]['belongCabinet'] == 'bbbb2222bbbb2222bbbb2222bbbb2222'
+    assert fixed[0]['other'] == 'S1'                       # 非引用字段不动
+    assert fixed[1]['deployDb'] == 'aaaa1111aaaa1111aaaa1111aaaa1111'   # 库内hex保持且不进悬空
+    assert fixed[2]['deployDb'] == '悬空名称'
+    assert len(unresolved) == 1 and unresolved[0]['value'] == '悬空名称'
+
+def test_fix_code_format_prefers_coded_side():
+    """编码敏感字段：优先取符合编码形态的一侧（mgmt优先下 developmentLanguage 取 report 的 02-Java）。"""
+    rv, mv = '02-Java', 'Java'
+    assert sync._pick_coded(rv, mv) == '02-Java'
+    assert sync._pick_coded(mv, rv) == '02-Java'           # 与参数序无关
+    assert sync._pick_coded('共享支持类', 'YYGJGXL000') == 'YYGJGXL000'
+    assert sync._pick_coded('A1000141000266', '中国人民银行河南省分行') == 'A1000141000266'
+    assert sync._pick_coded('无编码', '也无编码') is None    # 都不符合→None（不动）
+
+def test_default_fill():
+    """空值填充：str 字段填未知；CPU品牌属地沿用顶层 brandLand；不清已有值。"""
+    row = {'assetType': None, 'other': 'x',
+           'rackServer_cpu': [{'brandLand': None, 'cpuFrequency': 2.2}],
+           'brandLand': '00-国内'}
+    out = sync._apply_default_fill('rackServer', row)
+    assert out['assetType'] == '未知' and out['other'] == 'x'
+    assert out['rackServer_cpu'][0]['brandLand'] == '00-国内'   # 沿用顶层
+    assert out['rackServer_cpu'][0]['cpuFrequency'] == 2.2

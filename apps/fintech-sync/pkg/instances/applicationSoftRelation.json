@@ -5,7 +5,13 @@
   "facilityCategory": "GXYS000000",
   "facilityOwnershipAgency": "A1000141000266",
   "softwareDescriptor": "ab42b9f7fe22442b922743f7ca8064ea",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "relationalIdentifier": "042a0f653a2a46a5bd551a40c5864e30",
@@ -13,7 +19,13 @@
   "facilityCategory": "GXYS000000",
   "facilityOwnershipAgency": "A1000141000266",
   "softwareDescriptor": "ab42b9f7fe22442b922743f7ca8064ea",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "relationalIdentifier": "05c42b29435b4cc4b709bea3ea3fc781",
@@ -21,7 +33,13 @@
   "facilityCategory": "GXYS000000",
   "facilityOwnershipAgency": "A1000141000266",
   "softwareDescriptor": "bd3a2370221345cc908903d43398ea13",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "relationalIdentifier": "0de8b2248a3b4c53b845a6397268fd3c",
@@ -29,7 +47,13 @@
   "facilityCategory": "GXYS000000",
   "facilityOwnershipAgency": "A1000141000266",
   "softwareDescriptor": "db628742d4bb420e81784c72d568428c",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "relationalIdentifier": "24b17f6635c7498bae8122284e450d79",
@@ -37,7 +61,13 @@
   "facilityCategory": "GXYS000000",
   "facilityOwnershipAgency": "A1000141000266",
   "softwareDescriptor": "ab42b9f7fe22442b922743f7ca8064ea",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "relationalIdentifier": "2da7be260d9e4a7cb8bbbe90db47b9ac",
@@ -45,7 +75,13 @@
   "facilityCategory": "GXYS000000",
   "facilityOwnershipAgency": "A1000141000266",
   "softwareDescriptor": "ab42b9f7fe22442b922743f7ca8064ea",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "relationalIdentifier": "3203e7ecdef340748ad8ee8a867cd257",
@@ -53,7 +89,13 @@
   "facilityCategory": "GXYS000000",
   "facilityOwnershipAgency": "A1000141000266",
   "softwareDescriptor": "ab42b9f7fe22442b922743f7ca8064ea",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "relationalIdentifier": "37d4d784a0974deb81f6e8488b5d4061",
@@ -61,7 +103,13 @@
   "facilityCategory": "GXYS000000",
   "facilityOwnershipAgency": "A1000141000266",
   "softwareDescriptor": "442fb8a8cffd4e628cfb05d834c695e1",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "relationalIdentifier": "39babdf2f45e409ab92a5213c1e8bb58",
@@ -69,7 +117,13 @@
   "facilityCategory": "GXYS000000",
   "facilityOwnershipAgency": "A1000141000266",
   "softwareDescriptor": "67c47bdb0e044766a19c07bbd33b7d93",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "relationalIdentifier": "3bbd1e05718742599c0b940bd32227ba",
@@ -77,7 +131,13 @@
   "facilityCategory": "GXYS000000",
   "facilityOwnershipAgency": "A1000141000266",
   "softwareDescriptor": "ab42b9f7fe22442b922743f7ca8064ea",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "relationalIdentifier": "3df855a79a98405e99027ae95b37787d",
@@ -85,7 +145,13 @@
   "facilityCategory": "GXYS000000",
   "facilityOwnershipAgency": "A1000141000266",
   "softwareDescriptor": "ab42b9f7fe22442b922743f7ca8064ea",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "relationalIdentifier": "3e45e1cfae9e48c4a74a6e0dc67151a6",
@@ -93,7 +159,13 @@
   "facilityCategory": "GXYS000000",
   "facilityOwnershipAgency": "A1000141000266",
   "softwareDescriptor": "ab42b9f7fe22442b922743f7ca8064ea",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "relationalIdentifier": "4e5575d16ad64841bcca0cd74083810b",
@@ -101,7 +173,13 @@
   "facilityCategory": "GXYS000000",
   "facilityOwnershipAgency": "A1000141000266",
   "softwareDescriptor": "ab42b9f7fe22442b922743f7ca8064ea",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "relationalIdentifier": "5006eca108ae4244ab535d7b3fde89de",
@@ -109,7 +187,13 @@
   "facilityCategory": "GXYS000000",
   "facilityOwnershipAgency": "A1000141000266",
   "softwareDescriptor": "ab42b9f7fe22442b922743f7ca8064ea",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "relationalIdentifier": "51a7506d169c4ed58f5d39be4f9e2b5f",
@@ -117,7 +201,13 @@
   "facilityCategory": "GXYS000000",
   "facilityOwnershipAgency": "A1000141000266",
   "softwareDescriptor": "ab42b9f7fe22442b922743f7ca8064ea",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "relationalIdentifier": "5acf46bfe3e24c2299567077348efe83",
@@ -125,7 +215,13 @@
   "facilityCategory": "GXYS000000",
   "facilityOwnershipAgency": "A1000141000266",
   "softwareDescriptor": "e40c1008aa794b268463b381aa708cbe",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "relationalIdentifier": "5bf78d1b656846daa81959305201bbc6",
@@ -133,7 +229,13 @@
   "facilityCategory": "GXYS000000",
   "facilityOwnershipAgency": "A1000141000266",
   "softwareDescriptor": "ab42b9f7fe22442b922743f7ca8064ea",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "relationalIdentifier": "5caf16e5dc734454875986e5a045eac5",
@@ -141,7 +243,13 @@
   "facilityCategory": "GXYS000000",
   "facilityOwnershipAgency": "A1000141000266",
   "softwareDescriptor": "0c13385d4599417cb9ecfe308c061297",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "relationalIdentifier": "630c0d5edc474353beb8f07db1471154",
@@ -149,7 +257,13 @@
   "facilityCategory": "GXYS000000",
   "facilityOwnershipAgency": "A1000141000266",
   "softwareDescriptor": "ab42b9f7fe22442b922743f7ca8064ea",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "relationalIdentifier": "6d817f15d59247dbb79b1bdf95456108",
@@ -157,7 +271,13 @@
   "facilityCategory": "GXYS000000",
   "facilityOwnershipAgency": "A1000141000266",
   "softwareDescriptor": "0c13385d4599417cb9ecfe308c061297",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "relationalIdentifier": "776503f7d69d4128b4689ebb17f4c622",
@@ -165,7 +285,13 @@
   "facilityCategory": "GXYS000000",
   "facilityOwnershipAgency": "A1000141000266",
   "softwareDescriptor": "ab42b9f7fe22442b922743f7ca8064ea",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "relationalIdentifier": "78266cd32ee6489cbd0a82ba68d244db",
@@ -173,7 +299,13 @@
   "facilityCategory": "GXYS000000",
   "facilityOwnershipAgency": "A1000141000266",
   "softwareDescriptor": "ab42b9f7fe22442b922743f7ca8064ea",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "relationalIdentifier": "7acd4e882a014f6c92848441fa90535a",
@@ -181,7 +313,13 @@
   "facilityCategory": "GXYS000000",
   "facilityOwnershipAgency": "A1000141000266",
   "softwareDescriptor": "ab42b9f7fe22442b922743f7ca8064ea",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "relationalIdentifier": "8ac7e682c1564e30841dcb1978a9f8d2",
@@ -189,7 +327,13 @@
   "facilityCategory": "GXYS000000",
   "facilityOwnershipAgency": "A1000141000266",
   "softwareDescriptor": "455d4dff6bc4448faa19b80ce791870c",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "relationalIdentifier": "90c12aed19e946dfb224ca750fdeede5",
@@ -197,7 +341,13 @@
   "facilityCategory": "GXYS000000",
   "facilityOwnershipAgency": "A1000141000266",
   "softwareDescriptor": "a3410d75d3dd4e639da6c2b98cd79e56",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "relationalIdentifier": "91d2265ef9104b52bf67d9b22907613d",
@@ -205,7 +355,13 @@
   "facilityCategory": "GXYS000000",
   "facilityOwnershipAgency": "A1000141000266",
   "softwareDescriptor": "ab42b9f7fe22442b922743f7ca8064ea",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "relationalIdentifier": "94f150110b614b7e9f2900d0ca8e1ccf",
@@ -213,7 +369,13 @@
   "facilityCategory": "GXYS000000",
   "facilityOwnershipAgency": "A1000141000266",
   "softwareDescriptor": "ab42b9f7fe22442b922743f7ca8064ea",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "relationalIdentifier": "9fd815257b4c42898921deb2fd5ee541",
@@ -221,7 +383,13 @@
   "facilityCategory": "GXYS000000",
   "facilityOwnershipAgency": "A1000141000266",
   "softwareDescriptor": "ab42b9f7fe22442b922743f7ca8064ea",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "relationalIdentifier": "a74e336567234fc98dbf6ea7534c2712",
@@ -229,7 +397,13 @@
   "facilityCategory": "GXYS000000",
   "facilityOwnershipAgency": "A1000141000266",
   "softwareDescriptor": "ab42b9f7fe22442b922743f7ca8064ea",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "relationalIdentifier": "ac1d4bc771ce4850b3addba615900b68",
@@ -237,7 +411,13 @@
   "facilityCategory": "GXYS000000",
   "facilityOwnershipAgency": "A1000141000266",
   "softwareDescriptor": "ab42b9f7fe22442b922743f7ca8064ea",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "relationalIdentifier": "b621be7148dd454e8cd4a539b9f5f011",
@@ -245,7 +425,13 @@
   "facilityCategory": "GXYS000000",
   "facilityOwnershipAgency": "A1000141000266",
   "softwareDescriptor": "4e9a66ec25c94824b38be54124466b04",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "relationalIdentifier": "c1eccc03230549bb882d1e37e05b7b4d",
@@ -253,7 +439,13 @@
   "facilityCategory": "GXYS000000",
   "facilityOwnershipAgency": "A1000141000266",
   "softwareDescriptor": "ab42b9f7fe22442b922743f7ca8064ea",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "relationalIdentifier": "c7d48e6934b442ff8ed72d249c95ab19",
@@ -261,7 +453,13 @@
   "facilityCategory": "GXYS000000",
   "facilityOwnershipAgency": "A1000141000266",
   "softwareDescriptor": "f7db704baaff4d6899615f8e5bad5c3b",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "relationalIdentifier": "c97d8767114a42ca8287fbbaffdb3582",
@@ -269,7 +467,13 @@
   "facilityCategory": "GXYS000000",
   "facilityOwnershipAgency": "A1000141000266",
   "softwareDescriptor": "ab42b9f7fe22442b922743f7ca8064ea",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "relationalIdentifier": "d0cb4f69a3a24921ad172005f49e98a7",
@@ -277,7 +481,13 @@
   "facilityCategory": "GXYS000000",
   "facilityOwnershipAgency": "A1000141000266",
   "softwareDescriptor": "ab42b9f7fe22442b922743f7ca8064ea",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "relationalIdentifier": "d0e3309c10db44dfbeb095b901c08f72",
@@ -285,7 +495,13 @@
   "facilityCategory": "GXYS000000",
   "facilityOwnershipAgency": "A1000141000266",
   "softwareDescriptor": "ab42b9f7fe22442b922743f7ca8064ea",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "relationalIdentifier": "e302cd4f1e26495caa8229bc59315964",
@@ -293,7 +509,13 @@
   "facilityCategory": "GXYS000000",
   "facilityOwnershipAgency": "A1000141000266",
   "softwareDescriptor": "ab42b9f7fe22442b922743f7ca8064ea",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "relationalIdentifier": "e3737b8390b5441bb804452feaf66a4a",
@@ -301,7 +523,13 @@
   "facilityCategory": "GXYS000000",
   "facilityOwnershipAgency": "A1000141000266",
   "softwareDescriptor": "ab42b9f7fe22442b922743f7ca8064ea",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "relationalIdentifier": "e53762b9641b488ab566103855e65f56",
@@ -309,7 +537,13 @@
   "facilityCategory": "GXYS000000",
   "facilityOwnershipAgency": "A1000141000266",
   "softwareDescriptor": "ab42b9f7fe22442b922743f7ca8064ea",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "relationalIdentifier": "f4c7fb59bb9348b1a4ae354b460f0340",
@@ -317,7 +551,13 @@
   "facilityCategory": "GXYS000000",
   "facilityOwnershipAgency": "A1000141000266",
   "softwareDescriptor": "41c43981963448e6974d90d7b258f0d4",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "relationalIdentifier": "f859dcdfe29a4bfd9093839211100f66",
@@ -325,7 +565,13 @@
   "facilityCategory": "GXYS000000",
   "facilityOwnershipAgency": "A1000141000266",
   "softwareDescriptor": "ab42b9f7fe22442b922743f7ca8064ea",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "relationalIdentifier": "faf989d5622148c4a5bd5c2b4843f14d",
@@ -333,7 +579,13 @@
   "facilityCategory": "GXYS000000",
   "facilityOwnershipAgency": "A1000141000266",
   "softwareDescriptor": "ab42b9f7fe22442b922743f7ca8064ea",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "relationalIdentifier": "ff7f948ab110449d87a0eeacb7d26b87",
@@ -341,6 +593,12 @@
   "facilityCategory": "GXYS000000",
   "facilityOwnershipAgency": "A1000141000266",
   "softwareDescriptor": "ab42b9f7fe22442b922743f7ca8064ea",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "assetType": "未知",
+  "operatingSystemVersionInformation": "未知",
+  "deployComputerRoom": "未知"
  }
 ]

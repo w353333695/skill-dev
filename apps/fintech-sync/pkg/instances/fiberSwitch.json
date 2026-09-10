@@ -17,14 +17,14 @@
    {
     "deployArea": "00-主机房-服务器区",
     "deployComputerRoom": "郑州中支主中心机房",
-    "deployDb": "郑州中支主中心机房",
+    "deployDb": "77e1d9d6869044889909f41f30517418",
     "deployFloor": "十一层",
     "deployGallery": "河南省郑州市郑东新区商务外环路21号"
    }
   ],
   "fiberSwitch_installationPosition": [
    {
-    "belongCabinet": "郑州中支主中心服务器机房服务器机柜14",
+    "belongCabinet": "8cd3b423340c4c13a7b83fde3b27c3a1",
     "slotNo": "40"
    }
   ],
@@ -46,7 +46,11 @@
   "numberOfOpticalFiberPorts": "48",
   "operatingSystemVersionInformation": "EMC conmectrix manager 融合网络版 11.1结构操作系统7.0.0A",
   "supportIpv6": "False",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "59b466c4d1c5491598a78adbb45f4c1c",
@@ -66,14 +70,14 @@
    {
     "deployArea": "00-主机房-服务器区",
     "deployComputerRoom": "郑州中支转接中心机房",
-    "deployDb": "郑州中支转接中心机房",
+    "deployDb": "96f680d2b4f348a198a690325356a7c4",
     "deployFloor": "二层",
     "deployGallery": "河南省郑州市经开区第三大街与经北二路东北办公楼"
    }
   ],
   "fiberSwitch_installationPosition": [
    {
-    "belongCabinet": "郑州中支转接中心机房机柜1",
+    "belongCabinet": "c711cdad51d745e2b7c044f3cdd63781",
     "slotNo": "1"
    }
   ],
@@ -95,7 +99,11 @@
   "numberOfOpticalFiberPorts": "24",
   "operatingSystemVersionInformation": "FabricManager Server",
   "supportIpv6": "False",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "7819314d24de4e2792df82068dd52da0",
@@ -115,14 +123,14 @@
    {
     "deployArea": "00-主机房-服务器区",
     "deployComputerRoom": "郑州中支主中心机房",
-    "deployDb": "郑州中支主中心机房",
+    "deployDb": "77e1d9d6869044889909f41f30517418",
     "deployFloor": "十一层",
     "deployGallery": "河南省郑州市郑东新区商务外环路21号"
    }
   ],
   "fiberSwitch_installationPosition": [
    {
-    "belongCabinet": "郑州中支主中心服务器机房服务器机柜14",
+    "belongCabinet": "8cd3b423340c4c13a7b83fde3b27c3a1",
     "slotNo": "35"
    }
   ],
@@ -144,7 +152,11 @@
   "numberOfOpticalFiberPorts": "48",
   "operatingSystemVersionInformation": "EMC conmectrix manager 融合网络版 11.1结构操作系统7.0.0A",
   "supportIpv6": "False",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "deployComputerRoom": "未知"
  },
  {
   "facilityDescriptor": "e09055ee03a5423f8d37a3102fe11528",
@@ -164,14 +176,14 @@
    {
     "deployArea": "00-主机房-服务器区",
     "deployComputerRoom": "郑州中支转接中心机房",
-    "deployDb": "郑州中支转接中心机房",
+    "deployDb": "96f680d2b4f348a198a690325356a7c4",
     "deployFloor": "二层",
     "deployGallery": "河南省郑州市经开区第三大街与经北二路东北办公楼"
    }
   ],
   "fiberSwitch_installationPosition": [
    {
-    "belongCabinet": "郑州中支转接中心机房机柜1",
+    "belongCabinet": "c711cdad51d745e2b7c044f3cdd63781",
     "slotNo": "3"
    }
   ],
@@ -193,6 +205,10 @@
   "numberOfOpticalFiberPorts": "24",
   "operatingSystemVersionInformation": "FabricManager Server",
   "supportIpv6": "False",
-  "_dataSource": "双源"
+  "_dataSource": "双源",
+  "serviceProvider": "未知",
+  "softwareInstallationConditions": "未知",
+  "otherSystems": "未知",
+  "deployComputerRoom": "未知"
  }
 ]
