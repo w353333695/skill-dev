@@ -12,9 +12,10 @@
 | `instances/<name>.json` | 36 模型实例数据（共 3314 行，**与 CMDB 兼容的最终写入形态**：structs=list[dict]、enums=list[str]） |
 
 实例数据特性：
+- **本包为「管理端覆盖上报端」版**（MERGE_PRIORITY=mgmt）：双源冲突取管理值；管理值无效（脱敏/空）回落上报值；差异仍记 _diffDetail
 - `_dataSource`（enum：上报/管理/双源/双源(有差异)）+ `_diffDetail`（structs 数组：attr/reportValue/mgmtValue）溯源字段（继承自 CUSTOM@FINTECHDATA）
 - `facilityOwnershipAgency` 已统一编号 `A1000141000266`
-- 双源合并：脱敏值无效、上报优先；lowVoltage 存在 4 条双写（双侧同实体不同键，既定决策）
+- lowVoltage 存在 4 条双写（双侧同实体不同键，既定决策）
 
 ## 已知外部依赖
 
@@ -58,6 +59,7 @@ python3 import_all.py --host <IP> --only switches
 - 模型预检：43/43 成功
 - 全量 upsert：36/36 模型 update=3314 failed=0；幂等回归 insert=0
 - `--clean` 全链：清实例 3314 → 清模型 36/36 → 导模型 43/43 → 导实例 insert=3314 failed=0；重建后抽查 `_dataSource`/`switches_deployment`(structs)/`networkSecurityCapability`(enums)/机构编号 全部正确
+- **mgmt 覆盖版**（本包）：全量 update=3314 failed=0；与 report 版数据面差异 = 2 条真差异行取管理侧值（powerSupplyRelation 端点/dataCenterSpacing 机房）+ 3 机构口径豁免属性取向管理侧
 
 ## 唯一键映射（与源环境一致）
 

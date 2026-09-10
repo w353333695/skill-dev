@@ -5,8 +5,8 @@
   "airlineDistance": 11.0,
   "facilityCategory": "GXDC000000",
   "facilityOwnershipAgency": "A1000141000266",
-  "localDb": "郑州中支主中心机房",
-  "oppositeDb": "郑州中支转接中心机房",
+  "localDb": "77e1d9d6869044889909f41f30517418",
+  "oppositeDb": "96f680d2b4f348a198a690325356a7c4",
   "_dataSource": "双源(有差异)",
   "_diffDetail": [
    {

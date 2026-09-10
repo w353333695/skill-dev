@@ -118,6 +118,7 @@ def test_normalize_row_full():
 PAIRS = [('设施标识符', '设施标识符', 'fd'), ('管理IP地址', '管理IP地址', 'ip')]
 
 def test_merge_model_all_branches():
+    sync.MERGE_PRIORITY = 'report'   # 本测试锁 report 优先行为
     r = [{'fd': 'a', 'ip': '1.1.1.1'}, {'fd': 'b', 'ip': '2.2.2.2'},
          {'fd': 'c', 'ip': '3.3.3.3'}, {'ip': 'no-key'}]
     m = [{'fd': 'a', 'ip': '1.1.1.1'}, {'fd': 'b', 'ip': '******'},
@@ -197,6 +198,7 @@ def test_loose_eq_list_join():
     assert not sync._loose_eq(['00-IPSec'], ['01-MACSec'])
 
 def test_merge_model_enums_list_diff_detail():
+    sync.MERGE_PRIORITY = 'report'   # 本测试锁 report 优先行为
     # enums list 差异明细 reportValue/mgmtValue 为 join 后的 str
     r = [{'fd': 'a', 'nsc': ['00-IPSec', '01-MACSec']}]
     m = [{'fd': 'a', 'nsc': ['00-IPSec']}]
@@ -231,6 +233,7 @@ def test_normalize_row_nested_and_assemble():
     assert assembled2['x_deployment'] == [{'deployArea': '01-主机房-网络区'}]
 
 def test_merge_model_struct_leaf_diff():
+    sync.MERGE_PRIORITY = 'report'   # 本测试锁 report 优先行为
     r = [{'fd': 'a', 'dep': {'area': '01-网络区', 'db': 'D1'}}]
     m = [{'fd': 'a', 'dep': {'area': '01-网络区', 'db': 'D2'}}]
     merged, stats, _ = sync.merge_model(r, m, 'fd', ['fd', 'dep'])
@@ -292,3 +295,35 @@ def test_search_total(monkeypatch):
     assert sync.search_total('x@FINTECHDATA') == 407
     monkeypatch.setattr(sync, 'api_cli', lambda *a, **k: (0, '', ''))   # exit0+空=0
     assert sync.search_total('x@FINTECHDATA') == 0
+
+# ---------------- 管理端覆盖上报端（MERGE_PRIORITY='mgmt'） ----------------
+def test_merge_model_mgmt_priority():
+    """管理端覆盖：冲突取管理值；管理脱敏/空时回落上报值；_diffDetail 字段名不变（reportValue=上报原值）。"""
+    sync.MERGE_PRIORITY = 'mgmt'
+    try:
+        r = [{'fd': 'a', 'ip': '1.1.1.1'}, {'fd': 'b', 'ip': '2.2.2.2'},
+             {'fd': 'c', 'ip': '3.3.3.3'}]
+        m = [{'fd': 'a', 'ip': '1.1.1.1'}, {'fd': 'b', 'ip': '9.9.9.9'},
+             {'fd': 'd', 'ip': '******'}]           # b 冲突取管理；d 管理脱敏→回落上报？d 仅管理存在
+        merged, stats, orphan = sync.merge_model(r, m, 'fd', ['fd', 'ip'])
+        by = {row['fd']: row for row in merged if row.get('fd')}
+        assert by['a']['_dataSource'] == '双源' and by['a']['_diffDetail'] == []
+        assert by['b']['ip'] == '9.9.9.9' and by['b']['_dataSource'] == '双源(有差异)'   # 管理优先
+        assert by['b']['_diffDetail'] == [{'attr': 'ip', 'reportValue': '2.2.2.2', 'mgmtValue': '9.9.9.9'}]
+        assert by['d']['ip'] == '******' and by['d']['_dataSource'] == '管理'  # 仅管理：原样保留标来源（脱敏剔除是 transform 层职责）
+        assert stats['both_diff'] == 1 and stats['mgmt_only'] == 1
+    finally:
+        sync.MERGE_PRIORITY = 'report'              # 恢复全局默认，不污染其他测试
+
+def test_merge_model_mgmt_priority_fallback():
+    """管理值无效（脱敏/空）时回落上报值——优先侧无效不产生空字段。"""
+    sync.MERGE_PRIORITY = 'mgmt'
+    try:
+        r = [{'fd': 'x', 'ip': '1.1.1.1', 'brand': '华三'}]
+        m = [{'fd': 'x', 'ip': None, 'brand': None}]            # 管理侧全无效（transform 后脱敏/空→None）
+        merged, _, _ = sync.merge_model(r, m, 'fd', ['fd', 'ip', 'brand'])
+        row = next(row for row in merged if row.get('fd') == 'x')
+        assert row['ip'] == '1.1.1.1' and row['brand'] == '华三'
+        assert row['_dataSource'] == '双源'                      # 无效值不算差异
+    finally:
+        sync.MERGE_PRIORITY = 'report'

@@ -7,7 +7,12 @@ from pathlib import Path
 import openpyxl
 
 # ============================== CONFIG ==============================
-SIDES = {'report': Path('/workspace/tmp/人行上报'), 'mgmt': Path('/workspace/tmp/人行管理')}
+_APP_DIR = Path(__file__).resolve().parent
+SIDES = {'report': _APP_DIR / '人行上报', 'mgmt': _APP_DIR / '人行管理'}
+
+# 双源冲突取值优先级：'report'=上报覆盖管理（默认）| 'mgmt'=管理覆盖上报。
+# 仅影响【双侧都有效且不等】时的取值与豁免属性归属；无效值（脱敏/空）永远回落对侧。
+MERGE_PRIORITY = 'mgmt'
 
 # excel主名(上报侧) → {'model_id','key'(唯一键中文列名),'mgmt_alias'(管理侧文件主名,缺省同名)}
 MODEL_MAP = {
@@ -1626,14 +1631,15 @@ def merge_model(r_rows, m_rows, key_attr, attr_ids):
                     # 双侧都有：逐叶比较（struct 子字段级差异定位；单侧缺叶不记差异）
                     rl = dict(_iter_leaves(rv, a)) if isinstance(rv, dict) else {a: rv}
                     ml = dict(_iter_leaves(mv, a)) if isinstance(mv, dict) else {a: mv}
-                    row[a] = rv
+                    row[a] = mv if MERGE_PRIORITY == 'mgmt' else rv      # 冲突取优先侧
                     for p in sorted(set(rl) & set(ml)):            # 只比双侧都有值的叶
                         if not _loose_eq(rl[p], ml[p]):
                             _s = lambda v: ','.join(str(x) for x in v) if isinstance(v, list) else str(v)
                             diffs.append({'attr': p, 'reportValue': _s(rl[p]),
                                           'mgmtValue': _s(ml[p])})
                 if a in DIFF_EXEMPT_ATTRS:
-                    diffs = [d for d in diffs if d['attr'] != a]   # 口径豁免：值取上报，不记差异
+                    # 口径豁免：不记差异；值取优先侧
+                    diffs = [d for d in diffs if d['attr'].split('.')[0] != a]
             row['_dataSource'] = '双源(有差异)' if diffs else '双源'
             row['_diffDetail'] = diffs
             stats['both_diff' if diffs else 'both_same'] += 1

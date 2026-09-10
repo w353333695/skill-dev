@@ -4375,7 +4375,7 @@
   "facilityOwnershipAgency": "A1000141000266",
   "powerSupplyAsset": "平顶山市中支电源室UPS电源主机B",
   "powerSupplyAssetCategory": "FAPDUPS000",
-  "powerUsedAsset": "平顶山市中支中心机房",
+  "powerUsedAsset": "cef9b1d212644d818ae42965f7395b25",
   "powerUsedAssetCategory": "DC00000000",
   "_dataSource": "双源(有差异)",
   "_diffDetail": [

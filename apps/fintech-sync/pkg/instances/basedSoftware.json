@@ -15,7 +15,7 @@
   "softwareCategory": "YYTYOFFWPR",
   "softwareManufacturer": "北京金山办公软件股份有限公司",
   "softwareName": "商丘市中支基础软件WPS OFFICE",
-  "softwareOwnershipAgency": "中国人民银行郑州中心支行",
+  "softwareOwnershipAgency": "中国人民银行河南省分行",
   "softwareSource": "01-其它机构提供",
   "softwareVersionInformation": "9.1.0.4895",
   "_dataSource": "双源"
@@ -36,7 +36,7 @@
   "softwareCategory": "XTOSFOSLNX",
   "softwareManufacturer": "红帽软件",
   "softwareName": "周口市中支服务器操作系统2",
-  "softwareOwnershipAgency": "中国人民银行郑州中心支行",
+  "softwareOwnershipAgency": "中国人民银行河南省分行",
   "softwareSource": "03-开源软件",
   "softwareVersionInformation": "CentOS Linux release 7.3.1611",
   "_dataSource": "双源"
@@ -56,7 +56,7 @@
   "softwareCategory": "XTOSFOSLNX",
   "softwareManufacturer": "Red Hat",
   "softwareName": "中国人民银行三门峡市中心支行 操作系统1",
-  "softwareOwnershipAgency": "中国人民银行郑州中心支行",
+  "softwareOwnershipAgency": "中国人民银行河南省分行",
   "softwareSource": "02-硬件设备自带",
   "softwareVersionInformation": "Linnux 5 Enterprise",
   "_dataSource": "双源"
@@ -77,7 +77,7 @@
   "softwareCategory": "YYTYOFFWPR",
   "softwareManufacturer": "北京金山办公软件股份有限公司",
   "softwareName": "中国人民银行南阳市中心支行基础软件WPS OFFICE",
-  "softwareOwnershipAgency": "中国人民银行郑州中心支行",
+  "softwareOwnershipAgency": "中国人民银行河南省分行",
   "softwareSource": "01-其它机构提供",
   "softwareVersionInformation": "9.1.0.4895",
   "_dataSource": "双源"
@@ -97,7 +97,7 @@
   "softwareCategory": "XTOSFOSLNX",
   "softwareManufacturer": "红帽软件",
   "softwareName": "郑州中支CentOS 4/5/6/7 (64 位)",
-  "softwareOwnershipAgency": "中国人民银行郑州中心支行",
+  "softwareOwnershipAgency": "中国人民银行河南省分行",
   "softwareSource": "03-开源软件",
   "softwareVersionInformation": "CentOS 4/5/6/7 (64 位)",
   "_dataSource": "双源"
@@ -118,7 +118,7 @@
   "softwareCategory": "ZCZJLLZ000",
   "softwareManufacturer": "威睿信息技术（中国）有限公司",
   "softwareName": "焦作市中支VMWare虚拟化操作系统",
-  "softwareOwnershipAgency": "中国人民银行郑州中心支行",
+  "softwareOwnershipAgency": "中国人民银行河南省分行",
   "softwareSource": "01-其它机构提供",
   "softwareVersionInformation": "ESXi-6.5.0",
   "_dataSource": "双源"
@@ -139,7 +139,7 @@
   "softwareCategory": "YYTYOFFPDF",
   "softwareManufacturer": "微软公司",
   "softwareName": "中国人民银行三门峡市中心支行 Visio绘图软件",
-  "softwareOwnershipAgency": "中国人民银行郑州中心支行",
+  "softwareOwnershipAgency": "中国人民银行河南省分行",
   "softwareSource": "02-硬件设备自带",
   "softwareVersionInformation": "Office Visio2016",
   "_dataSource": "双源"
@@ -160,7 +160,7 @@
   "softwareCategory": "XTOSFOSWDS",
   "softwareManufacturer": "微软公司",
   "softwareName": "许昌市中支动环Sql server数据库",
-  "softwareOwnershipAgency": "中国人民银行郑州中心支行",
+  "softwareOwnershipAgency": "中国人民银行河南省分行",
   "softwareSource": "01-其它机构提供",
   "softwareVersionInformation": "Sql server 2008 R2",
   "_dataSource": "双源"
@@ -181,7 +181,7 @@
   "softwareCategory": "XTOSFOSLNX",
   "softwareManufacturer": "Red Hat",
   "softwareName": "焦作市中支服务器操作系统1",
-  "softwareOwnershipAgency": "中国人民银行郑州中心支行",
+  "softwareOwnershipAgency": "中国人民银行河南省分行",
   "softwareSource": "03-开源软件",
   "softwareVersionInformation": "Red Hat Enterprise Linux Server release 5.3",
   "_dataSource": "双源"
@@ -201,7 +201,7 @@
   "softwareCategory": "ZCZJLLZ000",
   "softwareManufacturer": "威睿信息技术（中国）有限公司",
   "softwareName": "郑州中支ESXI",
-  "softwareOwnershipAgency": "中国人民银行郑州中心支行",
+  "softwareOwnershipAgency": "中国人民银行河南省分行",
   "softwareSource": "01-其它机构提供",
   "softwareVersionInformation": "6.5",
   "_dataSource": "双源"
@@ -221,7 +221,7 @@
   "softwareCategory": "XTOSFOSWDS",
   "softwareManufacturer": "微软",
   "softwareName": "郑州中支Microsoft Windows Server 2008 R2 (64 位)",
-  "softwareOwnershipAgency": "中国人民银行郑州中心支行",
+  "softwareOwnershipAgency": "中国人民银行河南省分行",
   "softwareSource": "02-硬件设备自带",
   "softwareVersionInformation": "Microsoft Windows Server 2008 R2 (64 位)",
   "_dataSource": "双源"
@@ -241,7 +241,7 @@
   "softwareCategory": "XTOSFOSLNX",
   "softwareManufacturer": "Debian",
   "softwareName": "郑州中支Debian GNU/Linux 8 (64 位)",
-  "softwareOwnershipAgency": "中国人民银行郑州中心支行",
+  "softwareOwnershipAgency": "中国人民银行河南省分行",
   "softwareSource": "03-开源软件",
   "softwareVersionInformation": "Debian GNU/Linux 8 (64 位)",
   "_dataSource": "双源"
@@ -262,7 +262,7 @@
   "softwareCategory": "XTOSFOSWDS",
   "softwareManufacturer": "微软公司",
   "softwareName": "焦作市中支服务器操作系统2",
-  "softwareOwnershipAgency": "中国人民银行郑州中心支行",
+  "softwareOwnershipAgency": "中国人民银行河南省分行",
   "softwareSource": "01-其它机构提供",
   "softwareVersionInformation": "Windows Server 2003 Enterprise Editon",
   "_dataSource": "双源"
@@ -282,7 +282,7 @@
   "softwareCategory": "XTOSFOSLNX",
   "softwareManufacturer": "SuSE Linux AG公司",
   "softwareName": "郑州中支SUSE Linux Enterprise 10 (64 位)",
-  "softwareOwnershipAgency": "中国人民银行郑州中心支行",
+  "softwareOwnershipAgency": "中国人民银行河南省分行",
   "softwareSource": "03-开源软件",
   "softwareVersionInformation": "SUSE Linux Enterprise 10 (64 位)",
   "_dataSource": "双源"
@@ -302,7 +302,7 @@
   "softwareCategory": "XTOSFOSLNX",
   "softwareManufacturer": "Debian",
   "softwareName": "郑州中支Debian GNU/Linux 6 (64 位)",
-  "softwareOwnershipAgency": "中国人民银行郑州中心支行",
+  "softwareOwnershipAgency": "中国人民银行河南省分行",
   "softwareSource": "03-开源软件",
   "softwareVersionInformation": "Debian GNU/Linux 6 (64 位)",
   "_dataSource": "双源"
@@ -322,7 +322,7 @@
   "softwareCategory": "XTOSFOSWDS",
   "softwareManufacturer": "微软公司",
   "softwareName": "许昌市中支win2008操作系统",
-  "softwareOwnershipAgency": "中国人民银行郑州中心支行",
+  "softwareOwnershipAgency": "中国人民银行河南省分行",
   "softwareSource": "00-自购软件",
   "softwareVersionInformation": "win2008 server R2",
   "_dataSource": "双源"
@@ -343,7 +343,7 @@
   "softwareCategory": "XTOSFOSWDS",
   "softwareManufacturer": "微软",
   "softwareName": "周口市中支服务器操作系统1",
-  "softwareOwnershipAgency": "中国人民银行郑州中心支行",
+  "softwareOwnershipAgency": "中国人民银行河南省分行",
   "softwareSource": "01-其它机构提供",
   "softwareVersionInformation": "Windows Server 2003 Enterprise X64 Editon",
   "_dataSource": "双源"
@@ -363,7 +363,7 @@
   "softwareCategory": "XTOSFOSWDS",
   "softwareManufacturer": "微软",
   "softwareName": "郑州中支Microsoft Windows Server 2003 Standard (64 位)",
-  "softwareOwnershipAgency": "中国人民银行郑州中心支行",
+  "softwareOwnershipAgency": "中国人民银行河南省分行",
   "softwareSource": "02-硬件设备自带",
   "softwareVersionInformation": "Microsoft Windows Server 2003 Standard (64 位)",
   "_dataSource": "双源"
@@ -383,7 +383,7 @@
   "softwareCategory": "ZCZJJCLTMC",
   "softwareManufacturer": "Apache公司",
   "softwareName": "郑州中支Tomcat",
-  "softwareOwnershipAgency": "中国人民银行郑州中心支行",
+  "softwareOwnershipAgency": "中国人民银行河南省分行",
   "softwareSource": "00-自购软件",
   "softwareVersionInformation": "7",
   "_dataSource": "双源"
@@ -403,7 +403,7 @@
   "softwareCategory": "XTDBSQS000",
   "softwareManufacturer": "微软",
   "softwareName": "郑州中支SQL Server",
-  "softwareOwnershipAgency": "中国人民银行郑州中心支行",
+  "softwareOwnershipAgency": "中国人民银行河南省分行",
   "softwareSource": "00-自购软件",
   "softwareVersionInformation": "v2014",
   "_dataSource": "双源"
@@ -423,7 +423,7 @@
   "softwareCategory": "XTOSFOSLNX",
   "softwareManufacturer": "红帽软件",
   "softwareName": "郑州中支CentOS 8 (64 位)",
-  "softwareOwnershipAgency": "中国人民银行郑州中心支行",
+  "softwareOwnershipAgency": "中国人民银行河南省分行",
   "softwareSource": "03-开源软件",
   "softwareVersionInformation": "CentOS 8 (64 位)",
   "_dataSource": "双源"
@@ -443,7 +443,7 @@
   "softwareCategory": "XTOSFOSWDS",
   "softwareManufacturer": "微软",
   "softwareName": "郑州中支Microsoft Windows Server 2003 Standard (32 位)",
-  "softwareOwnershipAgency": "中国人民银行郑州中心支行",
+  "softwareOwnershipAgency": "中国人民银行河南省分行",
   "softwareSource": "02-硬件设备自带",
   "softwareVersionInformation": "Microsoft Windows Server 2003 Standard (32 位)",
   "_dataSource": "双源"
@@ -463,7 +463,7 @@
   "softwareCategory": "XTOSFOSLNX",
   "softwareManufacturer": "红帽软件",
   "softwareName": "郑州中支Red Hat Enterprise Linux 6 (64 位)",
-  "softwareOwnershipAgency": "中国人民银行郑州中心支行",
+  "softwareOwnershipAgency": "中国人民银行河南省分行",
   "softwareSource": "03-开源软件",
   "softwareVersionInformation": "Red Hat Enterprise Linux 6 (64 位)",
   "_dataSource": "双源"
@@ -484,7 +484,7 @@
   "softwareCategory": "YYTYWLP000",
   "softwareManufacturer": "北京金山办公软件股份有限公司",
   "softwareName": "鹤壁市中支基础软件WPS OFFICE",
-  "softwareOwnershipAgency": "中国人民银行郑州中心支行",
+  "softwareOwnershipAgency": "中国人民银行河南省分行",
   "softwareSource": "01-其它机构提供",
   "softwareVersionInformation": "9.1.0.4895",
   "_dataSource": "双源"
@@ -504,7 +504,7 @@
   "softwareCategory": "ZCZJLLZ000",
   "softwareManufacturer": "南昌蓝智科技有限公司",
   "softwareName": "郑州中支JspxCMS",
-  "softwareOwnershipAgency": "中国人民银行郑州中心支行",
+  "softwareOwnershipAgency": "中国人民银行河南省分行",
   "softwareSource": "00-自购软件",
   "softwareVersionInformation": "10.1",
   "_dataSource": "双源"
@@ -524,7 +524,7 @@
   "softwareCategory": "XTOSFOSWDS",
   "softwareManufacturer": "微软公司",
   "softwareName": "平顶山市中支服务器操作系统",
-  "softwareOwnershipAgency": "中国人民银行郑州中心支行",
+  "softwareOwnershipAgency": "中国人民银行河南省分行",
   "softwareSource": "02-硬件设备自带",
   "softwareVersionInformation": "Windows Server 2012 R2 Standard",
   "_dataSource": "双源"
@@ -545,7 +545,7 @@
   "softwareCategory": "YYHY000000",
   "softwareManufacturer": "宝利通中国",
   "softwareName": "许昌市中支机房多点控制单元服务器（MCU）操作系统",
-  "softwareOwnershipAgency": "中国人民银行郑州中心支行",
+  "softwareOwnershipAgency": "中国人民银行河南省分行",
   "softwareSource": "01-其它机构提供",
   "softwareVersionInformation": "V2.5.1-Aug 06,2012 rew.33387",
   "_dataSource": "双源"
@@ -566,7 +566,7 @@
   "softwareCategory": "YYTYOFFWPR",
   "softwareManufacturer": "金山办公软件股份有限公司",
   "softwareName": "漯河市中支基础软件WPS OFFICE",
-  "softwareOwnershipAgency": "中国人民银行郑州中心支行",
+  "softwareOwnershipAgency": "中国人民银行河南省分行",
   "softwareSource": "01-其它机构提供",
   "softwareVersionInformation": "9.1.0.4895",
   "_dataSource": "双源"
@@ -587,7 +587,7 @@
   "softwareCategory": "XTOSFOSWDS",
   "softwareManufacturer": "微软公司",
   "softwareName": "漯河市中支终端Windows7操作系统",
-  "softwareOwnershipAgency": "中国人民银行郑州中心支行",
+  "softwareOwnershipAgency": "中国人民银行河南省分行",
   "softwareSource": "01-其它机构提供",
   "softwareVersionInformation": "Windows 7专业版",
   "_dataSource": "双源"
@@ -607,7 +607,7 @@
   "softwareCategory": "XTOSFOSLNX",
   "softwareManufacturer": "红帽软件（北京）有限公司",
   "softwareName": "许昌市中支IT运维监控操作系统",
-  "softwareOwnershipAgency": "中国人民银行郑州中心支行",
+  "softwareOwnershipAgency": "中国人民银行河南省分行",
   "softwareSource": "01-其它机构提供",
   "softwareVersionInformation": "Red Hat Enterprise Linux Server5.3",
   "_dataSource": "双源"
@@ -628,7 +628,7 @@
   "softwareCategory": "ZCXNJSZ000",
   "softwareManufacturer": "深信服科技",
   "softwareName": "驻马店市中支虚拟桌面接入管理系统",
-  "softwareOwnershipAgency": "中国人民银行郑州中心支行",
+  "softwareOwnershipAgency": "中国人民银行河南省分行",
   "softwareSource": "00-自购软件",
   "softwareVersionInformation": "VDI5.38R2",
   "_dataSource": "双源"
@@ -648,7 +648,7 @@
   "softwareCategory": "XTOSFOSWDS",
   "softwareManufacturer": "微软公司",
   "softwareName": "许昌市中支win2012操作系统",
-  "softwareOwnershipAgency": "中国人民银行郑州中心支行",
+  "softwareOwnershipAgency": "中国人民银行河南省分行",
   "softwareSource": "00-自购软件",
   "softwareVersionInformation": "win2012 server R2",
   "_dataSource": "双源"
@@ -668,7 +668,7 @@
   "softwareCategory": "XTOSFOSUNX",
   "softwareManufacturer": "SCO公司",
   "softwareName": "郑州中支SCO OpenServer 5",
-  "softwareOwnershipAgency": "中国人民银行郑州中心支行",
+  "softwareOwnershipAgency": "中国人民银行河南省分行",
   "softwareSource": "02-硬件设备自带",
   "softwareVersionInformation": "SCO OpenServer 5",
   "_dataSource": "双源"
@@ -689,7 +689,7 @@
   "softwareCategory": "XTOSFOSWDS",
   "softwareManufacturer": "微软公司",
   "softwareName": "中国人民银行南阳市中心支行 操作系统1",
-  "softwareOwnershipAgency": "中国人民银行郑州中心支行",
+  "softwareOwnershipAgency": "中国人民银行河南省分行",
   "softwareSource": "02-硬件设备自带",
   "softwareVersionInformation": "Win2003 Server",
   "_dataSource": "双源"
@@ -710,7 +710,7 @@
   "softwareCategory": "XTOSFOSLNX",
   "softwareManufacturer": "开源软件",
   "softwareName": "安阳市中支服务器操作系统3",
-  "softwareOwnershipAgency": "中国人民银行郑州中心支行",
+  "softwareOwnershipAgency": "中国人民银行河南省分行",
   "softwareSource": "03-开源软件",
   "softwareVersionInformation": "Centos7",
   "_dataSource": "双源"
@@ -731,7 +731,7 @@
   "softwareCategory": "XTOSFOSWDS",
   "softwareManufacturer": "微软公司",
   "softwareName": "漯河市中支终端WindowsXP操作系统",
-  "softwareOwnershipAgency": "中国人民银行郑州中心支行",
+  "softwareOwnershipAgency": "中国人民银行河南省分行",
   "softwareSource": "01-其它机构提供",
   "softwareVersionInformation": "windows XP专业版",
   "_dataSource": "双源"
@@ -752,7 +752,7 @@
   "softwareCategory": "YYTYOFFWPR",
   "softwareManufacturer": "北京金山办公软件股份有限公司",
   "softwareName": "濮阳市中支基础软件WPS OFFICE",
-  "softwareOwnershipAgency": "中国人民银行郑州中心支行",
+  "softwareOwnershipAgency": "中国人民银行河南省分行",
   "softwareSource": "01-其它机构提供",
   "softwareVersionInformation": "9.1.0.4895",
   "_dataSource": "双源"
@@ -773,7 +773,7 @@
   "softwareCategory": "YYTYOFFWPR",
   "softwareManufacturer": "北京金山办公软件股份有限公司",
   "softwareName": "济源市中支基础软件WPS OFFICE",
-  "softwareOwnershipAgency": "中国人民银行郑州中心支行",
+  "softwareOwnershipAgency": "中国人民银行河南省分行",
   "softwareSource": "01-其它机构提供",
   "softwareVersionInformation": "9.1.0.4895",
   "_dataSource": "双源"
@@ -794,7 +794,7 @@
   "softwareCategory": "ZCZJIHT000",
   "softwareManufacturer": "威睿信息技术（中国）有限公司",
   "softwareName": "许昌市中支VMWare虚拟化操作系统",
-  "softwareOwnershipAgency": "中国人民银行郑州中心支行",
+  "softwareOwnershipAgency": "中国人民银行河南省分行",
   "softwareSource": "01-其它机构提供",
   "softwareVersionInformation": "ESXi-6.5.0",
   "_dataSource": "双源"
@@ -814,7 +814,7 @@
   "softwareCategory": "XTOSFOSLNX",
   "softwareManufacturer": "红帽软件",
   "softwareName": "郑州中支Red Hat Enterprise Linux 7 (64 位)",
-  "softwareOwnershipAgency": "中国人民银行郑州中心支行",
+  "softwareOwnershipAgency": "中国人民银行河南省分行",
   "softwareSource": "03-开源软件",
   "softwareVersionInformation": "Red Hat Enterprise Linux 7 (64 位)",
   "_dataSource": "双源"
@@ -835,7 +835,7 @@
   "softwareCategory": "YYTYOFFWPR",
   "softwareManufacturer": "北京金山办公软件股份有限公司",
   "softwareName": "开封市中支基础软件WPS OFFICE",
-  "softwareOwnershipAgency": "中国人民银行郑州中心支行",
+  "softwareOwnershipAgency": "中国人民银行河南省分行",
   "softwareSource": "01-其它机构提供",
   "softwareVersionInformation": "9.1.0.4833",
   "_dataSource": "双源"
@@ -856,7 +856,7 @@
   "softwareCategory": "ZCXNJSZ000",
   "softwareManufacturer": "深信服科技",
   "softwareName": "驻马店市中支虚拟化管理平台",
-  "softwareOwnershipAgency": "中国人民银行郑州中心支行",
+  "softwareOwnershipAgency": "中国人民银行河南省分行",
   "softwareSource": "00-自购软件",
   "softwareVersionInformation": "VMP5.3.8R2",
   "_dataSource": "双源"
@@ -876,7 +876,7 @@
   "softwareCategory": "ZCZJLLZ000",
   "softwareManufacturer": "北京东方通技术有限公司",
   "softwareName": "郑州中支TLQ",
-  "softwareOwnershipAgency": "中国人民银行郑州中心支行",
+  "softwareOwnershipAgency": "中国人民银行河南省分行",
   "softwareSource": "00-自购软件",
   "softwareVersionInformation": "8",
   "_dataSource": "双源"
@@ -896,7 +896,7 @@
   "softwareCategory": "XTOSFOSLNX",
   "softwareManufacturer": "SuSE Linux AG公司",
   "softwareName": "郑州中支SUSE Linux Enterprise 11 (64 位)",
-  "softwareOwnershipAgency": "中国人民银行郑州中心支行",
+  "softwareOwnershipAgency": "中国人民银行河南省分行",
   "softwareSource": "03-开源软件",
   "softwareVersionInformation": "SUSE Linux Enterprise 11 (64 位)",
   "_dataSource": "双源"
@@ -917,7 +917,7 @@
   "softwareCategory": "XTOSFOSWDS",
   "softwareManufacturer": "微软公司",
   "softwareName": "焦作市中支服务器操作系统3",
-  "softwareOwnershipAgency": "中国人民银行郑州中心支行",
+  "softwareOwnershipAgency": "中国人民银行河南省分行",
   "softwareSource": "01-其它机构提供",
   "softwareVersionInformation": "Windows Server 2012 R2 Standard",
   "_dataSource": "双源"
@@ -938,7 +938,7 @@
   "softwareCategory": "XTOSFOSLNX",
   "softwareManufacturer": "红帽公司",
   "softwareName": "濮阳市中支基础软件操作系统1",
-  "softwareOwnershipAgency": "中国人民银行郑州中心支行",
+  "softwareOwnershipAgency": "中国人民银行河南省分行",
   "softwareSource": "03-开源软件",
   "softwareVersionInformation": "Red Hat Enterprise Linux Server release 5.3",
   "_dataSource": "双源"
@@ -958,7 +958,7 @@
   "softwareCategory": "XTOSFOSWDS",
   "softwareManufacturer": "微软公司",
   "softwareName": "中国人民银行三门峡市中心支行 操作系统5",
-  "softwareOwnershipAgency": "中国人民银行郑州中心支行",
+  "softwareOwnershipAgency": "中国人民银行河南省分行",
   "softwareSource": "02-硬件设备自带",
   "softwareVersionInformation": "Win XP",
   "_dataSource": "双源"
@@ -978,7 +978,7 @@
   "softwareCategory": "XTOSFOSWDS",
   "softwareManufacturer": "微软",
   "softwareName": "郑州中支Microsoft Windows Server 2003 (32 位)",
-  "softwareOwnershipAgency": "中国人民银行郑州中心支行",
+  "softwareOwnershipAgency": "中国人民银行河南省分行",
   "softwareSource": "02-硬件设备自带",
   "softwareVersionInformation": "Microsoft Windows Server 2003 (32 位)",
   "_dataSource": "双源"
@@ -998,7 +998,7 @@
   "softwareCategory": "XTOSFOSWDS",
   "softwareManufacturer": "微软公司",
   "softwareName": "信阳市中支server2008操作系统",
-  "softwareOwnershipAgency": "中国人民银行郑州中心支行",
+  "softwareOwnershipAgency": "中国人民银行河南省分行",
   "softwareSource": "00-自购软件",
   "softwareVersionInformation": "win2008 server R2",
   "_dataSource": "双源"
@@ -1018,7 +1018,7 @@
   "softwareCategory": "ZCZJLLZ000",
   "softwareManufacturer": "国际商业机器公司",
   "softwareName": "郑州中支Domino",
-  "softwareOwnershipAgency": "中国人民银行郑州中心支行",
+  "softwareOwnershipAgency": "中国人民银行河南省分行",
   "softwareSource": "00-自购软件",
   "softwareVersionInformation": "6",
   "_dataSource": "双源"
@@ -1039,7 +1039,7 @@
   "softwareCategory": "XTOSFOSWDS",
   "softwareManufacturer": "微软公司",
   "softwareName": "中国人民银行南阳市中心支行 操作系统2",
-  "softwareOwnershipAgency": "中国人民银行郑州中心支行",
+  "softwareOwnershipAgency": "中国人民银行河南省分行",
   "softwareSource": "02-硬件设备自带",
   "softwareVersionInformation": "Win 7",
   "_dataSource": "双源"
@@ -1060,7 +1060,7 @@
   "softwareCategory": "XTOSFOSWDS",
   "softwareManufacturer": "微软公司",
   "softwareName": "濮阳市中支基础软件操作系统2",
-  "softwareOwnershipAgency": "中国人民银行郑州中心支行",
+  "softwareOwnershipAgency": "中国人民银行河南省分行",
   "softwareSource": "01-其它机构提供",
   "softwareVersionInformation": "Windows Server 2003 Enterprise x64 Edition",
   "_dataSource": "双源"
@@ -1080,7 +1080,7 @@
   "softwareCategory": "XTOSFOSWDS",
   "softwareManufacturer": "微软",
   "softwareName": "郑州中支Microsoft Windows 7 (32 位)",
-  "softwareOwnershipAgency": "中国人民银行郑州中心支行",
+  "softwareOwnershipAgency": "中国人民银行河南省分行",
   "softwareSource": "02-硬件设备自带",
   "softwareVersionInformation": "Microsoft Windows 7 (32 位)",
   "_dataSource": "双源"
@@ -1101,7 +1101,7 @@
   "softwareCategory": "YYTYOFFPPT",
   "softwareManufacturer": "北京书生公司",
   "softwareName": "中国人民银行南阳市中心支行 书生阅览器",
-  "softwareOwnershipAgency": "中国人民银行郑州中心支行",
+  "softwareOwnershipAgency": "中国人民银行河南省分行",
   "softwareSource": "00-自购软件",
   "softwareVersionInformation": "Sursen Reader 7.2.1347.4299",
   "_dataSource": "双源"
@@ -1121,7 +1121,7 @@
   "softwareCategory": "ZCZJLLZ000",
   "softwareManufacturer": "国际商业机器公司",
   "softwareName": "郑州中支MQ2",
-  "softwareOwnershipAgency": "中国人民银行郑州中心支行",
+  "softwareOwnershipAgency": "中国人民银行河南省分行",
   "softwareSource": "00-自购软件",
   "softwareVersionInformation": "8",
   "_dataSource": "双源"
@@ -1141,7 +1141,7 @@
   "softwareCategory": "XTOSFOSWDS",
   "softwareManufacturer": "微软公司",
   "softwareName": "鹤壁市中支服务器操作系统3",
-  "softwareOwnershipAgency": "中国人民银行郑州中心支行",
+  "softwareOwnershipAgency": "中国人民银行河南省分行",
   "softwareSource": "01-其它机构提供",
   "softwareVersionInformation": "Windows Server 2012 R2 Standard",
   "_dataSource": "双源"
@@ -1162,7 +1162,7 @@
   "softwareCategory": "XTOSFOSLNX",
   "softwareManufacturer": "红帽公司",
   "softwareName": "新乡市中支服务器操作系统2",
-  "softwareOwnershipAgency": "中国人民银行郑州中心支行",
+  "softwareOwnershipAgency": "中国人民银行河南省分行",
   "softwareSource": "03-开源软件",
   "softwareVersionInformation": "Red Hat Enterprise Linux Server release 5.3",
   "_dataSource": "双源"
@@ -1182,7 +1182,7 @@
   "softwareCategory": "ZCZJLLZ000",
   "softwareManufacturer": "国际商业机器公司",
   "softwareName": "郑州中支WAS",
-  "softwareOwnershipAgency": "中国人民银行郑州中心支行",
+  "softwareOwnershipAgency": "中国人民银行河南省分行",
   "softwareSource": "00-自购软件",
   "softwareVersionInformation": "7",
   "_dataSource": "双源"
@@ -1203,7 +1203,7 @@
   "softwareCategory": "XTOSFOSWDS",
   "softwareManufacturer": "微软公司",
   "softwareName": "新乡市中支服务器操作系统1",
-  "softwareOwnershipAgency": "中国人民银行郑州中心支行",
+  "softwareOwnershipAgency": "中国人民银行河南省分行",
   "softwareSource": "01-其它机构提供",
   "softwareVersionInformation": "Windows Server 2003 Enterprise Editon",
   "_dataSource": "双源"
@@ -1223,7 +1223,7 @@
   "softwareCategory": "XTOSFOSWDS",
   "softwareManufacturer": "微软公司",
   "softwareName": "鹤壁市中支服务器操作系统2",
-  "softwareOwnershipAgency": "中国人民银行郑州中心支行",
+  "softwareOwnershipAgency": "中国人民银行河南省分行",
   "softwareSource": "01-其它机构提供",
   "softwareVersionInformation": "Windows Server 2003 Enterprise Editon",
   "_dataSource": "双源"
@@ -1243,7 +1243,7 @@
   "softwareCategory": "XTOSFOSLNX",
   "softwareManufacturer": "SuSE Linux AG公司",
   "softwareName": "郑州中支SUSE Linux Enterprise 8/9 (32 位)",
-  "softwareOwnershipAgency": "中国人民银行郑州中心支行",
+  "softwareOwnershipAgency": "中国人民银行河南省分行",
   "softwareSource": "03-开源软件",
   "softwareVersionInformation": "SUSE Linux Enterprise 8/9 (32 位)",
   "_dataSource": "双源"
@@ -1264,7 +1264,7 @@
   "softwareCategory": "YYTYOFFPPT",
   "softwareManufacturer": "北京书生公司",
   "softwareName": "中国人民银行三门峡市中心支行 书生阅览器",
-  "softwareOwnershipAgency": "中国人民银行郑州中心支行",
+  "softwareOwnershipAgency": "中国人民银行河南省分行",
   "softwareSource": "00-自购软件",
   "softwareVersionInformation": "Sursen Reader 7.2.1347.4299",
   "_dataSource": "双源"
@@ -1284,7 +1284,7 @@
   "softwareCategory": "XTOSFOSWDS",
   "softwareManufacturer": "微软",
   "softwareName": "郑州中支Microsoft Windows Server 2003 (64 位)",
-  "softwareOwnershipAgency": "中国人民银行郑州中心支行",
+  "softwareOwnershipAgency": "中国人民银行河南省分行",
   "softwareSource": "02-硬件设备自带",
   "softwareVersionInformation": "Microsoft Windows Server 2003 (64 位)",
   "_dataSource": "双源"
@@ -1304,7 +1304,7 @@
   "softwareCategory": "XTOSFOSLNX",
   "softwareManufacturer": "Debian",
   "softwareName": "郑州中支Debian GNU/Linux 7 (64 位)",
-  "softwareOwnershipAgency": "中国人民银行郑州中心支行",
+  "softwareOwnershipAgency": "中国人民银行河南省分行",
   "softwareSource": "03-开源软件",
   "softwareVersionInformation": "Debian GNU/Linux 7 (64 位)",
   "_dataSource": "双源"
@@ -1324,7 +1324,7 @@
   "softwareCategory": "ZCZJLLZ000",
   "softwareManufacturer": "国际商业机器公司",
   "softwareName": "郑州中支MQ1",
-  "softwareOwnershipAgency": "中国人民银行郑州中心支行",
+  "softwareOwnershipAgency": "中国人民银行河南省分行",
   "softwareSource": "00-自购软件",
   "softwareVersionInformation": "6",
   "_dataSource": "双源"
@@ -1345,7 +1345,7 @@
   "softwareCategory": "YYTYOFFWPR",
   "softwareManufacturer": "金山办公软件有限公司",
   "softwareName": "中国人民银行三门峡市中心支行 WPS Office",
-  "softwareOwnershipAgency": "中国人民银行郑州中心支行",
+  "softwareOwnershipAgency": "中国人民银行河南省分行",
   "softwareSource": "00-自购软件",
   "softwareVersionInformation": "WPS_2052_9.1.0.4895_Professional_VBA_RMYH_M5",
   "_dataSource": "双源"
@@ -1365,7 +1365,7 @@
   "softwareCategory": "XTOSFOSWDS",
   "softwareManufacturer": "微软公司",
   "softwareName": "信阳市中支server2012操作系统",
-  "softwareOwnershipAgency": "中国人民银行郑州中心支行",
+  "softwareOwnershipAgency": "中国人民银行河南省分行",
   "softwareSource": "00-自购软件",
   "softwareVersionInformation": "win2012 server R2",
   "_dataSource": "双源"
@@ -1385,7 +1385,7 @@
   "softwareCategory": "XTOSFOSWDS",
   "softwareManufacturer": "微软",
   "softwareName": "郑州中支Microsoft Windows XP Professional (32 位)",
-  "softwareOwnershipAgency": "中国人民银行郑州中心支行",
+  "softwareOwnershipAgency": "中国人民银行河南省分行",
   "softwareSource": "02-硬件设备自带",
   "softwareVersionInformation": "Microsoft Windows XP Professional (32 位)",
   "_dataSource": "双源"
@@ -1405,7 +1405,7 @@
   "softwareCategory": "ZCZJLLZ000",
   "softwareManufacturer": "微软",
   "softwareName": "郑州中支IIS",
-  "softwareOwnershipAgency": "中国人民银行郑州中心支行",
+  "softwareOwnershipAgency": "中国人民银行河南省分行",
   "softwareSource": "00-自购软件",
   "softwareVersionInformation": "7",
   "_dataSource": "双源"
@@ -1426,7 +1426,7 @@
   "softwareCategory": "XTOSFOSWDS",
   "softwareManufacturer": "微软公司",
   "softwareName": "中国人民银行南阳市中心支行 操作系统3",
-  "softwareOwnershipAgency": "中国人民银行郑州中心支行",
+  "softwareOwnershipAgency": "中国人民银行河南省分行",
   "softwareSource": "02-硬件设备自带",
   "softwareVersionInformation": "Win XP",
   "_dataSource": "双源"
@@ -1444,10 +1444,10 @@
   ],
   "brandLand": "00-国内",
   "numberOfSoftwareInstance": "3",
-  "softwareCategory": "XTOSWOSLNX",
+  "softwareCategory": "XTOSFOSLNX",
   "softwareManufacturer": "华为技术有限公司",
   "softwareName": "许昌市中支机房桌面云集群1服务器操作系统",
-  "softwareOwnershipAgency": "中国人民银行郑州中心支行",
+  "softwareOwnershipAgency": "中国人民银行河南省分行",
   "softwareSource": "01-其它机构提供",
   "softwareVersionInformation": "Linux version 3.0.93-0.8-xen",
   "_dataSource": "双源"
@@ -1467,7 +1467,7 @@
   "softwareCategory": "ZCZJLLZ000",
   "softwareManufacturer": "威睿信息技术（中国）有限公司",
   "softwareName": "郑州中支VMware Esxi",
-  "softwareOwnershipAgency": "中国人民银行郑州中心支行",
+  "softwareOwnershipAgency": "中国人民银行河南省分行",
   "softwareSource": "00-自购软件",
   "softwareVersionInformation": "6",
   "_dataSource": "双源"
@@ -1487,7 +1487,7 @@
   "softwareCategory": "XTOSFOSLNX",
   "softwareManufacturer": "SuSE Linux AG公司",
   "softwareName": "郑州中支SUSE Linux Enterprise 10 (32 位)",
-  "softwareOwnershipAgency": "中国人民银行郑州中心支行",
+  "softwareOwnershipAgency": "中国人民银行河南省分行",
   "softwareSource": "03-开源软件",
   "softwareVersionInformation": "SUSE Linux Enterprise 10 (32 位)",
   "_dataSource": "双源"
@@ -1507,7 +1507,7 @@
   "softwareCategory": "XTOSFOSWDS",
   "softwareManufacturer": "微软公司",
   "softwareName": "中国人民银行三门峡市中心支行 操作系统4",
-  "softwareOwnershipAgency": "中国人民银行郑州中心支行",
+  "softwareOwnershipAgency": "中国人民银行河南省分行",
   "softwareSource": "02-硬件设备自带",
   "softwareVersionInformation": "Win 7",
   "_dataSource": "双源"
@@ -1527,7 +1527,7 @@
   "softwareCategory": "ZCZJLLZ000",
   "softwareManufacturer": "戴尔公司",
   "softwareName": "郑州中支Avamar",
-  "softwareOwnershipAgency": "中国人民银行郑州中心支行",
+  "softwareOwnershipAgency": "中国人民银行河南省分行",
   "softwareSource": "00-自购软件",
   "softwareVersionInformation": "7.3",
   "_dataSource": "双源"
@@ -1548,7 +1548,7 @@
   "softwareCategory": "XTOSFOSWDS",
   "softwareManufacturer": "微软公司",
   "softwareName": "焦作市中支win2008操作系统",
-  "softwareOwnershipAgency": "中国人民银行郑州中心支行",
+  "softwareOwnershipAgency": "中国人民银行河南省分行",
   "softwareSource": "00-自购软件",
   "softwareVersionInformation": "Windows 2008 server R2",
   "_dataSource": "双源"
@@ -1566,10 +1566,10 @@
   ],
   "brandLand": "00-国内",
   "numberOfSoftwareInstance": "3",
-  "softwareCategory": "XTOSWOSLNX",
+  "softwareCategory": "XTOSFOSLNX",
   "softwareManufacturer": "华为技术有限公司",
   "softwareName": "许昌市中支机房桌面云集群2服务器操作系统",
-  "softwareOwnershipAgency": "中国人民银行郑州中心支行",
+  "softwareOwnershipAgency": "中国人民银行河南省分行",
   "softwareSource": "01-其它机构提供",
   "softwareVersionInformation": "Linux version 3.10.0",
   "_dataSource": "双源"
@@ -1589,7 +1589,7 @@
   "softwareCategory": "XTOSFOSLNX",
   "softwareManufacturer": "Ubuntu",
   "softwareName": "郑州中支Ubuntu Linux (64 位)",
-  "softwareOwnershipAgency": "中国人民银行郑州中心支行",
+  "softwareOwnershipAgency": "中国人民银行河南省分行",
   "softwareSource": "03-开源软件",
   "softwareVersionInformation": "Ubuntu Linux (64 位)",
   "_dataSource": "双源"
@@ -1609,7 +1609,7 @@
   "softwareCategory": "XTOSFOSWDS",
   "softwareManufacturer": "微软",
   "softwareName": "郑州中支Microsoft Windows 2000 Server",
-  "softwareOwnershipAgency": "中国人民银行郑州中心支行",
+  "softwareOwnershipAgency": "中国人民银行河南省分行",
   "softwareSource": "02-硬件设备自带",
   "softwareVersionInformation": "Microsoft Windows 2000 Server",
   "_dataSource": "双源"
@@ -1629,7 +1629,7 @@
   "softwareCategory": "XTDBDB2000",
   "softwareManufacturer": "国际商业机器公司",
   "softwareName": "郑州中支DB2",
-  "softwareOwnershipAgency": "中国人民银行郑州中心支行",
+  "softwareOwnershipAgency": "中国人民银行河南省分行",
   "softwareSource": "00-自购软件",
   "softwareVersionInformation": "9",
   "_dataSource": "双源"
@@ -1649,7 +1649,7 @@
   "softwareCategory": "XTOSFOSWDS",
   "softwareManufacturer": "微软公司",
   "softwareName": "中国人民银行三门峡市中心支行 操作系统3",
-  "softwareOwnershipAgency": "中国人民银行郑州中心支行",
+  "softwareOwnershipAgency": "中国人民银行河南省分行",
   "softwareSource": "02-硬件设备自带",
   "softwareVersionInformation": "Win2003 Server",
   "_dataSource": "双源"
@@ -1670,7 +1670,7 @@
   "softwareCategory": "XTOSFOSWDS",
   "softwareManufacturer": "微软公司",
   "softwareName": "安阳市中支服务器操作系统1",
-  "softwareOwnershipAgency": "中国人民银行郑州中心支行",
+  "softwareOwnershipAgency": "中国人民银行河南省分行",
   "softwareSource": "01-其它机构提供",
   "softwareVersionInformation": "Windows Server 2003 Enterprise Editon",
   "_dataSource": "双源"
@@ -1691,7 +1691,7 @@
   "softwareCategory": "XTOSFOSLNX",
   "softwareManufacturer": "红帽公司",
   "softwareName": "安阳市中支服务器操作系统2",
-  "softwareOwnershipAgency": "中国人民银行郑州中心支行",
+  "softwareOwnershipAgency": "中国人民银行河南省分行",
   "softwareSource": "03-开源软件",
   "softwareVersionInformation": "Red Hat Enterprise Linux Server release 5.3",
   "_dataSource": "双源"
@@ -1711,7 +1711,7 @@
   "softwareCategory": "XTOSFOSWDS",
   "softwareManufacturer": "微软",
   "softwareName": "郑州中支Microsoft Windows Server 2012 (64 位)",
-  "softwareOwnershipAgency": "中国人民银行郑州中心支行",
+  "softwareOwnershipAgency": "中国人民银行河南省分行",
   "softwareSource": "02-硬件设备自带",
   "softwareVersionInformation": "Microsoft Windows Server 2012 (64 位)",
   "_dataSource": "双源"
@@ -1731,7 +1731,7 @@
   "softwareCategory": "XTOSFOSLNX",
   "softwareManufacturer": "红帽公司",
   "softwareName": "鹤壁市中支服务器操作系统1",
-  "softwareOwnershipAgency": "中国人民银行郑州中心支行",
+  "softwareOwnershipAgency": "中国人民银行河南省分行",
   "softwareSource": "03-开源软件",
   "softwareVersionInformation": "Red Hat Enterprise Linux Server release 5.3",
   "_dataSource": "双源"
@@ -1751,7 +1751,7 @@
   "softwareCategory": "XTOSFOSWDS",
   "softwareManufacturer": "微软公司",
   "softwareName": "中国人民银行三门峡市中心支行 操作系统2",
-  "softwareOwnershipAgency": "中国人民银行郑州中心支行",
+  "softwareOwnershipAgency": "中国人民银行河南省分行",
   "softwareSource": "02-硬件设备自带",
   "softwareVersionInformation": "Win2012 Server",
   "_dataSource": "双源"
@@ -1771,7 +1771,7 @@
   "softwareCategory": "XTOSFOSWDS",
   "softwareManufacturer": "微软",
   "softwareName": "郑州中支Microsoft Windows 7 (64 位)",
-  "softwareOwnershipAgency": "中国人民银行郑州中心支行",
+  "softwareOwnershipAgency": "中国人民银行河南省分行",
   "softwareSource": "02-硬件设备自带",
   "softwareVersionInformation": "Microsoft Windows 7 (64 位)",
   "_dataSource": "双源"
@@ -1792,7 +1792,7 @@
   "softwareCategory": "YYHY000000",
   "softwareManufacturer": "IBM",
   "softwareName": "商丘中支数据库软件",
-  "softwareOwnershipAgency": "中国人民银行郑州中心支行",
+  "softwareOwnershipAgency": "中国人民银行河南省分行",
   "softwareSource": "01-其它机构提供",
   "softwareVersionInformation": "Lotus Notes 6.0.5 zh-CN",
   "_dataSource": "双源"
@@ -1813,7 +1813,7 @@
   "softwareCategory": "YYTYOFFWPR",
   "softwareManufacturer": "北京金山办公软件股份有限公司",
   "softwareName": "新乡市中支基础软件WPS OFFICE",
-  "softwareOwnershipAgency": "中国人民银行郑州中心支行",
+  "softwareOwnershipAgency": "中国人民银行河南省分行",
   "softwareSource": "01-其它机构提供",
   "softwareVersionInformation": "9.1.0.4895",
   "_dataSource": "双源"
@@ -1833,7 +1833,7 @@
   "softwareCategory": "XTOSFOSWDS",
   "softwareManufacturer": "微软公司",
   "softwareName": "洛阳市中支服务器操作系统2",
-  "softwareOwnershipAgency": "中国人民银行郑州中心支行",
+  "softwareOwnershipAgency": "中国人民银行河南省分行",
   "softwareSource": "01-其它机构提供",
   "softwareVersionInformation": "Windows Server 2003 Enterprise Editon",
   "_dataSource": "双源"
@@ -1853,7 +1853,7 @@
   "softwareCategory": "XTOSFOSLNX",
   "softwareManufacturer": "Ubuntu",
   "softwareName": "郑州中支Ubuntu Linux (32 位)",
-  "softwareOwnershipAgency": "中国人民银行郑州中心支行",
+  "softwareOwnershipAgency": "中国人民银行河南省分行",
   "softwareSource": "03-开源软件",
   "softwareVersionInformation": "Ubuntu Linux (32 位)",
   "_dataSource": "双源"
@@ -1874,7 +1874,7 @@
   "softwareCategory": "XTOSFOSWDS",
   "softwareManufacturer": "微软公司",
   "softwareName": "商丘市中支服务器操作系统",
-  "softwareOwnershipAgency": "中国人民银行郑州中心支行",
+  "softwareOwnershipAgency": "中国人民银行河南省分行",
   "softwareSource": "01-其它机构提供",
   "softwareVersionInformation": "Windows Server 2003",
   "_dataSource": "双源"
@@ -1894,7 +1894,7 @@
   "softwareCategory": "XTOSFOSWDS",
   "softwareManufacturer": "微软公司",
   "softwareName": "许昌市中支动环服务器操作系统",
-  "softwareOwnershipAgency": "中国人民银行郑州中心支行",
+  "softwareOwnershipAgency": "中国人民银行河南省分行",
   "softwareSource": "01-其它机构提供",
   "softwareVersionInformation": "win2008 server R2",
   "_dataSource": "双源"
@@ -1914,7 +1914,7 @@
   "softwareCategory": "XTDBMSQ000",
   "softwareManufacturer": "MYSQL AB公司",
   "softwareName": "郑州中支Mysql",
-  "softwareOwnershipAgency": "中国人民银行郑州中心支行",
+  "softwareOwnershipAgency": "中国人民银行河南省分行",
   "softwareSource": "00-自购软件",
   "softwareVersionInformation": "5",
   "_dataSource": "双源"
@@ -1934,7 +1934,7 @@
   "softwareCategory": "XTOSFOSLNX",
   "softwareManufacturer": "红帽公司",
   "softwareName": "洛阳市中支服务器操作系统1",
-  "softwareOwnershipAgency": "中国人民银行郑州中心支行",
+  "softwareOwnershipAgency": "中国人民银行河南省分行",
   "softwareSource": "03-开源软件",
   "softwareVersionInformation": "Red Hat Enterprise Linux Server release 5.3",
   "_dataSource": "双源"
