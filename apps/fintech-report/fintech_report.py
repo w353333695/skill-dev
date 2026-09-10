@@ -947,13 +947,12 @@ def _inst_content_hash(converted: dict) -> str:
     return hashlib.md5(json.dumps(converted, ensure_ascii=False, sort_keys=True).encode()).hexdigest()
 
 
-def report_one_model(rule: dict, report_obj: dict, conf: dict, variant: str,
-                     scope_full: bool) -> dict:
+def report_one_model(rule: dict, report_obj: dict, conf: dict, variant: str) -> dict:
     """单模型一次上报。返回任务记录（已写 CMDB + 原文已落盘）。
 
     增量逻辑（P1，替代 Go compareWithExisted + fintech_report_data 台账）:
       取该 objectId 最近一次 success 且未回滚的任务 → 读 dataFile 原文 →
-      diff 出 new/update/delete；无历史任务或 scope_full 则全量 new。
+      diff 出 new/update/delete；无历史任务（首次）则全量 new。
     """
     object_id = rule["objectId"]
     batch_num = int(rule.get("batchNum") or 100)
@@ -991,7 +990,8 @@ def report_one_model(rule: dict, report_obj: dict, conf: dict, variant: str,
         #    「数据已存在」，删除人行侧也未落地）
         confirmed, prev_meta, inflight_descs, exists_map = _last_success_data(object_id)
         new_items, update_items, delete_items = [], [], []
-        if not confirmed or scope_full:
+        if not confirmed:
+            # 无成功台账（首次接入/全回滚后）→ 全部按 new
             new_items = [v for d, v in converted.items()
                          if d not in inflight_descs and not _exists_unchanged(
                              d, converted[d], exists_map)]
@@ -1611,7 +1611,7 @@ def _confirmed_snapshot(payload: dict) -> dict[str, dict]:
             if inst.get("_confirmed")}
 
 
-def cmd_report(scope: str, full: bool) -> int:
+def cmd_report(scope: str) -> int:
     conf = load_global_config()
     rules = load_rules(scope)
     objects = load_report_objects()
@@ -1629,7 +1629,7 @@ def cmd_report(scope: str, full: bool) -> int:
             LOG.warning("[report] %s 无 objectDefine（规则实例未同步模型定义），跳过", oid)
             continue
         try:
-            report_one_model(rule, report_obj, conf, variant, full)
+            report_one_model(rule, report_obj, conf, variant)
         except Exception as e:
             LOG.error("[report] %s 任务失败: %s\n%s", oid, e, traceback.format_exc())
             rc = 1
@@ -1832,7 +1832,6 @@ def main(argv: list[str] | None = None) -> int:
     sub = ap.add_subparsers(dest="cmd", required=True)
     p_report = sub.add_parser("report", help="执行上报（留空 scope=全部启用规则）")
     p_report.add_argument("--scope", default="", help="逗号分隔 objectId；留空=全量")
-    p_report.add_argument("--full", action="store_true", help="忽略增量直接全量 new")
     p_rb = sub.add_parser("rollback", help="回滚任务本地状态（下次全量重报）")
     p_rb.add_argument("--task", required=True, help="taskId")
     p_cl = sub.add_parser("cleanup", help="按清理规则清理历史（默认规则不启用=不清理）")
@@ -1842,7 +1841,7 @@ def main(argv: list[str] | None = None) -> int:
     logging.basicConfig(level=logging.DEBUG if DEBUG else logging.INFO,
                         format="%(asctime)s %(levelname)s %(message)s", stream=sys.stderr)
     if args.cmd == "report":
-        return cmd_report(args.scope, args.full)
+        return cmd_report(args.scope)
     if args.cmd == "rollback":
         return cmd_rollback(args.task)
     return cmd_cleanup(args.dry_run)
