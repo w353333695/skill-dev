@@ -1002,11 +1002,17 @@ def report_one_model(rule: dict, report_obj: dict, conf: dict, variant: str) -> 
         #    内容变了放行重报；删除行：inFlight 实例人行侧未落地，hash 未变不删）
         confirmed, prev_meta, inflight_map, exists_map = _last_success_data(object_id)
 
+        def _inflight_inst(desc: str) -> dict | None:
+            return inflight_map.get(desc)
+
         def _frozen(desc: str, data: dict) -> bool:
             """在途冻结精判：实例在 inFlight 原文且内容与冻结时一致 → 冻结；
             内容变了 → 放行（新内容人行库没有，值得重报——粗粒度冻结曾把
             实例修改吞成 noReport，2026-09-10 实测修正）。"""
-            h = inflight_map.get(desc)
+            inst = _inflight_inst(desc)
+            if not inst:
+                return False
+            h = str(inst.get("_hash") or "")
             return bool(h) and h == _inst_content_hash(data)
 
         new_items, update_items, delete_items = [], [], []
@@ -1015,6 +1021,21 @@ def report_one_model(rule: dict, report_obj: dict, conf: dict, variant: str) -> 
             new_items = [v for d, v in converted.items()
                          if not _frozen(d, v) and not _exists_unchanged(
                              d, converted[d], exists_map)]
+            # 无台账也要检查在途删除（v1.0.35: 在途实例被 CMDB 删除时发 delete，
+            # 与是否有 confirmed 台账无关）
+            for desc, inst in inflight_map.items():
+                if desc in converted:
+                    continue
+                snap = inst.get("_snapshot") or {}
+                if snap:
+                    row = dict(snap)
+                    row[converter.key_desc] = desc
+                    row[converter.key_cate] = inst.get("_cate", "")
+                else:
+                    row = {converter.key_desc: desc,
+                           converter.key_cate: inst.get("_cate", "")}
+                row.pop("_hash", None)
+                delete_items.append(row)
         else:
             for desc, data in converted.items():
                 if _frozen(desc, data):
@@ -1027,12 +1048,14 @@ def report_one_model(rule: dict, report_obj: dict, conf: dict, variant: str) -> 
                 elif old.get("_hash") != _inst_content_hash({k: v for k, v in data.items()}):
                     update_items.append(data)           # 内容变了 → update
                 # 否则一致 → 不报（已确认且无变化）
+            # delete 判断覆盖 confirmed + inFlight（v1.0.35）：
+            # 在途实例被 CMDB 删除也发 delete——组后续入库则人行侧生效，
+            # 未入库则失败明细诚实暴露、组结算后下次重删（不漏删避免人行侧脏数据）
             for desc, old in confirmed.items():
-                if desc in inflight_map and inflight_map.get(desc) == old.get("_hash"):
-                    continue   # 在途冻结：不生成 delete 行（人行侧未落地）
+                _inf = _inflight_inst(desc)
+                if _inf and str(_inf.get("_hash") or "") == str(old.get("_hash") or ""):
+                    continue   # 在途且内容未变：人行侧未落地，不删
                 if desc not in converted:
-                    # Go convertDeleteData: 从该实例上次成功快照取完整字段（人行对
-                    # delete 行也校验归属机构等）；快照缺失退两键（Go RecoverReportInst）
                     snap = old.get("_snapshot") or {}
                     if snap:
                         row = dict(snap)
@@ -1043,6 +1066,20 @@ def report_one_model(rule: dict, report_obj: dict, conf: dict, variant: str) -> 
                                converter.key_cate: old.get("_cate", "")}
                     row.pop("_hash", None)
                     delete_items.append(row)
+            for desc, inst in inflight_map.items():
+                # 在途实例被 CMDB 删除（不在 converted）→ 也发 delete（从 inFlight 快照取字段）
+                if desc in confirmed or desc in converted:
+                    continue
+                snap = inst.get("_snapshot") or {}
+                if snap:
+                    row = dict(snap)
+                    row[converter.key_desc] = desc
+                    row[converter.key_cate] = inst.get("_cate", "")
+                else:
+                    row = {converter.key_desc: desc,
+                           converter.key_cate: inst.get("_cate", "")}
+                row.pop("_hash", None)
+                delete_items.append(row)
         # 3.1) 原文落盘（diff 基石）：本次实例先标 _confirmed=False，
         #      批次回执成功后置 True（见下方批次循环）；未变且历史已 confirmed 的直接继承；
         #      已存在基准未变（hash 一致）的继承 _alreadyExists（跳过的实例本任务
@@ -1542,7 +1579,8 @@ def _last_success_data(object_id: str) -> tuple[dict, dict | None, set[str], dic
       partialSuccess 的成功批次也计入 confirmed，不再整任务丢弃。
 
     v1.0.29 在途冻结 → v1.0.33 精细化：inFlight 任务的原文实例计入
-    inflight_map{desc: hash}——diff 时仅当内容 hash 与冻结时一致（原样
+    inflight_map{desc: inst}（inst 含 _hash/_snapshot）——diff 时仅当
+    内容 hash 与冻结时一致（原样
     重发，必撞「数据已存在」）才跳过；数据变了（hash 失配）不冻结，
     正常 new/update（新内容人行库没有，值得重报；用户实测 2026-09-10：
     粗粒度冻结把实例修改吞成 noReport）。结算后按终态自然解冻。
@@ -1569,10 +1607,11 @@ def _last_success_data(object_id: str) -> tuple[dict, dict | None, set[str], dic
         if not isinstance(instances, dict):
             continue
         for desc, inst in instances.items():
+            # 值存完整实例（_frozen 取 _hash；delete 取 _snapshot——v1.0.35
+            # 在途实例被 CMDB 删除时也发 delete，人行已入库则生效、未入库
+            # 则失败明细诚实暴露，组结算入库后下次重删）
             if isinstance(inst, dict):
-                h = str(inst.get("_hash") or "")
-                if h:
-                    inflight_map[desc] = h
+                inflight_map[desc] = inst
     # 已存在基准：扫全部未回滚任务原文（新覆盖旧——最新一次的撞墙 hash 为准）
     for r in cmdb_search_task_v2(object_id, statuses=None):
         f = r.get("dataFile")
