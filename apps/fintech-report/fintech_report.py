@@ -986,30 +986,38 @@ def report_one_model(rule: dict, report_obj: dict, conf: dict, variant: str) -> 
             converted[desc] = data
             pk_set[desc] = cate
         # 2) 增量 diff（对『成功实例台账』+『已存在基准』双基准；
-        #    在途冻结集合内的实例一律跳过——检核已过等人工入库，重发会制造
-        #    「数据已存在」，删除人行侧也未落地）
-        confirmed, prev_meta, inflight_descs, exists_map = _last_success_data(object_id)
+        #    在途冻结（v1.0.33 hash 精判）——原样重发跳过（防「数据已存在」），
+        #    内容变了放行重报；删除行：inFlight 实例人行侧未落地，hash 未变不删）
+        confirmed, prev_meta, inflight_map, exists_map = _last_success_data(object_id)
+
+        def _frozen(desc: str, data: dict) -> bool:
+            """在途冻结精判：实例在 inFlight 原文且内容与冻结时一致 → 冻结；
+            内容变了 → 放行（新内容人行库没有，值得重报——粗粒度冻结曾把
+            实例修改吞成 noReport，2026-09-10 实测修正）。"""
+            h = inflight_map.get(desc)
+            return bool(h) and h == _inst_content_hash(data)
+
         new_items, update_items, delete_items = [], [], []
         if not confirmed:
             # 无成功台账（首次接入/全回滚后）→ 全部按 new
             new_items = [v for d, v in converted.items()
-                         if d not in inflight_descs and not _exists_unchanged(
+                         if not _frozen(d, v) and not _exists_unchanged(
                              d, converted[d], exists_map)]
         else:
             for desc, data in converted.items():
-                if desc in inflight_descs:
-                    continue   # 在途冻结：不 new/update
-                old = confirmed.get(desc)
+                if _frozen(desc, data):
+                    continue   # 在途冻结：原样重发跳过（内容变了不冻结）
                 if _exists_unchanged(desc, data, exists_map):
                     continue   # 已存在且数据未变——重报必撞「数据已存在」，跳过
+                old = confirmed.get(desc)
                 if old is None:
                     new_items.append(data)              # 台账没有 → new
                 elif old.get("_hash") != _inst_content_hash({k: v for k, v in data.items()}):
                     update_items.append(data)           # 内容变了 → update
                 # 否则一致 → 不报（已确认且无变化）
             for desc, old in confirmed.items():
-                if desc in inflight_descs:
-                    continue   # 在途冻结：不生成 delete 行
+                if desc in inflight_map and inflight_map.get(desc) == old.get("_hash"):
+                    continue   # 在途冻结：不生成 delete 行（人行侧未落地）
                 if desc not in converted:
                     # Go convertDeleteData: 从该实例上次成功快照取完整字段（人行对
                     # delete 行也校验归属机构等）；快照缺失退两键（Go RecoverReportInst）
@@ -1521,9 +1529,11 @@ def _last_success_data(object_id: str) -> tuple[dict, dict | None, set[str], dic
       失败批次（未 confirmed）下次自动当 new 重报。
       partialSuccess 的成功批次也计入 confirmed，不再整任务丢弃。
 
-    v1.0.29 在途冻结：inFlight 任务的原文实例（检核已过、入库申请等人工）
-    一律计入 inflight_descs——diff 跳过（不 new/update/delete），防止入库
-    申请期间重复报送制造「数据已存在」；结算后按终态自然解冻。
+    v1.0.29 在途冻结 → v1.0.33 精细化：inFlight 任务的原文实例计入
+    inflight_map{desc: hash}——diff 时仅当内容 hash 与冻结时一致（原样
+    重发，必撞「数据已存在」）才跳过；数据变了（hash 失配）不冻结，
+    正常 new/update（新内容人行库没有，值得重报；用户实测 2026-09-10：
+    粗粒度冻结把实例修改吞成 noReport）。结算后按终态自然解冻。
 
     v1.0.30 已存在基准（双基准防重复上报）：扫所有任务原文（不限状态，
     时间倒序新覆盖旧）里 _alreadyExists=True 的实例 → exists_map{desc: hash}。
@@ -1532,7 +1542,7 @@ def _last_success_data(object_id: str) -> tuple[dict, dict | None, set[str], dic
     实例后续被 confirmed（组入库终态成功）时以台账优先（新覆盖）。
     """
     confirmed: dict[str, dict] = {}
-    inflight_descs: set[str] = set()
+    inflight_map: dict[str, str] = {}
     exists_map: dict[str, str] = {}
     # 在途冻结集合（inFlight 任务原文的全部实例）
     for r in cmdb_search_task_v2(object_id, statuses=["inFlight"]):
@@ -1546,8 +1556,11 @@ def _last_success_data(object_id: str) -> tuple[dict, dict | None, set[str], dic
         instances = data.get("instances") if isinstance(data, dict) else None
         if not isinstance(instances, dict):
             continue
-        for desc in instances:
-            inflight_descs.add(desc)
+        for desc, inst in instances.items():
+            if isinstance(inst, dict):
+                h = str(inst.get("_hash") or "")
+                if h:
+                    inflight_map[desc] = h
     # 已存在基准：扫全部未回滚任务原文（新覆盖旧——最新一次的撞墙 hash 为准）
     for r in cmdb_search_task_v2(object_id, statuses=None):
         f = r.get("dataFile")
@@ -1596,11 +1609,11 @@ def _last_success_data(object_id: str) -> tuple[dict, dict | None, set[str], dic
             if isinstance(inst, dict) and inst.get("_confirmed"):
                 confirmed[desc] = inst
                 exists_map.pop(desc, None)   # 已正式确认——已存在基准让位
-    _dbg_ledger(object_id, confirmed, inflight_descs, exists_map)
-    return confirmed, prev_meta, inflight_descs, exists_map
+    _dbg_ledger(object_id, confirmed, inflight_map, exists_map)
+    return confirmed, prev_meta, inflight_map, exists_map
 
 
-def _dbg_ledger(object_id: str, confirmed: dict, inflight: set, exists: dict) -> None:
+def _dbg_ledger(object_id: str, confirmed: dict, inflight: dict, exists: dict) -> None:
     LOG.debug("[report] %s 台账: confirmed=%d inflight=%d alreadyExists=%d",
               object_id, len(confirmed), len(inflight), len(exists))
 
