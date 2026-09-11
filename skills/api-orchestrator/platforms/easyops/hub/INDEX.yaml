@@ -179,7 +179,7 @@ items:
     scenario: 深信服 AD 负载均衡器监控指标套件+告警规则模板
     notes: 告警规则模板与套件配套，不单独成商品
     added: "2026-08-29"
-  # ---- scripts（16 商品）----
+  # ---- scripts（17 商品）----
   - id: baseline-checker
     name: 配置基线管理
     category: scripts
@@ -324,6 +324,16 @@ items:
     scenario: 共济基础设施监控告警接入（V2.23 接入标准 PDF+gongji_alarm_pusher 推送脚本）
     notes: 与 snmpwalk-alarm-pusher 同源场景，本条为含接入标准 PDF 的打包版
     added: "2026-08-29"
+  - id: search-artifact-package
+    name: CICD程序包搜索
+    category: scripts
+    files: [cicd/search_artifact_package.py]
+    version: "1.0.0"
+    history:
+      - {ver: "1.0.0", date: "2026-09-11", change: 初版入库}
+    scenario: CICD artifact 制品组件程序包搜索（GET /package/search，logic.artifact:8175 直连，模糊/精确/类型/标签过滤+分页表格输出，py2/3 兼容）
+    notes: 免 cookie 直连（org/user/Host 三件 header）；接口契约来源 FLOW_BUILDER_API_CONTRACT Search
+    added: "2026-09-11"
   # ---- other（1 商品）----
   - id: cluster-deploy-checklists
     name: EasyOps集群部署清单-合集
