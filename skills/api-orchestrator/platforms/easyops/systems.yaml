@@ -99,6 +99,8 @@ systems:
         search: "按 MongoDB 风格 query 搜索实例（fields 必填，分页；总数读 data.total）"
         import: "批量建/改实例（upsert，keys+datas）—— 新建 + 改的统一入口（C+U）"
         delete: "批量删除实例（instanceIds 分号分隔；路径 instance_batch）"
+      api_contract:
+        search: "平台全量接口契约兜底检索（11501 条，object_instance.search FLOW_BUILDER_API_CONTRACT@EASYOPS）——用户要的接口不在本 platforms spec 时用：按 name 模糊/endpoint.uri 模糊搜 → 拿 method+uri+serviceName → serviceName 查 ens-routing.json 得 host:port 直连。对象结构/检索配方见 objects.yaml#flow_builder_api_contract"
       dashboard:
         create: "建仪表盘（_DASHBOARD 实例，POST /v2/object/_DASHBOARD/instance，镜像前端 v2 保存）——配置结构见 formats/dashboard-kit/"
         update: "改仪表盘（PUT 全量覆盖——先 search 取现配再改再 PUT）"
@@ -161,6 +163,16 @@ systems:
       cookie_optional_direct: "实测（2026-08-12，api-cli auth=none 经 run.sh 验证）：直连 cmdb:8079 时 cookie 非必需——org+user+Host 三件 header 直接 200（USER search total=2）。与 autoops:8181 历史实测一致。机制：engine/execute.go:135 auth=none 跳过 auth.Apply；org/user 由 endpoint.headers 在 resolve 阶段独立注入（engine/request.go:40-43），不依赖 auth provider。故 backend spec auth 已改 none——cookie 配置缺失不再阻断直连调用。网关面（frontend endpoint，auth=easyops-cookie）仍需 cookie"
       org_query: "user_service GET ${EASYOPS_USER_SERVICE_URL}/api/v1/org/list（Cookie + Host）"
       default_org_chain: "user_service: agollo common.org > $COMMON_ORG > yaml default_org；validator gte:1（org=0 报 Can not find 0 database）"
+      api_fallback_recipe: |
+        接口兜底链（用户需要的接口不在本 platforms spec 时）：
+        ① object_instance.search FLOW_BUILDER_API_CONTRACT@EASYOPS（配方见 objects.yaml#flow_builder_api_contract）
+           —— name $like 或 endpoint.uri $like 搜契约，过滤 private=true / deprecated=true
+        ② 拿契约的 endpoint{method,uri} + serviceName
+        ③ serviceName → 本目录 ens-routing.json 的 routes[].contract 精确匹配 → host:port
+           （host=127.0.0.1 是回环：直连时替换为部署根 env 的目标机 IP；其他 host 字面使用；
+            未命中 = 该服务无路由快照，如实告知，勿猜端口）
+        ④ 直连调用：HTTP {method} http://{host}:{port}{uri}，header 三件套（Host: admin.easyops.local + org + user）
+           ——契约带 request/response json 可用于构造 body；useApiGateway=true 的接口走网关面（frontend endpoint + cookie）
       protected_orgs: [0, 1, 2]        # 系统自带禁动（0 无库、1 主业务 22 模型、2 名字服务 9 模型）
       test_org: 18832008               # 非系统测试 org（2026-07-31 建），写验证用
       list_pagination: "流式 NDJSON——每行一个完整对象，非 {data:{list:[...]}} 包装；逐行 json.loads"

@@ -1792,3 +1792,54 @@ api_behavior:
     api_behavior:
       list_response: "wrapper {code, data:{list,total}}（kitweb JSONPb gogo 序列化）；list 元素见 fields（实测还返回 dataType/type/expression/disabled/alertRuleBound/jobList 等扩展字段，total=200 for HOST）"
       port_resolved: "✅已定案（e2e 2026-08-14）：metric 端点在 legacy 进程 :8125（EASYOPS_COLLECTOR_SERVICE_LEGACY_URL），直 200 免 contract header；:12000 报 giraffe-contract-name 错。调用加 --endpoint backend_legacy"
+
+  # ---------- 平台接口契约（FlowBuilder 全量接口注册表，org 8888） ----------
+  flow_builder_api_contract:
+    description: |
+      EasyOps 平台全量接口契约（11501 条，2026-09-11 实测）—— FlowBuilder 编排器注册的全部内部/第三方接口元数据。
+      用途（api_fallback_recipe 的①）：用户需要的接口不在 platforms spec 时，按 name/uri 检索本模型拿
+      method+uri+serviceName，再经 ens-routing.json 解析名字服务地址直连。命中即代表平台存在该接口。
+    source: CMDB 模型 FLOW_BUILDER_API_CONTRACT@EASYOPS（FlowBuilder 同步平台服务契约入库）
+    api: object_instance   # 走 object_instance.search，object_id=FLOW_BUILDER_API_CONTRACT@EASYOPS
+    fields:
+      name:            { type: string, desc: "接口名（PascalCase 动词式，如 GetHoliday/BatchDeleteArchiveInstance）——主检索轴 $like" }
+      serviceName:     { type: string, desc: "名字服务（如 logic.sys_setting/logic.cmdb.service）——解析直连地址的键，查 ens-routing.json routes[].contract；为空表示无独立服务（网关路由型）" }
+      endpoint:        { type: struct, desc: "{method(如 GET/POST/LIST), uri(如 /api/sys_setting/v1/holiday), ext_fields}" }
+      version:         { type: string, desc: "契约版本（1.0.0 式）" }
+      private:         { type: bool, desc: "私有接口——编排过滤掉（true 共 ~123 条）" }
+      deprecated:      { type: bool, desc: "已弃用——编排过滤掉（true 共 ~30 条）" }
+      useApiGateway:   { type: bool, desc: "true=走 API 网关面（frontend endpoint + cookie）而非直连" }
+      request:         { type: json, desc: "请求体 schema——构造 body 用" }
+      response:        { type: json, desc: "响应体 schema——解析结果用" }
+      summary:         { type: string, desc: "接口文档摘要" }
+      provider/providerPackage: { type: string, desc: "提供方/所属 NB 包" }
+    relations:
+      - { to: ens_routing, type: reference, cardinality: "N:1", via: serviceName→contract, desc: "serviceName 精确匹配 ens-routing routes[].contract 解析 host:port" }
+    side_effects:
+      - op: object_instance.search
+        rule: |
+          检索配方（实测）：query 用 $like 组合——
+          按 uri：{"endpoint.uri":{"$like":"%holiday%"}}；按名称：{"name":{"$like":"%Holiday%"}}
+          排除私有/弃用：加 {"$or":[{"private":{"$ne":true}},{"private":{"$exists":false}}]} 同理 deprecated。
+          fields 最小集 ["instanceId","name","serviceName","endpoint","version","private","deprecated","useApiGateway"]。
+          ⚠️ classify/origin/originEnvKey 字段几乎全空（不可作检索轴）；total≈11501。
+      - op: 直连调用
+        rule: "拿 method+uri 后：serviceName 有值→ens-routing 解析 host:port 直连（Host: admin.easyops.local + org + user 三件 header）；useApiGateway=true→改走 frontend 网关面；serviceName 空→多为网关路由型（easyops.api.*），无直连路径，如实告知"
+
+  # ---------- 名字服务路由（ENS 静态快照） ----------
+  ens_routing:
+    description: |
+      EasyOps 名字服务（ENS）路由表快照（171 条服务型条目）—— contract(名字服务) → host:port。
+      数据文件：本目录 ens-routing.json（随 skill 分发；快照时点见其 _meta.source，端口大变更需重新导出）。
+      用途（api_fallback_recipe 的③）：FLOW_BUILDER_API_CONTRACT 的 serviceName → 直连地址。
+    api: none   # 静态数据文件，无 API；编排直接读 ens-routing.json
+    fields:
+      contract: { type: string, desc: "名字服务全名（== flow_builder_api_contract.serviceName；如 logic.cmdb.service）" }
+      host:     { type: string, desc: "127.0.0.1=本机回环——直连时替换为部署根 env 的目标机 IP；其他（如 172.30.0.90）字面使用" }
+      port:     { type: integer, desc: "服务端口（如 cmdb=8079/sys_setting=8271，与 runtime.ports 对账一致）" }
+      weight/static: { type: int/bool, desc: "路由权重/静态标记（多实例时选 weight 高者）" }
+    relations:
+      - { to: flow_builder_api_contract, type: referenced-by, cardinality: "1:N", via: contract←serviceName }
+    side_effects:
+      - op: 查询
+        rule: "未命中 contract = 快照内无此服务路由——如实告知用户，禁止猜端口/猜 IP。已剔除 easyops.api.*（网关路由型 port=0）与 deleted=true 条目"

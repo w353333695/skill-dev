@@ -1,0 +1,1209 @@
+{
+ "_meta": {
+  "name": "ens-routing",
+  "desc": "EasyOps 名字服务(ENS)路由表快照：contract(名字服务) → host:port。api-orchestrator 用 FLOW_BUILDER_API_CONTRACT 查到接口的 serviceName 后在此解析直连地址。",
+  "source": "ENS_ROUTING_TABLE.json 导出（2026-09-11，数据 mtime 至 2026-06）",
+  "filter": "仅服务型条目：port>0 且非 easyops.api.*(网关路由型 port=0) 且 deleted=false",
+  "host_rule": "host=127.0.0.1 表示本机回环——直连时替换为部署根 env 的目标机 IP($EASYOPS_CMDB_BACKEND_URL 的 host 或部署清单 host)；其他 host 字面使用",
+  "count": 171
+ },
+ "routes": [
+  {
+   "contract": "command.easyops-only.com",
+   "host": "127.0.0.1",
+   "port": 8060,
+   "weight": 100,
+   "static": false
+  },
+  {
+   "contract": "data.clickhouse",
+   "host": "127.0.0.1",
+   "port": 9880,
+   "weight": 100,
+   "static": false
+  },
+  {
+   "contract": "data.clickhouse.http",
+   "host": "127.0.0.1",
+   "port": 9880,
+   "weight": 100,
+   "static": false
+  },
+  {
+   "contract": "data.clickhouse.tcp",
+   "host": "127.0.0.1",
+   "port": 9800,
+   "weight": 100,
+   "static": false
+  },
+  {
+   "contract": "data.console_db",
+   "host": "127.0.0.1",
+   "port": 8284,
+   "weight": 100,
+   "static": false
+  },
+  {
+   "contract": "data.easy_columndb",
+   "host": "127.0.0.1",
+   "port": 8293,
+   "weight": 100,
+   "static": false
+  },
+  {
+   "contract": "data.easy_core",
+   "host": "127.0.0.1",
+   "port": 8070,
+   "weight": 100,
+   "static": false
+  },
+  {
+   "contract": "data.easy_core.http",
+   "host": "127.0.0.1",
+   "port": 8098,
+   "weight": 100,
+   "static": false
+  },
+  {
+   "contract": "data.easy_tsdb",
+   "host": "127.0.0.1",
+   "port": 8205,
+   "weight": 100,
+   "static": false
+  },
+  {
+   "contract": "data.ldap",
+   "host": "172.30.0.163",
+   "port": 389,
+   "weight": 100,
+   "static": false
+  },
+  {
+   "contract": "data.mysql",
+   "host": "127.0.0.1",
+   "port": 3306,
+   "weight": 100,
+   "static": false
+  },
+  {
+   "contract": "data.mysql.instance",
+   "host": "127.0.0.1",
+   "port": 3306,
+   "weight": 100,
+   "static": false
+  },
+  {
+   "contract": "data.qdrant",
+   "host": "127.0.0.1",
+   "port": 8321,
+   "weight": 100,
+   "static": false
+  },
+  {
+   "contract": "data.redis",
+   "host": "127.0.0.1",
+   "port": 6379,
+   "weight": 100,
+   "static": false
+  },
+  {
+   "contract": "data.seaweedfs",
+   "host": "127.0.0.1",
+   "port": 9336,
+   "weight": 100,
+   "static": false
+  },
+  {
+   "contract": "deploy.easyops-only.com",
+   "host": "127.0.0.1",
+   "port": 8176,
+   "weight": 100,
+   "static": false
+  },
+  {
+   "contract": "dev.mysql.easyops-only.com",
+   "host": "127.0.0.1",
+   "port": 3306,
+   "weight": 100,
+   "static": false
+  },
+  {
+   "contract": "logic.admin",
+   "host": "127.0.0.1",
+   "port": 8082,
+   "weight": 100,
+   "static": false
+  },
+  {
+   "contract": "logic.agent_admin",
+   "host": "172.30.0.90",
+   "port": 8102,
+   "weight": 100,
+   "static": false
+  },
+  {
+   "contract": "logic.aggregate_metric_process.http",
+   "host": "127.0.0.1",
+   "port": 8299,
+   "weight": 100,
+   "static": false
+  },
+  {
+   "contract": "logic.air_admin_service",
+   "host": "127.0.0.1",
+   "port": 8210,
+   "weight": 100,
+   "static": false
+  },
+  {
+   "contract": "logic.alert_channel_go",
+   "host": "127.0.0.1",
+   "port": 22,
+   "weight": 100,
+   "static": false
+  },
+  {
+   "contract": "logic.alert_metric_process.http",
+   "host": "127.0.0.1",
+   "port": 8297,
+   "weight": 100,
+   "static": false
+  },
+  {
+   "contract": "logic.alert_portal",
+   "host": "127.0.0.1",
+   "port": 8149,
+   "weight": 100,
+   "static": false
+  },
+  {
+   "contract": "logic.alert_service",
+   "host": "127.0.0.1",
+   "port": 8131,
+   "weight": 100,
+   "static": false
+  },
+  {
+   "contract": "logic.api.gateway",
+   "host": "127.0.0.1",
+   "port": 8107,
+   "weight": 100,
+   "static": false
+  },
+  {
+   "contract": "logic.api.gateway.auth",
+   "host": "127.0.0.1",
+   "port": 8104,
+   "weight": 100,
+   "static": false
+  },
+  {
+   "contract": "logic.api.gateway.inner",
+   "host": "127.0.0.1",
+   "port": 8107,
+   "weight": 100,
+   "static": false
+  },
+  {
+   "contract": "logic.api_service",
+   "host": "127.0.0.1",
+   "port": 8163,
+   "weight": 100,
+   "static": false
+  },
+  {
+   "contract": "logic.apm_metric_process.http",
+   "host": "127.0.0.1",
+   "port": 8298,
+   "weight": 100,
+   "static": false
+  },
+  {
+   "contract": "logic.app_deploy_service",
+   "host": "127.0.0.1",
+   "port": 8270,
+   "weight": 100,
+   "static": false
+  },
+  {
+   "contract": "logic.appconfig",
+   "host": "127.0.0.1",
+   "port": 8100,
+   "weight": 100,
+   "static": false
+  },
+  {
+   "contract": "logic.appconfig_init",
+   "host": "127.0.0.1",
+   "port": 22,
+   "weight": 100,
+   "static": false
+  },
+  {
+   "contract": "logic.artifact",
+   "host": "127.0.0.1",
+   "port": 8175,
+   "weight": 100,
+   "static": false
+  },
+  {
+   "contract": "logic.auto_detect",
+   "host": "127.0.0.1",
+   "port": 8084,
+   "weight": 100,
+   "static": false
+  },
+  {
+   "contract": "logic.blueprint",
+   "host": "127.0.0.1",
+   "port": 8156,
+   "weight": 100,
+   "static": false
+  },
+  {
+   "contract": "logic.cmdb",
+   "host": "127.0.0.1",
+   "port": 8113,
+   "weight": 100,
+   "static": false
+  },
+  {
+   "contract": "logic.cmdb.resource",
+   "host": "127.0.0.1",
+   "port": 8079,
+   "weight": 100,
+   "static": false
+  },
+  {
+   "contract": "logic.cmdb.service",
+   "host": "127.0.0.1",
+   "port": 8079,
+   "weight": 100,
+   "static": false
+  },
+  {
+   "contract": "logic.cmdb.toolkit",
+   "host": "127.0.0.1",
+   "port": 8113,
+   "weight": 100,
+   "static": false
+  },
+  {
+   "contract": "logic.cmdb_api-PF",
+   "host": "127.0.0.1",
+   "port": 12016,
+   "weight": 100,
+   "static": false
+  },
+  {
+   "contract": "logic.cmdb_extend",
+   "host": "127.0.0.1",
+   "port": 8113,
+   "weight": 100,
+   "static": false
+  },
+  {
+   "contract": "logic.code_service",
+   "host": "127.0.0.1",
+   "port": 8267,
+   "weight": 100,
+   "static": false
+  },
+  {
+   "contract": "logic.collector_center",
+   "host": "127.0.0.1",
+   "port": 8075,
+   "weight": 100,
+   "static": false
+  },
+  {
+   "contract": "logic.collector_plugin_service",
+   "host": "127.0.0.1",
+   "port": 8151,
+   "weight": 100,
+   "static": false
+  },
+  {
+   "contract": "logic.collector_proxy_server.grpc",
+   "host": "127.0.0.1",
+   "port": 8180,
+   "weight": 100,
+   "static": false
+  },
+  {
+   "contract": "logic.collector_proxy_server.http",
+   "host": "127.0.0.1",
+   "port": 8179,
+   "weight": 100,
+   "static": false
+  },
+  {
+   "contract": "logic.collector_proxy_server.reverse",
+   "host": "127.0.0.1",
+   "port": 8826,
+   "weight": 100,
+   "static": false
+  },
+  {
+   "contract": "logic.collector_scheduler",
+   "host": "127.0.0.1",
+   "port": 8125,
+   "weight": 100,
+   "static": false
+  },
+  {
+   "contract": "logic.collector_service",
+   "host": "127.0.0.1",
+   "port": 8125,
+   "weight": 100,
+   "static": false
+  },
+  {
+   "contract": "logic.collector_service-PF",
+   "host": "127.0.0.1",
+   "port": 12000,
+   "weight": 100,
+   "static": false
+  },
+  {
+   "contract": "logic.command",
+   "host": "127.0.0.1",
+   "port": 8060,
+   "weight": 100,
+   "static": false
+  },
+  {
+   "contract": "logic.container",
+   "host": "127.0.0.1",
+   "port": 8121,
+   "weight": 100,
+   "static": false
+  },
+  {
+   "contract": "logic.custom_service",
+   "host": "127.0.0.1",
+   "port": 8268,
+   "weight": 100,
+   "static": false
+  },
+  {
+   "contract": "logic.custom_service-PF",
+   "host": "127.0.0.1",
+   "port": 12023,
+   "weight": 100,
+   "static": false
+  },
+  {
+   "contract": "logic.dashboard_service",
+   "host": "127.0.0.1",
+   "port": 8153,
+   "weight": 100,
+   "static": false
+  },
+  {
+   "contract": "logic.dashboard_service-PF",
+   "host": "127.0.0.1",
+   "port": 12010,
+   "weight": 100,
+   "static": false
+  },
+  {
+   "contract": "logic.data_exchange",
+   "host": "127.0.0.1",
+   "port": 8152,
+   "weight": 100,
+   "static": false
+  },
+  {
+   "contract": "logic.data_loader",
+   "host": "127.0.0.1",
+   "port": 22,
+   "weight": 100,
+   "static": false
+  },
+  {
+   "contract": "logic.database_delivery",
+   "host": "172.30.0.90",
+   "port": 8067,
+   "weight": 100,
+   "static": false
+  },
+  {
+   "contract": "logic.dc_console.permission",
+   "host": "127.0.0.1",
+   "port": 8269,
+   "weight": 100,
+   "static": false
+  },
+  {
+   "contract": "logic.deploy",
+   "host": "127.0.0.1",
+   "port": 8176,
+   "weight": 100,
+   "static": false
+  },
+  {
+   "contract": "logic.deploy-permission-R",
+   "host": "127.0.0.1",
+   "port": 22,
+   "weight": 100,
+   "static": false
+  },
+  {
+   "contract": "logic.deploy.repo.archive",
+   "host": "127.0.0.1",
+   "port": 8175,
+   "weight": 100,
+   "static": false
+  },
+  {
+   "contract": "logic.deploy.repo.archive",
+   "host": "172.30.0.90",
+   "port": 80,
+   "weight": 100,
+   "static": false
+  },
+  {
+   "contract": "logic.deploy.repo.archive",
+   "host": "127.0.0.1",
+   "port": 80,
+   "weight": 100,
+   "static": false
+  },
+  {
+   "contract": "logic.deploy.repo.workspace",
+   "host": "127.0.0.1",
+   "port": 8175,
+   "weight": 100,
+   "static": false
+  },
+  {
+   "contract": "logic.deploy.repo.workspace",
+   "host": "172.30.0.90",
+   "port": 80,
+   "weight": 100,
+   "static": false
+  },
+  {
+   "contract": "logic.deploy.repo.workspace",
+   "host": "127.0.0.1",
+   "port": 80,
+   "weight": 100,
+   "static": false
+  },
+  {
+   "contract": "logic.easy-operation-PF",
+   "host": "127.0.0.1",
+   "port": 18000,
+   "weight": 100,
+   "static": false
+  },
+  {
+   "contract": "logic.easy_installer",
+   "host": "127.0.0.1",
+   "port": 8126,
+   "weight": 100,
+   "static": false
+  },
+  {
+   "contract": "logic.easy_process_sampler",
+   "host": "172.30.0.90",
+   "port": 22,
+   "weight": 100,
+   "static": false
+  },
+  {
+   "contract": "logic.easy_process_sampler-PF",
+   "host": "127.0.0.1",
+   "port": 12008,
+   "weight": 100,
+   "static": false
+  },
+  {
+   "contract": "logic.easyflow",
+   "host": "127.0.0.1",
+   "port": 8061,
+   "weight": 100,
+   "static": false
+  },
+  {
+   "contract": "logic.easyflow.arrange",
+   "host": "127.0.0.1",
+   "port": 8061,
+   "weight": 100,
+   "static": false
+  },
+  {
+   "contract": "logic.easyhub_client",
+   "host": "127.0.0.1",
+   "port": 8212,
+   "weight": 100,
+   "static": false
+  },
+  {
+   "contract": "logic.easyops_exporter.app",
+   "host": "127.0.0.1",
+   "port": 8197,
+   "weight": 100,
+   "static": false
+  },
+  {
+   "contract": "logic.easyops_exporter.host",
+   "host": "127.0.0.1",
+   "port": 8200,
+   "weight": 100,
+   "static": false
+  },
+  {
+   "contract": "logic.elevo_agent",
+   "host": "127.0.0.1",
+   "port": 8332,
+   "weight": 100,
+   "static": false
+  },
+  {
+   "contract": "logic.emergency_ms",
+   "host": "127.0.0.1",
+   "port": 8290,
+   "weight": 100,
+   "static": false
+  },
+  {
+   "contract": "logic.env_check_service",
+   "host": "127.0.0.1",
+   "port": 8335,
+   "weight": 100,
+   "static": false
+  },
+  {
+   "contract": "logic.event_bus.http",
+   "host": "127.0.0.1",
+   "port": 8315,
+   "weight": 100,
+   "static": false
+  },
+  {
+   "contract": "logic.event_center-PF",
+   "host": "127.0.0.1",
+   "port": 12006,
+   "weight": 100,
+   "static": false
+  },
+  {
+   "contract": "logic.file_previewer",
+   "host": "172.30.0.90",
+   "port": 8227,
+   "weight": 100,
+   "static": false
+  },
+  {
+   "contract": "logic.fintech_data",
+   "host": "127.0.0.1",
+   "port": 8203,
+   "weight": 100,
+   "static": false
+  },
+  {
+   "contract": "logic.flow_task",
+   "host": "127.0.0.1",
+   "port": 8068,
+   "weight": 100,
+   "static": false
+  },
+  {
+   "contract": "logic.flowable_service",
+   "host": "127.0.0.1",
+   "port": 8134,
+   "weight": 100,
+   "static": false
+  },
+  {
+   "contract": "logic.form_builder_service",
+   "host": "127.0.0.1",
+   "port": 8260,
+   "weight": 100,
+   "static": false
+  },
+  {
+   "contract": "logic.gateway",
+   "host": "127.0.0.1",
+   "port": 5513,
+   "weight": 100,
+   "static": false
+  },
+  {
+   "contract": "logic.gateway_service",
+   "host": "127.0.0.1",
+   "port": 8324,
+   "weight": 100,
+   "static": false
+  },
+  {
+   "contract": "logic.hyper-deploy-PF",
+   "host": "127.0.0.1",
+   "port": 12030,
+   "weight": 100,
+   "static": false
+  },
+  {
+   "contract": "logic.idc_service",
+   "host": "127.0.0.1",
+   "port": 8306,
+   "weight": 100,
+   "static": false
+  },
+  {
+   "contract": "logic.idcmanager",
+   "host": "127.0.0.1",
+   "port": 8118,
+   "weight": 100,
+   "static": false
+  },
+  {
+   "contract": "logic.inspection",
+   "host": "127.0.0.1",
+   "port": 8103,
+   "weight": 100,
+   "static": false
+  },
+  {
+   "contract": "logic.itsc_handler",
+   "host": "127.0.0.1",
+   "port": 8134,
+   "weight": 100,
+   "static": false
+  },
+  {
+   "contract": "logic.itsc_sla",
+   "host": "127.0.0.1",
+   "port": 8134,
+   "weight": 100,
+   "static": false
+  },
+  {
+   "contract": "logic.itsm-PF",
+   "host": "127.0.0.1",
+   "port": 16014,
+   "weight": 100,
+   "static": false
+  },
+  {
+   "contract": "logic.kafka",
+   "host": "127.0.0.1",
+   "port": 9092,
+   "weight": 100,
+   "static": false
+  },
+  {
+   "contract": "logic.llm.aiops_service",
+   "host": "127.0.0.1",
+   "port": 8320,
+   "weight": 100,
+   "static": false
+  },
+  {
+   "contract": "logic.mcp_server",
+   "host": "127.0.0.1",
+   "port": 8331,
+   "weight": 100,
+   "static": false
+  },
+  {
+   "contract": "logic.metadata_center",
+   "host": "127.0.0.1",
+   "port": 8124,
+   "weight": 100,
+   "static": false
+  },
+  {
+   "contract": "logic.metric_table_service",
+   "host": "127.0.0.1",
+   "port": 8174,
+   "weight": 100,
+   "static": false
+  },
+  {
+   "contract": "logic.mfa",
+   "host": "127.0.0.1",
+   "port": 8217,
+   "weight": 100,
+   "static": false
+  },
+  {
+   "contract": "logic.micro_app_service",
+   "host": "127.0.0.1",
+   "port": 8146,
+   "weight": 100,
+   "static": false
+  },
+  {
+   "contract": "logic.micro_app_standalone_service",
+   "host": "127.0.0.1",
+   "port": 8259,
+   "weight": 100,
+   "static": false
+  },
+  {
+   "contract": "logic.mock_server",
+   "host": "127.0.0.1",
+   "port": 8245,
+   "weight": 100,
+   "static": false
+  },
+  {
+   "contract": "logic.mock_server.proxy",
+   "host": "127.0.0.1",
+   "port": 8247,
+   "weight": 100,
+   "static": false
+  },
+  {
+   "contract": "logic.model-center-PF",
+   "host": "127.0.0.1",
+   "port": 12014,
+   "weight": 100,
+   "static": false
+  },
+  {
+   "contract": "logic.model_resource_service",
+   "host": "127.0.0.1",
+   "port": 8246,
+   "weight": 100,
+   "static": false
+  },
+  {
+   "contract": "logic.monthly_collection_service",
+   "host": "127.0.0.1",
+   "port": 8167,
+   "weight": 100,
+   "static": false
+  },
+  {
+   "contract": "logic.msgsender",
+   "host": "127.0.0.1",
+   "port": 8095,
+   "weight": 100,
+   "static": false
+  },
+  {
+   "contract": "logic.na_package_service",
+   "host": "127.0.0.1",
+   "port": 8302,
+   "weight": 100,
+   "static": false
+  },
+  {
+   "contract": "logic.next_builder_service",
+   "host": "127.0.0.1",
+   "port": 8142,
+   "weight": 100,
+   "static": false
+  },
+  {
+   "contract": "logic.next_console_service.console",
+   "host": "127.0.0.1",
+   "port": 8182,
+   "weight": 100,
+   "static": false
+  },
+  {
+   "contract": "logic.next_console_service.logstash",
+   "host": "127.0.0.1",
+   "port": 8188,
+   "weight": 100,
+   "static": false
+  },
+  {
+   "contract": "logic.next_console_service.metrics",
+   "host": "127.0.0.1",
+   "port": 8183,
+   "weight": 100,
+   "static": false
+  },
+  {
+   "contract": "logic.notify",
+   "host": "127.0.0.1",
+   "port": 8069,
+   "weight": 100,
+   "static": false
+  },
+  {
+   "contract": "logic.object_store_service",
+   "host": "127.0.0.1",
+   "port": 8138,
+   "weight": 100,
+   "static": false
+  },
+  {
+   "contract": "logic.one_ticket_service",
+   "host": "127.0.0.1",
+   "port": 8281,
+   "weight": 100,
+   "static": false
+  },
+  {
+   "contract": "logic.open_platform-PF",
+   "host": "127.0.0.1",
+   "port": 12101,
+   "weight": 100,
+   "static": false
+  },
+  {
+   "contract": "logic.ops_automation",
+   "host": "127.0.0.1",
+   "port": 8112,
+   "weight": 100,
+   "static": false
+  },
+  {
+   "contract": "logic.otelcol.health_check",
+   "host": "127.0.0.1",
+   "port": 8185,
+   "weight": 100,
+   "static": false
+  },
+  {
+   "contract": "logic.otelcol.pprof",
+   "host": "127.0.0.1",
+   "port": 8186,
+   "weight": 100,
+   "static": false
+  },
+  {
+   "contract": "logic.otelcol.receiver.otlp",
+   "host": "127.0.0.1",
+   "port": 8317,
+   "weight": 100,
+   "static": false
+  },
+  {
+   "contract": "logic.otelcol.receiver.rsyslog",
+   "host": "127.0.0.1",
+   "port": 8165,
+   "weight": 100,
+   "static": false
+  },
+  {
+   "contract": "logic.otelcol.receiver.skywalking6.grpc",
+   "host": "127.0.0.1",
+   "port": 11800,
+   "weight": 100,
+   "static": false
+  },
+  {
+   "contract": "logic.otelcol.receiver.skywalking6.http",
+   "host": "127.0.0.1",
+   "port": 12800,
+   "weight": 100,
+   "static": false
+  },
+  {
+   "contract": "logic.otelcol.receiver.skywalking8.grpc",
+   "host": "127.0.0.1",
+   "port": 13800,
+   "weight": 100,
+   "static": false
+  },
+  {
+   "contract": "logic.otelcol.receiver.skywalking8.http",
+   "host": "127.0.0.1",
+   "port": 14800,
+   "weight": 100,
+   "static": false
+  },
+  {
+   "contract": "logic.otelcol.zpages",
+   "host": "127.0.0.1",
+   "port": 8187,
+   "weight": 100,
+   "static": false
+  },
+  {
+   "contract": "logic.periodic_task",
+   "host": "127.0.0.1",
+   "port": 22,
+   "weight": 100,
+   "static": false
+  },
+  {
+   "contract": "logic.permission",
+   "host": "127.0.0.1",
+   "port": 8269,
+   "weight": 100,
+   "static": false
+  },
+  {
+   "contract": "logic.permission.api",
+   "host": "127.0.0.1",
+   "port": 8269,
+   "weight": 100,
+   "static": false
+  },
+  {
+   "contract": "logic.permission.audit",
+   "host": "127.0.0.1",
+   "port": 8269,
+   "weight": 100,
+   "static": false
+  },
+  {
+   "contract": "logic.permission_go_service",
+   "host": "127.0.0.1",
+   "port": 8269,
+   "weight": 100,
+   "static": false
+  },
+  {
+   "contract": "logic.pgextractor",
+   "host": "172.30.0.90",
+   "port": 8261,
+   "weight": 100,
+   "static": false
+  },
+  {
+   "contract": "logic.pipeline",
+   "host": "127.0.0.1",
+   "port": 8108,
+   "weight": 100,
+   "static": false
+  },
+  {
+   "contract": "logic.pipeline.arrange",
+   "host": "127.0.0.1",
+   "port": 8108,
+   "weight": 100,
+   "static": false
+  },
+  {
+   "contract": "logic.plugin",
+   "host": "127.0.0.1",
+   "port": 8062,
+   "weight": 100,
+   "static": false
+  },
+  {
+   "contract": "logic.py_script_runner",
+   "host": "127.0.0.1",
+   "port": 8319,
+   "weight": 100,
+   "static": false
+  },
+  {
+   "contract": "logic.rapid.flowable",
+   "host": "172.30.0.90",
+   "port": 8334,
+   "weight": 100,
+   "static": false
+  },
+  {
+   "contract": "logic.raw_metric_process.http",
+   "host": "127.0.0.1",
+   "port": 8292,
+   "weight": 100,
+   "static": false
+  },
+  {
+   "contract": "logic.receiver",
+   "host": "127.0.0.1",
+   "port": 8820,
+   "weight": 100,
+   "static": false
+  },
+  {
+   "contract": "logic.resource_manage",
+   "host": "127.0.0.1",
+   "port": 8073,
+   "weight": 100,
+   "static": false
+  },
+  {
+   "contract": "logic.resource_monitor",
+   "host": "127.0.0.1",
+   "port": 8140,
+   "weight": 100,
+   "static": false
+  },
+  {
+   "contract": "logic.resource_package_service",
+   "host": "127.0.0.1",
+   "port": 8126,
+   "weight": 100,
+   "static": false
+  },
+  {
+   "contract": "logic.resource_score_assessor",
+   "host": "127.0.0.1",
+   "port": 22,
+   "weight": 100,
+   "static": false
+  },
+  {
+   "contract": "logic.scheduler",
+   "host": "127.0.0.1",
+   "port": 8226,
+   "weight": 100,
+   "static": false
+  },
+  {
+   "contract": "logic.secret_service",
+   "host": "127.0.0.1",
+   "port": 8154,
+   "weight": 100,
+   "static": false
+  },
+  {
+   "contract": "logic.service-observe-PF",
+   "host": "127.0.0.1",
+   "port": 12004,
+   "weight": 100,
+   "static": false
+  },
+  {
+   "contract": "logic.span_loader.http",
+   "host": "127.0.0.1",
+   "port": 8291,
+   "weight": 100,
+   "static": false
+  },
+  {
+   "contract": "logic.sqlextractor",
+   "host": "172.30.0.90",
+   "port": 8223,
+   "weight": 100,
+   "static": false
+  },
+  {
+   "contract": "logic.sso_adapter",
+   "host": "127.0.0.1",
+   "port": 8211,
+   "weight": 100,
+   "static": false
+  },
+  {
+   "contract": "logic.state_workflow_service",
+   "host": "127.0.0.1",
+   "port": 8141,
+   "weight": 100,
+   "static": false
+  },
+  {
+   "contract": "logic.sync_center",
+   "host": "127.0.0.1",
+   "port": 8076,
+   "weight": 100,
+   "static": false
+  },
+  {
+   "contract": "logic.sys_setting",
+   "host": "127.0.0.1",
+   "port": 8271,
+   "weight": 100,
+   "static": false
+  },
+  {
+   "contract": "logic.tomcat",
+   "host": "127.0.0.1",
+   "port": 8135,
+   "weight": 100,
+   "static": false
+  },
+  {
+   "contract": "logic.tool",
+   "host": "127.0.0.1",
+   "port": 8181,
+   "weight": 100,
+   "static": false
+  },
+  {
+   "contract": "logic.tool.sandbox",
+   "host": "172.30.0.90",
+   "port": 8181,
+   "weight": 100,
+   "static": false
+  },
+  {
+   "contract": "logic.tool_service",
+   "host": "127.0.0.1",
+   "port": 8181,
+   "weight": 100,
+   "static": false
+  },
+  {
+   "contract": "logic.user_service",
+   "host": "127.0.0.1",
+   "port": 8111,
+   "weight": 100,
+   "static": false
+  },
+  {
+   "contract": "logic.visual_service",
+   "host": "127.0.0.1",
+   "port": 8304,
+   "weight": 100,
+   "static": false
+  },
+  {
+   "contract": "logic.websocket_service",
+   "host": "127.0.0.1",
+   "port": 8157,
+   "weight": 100,
+   "static": false
+  },
+  {
+   "contract": "logic.workflow_service",
+   "host": "127.0.0.1",
+   "port": 8307,
+   "weight": 100,
+   "static": false
+  },
+  {
+   "contract": "logic.zookeeper",
+   "host": "127.0.0.1",
+   "port": 2181,
+   "weight": 100,
+   "static": false
+  },
+  {
+   "contract": "plugin.easyops-only.com",
+   "host": "127.0.0.1",
+   "port": 8062,
+   "weight": 100,
+   "static": false
+  },
+  {
+   "contract": "tool.easyops-only.com",
+   "host": "127.0.0.1",
+   "port": 8181,
+   "weight": 100,
+   "static": false
+  },
+  {
+   "contract": "web.api-gateway.openapi",
+   "host": "127.0.0.1",
+   "port": 8109,
+   "weight": 100,
+   "static": false
+  },
+  {
+   "contract": "web.brick_next",
+   "host": "127.0.0.1",
+   "port": 80,
+   "weight": 100,
+   "static": false
+  },
+  {
+   "contract": "web.gateway",
+   "host": "172.30.0.90",
+   "port": 5511,
+   "weight": 100,
+   "static": false
+  },
+  {
+   "contract": "web.openapi",
+   "host": "127.0.0.1",
+   "port": 80,
+   "weight": 100,
+   "static": false
+  }
+ ]
+}
