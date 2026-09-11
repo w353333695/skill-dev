@@ -754,6 +754,18 @@ def load_report_data(data_file: str) -> dict:
     return json.loads(Path(data_file).read_text(encoding="utf-8"))
 
 
+def write_payload_to(data_file: str, payload: dict) -> None:
+    """原地回写任务原文到【原路径】（v1.0.34）。
+
+    settle 结算回写曾用 save_report_data——它按【今天】日期建目录，而原文
+    在 <上报日>/ 目录 → 同 taskId 产生两份文件，任务 dataFile 仍指旧路径：
+    台账(_last_success_data 按 dataFile 读)读不到 confirmed 标记、清理只删
+    旧文件、settle日新文件永久残留（现场实测 json 未删根因）。必须写回原路径。
+    """
+    Path(data_file).write_text(
+        json.dumps(payload, ensure_ascii=False, indent=1), encoding="utf-8")
+
+
 def upsert_task(task: dict) -> None:
     cmdb_import(OBJ_TASK, ["taskId"], [task])
 
@@ -1450,7 +1462,7 @@ def _settle_one_group(center: "ReportCenter", prev: dict, object_id: str) -> Non
             # 已确认（含入库终态下的已存在实例）——exists 标记使命完成清除，
             # confirmed 台账优先（避免双基准冗余与 hash 不一致的风险）
             inst.pop("_alreadyExists", None)
-    save_report_data(task_id_str, payload)   # 原地回写同一文件
+    write_payload_to(str(data_file), payload)   # 原地回写原路径（v1.0.34 修复：不得按今天日期另建）
     n_ins = sum(1 for i in instances.values()
                 if isinstance(i, dict) and str(i.get("_op", "new")) != "delete")
     if fail_details:
