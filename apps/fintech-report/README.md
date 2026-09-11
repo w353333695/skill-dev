@@ -25,6 +25,14 @@
 | 数据管理 | 平台 → CMDB 资源管理 | 维护上报数据源实例（人行上报相实例列表入口） |
 | 人行管理平台 | 浏览器访问 FICS | 查看上报批次组、提交报送入库申请、确认上报结果 |
 
+![平台入口-自动上报管理](docs/images/entry-1.png)
+
+![平台入口-定时任务](docs/images/entry-2.png)
+
+![平台入口-数据管理](docs/images/entry-3.png)
+
+![人行上报实例列表入口](docs/images/entry-4.png)
+
 ## 3. 两种运行模式（工具入参）
 
 | action | 能力 | 触发方式 |
@@ -59,6 +67,34 @@ python3 fintech_report.py cleanup [--dry-run]                      # 独立清�
 等待批次组处理完成，即可确认上报结果
 ```
 
+![新增-实例列表新增](docs/images/add-list.png)
+
+![新增-填写信息保存](docs/images/add-form.png)
+
+![新增-填写信息保存（续）](docs/images/add-form2.png)
+
+![新增-保存成功](docs/images/add-save.png)
+
+![新增-填写信息保存（续2）](docs/images/add-save2.png)
+
+![新增-定时任务列表](docs/images/add-task.png)
+
+![新增-立即执行](docs/images/add-trigger.png)
+
+**人行管理平台侧**——查看上报批次组、提交报送入库申请、确认结果：
+
+![人行平台-上报批次组](docs/images/pbc-group.png)
+
+![人行平台-批次组详情](docs/images/pbc-group2.png)
+
+![人行平台-提交入库申请](docs/images/pbc-apply.png)
+
+![人行平台-提交入库申请（续）](docs/images/pbc-apply2.png)
+
+![人行平台-处理结果](docs/images/pbc-result.png)
+
+![人行平台-确认上报结果](docs/images/pbc-result2.png)
+
 ### 4.2 修改实例
 
 ```
@@ -68,6 +104,10 @@ python3 fintech_report.py cleanup [--dry-run]                      # 独立清�
     ↓
 审批、查看结果（人行平台批次组）
 ```
+
+![修改-实例编辑](docs/images/edit-list.png)
+
+![修改-审批查看结果](docs/images/edit-result.png)
 
 **注意**：修改只改「上报字段集内」的业务字段才触发（系统字段如 mtime/creator 不在转换范围）；实例若处于在途（检核已过、等人工入库），内容变更同样会触发重报（v1.0.33「变了就报」）。
 
@@ -80,6 +120,12 @@ python3 fintech_report.py cleanup [--dry-run]                      # 独立清�
     ↓
 审批、查看结果
 ```
+
+![删除-选择实例批量删除](docs/images/del-list.png)
+
+![删除-确认删除](docs/images/del-confirm.png)
+
+![删除-审批查看结果](docs/images/del-result.png)
 
 删除触发条件：该实例曾被人行确认入库（在 confirmed 台账），或在途任务的原文里（v1.0.35：在途实例删除也发 delete——组后续入库则人行侧生效，未入库则失败明细暴露、结算后重删）。**从未成功上报过的实例删除是静默的**（人行库没有它，无需删除请求）。
 
