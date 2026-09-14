@@ -344,3 +344,12 @@ items:
     scenario: EasyOps 集群 1/3/5/7 节点部署清单 md 合集
     notes: ""
     added: "2026-08-29"
+  - id: alert2ticket
+    name: 告警转工单
+    category: scripts
+    files: [tools/alert2ticket.py]
+    history:
+      - {date: "2026-09-14", change: 初版入库（.232 实测端到端通过）}
+    scenario: 检索未恢复告警按级别/持续时长阈值批量转 EasyOps 故障工单并回填「识别和发起」表单（py2/3 兼容，可配 EasyOps agent 定时工具）
+    notes: "入参 range/auto_create/alert_level/alert_time；端口 8131 alert_service + 8134 flowable + 8079 cmdb；防重靠 _batch 消费事件（移出 not_recover）"
+    added: "2026-09-14"
