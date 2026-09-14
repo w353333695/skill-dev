@@ -27,12 +27,30 @@ import re
 import sys
 import time
 
-import requests
+IS_PY2 = sys.version_info[0] == 2
+
+try:
+    _string_types = (str, unicode)  # noqa: F821  (py2)
+except NameError:
+    _string_types = (str,)          # py3
+
+
+def _to_unicode(v):
+    """py2 平台注入的 str 可能是 bytes——统一转 unicode（py3 直接返回 str）。"""
+    if IS_PY2 and isinstance(v, str):
+        try:
+            return v.decode('utf-8')
+        except UnicodeDecodeError:
+            return v
+    return v
+
+if IS_PY2:
+    import httplib as _http_client
+else:
+    import http.client as _http_client
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s %(levelname)s %(message)s')
 logger = logging.getLogger('alert2ticket')
-
-IS_PY2 = sys.version_info[0] == 2
 
 # ---------------------------------------------------------------------------
 # 环境与常量（agent 注入 EASYOPS_*；编排侧可覆盖）
@@ -44,6 +62,23 @@ CMDB_PORT = 8079                   # logic.cmdb.service
 HOST = os.environ.get('EASYOPS_CMDB_HOST', os.environ.get('EASYOPS_HOST', '172.30.0.232'))
 ORG = os.environ.get('EASYOPS_ORG', '18832008')
 USER = os.environ.get('EASYOPS_USER', 'easyops')
+
+
+def _platform_var(name, default):
+    """平台注入变量：header 同名 python 变量 > 进程 env > 默认（见 objects.yaml tool_param_injection）。"""
+    g = globals()
+    if name in g and g[name] not in (None, ''):
+        return g[name]
+    return os.environ.get(name, default)
+
+
+def _resolve_conn():
+    """运行时解析连接参数（模块底部 main 前调用，避开前向引用）。"""
+    global HOST, ORG, USER
+    HOST = str(_platform_var('EASYOPS_CMDB_HOST', HOST)).split(':')[0].strip() or HOST
+    ORG = str(_platform_var('EASYOPS_ORG', ORG))
+    USER = str(_platform_var('EASYOPS_USER', USER))
+    BASE_HEADERS.update({'org': ORG, 'user': USER})
 
 SERVICE_ID = '60c33d948bf61'       # 「故障处理」服务实例（事件管理）
 HANDLER_NAME = 'easyops'           # 默认处理人（工单 handlerName 必填）
@@ -65,14 +100,28 @@ BASE_HEADERS = {
 
 
 def http_json(method, port, path, body=None, timeout=30):
-    """直连后端调 API，返回 (status, parsed_json_or_text)。"""
-    url = 'http://%s:%d%s' % (HOST, port, path)
+    """直连后端调 API（stdlib 实现，py2/3 兼容——agent 无第三方包）。
+
+    返回 (status, parsed_json_or_text)。
+    """
+    conn = _http_client.HTTPConnection(HOST, port, timeout=timeout)
     data = json.dumps(body) if body is not None else None
-    resp = requests.request(method, url, data=data, headers=BASE_HEADERS, timeout=timeout)
+    headers = dict(BASE_HEADERS)
     try:
-        return resp.status_code, resp.json()
+        conn.request(method, path, body=data, headers=headers)
+        resp = conn.getresponse()
+        raw = resp.read()
+        status = resp.status
+    finally:
+        conn.close()
+    if IS_PY2:
+        text = raw.decode('utf-8', 'replace')
+    else:
+        text = raw.decode('utf-8', 'replace') if isinstance(raw, bytes) else raw
+    try:
+        return status, json.loads(text)
     except ValueError:
-        return resp.status_code, resp.text
+        return status, text
 
 
 def put_str(message):
@@ -94,18 +143,60 @@ def parse_range(range_str):
 
 
 def parse_args(argv):
+    """入参获取（EasyOps 平台优先）。
+
+    平台注入形态：inputs 与 EASYOPS_* 都不是进程环境变量，而是执行器拼在脚本
+    header 的【同名 python 变量赋值】（creator.go AssembleParams）——用
+    globals().get() 取；本地/编排侧兜底 EASYOPS_TOOL_INPUT(JSON) 与 argv k=v。
+    优先级：globals 注入 > env 同名 > argv > 默认值。
+    """
     cfg = {'range': '1d', 'auto_create': u'是', 'alert_level': 'critical', 'alert_time': 20}
+
+    def _coerce(key, val):
+        val = _to_unicode(val)
+        val = val.strip() if isinstance(val, _string_types) else val
+        if val in (None, ''):
+            return
+        if key == 'alert_time':
+            try:
+                cfg[key] = int(val)
+            except (TypeError, ValueError):
+                pass
+        elif key == 'auto_create':
+            if isinstance(val, bool):
+                cfg[key] = u'是' if val else u'否'
+            elif isinstance(val, _string_types):
+                cfg[key] = val if val in (u'是', u'否') else (u'是' if val in ('true', 'True', '1') else u'否')
+        elif key in ('range', 'alert_level'):
+            cfg[key] = str(val)
+
+    # ① 平台 header 注入的同名变量（最高优先）
+    g = globals()
+    for k in cfg:
+        if k in g and g[k] not in (None, ''):
+            _coerce(k, g[k] if not isinstance(g[k], (list, tuple, dict)) else str(g[k]))
+    # ② env 同名（agent 兼容/编排侧）
+    for k in cfg:
+        v = os.environ.get(k) or os.environ.get(k.upper())
+        if v:
+            _coerce(k, v)
+    # ③ EASYOPS_TOOL_INPUT JSON 兜底（本地调试）
+    ti = os.environ.get('EASYOPS_TOOL_INPUT') or (g.get('EASYOPS_TOOL_INPUT') if isinstance(g.get('EASYOPS_TOOL_INPUT'), str) else '')
+    if ti:
+        try:
+            for k, v in (json.loads(ti) or {}).items():
+                if k in cfg:
+                    _coerce(k, v)
+        except ValueError:
+            pass
+    # ④ argv k=v（最低）
     for a in argv or []:
         if '=' not in a:
             continue
         k, v = a.split('=', 1)
         k = k.lstrip('-').strip()
-        if k in ('range', 'alert_level'):
-            cfg[k] = v.strip()
-        elif k == 'alert_time':
-            cfg[k] = int(v)
-        elif k in ('auto_create',):
-            cfg[k] = v.strip() if v.strip() in (u'是', u'否') else (u'是' if v.strip() in ('true', 'True', '1') else u'否')
+        if k in cfg:
+            _coerce(k, v)
     return cfg
 
 
@@ -324,6 +415,7 @@ def fill_step_form(step_instance_id, form_data):
 
 
 def main(argv=None):
+    _resolve_conn()
     cfg = parse_args(argv if argv is not None else sys.argv[1:])
     put_str(u'配置: %s' % json.dumps(cfg, ensure_ascii=False))
     range_sec = parse_range(cfg['range'])
