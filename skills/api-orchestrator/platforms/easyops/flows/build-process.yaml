@@ -101,6 +101,8 @@ steps:
     on_fail: "140500 偶发瞬时错 → 重试即好（完整语义见 objects.yaml#itsm_process_version.side_effects set_main rule）；仍败核对 state==done"
 
 key_rule: |
+  ⚠️processSetting wire 层是【JSON 对象】非字符串（2026-09-15 .26 实测：传字符串报 json解析失败 readObjectStart expect { or n；spec 描述有误）。
+
   完整建流程链（建 def → 建版本不部署 → 绑表单 → 合规检测+用户验收 → 设主版本部署生效）的部署语义
   见 objects.yaml#itsm_process_version.side_effects（process_version.create / set_main rule）。本文件只列【步骤顺序】（怎么做）：
   process_definition.create → process_version.create → process_form.set（⚠️显式绑表单，不靠 baseVersionId）
