@@ -1177,8 +1177,8 @@ resources:
   # ---------------------------------------------------------------------------
   # 资源：duty_group —— 值班组。
   # 8134 flowable_service，前缀 /api/flowable_service/v1/duty_group。
-  # delete 路径 :groupIds（分号分隔批量）。dutyShift=班次数组。duty_group_config
-  # 系列（日历配置/导入）按场景「不增噪声」未纳入（如需再补）。
+  # delete 路径 :groupIds（分号分隔批量）。dutyShift=班次数组。日历配置见下方
+  # duty_group_config 资源（2026-09-15 纳入；导入 import 系列仍未纳入）。
   # 数据源：契约 itsm-duty_group.xlsx + 实测详情样例（duty_group 658c1d374b66b）。
   # ---------------------------------------------------------------------------
   duty_group:
@@ -1295,3 +1295,84 @@ resources:
         path: /api/flowable_service/v1/duty_group/{groupIds}
         params:
           groupIds: { in: path, type: string, required: true, description: "值班组 id，分号分隔" }
+
+  # ---------------------------------------------------------------------------
+  # 资源：duty_group_config —— 值班组日历配置（某天谁值班）。
+  # 8134 flowable_service。create 名=groupId_date；创建后自动 SyncDutyDays
+  # 同步值班数据。update 若 date 变化后端自动转 create。search 按
+  # groupName/groupId 精确命中组（≠1 个→500），date 支持 YYYY/YYYY-MM/YYYY-MM-DD
+  # 三粒度（日→查到当月底）。v2 search 额外经 user 服务补 nickname/userTel。
+  # 数据源：后端源码 duty_group/{route.go, duty_group_service.go:861-1180,
+  # validators/request_validate_trees.go} + .26 实测（无组时 500 复现）。
+  # 2026-09-15 随「同步CCPC值班表」工具 onboarding 纳入。
+  # ---------------------------------------------------------------------------
+  duty_group_config:
+    description: ITSM 值班组日历配置——定义某日期各班次的值班人(users)/值班领导(leader)。config 名=groupId_date。被 SyncDutyDays 展开成值班数据供排班/通知引用。
+    path: ""
+
+    operations:
+      search_v2:
+        description: 按组+日期查日历配置（v2，user 信息增强）。⚠️组必须按 groupName/groupId 恰好命中 1 个（total≠1 报 500 "查询值班日历信息失败"）；dutyCycle 结束月<查询月返回空 list。date 三粒度：YYYY/YYYY-MM/YYYY-MM-DD（日→查到当月底闭区间）。
+        method: POST
+        path: /api/flowable_service/v2/duty_group_config/search
+        body:
+          type: object
+          required: [date]
+          properties:
+            groupName: { type: string, description: "值班组名（与 groupId 二选一）" }
+            groupId:   { type: string, description: "值班组 id 13hex（与 groupName 二选一）" }
+            date:      { type: string, description: "日期，YYYY / YYYY-MM / YYYY-MM-DD" }
+            isMine:    { type: boolean, description: "只看我的（按 header user 过滤 users/leader）" }
+        response:
+          type: object
+          description: "{ code, data: { list[] } }——list item 见 get 响应（v2 的 users/leader 是 {name,nickname,userTel} 对象数组，dutyShiftConf 多 dutyTime）"
+
+      create:
+        description: 新建某日配置。后端自动 SyncDutyDays（值班数据+法定假日）；config 名=groupId_date；同组同日重复 create 会产生重复 config（幂等靠先 search）。update 时 date 变化后端自动转此接口。
+        method: POST
+        path: /api/flowable_service/v1/duty_group_config
+        body:
+          type: object
+          required: [groupId, date, status]
+          properties:
+            groupId:    { type: string, description: "值班组 id 13hex" }
+            date:       { type: string, description: "日期 YYYY-MM-DD" }
+            status:     { type: integer, description: "日历状态（int；工具 sync_ccpc_duty 实测语义待校准，默认 0）" }
+            dutyShiftConf:
+              type: array
+              description: "班次配置列表"
+              items:
+                type: object
+                properties:
+                  name:   { type: string, description: "班次名（须与值班组 dutyShift.name 一致）" }
+                  users:  { type: array, items: { type: string }, description: "值班人 username 列表" }
+                  leader: { type: array, items: { type: string }, description: "值班领导 username 列表" }
+            dutyMode:         { type: string, description: "重复模式（空=无重复）" }
+            handOverNotifyId: { type: string, description: "交班通知模版 id" }
+            takeOverNotifyId: { type: string, description: "接班通知模版 id" }
+        response:
+          type: object
+          description: "{ code, data: { instanceId } }"
+
+      update:
+        description: 更新某日配置（全量）。⚠️若原配置 date≠请求 date，后端自动转新建（不删旧的）。configId 从 search_v2 结果取。
+        method: PUT
+        path: /api/flowable_service/v1/duty_group_config/{configId}
+        params:
+          configId: { in: path, type: string, required: true, description: "配置 id 13hex" }
+        body:
+          type: object
+          required: [configId, date, status, dutyShiftConf]
+          properties:
+            configId:    { type: string, description: "配置 id 13hex" }
+            date:        { type: string, description: "日期 YYYY-MM-DD" }
+            status:      { type: integer, description: "同 create" }
+            dutyShiftConf:
+              type: array
+              description: "班次配置列表（结构同 create）"
+              items:
+                type: object
+                properties:
+                  name:   { type: string }
+                  users:  { type: array, items: { type: string } }
+                  leader: { type: array, items: { type: string } }

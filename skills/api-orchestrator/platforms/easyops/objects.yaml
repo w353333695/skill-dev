@@ -976,7 +976,7 @@ objects:
 
   # ---------- ITSM 值班组（duty_group）----------
   itsm_duty_group:
-    description: ITSM 值班组——定义值班组的名/周期(dutyCycle)/班次(dutyShift[])/弹性时间(flexTime)。被 SLA/工单排班引用。CRUD 在 /v1/duty_group（8134）。duty_group_config（日历配置/导入）系列未纳入（场景不需要，按「不增噪声」原则）。
+    description: ITSM 值班组——定义值班组的名/周期(dutyCycle)/班次(dutyShift[])/弹性时间(flexTime)。被 SLA/工单排班引用。CRUD 在 /v1/duty_group（8134）。日历配置见 itsm_duty_group_config（2026-09-15 纳入；import 导入系列仍未纳入）。
     source: data/api-doc/itsm-duty_group.xlsx + duty_group/validators/{request_validate_trees.go:15,95, api_validator.go:58} + parse_date.go:175-187 + 实测样例（658c1d374b66b）
     api: duty_group
     fields:
@@ -995,6 +995,29 @@ objects:
         rule: "POST /v1/duty_group。name/dutyCycle/status/dutyShift 必填（validator request_validate_trees.go:15）。instanceId CMDB 生成返回。"
       - op: duty_group.delete
         rule: "DELETE /v1/duty_group/:groupIds。groupIds 走 path 分号分隔批量。"
+
+  # ---------- ITSM 值班组日历配置（duty_group_config）----------
+  itsm_duty_group_config:
+    description: ITSM 值班组日历配置——某日期各班次 {name, users[], leader[]}。config 名=groupId_date；create 后自动 SyncDutyDays 展开值班数据。sync 类工具的幂等锚点（先 search 再 create/update）。
+    source: data/sources/backend/ITSM/flowable_service/duty_group/{duty_group_service.go:861-1180, validators/request_validate_trees.go, internal/duty_group/models.go} + .26 实测（2026-09-15）
+    api: duty_group_config
+    fields:
+      instanceId:    { type: string, anchor: true, desc: "配置 id（13hex）" }
+      name:          { type: string, desc: "配置名，= groupId_date（后端拼）" }
+      date:          { type: string, required: true, desc: "日期 YYYY-MM-DD" }
+      status:        { type: integer, required: true, desc: "日历状态 int（语义未完全确认，工具默认 0）" }
+      dutyShiftConf: { type: array, items: object, desc: "班次配置 [{name, users[](值班人 username), leader[](值班领导 username)}]。name 须与值班组 dutyShift.name 一致" }
+      dutyMode:      { type: string, desc: "重复模式（空=无重复，非空时 search 会按 date<=查询日 展开）" }
+      fbFormInstanceId: { type: string, desc: "表单构建器表单实例 id（useFormBuilder=true 时）" }
+    relations:
+      - { to: itsm_duty_group, type: association, cardinality: "N:1", desc: "属某值班组（groupId）；组删除级联失效" }
+    api_behavior:
+      search_total_must_be_1: "search v1/v2 先按 groupName/groupId 查组，total≠1（0 个或多个同名）直接 500『查询值班日历信息失败』——排查时先 GET /v1/duty_group?name= 确认组唯一（.26 无组时复现）"
+      update_date_shift: "update 时原配置 date≠请求 date → 后端自动转 create 新配置（旧的不删），并非改期"
+      sync_duty_days: "create/update 成功后自动 SyncDutyDays（按法定假日日历展开值班数据），无需手动触发"
+    side_effects:
+      - op: duty_group_config.create
+        rule: "POST /v1/duty_group_config。groupId/date/status 必填。同组同日重复 create 产生重复 config——同步工具必须先 search 判重"
 
   # ---------- 系统设置·工作日历（work_calendar，sys_setting 微服务）----------
   sys_setting_work_calendar:
