@@ -353,6 +353,7 @@ items:
       - {date: "2026-09-14", change: 注册为 autoops 工具（toolId a0014959...，v5）；py2 stdlib http 层+平台 header 变量注入取参}
       - {date: "2026-09-15", change: "v6 表单赋值协议修正——COMMONDATE 传 RFC3339（非时间戳）/SELECT 枚举传 {key,label,value} 对象/alertUrl 改事件详情页 /next/events/{eventId}/detail；连接解析支持 EASYOPS_CMDB_BACKEND_URL"}
       - {date: "2026-09-15", change: 导出终态工具包 tools/告警转工单.tool.tar.gz（v6，round-trip 导入验证通过）}
+      - {date: "2026-09-15", change: v7 handler 取告警待响应人（多告警去重）+duty_group 兜底值班组（默认 test，查当日排班 users+leader）；工具包同步 v7}
     scenario: 检索未恢复告警按级别/持续时长阈值批量转 EasyOps 故障工单并回填「识别和发起」表单（py2/3 兼容，可配 EasyOps agent 定时工具）
     notes: "入参 range/auto_create/alert_level/alert_time；端口 8131 alert_service + 8134 flowable + 8079 cmdb；防重靠 _batch 消费事件（移出 not_recover）"
     added: "2026-09-14"

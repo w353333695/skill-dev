@@ -98,8 +98,9 @@ def _resolve_conn():
     BASE_HEADERS.update({'org': ORG, 'user': USER})
 
 SERVICE_ID = '60c33d948bf61'       # 「故障处理」服务实例（事件管理）
-HANDLER_NAME = 'easyops'           # 默认处理人（工单 handlerName 必填）
+HANDLER_NAME = 'easyops'           # 工单 handlerName 兜底（建单必填）
 STEP_TASK_NAME = u'识别和发起'      # 表单数据挂靠的流程步骤
+DEFAULT_DUTY_GROUP = 'test'        # 兜底值班组名（告警无待响应人时查今日排班）
 
 # 告警 level(str) → 工单 level(int)
 ALERT_LEVEL_TO_INT = {u'info': 0, u'warning': 1, u'critical': 2}
@@ -167,7 +168,8 @@ def parse_args(argv):
     globals().get() 取；本地/编排侧兜底 EASYOPS_TOOL_INPUT(JSON) 与 argv k=v。
     优先级：globals 注入 > env 同名 > argv > 默认值。
     """
-    cfg = {'range': '1d', 'auto_create': u'是', 'alert_level': 'critical', 'alert_time': 20}
+    cfg = {'range': '1d', 'auto_create': u'是', 'alert_level': 'critical', 'alert_time': 20,
+           'duty_group': DEFAULT_DUTY_GROUP}
 
     def _coerce(key, val):
         val = _to_unicode(val)
@@ -184,7 +186,7 @@ def parse_args(argv):
                 cfg[key] = u'是' if val else u'否'
             elif isinstance(val, _string_types):
                 cfg[key] = val if val in (u'是', u'否') else (u'是' if val in ('true', 'True', '1') else u'否')
-        elif key in ('range', 'alert_level'):
+        elif key in ('range', 'alert_level', 'duty_group'):
             cfg[key] = str(val)
 
     # ① 平台 header 注入的同名变量（最高优先）
@@ -374,6 +376,54 @@ def lookup_user_instance_id(name):
     return iid
 
 
+def build_event_responder_index(range_sec):
+    """历史事件索引：eventId → responder（待响应人）。
+
+    not_recover 查询不带 responder 时用；转单后事件移出 not_recover，
+    回填时按工单 alertList 的 eventId 到全量事件里反查。
+    """
+    idx = {}
+    status, resp = http_json('POST', ALERT_SERVICE_PORT, '/api/v1/monitor_event/_search', {
+        'page': 1, 'page_size': 300, 'st': '-%d' % range_sec,
+        'fields': ['eventId', 'responder', 'responderShowName'],
+    })
+    if status == 200 and isinstance(resp, dict):
+        for ev in (resp.get('data') or {}).get('list') or []:
+            r = (ev.get('responder') or '').strip()
+            if r:
+                idx[ev.get('eventId') or ev.get('_id')] = r
+    return idx
+
+
+def lookup_duty_members(group_name, date_str):
+    """值班组当日值班人（users + leader，去重）——duty_group_config v2 search。
+
+    :param group_name: 值班组名（兜底入参）
+    :param date_str: YYYY-MM-DD
+    :return: 值班人 name 列表（去重保序）；查不到返回 []
+    """
+    if not group_name:
+        return []
+    status, resp = http_json('POST', FLOWABLE_PORT, '/api/flowable_service/v2/duty_group_config/search', {
+        'groupName': group_name, 'date': date_str,
+    })
+    if status != 200 or not isinstance(resp, dict) or resp.get('code') not in (0, None):
+        put_str(u'值班组查询失败: %s HTTP %s' % (group_name, status))
+        return []
+    members = []
+    for cfg in (resp.get('data') or {}).get('list') or []:
+        for shift in (cfg.get('dutyShiftConf') or []):
+            for u in (shift.get('users') or []):
+                n = (u.get('name') or '').strip()
+                if n and n not in members:
+                    members.append(n)
+            for l in (shift.get('leader') or []):
+                n = (l.get('name') or '').strip()
+                if n and n not in members:
+                    members.append(n)
+    return members
+
+
 def find_identify_step(pi_instance_id):
     """流程实例 → 「识别和发起」_ITSC_INSTANCE_STEP。
 
@@ -394,11 +444,12 @@ def find_identify_step(pi_instance_id):
     return None
 
 
-def build_form_data(ticket, alert_rule_id=''):
+def build_form_data(ticket, responder_names):
     """工单详情 → 表单 formData 结构（[{key:容器, values:[{控件:值}]}]）。
 
     控件赋值协议（objects.yaml#itsm_form_component「formData 控件赋值协议」）：
     SELECT 单选传 {key,label,value} 对象；COMMONDATE 传 RFC3339 串；LINK 传 {href,label}。
+    :param responder_names: 处理人列表（告警待响应人去重合并；空则值班组兜底，由调用方决定）
     """
     lv_int = ticket.get('level')
     # SELECT 控件 key 对齐表单 extraProps.items（key→label/value）
@@ -407,7 +458,7 @@ def build_form_data(ticket, alert_rule_id=''):
 
     p_map = {2: _enum('p1', u'P1'), 1: _enum('p2', u'P2'), 0: _enum('p4', u'P4')}
     priority_map = {2: _enum('urgent', u'紧急'), 1: _enum('urgent', u'紧急'), 0: _enum('normal', u'普通')}
-    handler_names = ticket.get('operator') or [HANDLER_NAME]
+    handler_names = responder_names or [HANDLER_NAME]
     rows = []
     for al in ticket.get('alertList') or []:
         rows.append({
@@ -463,29 +514,39 @@ def main(argv=None):
     put_str(u'配置: %s' % json.dumps(cfg, ensure_ascii=False))
     range_sec = parse_range(cfg['range'])
 
-    # 步骤 1+2：自动转工单（同时留 eventId→alertRuleId 索引供回填用；
-    # 防重：_batch 成功即消费事件（移出 not_recover），天然幂等）
-    ev_rule_map = {}
+    # 步骤 1+2：自动转工单
+    # （防重：_batch 成功即消费事件移出 not_recover，天然幂等）
     if cfg['auto_create'] == u'是':
         events = search_not_recover(range_sec, cfg['alert_level'], cfg['alert_time'] * 60)
         put_str(u'待转工单告警数: %d' % len(events))
-        for ev in events:
-            if ev.get('alertRuleId'):
-                ev_rule_map[ev['eventId'] or ev.get('_id')] = ev['alertRuleId']
         ok, fail = batch_create_tickets(events)
         put_str(u'转工单完成: 成功 %d 失败 %d' % (ok, fail))
     else:
         put_str(u'自动转工单=否，跳过检索与建单')
 
-    # 全量事件建 ruleId 索引（覆盖历史单回填——not_recover 之外的事件也带 alertRuleId）
-    status, resp = http_json('POST', ALERT_SERVICE_PORT, '/api/v1/monitor_event/_search', {
-        'page': 1, 'page_size': 300, 'st': '-%d' % range_sec,
-        'fields': ['eventId', 'alertRuleId'],
-    })
-    if status == 200 and isinstance(resp, dict):
-        for ev in (resp.get('data') or {}).get('list') or []:
-            if ev.get('alertRuleId'):
-                ev_rule_map[ev.get('eventId') or ev.get('_id')] = ev['alertRuleId']
+    # 全量事件索引：eventId → responder（待响应人）——handler 主来源
+    responder_idx = build_event_responder_index(range_sec)
+
+    # 值班组兜底（懒查：只在有工单缺待响应人时用）
+    _duty_cache = {}
+
+    def _resolve_handlers(ticket):
+        """告警待响应人（多告警去重保序）→ 空则值班组当日排班 → 仍空 HANDLER_NAME。"""
+        names = []
+        for al in ticket.get('alertList') or []:
+            r = responder_idx.get(al.get('eventId')) or ''
+            r = r.strip()
+            if r and r not in names:
+                names.append(r)
+        if names:
+            return names
+        dg = cfg.get('duty_group') or ''
+        if dg not in _duty_cache:
+            _duty_cache[dg] = lookup_duty_members(dg, time.strftime('%Y-%m-%d')) if dg else []
+        if _duty_cache[dg]:
+            put_str(u'告警无待响应人，兜底值班组 %s: %s' % (dg, ','.join(_duty_cache[dg])))
+            return _duty_cache[dg]
+        return []
 
     # 步骤 3：查范围内新建的转故障工单
     tickets = list_created_tickets(range_sec)
@@ -504,12 +565,7 @@ def main(argv=None):
             skipped += 1
             put_str(u'未找到识别和发起步骤: %s' % pi.get('instanceId'))
             continue
-        rule_id = ''
-        for al in t.get('alertList') or []:
-            rule_id = ev_rule_map.get(al.get('eventId')) or ''
-            if rule_id:
-                break
-        ok, resp = fill_step_form(step['instanceId'], build_form_data(t, rule_id))
+        ok, resp = fill_step_form(step['instanceId'], build_form_data(t, _resolve_handlers(t)))
         if ok:
             filled += 1
             put_str(u'表单回填成功: %s -> step %s' % (t.get('orderNum'), step['instanceId']))
