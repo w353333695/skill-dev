@@ -39,6 +39,7 @@ IS_PY2 = sys.version_info[0] == 2
 
 CCPC_PORT = 8880
 FLOWABLE_PORT = 8134               # logic.flowable_service
+FLEX_TIME = 5                      # 交接班弹性时间（分钟）
 
 HOST = ''
 ORG = ''
@@ -248,8 +249,9 @@ def fetch_ccpc(ip, group_id, start, end, fixture=None):
 def ensure_duty_group(name, shifts):
     """查/建/更新值班组。返回 (groupId, 变更描述)。
 
-    无 → 建（dutyCycle 未来一百年，dutyShift=归纳班次）；
-    有且 dutyShift（名称+时段集合）不一致 → PUT 更新 dutyShift（保留 name/dutyCycle）。
+    无 → 建（dutyCycle 未来一百年，dutyShift=归纳班次，flexTime=5 分钟交接班弹性时间）；
+    有且 dutyShift（名称+时段集合）不一致 → PUT 更新 dutyShift（保留 name/dutyCycle）；
+    有且 flexTime≠5 → PUT 补设 flexTime（保留其余原值）。
     """
     status, resp = http_json('GET', '/api/flowable_service/v1/duty_group?name=%s' % _url_quote(name))
     if status != 200 or not isinstance(resp, dict) or resp.get('code') != 0:
@@ -257,27 +259,37 @@ def ensure_duty_group(name, shifts):
     lst = (resp.get('data') or {}).get('list') or []
     if not lst:
         body = {'name': name, 'dutyCycle': duty_cycle_100y(), 'status': 'enabled',
-                'dutyShift': shifts, 'memo': u'sync_ccpc_duty 自动创建'}
+                'dutyShift': shifts, 'flexTime': FLEX_TIME,
+                'memo': u'sync_ccpc_duty 自动创建'}
         status, resp = http_json('POST', '/api/flowable_service/v1/duty_group', body)
         if status != 200 or not isinstance(resp, dict) or resp.get('code') != 0:
             raise RuntimeError(u'创建值班组失败: HTTP %s %s' % (status, _resp_text(resp)))
         gid = (resp.get('data') or {}).get('instanceId') or ''
         if not gid:
             raise RuntimeError(u'创建值班组未返回 instanceId: %s' % _resp_text(resp))
-        put_str(u'值班组已创建: %s (%s) 班次=%s' % (name, gid, json.dumps(shifts, ensure_ascii=False)))
+        put_str(u'值班组已创建: %s (%s) 班次=%s flexTime=%d' % (
+            name, gid, json.dumps(shifts, ensure_ascii=False), FLEX_TIME))
         return gid, 'created'
     group = lst[0]
     gid = group.get('instanceId') or ''
-    if sorted_shifts(group.get('dutyShift') or []) != sorted_shifts(shifts):
+    shifts_diff = sorted_shifts(group.get('dutyShift') or []) != sorted_shifts(shifts)
+    flex_diff = group.get('flexTime') != FLEX_TIME
+    if shifts_diff or flex_diff:
         body = {'name': group.get('name') or name,
                 'dutyCycle': group.get('dutyCycle') or duty_cycle_100y(),
                 'status': group.get('status') or 'enabled',
-                'dutyShift': shifts}
+                'dutyShift': shifts,
+                'flexTime': FLEX_TIME}
         status, resp = http_json('PUT', '/api/flowable_service/v1/duty_group/%s' % gid, body)
         if status != 200 or not isinstance(resp, dict) or resp.get('code') != 0:
-            raise RuntimeError(u'更新值班组班次失败: HTTP %s %s' % (status, _resp_text(resp)))
-        put_str(u'值班组班次已更新: %s -> %s' % (name, json.dumps(shifts, ensure_ascii=False)))
-        return gid, 'shifts_updated'
+            raise RuntimeError(u'更新值班组失败: HTTP %s %s' % (status, _resp_text(resp)))
+        what = []
+        if shifts_diff:
+            what.append(u'班次=%s' % json.dumps(shifts, ensure_ascii=False))
+        if flex_diff:
+            what.append(u'flexTime=%d' % FLEX_TIME)
+        put_str(u'值班组已更新: %s (%s)' % (name, u', '.join(what)))
+        return gid, 'shifts_updated' if shifts_diff else 'flex_updated'
     return gid, 'unchanged'
 
 
