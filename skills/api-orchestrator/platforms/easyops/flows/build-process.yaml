@@ -102,6 +102,9 @@ steps:
 
 key_rule: |
   ⚠️processSetting wire 层是【JSON 对象】非字符串（2026-09-15 .26 实测：传字符串报 json解析失败 readObjectStart expect { or n；spec 描述有误）。
+  ⚠️nodeSettings 元素是【扁平结构】{userTaskId, memoLevel, rejectNodes[], allowedOps[], ...}——非 get 端点返回的 {node:{},setting:{}} 嵌套形态；
+  传嵌套会被后端清洗成全空壳（userTaskId 空/rejectNodes 空，2026-09-15 .26 实测：1.2.3 及之前版本的驳回配置全因此丢失）。
+  驳回配置=rejectNodes:["目标节点id:线名"]（运行时动态跳转，不画反向 sequenceFlow），配 memoLevel:1 驳回意见必填。
 
   完整建流程链（建 def → 建版本不部署 → 绑表单 → 合规检测+用户验收 → 设主版本部署生效）的部署语义
   见 objects.yaml#itsm_process_version.side_effects（process_version.create / set_main rule）。本文件只列【步骤顺序】（怎么做）：
