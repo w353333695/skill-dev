@@ -780,6 +780,59 @@ def rule_form_expression_path_resolvable(e: BO, t: Reporter, ctx) -> None:
                      .format(var, component_id, contain_id))
 
 
+def rule_assignee_value_resolvable(e: BO, t: Reporter, ctx) -> None:
+    """R4 独立规则（error）：formValue 处理人 assigneeValue 取值路径存在性。
+
+    userType=formValue（flowable:assignee="{{.formValue}}"）的节点，
+    assigneeValue 是 JSON {userTaskId, containId, componentId}——运行时
+    syncer/assignee_source/form_value 从【来源节点的 done step formData】
+    按 containId/componentId 取 [{instanceId}] 反查 USER。
+    componentId 必须是来源节点表单控件的 key/modelField，错一个字母即
+    处理人为空（2026-09-15 .26 实测踩坑：review_leader vs reviewLeader）。
+    需 ctx.form_bindings 才做实质校验；未提供只查 JSON 格式。"""
+    fb = getattr(ctx, "form_bindings", None)
+    if not e.is_a("bpmn:UserTask"):
+        return
+    if e.attrs_.get("flowable:assigneeType") != "formValue" and \
+            e.attrs_.get("flowable:assignee") != "{{.formValue}}":
+        return
+    raw = e.attrs_.get("flowable:assigneeValue") or ""
+    raw = raw.replace("&quot;", '"')
+    if not raw.strip():
+        t.report(e.id, "formValue 处理人缺 assigneeValue 配置")
+        return
+    try:
+        cfg = json.loads(raw)
+    except ValueError:
+        t.report(e.id, "assigneeValue 不是合法 JSON: [{}]".format(raw[:60]))
+        return
+    utid = (cfg.get("userTaskId") or "").strip()
+    contain_id = (cfg.get("containId") or "").strip()
+    component_id = (cfg.get("componentId") or "").strip()
+    if not (utid and contain_id and component_id):
+        t.report(e.id, "assigneeValue 缺 userTaskId/containId/componentId 字段")
+        return
+    if fb is None:
+        return
+    containers = fb.get(utid)
+    if containers is None:
+        t.report(e.id,
+                 "处理人取值节点 [{}] 无绑定表单（--form-bindings 未提供该节点）"
+                 .format(utid))
+        return
+    index = _form_path_index(containers)
+    comp_keys = index.get(contain_id)
+    if comp_keys is None:
+        t.report(e.id,
+                 "处理人取值容器 [{}] 不在节点 [{}] 绑定表单的容器集（{}）"
+                 .format(contain_id, utid, ", ".join(sorted(index))[:60]))
+        return
+    if component_id not in comp_keys:
+        t.report(e.id,
+                 "处理人控件 [{}] 不在节点 [{}] 容器 [{}] 的控件集——运行时该节点处理人为空"
+                 .format(component_id, utid, contain_id))
+
+
 def rule_flow_conditional_error(e: BO, t: Reporter, ctx) -> None:
     if not e.is_any(_GW_TYPES_COND):
         return
@@ -801,11 +854,12 @@ def rule_flow_conditional_error(e: BO, t: Reporter, ctx) -> None:
             continue
         if src.attrs_.get("flowable:isFormDecision") == "1":
             fen = src.attrs_.get("flowable:formExpressionName")
-            o = fen.split(";") if fen else None
+            o = [x for x in fen.split(";") if x.strip()] if fen else None  # 尾部分号防空串
             s = [x.split(":")[0] for x in o] if o else None  # 变量名
-            l = [x.split(":")[1] for x in o] if o else None  # 表单字段
+            l = [x.split(":")[1] for x in o if ":" in x] if o else None  # 表单字段
             if not (s and l and s[0] and l[0]):
                 t.report(f.id, "使用了表单决定流转但未配置变量名和表单字段")
+                continue
             for out_f in r:
                 a: List[str] = []
                 if out_f.conditionExpression and out_f.conditionExpression.body:
@@ -1005,6 +1059,7 @@ RULES: List[tuple] = [
     # 全量校验；未提供时仅格式层（段数/分隔符）。前端 bpmnlint 无此规则——前端靠
     # 级联选择器结构性规避，直调 API 绕过前端时这里是唯一防线。
     ("form-expression-path-resolvable", "error", rule_form_expression_path_resolvable),
+    ("assignee-value-resolvable", "error", rule_assignee_value_resolvable),
 ]
 
 
