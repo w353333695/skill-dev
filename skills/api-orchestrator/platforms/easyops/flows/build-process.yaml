@@ -104,7 +104,12 @@ key_rule: |
   ⚠️processSetting wire 层是【JSON 对象】非字符串（2026-09-15 .26 实测：传字符串报 json解析失败 readObjectStart expect { or n；spec 描述有误）。
   ⚠️nodeSettings 元素是【扁平结构】{userTaskId, memoLevel, rejectNodes[], allowedOps[], ...}——非 get 端点返回的 {node:{},setting:{}} 嵌套形态；
   传嵌套会被后端清洗成全空壳（userTaskId 空/rejectNodes 空，2026-09-15 .26 实测：1.2.3 及之前版本的驳回配置全因此丢失）。
-  驳回配置=rejectNodes:["目标节点id:线名"]（运行时动态跳转，不画反向 sequenceFlow），配 memoLevel:1 驳回意见必填。
+  驳回配置三件套（2026-09-15 .26 用户手改 1.2.5 定案）：① rejectNodes:["目标节点id:0"]（线名用数字索引非中文）
+  ② allowedOps 含 "jump"（不配则驳回按钮不出现，只配 rejectNodes 无效）③ memoLevel:1（驳回意见必填）。
+  【设计规则：所有审批类型的节点（复核/审批/审查类，非首节点非自动节点）默认都加驳回权限】——
+  驳回目标=该节点业务上的上一个产数据节点；审批节点无驳回权限=审批人只能放行不能打回，设计缺陷。
+  且 nodeSettings 子对象须给完整骨架（suspendSetting/autoCCSetting/scriptSettings 等空对象非 null——
+  null 会被前端设计器二次编辑时覆盖重置，2026-09-15 .26 实测）。
 
   完整建流程链（建 def → 建版本不部署 → 绑表单 → 合规检测+用户验收 → 设主版本部署生效）的部署语义
   见 objects.yaml#itsm_process_version.side_effects（process_version.create / set_main rule）。本文件只列【步骤顺序】（怎么做）：

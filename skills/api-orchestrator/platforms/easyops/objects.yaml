@@ -670,9 +670,9 @@ objects:
       assignType:        { type: string, desc: "指派类型 single(单签)/assigneeList(会签，legacy)" }
       handling:          { type: string, enum: [directly, send_directly, claim_directly, send_claim_directly], desc: "处理方式：directly直接/send_directly先派单/claim_directly先认领/send_claim_directly派单+认领" }
       presetAssigneeConf: { type: object, ref: itsm_process_assignee, desc: "审批人（后端按 userType 回查 name 的展示视图；真正来源在 BPMN flowable:assignee）" }
-      allowedOps:        { type: array, items: string, desc: "节点允许的操作按钮。取值：assignee(审批处理)/distribute(派单)/claim(认领)/withdraw(撤回)/cc(抄送)/SLAChange(SLA变更,首节点默认)/close(关单)/add(加签)。⚠️done(通过)+convert(工单转换)默认开启不在列表配。V2 在 nodeSettings 配（非 BPMN XML）" }
-      memoLevel:         { type: integer, enum: [-1, 0, 1], desc: "审批意见级别 -1隐藏/0非必填/1必填" }
-      rejectNodes:       { type: array, items: string, desc: "可驳回/跳回的目标节点。格式 `节点id:线名`（如 Task_apply:驳回修改）。⚠️驳回是运行时动态跳转，靠此字段声明，bpmnXML 不画反向 sequenceFlow（画了反而不对）。目标节点id须图中存在否则被 cleanSetting 清洗" }
+      allowedOps:        { type: array, items: string, desc: "节点允许的操作按钮。取值：assignee(审批处理)/distribute(派单)/claim(认领)/withdraw(撤回)/cc(抄送)/SLAChange(SLA变更,首节点默认)/close(关单)/add(加签)/**jump(驳回跳转)**。⚠️done(通过)+convert(工单转换)默认开启不在列表配。V2 在 nodeSettings 配（非 BPMN XML）。【驳回权限=allowedOps 含 jump + rejectNodes 声明目标，两者缺一不可（2026-09-15 .26 用户手改 1.2.5 定案：只配 rejectNodes 不配 jump 驳回按钮不出现）】" }
+      memoLevel:         { type: integer, enum: [-1, 0, 1], desc: "审批意见级别 -1隐藏/0非必填/1必填（驳回节点建议 1 强制填驳回理由）" }
+      rejectNodes:       { type: array, items: string, desc: "可驳回/跳回的目标节点。格式 `节点id:线名`——【线名实测用数字索引（如 Activity_alert_handle:0），写中文线名不生效（2026-09-15 .26 用户手改 1.2.5 定案）】。⚠️驳回是运行时动态跳转，靠此字段声明，bpmnXML 不画反向 sequenceFlow（画了反而不对）。目标节点id须图中存在否则被 cleanSetting 清洗。⚠️生效前提：节点 allowedOps 须含 jump" }
       scriptSettings:    { type: object, ref: itsm_process_script, desc: "前后置脚本 {PreScript,PostScript}" }
       autoSetting:       { type: object, ref: itsm_process_auto_node, desc: "自动化节点（绑 autoops 工具）" }
       nextAssigneeSetting: { type: object, desc: "允许本节点设下节点审批人；细粒度配在 BPMN subsequentConf" }
