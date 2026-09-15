@@ -376,22 +376,31 @@ def lookup_user_instance_id(name):
     return iid
 
 
-def build_event_responder_index(range_sec):
-    """历史事件索引：eventId → responder（待响应人）。
+def build_event_detail_index(range_sec):
+    """历史事件索引：eventId → 事件详情（表单表格行级数据源）。
 
-    not_recover 查询不带 responder 时用；转单后事件移出 not_recover，
-    回填时按工单 alertList 的 eventId 到全量事件里反查。
+    表格每行对齐【该条告警】自己的内容（信息/等级/资源/时间），
+    不用工单级聚合值——同一工单挂多条告警时各行不同。
     """
     idx = {}
-    status, resp = http_json('POST', ALERT_SERVICE_PORT, '/api/v1/monitor_event/_search', {
-        'page': 1, 'page_size': 300, 'st': '-%d' % range_sec,
-        'fields': ['eventId', 'responder', 'responderShowName'],
-    })
-    if status == 200 and isinstance(resp, dict):
-        for ev in (resp.get('data') or {}).get('list') or []:
-            r = (ev.get('responder') or '').strip()
-            if r:
-                idx[ev.get('eventId') or ev.get('_id')] = r
+    page = 1
+    while page <= 20:                                    # 上限 20 页保护
+        status, resp = http_json('POST', ALERT_SERVICE_PORT, '/api/v1/monitor_event/_search', {
+            'page': page, 'page_size': 300, 'st': '-%d' % range_sec,
+            'fields': ['eventId', 'responder', 'originContent', 'originTitle',
+                       'target', 'level', 'startTime', 'objectId', 'instanceId'],
+        })
+        if status != 200 or not isinstance(resp, dict):
+            break
+        data = resp.get('data') or {}
+        lst = data.get('list') or []
+        if not lst:
+            break
+        for ev in lst:
+            idx[ev.get('eventId') or ev.get('_id')] = ev
+        if page * 300 >= int(data.get('total') or 0):
+            break
+        page += 1
     return idx
 
 
@@ -444,13 +453,16 @@ def find_identify_step(pi_instance_id):
     return None
 
 
-def build_form_data(ticket, responder_names):
+def build_form_data(ticket, responder_names, event_idx=None):
     """工单详情 → 表单 formData 结构（[{key:容器, values:[{控件:值}]}]）。
 
     控件赋值协议（objects.yaml#itsm_form_component「formData 控件赋值协议」）：
     SELECT 单选传 {key,label,value} 对象；COMMONDATE 传 RFC3339 串；LINK 传 {href,label}。
     :param responder_names: 处理人列表（告警待响应人去重合并；空则值班组兜底，由调用方决定）
+    :param event_idx: eventId → 事件详情索引；表格行优先取【该条告警】自己的
+                      信息/等级/资源/时间（工单挂多告警时各行不同），索引缺失时回退工单级值。
     """
+    event_idx = event_idx or {}
     lv_int = ticket.get('level')
     # SELECT 控件 key 对齐表单 extraProps.items（key→label/value）
     def _enum(key, label_value):
@@ -459,18 +471,30 @@ def build_form_data(ticket, responder_names):
     p_map = {2: _enum('p1', u'P1'), 1: _enum('p2', u'P2'), 0: _enum('p4', u'P4')}
     priority_map = {2: _enum('urgent', u'紧急'), 1: _enum('urgent', u'紧急'), 0: _enum('normal', u'普通')}
     handler_names = responder_names or [HANDLER_NAME]
+    # 事件 level(str) → 表格「等级」SELECT 枚举
+    ev_level_enum = {u'critical': _enum('critical', u'严重'), u'warning': _enum('warning', u'警告'),
+                     u'info': _enum('notice', u'通知')}
+    ticket_resource = ticket.get('resource') or {}
     rows = []
     for al in ticket.get('alertList') or []:
+        ev = event_idx.get(al.get('eventId')) or {}
+        # 行级：优先事件自己的内容，缺失回退工单级
+        info = (ev.get('originContent') or ev.get('originTitle')
+                or ticket.get('title') or '')
+        ev_lv = ((ev.get('level') or '').lower()
+                 if ev.get('level') else '')
         rows.append({
-            'alertTime': rfc3339(al.get('startTime')),
-            'alertLevel': {2: _enum('critical', u'严重'), 1: _enum('warning', u'警告'), 0: _enum('notice', u'通知')}.get(lv_int, _enum('notice', u'通知')),
-            'alertResource': (ticket.get('resource') or {}).get('resourceName', ''),
-            'alertInfo': ticket.get('title') or '',
+            'alertTime': rfc3339(al.get('startTime') or ev.get('startTime')),
+            'alertLevel': ev_level_enum.get(ev_lv) or
+                          {2: _enum('critical', u'严重'), 1: _enum('warning', u'警告'),
+                           0: _enum('notice', u'通知')}.get(lv_int, _enum('notice', u'通知')),
+            'alertResource': ev.get('target') or ticket_resource.get('resourceName', ''),
+            'alertInfo': info,
             'alertSource': u'统一数据告警',
             'alertUrl': {'label': u'查看告警', 'href': '/next/events/%s/detail' % (al.get('eventId') or '')},
             'cmdbURL': {'label': u'查看实例', 'href': '/next/next-cmdb-instance-management/next/%s/instance/%s' % (
-                (ticket.get('resource') or {}).get('objectId', 'HOST'),
-                (ticket.get('resource') or {}).get('resourceId', ''))},
+                ev.get('objectId') or ticket_resource.get('objectId', 'HOST'),
+                ev.get('instanceId') or ticket_resource.get('resourceId', ''))},
         })
     return [
         {'key': 'sec_base', 'values': [{
@@ -524,8 +548,8 @@ def main(argv=None):
     else:
         put_str(u'自动转工单=否，跳过检索与建单')
 
-    # 全量事件索引：eventId → responder（待响应人）——handler 主来源
-    responder_idx = build_event_responder_index(range_sec)
+    # 全量事件索引：eventId → 事件详情（含 responder 待响应人）——handler 与表格行的数据源
+    event_idx = build_event_detail_index(range_sec)
 
     # 值班组兜底（懒查：只在有工单缺待响应人时用）
     _duty_cache = {}
@@ -534,8 +558,7 @@ def main(argv=None):
         """告警待响应人（多告警去重保序）→ 空则值班组当日排班 → 仍空 HANDLER_NAME。"""
         names = []
         for al in ticket.get('alertList') or []:
-            r = responder_idx.get(al.get('eventId')) or ''
-            r = r.strip()
+            r = ((event_idx.get(al.get('eventId')) or {}).get('responder') or '').strip()
             if r and r not in names:
                 names.append(r)
         if names:
@@ -565,7 +588,7 @@ def main(argv=None):
             skipped += 1
             put_str(u'未找到识别和发起步骤: %s' % pi.get('instanceId'))
             continue
-        ok, resp = fill_step_form(step['instanceId'], build_form_data(t, _resolve_handlers(t)))
+        ok, resp = fill_step_form(step['instanceId'], build_form_data(t, _resolve_handlers(t), event_idx))
         if ok:
             filled += 1
             put_str(u'表单回填成功: %s -> step %s' % (t.get('orderNum'), step['instanceId']))
