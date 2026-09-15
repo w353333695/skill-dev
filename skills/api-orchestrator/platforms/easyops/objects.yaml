@@ -754,7 +754,12 @@ objects:
       exceptionNotice: { type: object, desc: "{method[email等], subject, content, receivers{userNames[],userGroupIds[]}}——执行失败通知" }
 
   itsm_process_form:
-    description: 流程版本↔表单绑定（ITSC_PROCESS_FORM_RELATION）—— 表单绑到【节点】(userTaskId)非版本；每节点一条关系。
+    description: |
+      流程版本↔表单绑定（ITSC_PROCESS_FORM_RELATION）—— 表单绑到【节点】(userTaskId)非版本；每节点一条关系。
+      【绑定语义（2026-09-15 .26 用户纠偏）】节点绑定的表单 = 该节点处理人【要填写】的信息——
+      表单属于「产出数据」的节点。纯审批/复核/查看节点（处理人只看不填）【不绑表单】：
+      误绑会让审批人可编辑上游数据（混淆数据归属+误改风险）。审批节点要看上下文靠
+      工单详情聚合展示（formData 全节点可读），无需绑表单。
     source: data/sources/backend/ITSM/flowable_service/process_definition_version/process_definition_version_service.go:511-636
     api: process_form
     fields:
