@@ -59,8 +59,17 @@ ALERT_SERVICE_PORT = 8131          # logic.alert_service
 FLOWABLE_PORT = 8134               # logic.flowable_service
 CMDB_PORT = 8079                   # logic.cmdb.service
 
-HOST = os.environ.get('EASYOPS_CMDB_HOST', os.environ.get('EASYOPS_HOST', '172.30.0.232'))
-ORG = os.environ.get('EASYOPS_ORG', '18832008')
+def _default_host():
+    """从 EASYOPS_*_URL 类变量提取 host；都无则回退硬编码。"""
+    for var in ('EASYOPS_CMDB_BACKEND_URL', 'EASYOPS_CMDB_SERVICE_HOST', 'EASYOPS_HOST'):
+        v = os.environ.get(var, '')
+        if v:
+            return v.replace('http://', '').replace('https://', '').split(':')[0].strip()
+    return '172.30.0.232'
+
+
+HOST = _default_host()
+ORG = os.environ.get('EASYOPS_ORG', '1888')
 USER = os.environ.get('EASYOPS_USER', 'easyops')
 
 
@@ -73,9 +82,17 @@ def _platform_var(name, default):
 
 
 def _resolve_conn():
-    """运行时解析连接参数（模块底部 main 前调用，避开前向引用）。"""
+    """运行时解析连接参数（平台注入优先；env 用 *_URL/同名变量多形态解析）。"""
     global HOST, ORG, USER
-    HOST = str(_platform_var('EASYOPS_CMDB_HOST', HOST)).split(':')[0].strip() or HOST
+    g = globals()
+    url_host = ''
+    for var in ('EASYOPS_CMDB_SERVICE_HOST', 'EASYOPS_CMDB_HOST'):
+        if isinstance(g.get(var), str) and g[var]:
+            url_host = str(g[var]).split(':')[0].strip()
+            break
+    if not url_host:
+        url_host = _default_host()
+    HOST = url_host or HOST
     ORG = str(_platform_var('EASYOPS_ORG', ORG))
     USER = str(_platform_var('EASYOPS_USER', USER))
     BASE_HEADERS.update({'org': ORG, 'user': USER})
@@ -378,32 +395,58 @@ def find_identify_step(pi_instance_id):
 
 
 def build_form_data(ticket, alert_rule_id=''):
-    """工单详情 → 表单 formData 结构（[{key:容器, values:[{控件:值}]}]）。"""
+    """工单详情 → 表单 formData 结构（[{key:容器, values:[{控件:值}]}]）。
+
+    控件赋值协议（objects.yaml#itsm_form_component「formData 控件赋值协议」）：
+    SELECT 单选传 {key,label,value} 对象；COMMONDATE 传 RFC3339 串；LINK 传 {href,label}。
+    """
     lv_int = ticket.get('level')
-    p_map = {2: u'P1', 1: u'P2', 0: u'P4'}
+    # SELECT 控件 key 对齐表单 extraProps.items（key→label/value）
+    def _enum(key, label_value):
+        return {'key': key, 'label': label_value, 'value': label_value}
+
+    p_map = {2: _enum('p1', u'P1'), 1: _enum('p2', u'P2'), 0: _enum('p4', u'P4')}
+    priority_map = {2: _enum('urgent', u'紧急'), 1: _enum('urgent', u'紧急'), 0: _enum('normal', u'普通')}
     handler_names = ticket.get('operator') or [HANDLER_NAME]
     rows = []
     for al in ticket.get('alertList') or []:
         rows.append({
-            'alertTime': al.get('startTime'),
-            'alertLevel': {2: u'严重', 1: u'警告', 0: u'通知'}.get(lv_int, u'通知'),
+            'alertTime': rfc3339(al.get('startTime')),
+            'alertLevel': {2: _enum('critical', u'严重'), 1: _enum('warning', u'警告'), 0: _enum('notice', u'通知')}.get(lv_int, _enum('notice', u'通知')),
             'alertResource': (ticket.get('resource') or {}).get('resourceName', ''),
             'alertInfo': ticket.get('title') or '',
             'alertSource': u'统一数据告警',
-            'alertUrl': {'label': u'查看告警', 'href': '/next/events/alert-rule/detail/%s' % alert_rule_id},
+            'alertUrl': {'label': u'查看告警', 'href': '/next/events/%s/detail' % (al.get('eventId') or '')},
             'cmdbURL': {'label': u'查看实例', 'href': '/next/next-cmdb-instance-management/next/%s/instance/%s' % (
                 (ticket.get('resource') or {}).get('objectId', 'HOST'),
                 (ticket.get('resource') or {}).get('resourceId', ''))},
         })
     return [
         {'key': 'sec_base', 'values': [{
-            'incidentLevel': p_map.get(lv_int, u'P4'),
-            'priority': {2: u'紧急', 1: u'紧急', 0: u'普通'}.get(lv_int, u'普通'),
-            'incidentType': u'告警异常',
+            'incidentLevel': p_map.get(lv_int, _enum('p4', u'P4')),
+            'priority': priority_map.get(lv_int, _enum('normal', u'普通')),
+            'incidentType': _enum('alert', u'告警异常'),
             'handler': [{'instanceId': lookup_user_instance_id(n), 'name': n} for n in handler_names],
         }]},
         {'key': 'sec_alerts', 'values': rows},
     ]
+
+
+def rfc3339(ts):
+    """unix 时间戳 → RFC3339 带本地时区串（COMMONDATE 控件协议，不收时间戳）。"""
+    if not ts:
+        return ''
+    ts = int(ts)
+    if IS_PY2:
+        import datetime
+        dt = datetime.datetime.fromtimestamp(ts)
+        offset = datetime.datetime.utcnow() - datetime.datetime.now()
+        off_sec = int(offset.total_seconds())
+        sign = '+' if off_sec >= 0 else '-'
+        off_sec = abs(off_sec)
+        return dt.strftime('%Y-%m-%dT%H:%M:%S') + '%s%02d:%02d' % (sign, off_sec // 3600, (off_sec % 3600) // 60)
+    import datetime
+    return datetime.datetime.fromtimestamp(ts).astimezone().isoformat(timespec='seconds')
 
 
 def fill_step_form(step_instance_id, form_data):

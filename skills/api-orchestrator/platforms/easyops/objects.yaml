@@ -420,6 +420,29 @@ objects:
     description: |
       控件（Component，component.go:13-24）—— 表单字段。type 取 field_kind 枚举（23 种，enum.go:7-34）。控件特有配置塞 options.extraProps（map）；CMDB 类控件还有 cmdbProps。
       23 种：INPUT 单行 / TEXTAREA 多行 / RICHTEXT 富文本 / NUMBERINPUT 计数器 / RADIO 单选组 / CHECKBOX 多选组 / SELECT 下拉单选 / MULTIPLESELECT 下拉多选 / SWITCH 开关 / UPLOAD 普通附件 / LARGEFILE_UPLOAD 超大附件 / SLIDER 滑块 / TIME 时间(前端隐藏) / DATE 日期(前端隐藏) / COMMONDATE 日期时间 / TIMERANGE 时间段 / DATERANGE 日期段 / LINK 链接 / MODALSELECT 实例选择 / CASCADER 级联 / ARRATINPUT 数组输入 / CMDBINSTANCESELECT CMDB实例选择 / CMDBCASCADER CMDB级联 / USER_SELECTOR 用户 / USER_GROUP_SELECTOR 用户组 / DEPARTMENT_SELECTOR 组织。
+      【formData 控件赋值协议】（写表单数据——step.formData / 表单预填——时每控件 value 的真实形态）：
+      2026-09-15 .26 实测用户反馈三点纠偏：① 时间控件不能传时间戳，须 RFC3339 格式化串；
+      ② SELECT/RADIO 等枚举型控件不能传 str，须 {key,label,value} 对象（多选为数组）；
+      ③ 告警详情页 URL 形如 /next/events/{eventId}/detail（非 alert-rule/detail/{ruleId}）。
+      权威对照表（源码 ticket_standard_field/models.go ParseFormValueByKind 注释 + testdata/formdata.json 交叉验证）：
+        INPUT/TEXTAREA → "字符串"（TEXTAREA 换行 \n）
+        RICHTEXT → "<p>html</p>"
+        COMMONDATE → "2025-07-25T17:05:42+08:00"（RFC3339 带时区；⚠️不是时间戳）
+        TIMERANGE/DATERANGE → ["RFC3339", "RFC3339"]
+        NUMBERINPUT/SLIDER → 数字
+        SWITCH → true/false
+        SELECT/RADIO（单选）→ {key, label, value}（⚠️不是 str；key 取 extraProps.items[].key）
+        MULTIPLESELECT/CHECKBOX/CASCADER（多选）→ [{key,label,value}...]
+        LINK → {href, label}
+        ARRATINPUT → ["a","b"]
+        UPLOAD → [{checksum,fileName,instanceId:"",size,source:"oss"}]
+        LARGEFILE_UPLOAD → [{checksum,fileId,fileName,size,source:"file_repo",workspaceId}]
+        USER_SELECTOR → [{instanceId,name}]（CMDB 实例引用）
+        USER_GROUP_SELECTOR → [{_object_id:"USER_GROUP",instanceId,name}]
+        DEPARTMENT_SELECTOR → [{departmentId,name,namePath}]
+        CMDBINSTANCESELECT/CMDBCASCADER → [{instanceId}] 或 [{instanceId,name}]
+      formData 整体结构（form_data.go ParseData）：[{key:容器key, values:[{控件modelField:值}]}]，
+      取值路径 formData[容器key][0][控件modelField]；写回即同构 PUT step.formData（JSON 串）。
     source: data/sources/backend/ITSM/flowable_service/internal/form/definition/components/component.go + internal/enums/field_kind/enum.go:7-34
     fields:
       key:             { type: string, desc: "前端唯一 key" }
