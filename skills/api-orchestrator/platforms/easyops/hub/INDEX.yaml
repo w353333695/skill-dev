@@ -3,7 +3,8 @@
 #   monitor-kits=监控套件包+配套告警规则模板(xlsx) scripts=可交付脚本(按域分子目录)
 #   tools=autoops 工具成品 sso-adapter-providers=sso provider 成品
 #   itsm-service=ITSM 服务/流程交付包 custom-msg-sender=自定义消息发送器 other=未归类交付物
-# 收录门槛: 仅成品交付物；命名 <名称>_v<版本>.<ext>；新版回流删旧版文件
+# 收录门槛: 仅成品交付物；命名规范（2026-09-17 起）{类别}_{名称}_{版本}.{扩展名}，中文人类可读，
+#   如「ITSM服务_主机申请_1.3.4.zip」；旧命名 <名称>_v<版本>.<ext> 存量不动，新版回流按新命名+删旧版文件
 items:
   # ---- cmdb-kits（3 商品）----
   - id: svc-cmdb-kit
@@ -396,3 +397,24 @@ items:
     scenario: EasyOps autoops 工具包——同步CCPC值班表 v2（拉 CCPC 值班表同步 ITSM 值班组日历）
     notes: "源码见 scripts/tools/sync_ccpc_duty.py"
     added: "2026-09-15"
+  # ---- custom-msg-sender（1 商品，2026-09-17 起按新命名规范）----
+  - id: notify-site-message
+    name: 通知方式_custom站内信
+    category: custom-msg-sender
+    files: [通知方式_custom站内信_1.0.0.zip]
+    version: "1.0.0"
+    history:
+      - {ver: "1.0.0", date: "2026-09-17", change: 初版入库（.26 org1888 v1 明文导出，含 scriptContent+导入说明）}
+    scenario: 合规性检查结果推送 EasyOps 站内信（custom 脚本调 logic.sys_setting site_msg；py2 ens_api+requests）
+    notes: "导入 POST :8095/api/v2/message_sender/configs（user=easyops）；内置 mail/dingding/wework 含密码不入交付物；msgsender 域此前无离线交付物，本件补缺"
+    added: "2026-09-17"
+  - id: dashboard-cangguan
+    name: 仪表盘_仓管资源报表
+    category: other
+    files: [仪表盘_仓管资源报表_1.0.0.zip]
+    version: "1.0.0"
+    history:
+      - {ver: "1.0.0", date: "2026-09-17", change: 初版入库（.26 导出 2 盘：仓管资源报表 65751c2507b05 + 统计仪表盘 6648a2c3b4d50，已剥离实时数据快照）}
+    scenario: 仓管资源统计仪表盘 2 件（DEEPSEEK 仓管模型数据聚合展示；2+7 图表面板）
+    notes: "导入 POST :8079/v2/object/_DASHBOARD/instance（去 instanceId 新建）；依赖仓管 CMDB 模型先建；验收 /next/dashboard/dashboard/v2/{instanceId}；data_exchange 域此前无离线交付物，本件补缺"
+    added: "2026-09-17"
