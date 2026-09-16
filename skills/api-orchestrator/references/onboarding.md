@@ -82,7 +82,7 @@ onboarding 的速度和质量取决于输入完整度。**开工前按此清单�
 |---|---|---|
 | 5 | **后端源码位置** | 契约常不完整——源码补全缺失端点 + 拿到**权威结构体/校验规则**（契约里的字段类型常是弱描述）|
 | 6 | **测试环境 / 隔离租户** | 写路径要落库验证，**绝不能动生产/系统自带数据**。要一个可写的测试空间（org/namespace/project）|
-| 7 | **验收方式** | 确认编排结果可见 | 前端 URL、校验命令、或查询语句 |
+| 7 | **验收方式** | 确认编排结果可见（步 7 交付能力门禁的输入） | 前端 URL、校验命令、或查询语句 |
 
 ### 可选（增量更新 / 特殊约束）
 
@@ -191,9 +191,13 @@ uncovered:                            # 强制输出「我覆盖到了什么 / �
 
 ### 步 7：交付 + 自检
 - **跑 lint**：`scripts/lint-platforms.py <deployment>`——校验 platforms 符合 asset-schema + 引用闭合（spec 文件存在 / api 指向 resource / ref 指向 object / flows 的 op 在 spec verbs 里）+ **source 证据门禁**（每个有 `api:` 的 object 必须有非空 `source:`，防步 3 被跳）。**0 ERR 才算产物合格**；WARN 逐条确认是否可接受。可加 `--api-cli <bin>` 额外校验 spec 能被 api-cli 解析。
-- **成品回流 hub**：本次交付若产出可导入/可部署成品（套件包/脚本/工具），按 `references/hub.md` 回流流程落 `hub/<category>/` + 登记 INDEX.yaml（新商品 history 首行"初版入库"）。
+- **成品回流 hub**：本次交付若产出可导入/可部署成品（套件包/脚本/工具），按 `references/hub.md` 回流流程落 `hub/<category>/` + 登记 INDEX.yaml（新商品 history 首行"初版入库"；命名中文三段式 `{类别}_{名称}_{版本}.{ext}`，包内附导入说明）。
 - README 作资料地图索引（指向各文件）。
 - e2e 场景逐条标注用哪个 resource.verb（覆盖标尺）。
+- **交付能力门禁（acceptance_urls + 导出说明，二者必录）**：编排完结时要交付「前端验收 URL + 离线交付物 + 导入方式」三件套（见 `references/hub.md`「完结交付」），其数据来源在 onboarding 录入——因此每个新接入 system 段**必须**提供：
+  1. `acceptance_urls`：前端 URL format 模板（含 `{objectId}`/`{instanceId}` 等占位符）——实测拿到的真实 URL 模板化，不许凭路径规律编。**确无前端页的域**（纯后端服务/插件运行时，如 sso-adapter provider）显式写 `acceptance_urls: none  # 原因：…`，不许静默缺失。
+  2. **离线交付物导出说明**：该域产物怎么导出成可导入包（哪个 verb/端点导出、包格式、怎么导入回去）——记在 `runtime` 段（如 `export_recipe`）或对应 flow 的导出步骤。无导出端点的域说明手工打包方式（如实例 search 全量导 JSON）。
+  缺任一项 → onboarding 不算完成（lint WARN 提示），因为后续编排完结交付必然交不出。
 - 验收 URL / 校验命令记录在 systems.yaml。
 - 提交；坑已回流 platforms（**不进记忆**——platforms 是唯一真相来源；本 skill 的所有知识落在 skill 本体，遵守 AGENTS.md §8 skill 自包含纪律）。
 

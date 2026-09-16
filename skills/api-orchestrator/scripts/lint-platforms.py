@@ -374,10 +374,10 @@ def main():
                             rel_files.append(rel)
                             if f"{c}/{rel}" not in id_by_file:
                                 err(f"hub/{c}/{rel} 未登记在 INDEX.yaml（查重不可用）")
-                    # 规则6: 同类目下同商品多版本并存（_vX.Y.Z 前缀相同；含子目录，按去版本路径分组）
+                    # 规则6: 同类目下同商品多版本并存（_vX.Y.Z 旧命名 或 _X.Y.Z 中文三段式新命名；含子目录，按去版本路径分组）
                     vers = {}
                     for rel in rel_files:
-                        m = re.match(r"^(.+)_v(\d+\.\d+\.\d+)", rel)
+                        m = re.match(r"^(.+?)_v(\d+\.\d+\.\d+)", rel) or re.match(r"^(.+?)_(\d+\.\d+\.\d+)(?=\.)", rel)
                         if m:
                             vers.setdefault(m.group(1), []).append(rel)
                     for base_name, vfn in vers.items():
