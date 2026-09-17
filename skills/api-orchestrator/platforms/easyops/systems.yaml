@@ -143,6 +143,22 @@ systems:
           - { name: 存储设备, aliases: [存储阵列, 磁盘阵列, SAN], objectId: STORAGE@ONEMODEL }
         基础设施.安全资源:
           - { name: 防火墙, aliases: [FW, 防火墙设备], objectId: FIREWALL@ONEMODEL }
+        平台隐藏模型.交付物载体:
+          description: |
+            平台功能数据的 CMDB 落库模型（多为隐藏模型 visible=invisible）——六域交付物
+            （表单/流程/仪表盘/通知/值班/日历等）全部是这些模型的实例，交付导出统一走
+            instance_excel.export（Excel 人类友好）或 object_instance.search（结构 JSON）。
+            实测 2026-09-17（.26 org1888，Excel 全字段导出行数含关系列多值展开行）。
+          models:
+            - { name: ITSM表单, aliases: [流程表单, 表单Schema], objectId: _ITSC_FORM_SCHEMA, note: "245 实例；版本 _ITSC_FORM_VERSION、模板 _ITSC_FORM_TEMPLATE" }
+            - { name: ITSM流程, aliases: [流程定义], objectId: _ITSC_PROCESS, note: "55 实例；版本 _ITSC_PROCESS_VERSION" }
+            - { name: 仪表盘, aliases: [Dashboard, 盘], objectId: _DASHBOARD, note: "8 实例；构件 _DASHBOARD_BRICK、数据源 _DASHBOARD_PROVIDER" }
+            - { name: 通知方式, aliases: [通知配置, msgsender配置], objectId: _MSGSENDER_NOTIFY_CONFIG@EASYOPS, note: "4 实例（含 custom scriptContent）" }
+            - { name: 触发器, aliases: [ITSM触发器], objectId: _ITSC_TRIGGER, note: "5 实例" }
+            - { name: 通知策略, aliases: [ITSM通知策略], objectId: _ITSC_NOTIFY_POLICY, note: "34 实例" }
+            - { name: SLA规则, aliases: [服务协议], objectId: _ITSC_SLA_RULE, note: "1 实例" }
+            - { name: 值班组, aliases: [值班配置], objectId: _ITSC_DUTY_GROUP, note: "2 实例；V2 体系 _ITSC_DUTY_GROUP_V2@EASYOPS + 班次配置/计划/日志一族" }
+            - { name: 工作日历, aliases: [营业时间日历], objectId: sys_work_calendar@EASYOPS, note: "⚠️源码常量（sys_setting working_calendar/models.go:14）但 .26 org1888 模型未注册（404）——日历主体数据经 work_calendar API（sys_setting:8271）读写，逐日明细 sys_work_day@EASYOPS；导出走 API 导 JSON 不走 CMDB 实例" }
       usage: |
         场景："查主机的实例" → common_models 匹配 "主机" → objectId=HOST
         → scripts/run.sh --spec easyops-cmdb.yaml object_instance search HOST ...
