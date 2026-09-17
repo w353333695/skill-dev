@@ -101,6 +101,11 @@ systems:
         delete: "批量删除实例（instanceIds 分号分隔；路径 instance_batch）"
       api_contract:
         search: "平台全量接口契约兜底检索（11501 条，object_instance.search FLOW_BUILDER_API_CONTRACT@EASYOPS）——用户要的接口不在本 platforms spec 时用：按 name 模糊/endpoint.uri 模糊搜 → 拿 method+uri+serviceName → serviceName 查 ens-routing.json 得 host:port 直连。对象结构/检索配方见 objects.yaml#flow_builder_api_contract"
+      instance_excel:
+        export:           "按模型导出实例为 Excel（xlsx 二进制，中文表头=模型属性名，自动分页拉全）——【离线交付物默认格式】CMDB 实例类交付优先用这个，不要 search 导 JSON（2026-09-17 .26 实测：HOST 262 行/163 列）"
+        import_template:  "拿某模型实例导入空模板（xlsx）"
+        validate:         "上传 xlsx 导入预检（不落库，逐行校验结果；multipart form 字段名=attachment）"
+        import:           "上传 xlsx 批量导入实例（upsert 按 showKey；multipart attachment）"
       dashboard:
         create: "建仪表盘（_DASHBOARD 实例，POST /v2/object/_DASHBOARD/instance，镜像前端 v2 保存）——配置结构见 formats/dashboard-kit/"
         update: "改仪表盘（PUT 全量覆盖——先 search 取现配再改再 PUT）"
@@ -174,6 +179,15 @@ systems:
         ④ 直连调用：HTTP {method} http://{host}:{port}{uri}，header 三件套（Host: admin.easyops.local + org + user）
            ——契约带 request/response json 可用于构造 body；useApiGateway=true 的接口走网关面（frontend endpoint + cookie）
       protected_orgs: [0, 1, 2]        # 系统自带禁动（0 无库、1 主业务 22 模型、2 名字服务 9 模型）
+      excel_export: |
+        实例 Excel 导入导出（export_excel 模块，2026-09-17 .26 org1888 真调全通）：
+        export POST /export/object/{id}/instance/excel——body {} 导出全部（query 同 search 语义过滤、
+        fields 是 map 非 search 的数组）；响应 xlsx 二进制流（-o 落盘）。中文表头=模型属性显示名。
+        ⚠️两个坑：① openpyxl read_only 模式对导出文件计数失真（max_row=1 假象，行数据其实在）——
+        校验内容用正常模式 load_workbook 或数 sheet XML 的 <row> 数；② validate/import 的 multipart
+        form 字段名固定 attachment（custom_controller.go:33 c.FormFile("attachment")），不是 file。
+        权限：非 admin 用户导出会按 readAuthorizers 过滤（util.go:43-53 query 注入 $and filter），
+        easyops 走 admin 白名单路径全量导出。
       test_org: 18832008               # 非系统测试 org（2026-07-31 建），写验证用
       list_pagination: "流式 NDJSON——每行一个完整对象，非 {data:{list:[...]}} 包装；逐行 json.loads"
       instance_search_fields_required: true   # object_instance.search body 必带 fields（属性 id 列表），否则 100000

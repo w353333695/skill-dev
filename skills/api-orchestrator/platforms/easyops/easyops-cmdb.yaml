@@ -640,6 +640,84 @@ resources:
                   items: { type: object, additional_properties: true }
 
   # -----------------------------------------------------------------------------
+  # 资源：instance_excel —— 实例 Excel 导入导出（export_excel 模块，人类友好交付物）。
+  # 数据源：backend CMDB cmdb_service/export_excel（route.go:7-13）+ .26 真调实测
+  # （2026-09-17，org 1888，HOST 导出 262 行=1 表头+261 数据行，163 列中文表头）。
+  # 用途：离线交付物默认人类友好格式——CMDB 实例类交付用 Excel（.xlsx）不用 JSON。
+  # -----------------------------------------------------------------------------
+  instance_excel:
+    description: 实例 Excel 导入导出（export_excel 模块）。export 按模型导出实例为 xlsx（中文表头=模型属性名，人类可直接读，适合离线交付）；import_template 拿空模板；import 上传 xlsx 批量导入；validate 导入预检。
+    path: ""
+    operations:
+      # ---------- 导出（POST /export/object/{object_id}/instance/excel）----------
+      export:
+        description: 按模型导出实例为 Excel（xlsx 二进制流）。表头=模型全部属性的中文显示名，数据=全部实例（自动分页拉全，受 license 上限）。query 语义同 object_instance.search 的 query（MongoDB 风格）。离线交付物场景优先用本端点（人类友好），不要 search 导 JSON。
+        method: POST
+        path: /export/object/{object_id}/instance/excel
+        params:
+          object_id: { in: path, type: string, required: true, description: "所属模型 ID（如 HOST）" }
+        body:
+          type: object
+          description: "导出请求。body 可传 {} 导出全部；query 同 search 语义（支持 $like/$eq/$in 等操作符 + 关系路径 key）。"
+          properties:
+            query:           { type: object, additional_properties: true, description: "MongoDB 风格查询过滤（语义同 object_instance.search 的 query），留空导出全部实例" }
+            fields:          { type: object, additional_properties: true, description: "字段过滤 map（true=只要这些 / false=排除这些），留空导出全部字段。注意：与 search 的 fields 数组不同，这里是 map 形态（proto _struct.Struct）" }
+            sort:            { type: object, additional_properties: true, description: "排序 map（key=属性 id，value=1 升 / -1 降），留空默认 instanceId 降序" }
+            more_meta_attr:  { type: boolean, description: "true 追加内置属性列（创建者/创建时间/修改者/修改时间），默认 false" }
+            only_my_instance: { type: boolean, description: "true 只导出与我相关实例，默认 false" }
+        response:
+          format: binary
+          type: object
+          description: "xlsx 二进制流（application/vnd.openxmlformats-officedocument.spreadsheetml.sheet）——用 -o 落盘。⚠️openpyxl read_only 模式对该文件计数失真（max_row=1 假象），读内容用正常模式 load_workbook 或数 sheet XML 的 <row> 数。"
+
+      # ---------- 导入模板（GET /import/object/{object_id}/instance/excel）----------
+      import_template:
+        description: 获取某模型的实例导入 Excel 空模板（表头=模型属性中文名，含数据校验规则说明行）。给用户手工填数据的起点。
+        method: GET
+        path: /import/object/{object_id}/instance/excel
+        params:
+          object_id: { in: path, type: string, required: true, description: "所属模型 ID" }
+        response:
+          format: binary
+          type: object
+          description: "xlsx 二进制流——用 -o 落盘"
+
+      # ---------- 导入预检（POST /validate/object/{object_id}/instances/excel）----------
+      validate:
+        description: 上传 xlsx 预检（不落库）——导入前 dry-run，返回逐行校验结果（哪行哪列什么错）。multipart 上传。
+        method: POST
+        path: /validate/object/{object_id}/instances/excel
+        content_type: multipart-form-data
+        params:
+          object_id: { in: path, type: string, required: true, description: "所属模型 ID" }
+          attachment: { in: formData, format: binary, required: true, description: "xlsx 文件（路径）——form 字段名固定 attachment（custom_controller.go:33）" }
+        response:
+          type: object
+          properties:
+            code: { type: integer }
+            data: { type: object, additional_properties: true, description: "逐行校验结果" }
+
+      # ---------- 导入（POST /import/object/{object_id}/instance/excel）----------
+      import:
+        description: 上传 xlsx 批量导入实例（upsert 语义，按模型 showKey 匹配）。配合 import_template 给的模板填数据后导入。multipart 上传。
+        method: POST
+        path: /import/object/{object_id}/instance/excel
+        content_type: multipart-form-data
+        params:
+          object_id: { in: path, type: string, required: true, description: "所属模型 ID" }
+          attachment: { in: formData, format: binary, required: true, description: "xlsx 文件（路径）——form 字段名固定 attachment（custom_controller.go:33）" }
+        body:
+          type: object
+          description: "导入选项（query/form 参数）"
+          properties:
+            is_stop_on_error: { type: boolean, description: "遇错是否中断（默认 false 跳过错误行）" }
+        response:
+          type: object
+          properties:
+            code: { type: integer }
+            data: { type: object, additional_properties: true, description: "导入结果统计（成功/失败行）" }
+
+  # -----------------------------------------------------------------------------
   # 资源：dashboard —— 仪表盘（_DASHBOARD 模型实例，前端 hyper-insign-v2 apps/dashboard）。
   # 建模说明：镜像前端真实 CRUD 行为（源码 07-source-repos/next-apps-hyper-insign-v2/...
   # apps/dashboard/src/Pages/Dashboard/CreateAndEditDashboardV2/route.yaml:402-530）：

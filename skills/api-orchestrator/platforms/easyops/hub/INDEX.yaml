@@ -418,3 +418,13 @@ items:
     scenario: 仓管资源统计仪表盘 2 件（DEEPSEEK 仓管模型数据聚合展示；2+7 图表面板）
     notes: "导入 POST :8079/v2/object/_DASHBOARD/instance（去 instanceId 新建）；依赖仓管 CMDB 模型先建；验收 /next/dashboard/dashboard/v2/{instanceId}；data_exchange 域此前无离线交付物，本件补缺"
     added: "2026-09-17"
+  - id: cmdb-instances-host-user
+    name: CMDB实例_主机用户清单
+    category: other
+    files: [CMDB实例_主机用户清单_1.0.0.zip]
+    version: "1.0.0"
+    history:
+      - {ver: "1.0.0", date: "2026-09-17", change: 初版入库（.26 org1888 经 instance_excel.export 导出，Excel 人类友好格式）}
+    scenario: CMDB HOST/USER 模型全量实例清单（261+324 行，中文表头 xlsx）——环境迁移/台账交付/离线备份
+    notes: "导入 POST :8079/import/object/{id}/instance/excel（multipart 字段名 attachment，先 /validate 预检）；同类交付优先走 instance_excel.export 接口导 Excel，不 search 导 JSON（接口 2026-09-17 接入，见 systems.yaml#easyops-cmdb.capabilities.instance_excel）"
+    added: "2026-09-17"

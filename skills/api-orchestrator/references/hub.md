@@ -47,6 +47,14 @@ items:
   存量不动（改了断引用）；新商品一律新命名。新版本回流 → 删旧版文件（git rm），目录只留最新版，
   历史靠 git + INDEX.history 双轨追溯。
 - 收录门槛：**仅成品交付物**（可导入/可部署）。中间产物/调试脚本不回流（落 tmp/ 或项目目录）。
+- **交付物格式人类友好（按产物类型选格式，不默认 JSON）**：
+  - **CMDB 实例类 → Excel（.xlsx）**：用平台的实例 Excel 导出接口（EasyOps 是
+    `instance_excel.export`，表头=模型属性中文显示名，Excel/WPS 直接读）——不要 `search` 导
+    JSON。查「该系统有没有 Excel 导出能力」优先看 spec 里 export/excel 类 verb；没有就按
+    onboarding 门禁（下述「与 onboarding 的对接」）调研补充，补上之前可临时用 JSON 但要注明。
+  - 结构配置类（模型定义/流程 BPMN/仪表盘配置）→ 保持原生结构格式（JSON/YAML/zip），Excel
+    不适用；但包内**附带一份 Excel 或 md 的「内容清单」**让人不打开工具也能知道包里有什么。
+  - 脚本/工具类 → 源码文件 + tar.gz/zip，包内 README。
 - **交付包必备「导入说明.md`」**：包内附一份导入说明（或 README），含 ①交付物清单 ②导入方式
   （API 端点/curl 示例 + 前端操作路径，二选一或并列）③验收 URL ④依赖与注意——离线交付物要能
   脱离本 skill 独立导入，导入说明是唯一载体。
