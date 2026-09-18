@@ -187,7 +187,8 @@ def parse_args(argv):
             elif isinstance(val, _string_types):
                 cfg[key] = val if val in (u'是', u'否') else (u'是' if val in ('true', 'True', '1') else u'否')
         elif key in ('range', 'alert_level', 'duty_group'):
-            cfg[key] = str(val)
+            # py2 str(u中文) 触发 ascii 编码错——已是字符串（str/unicode）直接用
+            cfg[key] = val if isinstance(val, _string_types) else str(val)
 
     # ① 平台 header 注入的同名变量（最高优先）
     g = globals()
@@ -231,7 +232,7 @@ def search_not_recover(range_sec, min_level, older_than_sec):
     fields = ['_id', 'eventId', 'batchId', 'startTime', 'time', 'level', 'objectId',
               'instanceId', 'target', 'originContent', 'originTitle', 'metricName',
               'metricValue', 'metricThresholdValue', 'metricThresholdComparator',
-              'source', 'alertRuleId']
+              'source', 'alertRuleId', 'alertReceivers']
     st = '-%d' % range_sec
     now = int(time.time())
     out, page = [], 1
@@ -315,28 +316,43 @@ def fmt_time(ts):
 
 
 # ---------------------------------------------------------------------------
-# 步骤 3：查时间范围内新建的故障工单
+# 步骤 3：查时间范围内已转单的告警事件（hasOrder=true，2026-09-18 v9 换接口）
 # ---------------------------------------------------------------------------
-def list_created_tickets(range_sec):
-    st = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(int(time.time()) - range_sec))
-    et = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime())
+def list_ordered_events(range_sec):
+    """查范围内已转工单的告警事件（事件侧反查，替代 incident_management/ticket——
+    后者部分版本不可用；hasOrder=true 查询同时返回 orders[].orderNum（工单号）、
+    alertReceivers（通知接收人）与事件详情，一次拿全回填所需数据）。
+
+    返回事件列表（每项含 orders/alertReceivers/详情字段）。
+    """
     out, page = [], 1
-    while True:
-        status, resp = http_json('POST', FLOWABLE_PORT, '/api/flowable_service/v1/incident_management/ticket', {
-            'ctimeRange': {'st': st, 'et': et},
-            'states': 'divide,diagnostic,recover',
-            'page': page, 'pageSize': 100,
+    while page <= 50:
+        status, resp = http_json('POST', ALERT_SERVICE_PORT, '/api/v1/monitor_event/not_recover/_search', {
+            'onlyNotifyMyself': False,
+            'page': page, 'page_size': 100,
+            'st': 'now-%dd' % max(1, range_sec // 86400) if range_sec >= 86400 else 'now-1d',
+            'et': '',
+            'displayNameEnabled': True,
+            'withCurrentStepUsers': True,
+            'hasOrder': True,
+            'fields': ['eventId', 'batchId', 'startTime', 'time', 'level', 'objectId',
+                       'instanceId', 'target', 'originContent', 'originTitle', 'metricName',
+                       'responder', 'alertReceivers', 'notifies', 'orders'],
+            'query': {'isGroup': False, 'type': 'alert',
+                      'status': {'$nin': ['block', 'inhibition', 'group']}, '$and': []},
         })
         if status != 200 or not isinstance(resp, dict) or resp.get('code') not in (0, None):
-            raise RuntimeError(u'查询故障工单失败: HTTP %s %s' % (status, resp))
+            raise RuntimeError(u'查询已转单事件失败: HTTP %s %s' % (status, resp))
         data = resp.get('data') or {}
         lst = data.get('list') or []
         out.extend(lst)
         total = int(data.get('total') or 0)
-        if not lst or len(out) >= total or page >= 100:
+        if not lst or len(out) >= total or page >= 50:
             break
         page += 1
-    return out
+    # st 只支持 now-Nd 天粒度兜底——内存过滤 startTime 精确到 range_sec
+    now = int(time.time())
+    return [ev for ev in out if now - int(ev.get('startTime') or 0) <= range_sec]
 
 
 # ---------------------------------------------------------------------------
@@ -405,7 +421,11 @@ def build_event_detail_index(range_sec):
 
 
 def lookup_duty_members(group_name, date_str):
-    """值班组当日值班人（users + leader，去重）——duty_group_config v2 search。
+    """值班组【当日】值班人——duty_group_config v2 search。
+
+    ⚠️date 传 YYYY-MM-DD 时后端仍可能返回整月配置（.26 实测）——须按 cfg.date
+    精确过滤到当日；多班次按【当前时刻】选在班班次（白班 08:00~19:00 样式），
+    取该班次 users + leader 去重。
 
     :param group_name: 值班组名（兜底入参）
     :param date_str: YYYY-MM-DD
@@ -419,9 +439,30 @@ def lookup_duty_members(group_name, date_str):
     if status != 200 or not isinstance(resp, dict) or resp.get('code') not in (0, None):
         put_str(u'值班组查询失败: %s HTTP %s' % (group_name, status))
         return []
+    now_hm = time.strftime('%H:%M')
+
+    def _in_shift(duty_time):
+        """dutyTime "08:00~19:00"（00:00~00:00=全天）→ 当前是否在班。"""
+        try:
+            a, b = (duty_time or '').split('~')
+            ah, am = [int(x) for x in a.strip().split(':')]
+            bh, bm = [int(x) for x in b.strip().split(':')]
+        except ValueError:
+            return True                     # 解析失败视为在班（宽松）
+        start, end, now = ah * 60 + am, bh * 60 + bm, int(now_hm[:2]) * 60 + int(now_hm[3:])
+        if start == 0 and end == 0:
+            return True                     # 全天班
+        if start <= end:
+            return start <= now < end
+        return now >= start or now < end    # 跨夜班（19:00~08:00）
+
     members = []
     for cfg in (resp.get('data') or {}).get('list') or []:
+        if (cfg.get('date') or '') != date_str:
+            continue                        # 后端返回整月时只取当日
         for shift in (cfg.get('dutyShiftConf') or []):
+            if not _in_shift(shift.get('dutyTime')):
+                continue                    # 只取当前在班班次
             for u in (shift.get('users') or []):
                 n = (u.get('name') or '').strip()
                 if n and n not in members:
@@ -548,53 +589,74 @@ def main(argv=None):
     else:
         put_str(u'自动转工单=否，跳过检索与建单')
 
-    # 全量事件索引：eventId → 事件详情（含 responder 待响应人）——handler 与表格行的数据源
+    # 全量事件索引：eventId → 事件详情——表格行级数据源
     event_idx = build_event_detail_index(range_sec)
 
-    # 值班组兜底（懒查：只在有工单缺待响应人时用）
+    # 值班组兜底（懒查：只在事件缺接收人时用）
     _duty_cache = {}
 
-    def _resolve_handlers(ticket):
-        """告警待响应人（多告警去重保序）→ 空则值班组当日排班 → 仍空 HANDLER_NAME。"""
+    def _resolve_handlers(ev):
+        """告警通知接收人 alertReceivers（去重保序，2026-09-18 v9 主来源）
+        → 空则值班组当日排班 → 仍空 HANDLER_NAME。"""
         names = []
-        for al in ticket.get('alertList') or []:
-            r = ((event_idx.get(al.get('eventId')) or {}).get('responder') or '').strip()
-            if r and r not in names:
-                names.append(r)
+        for r in (ev.get('alertReceivers') or []):
+            n = (r.get('name') or '').strip()
+            if n and n not in names:
+                names.append(n)
         if names:
             return names
         dg = cfg.get('duty_group') or ''
         if dg not in _duty_cache:
             _duty_cache[dg] = lookup_duty_members(dg, time.strftime('%Y-%m-%d')) if dg else []
         if _duty_cache[dg]:
-            put_str(u'告警无待响应人，兜底值班组 %s: %s' % (dg, ','.join(_duty_cache[dg])))
+            put_str(u'告警无接收人，兜底值班组 %s: %s' % (dg, ','.join(_duty_cache[dg])))
             return _duty_cache[dg]
         return []
 
-    # 步骤 3：查范围内新建的转故障工单
-    tickets = list_created_tickets(range_sec)
-    put_str(u'范围内故障工单数: %d' % len(tickets))
+    # 步骤 3：查范围内已转单事件（v9：hasOrder=true 事件侧反查，含工单号/接收人/详情）
+    events = list_ordered_events(range_sec)
+    put_str(u'范围内已转单告警数: %d' % len(events))
 
-    # 步骤 4+5：回填表单
+    # 步骤 4+5：按事件回填表单（一事件一工单，orders[0] 即工单号）
     filled, skipped = 0, 0
-    for t in tickets:
-        pi = find_process_instance(t)
+    for ev in events:
+        orders = ev.get('orders') or []
+        order_num = orders[0].get('orderNum') if orders else ''
+        if not order_num:
+            skipped += 1
+            put_str(u'事件无关联工单号: %s' % ev.get('eventId'))
+            continue
+        ticket_like = {
+            'orderNum': order_num,
+            'level': ALERT_LEVEL_TO_INT.get((ev.get('level') or u'info').lower(), 0),
+            'title': ev.get('originContent') or ev.get('originTitle') or '',
+            'resource': {'resourceName': ev.get('target') or '',
+                         'objectId': ev.get('objectId') or 'HOST',
+                         'resourceId': ev.get('instanceId') or ''},
+            'alertList': [{'eventId': ev.get('eventId'), 'startTime': ev.get('startTime'),
+                           'time': ev.get('time'), 'batchId': ev.get('batchId')}],
+        }
+        pi = find_process_instance(ticket_like)
         if not pi:
             skipped += 1
-            put_str(u'未找到流程实例: %s' % t.get('orderNum'))
+            put_str(u'未找到流程实例: %s' % order_num)
             continue
         step = find_identify_step(pi.get('instanceId'))
         if not step:
             skipped += 1
             put_str(u'未找到识别和发起步骤: %s' % pi.get('instanceId'))
             continue
-        ok, resp = fill_step_form(step['instanceId'], build_form_data(t, _resolve_handlers(t), event_idx))
+        # 事件详情优先本事件对象（hasOrder 查询已带），索引兜底
+        ev_detail = dict(ev)
+        ev_detail.setdefault('eventId', ev.get('eventId'))
+        event_idx[ev.get('eventId')] = ev_detail
+        ok, resp = fill_step_form(step['instanceId'], build_form_data(ticket_like, _resolve_handlers(ev), event_idx))
         if ok:
             filled += 1
-            put_str(u'表单回填成功: %s -> step %s' % (t.get('orderNum'), step['instanceId']))
+            put_str(u'表单回填成功: %s -> step %s' % (order_num, step['instanceId']))
         else:
             skipped += 1
-            put_str(u'表单回填失败: %s HTTP %s %s' % (t.get('orderNum'), ok, json.dumps(resp, ensure_ascii=False)[:200] if not isinstance(resp, str) else resp[:200]))
+            put_str(u'表单回填失败: %s HTTP %s %s' % (order_num, ok, json.dumps(resp, ensure_ascii=False)[:200] if not isinstance(resp, str) else resp[:200]))
     put_str(u'回填完成: 成功 %d 跳过/失败 %d' % (filled, skipped))
     return 0
 
