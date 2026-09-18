@@ -262,11 +262,16 @@ def search_not_recover(range_sec, min_level, older_than_sec):
 # ---------------------------------------------------------------------------
 # 步骤 2：批量转故障工单
 # ---------------------------------------------------------------------------
-def build_ticket(ev):
-    """告警事件 → 工单 ticket 结构（对齐 BatchCreate validator）。"""
+def build_ticket(ev, handler_override=None):
+    """告警事件 → 工单 ticket 结构（对齐 BatchCreate validator）。
+
+    handlerName 接口正则硬约束单用户名——取告警通知接收人首个（2026-09-18 v9.2：
+    工单列表处理人显示真实接收人），无接收人时由调用方传值班组首人/兜底值。
+    """
     lv = (ev.get('level') or u'info').lower()
     content = ev.get('originContent') or ev.get('originTitle') or ev.get('metricName') or ''
     title = content[:200] or (u'%s 告警' % ev.get('target', ''))
+    handler = handler_override or HANDLER_NAME
     return {
         'resourceList': [{
             'objectId': ev.get('objectId') or 'HOST',
@@ -281,7 +286,7 @@ def build_ticket(ev):
             'eventId': ev.get('eventId') or ev.get('_id') or '',
         }],
         'priority': 0,
-        'handlerName': HANDLER_NAME,
+        'handlerName': handler,
         'memo': u'\n发生时间：%s\n告警资源：%s\n告警等级：%s\n事件描述：%s\n事件来源：%s' % (
             fmt_time(ev.get('startTime')), ev.get('target') or '', ALERT_LEVEL_TO_CN.get(lv, lv),
             content, u'统一数据告警'),
@@ -292,17 +297,33 @@ def build_ticket(ev):
     }
 
 
-def batch_create_tickets(events):
-    """逐条转工单（_batch 接口虽批量，逐条调用便于错误归因与部分成功统计）。"""
+def batch_create_tickets(events, duty_group='', duty_cache=None):
+    """逐条转工单（_batch 接口虽批量，逐条调用便于错误归因与部分成功统计）。
+
+    handlerName 单人契约（正则硬约束）：告警通知接收人首个 → 值班组当日首人 →
+    HANDLER_NAME 兜底（与表单回填的处理人三级链同源，取单人代表）。
+    """
     ok, fail = 0, 0
     for ev in events:
+        handler = ''
+        for r in (ev.get('alertReceivers') or []):
+            n = (r.get('name') or '').strip()
+            if n:
+                handler = n
+                break
+        if not handler and duty_group:
+            if duty_group not in (duty_cache or {}):
+                duty_cache[duty_group] = lookup_duty_members(duty_group, time.strftime('%Y-%m-%d'))
+            members = (duty_cache or {}).get(duty_group) or []
+            handler = members[0] if members else ''
+        ticket = build_ticket(ev, handler or None)
         status, resp = http_json('POST', FLOWABLE_PORT,
                                  '/api/flowable_service/v1/incident_management/ticket/_batch',
-                                 {'ticketList': [build_ticket(ev)]})
+                                 {'ticketList': [ticket]})
         body = json.dumps(resp, ensure_ascii=False) if not isinstance(resp, str) else resp
         if status == 200 and isinstance(resp, dict) and resp.get('code') in (0, None):
             ok += 1
-            put_str(u'转工单成功: %s (%s)' % (build_ticket(ev).get('title'), ev.get('eventId')))
+            put_str(u'转工单成功: %s (处理人:%s %s)' % (ticket.get('title'), ticket.get('handlerName'), ev.get('eventId')))
         else:
             fail += 1
             put_str(u'转工单失败: %s -> HTTP %s %s' % (ev.get('eventId'), status, body[:200]))
@@ -581,19 +602,17 @@ def main(argv=None):
 
     # 步骤 1+2：自动转工单
     # （防重：_batch 成功即消费事件移出 not_recover，天然幂等）
+    _duty_cache = {}
     if cfg['auto_create'] == u'是':
         events = search_not_recover(range_sec, cfg['alert_level'], cfg['alert_time'] * 60)
         put_str(u'待转工单告警数: %d' % len(events))
-        ok, fail = batch_create_tickets(events)
+        ok, fail = batch_create_tickets(events, cfg.get('duty_group') or '', _duty_cache)
         put_str(u'转工单完成: 成功 %d 失败 %d' % (ok, fail))
     else:
         put_str(u'自动转工单=否，跳过检索与建单')
 
     # 全量事件索引：eventId → 事件详情——表格行级数据源
     event_idx = build_event_detail_index(range_sec)
-
-    # 值班组兜底（懒查：只在事件缺接收人时用）
-    _duty_cache = {}
 
     def _resolve_handlers(ev):
         """告警通知接收人 alertReceivers（去重保序，2026-09-18 v9 主来源）
