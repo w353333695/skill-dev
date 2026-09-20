@@ -446,6 +446,7 @@ items:
       - {date: "2026-09-20", change: "v1.7 修后置脚本 formData 恒空（源码 NodeRear 传空串）——orderInfo.formData 兜底+inputs 声明 orderInfo/formData；event_center 发现失败回退 EASYOPS_EVENT_CENTER_HOST"}
       - {date: "2026-09-20", change: "v1.8 表单定位三级（注入>orderInfo.formData>stepList done步骤兜底），对齐真实 orderInfo 结构（用户样本）"}
       - {date: "2026-09-20", change: v2 复用 482db735 逻辑——PUT 12006 event_track/order（UpdateEventTrackITSMOrder，order.id=流程实例id），实测关联 200}
+      - {date: "2026-09-20", change: "v3 复刻 _batch 写链——PUT 12006 /api/v1/event_last/order（AssociateEventOrder：rowId=流程实例id+startTime=批次最早时间+op=append），实测 orders 落 last 表（hasOrder:true 可见）"}
     scenario: 识别和发起节点 postScript——提交后 PUT event_last/order 关联工单与告警
     notes: "toolId 4f8ab531c66bc9c04d654f54412fc8c8；sandboxRun=true（ITSM 脚本工具必须沙箱）"
     added: "2026-09-18"

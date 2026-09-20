@@ -2,13 +2,17 @@
 """
 节点后置脚本（识别和发起 postScript）：提交后关联工单与告警批次
 
-入参（平台注入）：
-    orderInfo   工单上下文 JSON（含 orderNum/rowId/processInstanceId）
-    formData    提交的整张表单 JSON（取 batchId）
-行为：
-    PUT /api/v1/event_last/order（event_center 服务，ens 发现）
-    data=[{rowId, batchIds, op:"append", orderNum}]
-运行环境：EasyOps agent py2（ens_api + requests）
+数据链路复刻 _batch（incident_management_service.go insertTicketData →
+MakeAssociateEventOrderRequest → PUT /api/v1/event_last/order）：
+  PUT http://{eventCenterIp}:12006/api/v1/event_last/order
+  giraffe-contract-name: easyops.api.event_center.event.AssociateEventOrder
+  body: {startTime: 最早批次时间, data: [{rowId: 工单columndb_row_id,
+         batchIds: [...], op: "append", orderNum: 工单号}]}
+  效果：事件 monitor_event/last 的 orders[] 追加 {orderId, orderNum}
+  → 告警列表 hasOrder:true 可见 + 事件页展示关联工单号
+
+入参（平台注入）：orderInfo（前后置脚本唯一数据源——formData 不注入）
+运行环境：EasyOps agent py2（requests 可用）
 """
 import json
 import sys
@@ -18,78 +22,19 @@ import requests
 reload(sys)
 sys.setdefaultencoding("utf-8")
 
-sys.path.append("/usr/local/easyops/ens_client/sdk/python_sdk")
-import ens_api
+# 平台注入变量可能缺省——globals().get 取，防 NameError
+_g = globals()
+orderInfo = _g.get("orderInfo") or ""
+eventCenterIp = _g.get("eventCenterIp") or ""
 
-EASYOPS_ORG = int(globals().get("EASYOPS_ORG") or 8888)
-EASYOPS_USER = globals().get("EASYOPS_USER") or "easyops"
-
-
-def get_event_center():
-    """关联端点地址。ens 发现（logic.event_center）失败时回退已知部署形态。
-
-    实测 .26：agent ens 无 logic.event_center 注册（转单链路是 flowable 服务端
-    内部调用）；event_last/order 属事件中心服务，端口未在常见端口暴露——
-    回退链由 EASYOPS_EVENT_CENTER_HOST 显式指定（编排侧/环境注入）。"""
-    try:
-        ret = ens_api.get_all_service_by_name("my_name", "logic.event_center")
-        if isinstance(ret, (list, tuple)):
-            for item in ret:
-                if isinstance(item, str) and ":" in item:
-                    return item
-                if isinstance(item, (list, tuple)) and len(item) >= 2:
-                    return "%s:%s" % (item[0], item[1])
-        if isinstance(ret, str):
-            return ret
-    except Exception:
-        pass
-    h = globals().get("EASYOPS_EVENT_CENTER_HOST") or ""
-    return h if h else None
+EASYOPS_ORG = int(_g.get("EASYOPS_ORG") or 8888)
+EASYOPS_USER = _g.get("EASYOPS_USER") or "easyops"
 
 
-def associate(row_id, batch_ids, order_num):
-    host = get_event_center()
-    if not host:
-        print "event_center service not found, skip associate"
-        return False
-    if ":" not in host:
-        host = host + ":8080"
-    url = "http://%s/api/v1/event_last/order" % host
-    headers = {"org": str(EASYOPS_ORG), "user": EASYOPS_USER,
-               "Content-Type": "application/json",
-               "giraffe-contract-name": "easyops.api.event_center.event.AssociateEventOrder"}
-    body = {"data": [{"rowId": row_id, "batchIds": batch_ids, "op": "append", "orderNum": order_num}]}
-    resp = requests.put(url, headers=headers, data=json.dumps(body), timeout=15)
-    print "associate:", resp.status_code, resp.text[:200]
-    return resp.status_code == 200
+def find_form_data(oi):
+    """定位含批次控件的表单 JSON 串（注入无 formData——从 orderInfo 取）。
 
-
-def extract_batch_ids(form):
-    """从表单 JSON 提取批次 id（sec_base.values[0].batchId——兼容 list/逗号串）。"""
-    try:
-        for c in (form or []):
-            if c.get("key") == "sec_base":
-                v = (c.get("values") or [{}])[0]
-                b = v.get("batchId")
-                if isinstance(b, (list, tuple)):
-                    return [str(x).strip() for x in b if str(x).strip()]
-                if isinstance(b, str):
-                    return [x.strip() for x in b.split(",") if x.strip()]
-    except Exception:
-        pass
-    return []
-
-
-def find_form_data(oi, injected_form):
-    """定位含批次控件的表单 JSON 串。
-
-    orderInfo 真实结构（2026-09-20 用户提供样本）：
-    - 顶层 formData：触发脚本的【当前步骤】表单（识别和发起提交时=其填写值）
-    - stepList[].formData：各步骤存储值（done 的识别和发起步骤带 batchId）
-    取值优先级：注入 formData > 顶层 orderInfo.formData > stepList 里
-    userTaskId 匹配本步骤（或最后一个 done 步骤）的 formData。"""
-    if injected_form:
-        return injected_form
+    优先顶层 formData（触发步骤表单），空则 stepList 最后一个有值步骤。"""
     fd = oi.get("formData") or ""
     if fd:
         return fd
@@ -99,29 +44,63 @@ def find_form_data(oi, injected_form):
     return fd or ""
 
 
+def get_batch_ids(form_data):
+    """遍历全部容器 values 取 batchId（兼容 list/逗号串，多容器合并去重）。"""
+    batch_ids = []
+    for d in (form_data or []):
+        for v in (d.get("values") or []):
+            b = v.get("batchId")
+            items = b if isinstance(b, (list, tuple)) else (
+                [x.strip() for x in (b or "").split(",") if x.strip()] if b else [])
+            for x in items:
+                x = str(x).strip()
+                if x and x not in batch_ids:
+                    batch_ids.append(x)
+    return batch_ids
+
+
+def associate(host, batch_ids, order_id, order_num, start_time):
+    url = "http://%s/api/v1/event_last/order" % host
+    headers = {
+        "org": str(EASYOPS_ORG),
+        "user": EASYOPS_USER,
+        "giraffe-contract-name": "easyops.api.event_center.event.AssociateEventOrder",
+    }
+    body = {"startTime": start_time,
+            "data": [{"rowId": order_id, "batchIds": batch_ids,
+                      "op": "append", "orderNum": order_num}]}
+    resp = requests.put(url, headers=headers, json=body, timeout=15)
+    print "associate:", resp.status_code, resp.text[:200]
+    return resp.status_code == 200
+
+
 if __name__ == "__main__":
-    # 平台注入变量可能缺省——globals().get 取，防 NameError
-    _g = globals()
-    orderInfo = _g.get("orderInfo") or ""
-    formData = _g.get("formData") or ""
     oi = {}
     try:
         oi = json.loads(orderInfo) if orderInfo else {}
     except Exception:
         pass
-    # 🔴后置脚本(NodeRear)的 formData 注入参数恒为空串（step/manager.go:965 传 ""，
-    # 且 getInputs 不注入 formData）——从 orderInfo 定位（顶层 formData > stepList）
-    formData = find_form_data(oi, formData)
     pi = oi.get("processInstance") or {}
-    order_num = pi.get("orderNum") or oi.get("orderNum") or ""
-    row_id = oi.get("instanceId") or pi.get("instanceId") or ""
+    process_instance_id = pi.get("instanceId") or ""
+    order_num = pi.get("orderNum") or ""
     try:
-        form = json.loads(formData) if formData else []
+        form_data = json.loads(find_form_data(oi)) or []
     except Exception:
-        form = []
-    bids = extract_batch_ids(form)
-    print "orderNum:", order_num, "| rowId:", row_id, "| batchIds:", bids
-    if not (order_num and bids):
-        print "missing orderNum or batchIds, skip"
+        form_data = []
+    batch_ids = get_batch_ids(form_data)
+    # startTime：批次 id 尾段即首次告警时间戳（<batchHash>-<startTime>），取最早
+    start_time = 0
+    for b in batch_ids:
+        try:
+            ts = int(b.rsplit("-", 1)[-1])
+            if not start_time or ts < start_time:
+                start_time = ts
+        except ValueError:
+            pass
+    print "orderNum:", order_num, "| piId:", process_instance_id, "| batchIds:", batch_ids
+    if not (process_instance_id and order_num and batch_ids):
+        print "missing params, skip"
         sys.exit(0)
-    associate(row_id, bids, order_num)
+    if not eventCenterIp:
+        eventCenterIp = (_g.get("EASYOPS_CMDB_SERVICE_HOST") or _g.get("EASYOPS_CMDB_HOST") or "127.0.0.1").split(":")[0]
+    associate(eventCenterIp + ":12006", batch_ids, process_instance_id, order_num, start_time)

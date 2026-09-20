@@ -549,6 +549,22 @@ objects:
       dataPath: { type: string, desc: "工具输出取数路径（如 output）" }
       showKey:  { type: array, items: string, desc: "用哪个字段展示（如 [name]）" }
 
+  itsm_event_order_association:
+    description: |
+      事件↔工单关联写链（_batch 建单内置 + postScript 复刻，2026-09-20 .26 实测定案）。
+      【端点】PUT http://{事件中心}:12006/api/v1/event_last/order
+      giraffe-contract-name: easyops.api.event_center.event.AssociateEventOrder
+      【body】{startTime: 最早批次时间戳, data: [{rowId: 工单流程实例instanceId,
+      batchIds: [...], op: "append", orderNum: 工单号}]}
+      【效果】事件的 monitor_event/last 表 orders[] 追加 {orderId, orderNum}——
+      告警列表 hasOrder:true 可查、事件页展示关联工单号（events-work-order 特性）。
+      ⚠️三条实测要点：①orders 写在【last 表】（not_recover/全量表不显示）；
+      ②op=append 重复调用重复追加（幂等需上层保证）；③事件中心服务=12006 端口
+      （agent ens 无注册，须 eventCenterIp 入参/host 回退）。
+      另有轨迹链 PUT :12006/api/v1/event_track/order（UpdateEventTrackITSMOrder，
+      body={batchId, order:{id,orderNum}}）——与 event_last 是两条不同写入。
+      源码：incident_management_service.go insertTicketData → data_builder.go
+      MakeAssociateEventOrderRequest。
   itsm_order_info:
     description: |
       脚本注入的工单上下文 orderInfo（真实 JSON 结构，2026-09-20 .26 用户提供完整样本定案）。
