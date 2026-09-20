@@ -401,3 +401,39 @@ items:
     scenario: EasyOps autoops 工具包——同步CCPC值班表 v2（拉 CCPC 值班表同步 ITSM 值班组日历）
     notes: "源码见 scripts/tools/sync_ccpc_duty.py"
     added: "2026-09-15"
+  - id: batch-autofill-suite
+    name: 手动提单批次ID自动填充套件
+    category: itsm-service
+    files: []
+    history:
+      - {date: "2026-09-18", change: 初版入库（onload v1.4 + associate v1.1，agent 实测填单输出验证通过）}
+    scenario: 手动提故障单只填批次ID即自动填表——①onPageLoad 脚本按批次查告警填等级/优先级/处理人(接收人)/关联告警行 ②识别和发起节点 postScript 提交后 PUT event_last/order 关联工单与告警批次；配套告警故障管理单 1.0.4（batchId 只读控件+容器挂 onPageLoadId）与故障处理流程 1.2.6
+    notes: "工具包在 tools/（表单按批次ID自动填单脚本/工单关联告警批次脚本）；ens_api 返回 list 形态须兼容取值；agent 无 ALERT 专用 env 时回退 CMDB host 同机 8131；event_center 服务 ens 发现失败回退 logic.event_center:8080"
+    added: "2026-09-18"
+  - id: batch-autofill-scripts
+    name: 批次ID自动填单脚本源码
+    category: scripts
+    files: [itsm/onload_fill_by_batch.py, itsm/postsubmit_associate.py]
+    history:
+      - {date: "2026-09-18", change: 初版入库（onload v1.4 + associate v1.1）}
+    scenario: 手动提单批次ID自动填充的两端脚本源码（加载后填表+提交后关联），工具包见 tools/ 两件
+    notes: "py2；配套表单 1.0.4+流程 1.2.6"
+    added: "2026-09-18"
+  - id: batch-autofill-onload-package
+    name: 表单按批次ID自动填单脚本工具包
+    category: tools
+    files: [表单按批次ID自动填单脚本.tool.tar.gz]
+    history:
+      - {date: "2026-09-18", change: v1.4 终态包（agent 实测 formData 输出正确）}
+    scenario: 表单 afterDataLoad 挂载脚本——按批次控件值查 monitor_event/last 填表
+    notes: "toolId 259aeb41350ef50744b29cd5b19887e9"
+    added: "2026-09-18"
+  - id: ticket-associate-package
+    name: 工单关联告警批次脚本工具包
+    category: tools
+    files: [工单关联告警批次脚本.tool.tar.gz]
+    history:
+      - {date: "2026-09-18", change: v1.1 终态包}
+    scenario: 识别和发起节点 postScript——提交后 PUT event_last/order 关联工单与告警
+    notes: "toolId 4f8ab531c66bc9c04d654f54412fc8c8"
+    added: "2026-09-18"
