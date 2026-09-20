@@ -80,6 +80,25 @@ def extract_batch_ids(form):
     return []
 
 
+def find_form_data(oi, injected_form):
+    """定位含批次控件的表单 JSON 串。
+
+    orderInfo 真实结构（2026-09-20 用户提供样本）：
+    - 顶层 formData：触发脚本的【当前步骤】表单（识别和发起提交时=其填写值）
+    - stepList[].formData：各步骤存储值（done 的识别和发起步骤带 batchId）
+    取值优先级：注入 formData > 顶层 orderInfo.formData > stepList 里
+    userTaskId 匹配本步骤（或最后一个 done 步骤）的 formData。"""
+    if injected_form:
+        return injected_form
+    fd = oi.get("formData") or ""
+    if fd:
+        return fd
+    for s in (oi.get("stepList") or []):
+        if s.get("formData"):
+            fd = s.get("formData")
+    return fd or ""
+
+
 if __name__ == "__main__":
     # 平台注入变量可能缺省——globals().get 取，防 NameError
     _g = globals()
@@ -91,9 +110,8 @@ if __name__ == "__main__":
     except Exception:
         pass
     # 🔴后置脚本(NodeRear)的 formData 注入参数恒为空串（step/manager.go:965 传 ""，
-    # 且 getInputs 不注入 formData）——须从 orderInfo.formData 取（= step 实例存储值）
-    if not formData:
-        formData = oi.get("formData") or ""
+    # 且 getInputs 不注入 formData）——从 orderInfo 定位（顶层 formData > stepList）
+    formData = find_form_data(oi, formData)
     pi = oi.get("processInstance") or {}
     order_num = pi.get("orderNum") or oi.get("orderNum") or ""
     row_id = oi.get("instanceId") or pi.get("instanceId") or ""

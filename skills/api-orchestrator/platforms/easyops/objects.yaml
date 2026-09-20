@@ -547,6 +547,32 @@ objects:
       dataPath: { type: string, desc: "工具输出取数路径（如 output）" }
       showKey:  { type: array, items: string, desc: "用哪个字段展示（如 [name]）" }
 
+  itsm_order_info:
+    description: |
+      脚本注入的工单上下文 orderInfo（真实 JSON 结构，2026-09-20 .26 用户提供完整样本定案）。
+      注入范围：流程前后置脚本(NodePre/NodeRear)【仅 4 键】orderInfo/action/scriptType/loginUser
+      （script/manager.go getInputs）——🔴无独立 formData 注入（后置连传参都是空串）；
+      表单生命周期脚本另有 formData/eventSource/args 注入。
+      结构（顶层 → 常用字段）：
+        processInstance: 工单主体 {instanceId, orderNum, name, category, creator, ctime, status(running/done/closed),
+          serviceId, visibleRange, handleWay, currentAssigneeList, versionRelevanceUserTaskInfo[](节点→表单版本绑定)}
+        processVersion: {instanceId, versionName, bpmnXML(全量!), isJumpable}
+        process: {instanceId, name, category}
+        serviceInstance: {instanceId, name, category, owner...}
+        userTaskList[]: 各节点视图 {id, name, formDefinition(全量表单JSON串), formVersionId, formName,
+          isFormDecision, formExpressionName, processOp[], type(处理人userType)}
+        nodeList[]: {id, name, links, userType, assigneeValue, skipStragety, Setting(=扁平nodeSettings:
+          scriptSettings/allowedOps/rejectNodes/memoLevel...)}
+        stepList[]: 各步骤实例 {instanceId(=rowId), userTaskId, taskName, status(running/done),
+          operator, otime, formData(该步骤存储表单JSON串——done 步骤含填写值)}
+        userTaskInfo[]: 当前待办 {instanceId, userTaskId, assignee[], status}
+        stepOperationRecord[]: 操作记录 {operator{username,showName}, action, operationTime}
+        userInfoMap: {username: nickname}
+        顶层（当前步骤上下文）: instanceId(当前stepId), userTaskId, taskName, operator, status,
+          action, formData(触发脚本的当前步骤表单JSON串——后置脚本时=提交步骤的值)
+      脚本取数范式（postsubmit v1.8 实证）：工单号=processInstance.orderNum；rowId=顶层instanceId；
+      表单值定位三级=注入formData > 顶层formData > stepList(done步骤).formData。
+    source: 用户提供真实样本（.26 INC26092000003，2026-09-20）+ internal/process_instance/order_info.pb.go
   itsm_lifecycle_script:
     description: |
       表单生命周期脚本（5 钩子；脚本=预注册 EasyOps 工具(toolId,python)，非 JS/表达式，schema 只存 toolId+映射；enums/process_script/enum.go:39-50）。
