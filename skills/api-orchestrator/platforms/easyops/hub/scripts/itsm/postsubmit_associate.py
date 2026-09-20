@@ -77,6 +77,11 @@ def extract_batch_ids(form):
 
 
 if __name__ == "__main__":
+    # 平台注入变量可能缺省（正常提单无批次时 formData 仍注入，orderInfo 首节点可能缺）
+    # ——globals().get 取，防 NameError
+    _g = globals()
+    orderInfo = _g.get("orderInfo") or ""
+    formData = _g.get("formData") or ""
     oi = {}
     try:
         oi = json.loads(orderInfo) if orderInfo else {}
@@ -85,7 +90,11 @@ if __name__ == "__main__":
     pi = oi.get("processInstance") or {}
     order_num = pi.get("orderNum") or oi.get("orderNum") or ""
     row_id = oi.get("instanceId") or pi.get("instanceId") or ""
-    bids = extract_batch_ids(json.loads(formData) if formData else [])
+    try:
+        form = json.loads(formData) if formData else []
+    except Exception:
+        form = []
+    bids = extract_batch_ids(form)
     print "orderNum:", order_num, "| rowId:", row_id, "| batchIds:", bids
     if not (order_num and bids):
         print "missing orderNum or batchIds, skip"

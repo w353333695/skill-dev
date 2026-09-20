@@ -86,7 +86,7 @@ def fmt_time(ts):
     return _t.strftime("%Y-%m-%dT%H:%M:%S+08:00", _t.gmtime(int(ts) + 8 * 3600))
 
 
-def build_form(alerts, cur_form):
+def build_form(alerts, cur_form, batch_id=None):
     """告警列表 → 表单 formData（cur_form 空时按表单模板结构生成）。"""
     lv = (alerts[0].get("level") or "info").lower() if alerts else "info"
     receivers = []
@@ -122,7 +122,7 @@ def build_form(alerts, cur_form):
             vals = c["values"][0]
             # batchId 控件值：透传 list 形态原样写（只读控件展示），串形态原样
             if not vals.get("batchId"):
-                vals["batchId"] = batchId if isinstance(batchId, (list, tuple)) else (batchId or "")
+                vals["batchId"] = batch_id if isinstance(batch_id, (list, tuple)) else (batch_id or "")
             if not vals.get("incidentLevel"):
                 vals["incidentLevel"] = LEVEL_P.get(lv, LEVEL_P["info"])
             if not vals.get("priority"):
@@ -137,21 +137,30 @@ def build_form(alerts, cur_form):
 
 
 if __name__ == "__main__":
+    # 平台注入变量可能缺省（正常提单无 formEventArgs 时 batchId/formData 未注入）
+    # ——globals().get 取，防 NameError
+    _g = globals()
+    batchId = _g.get("batchId") or ""
+    formData = _g.get("formData") or ""
     print "batchId:", batchId
+    # 入参 formData 原样解析（所有出口都要回吐，否则前端报『formData, 或字段值类型不合法』）
+    try:
+        cur = json.loads(formData) if formData else []
+    except Exception:
+        cur = []
     # URL 透传形态兼容：list[]（formEventArgs={"batchId":[...]}）或逗号串
     if isinstance(batchId, (list, tuple)):
         bids = [str(b).strip() for b in batchId if str(b).strip()]
     else:
         bids = [b.strip() for b in (batchId or "").split(",") if b.strip()]
     if not bids:
-        print "empty batchId, skip"
+        print "empty batchId, pass-through formData"
+        PutStr("formData", json.dumps(cur, ensure_ascii=False))
         sys.exit(0)
-    try:
-        cur = json.loads(formData) if formData else []
-    except Exception:
-        cur = []
     alerts = search_alerts(bids)
     print "alerts found:", len(alerts)
     if not alerts:
+        print "no alerts, pass-through formData"
+        PutStr("formData", json.dumps(cur, ensure_ascii=False))
         sys.exit(0)
-    PutStr("formData", json.dumps(build_form(alerts, cur), ensure_ascii=False))
+    PutStr("formData", json.dumps(build_form(alerts, cur, batchId), ensure_ascii=False))
