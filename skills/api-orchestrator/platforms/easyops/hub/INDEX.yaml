@@ -476,6 +476,7 @@ items:
     files: [清理ITSM.tool.tar.gz]
     history:
       - {date: "2026-09-20", change: v1 初版（.26 三套靶子 dry+真删验证：工单/服务/流程/表单四层全清）}
+      - {date: "2026-09-20", change: "v1.1 修 dry_run 枚举判断（bool('否')=True 坑——dry_run=否 恒走预检；按值 是/否 判断）"}
     scenario: 按服务删除 ITSM 工单/服务/流程/表单——依赖顺序清理（工单作废→删、服务、流程解绑表单→删版本→删定义、表单删版本→删表单）；流程/表单删除前查多服务/多流程绑定保护（被引用跳过并提示）；dry_run 预检模式仅列出；工单查询走 /v1/service/{id}/ticket_list 专用端点+CMDB 逐张归属校验双保险
     notes: "toolId 544132045c7c09c3c41dc0e56dafdf7b；sandboxRun=true；入参 itsm_service(cmdbInstance _ITSC_SERVICE_INSTANCE)+clean_scope(enums 工单/服务/流程/表单)+dry_run(是/否)；源码 scripts/tools/clean_itsm.py；🔴安全设计源自 v4 filter serviceId 过滤误删事故（operator 陷阱见 objects.yaml ticket.list 纠偏）"
     added: "2026-09-20"

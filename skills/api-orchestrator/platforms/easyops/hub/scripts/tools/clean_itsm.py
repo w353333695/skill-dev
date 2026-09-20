@@ -129,7 +129,14 @@ def parse_args(argv):
         service_ids = [x.strip() for x in raw.split(',') if x.strip()]
 
     # clean_scope：enum 多选（平台形态：list 或逗号串）
-    dry_run = bool(g.get('dry_run') or g.get('dryRun') or False)
+    # dry_run：枚举 是/否（字符串"否"是 truthy——bool("否")=True 坑！按值判断）
+    _dr = _to_unicode(g.get('dry_run') or g.get('dryRun') or '')
+    if isinstance(_dr, bool):
+        dry_run = _dr
+    elif _dr in (u'是', 'true', 'True', '1', True):
+        dry_run = True
+    else:
+        dry_run = False
     raw = g.get('clean_scope') or g.get('cleanScope') or ''
     if isinstance(raw, (list, tuple)):
         scopes = [_to_unicode(x).strip() for x in raw if _to_unicode(x).strip()]
