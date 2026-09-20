@@ -346,9 +346,9 @@ items:
     notes: ""
     added: "2026-08-29"
   - id: alert2ticket
-    name: 告警转工单
+    name: 告警转故障工单
     category: scripts
-    files: [tools/alert2ticket.py]
+    files: [tools/alert2ticket.py, tools/alert2event.py]
     history:
       - {date: "2026-09-14", change: 初版入库（.232 实测端到端通过）}
       - {date: "2026-09-14", change: 注册为 autoops 工具（toolId a0014959...，v5）；py2 stdlib http 层+平台 header 变量注入取参}
@@ -358,7 +358,7 @@ items:
       - {date: "2026-09-15", change: "v8 表格行级取告警事件自身详情（originContent/level/target），同工单多告警各行不同；事件索引合并为 detail_index 一次拉全"}
       - {date: "2026-09-18", change: "v9 查单改 hasOrder=true 事件接口（incident ticket 部分版本缺失）；处理人改 alertReceivers 通知接收人优先+值班组【当日班次】兜底；修 py2 中文入参 ascii 编码"}
       - {date: "2026-09-18", change: v9.2 建单 handlerName 取接收人首个（工单列表处理人显示真实接收人，无接收人值班组当日首人兜底；实测 INC26091800011 operator=ahuatan）}
-    scenario: 检索未恢复告警按级别/持续时长阈值批量转 EasyOps 故障工单并回填「识别和发起」表单（py2/3 兼容，可配 EasyOps agent 定时工具）
+    scenario: 【方案A·自动转故障单】alert2ticket：_batch 建单+表单回填两步（故障处理服务）；【新增 alert2event.py·一步发起】见 tools/告警转事件工单——StartProcessInstanceV2 直接带表单发起（事件处理服务），两脚本同入参
     notes: "入参 range/auto_create/alert_level/alert_time；端口 8131 alert_service + 8134 flowable + 8079 cmdb；防重靠 _batch 消费事件（移出 not_recover）"
     added: "2026-09-14"
   - id: sync-ccpc-duty
@@ -382,9 +382,9 @@ items:
     notes: "导入 POST service_catalog/{目录id}/import（gzip 包内 cmdb_service_instance.json，17 对象）；导入 upsert 同 org 重导即更新；新环境导入后注意——SERVICE_ID 需按新环境重查（服务 instanceId 可能变）、告警处理单 needReview/reviewLeader 必填+条件显示已含"
     added: "2026-09-15"
   - id: alert2ticket-tool-package
-    name: 告警转工单工具包
+    name: 告警转故障工单工具包
     category: tools
-    files: [告警转工单.tool.tar.gz]
+    files: [告警转故障工单.tool.tar.gz]
     history:
       - {date: "2026-09-15", change: v8 终态包（.26 导出，round-trip 导入验证通过；配套 itsm-service/alert-itsm-service 服务包）}
       - {date: "2026-09-18", change: v9.1 终态包（hasOrder 查询+通知接收人处理人+当日班次兜底）}
@@ -460,4 +460,13 @@ items:
       - {date: "2026-09-20", change: "v1.2.7：postScript 补 operations=[pass]（原空=任意审批不触发）；批次控件改 ARRATINPUT（值=list[] 对齐 URL 透传）；表单 1.0.6"}
     scenario: 【方案B·前端手动提单】events"告警转事件"能力——告警列表/详情点转工单按钮，URL formEventArgs 透传批次ID，表单 onPageLoad 脚本自动填单（等级/优先级/处理人=接收人/告警行），提交后 postScript 关联工单与告警批次；事件处理服务（enabled）走 events-work-order 个性化配置 workOrderCreateUrl（serviceId=该服务实例id，导入后按新环境改）。前置：开特性开关 events-work-order + events 个性化配置两 URL。方案A（自动转单）见 alert-itsm-service 条目
     notes: "两方案同流程同表单架构但独立交付：方案A=故障处理服务+alert2ticket 工具自动建单；方案B=事件处理服务+URL透传+onPageLoad 填单。导入后 events 个性化配置 serviceId 改为新环境服务实例id；脚本工具已随包（tools/ 内两 tar.gz，导入自动注册）"
+    added: "2026-09-20"
+  - id: alert2event-tool-package
+    name: 告警转事件工单工具包
+    category: tools
+    files: [告警转事件工单.tool.tar.gz]
+    history:
+      - {date: "2026-09-20", change: "v1.1 初版（一步发起：构建表单→StartProcessInstanceV2，事件处理服务；.26 实测 3 单表单带值+ahuatan 待办）"}
+    scenario: 检索未恢复告警→构建识别和发起表单（等级/优先级/处理人=接收人/批次/关联告警行）→直接发起工单（事件处理服务）——区别于告警转故障工单（_batch+回填两步）
+    notes: "toolId 453cf774e44bdf041a0a0a2feeb8d31f；sandboxRun=true；入参同告警转故障工单（range/auto_create/alert_level/alert_time/duty_group）；防重靠 hasOrder=false+orders 双保险"
     added: "2026-09-20"
