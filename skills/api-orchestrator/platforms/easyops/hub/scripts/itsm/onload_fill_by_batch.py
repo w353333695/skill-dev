@@ -86,6 +86,31 @@ def fmt_time(ts):
     return _t.strftime("%Y-%m-%dT%H:%M:%S+08:00", _t.gmtime(int(ts) + 8 * 3600))
 
 
+def lookup_user_instance_id(name):
+    """USER 模型按 name 查 instanceId（带缓存）——formValue 处理人必须真 instanceId。"""
+    global _USER_CACHE
+    try:
+        _USER_CACHE
+    except NameError:
+        _USER_CACHE = {}
+    if not name or name in _USER_CACHE:
+        return _USER_CACHE.get(name, "")
+    if name not in _USER_CACHE:
+        host = get_alert_service()
+        cmdb = (host or "127.0.0.1").split(":")[0]
+        try:
+            resp = requests.post(
+                "http://%s:8079/v3/object/USER/instance/_search" % cmdb,
+                headers={"org": str(EASYOPS_ORG), "user": EASYOPS_USER},
+                json={"fields": ["instanceId", "name"], "page": 1, "page_size": 5,
+                      "query": {"name": name}}, timeout=10)
+            lst = (resp.json().get("data") or {}).get("list") or []
+            _USER_CACHE[name] = (lst[0].get("instanceId") or "") if lst else ""
+        except Exception:
+            _USER_CACHE[name] = ""
+    return _USER_CACHE.get(name, "")
+
+
 def build_form(alerts, cur_form, batch_id=None):
     """告警列表 → 表单 formData（cur_form 空时按表单模板结构生成）。"""
     lv = (alerts[0].get("level") or "info").lower() if alerts else "info"
@@ -129,7 +154,10 @@ def build_form(alerts, cur_form, batch_id=None):
                 vals["priority"] = PRIORITY.get(lv, PRIORITY["info"])
             if not vals.get("incidentType"):
                 vals["incidentType"] = {"key": "alert", "label": "告警异常", "value": "告警异常"}
-            vals["handler"] = [{"instanceId": "", "name": n} for n in receivers]
+            # 🔴handler 必须带真实 instanceId——form_value 运行时只按 instanceId 反查 USER
+            # （helper.go:66），空串查不到=下节点处理人为空（2026-09-20 .26 实测）。
+            # 前端手动提交是完整实例序列化；脚本回填至少要 {instanceId, name}（instanceId 必须真）
+            vals["handler"] = [{"instanceId": lookup_user_instance_id(n), "name": n} for n in receivers]
         elif c.get("key") == ALERT_SEC and rows and not (c.get("values")):
             c["values"] = rows
         out.append(c)

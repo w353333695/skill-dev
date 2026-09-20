@@ -441,7 +441,9 @@ objects:
         USER_SELECTOR → [{instanceId,name}]（CMDB 实例引用）
         USER_GROUP_SELECTOR → [{_object_id:"USER_GROUP",instanceId,name}]
         DEPARTMENT_SELECTOR → [{departmentId,name,namePath}]
-        CMDBINSTANCESELECT/CMDBCASCADER → [{instanceId}] 或 [{instanceId,name}]
+        CMDBINSTANCESELECT/CMDBCASCADER → [{instanceId,name}]——🔴instanceId 必须真实（查 USER/目标模型），
+        空串=运行时 formValue 处理人解析为空（2026-09-20 .26 实测：onload 脚本回填 {instanceId:"",name} 导致
+        告警处理节点无处理人；前端手动提交是完整实例序列化，脚本回填最小集 {真instanceId,name} 即生效）
       formData 整体结构（form_data.go ParseData）：[{key:容器key, values:[{控件modelField:值}]}]，
       取值路径 formData[容器key][0][控件modelField]；写回即同构 PUT step.formData（JSON 串）。
     source: data/sources/backend/ITSM/flowable_service/internal/form/definition/components/component.go + internal/enums/field_kind/enum.go:7-34
