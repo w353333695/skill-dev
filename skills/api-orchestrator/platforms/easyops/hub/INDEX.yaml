@@ -448,10 +448,11 @@ items:
   - id: event-itsm-service
     name: 事件处理服务(前端手动提单方案)
     category: itsm-service
-    files: [事件处理_v1.2.6.zip]
-    version: "1.2.6"
+    files: [事件处理_v1.2.7.zip]
+    version: "1.2.7"
     history:
       - {date: "2026-09-20", change: 初版入库（.26 导出，含流程1.2.6+告警故障管理单1.0.4+告警处理单+两脚本工具随包）}
+      - {date: "2026-09-20", change: "v1.2.7：postScript 补 operations=[pass]（原空=任意审批不触发）；批次控件改 ARRATINPUT（值=list[] 对齐 URL 透传）；表单 1.0.6"}
     scenario: 【方案B·前端手动提单】events"告警转事件"能力——告警列表/详情点转工单按钮，URL formEventArgs 透传批次ID，表单 onPageLoad 脚本自动填单（等级/优先级/处理人=接收人/告警行），提交后 postScript 关联工单与告警批次；事件处理服务（enabled）走 events-work-order 个性化配置 workOrderCreateUrl（serviceId=该服务实例id，导入后按新环境改）。前置：开特性开关 events-work-order + events 个性化配置两 URL。方案A（自动转单）见 alert-itsm-service 条目
     notes: "两方案同流程同表单架构但独立交付：方案A=故障处理服务+alert2ticket 工具自动建单；方案B=事件处理服务+URL透传+onPageLoad 填单。导入后 events 个性化配置 serviceId 改为新环境服务实例id；脚本工具已随包（tools/ 内两 tar.gz，导入自动注册）"
     added: "2026-09-20"
