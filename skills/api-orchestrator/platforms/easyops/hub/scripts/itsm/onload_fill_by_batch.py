@@ -120,7 +120,9 @@ def build_form(alerts, cur_form):
             if not c.get("values"):
                 c["values"] = [{}]
             vals = c["values"][0]
-            vals.setdefault("batchId", (batchId or "") if isinstance(batchId, str) else "")
+            # batchId 控件值：透传 list 形态原样写（只读控件展示），串形态原样
+            if not vals.get("batchId"):
+                vals["batchId"] = batchId if isinstance(batchId, (list, tuple)) else (batchId or "")
             if not vals.get("incidentLevel"):
                 vals["incidentLevel"] = LEVEL_P.get(lv, LEVEL_P["info"])
             if not vals.get("priority"):
@@ -136,7 +138,11 @@ def build_form(alerts, cur_form):
 
 if __name__ == "__main__":
     print "batchId:", batchId
-    bids = [b.strip() for b in (batchId or "").split(",") if b.strip()]
+    # URL 透传形态兼容：list[]（formEventArgs={"batchId":[...]}）或逗号串
+    if isinstance(batchId, (list, tuple)):
+        bids = [str(b).strip() for b in batchId if str(b).strip()]
+    else:
+        bids = [b.strip() for b in (batchId or "").split(",") if b.strip()]
     if not bids:
         print "empty batchId, skip"
         sys.exit(0)

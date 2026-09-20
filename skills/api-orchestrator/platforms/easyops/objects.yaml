@@ -563,6 +563,7 @@ objects:
       - "instSelect（实例选择）：候选项过滤/计算"
       - "工具执行失败且输出含 raise 字段 → raise 值作为 error 抛前端（自定义报错文案）"
       - "🔴绑定的工具必须 sandboxRun=true（ITSM 平台要求，非沙箱工具不可选/不生效）——开发 ITSM 脚本工具时 create/update 就带上，见 autoops_tool.sandboxRun"
+      - "URL 透传表单值：/next/itsc-ticket-center/ticket-apply?serviceId=<id>&formEventArgs=<URL编码JSON>（如 {"batchId":[...]}）——透传值是【控件原名】，batchId 多值形态为 list[]（2026-09-20 .26 实测）；脚本入参 currentNode 接到的即该 list，脚本须兼容 list/串两形态"
 
   # ===========================================================================
   # EasyOps ITSM 流程定义（flowable_service，第二域）—— 三层：流程定义/版本/内容。

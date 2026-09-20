@@ -61,13 +61,16 @@ def associate(row_id, batch_ids, order_num):
 
 
 def extract_batch_ids(form):
-    """从表单 JSON 提取批次 id（sec_base.values[0].batchId，兼容 URL 自动写入）。"""
+    """从表单 JSON 提取批次 id（sec_base.values[0].batchId——兼容 list/逗号串）。"""
     try:
         for c in (form or []):
             if c.get("key") == "sec_base":
                 v = (c.get("values") or [{}])[0]
-                b = v.get("batchId") or ""
-                return [x.strip() for x in b.split(",") if x.strip()]
+                b = v.get("batchId")
+                if isinstance(b, (list, tuple)):
+                    return [str(x).strip() for x in b if str(x).strip()]
+                if isinstance(b, str):
+                    return [x.strip() for x in b.split(",") if x.strip()]
     except Exception:
         pass
     return []
