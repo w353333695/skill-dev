@@ -378,7 +378,7 @@ items:
     version: "1.2.5"
     history:
       - {date: "2026-09-15", change: 初版入库（.26 导出，onlyCheck 校验通过）}
-    scenario: 告警转工单全链 ITSM 交付包——故障处理服务+流程1.2.5（识别和发起→告警处理→网关→领导复核→自动完结，formValue处理人+表单驱动流转+驳回）+两表单（告警故障管理单1.0.3/告警处理单1.0.2），导入后配 hub/scripts/tools/alert2ticket 工具即完成告警→工单→表单回填闭环
+    scenario: 告警转工单全链 ITSM 交付包——流程+两表单，双服务并存（2026-09-20 拆分）：①「故障处理」60c33d948bf61=alert2ticket 自动转单路径（SERVICE_ID 指它）②「事件处理」65be037e02d51=前端"告警转事件"手动提单路径（events-work-order 个性化配置 workOrderCreateUrl 的 SERVICE_ID 指它），两服务同流程同表单，导入后按需指向
     notes: "导入 POST service_catalog/{目录id}/import（gzip 包内 cmdb_service_instance.json，17 对象）；导入 upsert 同 org 重导即更新；新环境导入后注意——SERVICE_ID 需按新环境重查（服务 instanceId 可能变）、告警处理单 needReview/reviewLeader 必填+条件显示已含"
     added: "2026-09-15"
   - id: alert2ticket-tool-package
