@@ -435,10 +435,6 @@ def main(argv=None):
     return 0
 
 
-if __name__ == '__main__':
-    sys.exit(main())
-
-
 def _clean_process_with_cache(service_id, def_id, def_name):
     """流程删除（def_id 由调用方缓存——服务可能已删）。"""
     put_str(u'[%s] 关联流程: %s(%s)' % (service_id, def_name, def_id))
@@ -524,3 +520,7 @@ def _clean_forms_with_cache(service_id, def_id, form_ids):
             put_str(u'  删表单 %s: %s' % (fid, (r4.get('error') if isinstance(r4, dict) else r4)))
     put_str(u'[%s] 表单清理: 删除 %d 跳过 %d' % (service_id, deleted, skipped))
     return deleted > 0
+
+
+if __name__ == '__main__':
+    sys.exit(main())
