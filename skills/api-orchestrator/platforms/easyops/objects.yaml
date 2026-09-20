@@ -180,6 +180,7 @@ objects:
       toolLibs:        { type: array, items: autoops_tool_lib, desc: "绑定的动态库" }
       timeout:         { type: integer, desc: "超时秒，默认 86400；0=不限" }
       defaultExecUser: { type: string, desc: "默认执行用户（Linux，如 root）" }
+      sandboxRun:      { type: bool, desc: "沙箱执行。🔴【ITSM 绑定的工具（表单生命周期脚本/流程前后置脚本/触发器）必须 sandboxRun=true——平台要求，非沙箱工具在 ITSM 脚本位不可选/不生效（2026-09-20 .26 用户纠偏）。ToolConfig 字段，tool.update 顶层直接改即生效不派生版本；沙箱不限制脚本内 HTTP 调用（实测 cmdb/alert_service 直连正常）】" }
       disable:         { type: bool, desc: "禁用开关" }
       listVisible:     { type: bool, desc: "列表中是否显示，默认 true" }
       delete_me:       { type: bool, desc: "软删标记（true=已删）" }
@@ -561,6 +562,7 @@ objects:
       - "componentLoad（控件加载）：实例选择/下拉的异步数据源（按当前值过滤候选）"
       - "instSelect（实例选择）：候选项过滤/计算"
       - "工具执行失败且输出含 raise 字段 → raise 值作为 error 抛前端（自定义报错文案）"
+      - "🔴绑定的工具必须 sandboxRun=true（ITSM 平台要求，非沙箱工具不可选/不生效）——开发 ITSM 脚本工具时 create/update 就带上，见 autoops_tool.sandboxRun"
 
   # ===========================================================================
   # EasyOps ITSM 流程定义（flowable_service，第二域）—— 三层：流程定义/版本/内容。

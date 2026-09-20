@@ -389,8 +389,9 @@ items:
       - {date: "2026-09-15", change: v8 终态包（.26 导出，round-trip 导入验证通过；配套 itsm-service/alert-itsm-service 服务包）}
       - {date: "2026-09-18", change: v9.1 终态包（hasOrder 查询+通知接收人处理人+当日班次兜底）}
       - {date: "2026-09-18", change: v9.2 终态包（handlerName=接收人首个）}
+      - {date: "2026-09-20", change: sandboxRun=true（ITSM 绑定工具必须沙箱）}
     scenario: EasyOps autoops 工具包——告警转工单 v8（检索未恢复告警转工单+表单回填+值班组兜底），配合故障处理服务包使用
-    notes: "toolId a00149590a1c9d38444cd208edf480f5；导入同 org 重导即更新（upsert）；源码见 scripts/tools/alert2ticket.py"
+    notes: "toolId a00149590a1c9d38444cd208edf480f5；sandboxRun=true（ITSM 绑定工具必须沙箱）；导入同 org 重导即更新（upsert）；源码见 scripts/tools/alert2ticket.py"
     added: "2026-09-15"
   - id: sync-ccpc-duty-tool-package
     name: 同步CCPC值班表工具包
@@ -425,8 +426,9 @@ items:
     files: [表单按批次ID自动填单脚本.tool.tar.gz]
     history:
       - {date: "2026-09-18", change: v1.4 终态包（agent 实测 formData 输出正确）}
+      - {date: "2026-09-20", change: sandboxRun=true（ITSM 脚本工具必须沙箱）}
     scenario: 表单 afterDataLoad 挂载脚本——按批次控件值查 monitor_event/last 填表
-    notes: "toolId 259aeb41350ef50744b29cd5b19887e9"
+    notes: "toolId 259aeb41350ef50744b29cd5b19887e9；sandboxRun=true（ITSM 脚本工具必须沙箱）"
     added: "2026-09-18"
   - id: ticket-associate-package
     name: 工单关联告警批次脚本工具包
@@ -434,6 +436,7 @@ items:
     files: [工单关联告警批次脚本.tool.tar.gz]
     history:
       - {date: "2026-09-18", change: v1.1 终态包}
+      - {date: "2026-09-20", change: sandboxRun=true}
     scenario: 识别和发起节点 postScript——提交后 PUT event_last/order 关联工单与告警
-    notes: "toolId 4f8ab531c66bc9c04d654f54412fc8c8"
+    notes: "toolId 4f8ab531c66bc9c04d654f54412fc8c8；sandboxRun=true（ITSM 脚本工具必须沙箱）"
     added: "2026-09-18"
