@@ -787,7 +787,10 @@ objects:
 
   # ---------- ITSM 服务实例（service_instance）----------
   itsm_service_instance:
-    description: ITSM 服务实例（服务目录条目）—— 用户在 ITSM 前端选服务发起工单；每个服务关联一个流程定义（associatedProcess）。CRUD 全在 /v1/service_instance。
+    description: >-
+      ITSM 服务实例（服务目录条目）—— 用户在 ITSM 前端选服务发起工单；每个服务关联一个流程定义（associatedProcess）。CRUD 全在 /v1/service_instance。
+      【坑】create 的 status 契约写『默认 enabled』但实测不传时为空串=前端不可见/未启用（2026-09-20 .26：新建服务前端不出现，须显式 status:"enabled"；
+      edit(PUT) 修 status 时还要带必填 catalogId+name+category+associatedProcess——缺 catalogId 报『必填key catalogId 不存在』）。
     source: data/sources/backend/ITSM/flowable_service/service_catalog/service_catalog_service.go
     api: service_instance
     fields:
