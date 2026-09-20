@@ -635,6 +635,30 @@ def parse_form_bindings(spec) -> "Optional[Dict[str, List[dict]]]":
     return bindings or None
 
 
+def parse_form_bindings_meta(spec) -> "Dict[str, dict]":
+    """从 taskInfo 形态抽 {userTaskId: {formId, formName}}（ExtraData formId 校验用）。
+
+    仅 taskInfo 列表态有 formInfo.formId；精简形返回空 dict（校验自动跳过）。"""
+    meta: Dict[str, dict] = {}
+    if spec is None:
+        return meta
+    if isinstance(spec, str):
+        spec = json.loads(spec)
+    if isinstance(spec, dict):
+        task_info = spec.get("taskInfo")
+        if isinstance(task_info, list):
+            spec = task_info
+    if isinstance(spec, list):
+        for it in spec:
+            if not isinstance(it, dict):
+                continue
+            utid = (it.get("node") or {}).get("id")
+            fi = it.get("formInfo") or {}
+            if utid and fi.get("formId"):
+                meta[utid] = {"formId": fi.get("formId"), "formName": fi.get("formName") or ""}
+    return meta
+
+
 def _form_path_index(containers: List[dict]) -> Dict[str, set]:
     """从 []Container 建立取值路径索引：containId -> {componentKey, ...}。
 
@@ -831,6 +855,28 @@ def rule_assignee_value_resolvable(e: BO, t: Reporter, ctx) -> None:
         t.report(e.id,
                  "处理人控件 [{}] 不在节点 [{}] 容器 [{}] 的控件集——运行时该节点处理人为空"
                  .format(component_id, utid, contain_id))
+        return
+    # ExtraData formId 定位校验（2026-09-20 .26 用户手改 1.2.8 定案的标准形态：
+    # ExtraData="[formId, containId, componentId]"）——ExtraData[0] 须等于来源节点
+    # 实际绑定的表单 id，配错表单即运行时取错值（formBindings 的 value 若带 formId 可精准对）
+    extra = (cfg.get("ExtraData") or "").strip()
+    if extra:
+        try:
+            ed = json.loads(extra) if isinstance(extra, str) else extra
+        except ValueError:
+            t.report(e.id, "assigneeValue.ExtraData 不是合法 JSON 数组: [{}]".format(str(extra)[:60]))
+            return
+        if isinstance(ed, list) and ed and str(ed[0]).strip():
+            extra_form_id = str(ed[0]).strip()
+            binding = ctx.form_bindings_meta.get(utid) if hasattr(ctx, "form_bindings_meta") else None
+            if binding and binding.get("formId") and binding["formId"] != extra_form_id:
+                t.report(e.id,
+                         "assigneeValue.ExtraData 表单 [{}] 与节点 [{}] 实际绑定表单 [{}] 不一致——运行时取错表单"
+                         .format(extra_form_id, utid, binding["formId"]))
+            elif len(ed) >= 3 and (str(ed[1]).strip() != contain_id or str(ed[2]).strip() != component_id):
+                t.report(e.id,
+                         "assigneeValue.ExtraData 路径 [{}] 与顶层 containId/componentId 不一致"
+                         .format("/".join(str(x) for x in ed[1:3])))
 
 
 def rule_flow_conditional_error(e: BO, t: Reporter, ctx) -> None:
@@ -1070,7 +1116,8 @@ class Linter:
     """规则调度器，持有跨元素状态（如 no-duplicate-sequence-flows 的去重表）。"""
 
     def __init__(self, include_off: bool = False,
-                 form_bindings: Optional[Dict[str, List[dict]]] = None):
+                 form_bindings: Optional[Dict[str, List[dict]]] = None,
+                 form_bindings_meta: Optional[Dict[str, dict]] = None):
         self.include_off = include_off
         # no-duplicate-sequence-flows 跨元素共享状态
         self.dup_seen: Dict[str, BO] = {}
@@ -1078,6 +1125,7 @@ class Linter:
         self.dup_in: Dict[str, bool] = {}
         self.model: Optional[BpmnModel] = None  # DI 规则经 ctx 访问
         self.form_bindings = form_bindings      # R3 运行时路径校验数据源
+        self.form_bindings_meta = form_bindings_meta or {}  # R4 ExtraData formId 校验
         self.all_node_ids: set = set()
 
     def lint(self, model: BpmnModel) -> List[Issue]:
@@ -1179,6 +1227,7 @@ def main(argv: Optional[List[str]] = None) -> int:
             print(f"--form-bindings 不是合法 JSON: {exc}", file=sys.stderr)
             return 2
     form_bindings = parse_form_bindings(fb_spec)
+    form_bindings_meta = parse_form_bindings_meta(fb_spec)
 
     try:
         model = BpmnModel(xml_text)
@@ -1191,7 +1240,8 @@ def main(argv: Optional[List[str]] = None) -> int:
         return 2
 
     issues = Linter(include_off=args.include_off,
-                    form_bindings=form_bindings).lint(model)
+                    form_bindings=form_bindings,
+                    form_bindings_meta=form_bindings_meta).lint(model)
 
     if args.json:
         print(format_json(issues))

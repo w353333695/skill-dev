@@ -26,7 +26,11 @@ EASYOPS_USER = globals().get("EASYOPS_USER") or "easyops"
 
 
 def get_event_center():
-    """ens 服务发现 event_center；返回 host:str 或 None。"""
+    """关联端点地址。ens 发现（logic.event_center）失败时回退已知部署形态。
+
+    实测 .26：agent ens 无 logic.event_center 注册（转单链路是 flowable 服务端
+    内部调用）；event_last/order 属事件中心服务，端口未在常见端口暴露——
+    回退链由 EASYOPS_EVENT_CENTER_HOST 显式指定（编排侧/环境注入）。"""
     try:
         ret = ens_api.get_all_service_by_name("my_name", "logic.event_center")
         if isinstance(ret, (list, tuple)):
@@ -77,8 +81,7 @@ def extract_batch_ids(form):
 
 
 if __name__ == "__main__":
-    # 平台注入变量可能缺省（正常提单无批次时 formData 仍注入，orderInfo 首节点可能缺）
-    # ——globals().get 取，防 NameError
+    # 平台注入变量可能缺省——globals().get 取，防 NameError
     _g = globals()
     orderInfo = _g.get("orderInfo") or ""
     formData = _g.get("formData") or ""
@@ -87,6 +90,10 @@ if __name__ == "__main__":
         oi = json.loads(orderInfo) if orderInfo else {}
     except Exception:
         pass
+    # 🔴后置脚本(NodeRear)的 formData 注入参数恒为空串（step/manager.go:965 传 ""，
+    # 且 getInputs 不注入 formData）——须从 orderInfo.formData 取（= step 实例存储值）
+    if not formData:
+        formData = oi.get("formData") or ""
     pi = oi.get("processInstance") or {}
     order_num = pi.get("orderNum") or oi.get("orderNum") or ""
     row_id = oi.get("instanceId") or pi.get("instanceId") or ""
