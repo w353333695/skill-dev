@@ -888,7 +888,7 @@ objects:
       - { to: itsm_process_definition, type: association, cardinality: "N:1", desc: "工单走某流程定义" }
     side_effects:
       - op: ticket.list
-        rule: "POST /v4/process_instance_filter 高级搜索。body 含 filter(standard_fields/process_fields)+Q模糊+status/creator/serviceCategory 精确。token 翻页（nextToken）。返回 ProcessInstanceBasic[]+total。"
+        rule: "POST /v4/process_instance_filter 高级搜索。🔴serviceId 过滤【必须】filter.process_fields[{field:'serviceId',operator:'=~',value:...}]——operator 只认 =~/!~（addSpecificQ utils.go:159 传 == 被静默丢弃=全量返回，2026-09-20 .26 实测踩坑致误删）；顶层 serviceId 参数不生效（ticketFilter 不消费，源码注『外层固定字段基本已很少使用』）。按服务查工单专用端点更稳：POST /v1/service/{serviceId}/ticket_list。mixed 数据源 total 含冷表已删(isDelete)单——现存数须 CMDB _ITSC_PROCESS_INSTANCE serviceId 直查对账。token 翻页（nextToken）。返回 ProcessInstanceBasic[]+total。"
       - op: ticket.set_state
         rule: "PUT /v1/process_instance_state 批量状态变更。action=suspend(仅running)/activate(仅suspended)/cancel(仅running)。⚠️只有 running 的工单能挂起；只有作废(isCancelled)的能删除。"
       - op: ticket.delete

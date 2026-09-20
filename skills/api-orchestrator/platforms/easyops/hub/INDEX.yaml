@@ -348,7 +348,7 @@ items:
   - id: alert2ticket
     name: 告警转故障工单
     category: scripts
-    files: [tools/alert2ticket.py, tools/alert2event.py]
+    files: [tools/alert2ticket.py, tools/alert2event.py, tools/clean_itsm.py]
     history:
       - {date: "2026-09-14", change: 初版入库（.232 实测端到端通过）}
       - {date: "2026-09-14", change: 注册为 autoops 工具（toolId a0014959...，v5）；py2 stdlib http 层+平台 header 变量注入取参}
@@ -469,4 +469,13 @@ items:
       - {date: "2026-09-20", change: "v1.1 初版（一步发起：构建表单→StartProcessInstanceV2，事件处理服务；.26 实测 3 单表单带值+ahuatan 待办）"}
     scenario: 检索未恢复告警→构建识别和发起表单（等级/优先级/处理人=接收人/批次/关联告警行）→直接发起工单（事件处理服务）——区别于告警转故障工单（_batch+回填两步）
     notes: "toolId 453cf774e44bdf041a0a0a2feeb8d31f；sandboxRun=true；入参同告警转故障工单（range/auto_create/alert_level/alert_time/duty_group）；防重靠 hasOrder=false+orders 双保险"
+    added: "2026-09-20"
+  - id: clean-itsm-tool-package
+    name: 清理ITSM工具包
+    category: tools
+    files: [清理ITSM.tool.tar.gz]
+    history:
+      - {date: "2026-09-20", change: v1 初版（.26 三套靶子 dry+真删验证：工单/服务/流程/表单四层全清）}
+    scenario: 按服务删除 ITSM 工单/服务/流程/表单——依赖顺序清理（工单作废→删、服务、流程解绑表单→删版本→删定义、表单删版本→删表单）；流程/表单删除前查多服务/多流程绑定保护（被引用跳过并提示）；dry_run 预检模式仅列出；工单查询走 /v1/service/{id}/ticket_list 专用端点+CMDB 逐张归属校验双保险
+    notes: "toolId 544132045c7c09c3c41dc0e56dafdf7b；sandboxRun=true；入参 itsm_service(cmdbInstance _ITSC_SERVICE_INSTANCE)+clean_scope(enums 工单/服务/流程/表单)+dry_run(是/否)；源码 scripts/tools/clean_itsm.py；🔴安全设计源自 v4 filter serviceId 过滤误删事故（operator 陷阱见 objects.yaml ticket.list 纠偏）"
     added: "2026-09-20"
