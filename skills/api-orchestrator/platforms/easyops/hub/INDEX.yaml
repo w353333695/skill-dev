@@ -372,13 +372,13 @@ items:
     notes: "入参 ccpc_ip/ccpc_group_id/duty_group_name/sync_days；角色映射 dutys→users、maintainer+leader→leader（CCPC uid=easyops username 同名直用）；幂等回读走 v1 search（v2 user 增强在用户不存在时回空壳对象，永判不等——.26 实测坑）；CCPC_FIXTURE 环境变量切样例测试；端口 8880 ccpc + 8134 flowable"
     added: "2026-09-15"
   - id: alert-itsm-service
-    name: 故障处理服务(告警转工单配套)
+    name: 故障处理服务(自动转单方案)
     category: itsm-service
     files: [故障处理_v1.2.5.zip]
     version: "1.2.5"
     history:
       - {date: "2026-09-15", change: 初版入库（.26 导出，onlyCheck 校验通过）}
-    scenario: 告警转工单全链 ITSM 交付包——流程+两表单，双服务并存（2026-09-20 拆分）：①「故障处理」60c33d948bf61=alert2ticket 自动转单路径（SERVICE_ID 指它）②「事件处理」65be037e02d51=前端"告警转事件"手动提单路径（events-work-order 个性化配置 workOrderCreateUrl 的 SERVICE_ID 指它），两服务同流程同表单，导入后按需指向
+    scenario: 【方案A·自动转单】alert2ticket 工具定时检索未恢复告警自动建单——故障处理服务（SERVICE_ID=60c33d948bf61）+流程1.2.5+两表单；导入后配 hub/scripts/tools/alert2ticket 即闭环。方案B（前端手动提单）见 event-itsm-service 条目，两套方案独立存储互不依赖
     notes: "导入 POST service_catalog/{目录id}/import（gzip 包内 cmdb_service_instance.json，17 对象）；导入 upsert 同 org 重导即更新；新环境导入后注意——SERVICE_ID 需按新环境重查（服务 instanceId 可能变）、告警处理单 needReview/reviewLeader 必填+条件显示已含"
     added: "2026-09-15"
   - id: alert2ticket-tool-package
@@ -445,3 +445,13 @@ items:
     scenario: 识别和发起节点 postScript——提交后 PUT event_last/order 关联工单与告警
     notes: "toolId 4f8ab531c66bc9c04d654f54412fc8c8；sandboxRun=true（ITSM 脚本工具必须沙箱）"
     added: "2026-09-18"
+  - id: event-itsm-service
+    name: 事件处理服务(前端手动提单方案)
+    category: itsm-service
+    files: [事件处理_v1.2.6.zip]
+    version: "1.2.6"
+    history:
+      - {date: "2026-09-20", change: 初版入库（.26 导出，含流程1.2.6+告警故障管理单1.0.4+告警处理单+两脚本工具随包）}
+    scenario: 【方案B·前端手动提单】events"告警转事件"能力——告警列表/详情点转工单按钮，URL formEventArgs 透传批次ID，表单 onPageLoad 脚本自动填单（等级/优先级/处理人=接收人/告警行），提交后 postScript 关联工单与告警批次；事件处理服务（enabled）走 events-work-order 个性化配置 workOrderCreateUrl（serviceId=该服务实例id，导入后按新环境改）。前置：开特性开关 events-work-order + events 个性化配置两 URL。方案A（自动转单）见 alert-itsm-service 条目
+    notes: "两方案同流程同表单架构但独立交付：方案A=故障处理服务+alert2ticket 工具自动建单；方案B=事件处理服务+URL透传+onPageLoad 填单。导入后 events 个性化配置 serviceId 改为新环境服务实例id；脚本工具已随包（tools/ 内两 tar.gz，导入自动注册）"
+    added: "2026-09-20"
