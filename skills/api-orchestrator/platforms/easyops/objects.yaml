@@ -562,8 +562,17 @@ objects:
       - "componentLoad（控件加载）：实例选择/下拉的异步数据源（按当前值过滤候选）"
       - "instSelect（实例选择）：候选项过滤/计算"
       - "工具执行失败且输出含 raise 字段 → raise 值作为 error 抛前端（自定义报错文案）"
+      - "🔴生命周期脚本（afterDataLoad/preSubmitCheck 等）返回【必须含 formData 输出】——不返回则前端报『formData, 或字段值类型不合法』（2026-09-20 .26 用户纠偏）；即使无改动也要原样回吐 PutStr('formData', <入参 formData 原文>)"
       - "🔴绑定的工具必须 sandboxRun=true（ITSM 平台要求，非沙箱工具不可选/不生效）——开发 ITSM 脚本工具时 create/update 就带上，见 autoops_tool.sandboxRun"
-      - "URL 透传表单值：/next/itsc-ticket-center/ticket-apply?serviceId=<id>&formEventArgs=<URL编码JSON>（如 {"batchId":[...]}）——透传值是【控件原名】，batchId 多值形态为 list[]（2026-09-20 .26 实测）；脚本入参 currentNode 接到的即该 list，脚本须兼容 list/串两形态"
+      - >-
+        URL 透传表单值（formEventArgs）【不是通用能力，仅『告警转事件』能力且须先开启】：
+        (1) 打开特性开关 events-work-order；(2) events 小产品个性化配置（管理端 /next/micro-app-configuration/setting/events）写
+        workOrderDetailUrl = https://$(HOST)/next/itsc-ticket-center/ticket-list/PLACEHOLDER_ticketId 与
+        workOrderCreateUrl = https://$(HOST)/next/itsc-ticket-center/ticket-apply?serviceId=$(SERVICE_ID)&formEventArgs=PLACEHOLDER_formEventArgs
+        （PLACEHOLDER 原文为 #\#{ticketId} / #\#{formEventArgs}，YAML 转义书写；单花括号占位被 URL replace）。
+        开启后告警列表/详情出现转工单按钮，点击 window.open workOrderCreateUrl 并把 {batchId:[...]} encodeURIComponent
+        填入 formEventArgs 占位（源码 TplEventsDetailOpButtons.yaml）。
+        透传值是【控件原名】，batchId 多值形态 list[]（2026-09-20 .26 实测）；脚本入参 currentNode 接到的即该 list，脚本须兼容 list/串两形态
 
   # ===========================================================================
   # EasyOps ITSM 流程定义（flowable_service，第二域）—— 三层：流程定义/版本/内容。
