@@ -563,6 +563,7 @@ objects:
       - "instSelect（实例选择）：候选项过滤/计算"
       - "工具执行失败且输出含 raise 字段 → raise 值作为 error 抛前端（自定义报错文案）"
       - "🔴生命周期脚本（afterDataLoad/preSubmitCheck 等）返回【必须含 formData 输出】——不返回则前端报『formData, 或字段值类型不合法』（2026-09-20 .26 用户纠偏）；即使无改动也要原样回吐 PutStr('formData', <入参 formData 原文>)"
+      - "🔴脚本 PutStr 的每个输出 id 必须在工具 outputDefs 声明（如 [{id:'formData', name:'回填表单数据'}]）——只 PutStr 不声明则平台【不回传该输出】（tool_execution outputs 为空；2026-09-20 .26 用户纠偏，对照可用老脚本 ac3f1d9f 实证）。建工具时 outputDefs 与 PutStr 同步配"
       - "🔴绑定的工具必须 sandboxRun=true（ITSM 平台要求，非沙箱工具不可选/不生效）——开发 ITSM 脚本工具时 create/update 就带上，见 autoops_tool.sandboxRun"
       - >-
         URL 透传表单值（formEventArgs）【不是通用能力，仅『告警转事件』能力且须先开启】：
