@@ -234,6 +234,38 @@ def delete_service(service_id):
 # ---------------------------------------------------------------------------
 # ③ 流程删除（多服务绑定保护）
 # ---------------------------------------------------------------------------
+
+_CURRENT_CLEAN_SET = set()
+all_svc_names = set()
+
+
+def _in_clean_set(name, ids, names_set):
+    """其他服务名是否属于本轮清理目标（同轮互绑不保护——清理全部时应能删）。"""
+    if not name:
+        return False
+    return name in (names_set or set()) or name in (ids or [])
+
+
+def list_all_services():
+    """全部非内置 ITSM 服务（itsm_service 为空=清理所有时用）。"""
+    out, page = [], 1
+    while page <= 50:
+        s, r = http_json('GET', FLOWABLE_PORT,
+                         '/api/flowable_service/v1/service_instance?catalogID=&page=%d&pageSize=100' % page)
+        if not ok_resp(s, r):
+            return out
+        data = r.get('data') or {}
+        for it in (data.get('list') or []):
+            if it.get('builtIn'):
+                continue                     # 内置服务不可删（源码 CheckServiceRemovable）
+            out.append(it)
+        total = int(data.get('total') or 0)
+        if not (data.get('list') or []) or len(out) >= total or page >= 50:
+            break
+        page += 1
+    return out
+
+
 def get_service_detail(service_id):
     s, r = http_json('GET', FLOWABLE_PORT, '/api/flowable_service/v1/service_instance/%s' % service_id)
     if ok_resp(s, r):
@@ -398,8 +430,19 @@ def main(argv=None):
     _resolve_conn()
     service_ids, scopes, dry_run = parse_args(argv if argv is not None else sys.argv[1:])
     if not service_ids:
-        put_str(u'缺少必填入参 itsm_service（ITSM 服务实例），退出')
-        return 1
+        # 入参为空=清理所有（非内置）服务
+        all_svc = list_all_services()
+        service_ids = [it.get('instanceId') for it in all_svc if it.get('instanceId')]
+        put_str(u'itsm_service 为空 → 清理全部非内置服务（%d 个）' % len(service_ids))
+        if not service_ids:
+            put_str(u'无非内置服务可清理，退出')
+            return 0
+    global _CURRENT_CLEAN_SET, all_svc_names
+    all_svc_names = set()
+    for it in list_all_services():
+        if it.get('name'):
+            all_svc_names.add(it.get('name'))
+    _CURRENT_CLEAN_SET = set(service_ids)
     put_str(u'服务: %s | 清理范围: %s | dry_run: %s' % (','.join(service_ids), ','.join(scopes), dry_run))
     for sid in service_ids:
         # 🔴删服务前先缓存关联流程/表单（服务删除后 get_service_detail 404）
@@ -417,7 +460,8 @@ def main(argv=None):
         # 流程/表单清理（用缓存信息；顺序：工单→服务→流程→表单）
         if u'流程' in scopes and def_id:
             if dry_run:
-                others = find_other_services_on_process(def_id, sid)
+                others = [o for o in find_other_services_on_process(def_id, sid)
+                          if not _in_clean_set(o, service_ids, all_svc_names)]
                 put_str(u'[dry] 流程清理 %s(%s)：%s' % (
                     ap.get('name'), def_id,
                     u'⚠️被其他服务绑定(%s)将跳过' % ','.join(others) if others else u'将删除（版本+定义）'))
@@ -438,7 +482,8 @@ def main(argv=None):
 def _clean_process_with_cache(service_id, def_id, def_name):
     """流程删除（def_id 由调用方缓存——服务可能已删）。"""
     put_str(u'[%s] 关联流程: %s(%s)' % (service_id, def_name, def_id))
-    others = find_other_services_on_process(def_id, service_id)
+    others = [o for o in find_other_services_on_process(def_id, service_id)
+              if not _in_clean_set(o, [service_id], _CURRENT_CLEAN_SET)]
     if others:
         put_str(u'  ⚠️流程被其他服务绑定(%s)，跳过删除' % ','.join(others))
         return False
