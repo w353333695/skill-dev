@@ -116,6 +116,23 @@ def test_emit_ws_frame_masks_and_truncates(tmp_path):
     assert len(lines[1]["payload"]) == 8192
 
 
+def test_emit_action_source_and_drive_events(tmp_path):
+    """action.source 透传 + drive_step/drive_fail 原样落盘（脱敏行为锁定）。"""
+    w = SessionWriter(tmp_path)
+    w.emit("action", {"type": "input", "source": "drive", "html_type": "password",
+                      "value": "secret", "element": {}, "target_id": "t0"})
+    w.emit("drive_step", {"n": 3, "desc": "密钥", "act": "input",
+                          "dispatch": "trusted", "target_id": "t0"})
+    w.emit("drive_fail", {"n": 3, "reason": "timeout", "detail": "等待元素超时"})
+    w.close()
+    lines = [json.loads(l) for l in (tmp_path / "session.jsonl").read_text().splitlines()]
+    assert lines[0]["source"] == "drive"
+    assert lines[0]["value"] == "***"          # drive 来源的 password 同样脱敏
+    assert lines[0]["html_type"] == "password"
+    assert lines[1]["kind"] == "drive_step" and lines[1]["n"] == 3
+    assert lines[2]["kind"] == "drive_fail" and lines[2]["reason"] == "timeout"
+
+
 def test_emit_io_error_sets_fatal(tmp_path):
     """emit 落盘 IO 失败（文件已关）→ fatal 置位并上抛（IO 致命升级）。"""
     w = SessionWriter(tmp_path)
