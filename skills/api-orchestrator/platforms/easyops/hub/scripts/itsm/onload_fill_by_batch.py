@@ -5,6 +5,7 @@
 入参（平台注入）：
     batchId    当前表单批次控件的值（currentNode 类型 scriptInputs）
     formData   整张表单 JSON
+    duty_group 值班组名称，字符串，默认 告警值班组（告警无响应人时查当日排班）
 输出：
     PutStr("formData", ...) —— afterDataLoad 返回改后表单
 运行环境：EasyOps agent py2（ens_api 服务发现 + requests 可用）
@@ -25,6 +26,82 @@ EASYOPS_USER = globals().get("EASYOPS_USER") or "easyops"
 
 SEC_BASE = "sec_base"      # 基础信息容器 key
 ALERT_SEC = "sec_alerts"   # 关联告警信息容器 key
+
+DEFAULT_DUTY_GROUP = u"告警值班组"
+FLOWABLE_PORT = 8134
+# 处理人类型（表单 handlerType 控件值）
+HANDLER_TYPE = {"responder": {"key": "responder", "label": u"告警待响应人", "value": "responder"},
+                "duty": {"key": "duty", "label": u"值班人", "value": "duty"},
+                "fallback": {"key": "fallback", "label": u"兜底人", "value": "fallback"}}
+
+
+def _to_unicode(v):
+    """py2 平台注入的 str 可能是 bytes——统一转 unicode（py3 直接返回 str）。
+
+    v2.2 修复：此前只调用未定义，agent 运行即 NameError: _to_unicode is not defined。
+    实现与「告警转故障工单」_to_unicode 一致（同为 ITSM 脚本族，py2/py3 双兼容）。
+    """
+    try:
+        _is_py2 = sys.version_info[0] == 2
+    except Exception:
+        _is_py2 = False
+    if _is_py2 and isinstance(v, str):
+        try:
+            return v.decode("utf-8")
+        except UnicodeDecodeError:
+            return v
+    return v
+
+
+def _get_duty_group():
+    g = globals()
+    v = _to_unicode(g.get("duty_group") or g.get("dutyGroup") or "")
+    return v.strip() if isinstance(v, str) and v.strip() else DEFAULT_DUTY_GROUP
+
+
+def lookup_duty_members(group_name, date_str):
+    """值班组当日班次 users+leader（同 alert2event 逻辑，自包含版）。"""
+    if not group_name:
+        return []
+    host = get_alert_service()
+    cmdb = (host or "127.0.0.1").split(":")[0]
+    try:
+        resp = requests.post(
+            "http://%s:%d/api/flowable_service/v2/duty_group_config/search" % (cmdb, FLOWABLE_PORT),
+            headers={"org": str(EASYOPS_ORG), "user": EASYOPS_USER},
+            json={"groupName": group_name, "date": date_str}, timeout=10)
+        r = resp.json()
+    except Exception:
+        return []
+    if not isinstance(r, dict) or r.get("code") not in (0, None):
+        return []
+    import time as _t
+    now_hm = _t.strftime("%%H:%%M") if False else _t.strftime("%H:%M")
+
+    def _in_shift(duty_time):
+        try:
+            a, b = (duty_time or "").split("~")
+            ah, am = [int(x) for x in a.strip().split(":")]
+            bh, bm = [int(x) for x in b.strip().split(":")]
+        except ValueError:
+            return True
+        s, e, n = ah * 60 + am, bh * 60 + bm, int(now_hm[:2]) * 60 + int(now_hm[3:])
+        if s == 0 and e == 0:
+            return True
+        return s <= n < e if s <= e else (n >= s or n < e)
+
+    members = []
+    for cfg in (r.get("data") or {}).get("list") or []:
+        if (cfg.get("date") or "") != date_str:
+            continue
+        for sh in (cfg.get("dutyShiftConf") or []):
+            if not _in_shift(sh.get("dutyTime")):
+                continue
+            for u in (sh.get("users") or []) + (sh.get("leader") or []):
+                n = (u.get("name") or "").strip()
+                if n and n not in members:
+                    members.append(n)
+    return members
 
 # 告警 level → 表单枚举（与告警故障管理单 items 对齐）
 LEVEL_P = {"critical": {"key": "p1", "label": "P1", "value": "P1"},
@@ -86,40 +163,47 @@ def fmt_time(ts):
     return _t.strftime("%Y-%m-%dT%H:%M:%S+08:00", _t.gmtime(int(ts) + 8 * 3600))
 
 
+_USER_FIELDS_CACHE = {}
+
+
 def lookup_user_instance_id(name):
-    """USER 模型按 name 查 instanceId（带缓存）——formValue 处理人必须真 instanceId。"""
-    global _USER_CACHE
+    return lookup_user_fields(name).get("instanceId", "")
+
+
+def lookup_user_fields(name):
+    """USER 按 name 查 {instanceId,name,nickname,user_tel}（缓存）——formValue 需要真
+    instanceId；handler 控件显示字段 frontKey=[nickname, user_tel]，值里要带这俩字段。"""
+    global _USER_FIELDS_CACHE
+    if not name or name in _USER_FIELDS_CACHE:
+        return _USER_FIELDS_CACHE.get(name, {})
+    host = get_alert_service()
+    cmdb = (host or "127.0.0.1").split(":")[0]
     try:
-        _USER_CACHE
-    except NameError:
-        _USER_CACHE = {}
-    if not name or name in _USER_CACHE:
-        return _USER_CACHE.get(name, "")
-    if name not in _USER_CACHE:
-        host = get_alert_service()
-        cmdb = (host or "127.0.0.1").split(":")[0]
-        try:
-            resp = requests.post(
-                "http://%s:8079/v3/object/USER/instance/_search" % cmdb,
-                headers={"org": str(EASYOPS_ORG), "user": EASYOPS_USER},
-                json={"fields": ["instanceId", "name"], "page": 1, "page_size": 5,
-                      "query": {"name": name}}, timeout=10)
-            lst = (resp.json().get("data") or {}).get("list") or []
-            _USER_CACHE[name] = (lst[0].get("instanceId") or "") if lst else ""
-        except Exception:
-            _USER_CACHE[name] = ""
-    return _USER_CACHE.get(name, "")
+        resp = requests.post(
+            "http://%s:8079/v3/object/USER/instance/_search" % cmdb,
+            headers={"org": str(EASYOPS_ORG), "user": EASYOPS_USER},
+            json={"fields": ["instanceId", "name", "nickname", "user_tel"],
+                  "page": 1, "page_size": 5, "query": {"name": name}}, timeout=10)
+        lst = (resp.json().get("data") or {}).get("list") or []
+        if lst:
+            u = lst[0]
+            _USER_FIELDS_CACHE[name] = {"instanceId": u.get("instanceId") or "",
+                                        "name": u.get("name") or name,
+                                        "nickname": u.get("nickname") or u.get("name") or name,
+                                        "user_tel": u.get("user_tel") or ""}
+        else:
+            _USER_FIELDS_CACHE[name] = {"instanceId": "", "name": name, "nickname": name, "user_tel": ""}
+    except Exception:
+        _USER_FIELDS_CACHE[name] = {"instanceId": "", "name": name, "nickname": name, "user_tel": ""}
+    return _USER_FIELDS_CACHE.get(name, {})
 
 
 def build_form(alerts, cur_form, batch_id=None):
-    """告警列表 → 表单 formData（cur_form 空时按表单模板结构生成）。"""
+    """告警列表 → 表单 formData（cur_form 空时按表单模板结构生成）。
+
+    处理人取告警 user 字段（v2.2 改，单用户）——alertReceivers 仅通知接收人不再作处理人源。
+    """
     lv = (alerts[0].get("level") or "info").lower() if alerts else "info"
-    receivers = []
-    for a in alerts:
-        for r in (a.get("alertReceivers") or []):
-            n = r.get("name") or ""
-            if n and n not in receivers:
-                receivers.append(n)
     rows = []
     for a in alerts:
         ev = a.get("eventId") or a.get("_id") or ""
@@ -157,7 +241,30 @@ def build_form(alerts, cur_form, batch_id=None):
             # 🔴handler 必须带真实 instanceId——form_value 运行时只按 instanceId 反查 USER
             # （helper.go:66），空串查不到=下节点处理人为空（2026-09-20 .26 实测）。
             # 前端手动提交是完整实例序列化；脚本回填至少要 {instanceId, name}（instanceId 必须真）
-            vals["handler"] = [{"instanceId": lookup_user_instance_id(n), "name": n} for n in receivers]
+            # 处理人来源（v2.2 改）：告警 user 字段（单用户）→ 值班组当日班次 → 兜底人(easyops)，
+            # handlerType 记录命中级别。responser 只取一个用户（首人代表）。
+            # 批次内多条告警按序取首条非空 user（各告警 user 可能不同，不假定 alerts[0] 有值）
+            import time as _t
+            names = []
+            for _a in alerts:
+                for _u in (_a.get("user") or []):
+                    _u = (_to_unicode(_u) or "").strip()
+                    if _u:
+                        names.append(_u)
+                if names:
+                    break
+            names = names[:1]
+            htype = 'responder'
+            if not names:
+                names = lookup_duty_members(_get_duty_group(), _t.strftime('%Y-%m-%d'))
+                names = [names[0]] if names else []
+                htype = 'duty'
+            if not names:
+                names = ['easyops']
+                htype = 'fallback'
+            vals["handlerType"] = HANDLER_TYPE.get(htype, HANDLER_TYPE['fallback'])
+            # handler 值带 nickname/user_tel（显示字段 frontKey=[nickname, user_tel]）
+            vals["handler"] = [lookup_user_fields(n) for n in names]
         elif c.get("key") == ALERT_SEC and rows and not (c.get("values")):
             c["values"] = rows
         out.append(c)

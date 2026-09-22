@@ -7,6 +7,9 @@ EasyOps 工具：告警转事件工单（未恢复告警 → 构建表单 → �
 本工具【一步到位】——构建好识别和发起表单（等级/优先级/处理人/批次/关联告警行），
 直接 StartProcessInstanceV2 发起（事件处理服务），无需事后回填。
 
+处理人：告警 user 字段（用户名列表，如 ["ahuatan","wwy"]）取首人（responser 单用户）→
+值班组当日班次首人 → 兜底人 easyops；handlerType 控件记录实际命中级别。
+
 入参：
     range            查询时间范围，字符串，\d+[m,h,d]（如 30m/2h/1d），默认 1d
     auto_create      是否自动转工单，枚举 是/否，默认 是
@@ -174,7 +177,7 @@ def search_not_recover(range_sec, min_level, older_than_sec):
     order = {u'info': 0, u'warning': 1, u'critical': 2}
     fields = ['_id', 'eventId', 'batchId', 'startTime', 'time', 'level', 'objectId',
               'instanceId', 'target', 'originContent', 'originTitle', 'metricName',
-              'alertReceivers', 'orders']
+              'user', 'alertReceivers', 'orders']
     out, page = [], 1
     now = int(time.time())
     while page <= 50:
@@ -277,20 +280,23 @@ def lookup_duty_members(group_name, date_str):
 
 
 def resolve_handlers(ev, duty_group, duty_cache):
-    """三级链：告警待响应人 → 值班组当日班次 → 兜底人(easyops)。
+    """处理人三级链：告警 user 字段 → 值班组当日班次 → 兜底人(easyops)。
 
-    返回 (handlerType枚举对象, handlers)——type 记录实际命中级别，填表单 handlerType 控件。
+    告警 user 字段是用户名列表（如 ["ahuatan","wwy"]）——responser 只取一个用户
+    （首人代表）。返回 (handlerType枚举对象, handlers)——type 记录实际命中级别，
+    填表单 handlerType 控件。
     """
     names = []
-    for r in (ev.get('alertReceivers') or []):
-        n = (r.get('name') or '').strip()
+    for u in (ev.get('user') or []):
+        n = (u or '').strip() if isinstance(u, _string_types) else ''
         if n and n not in names:
             names.append(n)
+    names = names[:1]                      # responser 单用户
     htype = 'responder'
     if not names and duty_group:
         if duty_group not in duty_cache:
             duty_cache[duty_group] = lookup_duty_members(duty_group, time.strftime('%Y-%m-%d'))
-        names = duty_cache[duty_group] or []
+        names = (duty_cache[duty_group] or [])[:1]
         htype = 'duty'
     if not names:
         names = ['easyops']
