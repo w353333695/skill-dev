@@ -831,6 +831,16 @@ objects:
 
   # ---------- ITSM 服务实例（service_instance）----------
   itsm_service_instance:
+    export_sync_discipline: |
+      🔴【服务包同步纪律】流程/表单/触发器/脚本（表单生命周期+前后置脚本工具）任一变化，
+      都必须重新导出 ITSM 服务包（GET /v1/export/service_instance?instanceIds=<id>&isMain=true）
+      覆盖 hub 归档——服务导出是【引用聚合】：包内含 _ITSC_PROCESS_VERSION(主版本+nodeSettings
+      含 triggerIdList)/_ITSC_FORM_SCHEMA+VERSION/_ITSC_TRIGGER/_ITSC_NOTIFY_POLICY/
+      _ITSC_PROCESS_FORM_RELATION/tools/*.tar.gz(脚本工具)。改了其中任何一项而只更新 hub 里的
+      裸脚本/工具包，服务包仍是旧快照——导入恢复时会缺最新配置（2026-09-22 用户立规）。
+      导出后同步：删旧版包（同名旧版本文件）→ INDEX files/version/history 三处更新 → commit。
+  itsm_service_instance:
+
     description: >-
       ITSM 服务实例（服务目录条目）—— 用户在 ITSM 前端选服务发起工单；每个服务关联一个流程定义（associatedProcess）。CRUD 全在 /v1/service_instance。
       【坑】create 的 status 契约写『默认 enabled』但实测不传时为空串=前端不可见/未启用（2026-09-20 .26：新建服务前端不出现，须显式 status:"enabled"；
