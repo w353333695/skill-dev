@@ -22,9 +22,12 @@ uv sync
 uv run browser-recorder record https://example.com
 # 浏览器弹出 → 正常操作 → 停止：页面内 Ctrl+Shift+F9 / 关窗 / 终端 q+回车
 uv run browser-recorder export sessions/20260829-153000   # 导出 zip
+# 驱动重放（详见「驱动与重放」）：录制 → flow.json → 无人值守跑即录
+uv run browser-recorder replay sessions/20260829-153000 --name demo
+uv run browser-recorder drive flows/demo.json --dry-run
 ```
 
-浏览器二进制默认找 Playwright 缓存的 Chromium（见下 `BR_CHROME`）；退出码 0=正常停止，2=异常（崩溃/被杀），130=Ctrl-C 中断（已录事件已落盘）。
+浏览器二进制默认找 Playwright 缓存的 Chromium（见下 `BR_CHROME`）；退出码 0=正常停止，2=异常（崩溃/被杀），130=Ctrl-C 中断（已录事件已落盘）。drive/replay 的退出码见各自章节。
 
 ## CLI 旗子
 
@@ -48,6 +51,24 @@ uv run browser-recorder export sessions/20260829-153000   # 导出 zip
 
 - `BR_CHROME`：浏览器二进制路径。默认 `~/.cache/ms-playwright/chromium-1208/chrome-linux/chrome`（可指向任何 Chromium 系二进制；chrome 不存在时启动即报错并提示用此变量）
 
+## 驱动与重放（drive / replay）
+
+```bash
+browser-recorder drive flows/easyops.json --profile easyops        # 跑即录（session 与真人录制同构）
+browser-recorder drive flows/easyops.json --dry-run                # 只定位不动作（选择器体检）
+browser-recorder drive flows/easyops.json --step-from 8 --var BR_PW_8=x   # 断点续跑 + 注入变量
+browser-recorder replay sessions/20260922-xxxx --name my-flow      # 录制 session → flow.json
+```
+
+- **跑即录**：drive 默认同步录制 session——每步除机器视角的 `drive_step` 事件外，同时落统一 `action` 事件（带 `source:"drive"`）+ 双截图，产物与真人录制同构，可直接生成手册/审计。`--no-record` 不留产物（临时目录用完即删，行为不变）
+- **flow.json**：`steps` 数组，每步 `{n, desc, act, loc(候选数组), value?, clear?, tabs?, wait?, on_new_tab?, expect?, on_expect_fail?, retries?, locate_timeout?}`；act ∈ open/click/input/submit/hover。密码写 `${env.XXX}` 引用环境变量（`--var KEY=VALUE` 或环境变量注入），credential 步的值在 session/证据包中恒 `***` 不落盘
+- **候选链 loc**：按序试到首个命中——`css:#id`（穿透 open shadow root）/ `xpath://...` / `text:词`（`^` 前缀=词首锚定）/ `dom:div#app>span.btn`（录制 dom_path 直译）
+- **失败协议**：定位 miss → 重试（默认 3，步级 `retries` 可覆盖）→ 证据包 `<session>/evidence/fail-step<N>/`（截图+DOM dump+context.json）→ 退出码 3。失败原因：locate-miss / check-fail / expect-fail / hotkey-stop
+- **退出码**：0 成功 / 3 步失败（证据包已落盘）/ 4 flow 格式错误（含 `${env.XXX}` 变量未定义）
+- **replay 转换器**：录制 session → flow.json，按稳定性推导候选链（id > 测试锚点 data-* > name/aria > 文本 > 语义 class；dom_path 兜底），并自动合成 open 起点、推导 `tabs`/`on_new_tab`/`wait:nav`；仅 dom_path 兜底的步默认剔除并出报告 `flows/<name>.report.md`（`--keep-fragile` 保留，标 `fragile:true`）。password 值转 `${env.BR_PW_<n>}` 占位（`needs_credential:true`），产物必须过 drive 同一校验
+
+**drive 旗子**：`-p/--profile`（默认一次性，不留登录态）、`--headless`、`-o/--out`、`--var KEY=VALUE`（可多次）、`--step-from N`（从步号 N 续跑）、`--dry-run`、`--no-record`、`--no-sandbox`（容器环境必需）。
+
 ## 生成操作指引文档
 
 session 目录下启动 Claude Code，直接说"按 PROMPT.md 执行"，产出 `guide.md`（人类步骤指引 + API 逆向详情两附录）。
@@ -60,20 +81,24 @@ session 目录下启动 Claude Code，直接说"按 PROMPT.md 执行"，产出 `
 
 | kind | 触发 | payload 关键字段 |
 |---|---|---|
-| `session_start` / `session_end` | 录制起止 | url、ts、chrome 路径、pid；end 带 `abnormal`、`stop_reason`（hotkey/browser_closed/terminal_q/io_error/interrupt），io_error 时附 `error` |
+| `session_start` / `session_end` | 录制起止 | url、ts、chrome 路径、pid；end 带 `abnormal`、`stop_reason`（hotkey/browser_closed/terminal_q/io_error/interrupt，drive 模态另有 drive_done/drive_fail），io_error 时附 `error` |
 | `nav` | 主 frame 导航 | url, title |
-| `action` | 注入脚本上报 click/input/submit | type, element{rect, viewport, descriptor}, value, html_type |
+| `action` | 注入脚本上报 click/input/submit（drive 模态为机器动作落盘） | type, source（`"drive"`=drive 派发的机器动作；缺省=真人操作）, element{rect, viewport, descriptor}, value, html_type, target_id |
 | `request` / `response` / `response_body` | CDP Network 域 | request: method/url/headers/post_body/initiator；response: status/mime/headers/size；body: 全量不截断，取不到记 `error: "evicted"` |
+| `ws_frame` | WebSocket 帧收/发 | request_id, direction(sent/received), payload（文本帧复用 post_body 敏感键打码+截 8KB）, payload_base64 |
 | `dom_mutations` | MutationObserver 150ms 聚合 | count |
 | `screenshot` | 每动作双截图完成 | action_seq, phase(before/after), file, status（before: ok/raced；after: stable/timeout；截取失败: failed） |
+| `drive_step` | drive 每步执行成功（机器视角） | n, desc, act, dispatch（trusted/js-fallback/js/dry/nav）, match_count, retry_used, expect_result, target_id |
+| `drive_fail` | drive 步失败 | n, desc, reason（locate-miss/check-fail/expect-fail/hotkey-stop）, evidence（证据包路径）, target_id |
 | `control_stop` | 页面内 Ctrl+Shift+F9 | — |
 
 **硬脱敏**（写死在 `writer.py`，不可配置）：`Authorization`/`Cookie`/`Set-Cookie`/token 类 header 只记键名不记值；`type=password` input 值恒 `***`；URL（nav/session_start/request/response）中 `token`/`password`/`secret` 类参数值打码为 `***`；`post_body` JSON 顶层敏感键值与 form 形态敏感参数值打码。body 不截断。
 
 ## 已知限制（spec §4）
 
-- 单 tab 录制：只跟启动 tab，新开标签页/弹窗不录（设计中的 `note` 事件未实现，新 tab 无记录）
+- ~~单 tab 录制~~ **已解决**：autoAttach 自动跟随新开标签页/弹窗（事件带 `target_id` 区分），drive 侧 `tabs`/`on_new_tab` 显式建模多 tab
 - iframe 内操作坐标为 frame 视口坐标（MVP 不做换算，文档生成时结合截图判断）
+- WebSocket 二进制帧不落内容（`payload_base64` 恒 `false`，文本帧打码+截 8KB）；`ws://` 常驻连接不计入稳定判定（防 wait_stable 永不达稳）
 - 下载行为未拦截（设计 §4 #8 的 `Browser.setDownloadBehavior` 未实现，下载走浏览器原生行为）
 - before 截图与极速跳转存在竞态：截不到时标 `raced`，rect + descriptor 兜底仍落盘
 
@@ -82,7 +107,7 @@ session 目录下启动 Claude Code，直接说"按 PROMPT.md 执行"，产出 `
 ```bash
 cd projects/browser-recorder
 uv sync
-uv run pytest tests/ -v   # 19 个测试（writer 脱敏 / cdp / inject / recorder 流程 / annotator）
+uv run pytest tests/ -v   # 73 个测试（writer 脱敏 / cdp / inject / recorder 流程 / driver / flow 引擎 / replay / annotator；真浏览器用例无 Chrome 环境自动 skip）
 ```
 
 设计文档：`docs/2026-08-29-browser-recorder-design.md`（实现计划：`docs/2026-08-29-browser-recorder-plan.md`）
