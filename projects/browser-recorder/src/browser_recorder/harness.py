@@ -282,6 +282,7 @@ class SessionHarness:
         sid = next((t.sid for t in self.tabs.values() if t.tid == tid), None)
         seq = self.writer.emit("action", {
             "type": payload["type"],
+            "source": payload.get("source"),          # drive 模态标 "drive"（文档端区分人/机）
             "element": {"rect": payload.get("rect"),
                         "viewport": payload.get("viewport"),
                         "descriptor": payload.get("descriptor")},
