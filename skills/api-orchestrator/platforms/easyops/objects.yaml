@@ -441,6 +441,10 @@ objects:
         USER_SELECTOR → [{instanceId,name}]（CMDB 实例引用）
         USER_GROUP_SELECTOR → [{_object_id:"USER_GROUP",instanceId,name}]
         DEPARTMENT_SELECTOR → [{departmentId,name,namePath}]
+        CMDBINSTANCESELECT 显示字段=options.frontKey（[]string，如 ["nickname","user_tel"]）——
+        🔴控件值里要带这些字段，前端才显示得出（脚本回填只给 {instanceId,name} 时 nickname 列空白）；
+        改显示字段须同步改脚本回填的值（2026-09-22 .26：handler frontKey 由 [name] 改 [nickname,user_tel]，
+        两脚本 lookup_user_fields 同步补字段）。
         CMDBINSTANCESELECT/CMDBCASCADER → [{instanceId,name}]——🔴instanceId 必须真实（查 USER/目标模型），
         空串=运行时 formValue 处理人解析为空（2026-09-20 .26 实测：onload 脚本回填 {instanceId:"",name} 导致
         告警处理节点无处理人；前端手动提交是完整实例序列化，脚本回填最小集 {真instanceId,name} 即生效）
@@ -830,7 +834,27 @@ objects:
         rule: "按 formRelationInstanceId+formId 组合 4 动作：①都空=无操作 ②relId空+formId非空=绑定 ③relId非空+formId空=解绑 ④都非空=换绑。useFormBuilder=false 时后端默认取表单【主版本】绑（service.go:593,604）。"
 
   # ---------- ITSM 服务实例（service_instance）----------
+  env_binding_principle:
+    description: |
+      🔴【输出物去环境绑定原则】（2026-09-22 用户立规）：所有输出物（hub 工具包/脚本/服务包）
+      尽量避免绑定环境信息（IP/org 等部署态值）：
+      · 入参默认值用 127.0.0.1（同机形态）等通用值，不用具体环境 IP——异机时使用者显式传参
+      · 脚本内回退链不 fallback 到具体 IP；环境差异靠：平台注入变量（EASYOPS_*）> 显式入参 > 通用默认
+      · postsubmit eventCenterIp 已改（v3.1 default=127.0.0.1）；同类待改：alert2ticket/alert2event/clean_itsm
+        的 _default_host 回退 IP（当前回落 172.30.0.232/192.168.110.26——编排侧有 env 可覆盖，回退值仅兜底）
+      · 服务包导出本身含环境 id（formId/流程 id 等）属引用聚合必需——去环境绑定指【连接信息】不进默认值
+
   itsm_service_instance:
+    export_sync_discipline: |
+      🔴【服务包同步纪律】流程/表单/触发器/脚本（表单生命周期+前后置脚本工具）任一变化，
+      都必须重新导出 ITSM 服务包（GET /v1/export/service_instance?instanceIds=<id>&isMain=true）
+      覆盖 hub 归档——服务导出是【引用聚合】：包内含 _ITSC_PROCESS_VERSION(主版本+nodeSettings
+      含 triggerIdList)/_ITSC_FORM_SCHEMA+VERSION/_ITSC_TRIGGER/_ITSC_NOTIFY_POLICY/
+      _ITSC_PROCESS_FORM_RELATION/tools/*.tar.gz(脚本工具)。改了其中任何一项而只更新 hub 里的
+      裸脚本/工具包，服务包仍是旧快照——导入恢复时会缺最新配置（2026-09-22 用户立规）。
+      导出后同步：删旧版包（同名旧版本文件）→ INDEX files/version/history 三处更新 → commit。
+  itsm_service_instance:
+
     description: >-
       ITSM 服务实例（服务目录条目）—— 用户在 ITSM 前端选服务发起工单；每个服务关联一个流程定义（associatedProcess）。CRUD 全在 /v1/service_instance。
       【坑】create 的 status 契约写『默认 enabled』但实测不传时为空串=前端不可见/未启用（2026-09-20 .26：新建服务前端不出现，须显式 status:"enabled"；
@@ -935,6 +959,33 @@ objects:
       - { to: itsm_service_instance, type: association, cardinality: "N:N", via: commonServices, desc: "常用服务关联多个服务实例" }
 
   # ---------- ITSM 触发器（trigger）----------
+  itsm_trigger_binding:
+    node_level_binding: |
+      🔴触发器绑定的【常理通道】是节点级（2026-09-22 用户示例 1.2.8 定案）：流程版本
+      processSetting.nodeSettings[].triggerIdList=["<触发器id>"]——版本保存时后端自动
+      composeTriggerRefs（process_definition_version_service.go:761-776,914-918）同步触发器实例的
+      processVersionTasks 属性 + ITSC_PROCESS_VERSION 关系（双向）。运行时匹配（trigger.go:79-84）：
+      任务事件取【当前节点的 nodeMap[step.UserTaskId].Setting.GetTriggerIdList()】并入 relQuery——
+      即节点没绑 triggerIdList 时，任务事件(todo/pass/...)匹配不到该触发器（这是只绑 ITSC_PROCESS
+      流程级关系时"通知不发"的根因：relQuery 命中但 bpmnTriggerInstanceIds 为空不影响查询，
+      真正的发送在 handler 消费端按节点过滤）。
+      三级绑定通道（按粒度）：
+      ① 节点级（常用）：nodeSettings[].triggerIdList——经 process_version.create/edit 随版本走
+      ② 流程级：CMDB PUT /v2/object/_ITSC_TRIGGER/instance/{id} {"ITSC_PROCESS":[流程id]}
+      ③ 服务级：同上 {"ITSC_SERVICE_INSTANCE":[服务id]}
+      API 侧给流程版本绑触发器：拉 processSetting → 改目标节点 triggerIdList → 派生新版本 → set_main。
+  itsm_trigger_binding:
+
+    description: |
+      触发器与流程/服务的绑定是【CMDB 关系】（非 trigger API 字段）——create/update 端点
+      不写绑定（源码 trigger_service.go CreateTrigger 只建实例；checkRemoveTrigger 按
+      ServiceInstances/ProcessDefinitions 关系判不可删）。绑定写法（2026-09-22 .26 实测）：
+      PUT /v2/object/_ITSC_TRIGGER/instance/{触发器id}  body {"ITSC_PROCESS":["<流程定义id>"]}
+      （关系键名=relation 定义里的 right_id：ITSC_PROCESS / ITSC_SERVICE_INSTANCE——绑服务用后者）
+      运行时匹配（internal/trigger/trigger.go:87-101）：按 event like + status=enabled +
+      relQuery=or(ITSC_PROCESS.instanceId=流程id, ITSC_SERVICE_INSTANCE.instanceId=服务id,
+      bpmn 内嵌 triggerIdList) 查触发器。
+      触发器→通知策略：config.actionList[{name:send_message, args:{notifyPolicyId, notifyInterval:"5m", notifyTimes:1}}]。
   itsm_trigger:
     description: ITSM 触发器——绑定流程/任务事件（event）到动作列表（config.actionList）。被服务实例/流程节点引用。CRUD 在 /v1/trigger（8134 flowable_service）。⚠️event/scope/action 的完整合法值见 api_behavior.trigger_enums（来自枚举接口，非自由文本）。
     source: data/api-doc/itsm-trigger.xlsx + trigger/validators/request_validate_trees.go:15,35 + 枚举接口 GET /api/flowable_service/v1/enums/trigger_enums（trigger_service.go:99 GetTriggerEnums）
@@ -981,6 +1032,17 @@ objects:
 
   # ---------- ITSM 通知策略（notify_policy）----------
   itsm_notify_policy:
+    _enum_dual_layer: |
+      🔴枚举字段【存储 key/显示 name 双层】（2026-09-22 前端报错实测踩坑）：
+      存储层（CMDB _ITSC_NOTIFY_POLICY）只存【key】——notifyType=process_task/process_instance/...、
+      triggerSignal=todo/start/pass/...、notifyRange=todo_user/creator/...、notifyMode=site_message/email/...；
+      API 读时自动反转成显示名（list：NotifyType= GetName、TriggerSignal=GetChildrenName、TriggerSignalKey=原 key；
+      notify_policy_service.go:440-462）。
+      ⚠️create/update 端点把传入值【原样落库】不校验 key 合法性——传中文显示名（如 triggerSignal=待办）会存成
+      待办 → GetChildrenName 反转 miss → 前端 notifyConfig.find(...triggerSignal.key===detail.triggerSignal) 报
+      『undefined (reading notifyRange)』页面崩。
+      ✅正确姿势：create/update 一律传 key（todo/todo_user/site_message）；传错可用 CMDB 直改救：
+      PUT /v2/object/_ITSC_NOTIFY_POLICY/instance/{id} {"triggerSignal":"todo",...}（key 形态）。
     description: ITSM 通知策略——「信号(triggerSignal)→通知谁(notifyRange)→怎么发(notifyMode)→发什么(content)」。被 trigger 经 notifyPolicyId 引用。CRUD 在 /api/itsc_trigger/v1/notify_policy（⚠️前缀 itsc_trigger 非 flowable_service，但仍 8134 端口）。⚠️notifyType/triggerSignal/notifyRange/content变量 的合法值见 api_behavior（来自 fixtures rawSetting + 枚举接口，非自由文本）。
     source: data/api-doc/itsm-notify_policy.xlsx + notify_policy/{route.go:7-14, validators/api_validator.go:75-99, fixtures/notify_setting.go:9 rawSetting（全量枚举权威源）} + 枚举接口 GET /api/itsc_trigger/v1/notify_type
     api: notify_policy

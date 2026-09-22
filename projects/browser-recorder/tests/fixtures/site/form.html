@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="zh">
+<head><meta charset="utf-8"><title>表单靶场</title>
+<style>body{font:16px sans-serif;padding:24px}.ok{color:green;margin-top:8px}</style>
+</head>
+<body>
+<h1>表单</h1>
+<form id="the-form" onsubmit="submitForm(event)">
+  <label>标题 <input name="title" type="text" data-testid="title-input"></label><br>
+  <label>内容 <textarea name="body" data-testid="body-input"></textarea></label><br>
+  <label>密钥 <input name="secret" type="password" data-testid="secret-input"></label><br>
+  <label>shadow <formitem-shadow></formitem-shadow></label><br>
+  <button type="submit" data-testid="submit-btn">提交</button>
+</form>
+<div class="ok" id="result" hidden></div>
+<p><a href="/index.html" target="_blank" data-testid="newtab-link">新 tab 打开首页</a></p>
+<script>
+// shadow 穿透值复检靶（formitem-shadow）：输入框藏在 open shadow root 里，
+// act 的裸 querySelector 复检/降级 JS 打不进去（T7 断层），flow 层
+// _deep_recheck_value 的 deepAll 穿透读值在这里验证。
+customElements.define('formitem-shadow', class extends HTMLElement {
+  connectedCallback() {
+    const sr = this.attachShadow({mode: 'open'});
+    sr.innerHTML = '<input type="text" data-testid="shadow-input" value="">';
+  }
+});</script>
+<script>
+function submitForm(e) {
+  e.preventDefault();
+  // 受控更新：真实 click 派发 → onsubmit 走到这里改 DOM（driver 复检的靶子）
+  const r = document.getElementById('result');
+  r.hidden = false;
+  r.textContent = '已提交：' + document.querySelector('[name=title]').value;
+  fetch('/api/echo?submitted=1').catch(() => {});   // expect response_contains 的靶
+}
+</script>
+</body>
+</html>

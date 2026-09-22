@@ -39,6 +39,30 @@ console.log(JSON.stringify([
     assert len(text) == 40
 
 
+def test_descriptor_extras():
+    """M1 增强：describe 增录 name/aria_label/data_attrs（测试锚点白名单）。"""
+    script = r"""
+const m = require('%s');
+const el = {
+  tagName: 'INPUT', id: 'user', className: 'form-control',
+  name: 'username',                                 // name 属性
+  getAttribute: (k) => k === 'aria-label' ? '用户名'
+                  : k === 'data-testid' ? 'user-input'
+                  : k === 'data-business' ? 'should-not-appear' : null,
+  textContent: '', value: '',
+  getBoundingClientRect: () => ({x:1,y:2,width:80,height:20}),
+  parentElement: null,
+};
+const r = m._describeForTest(el, {innerWidth:1280, innerHeight:900, devicePixelRatio:1});
+console.log(JSON.stringify(r.descriptor));
+""" % INJECT
+    d = json.loads(_run_node(script))
+    assert d["name"] == "username"
+    assert d["aria_label"] == "用户名"
+    assert d["data_attrs"] == {"data-testid": "user-input"}   # 白名单外不录
+    assert d["id"] == "user" and d["tag"] == "input"          # 旧字段无回归
+
+
 def test_install_survives_early_document():
     """回归：新文档极早期（documentElement 尚为 null）install 不得夭折。
 

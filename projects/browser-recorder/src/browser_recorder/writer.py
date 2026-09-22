@@ -120,6 +120,12 @@ class SessionWriter:
         if kind in ("nav", "session_start"):
             payload = dict(payload)
             payload["url"] = mask_url(payload.get("url", ""))
+        if kind == "ws_frame":
+            payload = dict(payload)
+            p = payload.get("payload")
+            if isinstance(p, str) and not payload.get("payload_base64") and p:
+                p = mask_post_body(p)          # 复用 JSON/form 敏感键打码（非敏感原样返回）
+                payload["payload"] = p[:8192]  # 文本截 8KB
         rec.update(payload)
         try:
             self._f.write(json.dumps(rec, ensure_ascii=False) + "\n")

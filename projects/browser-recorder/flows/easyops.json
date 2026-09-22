@@ -1,0 +1,31 @@
+{
+  "name": "easyops-create-kit",
+  "meta": {"source": "scripts/easyops_mvp.py STEPS", "login": "easyops/easyops"},
+  "steps": [
+    {"n": 1, "desc": "打开登录页", "act": "open", "value": "http://172.30.0.90/next/auth/login"},
+    {"n": 2, "desc": "用户名", "act": "input", "loc": ["css:input[placeholder*=\"用户名\"]", "css:input[type=text]"], "value": "easyops"},
+    {"n": 3, "desc": "密码", "act": "input", "loc": ["css:input[type=password]"], "value": "${env.BR_EASYOPS_PW}"},
+    {"n": 4, "desc": "登录", "act": "click", "loc": ["css:button[type=submit]", "text:登录"], "wait": "nav"},
+    {"n": 5, "desc": "点击菜单(launchpad)", "act": "click", "loc": ["css:eo-launchpad-button-v2, eo-launchpad-button-v2 a"]},
+    {"n": 6, "desc": "输入 monitor", "act": "input", "loc": ["css:input[placeholder*=Search], input[placeholder*=search][type=text]"], "value": "monitor"},
+    {"n": 7, "desc": "点击 monitor 应用", "act": "click", "loc": ["text:^monitor"]},
+    {"n": 8, "desc": "点击模块卡片", "act": "click", "loc": ["xpath://*[@id='main-mount-point']/eo-page-view/div/eo-category/eo-easy-view/basic-bricks.list-container/div/div[1]/basic-bricks.list-container/div/eo-card-item[2]//eo-link/div/div[1]"], "wait": "nav"},
+    {"n": 9, "desc": "点击资源卡片", "act": "click", "loc": ["xpath://*[@id='resource-detail-drawer']/eo-category/basic-bricks.list-container/div/eo-card-item[11]//eo-link/div/div[1]/div[1]"]},
+    {"n": 10, "desc": "选择 agentType", "act": "click", "loc": ["css:#agentType label:nth-of-type(1) span:nth-of-type(1) input, #portal-mount-point #agentType label:nth-of-type(1) span:nth-of-type(1) input"]},
+    {"n": 11, "desc": "确认(新tab)", "act": "click", "loc": ["css:#create-kit-modal button:nth-of-type(2) span, #portal-mount-point #create-kit-modal button:nth-of-type(2) span"], "on_new_tab": "switch"},
+    {"n": 12, "desc": "套件名称", "act": "input", "loc": ["css:#name"], "value": "e2e自动录制测试套件"},
+    {"n": 13, "desc": "选择 OS 系统", "act": "click", "loc": ["css:#rc_select_20"], "retries": 5},
+    {"n": 14, "desc": "使用说明", "act": "input", "loc": ["css:#rc-tabs-0-panel-1 textarea"], "value": "e2e 自动录制生成的使用说明"},
+    {"n": 15, "desc": "编写脚本", "act": "click", "loc": ["css:#scriptFrom label:nth-of-type(1) span:nth-of-type(1) input"]},
+    {"n": 16, "desc": "选 python", "act": "click", "loc": ["css:#scriptType label:nth-of-type(1) span:nth-of-type(2)"]},
+    {"n": 17, "desc": "脚本内容", "act": "input", "loc": ["css:#content > div:nth-of-type(2) > div"], "value": "print('hello from browser-recorder e2e')"},
+    {"n": 18, "desc": "弹开参数说明", "act": "click", "loc": ["css:#foldBrickButton14 span:nth-of-type(2) svg"]},
+    {"n": 19, "desc": "添加参数", "act": "click", "loc": ["css:forms.dynamic-form-item-v2 form button"]},
+    {"n": 20, "desc": "参数名", "act": "input", "loc": ["css:#dynamicForm_0_name"], "value": "e2e_param"},
+    {"n": 21, "desc": "提交保存", "act": "click", "loc": ["css:forms.general-buttons button:nth-of-type(1) span, forms.general-buttons button"], "expect": {"dom_contains": "成功"}},
+    {"n": 22, "desc": "更多", "act": "click", "loc": ["css:basic-bricks.general-custom-buttons button"]},
+    {"n": 23, "desc": "删除套件", "act": "click", "loc": ["css:body > div:nth-of-type(6) ul li:nth-of-type(4) div, #portal-mount-point ul li:nth-of-type(4) div"]},
+    {"n": 24, "desc": "确认删除-名称", "act": "input", "loc": ["css:body > div:nth-of-type(7) input", "css:#portal-mount-point input[type=text]"], "value": "e2e自动录制测试套件"},
+    {"n": 25, "desc": "删除", "act": "click", "loc": ["css:body > div:nth-of-type(7) button:nth-of-type(2), #portal-mount-point button:nth-of-type(2)"]}
+  ]
+}

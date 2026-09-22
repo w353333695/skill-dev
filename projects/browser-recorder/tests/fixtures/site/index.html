@@ -6,9 +6,20 @@
 <body>
 <h1>首页</h1>
 <div class="card" id="box">状态：初始</div>
-<button id="btn-fetch" onclick="fetchThenUpdate()">点我发请求</button>
+<button id="btn-fetch" data-testid="fetch-btn" onclick="fetchThenUpdate()">点我发请求</button>
+<div id="shadow-host"></div>
+<script>
+// shadow DOM 自定义元素：driver deepQuery 穿透靶
+customElements.define('demo-widget', class extends HTMLElement {
+  connectedCallback() {
+    const sr = this.attachShadow({mode: 'open'});
+    sr.innerHTML = '<button data-testid="shadow-btn">影子按钮</button>';
+  }
+});
+document.getElementById('shadow-host').appendChild(document.createElement('demo-widget'));
+</script>
 <form id="login" action="/page2.html">
-  <input name="user" type="text" placeholder="用户名">
+  <input name="user" type="text" placeholder="用户名" data-testid="user-input">
   <input name="pass" type="password" placeholder="密码">
   <button type="submit">提交</button>
 </form>

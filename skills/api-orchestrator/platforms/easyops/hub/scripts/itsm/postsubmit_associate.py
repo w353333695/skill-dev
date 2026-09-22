@@ -102,5 +102,6 @@ if __name__ == "__main__":
         print "missing params, skip"
         sys.exit(0)
     if not eventCenterIp:
-        eventCenterIp = (_g.get("EASYOPS_CMDB_SERVICE_HOST") or _g.get("EASYOPS_CMDB_HOST") or "127.0.0.1").split(":")[0]
+        # 默认 127.0.0.1（同机部署形态）——输出物不绑定环境信息，异机时使用者显式传 eventCenterIp
+        eventCenterIp = "127.0.0.1"
     associate(eventCenterIp + ":12006", batch_ids, process_instance_id, order_num, start_time)
