@@ -12,7 +12,7 @@ EasyOps 工具：告警转事件工单（未恢复告警 → 构建表单 → �
     auto_create      是否自动转工单，枚举 是/否，默认 是
     alert_level      自动转工单告警级别，枚举 info/warning/critical，默认 critical（含及以上）
     alert_time       自动转工单告警时间（分钟），整数，默认 20（发生时间已超过该时长）
-    duty_group       兜底值班组名称，字符串，默认 test（告警无接收人时查当日排班）
+    duty_group       值班组名称，字符串，默认 告警值班组（告警无响应人时查当日排班）
 
 运行环境：EasyOps agent（py2）/ 编排侧 py3。stdlib only。
 输出：PutStr 回吐进度与统计。
@@ -45,7 +45,11 @@ CMDB_PORT = 8079
 
 # 「事件处理」服务（前端手动提单同款路径）
 SERVICE_ID = '65be037e02d51'
-DEFAULT_DUTY_GROUP = 'test'
+DEFAULT_DUTY_GROUP = u'告警值班组'
+# 处理人类型（表单 handlerType 控件值）
+HANDLER_TYPE = {"responder": {"key": "responder", "label": u"告警待响应人", "value": "responder"},
+               "duty": {"key": "duty", "label": u"值班人", "value": "duty"},
+               "fallback": {"key": "fallback", "label": u"兜底人", "value": "fallback"}}
 
 ALERT_LEVEL_TO_INT = {u'info': 0, u'warning': 1, u'critical': 2}
 LEVEL_P = {"critical": {"key": "p1", "label": "P1", "value": "P1"},
@@ -257,19 +261,26 @@ def lookup_duty_members(group_name, date_str):
 
 
 def resolve_handlers(ev, duty_group, duty_cache):
-    """告警通知接收人 → 值班组当日班次 → easyops（含真实 instanceId）。"""
+    """三级链：告警待响应人 → 值班组当日班次 → 兜底人(easyops)。
+
+    返回 (handlerType枚举对象, handlers)——type 记录实际命中级别，填表单 handlerType 控件。
+    """
     names = []
     for r in (ev.get('alertReceivers') or []):
         n = (r.get('name') or '').strip()
         if n and n not in names:
             names.append(n)
+    htype = 'responder'
     if not names and duty_group:
         if duty_group not in duty_cache:
             duty_cache[duty_group] = lookup_duty_members(duty_group, time.strftime('%Y-%m-%d'))
         names = duty_cache[duty_group] or []
+        htype = 'duty'
     if not names:
         names = ['easyops']
-    return [{'instanceId': lookup_user_instance_id(n), 'name': n} for n in names]
+        htype = 'fallback'
+    handlers = [{'instanceId': lookup_user_instance_id(n), 'name': n} for n in names]
+    return HANDLER_TYPE.get(htype, HANDLER_TYPE['fallback']), handlers
 
 
 # ---------------------------------------------------------------------------
@@ -281,7 +292,7 @@ def fmt_time(ts):
     return time.strftime('%Y-%m-%dT%H:%M:%S+08:00', time.gmtime(int(ts) + 8 * 3600))
 
 
-def build_form_data(ev, handlers):
+def build_form_data(ev, handlers, handler_type=None):
     lv = (ev.get('level') or u'info').lower()
     row = {
         'alertTime': fmt_time(ev.get('startTime')),
@@ -298,6 +309,7 @@ def build_form_data(ev, handlers):
             'incidentLevel': LEVEL_P.get(lv, LEVEL_P['info']),
             'priority': PRIORITY.get(lv, PRIORITY['info']),
             'incidentType': {'key': 'alert', 'label': u'告警异常', 'value': u'告警异常'},
+            'handlerType': handler_type or HANDLER_TYPE['responder'],
             'handler': handlers,
             'batchId': [ev.get('batchId')] if ev.get('batchId') else [],
         }]},
@@ -339,14 +351,14 @@ def main(argv=None):
     duty_cache = {}
     ok, fail = 0, 0
     for ev in events:
-        handlers = resolve_handlers(ev, cfg.get('duty_group') or '', duty_cache)
-        form_data = build_form_data(ev, handlers)
+        htype, handlers = resolve_handlers(ev, cfg.get('duty_group') or '', duty_cache)
+        form_data = build_form_data(ev, handlers, htype)
         good, resp = start_ticket(ev, form_data)
         if good:
             ok += 1
             pi = (resp.get('data') or {}).get('instanceId') or ''
-            put_str(u'发起成功: %s (pi=%s 处理人:%s)' % (
-                (ev.get('originContent') or '')[:40], pi, ','.join(h['name'] for h in handlers)))
+            put_str(u'发起成功: %s (pi=%s 处理人[%s]:%s)' % (
+                (ev.get('originContent') or '')[:40], pi, htype.get('label'), ','.join(h['name'] for h in handlers)))
         else:
             fail += 1
             put_str(u'发起失败: %s HTTP %s %s' % (
