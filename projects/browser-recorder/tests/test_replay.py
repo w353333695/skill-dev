@@ -219,6 +219,23 @@ def test_cli_replay_keep_fragile(tmp_path):
     assert "dom-path-only" in rep and "已保留" in rep
 
 
+def test_cli_replay_bad_jsonl_line_click_exception(tmp_path):
+    """终审 Minor-3：session.jsonl 坏行（非法 JSON）→ ClickException
+    （exit 1 + 人话报错），不冒 json 解析裸 traceback。"""
+    sd = tmp_path / "sess"
+    sd.mkdir()
+    (sd / "session.jsonl").write_text(
+        '{"kind": "session_start"断裂的行\n', encoding="utf-8")
+    out = tmp_path / "bad.json"
+    r = subprocess.run(
+        [sys.executable, "-m", "browser_recorder.cli", "replay", str(sd),
+         "--out", str(out)],
+        capture_output=True, text=True, timeout=60, cwd=_PROJ_ROOT2)
+    assert r.returncode == 1, f"exit={r.returncode} stderr={r.stderr}"
+    assert "解析失败" in r.stderr
+    assert "Traceback" not in r.stderr
+
+
 # ---- 回路：drive 跑即录 → replay → dry-run 全命中（真 chrome）----
 
 
@@ -229,13 +246,21 @@ def test_replay_then_dry_run_on_fixture(local_site, chrome_path, tmp_path):
 
     session 里 drive_step 事件 replay 只读 kind=="action"；drive 产生的
     action 带 source:"drive"，与人工录制同等转换（不区分 source）。
+
+    I-3 锁定：smoke flow 含 shadow-input 步（formitem-shadow 的 open shadow
+    root 内输入框，主文档无 name/id/text 可锚）——drive 跑即录的 descriptor
+    来自 DEEP_QUERY_JS 返回（非 inject.js），该返回补 aria_label/data_attrs
+    前 data-testid 候选链是空的，replay 后该步会因 no-descriptor 被剔除。
+    断言 shadow-input 步保留 data-testid 候选 = 闭环不在此断。
     """
     smoke = tmp_path / "smoke.json"
     smoke.write_text(json.dumps({"name": "s", "steps": [
         {"n": 1, "desc": "打开", "act": "open", "value": f"{local_site}/form.html"},
         {"n": 2, "desc": "标题", "act": "input", "loc": ["css:[name=title]"],
          "value": "回路测试"},
-        {"n": 3, "desc": "提交", "act": "click",
+        {"n": 3, "desc": "shadow 输入", "act": "input",
+         "loc": ["css:[data-testid=shadow-input]"], "value": "影"},
+        {"n": 4, "desc": "提交", "act": "click",
          "loc": ["css:[data-testid=submit-btn]"]},
     ]}, ensure_ascii=False))
     out_root = tmp_path / "sessions"
@@ -251,6 +276,12 @@ def test_replay_then_dry_run_on_fixture(local_site, chrome_path, tmp_path):
     # open 步已合成（drive 的 open 只落 nav 事件，不落 action）
     assert flow["steps"][0]["act"] == "open"
     assert flow["steps"][0]["value"] == f"{local_site}/form.html"
+    # I-3：shadow-input 步（无 name/id/文本的 open shadow 输入框）经
+    # drive→replay 保留 data-testid 候选——DEEP_QUERY_JS 返回的 descriptor
+    # 带 data_attrs（+aria_label），候选链不空
+    shadow = next(s for s in flow["steps"]
+                  if "css:[data-testid=shadow-input]" in s.get("loc", []))
+    assert shadow["act"] == "input"
     # 产物能过 load_flow（schema 合规是本转换器的硬约束）
     from browser_recorder.flow import load_flow
     fp = tmp_path / "roundtrip.json"

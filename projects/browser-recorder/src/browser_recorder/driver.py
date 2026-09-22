@@ -124,14 +124,26 @@ DEEP_QUERY_JS = r"""
         // 命中多个：取视口内最靠近中心的第一个（可预测），match_count 供上层告警
         const cx = innerWidth / 2, cy = innerHeight / 2;
         pick.sort((a, b) => Math.hypot(a.x - cx, a.y - cy) - Math.hypot(b.x - cx, b.y - cy));
-        return JSON.stringify(pick.slice(0, 10).map(s => ({
-          rect: {x: Math.round(s.x - s.w / 2), y: Math.round(s.y - s.h / 2),
-                 w: Math.round(s.w), h: Math.round(s.h)},
-          tag: s.el.tagName ? s.el.tagName.toLowerCase() : '',
-          text: (s.el.textContent || '').trim().slice(0, 40),
-          id: s.el.id || null, name: s.el.name || null,
-          classes: s.el.classList ? Array.from(s.el.classList).slice(0, 8) : [],
-        }))) + '|' + pick.length;   // |N 尾巴带总命中数（截前 10 细节）
+        // data-* 测试锚点白名单——与 inject.js describe() 的 keep 一致
+        // （业务 data-* 不录，避免 descriptor 膨胀）
+        const DATA_KEEP = ['data-testid', 'data-test', 'data-qa', 'data-cy'];
+        return JSON.stringify(pick.slice(0, 10).map(s => {
+          const da = {};
+          for (const k of DATA_KEEP) {
+            const v = s.el.getAttribute && s.el.getAttribute(k);
+            if (v != null) da[k] = v;
+          }
+          return {
+            rect: {x: Math.round(s.x - s.w / 2), y: Math.round(s.y - s.h / 2),
+                   w: Math.round(s.w), h: Math.round(s.h)},
+            tag: s.el.tagName ? s.el.tagName.toLowerCase() : '',
+            text: (s.el.textContent || '').trim().slice(0, 40),
+            id: s.el.id || null, name: s.el.name || null,
+            classes: s.el.classList ? Array.from(s.el.classList).slice(0, 8) : [],
+            aria_label: (s.el.getAttribute && s.el.getAttribute('aria-label')) || null,
+            data_attrs: da,
+          };
+        })) + '|' + pick.length;   // |N 尾巴带总命中数（截前 10 细节）
       }
     }
   }
@@ -224,7 +236,8 @@ def value_of_js(locs: list[str]) -> str:
 async def locate(client, tabs: dict, tid: str, locs: list[str],
                  timeout: float = 10.0) -> dict | None:
     """候选链按序试：首个命中即返回 {rect, tag, text, id, name, classes,
-    match_count}（id/name/classes 供上层拼 descriptor 候选）。全 miss → None。
+    aria_label, data_attrs, match_count}（id/name/aria/data-* 供上层拼
+    descriptor 候选——drive 跑即录转 flow 时定位锚点不丢）。全 miss → None。
 
     200ms 轮询直到 timeout（元素可能晚出现）。evaluate 瞬态失败（导航中
     context 消失）按本轮 miss 处理，不中断轮询。

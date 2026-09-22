@@ -70,6 +70,35 @@ def test_locate_miss_returns_none():
     assert len(client.calls) >= 1   # 轮询至少发过一次
 
 
+def test_find_elements_js_returns_anchor_fields():
+    """终审 I-3：DEEP_QUERY_JS 返回 map 带 aria_label + data_attrs（白名单
+    四键，与 inject.js keep 一致）——drive 跑即录的 descriptor 靠它保住
+    定位锚点原料，replay 转 flow 的候选链才不空。"""
+    js = find_elements_js(["css:[data-testid=shadow-input]"])
+    assert "aria_label" in js
+    assert "data_attrs" in js
+    for k in ("data-testid", "data-test", "data-qa", "data-cy"):
+        assert f"'{k}'" in js, f"白名单缺 {k}"
+
+
+def test_locate_hit_passes_anchor_fields_through():
+    """locate 对命中 dict 整体透传（{**arr[0], match_count}）——descriptor
+    候选原料（aria_label/data_attrs）不在此层丢。"""
+    payload = json.dumps([
+        {"rect": {"x": 0, "y": 0, "w": 100, "h": 20}, "tag": "input",
+         "text": "", "id": None, "name": None, "classes": [],
+         "aria_label": "备注", "data_attrs": {"data-testid": "shadow-input"}},
+    ], ensure_ascii=False) + "|1"
+    client = _FakeClient(payload)
+
+    async def _run():
+        return await locate(client, _tabs(), "t0", ["css:[data-testid=shadow-input]"])
+
+    hit = asyncio.run(_run())
+    assert hit["aria_label"] == "备注"
+    assert hit["data_attrs"] == {"data-testid": "shadow-input"}
+
+
 # ---- act：信任派发命令序列 + 降级判定（mock CDP）----
 
 import base64
@@ -268,7 +297,7 @@ def test_locate_real_browser_shadow_dom(local_site, chrome_path):
     import time  # noqa: F401  # （模块级已导入，留档说明）
 
     async def _run():
-        port = 8871
+        port = _free_port()   # 随机端口（M-1）：硬编码端口并发/残留进程会冲突
         with tempfile.TemporaryDirectory() as td:
             p = subprocess.Popen(
                 [str(chrome_path), f"--remote-debugging-port={port}",
@@ -347,7 +376,7 @@ def test_locate_real_browser_visibility_layers(chrome_path):
       clientRects）即可命中（headless 放宽，easyops_mvp FIND_JS L105-113 沉库）
     - hidden 祖先 / display:none 祖先 / visibility:hidden 祖先：排除
     """
-    port = 8874
+    port = _free_port()       # 随机端口（M-1）：硬编码端口并发/残留进程会冲突
     page_url = ("data:text/html,"
                 "<button id='tiny' style='transform:scale(0)'>小</button>"
                 "<div hidden><button id='inh'>隐</button></div>"
@@ -392,7 +421,7 @@ def test_act_input_real_browser_controlled(local_site, chrome_path):
     顺带验滚动重取：form.html 无滚动场景，此处锁定的是完整输入链路
     （聚焦→清空→逐键→复检）在真浏览器的 trusted 路径。
     """
-    port = 8872
+    port = _free_port()       # 随机端口（M-1）
 
     async def _run():
         with tempfile.TemporaryDirectory() as td:
@@ -435,7 +464,7 @@ def test_act_click_and_submit_real_browser(local_site, chrome_path):
     click 复检的靶：form.html 的 submitForm 是受控更新（真实 click 派发 →
     onsubmit → #result 文本变化），此处用 evaluate 读 #result 验证 click 生效。
     """
-    port = 8873
+    port = _free_port()       # 随机端口（M-1）
 
     async def _run():
         with tempfile.TemporaryDirectory() as td:

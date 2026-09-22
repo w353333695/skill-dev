@@ -62,6 +62,16 @@ def test_load_flow_unknown_act_raises(tmp_path):
         load_flow(f)
 
 
+def test_load_flow_unknown_wait_raises(tmp_path):
+    """终审 Minor-2：wait 枚举校验（settle/none/nav）——未知值是格式错误。"""
+    f = tmp_path / "f.json"
+    f.write_text(json.dumps({"name": "t", "steps": [
+        {"n": 1, "desc": "点", "act": "click", "loc": ["css:#b"],
+         "wait": "fast"}]}))
+    with pytest.raises(FlowError, match="未知 wait"):
+        load_flow(f)
+
+
 def test_resolve_vars():
     assert resolve_vars("用户-${env.USER}", {"USER": "alice"}) == "用户-alice"
     with pytest.raises(FlowError, match="BR_PW"):
@@ -421,8 +431,14 @@ def test_run_flow_credential_var_without_html_type_masked(monkeypatch):
 
 
 def test_run_flow_open_dry_run_and_expect(monkeypatch):
-    """open 导航、dry-run（只 locate 不 act）、expect 双通道。"""
+    """open 导航、dry-run（只 locate 不 act）、expect 双通道。
+
+    I-1 后网络通道按 arm_t 时间窗过滤——新响应必须在动作派发后到达
+    （fake_act 内追加模拟 Network.responseReceived），布防前的旧响应
+    不再算命中。
+    """
     tmp = pathlib.Path(tempfile.mkdtemp())
+    import time as _time
 
     async def fake_locate(client, tabs, tid, locs, timeout=10):
         return dict(HIT)
@@ -452,9 +468,16 @@ def test_run_flow_open_dry_run_and_expect(monkeypatch):
         assert dry[1]["expect_result"] is None  # dry-run 不跑 expect
         h.close()
 
-        # 非 dry-run：expect 命中 → expect_result.ok=True；miss → drive_fail
+        # 非 dry-run：动作派发后同 URL 响应到达（arm_t 之后）→ expect 命中
         h2 = FakeHarness(tmp)
-        h2.resp_log.append({"url": "http://a/api/gateway/x", "status": 200, "t": 2})
+
+        async def act_then_resp(client, tabs, tid, a, on_dispatch=None):
+            h2.resp_log.append({"url": "http://a/api/gateway/x", "status": 200,
+                                "t": _time.monotonic_ns() // 1_000_000})
+            if on_dispatch:
+                on_dispatch("trusted")
+            return {"dispatch": "trusted", "check": True}
+        _patch(monkeypatch, act_fn=act_then_resp)
         r2 = await run_flow(h2, flow)
         assert r2["ok"] is True
         stp = [p for k, p in h2.emitted if k == "drive_step"][-1]
@@ -462,10 +485,65 @@ def test_run_flow_open_dry_run_and_expect(monkeypatch):
         h2.close()
 
         h3 = FakeHarness(tmp)      # resp_log 空 → expect miss
+        _patch(monkeypatch, act_fn=fake_act)
         r3 = await run_flow(h3, flow)
         assert r3["ok"] is False and r3["failed_step"] == 2
         assert next(p for k, p in h3.emitted if k == "drive_fail")["reason"] == "expect-fail"
         h3.close()
+
+    asyncio.run(_run())
+
+
+def test_expect_response_time_window_filters_stale(monkeypatch):
+    """终审 I-1：resp_log 是跨全流程的 200 条滑动窗口——同 URL 的旧响应
+    （几十步前，t 很小）不再假阳性命中；只有本步动作 arm 之后的响应算数。
+    """
+    tmp = pathlib.Path(tempfile.mkdtemp())
+    import time as _time
+
+    async def fake_locate(client, tabs, tid, locs, timeout=10):
+        return dict(HIT)
+
+    async def fake_act(client, tabs, tid, a, on_dispatch=None):
+        if on_dispatch:
+            on_dispatch("trusted")
+        return {"dispatch": "trusted", "check": True}
+
+    flow = {"name": "t", "steps": [
+        {"n": 1, "desc": "点", "act": "click", "loc": ["css:#b"],
+         "expect": {"response_contains": {"url": "/api/gateway/", "status": 200}}},
+    ]}
+
+    async def _run():
+        # 只有旧响应（布防前几十步的同 URL 响应）→ miss
+        _patch(monkeypatch, fake_locate, fake_act)
+        h = FakeHarness(tmp)
+        h.resp_log.append({"url": "http://a/api/gateway/old", "status": 200,
+                           "t": 1})
+        r = await run_flow(h, flow)
+        assert r["ok"] is False and r["failed_step"] == 1
+        assert next(p for k, p in h.emitted
+                    if k == "drive_fail")["reason"] == "expect-fail"
+        h.close()
+
+        # 旧响应 + 新响应（act 后到达）并存 → 只有新的算命中 → ok
+        h2 = FakeHarness(tmp)
+
+        async def act_then_resp(client, tabs, tid, a, on_dispatch=None):
+            h2.resp_log.append({"url": "http://a/api/gateway/new",
+                                "status": 200,
+                                "t": _time.monotonic_ns() // 1_000_000})
+            if on_dispatch:
+                on_dispatch("trusted")
+            return {"dispatch": "trusted", "check": True}
+        _patch(monkeypatch, act_fn=act_then_resp)
+        h2.resp_log.append({"url": "http://a/api/gateway/old", "status": 200,
+                            "t": 1})            # 旧响应：布防前，不算
+        r2 = await run_flow(h2, flow)
+        assert r2["ok"] is True, "布防后到达的响应应命中（旧响应被时间窗滤掉）"
+        stp = [p for k, p in h2.emitted if k == "drive_step"][-1]
+        assert stp["expect_result"]["ok"] is True
+        h2.close()
 
     asyncio.run(_run())
 
@@ -495,6 +573,101 @@ def test_run_flow_step_from_skips_earlier(monkeypatch):
         ns = [p["n"] for k, p in h.emitted if k == "drive_step"]
         assert ns == [2]
         h.close()
+
+    asyncio.run(_run())
+
+
+def test_run_flow_step_from_prepends_open(monkeypatch):
+    """终审 I-2：step_from 把 n=1 的 open 滤掉后自动补回——harness 起点
+    about:blank，无起点导航后续步必 miss。过滤结果已含 open 时不重复补。
+    """
+    tmp = pathlib.Path(tempfile.mkdtemp())
+
+    async def fake_locate(client, tabs, tid, locs, timeout=10):
+        return dict(HIT)
+
+    async def fake_act(client, tabs, tid, a, on_dispatch=None):
+        if on_dispatch:
+            on_dispatch("trusted")
+        return {"dispatch": "trusted", "check": True}
+
+    _patch(monkeypatch, fake_locate, fake_act)
+
+    async def _run():
+        # 首步 open 被 step_from=3 滤掉 → 补回，执行的 steps[0] 是 open
+        h = FakeHarness(tmp)
+        flow = {"name": "t", "steps": [
+            {"n": 1, "desc": "打开", "act": "open", "value": "http://a/form"},
+            {"n": 2, "desc": "点2", "act": "click", "loc": ["css:#a"]},
+            {"n": 3, "desc": "点3", "act": "click", "loc": ["css:#b"]},
+            {"n": 4, "desc": "点4", "act": "click", "loc": ["css:#c"]},
+        ]}
+        r = await run_flow(h, flow, step_from=3)
+        assert r["ok"] is True
+        ns = [p["n"] for k, p in h.emitted if k == "drive_step"]
+        assert ns == [1, 3, 4], "补回的 open（n=1）打头，再接 n>=3 的步"
+        assert h.nav_url == "http://a/form"
+        h.close()
+
+        # 过滤结果已含 open（n=2 是中途导航）→ 不重复补
+        h2 = FakeHarness(tmp)
+        flow2 = {"name": "t", "steps": [
+            {"n": 1, "desc": "打开", "act": "open", "value": "http://a/"},
+            {"n": 2, "desc": "站内跳转", "act": "open", "value": "http://a/p2"},
+            {"n": 3, "desc": "点3", "act": "click", "loc": ["css:#b"]},
+            {"n": 4, "desc": "点4", "act": "click", "loc": ["css:#c"]},
+        ]}
+        r2 = await run_flow(h2, flow2, step_from=2)
+        assert r2["ok"] is True
+        ns2 = [p["n"] for k, p in h2.emitted if k == "drive_step"]
+        assert ns2 == [2, 3, 4], "已含 open 时不再补回更早的 n=1"
+        h2.close()
+
+    asyncio.run(_run())
+
+
+def test_run_flow_wait_none_skips_post_wait(monkeypatch):
+    """终审 Minor-2：wait:"none" 跳过后置等待——wait_stable 调用数只剩
+    locate 重试循环里那次前置（1 次）；缺省 settle 是前置+后置（2 次）。
+    """
+    tmp = pathlib.Path(tempfile.mkdtemp())
+
+    async def fake_locate(client, tabs, tid, locs, timeout=10):
+        return dict(HIT)
+
+    async def fake_act(client, tabs, tid, a, on_dispatch=None):
+        if on_dispatch:
+            on_dispatch("trusted")
+        return {"dispatch": "trusted", "check": True}
+
+    _patch(monkeypatch, fake_locate, fake_act)
+
+    async def _run():
+        def make_h(wait_val):
+            h = FakeHarness(tmp)
+            h.flow_doc = {"name": "t", "steps": [
+                {"n": 1, "desc": "点", "act": "click", "loc": ["css:#b"],
+                 **({"wait": wait_val} if wait_val is not None else {})}]}
+            calls = {"n": 0}
+            real = h.wait_stable
+
+            async def spy(timeout=None):
+                calls["n"] += 1
+                return await real(timeout)
+            h.wait_stable = spy
+            return h, calls
+
+        h_none, c_none = make_h("none")
+        r1 = await run_flow(h_none, h_none.flow_doc)
+        assert r1["ok"] is True
+        assert c_none["n"] == 1, "wait:none 只剩 locate 前置那次 wait_stable"
+        h_none.close()
+
+        h_settle, c_settle = make_h(None)     # 缺省 settle
+        r2 = await run_flow(h_settle, h_settle.flow_doc)
+        assert r2["ok"] is True
+        assert c_settle["n"] == 2, "缺省 settle = 前置 + 后置两次"
+        h_settle.close()
 
     asyncio.run(_run())
 
@@ -768,6 +941,13 @@ def test_cli_drive_fixture_e2e_and_exit4(local_site, chrome_path, tmp_path):
     ru = subprocess.run(_drive_cmd(undef, tmp_path / "ou"), capture_output=True,
                         text=True, timeout=120, cwd=_PROJ_ROOT)
     assert ru.returncode == 4, f"exit={ru.returncode} stderr={ru.stderr}"
+    # 终审 Minor-4：run 期 FlowError 的 session_end stop_reason=invalid
+    # （与步失败的 drive_fail 区分——格式问题不是驱动失败）
+    su = sorted((tmp_path / "ou").glob("*/session.jsonl"))[-1]
+    ends = [json.loads(l) for l in su.read_text().splitlines()
+            if json.loads(l)["kind"] == "session_end"]
+    assert ends and ends[-1]["stop_reason"] == "invalid"
+    assert ends[-1]["abnormal"] is True
 
 
 def test_cli_drive_new_tab_on_fixture(local_site, chrome_path, tmp_path):
@@ -835,3 +1015,62 @@ def test_cli_drive_no_record_failure_path_cleans_tmp(local_site, chrome_path,
     after = set(pathlib.Path(tempfile.gettempdir()).glob("br-drive-*"))
     leaked = {d for d in after - before if d.is_dir() and any(d.iterdir())}
     assert not leaked, f"失败路径临时目录泄漏: {leaked}"
+
+
+# ---- 终审 I-4：run 期浏览器侧异常 → exit 3（不冒裸 traceback）----
+
+
+def test_cli_drive_crash_maps_to_exit3(tmp_path, monkeypatch):
+    """run 期 CDP 异常（浏览器被关/崩溃 → run_flow 抛 RuntimeError）→
+    CLI 收尾后 exit 3 + stderr「运行中断」，不冒裸 traceback（exit 1）。
+
+    cli 结构取可行者：in-process CliRunner + monkeypatch flow.run_flow /
+    harness.SessionHarness（drive_cmd 内调用点 import，替身生效），
+    不拉真浏览器。
+    """
+    from click.testing import CliRunner
+    import browser_recorder.cli as cli_mod
+    import browser_recorder.flow as flow_mod
+    import browser_recorder.harness as harness_mod
+
+    flow = tmp_path / "crash.json"
+    flow.write_text(json.dumps({"name": "t", "steps": [
+        {"n": 1, "desc": "点", "act": "click", "loc": ["css:#b"]}]}))
+
+    class _W:
+        @staticmethod
+        def emit(kind, payload):
+            return 0
+
+    class FakeHarness:
+        def __init__(self, *a, **k):
+            self.body_tasks = set()
+            self.tabs = {}
+            self.writer = _W()
+
+        async def __aenter__(self):
+            return self
+
+        async def __aexit__(self, *a):
+            return False
+
+        async def flush_inputs(self):
+            pass
+
+        def copy_prompt(self):
+            pass
+
+    async def boom(*a, **k):
+        raise RuntimeError("browser went away (connection reset)")
+
+    monkeypatch.setattr(cli_mod, "DEFAULT_CHROME", flow)   # exists() → True
+    monkeypatch.setattr(harness_mod, "SessionHarness", FakeHarness)
+    monkeypatch.setattr(flow_mod, "run_flow", boom)
+
+    runner = CliRunner()
+    r = runner.invoke(cli_mod.drive_cmd,
+                      [str(flow), "--out", str(tmp_path / "o")])
+    assert r.exit_code == 3, f"exit={r.exit_code} output={r.output}"
+    assert "运行中断" in r.output and "browser went away" in r.output
+    # 唯一异常是受控 SystemExit(3)——不是未捕获的 RuntimeError 裸 traceback
+    assert type(r.exception) is SystemExit and r.exception.code == 3

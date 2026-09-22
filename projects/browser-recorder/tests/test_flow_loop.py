@@ -71,6 +71,15 @@ class FakeShell:
         self.writer.close()
 
 
+def _free_port() -> int:
+    import socket
+    s = socket.socket()
+    s.bind(("127.0.0.1", 0))
+    port = s.getsockname()[1]
+    s.close()
+    return port
+
+
 def _wait_devtools(port, tries=50, interval=0.2):
     for _ in range(tries):
         try:
@@ -84,7 +93,7 @@ def _wait_devtools(port, tries=50, interval=0.2):
 
 
 def test_run_flow_real_browser_fixture(local_site, chrome_path, tmp_path):
-    port = 8875
+    port = _free_port()       # 随机端口（M-1）：硬编码端口并发/残留进程会冲突
 
     async def _run():
         with tempfile.TemporaryDirectory() as td:

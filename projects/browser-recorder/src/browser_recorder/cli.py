@@ -98,7 +98,7 @@ def export(session_dir):
 @click.option("--var", "vars_", multiple=True, metavar="KEY=VALUE",
               help="注入 ${env.KEY} 变量（可多次；密码走环境变量，不落盘）")
 @click.option("--step-from", default=None, type=int, metavar="N",
-              help="从步号 N 开始执行（断点续跑；之前的步不执行）")
+              help="从步号 N 开始执行（断点续跑，自动补回起点导航；之前的步不执行）")
 @click.option("--dry-run", is_flag=True, default=False,
               help="只 locate 不 act（选择器体检）")
 @click.option("--no-sandbox", is_flag=True, default=False,
@@ -107,7 +107,8 @@ def drive_cmd(flow_file, out_root, profile, headless, no_record, vars_,
               step_from, dry_run, no_sandbox):
     """驱动浏览器执行动作链 flow.json（默认跑即录）。
 
-    退出码：0 成功 / 3 步失败（证据包已落盘）/ 4 flow 格式错误（含变量未定义）
+    退出码：0 成功 / 3 步失败（证据包已落盘）或运行中断（浏览器崩溃等）/
+    4 flow 格式错误（含变量未定义）
     """
     from .flow import FlowError, load_flow, run_flow
     from .harness import SessionHarness
@@ -145,10 +146,16 @@ def drive_cmd(flow_file, out_root, profile, headless, no_record, vars_,
                            profile=profile, mode="drive",
                            extra_chrome_args=["--no-sandbox"] if no_sandbox else None)
 
-        async def _closeout(ok: bool) -> None:
+        async def _closeout(ok: bool, stop_reason: str = "drive_done") -> None:
             """跑即录产物收尾（与 record 同构）：末步 after 截图等完 +
             flush_inputs + session_end + PROMPT.md——session 产物对
-            browser-manual 等下游与真人录制无差别。"""
+            browser-manual 等下游与真人录制无差别。
+
+            stop_reason 语义（与步失败的 "drive_fail" 区分）：
+            - drive_done：全部步跑完（ok=True）
+            - drive_fail：步失败/热键停止（run_flow 返回 exit 3）
+            - invalid：run 期 FlowError（flow 格式级错误，exit 4）
+            """
             if h.body_tasks:  # 在途 _after_shot / response_body 抓取
                 await asyncio.wait(set(h.body_tasks),
                                    timeout=h.settle_timeout + 2)
@@ -162,7 +169,7 @@ def drive_cmd(flow_file, out_root, profile, headless, no_record, vars_,
             try:
                 h.writer.emit("session_end", {
                     "abnormal": not ok,
-                    "stop_reason": "drive_done" if ok else "drive_fail",
+                    "stop_reason": "drive_done" if ok else stop_reason,
                     "tabs": [t.tid for t in h.tabs.values()]})
             except (OSError, ValueError):
                 pass
@@ -176,14 +183,23 @@ def drive_cmd(flow_file, out_root, profile, headless, no_record, vars_,
         try:
             async with h:
                 # run 期 resolve_vars 的 FlowError（变量未定义）也是格式级错误
-                # → exit 4（不是 ClickException 的 exit 1）
+                # → exit 4（不是 ClickException 的 exit 1）；session_end 记
+                # invalid（与步失败的 drive_fail 区分——格式问题不是驱动失败）
                 try:
                     result = await run_flow(h, flow, env=env, dry_run=dry_run,
                                             step_from=step_from)
                 except FlowError as e:
                     click.echo(f"flow 格式错误: {e}", err=True)
-                    await _closeout(ok=False)
+                    await _closeout(ok=False, stop_reason="invalid")
                     return {"exit_code": 4}
+                except Exception as e:
+                    # run 期浏览器侧异常（浏览器被关/崩溃、CDP 连接断）：
+                    # 不冒泡裸 traceback——收尾后转 exit 3（运行中断，
+                    # 与步失败同码段：都属"这一轮没跑成"）
+                    click.echo(f"运行中断: {e}", err=True)
+                    await _closeout(ok=False, stop_reason="interrupt")
+                    return {"ok": False, "steps_done": 0, "failed_step": None,
+                            "exit_code": 3}
                 await _closeout(ok=result["exit_code"] == 0)
                 return result
         finally:
@@ -191,8 +207,10 @@ def drive_cmd(flow_file, out_root, profile, headless, no_record, vars_,
                 shutil.rmtree(out_dir, ignore_errors=True)
 
     result = asyncio.run(_run())
-    if result["exit_code"] == 3:
+    if result["exit_code"] == 3 and result.get("failed_step") is not None:
         click.echo(f"失败于步骤 {result['failed_step']}（证据包已落盘）")
+    elif result["exit_code"] == 3:
+        pass   # 运行中断（崩溃/连接断）：原因已在 _run 内 echo 到 stderr
     elif result["exit_code"] == 0 and not no_record:
         click.echo(f"完成：{result['steps_done']} 步")
     raise SystemExit(result["exit_code"])
@@ -218,8 +236,11 @@ def replay_cmd(session_dir, out, name, keep_fragile):
     sj = sd / "session.jsonl"
     if not sj.exists():
         raise click.ClickException(f"未找到 {sj}")
-    lines = [json.loads(l) for l in sj.read_text(encoding="utf-8").splitlines()
-             if l.strip()]
+    try:
+        lines = [json.loads(l) for l in sj.read_text(encoding="utf-8").splitlines()
+                 if l.strip()]
+    except ValueError as e:   # json.JSONDecodeError ⊂ ValueError：坏行不冒裸 traceback
+        raise click.ClickException(f"session.jsonl 解析失败: {e}")
     name = name or sd.name
     flow, removed = session_to_flow(lines, name=name, keep_fragile=keep_fragile)
     out_path = pathlib.Path(out) if out else pathlib.Path("flows") / f"{name}.json"

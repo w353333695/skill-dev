@@ -61,13 +61,13 @@ browser-recorder replay sessions/20260922-xxxx --name my-flow      # 录制 sess
 ```
 
 - **跑即录**：drive 默认同步录制 session——每步除机器视角的 `drive_step` 事件外，同时落统一 `action` 事件（带 `source:"drive"`）+ 双截图，产物与真人录制同构，可直接生成手册/审计。`--no-record` 不留产物（临时目录用完即删，行为不变）
-- **flow.json**：`steps` 数组，每步 `{n, desc, act, loc(候选数组), value?, clear?, tabs?, wait?, on_new_tab?, expect?, on_expect_fail?, retries?, locate_timeout?}`；act ∈ open/click/input/submit/hover。密码写 `${env.XXX}` 引用环境变量（`--var KEY=VALUE` 或环境变量注入），credential 步的值在 session/证据包中恒 `***` 不落盘
+- **flow.json**：`steps` 数组，每步 `{n, desc, act, loc(候选数组), value?, clear?, tabs?, wait?, on_new_tab?, expect?, on_expect_fail?, retries?, locate_timeout?}`；act ∈ open/click/input/submit/hover，wait ∈ settle(缺省)/none(跳过后置等待)/nav。密码写 `${env.XXX}` 引用环境变量（`--var KEY=VALUE` 或环境变量注入），credential 步的值在 session/证据包中恒 `***` 不落盘
 - **候选链 loc**：按序试到首个命中——`css:#id`（穿透 open shadow root）/ `xpath://...` / `text:词`（`^` 前缀=词首锚定）/ `dom:div#app>span.btn`（录制 dom_path 直译）
 - **失败协议**：定位 miss → 重试（默认 3，步级 `retries` 可覆盖）→ 证据包 `<session>/evidence/fail-step<N>/`（截图+DOM dump+context.json）→ 退出码 3。失败原因：locate-miss / check-fail / expect-fail / hotkey-stop
 - **退出码**：0 成功 / 3 步失败（证据包已落盘）/ 4 flow 格式错误（含 `${env.XXX}` 变量未定义）
 - **replay 转换器**：录制 session → flow.json，按稳定性推导候选链（id > 测试锚点 data-* > name/aria > 文本 > 语义 class；dom_path 兜底），并自动合成 open 起点、推导 `tabs`/`on_new_tab`/`wait:nav`；仅 dom_path 兜底的步默认剔除并出报告 `flows/<name>.report.md`（`--keep-fragile` 保留，标 `fragile:true`）。password 值转 `${env.BR_PW_<n>}` 占位（`needs_credential:true`），产物必须过 drive 同一校验
 
-**drive 旗子**：`-p/--profile`（默认一次性，不留登录态）、`--headless`、`-o/--out`、`--var KEY=VALUE`（可多次）、`--step-from N`（从步号 N 续跑）、`--dry-run`、`--no-record`、`--no-sandbox`（容器环境必需）。
+**drive 旗子**：`-p/--profile`（默认一次性，不留登录态）、`--headless`、`-o/--out`、`--var KEY=VALUE`（可多次）、`--step-from N`（从步号 N 续跑，自动补回起点导航）、`--dry-run`、`--no-record`、`--no-sandbox`（容器环境必需）。
 
 ## 生成操作指引文档
 

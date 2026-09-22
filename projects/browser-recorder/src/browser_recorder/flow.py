@@ -21,6 +21,14 @@ T9 多 tab：cur_tid 不再恒 "t0"——
 
 T9-fix I-1：drive 模态热键停止——步循环开头（含 locate 重试内层开头）检查
 harness.stop_event，已置位 → _fail("hotkey-stop") → exit 3（证据包照落）。
+
+终审修复（final review）：
+- I-1 expect 网络通道时间窗：response_contains 只认本步动作 arm 时刻之后的
+  响应（resp_log 是跨全流程的 200 条滑动窗口，全窗口扫描会把几十步前的
+  同 URL 旧响应误判为命中）；
+- I-2 --step-from 续跑：过滤后不含任何 open 时自动补回 n < step_from 中
+  最小的 open 步（harness 起点 about:blank，无起点导航后续步必 miss）；
+- wait:"none"：跳过后置等待（load_flow 校验 wait 枚举 settle/none/nav）。
 """
 from __future__ import annotations
 
@@ -28,12 +36,14 @@ import asyncio
 import json
 import os
 import re
+import time
 
 from .driver import act, locate, save_evidence, value_of_js
 
 DEFAULT_RETRIES = 3
 _VAR_RE = re.compile(r"\$\{env\.([A-Za-z_][A-Za-z0-9_]*)\}")
 _ACTS = ("open", "click", "input", "submit", "hover")
+_WAITS = ("settle", "none", "nav")
 
 # credential 信号词（不区分大小写）——模板变量名任一命中即整值脱敏。
 # BR_PW 前缀是其子集（含 "PW"），不再单列。
@@ -62,6 +72,9 @@ def load_flow(path) -> dict:
             raise FlowError(f"step {s['n']} ({s['desc']}) 非 open 动作缺 loc")
         if s["act"] == "input" and "value" not in s:
             raise FlowError(f"step {s['n']} ({s['desc']}) input 缺 value")
+        if "wait" in s and s["wait"] not in _WAITS:
+            raise FlowError(f"step {s['n']} ({s['desc']}) 未知 wait: {s['wait']!r}"
+                            f"（可选：{'/'.join(_WAITS)}）")
     return flow
 
 
@@ -146,6 +159,15 @@ async def run_flow(harness, flow: dict, env=None, dry_run=False,
     steps = flow["steps"]
     if step_from is not None:
         steps = [s for s in steps if s["n"] >= step_from]
+        if not any(s["act"] == "open" for s in steps):
+            # 续跑补起点导航（I-2）：harness 起点恒 about:blank，过滤把
+            # n=1 的 open 滤掉后后续步的 locate 全落在空白页上必 miss。
+            # 只补「n < step_from 中最小的 open」——多 open 流程（中途
+            # 站内跳转）续跑时回到最近一次起点即可，早前的 open 无意义。
+            pre_opens = [s for s in flow["steps"]
+                         if s["act"] == "open" and s["n"] < step_from]
+            if pre_opens:
+                steps = [min(pre_opens, key=lambda s: s["n"])] + steps
     steps_done = 0
     for s in steps:
         # 0. 热键停止（I-1）：drive 模态的 control_stop 热键置位 stop_event
@@ -191,6 +213,12 @@ async def run_flow(harness, flow: dict, env=None, dry_run=False,
             _emit_step(harness, s, "dry", hit, target_id=step_tid)
             steps_done += 1
             continue
+        # 3b. expect 网络通道布防时刻（I-1）：本步动作派发前记录——
+        #     response_contains 只认 arm_t 之后的响应。resp_log 是跨全流程
+        #     的 200 条滑动窗口，不过滤会把几十步前的同 URL 旧响应误判命中。
+        #     重派（on_expect_fail=retry）时重新布防：断言针对的是重派后
+        #     的响应，第一次派发产生的旧响应不再算数。
+        arm_t = time.monotonic_ns() // 1_000_000
         # 4. 派发动作（含降级回调）。on_new_tab=switch：动作后对比 tabs 快照，
         #    出现新 tid（autoAttach 已挂域）→ 后续步默认切到新 tab。
         #    attach 是异步的（target 弹出 → attachedToTarget → 挂域），短窗
@@ -235,18 +263,23 @@ async def run_flow(harness, flow: dict, env=None, dry_run=False,
         if not ok:
             return await _fail(harness, s, step_tid, "check-fail", dry_run,
                                steps_done, value, cred=cred, dispatch=dispatch)
-        # 6. 后置等待
-        if s.get("wait", "settle") == "nav":
+        # 6. 后置等待（wait:none 跳过——XHR 密集流程里每步 settle 累积
+        #    数秒空转；后续步自带 locate 重试预算，不依赖本步等稳）
+        wait_mode = s.get("wait", "settle")
+        if wait_mode == "nav":
             await _wait_nav(harness, step_tid, timeout=15)
-        else:
+        elif wait_mode != "none":
             await harness.wait_stable()
-        # 7. expect 断言
+        # 7. expect 断言（arm_t 时间窗过滤在 _check_expect 内）
         expect_result = None
         if s.get("expect"):
-            expect_result = await _check_expect(harness, s["expect"], step_tid)
+            expect_result = await _check_expect(harness, s["expect"], step_tid,
+                                                arm_t=arm_t)
             if not expect_result["ok"]:
                 if s.get("on_expect_fail") == "retry":
-                    # 简化重试：重派动作一次（v1 不整步循环）
+                    # 简化重试：重派动作一次（v1 不整步循环）——重新布防
+                    # 时间窗，断言针对重派后的响应
+                    arm_t = time.monotonic_ns() // 1_000_000
                     r = await act(harness.client, harness.tabs, step_tid,
                                   {"act": s["act"], "loc": s["loc"],
                                    "rect": hit["rect"], "value": value,
@@ -254,7 +287,7 @@ async def run_flow(harness, flow: dict, env=None, dry_run=False,
                                   on_dispatch=dispatches.append)
                     await harness.wait_stable()
                     expect_result = await _check_expect(harness, s["expect"],
-                                                        step_tid)
+                                                        step_tid, arm_t=arm_t)
                 if not expect_result["ok"]:
                     return await _fail(harness, s, step_tid, "expect-fail",
                                        dry_run, steps_done, value, cred=cred,
@@ -357,7 +390,7 @@ async def _wait_nav(harness, tid, timeout=15):
         pass  # CDPClient 无 off()——订阅泄漏一次可接受（v1），M6+ 考虑加 off
 
 
-async def _check_expect(harness, expect: dict, tid) -> dict:
+async def _check_expect(harness, expect: dict, tid, arm_t: int | None = None) -> dict:
     if "dom_contains" in expect:
         arg = expect["dom_contains"]
         js = f"document.body.innerText.includes({arg!r})"
@@ -371,12 +404,15 @@ async def _check_expect(harness, expect: dict, tid) -> dict:
         return {"ok": bool(got), "channel": "dom"}
     if "response_contains" in expect:
         arg = expect["response_contains"]
-        # 网络通道：harness.resp_log（Network.responseReceived 滑动窗口）。
-        # 未指定 status 时不比对状态码；时间窗不设——窗口数据源本身只有最近
-        # 200 条，drive 步间隔内混入旧响应的风险由「先 settle 后检查」压住。
+        # 网络通道：harness.resp_log（Network.responseReceived 滑动窗口，跨
+        # 全流程最近 200 条）。时间窗按 arm_t 过滤（I-1）：只认本步动作
+        # 派发时刻之后的响应——否则几十步前的同 URL 旧响应会假阳性命中。
+        # 未指定 status 时不比对状态码。arm_t 缺省（None）不设窗——直测
+        # _check_expect 的旧用法兼容；run_flow 主路径恒传。
         hits = [h for h in getattr(harness, "resp_log", [])
                 if arg.get("url", "") in h.get("url", "")
                 and (arg.get("status") is None
-                     or h.get("status") == arg.get("status"))]
+                     or h.get("status") == arg.get("status"))
+                and (arm_t is None or h.get("t", 0) >= arm_t)]
         return {"ok": bool(hits), "channel": "net"}
     return {"ok": False, "channel": "?", "error": "unknown expect"}
