@@ -214,15 +214,31 @@ def search_not_recover(range_sec, min_level, older_than_sec):
 _USER_CACHE = {}
 
 
+_USER_FIELDS_CACHE = {}
+
+
 def lookup_user_instance_id(name):
-    if not name or name in _USER_CACHE:
-        return _USER_CACHE.get(name, '')
+    return lookup_user_fields(name).get('instanceId', '')
+
+
+def lookup_user_fields(name):
+    """USER 按 name 查 {instanceId, name, nickname, user_tel}（带缓存）——handler 控件
+    显示字段 frontKey=[nickname, user_tel]，值里要有这俩字段前端才能显示。"""
+    if not name or name in _USER_FIELDS_CACHE:
+        return _USER_FIELDS_CACHE.get(name, {})
     status, resp = http_json('POST', CMDB_PORT, '/v3/object/USER/instance/_search', {
-        'fields': ['instanceId', 'name'], 'page': 1, 'page_size': 5,
+        'fields': ['instanceId', 'name', 'nickname', 'user_tel'], 'page': 1, 'page_size': 5,
         'query': {'name': name}})
     lst = (resp.get('data') or {}).get('list') or [] if isinstance(resp, dict) else []
-    _USER_CACHE[name] = lst[0].get('instanceId') if lst else ''
-    return _USER_CACHE[name]
+    if lst:
+        u = lst[0]
+        _USER_FIELDS_CACHE[name] = {'instanceId': u.get('instanceId') or '',
+                                    'name': u.get('name') or name,
+                                    'nickname': u.get('nickname') or u.get('name') or name,
+                                    'user_tel': u.get('user_tel') or ''}
+    else:
+        _USER_FIELDS_CACHE[name] = {'instanceId': '', 'name': name, 'nickname': name, 'user_tel': ''}
+    return _USER_FIELDS_CACHE[name]
 
 
 def lookup_duty_members(group_name, date_str):
@@ -279,7 +295,8 @@ def resolve_handlers(ev, duty_group, duty_cache):
     if not names:
         names = ['easyops']
         htype = 'fallback'
-    handlers = [{'instanceId': lookup_user_instance_id(n), 'name': n} for n in names]
+    # handler 值带 nickname/user_tel——表单处理人控件显示字段（frontKey=[nickname, user_tel]）
+    handlers = [lookup_user_fields(n) for n in names]
     return HANDLER_TYPE.get(htype, HANDLER_TYPE['fallback']), handlers
 
 

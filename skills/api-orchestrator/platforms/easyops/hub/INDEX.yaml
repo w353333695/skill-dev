@@ -431,6 +431,7 @@ items:
       - {date: "2026-09-20", change: "v1.6 补 outputDefs formData 声明——PutStr 输出必须在工具上声明才回传"}
       - {date: "2026-09-20", change: "v1.7 无路径参数容错：注入变量 globals().get 防 NameError，空批次/无告警路径回吐原 formData"}
       - {date: "2026-09-20", change: "v1.9 handler 补真实 instanceId（formValue 只按 instanceId 反查 USER，空串=下节点处理人空）"}
+      - {date: "2026-09-22", change: "v2.0/v2.1: 处理人三级链+填 handlerType；duty_group 参数默认告警值班组；handler 值带 nickname/user_tel"}
     scenario: 表单 afterDataLoad 挂载脚本——按批次控件值查 monitor_event/last 填表
     notes: "toolId 259aeb41350ef50744b29cd5b19887e9；sandboxRun=true（ITSM 脚本工具必须沙箱）"
     added: "2026-09-18"
@@ -469,6 +470,7 @@ items:
     files: [告警转事件工单.tool.tar.gz]
     history:
       - {date: "2026-09-20", change: "v1.1 初版（一步发起：构建表单→StartProcessInstanceV2，事件处理服务；.26 实测 3 单表单带值+ahuatan 待办）"}
+      - {date: "2026-09-22", change: "v2/v2.1: 处理人三级链（响应人→值班人→兜底人 easyops）+填 handlerType；duty_group 默认告警值班组；handler 值带 nickname/user_tel（表单显示字段）"}
     scenario: 检索未恢复告警→构建识别和发起表单（等级/优先级/处理人=接收人/批次/关联告警行）→直接发起工单（事件处理服务）——区别于告警转故障工单（_batch+回填两步）
     notes: "toolId 453cf774e44bdf041a0a0a2feeb8d31f；sandboxRun=true；入参同告警转故障工单（range/auto_create/alert_level/alert_time/duty_group）；防重靠 hasOrder=false+orders 双保险"
     added: "2026-09-20"

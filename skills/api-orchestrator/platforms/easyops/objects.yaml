@@ -441,6 +441,10 @@ objects:
         USER_SELECTOR → [{instanceId,name}]（CMDB 实例引用）
         USER_GROUP_SELECTOR → [{_object_id:"USER_GROUP",instanceId,name}]
         DEPARTMENT_SELECTOR → [{departmentId,name,namePath}]
+        CMDBINSTANCESELECT 显示字段=options.frontKey（[]string，如 ["nickname","user_tel"]）——
+        🔴控件值里要带这些字段，前端才显示得出（脚本回填只给 {instanceId,name} 时 nickname 列空白）；
+        改显示字段须同步改脚本回填的值（2026-09-22 .26：handler frontKey 由 [name] 改 [nickname,user_tel]，
+        两脚本 lookup_user_fields 同步补字段）。
         CMDBINSTANCESELECT/CMDBCASCADER → [{instanceId,name}]——🔴instanceId 必须真实（查 USER/目标模型），
         空串=运行时 formValue 处理人解析为空（2026-09-20 .26 实测：onload 脚本回填 {instanceId:"",name} 导致
         告警处理节点无处理人；前端手动提交是完整实例序列化，脚本回填最小集 {真instanceId,name} 即生效）
