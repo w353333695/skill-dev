@@ -1,7 +1,8 @@
-"""CLI 入口：record / export / drive。"""
+"""CLI 入口：record / export / drive / replay。"""
 from __future__ import annotations
 
 import asyncio
+import json
 import os
 import pathlib
 import shutil
@@ -195,6 +196,52 @@ def drive_cmd(flow_file, out_root, profile, headless, no_record, vars_,
     elif result["exit_code"] == 0 and not no_record:
         click.echo(f"完成：{result['steps_done']} 步")
     raise SystemExit(result["exit_code"])
+
+
+@main.command("replay")
+@click.argument("session_dir", type=click.Path(exists=True, file_okay=False))
+@click.option("--out", "-o", default=None,
+              help="输出 flow.json 路径（默认 flows/<name>.json）")
+@click.option("--name", default=None, help="flow 名（默认 session 目录名）")
+@click.option("--keep-fragile", is_flag=True, default=False,
+              help="保留仅 dom_path 兜底的步（steps 里附 fragile:true，报告仍列出）")
+def replay_cmd(session_dir, out, name, keep_fragile):
+    """session → flow.json 转换器（稳定性候选链推导；默认剔除仅 dom_path
+    兜底的步并出报告）。产物必须过 load_flow 校验。
+
+    退出码：0 成功 / 1 转换产物未过校验（含 session.jsonl 缺失）
+    """
+    from .flow import FlowError, load_flow
+    from .replay import session_to_flow
+
+    sd = pathlib.Path(session_dir)
+    sj = sd / "session.jsonl"
+    if not sj.exists():
+        raise click.ClickException(f"未找到 {sj}")
+    lines = [json.loads(l) for l in sj.read_text(encoding="utf-8").splitlines()
+             if l.strip()]
+    name = name or sd.name
+    flow, removed = session_to_flow(lines, name=name, keep_fragile=keep_fragile)
+    out_path = pathlib.Path(out) if out else pathlib.Path("flows") / f"{name}.json"
+    out_path.parent.mkdir(parents=True, exist_ok=True)
+    out_path.write_text(json.dumps(flow, ensure_ascii=False, indent=2),
+                        encoding="utf-8")
+    report = out_path.with_suffix(".report.md")
+    rep = [f"# replay 报告 · {name}", "",
+           f"- 转换步数：{len(flow['steps'])}",
+           f"- 剔除步数：{len(removed)}"
+           + ("（--keep-fragile：已保留在 steps，标注 fragile:true）"
+              if keep_fragile else ""),
+           ""]
+    for r in removed:
+        rep.append(f"- 步 {r['n']}：{r['reason']}（seq={r['action'].get('seq')}）")
+    report.write_text("\n".join(rep) + "\n", encoding="utf-8")
+    click.echo(f"flow: {out_path}")
+    click.echo(f"报告: {report}（剔除 {len(removed)} 步）")
+    try:
+        load_flow(out_path)   # replay 产物必须能过 drive 的同一把尺子
+    except FlowError as e:
+        raise click.ClickException(f"转换产物未过 flow 校验: {e}")
 
 
 if __name__ == "__main__":
