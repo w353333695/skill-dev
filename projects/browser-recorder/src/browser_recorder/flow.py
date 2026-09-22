@@ -1,8 +1,8 @@
 """flow.json 执行引擎：候选链定位 → 信任派发+降级 → 等待 → 断言 → 落盘。
 
-状态机每步：resolve_vars → (open=导航) → locate 重试预算 → act → 后置等待
-→ expect 断言 → drive_step 落盘（跑即录：同时经 harness.emit_action 落统一
-action 事件）。失败 → save_evidence 证据包 + drive_fail → 终止。
+状态机每步：resolve_vars → tab 选择 → (open=导航) → locate 重试预算 → act
+→ 后置等待 → expect 断言 → drive_step 落盘（跑即录：同时经 harness.emit_action
+落统一 action 事件）。失败 → save_evidence 证据包 + drive_fail → 终止。
 
 T7 审查遗留三项的处理（driver 不动，flow 层接住）：
 1. act 内部复检/降级 JS 用裸 querySelector 不穿透 shadow——input 类动作
@@ -12,6 +12,12 @@ T7 审查遗留三项的处理（driver 不动，flow 层接住）：
    expect 结果，dispatch 仅作观测落盘；
 3. save_evidence 原样落盘 step dict——credential 步的 value 先替换为 ***
    再传入（_is_credential 在 resolve 前对原始模板判定，强判据）。
+
+T9 多 tab：cur_tid 不再恒 "t0"——
+- step.tabs 显式指定优先："main"=t0 / "new"=最新出现的 tab / 形如 "t1" 直给；
+- step.on_new_tab="switch"：动作后 harness.tabs 出现动作前没有的新 tid
+  （harness.autoAttach 已挂域）→ 后续步默认切到该 tid；
+- 无 on_new_tab 声明时不动（旧 flow 行为与 T8 完全一致）。
 """
 from __future__ import annotations
 
@@ -87,6 +93,42 @@ def _is_credential(step: dict) -> bool:
     return False
 
 
+def _tab_tids(harness) -> list[str]:
+    """harness.tabs 当前全部 tid（{sid: _TabSession}，_TabSession 带 .tid）。"""
+    return [t.tid for t in harness.tabs.values()]
+
+
+def _newest_tid(harness, known: set[str]) -> str | None:
+    """known（动作前快照）之外最新出现的 tid；无新 tab 返回 None。
+
+    tid 形如 "t0"/"t1"…（_attach_tab 按挂载序编号），数值最大即最新。
+    """
+    fresh = [t for t in _tab_tids(harness) if t not in known]
+    if not fresh:
+        return None
+    def _num(t):
+        try:
+            return int(t[1:])
+        except ValueError:
+            return -1
+    return max(fresh, key=_num)
+
+
+def _resolve_tab(harness, spec, cur_tid) -> str:
+    """step.tabs → 实际 tid。"main"=t0；"new"=当前最新 tab；"t1" 直给。
+
+    "new" 找不到比 cur 更新的 tab 时（尚未弹出/已关闭）退 cur——元素
+    「预期在最新 tab」但新 tab 未及挂载，locate 重试预算会兜住时序。
+    """
+    if not spec or spec == "main":
+        return "t0" if any(t == "t0" for t in _tab_tids(harness)) else cur_tid
+    if spec == "new":
+        known = {cur_tid, "t0"}
+        newest = _newest_tid(harness, known)
+        return newest or cur_tid
+    return spec  # 显式 tid（"t1"…）——不存在时后续 locate/send 自然失败
+
+
 async def run_flow(harness, flow: dict, env=None, dry_run=False,
                    step_from=None) -> dict:
     env = dict(os.environ, **(env or {}))
@@ -96,14 +138,20 @@ async def run_flow(harness, flow: dict, env=None, dry_run=False,
         steps = [s for s in steps if s["n"] >= step_from]
     steps_done = 0
     for s in steps:
+        # 0. tab 选择：step.tabs 显式指定优先（main/new/tid）。
+        #    step_tid 钉住本步执行 tab——中途 on_new_tab 切换只改 cur_tid
+        #    影响后续步，本步 action/drive_step/证据包的 target_id 不漂移
+        if s.get("tabs"):
+            cur_tid = _resolve_tab(harness, s["tabs"], cur_tid)
+        step_tid = cur_tid
         # 1. 脱敏判定（resolve 前——模板变量名是唯一稳定信号）+ 变量解析
         cred = _is_credential(s)
         value = resolve_vars(s["value"], env) if "value" in s else None
         # 2. open 动作：导航
         if s["act"] == "open":
-            await harness.navigate(value, cur_tid)
+            await harness.navigate(value, step_tid)
             await harness.wait_stable()
-            _emit_step(harness, s, "nav", None, target_id=cur_tid)
+            _emit_step(harness, s, "nav", None, target_id=step_tid)
             steps_done += 1
             continue
         # 3. 前置等待 + locate 重试预算
@@ -111,24 +159,36 @@ async def run_flow(harness, flow: dict, env=None, dry_run=False,
         hit = None
         for attempt in range(retries + 1):
             await harness.wait_stable()
-            hit = await locate(harness.client, harness.tabs, cur_tid, s["loc"],
+            hit = await locate(harness.client, harness.tabs, step_tid, s["loc"],
                                timeout=s.get("locate_timeout", 10))
             if hit:
                 break
             await asyncio.sleep(0.5)
         if hit is None:
-            return await _fail(harness, s, cur_tid, "locate-miss", dry_run,
+            return await _fail(harness, s, step_tid, "locate-miss", dry_run,
                                steps_done, value, cred=cred)
         if dry_run:
-            _emit_step(harness, s, "dry", hit, target_id=cur_tid)
+            _emit_step(harness, s, "dry", hit, target_id=step_tid)
             steps_done += 1
             continue
-        # 4. 派发动作（含降级回调）
+        # 4. 派发动作（含降级回调）。on_new_tab=switch：动作后对比 tabs 快照，
+        #    出现新 tid（autoAttach 已挂域）→ 后续步默认切到新 tab。
+        #    attach 是异步的（target 弹出 → attachedToTarget → 挂域），短窗
+        #    轮询兜住时序（真机实测 attach 通常 <1s，5s 上限）
+        tabs_before = set(_tab_tids(harness))
         dispatches = []
-        r = await act(harness.client, harness.tabs, cur_tid,
+        r = await act(harness.client, harness.tabs, step_tid,
                       {"act": s["act"], "loc": s["loc"], "rect": hit["rect"],
                        "value": value, "clear": s.get("clear", True)},
                       on_dispatch=dispatches.append)
+        if s.get("on_new_tab") == "switch":
+            deadline = asyncio.get_running_loop().time() + 5.0
+            newest = _newest_tid(harness, tabs_before)
+            while newest is None and asyncio.get_running_loop().time() < deadline:
+                await asyncio.sleep(0.2)
+                newest = _newest_tid(harness, tabs_before)
+            if newest and newest != step_tid:
+                cur_tid = newest
         # 5. 落统一 action（跑即录）+ 截图；credential 步值恒 ***（强判据，
         #    resolve 前对原始模板判定，emit_action 侧不再自判）
         await harness.emit_action({
@@ -138,7 +198,7 @@ async def run_flow(harness, flow: dict, env=None, dry_run=False,
             "html_type": s.get("html_type"),
             "rect": hit["rect"], "viewport": s.get("viewport"),
             "descriptor": hit,
-            "target_id": cur_tid,
+            "target_id": step_tid,
         })
         # 5b. 生效判定（T7-2：只认 check / expect，不认 dispatch）。
         #     input + check=False（act 内复检/降级 JS 裸 querySelector 打不进
@@ -148,40 +208,40 @@ async def run_flow(harness, flow: dict, env=None, dry_run=False,
         dispatch = dispatches[-1] if dispatches else "?"
         if not ok and s["act"] == "input":
             got = await _deep_recheck_value(harness.client, harness.tabs,
-                                            cur_tid, s["loc"])
+                                            step_tid, s["loc"])
             if got is not None and got == (value or ""):
                 ok = True
                 dispatch = f"{dispatch}+recheck" if dispatch != "?" else "recheck"
         if not ok:
-            return await _fail(harness, s, cur_tid, "check-fail", dry_run,
+            return await _fail(harness, s, step_tid, "check-fail", dry_run,
                                steps_done, value, cred=cred, dispatch=dispatch)
         # 6. 后置等待
         if s.get("wait", "settle") == "nav":
-            await _wait_nav(harness, cur_tid, timeout=15)
+            await _wait_nav(harness, step_tid, timeout=15)
         else:
             await harness.wait_stable()
         # 7. expect 断言
         expect_result = None
         if s.get("expect"):
-            expect_result = await _check_expect(harness, s["expect"], cur_tid)
+            expect_result = await _check_expect(harness, s["expect"], step_tid)
             if not expect_result["ok"]:
                 if s.get("on_expect_fail") == "retry":
                     # 简化重试：重派动作一次（v1 不整步循环）
-                    r = await act(harness.client, harness.tabs, cur_tid,
+                    r = await act(harness.client, harness.tabs, step_tid,
                                   {"act": s["act"], "loc": s["loc"],
                                    "rect": hit["rect"], "value": value,
                                    "clear": s.get("clear", True)},
                                   on_dispatch=dispatches.append)
                     await harness.wait_stable()
                     expect_result = await _check_expect(harness, s["expect"],
-                                                        cur_tid)
+                                                        step_tid)
                 if not expect_result["ok"]:
-                    return await _fail(harness, s, cur_tid, "expect-fail",
+                    return await _fail(harness, s, step_tid, "expect-fail",
                                        dry_run, steps_done, value, cred=cred,
                                        extra={"expect": expect_result})
         # 8. drive_step 落盘
         _emit_step(harness, s, dispatch, hit, expect=expect_result,
-                   retry_used=attempt, target_id=cur_tid)
+                   retry_used=attempt, target_id=step_tid)
         steps_done += 1
     return {"ok": True, "steps_done": steps_done, "failed_step": None,
             "exit_code": 0}

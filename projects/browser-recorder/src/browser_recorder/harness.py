@@ -92,7 +92,7 @@ class SessionHarness:
                  chrome_path: pathlib.Path, settle_timeout: float = 30.0,
                  port: int | None = None, headless: bool = False,
                  extra_chrome_args: list[str] | None = None,
-                 profile: str | None = None):
+                 profile: str | None = None, mode: str = "record"):
         self.out_dir = pathlib.Path(out_dir)
         self.start_url = start_url
         self.chrome_path = chrome_path
@@ -101,6 +101,11 @@ class SessionHarness:
         self.headless = headless
         self.extra_chrome_args = extra_chrome_args
         self.profile = profile
+        # 模态：record（人操作经注入上报）/ drive（机器动作走 emit_action，
+        # 注入上报的 action 抑制——信任派发产生的真实 DOM 事件会被注入
+        # 捕获，与 emit_action 双记同一物理动作）。dom_mutations 与
+        # control_stop 热键两种模态都要。
+        self.mode = mode
 
         self.writer = SessionWriter(self.out_dir)
         self.state = StableState()
@@ -508,7 +513,11 @@ class SessionHarness:
                 self.state.mark_mutation()
                 self.writer.emit("dom_mutations", {"count": payload.get("count", 0),
                                                    "target_id": payload["target_id"]})
-            elif t in ACTION_TYPES:
+            elif t in ACTION_TYPES and self.mode != "drive":
+                # drive 模态：机器动作已由 emit_action(source="drive") 落盘，
+                # 注入捕获的同一物理动作（信任派发产生的真实 DOM 事件）不再
+                # 入队——双记会导致 session 里同一动作两条 action（一条无
+                # source 一条 drive），文档端归组错乱。
                 self.action_q.put_nowait(payload)
         self.client.on("Runtime.bindingCalled", on_binding, session_id=sid)
 

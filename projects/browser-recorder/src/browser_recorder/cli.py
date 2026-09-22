@@ -1,4 +1,4 @@
-"""CLI 入口：record / export。"""
+"""CLI 入口：record / export / drive。"""
 from __future__ import annotations
 
 import asyncio
@@ -81,6 +81,102 @@ def export(session_dir):
             if f.is_file() and "chrome-profile" not in f.parts:
                 z.write(f, f.relative_to(src))
     click.echo(f"导出: {zip_path}")
+
+
+@main.command("drive")
+@click.argument("flow_file", type=click.Path(exists=True))
+@click.option("--out", "-o", "out_root", default="sessions",
+              help="session 输出根目录（默认 sessions/，自动建时间戳子目录）")
+@click.option("--profile", "-p", default=None, metavar="NAME",
+              help="持久登录态 profile 名（默认一次性，录完即弃）")
+@click.option("--headless/--no-headless", default=False,
+              help="无头模式（默认有头；CI/无 DISPLAY 用 --headless）")
+@click.option("--no-record", is_flag=True, default=False,
+              help="不保留 session 产物（落临时目录用完即弃，行为与录无别）")
+@click.option("--var", "vars_", multiple=True, metavar="KEY=VALUE",
+              help="注入 ${env.KEY} 变量（可多次；密码走环境变量，不落盘）")
+@click.option("--step-from", default=None, type=int, metavar="N",
+              help="从步号 N 开始执行（断点续跑；之前的步不执行）")
+@click.option("--dry-run", is_flag=True, default=False,
+              help="只 locate 不 act（选择器体检）")
+@click.option("--no-sandbox", is_flag=True, default=False,
+              help="透传 --no-sandbox 给 chrome（容器/AppArmor 环境必需）")
+def drive_cmd(flow_file, out_root, profile, headless, no_record, vars_,
+              step_from, dry_run, no_sandbox):
+    """驱动浏览器执行动作链 flow.json（默认跑即录）。
+
+    退出码：0 成功 / 3 步失败（证据包已落盘）/ 4 flow 格式错误（含变量未定义）
+    """
+    from .flow import FlowError, load_flow, run_flow
+    from .harness import SessionHarness
+
+    try:
+        flow = load_flow(flow_file)
+    except FlowError as e:
+        # 4 语义：格式/校验错误——不用 ClickException（那是 exit 1）
+        click.echo(f"flow 格式错误: {e}", err=True)
+        raise SystemExit(4)
+    except (OSError, ValueError) as e:   # 文件不可读 / JSON 解析失败
+        click.echo(f"flow 文件不可读: {e}", err=True)
+        raise SystemExit(4)
+
+    env = {}
+    for kv in vars_:
+        k, _, v = kv.partition("=")
+        env[k] = v
+
+    if no_record:
+        import tempfile
+        out_dir = pathlib.Path(tempfile.mkdtemp(prefix="br-drive-"))
+    else:
+        out_dir = pathlib.Path(out_root) / datetime.now().strftime("%Y%m%d-%H%M%S")
+        out_dir.mkdir(parents=True, exist_ok=True)
+        click.echo(f"session 目录: {out_dir}")
+    chrome = DEFAULT_CHROME
+    if not chrome.exists():
+        raise click.ClickException(f"chrome 未找到: {chrome}（可用 BR_CHROME 指定）")
+
+    async def _run():
+        h = SessionHarness(out_dir, "about:blank", chrome, headless=headless,
+                           profile=profile, mode="drive",
+                           extra_chrome_args=["--no-sandbox"] if no_sandbox else None)
+
+        async def _closeout(ok: bool) -> None:
+            """跑即录产物收尾（与 record 同构）：末步 after 截图等完 +
+            flush_inputs + session_end + PROMPT.md——session 产物对
+            browser-manual 等下游与真人录制无差别。"""
+            if h.body_tasks:  # 在途 _after_shot / response_body 抓取
+                await asyncio.wait(set(h.body_tasks),
+                                   timeout=h.settle_timeout + 2)
+            try:
+                await h.flush_inputs()
+            except Exception:
+                pass
+            h.writer.emit("session_end", {
+                "abnormal": not ok,
+                "stop_reason": "drive_done" if ok else "drive_fail",
+                "tabs": [t.tid for t in h.tabs.values()]})
+            h.copy_prompt()
+
+        async with h:
+            # run 期 resolve_vars 的 FlowError（变量未定义）也是格式级错误
+            # → exit 4（不是 ClickException 的 exit 1）
+            try:
+                result = await run_flow(h, flow, env=env, dry_run=dry_run,
+                                        step_from=step_from)
+            except FlowError as e:
+                click.echo(f"flow 格式错误: {e}", err=True)
+                await _closeout(ok=False)
+                return {"exit_code": 4}
+            await _closeout(ok=result["exit_code"] == 0)
+            return result
+
+    result = asyncio.run(_run())
+    if result["exit_code"] == 3:
+        click.echo(f"失败于步骤 {result['failed_step']}（证据包已落盘）")
+    elif result["exit_code"] == 0 and not no_record:
+        click.echo(f"完成：{result['steps_done']} 步")
+    raise SystemExit(result["exit_code"])
 
 
 if __name__ == "__main__":

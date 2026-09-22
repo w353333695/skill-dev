@@ -8,15 +8,22 @@ T7 审查三遗留项 + T8 修复轮的锁定：
   / 变量名含 pw|password|secret|token（不区分大小写）/ 值===*** ——
   context.json、drive_fail、action 事件三处 value 一律 ***；
 - load_flow 校验 act 枚举（open/click/input/submit/hover），未知 act 报 FlowError。
+
+T9 增补：多 tab 状态机（tabs/on_new_tab）+ CLI 冒烟（exit 0/4、跑即录产物、
+真机新 tab 切换）。
 """
 import asyncio
 import json
 import pathlib
+import subprocess
+import sys
 import tempfile
 
 import pytest
 
 from browser_recorder.flow import FlowError, load_flow, resolve_vars
+
+_PROJ_ROOT = pathlib.Path(__file__).parent.parent
 
 
 def test_load_flow_valid(tmp_path):
@@ -490,3 +497,213 @@ def test_run_flow_step_from_skips_earlier(monkeypatch):
         h.close()
 
     asyncio.run(_run())
+
+
+# ---- T9: 多 tab 状态机（tabs/on_new_tab 消费）----
+
+
+class _Tab:
+    def __init__(self, tid, sid):
+        self.tid, self.sid = tid, sid
+
+
+def test_run_flow_on_new_tab_switches_target(monkeypatch):
+    """on_new_tab=switch：动作后 harness.tabs 出现新 tid（动作前没有的）→
+    后续步自动切到新 tid；locate/act 收到的 tid 与 drive_step.target_id 同步。
+    """
+    tmp = pathlib.Path(tempfile.mkdtemp())
+    holder = {}
+    seen_tids = []
+
+    async def fake_locate(client, tabs, tid, locs, timeout=10):
+        seen_tids.append(("locate", tid))
+        return dict(HIT)
+
+    async def fake_act(client, tabs, tid, a, on_dispatch=None):
+        seen_tids.append(("act", tid))
+        if on_dispatch:
+            on_dispatch("trusted")
+        if a.get("loc") == ["css:#open-newtab"]:
+            # 动作效果：新 page target 被 harness.autoAttach 挂上 → tabs 多 t1
+            holder["h"].tabs["s1"] = _Tab("t1", "s1")
+        return {"dispatch": "trusted", "check": True}
+
+    _patch(monkeypatch, fake_locate, fake_act)
+
+    async def _run():
+        h = FakeHarness(tmp)
+        holder["h"] = h
+        flow = {"name": "t", "steps": [
+            {"n": 1, "desc": "点开新tab", "act": "click",
+             "loc": ["css:#open-newtab"], "on_new_tab": "switch"},
+            {"n": 2, "desc": "新tab里点名", "act": "click", "loc": ["css:#b"]},
+        ]}
+        r = await run_flow(h, flow)
+        assert r["ok"] is True
+        # n1：locate/act 都在 t0；n2 的 locate 已在 t1
+        assert seen_tids[:2] == [("locate", "t0"), ("act", "t0")]
+        assert ("locate", "t1") in seen_tids[2:], seen_tids
+        steps = [p for k, p in h.emitted if k == "drive_step"]
+        assert [s["target_id"] for s in steps] == ["t0", "t1"]
+        h.close()
+
+    asyncio.run(_run())
+
+
+def test_run_flow_tabs_explicit_and_main(monkeypatch):
+    """step.tabs 显式指定优先：tabs="new" = 本步元素预期在最新出现的 tab；
+    tabs="t0"/"main" 显式回主 tab——自动切换不覆盖显式声明。
+    """
+    tmp = pathlib.Path(tempfile.mkdtemp())
+    holder = {}
+
+    async def fake_locate(client, tabs, tid, locs, timeout=10):
+        return dict(HIT)
+
+    async def fake_act(client, tabs, tid, a, on_dispatch=None):
+        if on_dispatch:
+            on_dispatch("trusted")
+        if a.get("loc") == ["css:#open-newtab"]:
+            holder["h"].tabs["s1"] = _Tab("t1", "s1")
+        return {"dispatch": "trusted", "check": True}
+
+    _patch(monkeypatch, fake_locate, fake_act)
+
+    async def _run():
+        h = FakeHarness(tmp)
+        holder["h"] = h
+        flow = {"name": "t", "steps": [
+            {"n": 1, "desc": "点开新tab", "act": "click",
+             "loc": ["css:#open-newtab"], "on_new_tab": "switch"},
+            {"n": 2, "desc": "新tab里", "act": "click", "loc": ["css:#b"],
+             "tabs": "new"},
+            {"n": 3, "desc": "回主tab", "act": "click", "loc": ["css:#c"],
+             "tabs": "main"},
+        ]}
+        r = await run_flow(h, flow)
+        assert r["ok"] is True
+        steps = [p for k, p in h.emitted if k == "drive_step"]
+        assert [s["target_id"] for s in steps] == ["t0", "t1", "t0"]
+        h.close()
+
+    asyncio.run(_run())
+
+
+def test_run_flow_no_auto_switch_without_flag(monkeypatch):
+    """无 on_new_tab=switch：动作后出现新 tab 也不切（默认 stay）——
+    旧 flow（无 tabs 字段）行为与 T8 完全一致（cur_tid 恒 t0）。
+    """
+    tmp = pathlib.Path(tempfile.mkdtemp())
+    holder = {}
+    seen = []
+
+    async def fake_locate(client, tabs, tid, locs, timeout=10):
+        seen.append(("locate", tid))
+        return dict(HIT)
+
+    async def fake_act(client, tabs, tid, a, on_dispatch=None):
+        seen.append(("act", tid))
+        if on_dispatch:
+            on_dispatch("trusted")
+        if a.get("loc") == ["css:#open-newtab"]:
+            holder["h"].tabs["s1"] = _Tab("t1", "s1")
+        return {"dispatch": "trusted", "check": True}
+
+    _patch(monkeypatch, fake_locate, fake_act)
+
+    async def _run():
+        h = FakeHarness(tmp)
+        holder["h"] = h
+        flow = {"name": "t", "steps": [
+            {"n": 1, "desc": "点开新tab", "act": "click", "loc": ["css:#open-newtab"]},
+            {"n": 2, "desc": "仍在原tab", "act": "click", "loc": ["css:#b"]},
+        ]}
+        r = await run_flow(h, flow)
+        assert r["ok"] is True
+        assert all(tid == "t0" for _, tid in seen), seen
+        h.close()
+
+    asyncio.run(_run())
+
+
+# ---- T9: CLI 冒烟（真 chrome 子进程）----
+
+
+def _drive_cmd(flow_path, out, extra=()):
+    return [sys.executable, "-m", "browser_recorder.cli", "drive", str(flow_path),
+            "--out", str(out), "--headless", "--no-sandbox", *extra]
+
+
+def test_cli_drive_fixture_e2e_and_exit4(local_site, chrome_path, tmp_path):
+    """CLI 冒烟一：完整 drive（非 dry-run）在 fixture 页跑通——exit 0 +
+    session 产物含 drive_step/action/screenshot 配对；格式错误 flow → exit 4。
+    """
+    flow = tmp_path / "smoke.json"
+    flow.write_text(json.dumps({"name": "smoke", "steps": [
+        {"n": 1, "desc": "打开表单", "act": "open", "value": local_site + "/form.html"},
+        {"n": 2, "desc": "标题", "act": "input", "loc": ["css:[name=title]"],
+         "value": "冒烟"},
+        {"n": 3, "desc": "提交", "act": "click", "loc": ["css:[data-testid=submit-btn]"],
+         "expect": {"dom_contains": "已提交：冒烟"}},
+    ]}, ensure_ascii=False))
+    out = tmp_path / "sessions"
+    r = subprocess.run(_drive_cmd(flow, out), capture_output=True, text=True,
+                       timeout=180, cwd=_PROJ_ROOT)
+    assert r.returncode == 0, f"stdout={r.stdout}\nstderr={r.stderr}"
+    sd = sorted(out.glob("*/session.jsonl"))
+    assert sd, "session 未落盘"
+    lines = [json.loads(l) for l in sd[-1].read_text().splitlines()]
+    kinds = [l["kind"] for l in lines]
+    assert "drive_step" in kinds and "action" in kinds
+    # 跑即录产物与真人录制同构：session_end + PROMPT.md + before/after 配对
+    assert kinds[-1] == "session_end"
+    assert (sd[-1].parent / "PROMPT.md").exists()
+    # 截图配对：每个 action seq 应有 before（after 可能仍在途，收尾前已 flush）
+    acts = [l for l in lines if l["kind"] == "action"]
+    shots = [l for l in lines if l["kind"] == "screenshot"]
+    before_seqs = {s["action_seq"] for s in shots if s["phase"] == "before"}
+    after_seqs = {s["action_seq"] for s in shots if s["phase"] == "after"}
+    assert {a["seq"] for a in acts} <= before_seqs
+    assert {a["seq"] for a in acts} <= after_seqs
+    # action 带 source=drive（跑即录）
+    assert all(a.get("source") == "drive" for a in acts)
+
+    # exit 4：格式错误（未知 act）——不是 ClickException 的 exit 1
+    bad = tmp_path / "bad.json"
+    bad.write_text(json.dumps({"name": "bad", "steps": [
+        {"n": 1, "desc": "拖", "act": "drag", "loc": ["css:#x"]}]}))
+    r4 = subprocess.run(_drive_cmd(bad, tmp_path / "o4"), capture_output=True,
+                        text=True, timeout=60, cwd=_PROJ_ROOT)
+    assert r4.returncode == 4, f"exit={r4.returncode} stderr={r4.stderr}"
+
+    # exit 4：run 期 resolve_vars 的 FlowError（变量未定义）同样转 4
+    undef = tmp_path / "undef.json"
+    undef.write_text(json.dumps({"name": "u", "steps": [
+        {"n": 1, "desc": "输", "act": "input", "loc": ["css:#i"],
+         "value": "${env.NO_SUCH_VAR}"}]}))
+    ru = subprocess.run(_drive_cmd(undef, tmp_path / "ou"), capture_output=True,
+                        text=True, timeout=120, cwd=_PROJ_ROOT)
+    assert ru.returncode == 4, f"exit={ru.returncode} stderr={ru.stderr}"
+
+
+def test_cli_drive_new_tab_on_fixture(local_site, chrome_path, tmp_path):
+    """CLI 冒烟二：真机多 tab——点 newtab-link（target=_blank）→ 后续步在
+    新 tab 操作（shadow 按钮命中即证明切过去了）。
+    """
+    flow = tmp_path / "newtab.json"
+    flow.write_text(json.dumps({"name": "newtab", "steps": [
+        {"n": 1, "desc": "打开表单", "act": "open", "value": local_site + "/form.html"},
+        {"n": 2, "desc": "点新tab链接", "act": "click",
+         "loc": ["css:[data-testid=newtab-link]"], "on_new_tab": "switch"},
+        {"n": 3, "desc": "新tab点影子按钮", "act": "click",
+         "loc": ["css:[data-testid=shadow-btn]"], "tabs": "new"},
+        {"n": 4, "desc": "新tab提交", "act": "click", "loc": ["css:#login button"]},
+    ]}, ensure_ascii=False))
+    out = tmp_path / "sessions"
+    r = subprocess.run(_drive_cmd(flow, out), capture_output=True, text=True,
+                       timeout=180, cwd=_PROJ_ROOT)
+    assert r.returncode == 0, f"stdout={r.stdout}\nstderr={r.stderr}"
+    sd = sorted(out.glob("*/session.jsonl"))
+    lines = [json.loads(l) for l in sd[-1].read_text().splitlines()]
+    steps = [l for l in lines if l["kind"] == "drive_step"]
+    assert [s["target_id"] for s in steps] == ["t0", "t0", "t1", "t1"]

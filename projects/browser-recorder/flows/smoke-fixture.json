@@ -1,0 +1,9 @@
+{
+  "name": "smoke-fixture",
+  "meta": {"purpose": "fixture 页端到端冒烟（不依赖内网）", "usage": "先起 http.server，再 BR_SMOKE_PORT=<port> browser-recorder drive flows/smoke-fixture.json --headless --no-sandbox"},
+  "steps": [
+    {"n": 1, "desc": "打开表单", "act": "open", "value": "http://127.0.0.1:${env.BR_SMOKE_PORT}/form.html"},
+    {"n": 2, "desc": "标题", "act": "input", "loc": ["css:[name=title]"], "value": "冒烟"},
+    {"n": 3, "desc": "提交", "act": "click", "loc": ["css:[data-testid=submit-btn]"], "expect": {"dom_contains": "已提交：冒烟"}}
+  ]
+}
