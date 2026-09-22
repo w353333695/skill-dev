@@ -830,6 +830,16 @@ objects:
         rule: "按 formRelationInstanceId+formId 组合 4 动作：①都空=无操作 ②relId空+formId非空=绑定 ③relId非空+formId空=解绑 ④都非空=换绑。useFormBuilder=false 时后端默认取表单【主版本】绑（service.go:593,604）。"
 
   # ---------- ITSM 服务实例（service_instance）----------
+  env_binding_principle:
+    description: |
+      🔴【输出物去环境绑定原则】（2026-09-22 用户立规）：所有输出物（hub 工具包/脚本/服务包）
+      尽量避免绑定环境信息（IP/org 等部署态值）：
+      · 入参默认值用 127.0.0.1（同机形态）等通用值，不用具体环境 IP——异机时使用者显式传参
+      · 脚本内回退链不 fallback 到具体 IP；环境差异靠：平台注入变量（EASYOPS_*）> 显式入参 > 通用默认
+      · postsubmit eventCenterIp 已改（v3.1 default=127.0.0.1）；同类待改：alert2ticket/alert2event/clean_itsm
+        的 _default_host 回退 IP（当前回落 172.30.0.232/192.168.110.26——编排侧有 env 可覆盖，回退值仅兜底）
+      · 服务包导出本身含环境 id（formId/流程 id 等）属引用聚合必需——去环境绑定指【连接信息】不进默认值
+
   itsm_service_instance:
     export_sync_discipline: |
       🔴【服务包同步纪律】流程/表单/触发器/脚本（表单生命周期+前后置脚本工具）任一变化，
