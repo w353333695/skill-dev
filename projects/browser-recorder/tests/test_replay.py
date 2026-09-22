@@ -4,7 +4,7 @@ import pathlib
 import subprocess
 import sys
 
-from browser_recorder.replay import is_stable_id, session_to_flow
+from browser_recorder.replay import _stable_classes, is_stable_id, session_to_flow
 
 _PROJ_ROOT2 = pathlib.Path(__file__).parent.parent
 
@@ -23,6 +23,19 @@ def test_is_stable_id():
     assert is_stable_id("name") is True          # 语义 id 稳定
     assert is_stable_id("rc_select_20") is False  # 纯数字后缀自动生成
     assert is_stable_id("dynamicForm_0_name") is False
+
+
+def test_stable_classes_filters_hash_classes():
+    """锁定：框架前缀（sc- 词边界）与哈希形态剔除，语义 class 保留。
+
+    desc-header/disc-list/misc-info 含 "sc-" 子串但非 sc- 开头——
+    子串匹配会误杀，必须按词边界前缀判。button2 纯字母数字 ≥6 含数字
+    → 按含数字即可能哈希，剔除。
+    """
+    got = _stable_classes(["sc-item", "desc-header", "disc-list", "misc-info",
+                           "btn-primary", "submit", "css-1q2w3e", "button2"])
+    assert got == ["desc-header", "disc-list", "misc-info",
+                   "btn-primary", "submit"]
 
 
 def test_candidate_order_by_stability():

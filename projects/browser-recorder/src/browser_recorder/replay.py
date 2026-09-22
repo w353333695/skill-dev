@@ -23,7 +23,9 @@ import re
 # dynamicForm_0_name 的数字段在中段，锚尾会漏判成稳定。
 _AUTO_ID_RE = re.compile(r"_\d+")
 # css-in-js 生成器指纹：框架前缀词，或「纯字母数字 ≥6 且含数字」（1q2w3e
-# 型）。不含数字的语义词（submit/button/primary）不误杀。
+# 型）。不含数字的语义词（submit/button/primary）不误杀。前缀按词边界
+# 匹配——class 以 marker 开头才算：子串包含会把 desc-header/disc-list/
+# misc-info 这类含 "sc-" 子串的语义 class 误杀。
 _HASH_CLASS_RE = re.compile(r"[a-z0-9]{6,}", re.I)
 _CLASS_MARKERS = ("css-", "emotion", "styled", "sc-", "jss", "mui-")
 # 纯符号/数字文本不作为文本候选（无区分度）。Python3 \w 默认含 CJK，
@@ -49,16 +51,17 @@ def _attr_sel(key: str, value) -> str:
 
 
 def _stable_classes(classes) -> list[str]:
-    """剔除生成器指纹 class，最多保留 3 个语义 class。"""
+    """剔除生成器指纹 class，保留全部语义 class（class 链是末位候选，
+    全保留提高兜底定位精度；截断会丢语义 class——Task 10 审查 I-1）。"""
     out = []
     for c in classes or []:
         cs = str(c)
-        if any(m in cs.lower() for m in _CLASS_MARKERS):
+        if any(cs.lower().startswith(m) for m in _CLASS_MARKERS):
             continue
         if _HASH_CLASS_RE.fullmatch(cs) and any(ch.isdigit() for ch in cs):
             continue
         out.append(cs)
-    return out[:3]
+    return out
 
 
 def _candidates(desc: dict, is_click_like: bool) -> list[str]:
