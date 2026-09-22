@@ -25,7 +25,7 @@
     {"n": 21, "desc": "提交保存", "act": "click", "loc": ["css:forms.general-buttons button:nth-of-type(1) span, forms.general-buttons button"], "expect": {"dom_contains": "成功"}},
     {"n": 22, "desc": "更多", "act": "click", "loc": ["css:basic-bricks.general-custom-buttons button"]},
     {"n": 23, "desc": "删除套件", "act": "click", "loc": ["css:body > div:nth-of-type(6) ul li:nth-of-type(4) div, #portal-mount-point ul li:nth-of-type(4) div"]},
-    {"n": 24, "desc": "确认删除-名称", "act": "input", "loc": ["css:body > div:nth-of-type(7) input, #portal-mount-point input[type=text]:visible"], "value": "e2e自动录制测试套件"},
+    {"n": 24, "desc": "确认删除-名称", "act": "input", "loc": ["css:body > div:nth-of-type(7) input", "css:#portal-mount-point input[type=text]"], "value": "e2e自动录制测试套件"},
     {"n": 25, "desc": "删除", "act": "click", "loc": ["css:body > div:nth-of-type(7) button:nth-of-type(2), #portal-mount-point button:nth-of-type(2)"]}
   ]
 }

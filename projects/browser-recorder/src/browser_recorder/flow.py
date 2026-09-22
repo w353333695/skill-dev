@@ -18,6 +18,9 @@ T9 多 tab：cur_tid 不再恒 "t0"——
 - step.on_new_tab="switch"：动作后 harness.tabs 出现动作前没有的新 tid
   （harness.autoAttach 已挂域）→ 后续步默认切到该 tid；
 - 无 on_new_tab 声明时不动（旧 flow 行为与 T8 完全一致）。
+
+T9-fix I-1：drive 模态热键停止——步循环开头（含 locate 重试内层开头）检查
+harness.stop_event，已置位 → _fail("hotkey-stop") → exit 3（证据包照落）。
 """
 from __future__ import annotations
 
@@ -129,6 +132,13 @@ def _resolve_tab(harness, spec, cur_tid) -> str:
     return spec  # 显式 tid（"t1"…）——不存在时后续 locate/send 自然失败
 
 
+def _stop_requested(harness) -> bool:
+    """drive 模态热键（control_stop）是否已触发。测试替身无 stop_event
+    属性时视为未停止（向后兼容）。"""
+    ev = getattr(harness, "stop_event", None)
+    return ev is not None and ev.is_set()
+
+
 async def run_flow(harness, flow: dict, env=None, dry_run=False,
                    step_from=None) -> dict:
     env = dict(os.environ, **(env or {}))
@@ -138,7 +148,14 @@ async def run_flow(harness, flow: dict, env=None, dry_run=False,
         steps = [s for s in steps if s["n"] >= step_from]
     steps_done = 0
     for s in steps:
-        # 0. tab 选择：step.tabs 显式指定优先（main/new/tid）。
+        # 0. 热键停止（I-1）：drive 模态的 control_stop 热键置位 stop_event
+        #    → 步循环开头短路——落 drive_fail（hotkey-stop，复用 _fail 证据包
+        #    路径）→ exit 3。 locate 重试预算单步最长 retries×(locate_timeout
+        #    +0.5s)，不检查的话热键后还要空转数十秒才见底。
+        if _stop_requested(harness):
+            return await _fail(harness, s, cur_tid,
+                               "hotkey-stop", dry_run, steps_done, None)
+        # 0b. tab 选择：step.tabs 显式指定优先（main/new/tid）。
         #    step_tid 钉住本步执行 tab——中途 on_new_tab 切换只改 cur_tid
         #    影响后续步，本步 action/drive_step/证据包的 target_id 不漂移
         if s.get("tabs"):
@@ -158,6 +175,9 @@ async def run_flow(harness, flow: dict, env=None, dry_run=False,
         retries = s.get("retries", DEFAULT_RETRIES)
         hit = None
         for attempt in range(retries + 1):
+            if _stop_requested(harness):   # 热键在 locate 轮询间触发——不再空转预算
+                return await _fail(harness, s, step_tid, "hotkey-stop",
+                                   dry_run, steps_done, value, cred=cred)
             await harness.wait_stable()
             hit = await locate(harness.client, harness.tabs, step_tid, s["loc"],
                                timeout=s.get("locate_timeout", 10))

@@ -4,6 +4,7 @@ from __future__ import annotations
 import asyncio
 import os
 import pathlib
+import shutil
 import zipfile
 from datetime import datetime
 
@@ -134,6 +135,8 @@ def drive_cmd(flow_file, out_root, profile, headless, no_record, vars_,
         click.echo(f"session 目录: {out_dir}")
     chrome = DEFAULT_CHROME
     if not chrome.exists():
+        if no_record:
+            shutil.rmtree(out_dir, ignore_errors=True)
         raise click.ClickException(f"chrome 未找到: {chrome}（可用 BR_CHROME 指定）")
 
     async def _run():
@@ -152,24 +155,39 @@ def drive_cmd(flow_file, out_root, profile, headless, no_record, vars_,
                 await h.flush_inputs()
             except Exception:
                 pass
-            h.writer.emit("session_end", {
-                "abnormal": not ok,
-                "stop_reason": "drive_done" if ok else "drive_fail",
-                "tabs": [t.tid for t in h.tabs.values()]})
+            # M-1：收尾 emit 守卫（对齐 record() 的收尾降级）——磁盘满/文件
+            # 已关时 session_end 的 OSError 不冒泡顶掉退出码；emit 前截获的
+            # 拷贝（emit 失败即丢弃）同理兜底。
+            try:
+                h.writer.emit("session_end", {
+                    "abnormal": not ok,
+                    "stop_reason": "drive_done" if ok else "drive_fail",
+                    "tabs": [t.tid for t in h.tabs.values()]})
+            except (OSError, ValueError):
+                pass
             h.copy_prompt()
 
-        async with h:
-            # run 期 resolve_vars 的 FlowError（变量未定义）也是格式级错误
-            # → exit 4（不是 ClickException 的 exit 1）
-            try:
-                result = await run_flow(h, flow, env=env, dry_run=dry_run,
-                                        step_from=step_from)
-            except FlowError as e:
-                click.echo(f"flow 格式错误: {e}", err=True)
-                await _closeout(ok=False)
-                return {"exit_code": 4}
-            await _closeout(ok=result["exit_code"] == 0)
-            return result
+        # I-2：no_record 临时目录用后即删（含登录态的 session.jsonl/chrome-
+        # profile 不留在 /tmp）。try/finally 包住 async with 全路径——步失败/
+        # FlowError/进程异常都不泄漏；正常录制目录不在此分支，不会误删。
+        # rmtree 前置条件：__aexit__ 已收敛 chrome 进程（Browser.close →
+        # terminate → kill），user-data-dir 不再被进程占用。
+        try:
+            async with h:
+                # run 期 resolve_vars 的 FlowError（变量未定义）也是格式级错误
+                # → exit 4（不是 ClickException 的 exit 1）
+                try:
+                    result = await run_flow(h, flow, env=env, dry_run=dry_run,
+                                            step_from=step_from)
+                except FlowError as e:
+                    click.echo(f"flow 格式错误: {e}", err=True)
+                    await _closeout(ok=False)
+                    return {"exit_code": 4}
+                await _closeout(ok=result["exit_code"] == 0)
+                return result
+        finally:
+            if no_record:
+                shutil.rmtree(out_dir, ignore_errors=True)
 
     result = asyncio.run(_run())
     if result["exit_code"] == 3:

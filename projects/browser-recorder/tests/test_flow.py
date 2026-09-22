@@ -499,6 +499,90 @@ def test_run_flow_step_from_skips_earlier(monkeypatch):
     asyncio.run(_run())
 
 
+# ---- T9-fix: 热键停止（I-1）----
+
+
+def test_run_flow_stop_event_short_circuits(monkeypatch):
+    """I-1：stop_event 预置（模态热键已触发）→ run_flow 立即返回失败，
+    不执行任何 locate/act——drive 模态下热键也能停止步循环。
+
+    failed_step=当前步 n、reason=hotkey-stop、exit_code=3（复用 _fail 证据包路径）。
+    """
+    tmp = pathlib.Path(tempfile.mkdtemp())
+    located = []
+
+    async def fake_locate(client, tabs, tid, locs, timeout=10):
+        located.append(tid)
+        return dict(HIT)
+
+    async def fake_act(client, tabs, tid, a, on_dispatch=None):
+        located.append(("act", tid))
+        return {"dispatch": "trusted", "check": True}
+
+    _patch(monkeypatch, fake_locate, fake_act)
+
+    async def _run():
+        h = FakeHarness(tmp)
+        # FakeHarness 无 stop_event——I-1 给 run_flow 加的依赖面，补上
+        h.stop_event = asyncio.Event()
+        h.stop_event.set()          # 热键先于循环触发
+        flow = {"name": "t", "steps": [
+            {"n": 1, "desc": "点", "act": "click", "loc": ["css:#b"]},
+        ]}
+        r = await run_flow(h, flow)
+        assert r == {"ok": False, "steps_done": 0, "failed_step": 1,
+                     "exit_code": 3}
+        assert located == [], "stop_event 已置位时不应执行任何 locate"
+        fail = next(p for k, p in h.emitted if k == "drive_fail")
+        assert fail["reason"] == "hotkey-stop"
+        assert fail["n"] == 1
+        h.close()
+
+    asyncio.run(_run())
+
+
+def test_run_flow_stop_event_after_first_step(monkeypatch):
+    """I-1 续：第 1 步完成后热键触发 → 第 2 步开头短路（不在步中途拦截），
+    steps_done 计入已完成的第 1 步。"""
+    tmp = pathlib.Path(tempfile.mkdtemp())
+    seen = []
+
+    async def fake_locate(client, tabs, tid, locs, timeout=10):
+        seen.append("locate")
+        return dict(HIT)
+
+    async def fake_act(client, tabs, tid, a, on_dispatch=None):
+        seen.append("act")
+        return {"dispatch": "trusted", "check": True}
+
+    _patch(monkeypatch, fake_locate, fake_act)
+
+    async def _run():
+        h = FakeHarness(tmp)
+        h.stop_event = asyncio.Event()
+        flow = {"name": "t", "steps": [
+            {"n": 1, "desc": "点1", "act": "click", "loc": ["css:#a"]},
+            {"n": 2, "desc": "点2", "act": "click", "loc": ["css:#b"]},
+        ]}
+        real_wait = h.wait_stable
+
+        async def wait_stable_spy(timeout=None):
+            # 第 1 步的 drive_step 落盘后、第 2 步进入前触发热键
+            if seen.count("act") >= 1 and not h.stop_event.is_set():
+                h.stop_event.set()
+            return await real_wait(timeout)
+        h.wait_stable = wait_stable_spy
+        r = await run_flow(h, flow)
+        assert r["ok"] is False and r["steps_done"] == 1 \
+            and r["failed_step"] == 2 and r["exit_code"] == 3
+        assert seen.count("act") == 1, "第 2 步不应派发动作"
+        assert next(p for k, p in h.emitted
+                    if k == "drive_fail")["reason"] == "hotkey-stop"
+        h.close()
+
+    asyncio.run(_run())
+
+
 # ---- T9: 多 tab 状态机（tabs/on_new_tab 消费）----
 
 
@@ -707,3 +791,47 @@ def test_cli_drive_new_tab_on_fixture(local_site, chrome_path, tmp_path):
     lines = [json.loads(l) for l in sd[-1].read_text().splitlines()]
     steps = [l for l in lines if l["kind"] == "drive_step"]
     assert [s["target_id"] for s in steps] == ["t0", "t0", "t1", "t1"]
+
+
+def test_cli_drive_no_record_cleans_tmp(local_site, chrome_path, tmp_path):
+    """I-2：--no-record 的临时 session 目录用后即删——含登录态的
+    session.jsonl/chrome-profile 不留在 /tmp。--out 仍指向正常录制根目录
+    （验证不误删正常目录：no_record 分支根本不用 --out）。
+    """
+    flow = tmp_path / "smoke.json"
+    flow.write_text(json.dumps({"name": "smoke", "steps": [
+        {"n": 1, "desc": "打开表单", "act": "open", "value": local_site + "/form.html"},
+        {"n": 2, "desc": "标题", "act": "input", "loc": ["css:[name=title]"],
+         "value": "无痕"},
+        {"n": 3, "desc": "提交", "act": "click", "loc": ["css:[data-testid=submit-btn]"],
+         "expect": {"dom_contains": "已提交：无痕"}},
+    ]}, ensure_ascii=False))
+    out = tmp_path / "sessions"
+    before = set(pathlib.Path(tempfile.gettempdir()).glob("br-drive-*"))
+    r = subprocess.run(_drive_cmd(flow, out, extra=("--no-record",)),
+                       capture_output=True, text=True, timeout=180, cwd=_PROJ_ROOT)
+    assert r.returncode == 0, f"stdout={r.stdout}\nstderr={r.stderr}"
+    after = set(pathlib.Path(tempfile.gettempdir()).glob("br-drive-*"))
+    leaked = {d for d in after - before if d.is_dir() and any(d.iterdir())}
+    assert not leaked, f"--no-record 临时目录泄漏: {leaked}"
+    # 正常录制根目录不受影响（no_record 不落 sessions/）
+    assert not list(out.glob("*/session.jsonl"))
+
+
+def test_cli_drive_no_record_failure_path_cleans_tmp(local_site, chrome_path,
+                                                     tmp_path):
+    """I-2 异常路径：步失败（exit 3）时临时目录同样被 finally 清掉。"""
+    flow = tmp_path / "fail.json"
+    flow.write_text(json.dumps({"name": "fail", "steps": [
+        {"n": 1, "desc": "打开表单", "act": "open", "value": local_site + "/form.html"},
+        {"n": 2, "desc": "点不存在的", "act": "click", "loc": ["css:#no-such-thing"],
+         "retries": 0, "locate_timeout": 1},
+    ]}, ensure_ascii=False))
+    out = tmp_path / "sessions"
+    before = set(pathlib.Path(tempfile.gettempdir()).glob("br-drive-*"))
+    r = subprocess.run(_drive_cmd(flow, out, extra=("--no-record",)),
+                       capture_output=True, text=True, timeout=120, cwd=_PROJ_ROOT)
+    assert r.returncode == 3, f"exit={r.returncode} stderr={r.stderr}"
+    after = set(pathlib.Path(tempfile.gettempdir()).glob("br-drive-*"))
+    leaked = {d for d in after - before if d.is_dir() and any(d.iterdir())}
+    assert not leaked, f"失败路径临时目录泄漏: {leaked}"
