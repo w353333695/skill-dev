@@ -936,6 +936,22 @@ objects:
 
   # ---------- ITSM 触发器（trigger）----------
   itsm_trigger_binding:
+    node_level_binding: |
+      🔴触发器绑定的【常理通道】是节点级（2026-09-22 用户示例 1.2.8 定案）：流程版本
+      processSetting.nodeSettings[].triggerIdList=["<触发器id>"]——版本保存时后端自动
+      composeTriggerRefs（process_definition_version_service.go:761-776,914-918）同步触发器实例的
+      processVersionTasks 属性 + ITSC_PROCESS_VERSION 关系（双向）。运行时匹配（trigger.go:79-84）：
+      任务事件取【当前节点的 nodeMap[step.UserTaskId].Setting.GetTriggerIdList()】并入 relQuery——
+      即节点没绑 triggerIdList 时，任务事件(todo/pass/...)匹配不到该触发器（这是只绑 ITSC_PROCESS
+      流程级关系时"通知不发"的根因：relQuery 命中但 bpmnTriggerInstanceIds 为空不影响查询，
+      真正的发送在 handler 消费端按节点过滤）。
+      三级绑定通道（按粒度）：
+      ① 节点级（常用）：nodeSettings[].triggerIdList——经 process_version.create/edit 随版本走
+      ② 流程级：CMDB PUT /v2/object/_ITSC_TRIGGER/instance/{id} {"ITSC_PROCESS":[流程id]}
+      ③ 服务级：同上 {"ITSC_SERVICE_INSTANCE":[服务id]}
+      API 侧给流程版本绑触发器：拉 processSetting → 改目标节点 triggerIdList → 派生新版本 → set_main。
+  itsm_trigger_binding:
+
     description: |
       触发器与流程/服务的绑定是【CMDB 关系】（非 trigger API 字段）——create/update 端点
       不写绑定（源码 trigger_service.go CreateTrigger 只建实例；checkRemoveTrigger 按
