@@ -992,6 +992,17 @@ objects:
 
   # ---------- ITSM 通知策略（notify_policy）----------
   itsm_notify_policy:
+    _enum_dual_layer: |
+      🔴枚举字段【存储 key/显示 name 双层】（2026-09-22 前端报错实测踩坑）：
+      存储层（CMDB _ITSC_NOTIFY_POLICY）只存【key】——notifyType=process_task/process_instance/...、
+      triggerSignal=todo/start/pass/...、notifyRange=todo_user/creator/...、notifyMode=site_message/email/...；
+      API 读时自动反转成显示名（list：NotifyType= GetName、TriggerSignal=GetChildrenName、TriggerSignalKey=原 key；
+      notify_policy_service.go:440-462）。
+      ⚠️create/update 端点把传入值【原样落库】不校验 key 合法性——传中文显示名（如 triggerSignal=待办）会存成
+      待办 → GetChildrenName 反转 miss → 前端 notifyConfig.find(...triggerSignal.key===detail.triggerSignal) 报
+      『undefined (reading notifyRange)』页面崩。
+      ✅正确姿势：create/update 一律传 key（todo/todo_user/site_message）；传错可用 CMDB 直改救：
+      PUT /v2/object/_ITSC_NOTIFY_POLICY/instance/{id} {"triggerSignal":"todo",...}（key 形态）。
     description: ITSM 通知策略——「信号(triggerSignal)→通知谁(notifyRange)→怎么发(notifyMode)→发什么(content)」。被 trigger 经 notifyPolicyId 引用。CRUD 在 /api/itsc_trigger/v1/notify_policy（⚠️前缀 itsc_trigger 非 flowable_service，但仍 8134 端口）。⚠️notifyType/triggerSignal/notifyRange/content变量 的合法值见 api_behavior（来自 fixtures rawSetting + 枚举接口，非自由文本）。
     source: data/api-doc/itsm-notify_policy.xlsx + notify_policy/{route.go:7-14, validators/api_validator.go:75-99, fixtures/notify_setting.go:9 rawSetting（全量枚举权威源）} + 枚举接口 GET /api/itsc_trigger/v1/notify_type
     api: notify_policy
