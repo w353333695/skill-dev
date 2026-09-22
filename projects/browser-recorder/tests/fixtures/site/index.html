@@ -16,7 +16,7 @@ customElements.define('demo-widget', class extends HTMLElement {
     sr.innerHTML = '<button data-testid="shadow-btn">影子按钮</button>';
   }
 });
-document.getElementById('shadow-host').appendChild(new demo-widget());
+document.getElementById('shadow-host').appendChild(document.createElement('demo-widget'));
 </script>
 <form id="login" action="/page2.html">
   <input name="user" type="text" placeholder="用户名" data-testid="user-input">
