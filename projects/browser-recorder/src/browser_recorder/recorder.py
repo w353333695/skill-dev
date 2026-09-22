@@ -224,6 +224,21 @@ async def record(
                 state.net_close(p["requestId"])
             client.on("Network.loadingFailed", on_loading_fail, session_id=sid)
 
+            def _on_ws_frame(p, _sid=sid, _dir=""):
+                # ws 帧不进 StableState 记账（长连接已在 net_open 排除，帧不算新请求）
+                # sent/received 参数结构相同：帧数据都在 response.payloadData
+                # （CDP 历史命名，sent 也是 response 字段），统一取法不分支。
+                d = p.get("response", {}).get("payloadData", "")
+                writer.emit("ws_frame", {
+                    "request_id": p.get("requestId"), "direction": _dir,
+                    "payload": d, "payload_base64": False,
+                    "target_id": tid_of(_sid),
+                })
+            client.on("Network.webSocketFrameSent",
+                      lambda p, _sid=sid: _on_ws_frame(p, _sid, "sent"), session_id=sid)
+            client.on("Network.webSocketFrameReceived",
+                      lambda p, _sid=sid: _on_ws_frame(p, _sid, "received"), session_id=sid)
+
             def on_nav(p, _sid=sid):
                 if p.get("frame", {}).get("parentId") is None:  # 主 frame
                     writer.emit("nav", {"url": p.get("frame", {}).get("url", ""), "title": "",

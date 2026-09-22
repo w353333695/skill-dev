@@ -100,6 +100,22 @@ def test_emit_masks_request_post_body(tmp_path):
     assert json.loads(lines[1]["post_body"]) == {"password": "***"}
 
 
+def test_emit_ws_frame_masks_and_truncates(tmp_path):
+    """ws_frame：JSON payload 敏感键打码 + 超 8KB 截断 + 二进制标 base64。"""
+    w = SessionWriter(tmp_path)
+    w.emit("ws_frame", {"request_id": "WS1", "direction": "sent",
+                        "payload": '{"token": "abc", "data": 1}', "payload_base64": False,
+                        "target_id": "t0"})
+    w.emit("ws_frame", {"request_id": "WS2", "direction": "received",
+                        "payload": "x" * 9000, "payload_base64": False,
+                        "target_id": "t0"})
+    w.close()
+    lines = [json.loads(l) for l in (tmp_path / "session.jsonl").read_text().splitlines()]
+    assert lines[0]["kind"] == "ws_frame"
+    assert json.loads(lines[0]["payload"]) == {"token": "***", "data": 1}
+    assert len(lines[1]["payload"]) == 8192
+
+
 def test_emit_io_error_sets_fatal(tmp_path):
     """emit 落盘 IO 失败（文件已关）→ fatal 置位并上抛（IO 致命升级）。"""
     w = SessionWriter(tmp_path)
