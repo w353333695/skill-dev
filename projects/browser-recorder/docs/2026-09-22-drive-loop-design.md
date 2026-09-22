@@ -294,10 +294,10 @@ fixture 页是关键新测试资产：shadow DOM 自定义元素 + 表单 + 新 
 | 里程碑 | 验收门 |
 |---|---|
 | M1 录制增强 | 单测绿 + 真机录 EasyOps：descriptor 含 name/aria-label/data-testid、ws 请求有 ws_frame、旧字段无回归 |
-| M2 harness 拆分 | **现有 19 测试全绿（零修改通过）** + fixture 页金录像 diff 一致（kind/顺序/截图状态） |
+| M2 harness 拆分 | **现有 19 测试全绿（零修改通过）** + fixture 页金录像 diff 一致（kind/顺序/截图状态）。fixture 页（tests/fixtures/）在本里程碑创建——金录像依赖它 |
 | M3 driver 库 | fixture 页单测：locate 四策略命中/歧义/miss、信任派发命令序列、降级触发、证据包落盘 |
 | M4 drive 闭环 | easyops.json（21 步手写迁移）真机跑通创建→删除 + session 产物完整（action/drive_step/截图配对）+ browser-manual 消费无报错 |
-| M5 replay 转换器 | M1 格式录的 21 步 session → replay → dry-run 命中率 100%（允许人工补候选后过关，报告明示） |
+| M5 replay 转换器 | M1 格式录的 21 步 session → replay → dry-run：转换器原始输出直接命中，或未命中步经人工补候选后命中（两种情况都要在 report.md 明示：原始命中率 + 人工补了哪些步）。未命中且未补 = 不过 |
 
 ### 风险与对策
 
