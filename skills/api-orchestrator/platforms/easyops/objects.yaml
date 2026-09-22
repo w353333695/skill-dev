@@ -935,6 +935,17 @@ objects:
       - { to: itsm_service_instance, type: association, cardinality: "N:N", via: commonServices, desc: "常用服务关联多个服务实例" }
 
   # ---------- ITSM 触发器（trigger）----------
+  itsm_trigger_binding:
+    description: |
+      触发器与流程/服务的绑定是【CMDB 关系】（非 trigger API 字段）——create/update 端点
+      不写绑定（源码 trigger_service.go CreateTrigger 只建实例；checkRemoveTrigger 按
+      ServiceInstances/ProcessDefinitions 关系判不可删）。绑定写法（2026-09-22 .26 实测）：
+      PUT /v2/object/_ITSC_TRIGGER/instance/{触发器id}  body {"ITSC_PROCESS":["<流程定义id>"]}
+      （关系键名=relation 定义里的 right_id：ITSC_PROCESS / ITSC_SERVICE_INSTANCE——绑服务用后者）
+      运行时匹配（internal/trigger/trigger.go:87-101）：按 event like + status=enabled +
+      relQuery=or(ITSC_PROCESS.instanceId=流程id, ITSC_SERVICE_INSTANCE.instanceId=服务id,
+      bpmn 内嵌 triggerIdList) 查触发器。
+      触发器→通知策略：config.actionList[{name:send_message, args:{notifyPolicyId, notifyInterval:"5m", notifyTimes:1}}]。
   itsm_trigger:
     description: ITSM 触发器——绑定流程/任务事件（event）到动作列表（config.actionList）。被服务实例/流程节点引用。CRUD 在 /v1/trigger（8134 flowable_service）。⚠️event/scope/action 的完整合法值见 api_behavior.trigger_enums（来自枚举接口，非自由文本）。
     source: data/api-doc/itsm-trigger.xlsx + trigger/validators/request_validate_trees.go:15,35 + 枚举接口 GET /api/flowable_service/v1/enums/trigger_enums（trigger_service.go:99 GetTriggerEnums）
