@@ -64,6 +64,21 @@
           ""
       ),
       dom_path: dom_path(el),
+      // M1 增强：定位候选链原料。name/aria-label 全录；data-* 只录测试锚点
+      // 白名单（业务 data-* 不录，避免 descriptor 膨胀）
+      name: el.name || null,
+      aria_label: (el.getAttribute && el.getAttribute("aria-label")) || null,
+      data_attrs: (function () {
+        var out = {};
+        var keep = ["data-testid", "data-test", "data-qa", "data-cy"];
+        try {
+          for (var i = 0; i < keep.length; i++) {
+            var v = el.getAttribute && el.getAttribute(keep[i]);
+            if (v != null) out[keep[i]] = v;
+          }
+        } catch (e) { /* 无 getAttribute 的节点忽略 */ }
+        return out;
+      })(),
     };
     desc.best_selector = best_selector(desc);
     return {
