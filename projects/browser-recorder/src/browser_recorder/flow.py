@@ -6,11 +6,12 @@ action 事件）。失败 → save_evidence 证据包 + drive_fail → 终止。
 
 T7 审查遗留三项的处理（driver 不动，flow 层接住）：
 1. act 内部复检/降级 JS 用裸 querySelector 不穿透 shadow——input 类动作
-   check=False 时先做一次显式 deepAll 复检（locate 同款穿透 JS），
-   命中且 tag/text 吻合则认为生效，不立即判失败；
+   check=False 时先做一次显式 deepAll 值复检（locate 同款穿透 JS 读
+   el.value），值与预期相等才认为生效，不立即判失败；
 2. act 的 dispatch 字段在 check=False 时不可信——失败判定只认 check 与
    expect 结果，dispatch 仅作观测落盘；
-3. save_evidence 原样落盘 step dict——password 值先替换为 *** 再传入。
+3. save_evidence 原样落盘 step dict——credential 步的 value 先替换为 ***
+   再传入（_is_credential 在 resolve 前对原始模板判定，强判据）。
 """
 from __future__ import annotations
 
@@ -19,10 +20,15 @@ import json
 import os
 import re
 
-from .driver import act, locate, save_evidence
+from .driver import act, locate, save_evidence, value_of_js
 
 DEFAULT_RETRIES = 3
 _VAR_RE = re.compile(r"\$\{env\.([A-Za-z_][A-Za-z0-9_]*)\}")
+_ACTS = ("open", "click", "input", "submit", "hover")
+
+# credential 信号词（不区分大小写）——模板变量名任一命中即整值脱敏。
+# BR_PW 前缀是其子集（含 "PW"），不再单列。
+_CRED_RE = re.compile(r"(?i)pw|password|secret|token")
 
 MASK = "***"
 
@@ -40,6 +46,9 @@ def load_flow(path) -> dict:
         for k in ("n", "desc", "act"):
             if k not in s:
                 raise FlowError(f"step {s.get('n', '?')} 缺必填字段 {k}")
+        if s["act"] not in _ACTS:
+            raise FlowError(f"step {s['n']} ({s['desc']}) 未知 act: {s['act']!r}"
+                            f"（可选：{'/'.join(_ACTS)}）")
         if s["act"] != "open" and not s.get("loc"):
             raise FlowError(f"step {s['n']} ({s['desc']}) 非 open 动作缺 loc")
         if s["act"] == "input" and "value" not in s:
@@ -56,25 +65,26 @@ def resolve_vars(value: str, env: dict) -> str:
     return _VAR_RE.sub(_sub, value)
 
 
-def _is_password(step: dict, raw_value) -> bool:
-    """脱敏判据：html_type=password / 值本身已是 *** / 变量名 BR_PW 开头（解析前）。"""
+def _is_credential(step: dict) -> bool:
+    """脱敏强判据——必须在 resolve 前对原始 step 判定（resolve 后模板已消失）。
+
+    判据（任一命中）：
+    1. step.html_type == "password"（录制侧联动字段；schema v1 可选）；
+    2. 原始模板 value 里任一 ${env.XXX} 变量名含 credential 信号词
+       （pw/password/secret/token，不区分大小写）——值本身不看了（明文
+       值无判据可循，变量名是唯一的稳定信号）；
+    3. 原始 value 整值已是 ***（上游已脱敏的透传）。
+    """
     if (step.get("html_type") or "").lower() == "password":
         return True
-    if raw_value is not None and str(raw_value) == MASK:
-        return True
-    if isinstance(step.get("value"), str):
-        for m in _VAR_RE.finditer(step["value"]):
-            if m.group(1).startswith("BR_PW"):
+    raw = step.get("value")
+    if isinstance(raw, str):
+        if raw == MASK:
+            return True
+        for m in _VAR_RE.finditer(raw):
+            if _CRED_RE.search(m.group(1)):
                 return True
     return False
-
-
-def _masked_step(s: dict, value) -> dict:
-    """save_evidence 用的 step 投影：password 值替换为 ***（context.json 原样落盘）。"""
-    d = dict(s)
-    if _is_password(s, value):
-        d["value"] = MASK
-    return d
 
 
 async def run_flow(harness, flow: dict, env=None, dry_run=False,
@@ -86,7 +96,8 @@ async def run_flow(harness, flow: dict, env=None, dry_run=False,
         steps = [s for s in steps if s["n"] >= step_from]
     steps_done = 0
     for s in steps:
-        # 1. 变量解析
+        # 1. 脱敏判定（resolve 前——模板变量名是唯一稳定信号）+ 变量解析
+        cred = _is_credential(s)
         value = resolve_vars(s["value"], env) if "value" in s else None
         # 2. open 动作：导航
         if s["act"] == "open":
@@ -107,7 +118,7 @@ async def run_flow(harness, flow: dict, env=None, dry_run=False,
             await asyncio.sleep(0.5)
         if hit is None:
             return await _fail(harness, s, cur_tid, "locate-miss", dry_run,
-                               steps_done, value)
+                               steps_done, value, cred=cred)
         if dry_run:
             _emit_step(harness, s, "dry", hit, target_id=cur_tid)
             steps_done += 1
@@ -118,11 +129,12 @@ async def run_flow(harness, flow: dict, env=None, dry_run=False,
                       {"act": s["act"], "loc": s["loc"], "rect": hit["rect"],
                        "value": value, "clear": s.get("clear", True)},
                       on_dispatch=dispatches.append)
-        # 5. 落统一 action（跑即录）+ 截图；password 值不落盘
+        # 5. 落统一 action（跑即录）+ 截图；credential 步值恒 ***（强判据，
+        #    resolve 前对原始模板判定，emit_action 侧不再自判）
         await harness.emit_action({
             "type": s["act"] if s["act"] in ("click", "input", "submit") else "click",
             "source": "drive",
-            "value": MASK if _is_password(s, value) else value,
+            "value": MASK if cred else value,
             "html_type": s.get("html_type"),
             "rect": hit["rect"], "viewport": s.get("viewport"),
             "descriptor": hit,
@@ -130,19 +142,19 @@ async def run_flow(harness, flow: dict, env=None, dry_run=False,
         })
         # 5b. 生效判定（T7-2：只认 check / expect，不认 dispatch）。
         #     input + check=False（act 内复检/降级 JS 裸 querySelector 打不进
-        #     shadow 的断层）→ flow 层 deepAll 显式复检（T7-1）
+        #     shadow 的断层）→ flow 层 deepAll 读 el.value 真值比对（T7-1）：
+        #     穿透读到的值 == 预期值才算复检通过，不等则走失败协议
         ok = r.get("check")
         dispatch = dispatches[-1] if dispatches else "?"
         if not ok and s["act"] == "input":
-            re_hit = await _deep_recheck(harness.client, harness.tabs, cur_tid,
-                                         s["loc"])
-            if re_hit and re_hit.get("tag") == hit.get("tag") \
-                    and re_hit.get("text") == hit.get("text"):
+            got = await _deep_recheck_value(harness.client, harness.tabs,
+                                            cur_tid, s["loc"])
+            if got is not None and got == (value or ""):
                 ok = True
                 dispatch = f"{dispatch}+recheck" if dispatch != "?" else "recheck"
         if not ok:
             return await _fail(harness, s, cur_tid, "check-fail", dry_run,
-                               steps_done, value, dispatch=dispatch)
+                               steps_done, value, cred=cred, dispatch=dispatch)
         # 6. 后置等待
         if s.get("wait", "settle") == "nav":
             await _wait_nav(harness, cur_tid, timeout=15)
@@ -165,7 +177,7 @@ async def run_flow(harness, flow: dict, env=None, dry_run=False,
                                                         cur_tid)
                 if not expect_result["ok"]:
                     return await _fail(harness, s, cur_tid, "expect-fail",
-                                       dry_run, steps_done, value,
+                                       dry_run, steps_done, value, cred=cred,
                                        extra={"expect": expect_result})
         # 8. drive_step 落盘
         _emit_step(harness, s, dispatch, hit, expect=expect_result,
@@ -175,9 +187,35 @@ async def run_flow(harness, flow: dict, env=None, dry_run=False,
             "exit_code": 0}
 
 
-async def _deep_recheck(client, tabs, tid, locs) -> dict | None:
-    """act 复检断层后的显式 deepAll 复检（shadow 穿透，locate 同款 JS）。"""
-    return await locate(client, tabs, tid, locs, timeout=1)
+async def _deep_recheck_value(client, tabs, tid, locs) -> str | None:
+    """act 复检断层后的显式 deepAll 值复检（shadow 穿透读 el.value）。
+
+    解析 value_of_js 的返回（JSON [v, true] / [null] / [null, false]）：
+    返回穿透读到的元素当前值（input/textarea 之外的元素为 ''）；候选全
+    miss / evaluate 失败返回 None（与「读到空串」区分——None 表示复检
+    本身不可用，交由调用方按不通过处理）。
+    """
+    sid = None
+    for tab in tabs.values():
+        if tab.tid == tid:
+            sid = getattr(tab, "sid", None)
+            break
+    try:
+        r = await client.send("Runtime.evaluate",
+                              {"expression": value_of_js(locs),
+                               "awaitPromise": True, "returnByValue": True},
+                              session_id=sid)
+    except Exception:
+        return None
+    raw = (r.get("result") or {}).get("value")
+    if not isinstance(raw, str):
+        return None
+    try:
+        arr = json.loads(raw)
+        v = arr[0] if isinstance(arr, list) and arr else None
+    except ValueError:
+        return None
+    return None if v is None else str(v)
 
 
 def _emit_step(harness, s, dispatch, hit, expect=None, retry_used=0,
@@ -191,19 +229,23 @@ def _emit_step(harness, s, dispatch, hit, expect=None, retry_used=0,
 
 
 async def _fail(harness, s, tid, reason, dry_run, steps_done, value,
-                extra=None, dispatch=None) -> dict:
-    step = _masked_step({"n": s["n"], "desc": s["desc"], "loc": s.get("loc"),
-                         "tried": s.get("loc"), "act": s["act"],
-                         "retries": s.get("retries", DEFAULT_RETRIES),
-                         "html_type": s.get("html_type"),
-                         "value": value if "value" in s else None,
-                         "url": await _cur_url(harness, tid),
-                         "dispatch": dispatch or reason,
-                         **(extra or {})}, value)
+                cred=False, extra=None, dispatch=None) -> dict:
+    # credential 步：value 一律 ***（context.json 经 save_evidence 原样落盘，
+    # drive_fail 事件同理）——cred 在 resolve 前对原始模板判定（强判据）
+    v = MASK if cred else (value if "value" in s else None)
+    step = {"n": s["n"], "desc": s["desc"], "loc": s.get("loc"),
+            "tried": s.get("loc"), "act": s["act"],
+            "retries": s.get("retries", DEFAULT_RETRIES),
+            "html_type": s.get("html_type"),
+            "value": v,
+            "url": await _cur_url(harness, tid),
+            "dispatch": dispatch or reason,
+            **(extra or {})}
     ev_dir = await save_evidence(harness.out_dir, harness.client, harness.tabs,
                                  tid, step)
     harness.writer.emit("drive_fail", {
         "n": s["n"], "desc": s["desc"], "reason": reason,
+        "value": MASK if cred else (value if "value" in s else None),
         "evidence": str(ev_dir), "target_id": tid})
     return {"ok": False, "steps_done": steps_done, "failed_step": s["n"],
             "exit_code": 3}

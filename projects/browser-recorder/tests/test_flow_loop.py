@@ -116,40 +116,43 @@ def test_run_flow_real_browser_fixture(local_site, chrome_path, tmp_path):
                         {"n": 3, "desc": "密钥", "act": "input",
                          "loc": ["css:[name=secret]"], "value": "s3cret",
                          "html_type": "password"},
-                        {"n": 4, "desc": "提交", "act": "click",
+                        {"n": 4, "desc": "shadow 输入", "act": "input",
+                         "loc": ["css:[data-testid=shadow-input]"],
+                         "value": "穿"},
+                        {"n": 5, "desc": "提交", "act": "click",
                          "loc": ["css:[data-testid=submit-btn]"],
                          "expect": {"dom_contains": "已提交：回路"}},
-                        {"n": 5, "desc": "断网靶", "act": "click",
+                        {"n": 6, "desc": "断网靶", "act": "click",
                          "loc": ["css:#result"],
                          "expect": {"response_contains": {"url": "/api/echo",
                                                           "status": 200}}},
                     ]}
                     r = await run_flow(h, flow)
-                    # n5 expect：click #result 不再触发 fetch（form 只在 submit
+                    # n6 expect：click #result 不再触发 fetch（form 只在 submit
                     # 时 fetch 一次）→ resp_log 无新 /api/echo → expect-fail。
                     # 这正好覆盖失败协议：drive_fail + 证据包 + exit 3。
-                    assert r == {"ok": False, "steps_done": 4, "failed_step": 5,
+                    assert r == {"ok": False, "steps_done": 5, "failed_step": 6,
                                  "exit_code": 3}
                     # password 步：action 落盘值 ***（html_type 联动脱敏）
                     lines = [json.loads(l)
                              for l in (tmp_path / "session.jsonl").read_text()
                              .splitlines()]
-                    pw = [l for l in lines if l["kind"] == "action"
-                          and l.get("value") is not None][1]
+                    acts = [l for l in lines if l["kind"] == "action"]
+                    pw = [l for l in acts if l.get("value") is not None][1]
                     assert pw["value"] == "***" and pw["html_type"] == "password"
-                    # drive_step 前四步齐：nav + input×2 + click；expect dom 通道过
+                    # drive_step 前五步齐：nav + input×3 + click；expect dom 通道过
                     steps = [l for l in lines if l["kind"] == "drive_step"]
-                    assert [s["n"] for s in steps] == [1, 2, 3, 4]
-                    assert steps[3]["expect_result"]["channel"] == "dom"
-                    assert steps[3]["expect_result"]["ok"] is True
+                    assert [s["n"] for s in steps] == [1, 2, 3, 4, 5]
+                    assert steps[4]["expect_result"]["channel"] == "dom"
+                    assert steps[4]["expect_result"]["ok"] is True
                     fails = [l for l in lines if l["kind"] == "drive_fail"]
-                    assert len(fails) == 1 and fails[0]["n"] == 5 \
+                    assert len(fails) == 1 and fails[0]["n"] == 6 \
                         and fails[0]["reason"] == "expect-fail"
                     ev = pathlib.Path(fails[0]["evidence"])
                     assert (ev / "context.json").exists()
                     assert (ev / "dom.json").exists()
                     # 证据包 step dict 不含明文密码（n3 才是 password 步，
-                    # n5 无 value；此处锁定 save_evidence 调用约定本身）
+                    # n6 无 value；此处锁定 save_evidence 调用约定本身）
                     h.close()
                 finally:
                     await client.close()

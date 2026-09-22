@@ -145,6 +145,82 @@ def find_elements_js(locs: list[str]) -> str:
     return DEEP_QUERY_JS.replace("{locs_json}", json.dumps(locs, ensure_ascii=False))
 
 
+# deepAll 值复检（flow 层 T7-1 用）：候选链穿透（open shadow root）找首个
+# 可见元素，读 input/textarea 的当前 value。返回 JSON 数组：
+#   [null]        候选全 miss / 全不可见（复检不可用）
+#   [null, false] evaluate 自身异常（兜底 try/catch，约定同上）
+#   [v, true]     v=读到的值（非输入元素为 ''——命中元素但无 value 语义）
+# 可见性判据与 DEEP_QUERY_JS 同款（祖先链 hidden/aria-hidden/display:none/
+# visibility:hidden 排除；不筛面积——值读取与视口无关）。
+_VALUE_OF_JS = r"""
+(async () => {
+  const locs = {locs_json};
+  function deepAll(root, css) {
+    let out = [];
+    try { out = Array.from(root.querySelectorAll(css)); } catch (e) {}
+    let all = [];
+    try { all = Array.from(root.querySelectorAll('*')); } catch (e) {}
+    if (root.shadowRoot) out = out.concat(deepAll(root.shadowRoot, css));
+    for (const el of all) {
+      if (el.shadowRoot) out = out.concat(deepAll(el.shadowRoot, css));
+    }
+    return out;
+  }
+  function visible(el) {
+    if (el.hidden || el.getAttribute('aria-hidden') === 'true') return false;
+    for (let a = el; a; a = a.parentElement) {
+      if (a.hidden || a.getAttribute('aria-hidden') === 'true') return false;
+      const as = getComputedStyle(a);
+      if (as.display === 'none' || as.visibility === 'hidden') return false;
+    }
+    return true;
+  }
+  try {
+    for (const loc of locs) {
+      const kind = loc.split(':', 1)[0];
+      const expr = loc.slice(loc.indexOf(':') + 1);
+      let els = [];
+      if (kind === 'css') {
+        els = deepAll(document, expr);
+      } else if (kind === 'dom') {
+        const parts = expr.split('>');
+        let cur = [document];
+        for (const seg of parts) {
+          const nxt = [];
+          for (const node of cur) {
+            const m = seg.match(/^([a-z0-9_-]+)(#([\w-]+))?((?:\.[\w-]+)*)$/i);
+            if (!m) continue;
+            let css = m[1];
+            if (m[3]) css += '#' + m[3];
+            if (m[4]) css += m[4];
+            for (const el of deepAll(node, css)) nxt.push(el);
+          }
+          cur = nxt;
+          if (!cur.length) break;
+        }
+        els = cur;
+      }
+      const hit = els.find(visible);
+      if (hit) {
+        const v = (hit instanceof HTMLInputElement
+                   || hit instanceof HTMLTextAreaElement)
+          ? (hit.value || '') : '';
+        return JSON.stringify([v, true]);
+      }
+    }
+    return JSON.stringify([null]);
+  } catch (e) {
+    return JSON.stringify([null, false]);
+  }
+})()
+"""
+
+
+def value_of_js(locs: list[str]) -> str:
+    """生成 deepAll 值读取 JS（Runtime.evaluate 的 expression）。纯函数。"""
+    return _VALUE_OF_JS.replace("{locs_json}", json.dumps(locs, ensure_ascii=False))
+
+
 async def locate(client, tabs: dict, tid: str, locs: list[str],
                  timeout: float = 10.0) -> dict | None:
     """候选链按序试：首个命中即返回 {rect, tag, text, id, name, classes,

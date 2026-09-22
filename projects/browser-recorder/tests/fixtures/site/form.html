@@ -9,10 +9,21 @@
   <label>标题 <input name="title" type="text" data-testid="title-input"></label><br>
   <label>内容 <textarea name="body" data-testid="body-input"></textarea></label><br>
   <label>密钥 <input name="secret" type="password" data-testid="secret-input"></label><br>
+  <label>shadow <formitem-shadow></formitem-shadow></label><br>
   <button type="submit" data-testid="submit-btn">提交</button>
 </form>
 <div class="ok" id="result" hidden></div>
 <p><a href="/index.html" target="_blank" data-testid="newtab-link">新 tab 打开首页</a></p>
+<script>
+// shadow 穿透值复检靶（formitem-shadow）：输入框藏在 open shadow root 里，
+// act 的裸 querySelector 复检/降级 JS 打不进去（T7 断层），flow 层
+// _deep_recheck_value 的 deepAll 穿透读值在这里验证。
+customElements.define('formitem-shadow', class extends HTMLElement {
+  connectedCallback() {
+    const sr = this.attachShadow({mode: 'open'});
+    sr.innerHTML = '<input type="text" data-testid="shadow-input" value="">';
+  }
+});</script>
 <script>
 function submitForm(e) {
   e.preventDefault();
