@@ -626,6 +626,43 @@ def test_run_flow_step_from_prepends_open(monkeypatch):
     asyncio.run(_run())
 
 
+def test_run_flow_step_from_prepends_latest_open(monkeypatch):
+    """min→max 修正：多 open 流程（open A → 中间步 → open B → 后续步）
+    从 B 之后续跑时，补回的应是最接近续跑点的 open B（n=3）而非最早的
+    open A（n=1）——补 A 会落在错误页面。
+    """
+    tmp = pathlib.Path(tempfile.mkdtemp())
+
+    async def fake_locate(client, tabs, tid, locs, timeout=10):
+        return dict(HIT)
+
+    async def fake_act(client, tabs, tid, a, on_dispatch=None):
+        if on_dispatch:
+            on_dispatch("trusted")
+        return {"dispatch": "trusted", "check": True}
+
+    _patch(monkeypatch, fake_locate, fake_act)
+
+    async def _run():
+        # step_from=4：n<4 的 open 有 n=1（A）和 n=3（B）——须补 B
+        h = FakeHarness(tmp)
+        flow = {"name": "t", "steps": [
+            {"n": 1, "desc": "打开A", "act": "open", "value": "http://a/"},
+            {"n": 2, "desc": "点2", "act": "click", "loc": ["css:#a"]},
+            {"n": 3, "desc": "打开B", "act": "open", "value": "http://a/b"},
+            {"n": 4, "desc": "点4", "act": "click", "loc": ["css:#b"]},
+            {"n": 5, "desc": "点5", "act": "click", "loc": ["css:#c"]},
+        ]}
+        r = await run_flow(h, flow, step_from=4)
+        assert r["ok"] is True
+        ns = [p["n"] for k, p in h.emitted if k == "drive_step"]
+        assert ns == [3, 4, 5], "补回的应是最近一次 open（n=3，open B）"
+        assert h.nav_url == "http://a/b", "导航到 open B 的地址，而非 open A"
+        h.close()
+
+    asyncio.run(_run())
+
+
 def test_run_flow_wait_none_skips_post_wait(monkeypatch):
     """终审 Minor-2：wait:"none" 跳过后置等待——wait_stable 调用数只剩
     locate 重试循环里那次前置（1 次）；缺省 settle 是前置+后置（2 次）。

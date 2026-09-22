@@ -155,6 +155,7 @@ def drive_cmd(flow_file, out_root, profile, headless, no_record, vars_,
             - drive_done：全部步跑完（ok=True）
             - drive_fail：步失败/热键停止（run_flow 返回 exit 3）
             - invalid：run 期 FlowError（flow 格式级错误，exit 4）
+            - interrupt：run 期浏览器侧异常（崩溃/连接断，exit 3）
             """
             if h.body_tasks:  # 在途 _after_shot / response_body 抓取
                 await asyncio.wait(set(h.body_tasks),

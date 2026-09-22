@@ -27,7 +27,7 @@ harness.stop_event，已置位 → _fail("hotkey-stop") → exit 3（证据包�
   响应（resp_log 是跨全流程的 200 条滑动窗口，全窗口扫描会把几十步前的
   同 URL 旧响应误判为命中）；
 - I-2 --step-from 续跑：过滤后不含任何 open 时自动补回 n < step_from 中
-  最小的 open 步（harness 起点 about:blank，无起点导航后续步必 miss）；
+  最接近续跑点的 open 步（harness 起点 about:blank，无起点导航后续步必 miss）；
 - wait:"none"：跳过后置等待（load_flow 校验 wait 枚举 settle/none/nav）。
 """
 from __future__ import annotations
@@ -162,12 +162,13 @@ async def run_flow(harness, flow: dict, env=None, dry_run=False,
         if not any(s["act"] == "open" for s in steps):
             # 续跑补起点导航（I-2）：harness 起点恒 about:blank，过滤把
             # n=1 的 open 滤掉后后续步的 locate 全落在空白页上必 miss。
-            # 只补「n < step_from 中最小的 open」——多 open 流程（中途
-            # 站内跳转）续跑时回到最近一次起点即可，早前的 open 无意义。
+            # 只补「n < step_from 中最大的 open」（最接近续跑点的那个）——
+            # 多 open 流程（中途站内跳转）续跑时回到最近一次起点即可，
+            # 早前的 open 无意义。
             pre_opens = [s for s in flow["steps"]
                          if s["act"] == "open" and s["n"] < step_from]
             if pre_opens:
-                steps = [min(pre_opens, key=lambda s: s["n"])] + steps
+                steps = [max(pre_opens, key=lambda s: s["n"])] + steps
     steps_done = 0
     for s in steps:
         # 0. 热键停止（I-1）：drive 模态的 control_stop 热键置位 stop_event
