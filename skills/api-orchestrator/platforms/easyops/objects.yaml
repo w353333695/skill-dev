@@ -1678,10 +1678,12 @@ api_behavior:
       ⚠️工具脚本须【自包含】（不得 import 外部 .py；调 cmdb/easyops 用 py2 stdlib urllib2 + EASYOPS_*）——见 systems.yaml 顶层 platform_conventions.code。
   builtin_vars:
     rule: |
-      工具脚本运行时的内置变量（agent 侧环境变量；源码 internal/execution/param/param.go:64-96 + cmd/tool_service/conf/internal.param.default.yaml）。
-      ⚠️ 纠偏：场景文件提到的 __instance__/__host__/${cmdb.xxx} 在 tool_service 源码里【不存在】；真实机制是下面这些 EASYOPS_* 环境变量 + cmdbInstance 类型输入参数（按执行目标注入实例）。
+      工具脚本运行时的内置变量（源码 internal/execution/param/param.go:64-96 + cmd/tool_service/conf/internal.param.default.yaml）。
+      ⚠️ 纠偏：场景文件提到的 __instance__/__host__/${cmdb.xxx} 在 tool_service 源码里【不存在】；真实机制是下面这些 EASYOPS_* 变量 + cmdbInstance 类型输入参数（按执行目标注入实例）。
+      ⚠️ 注入形态（2026-09-23 .26 复核）：【脚本头全局变量，非进程环境变量】——执行器拼 NAME="""值""" 注入
+      脚本 header（详见 tool_param_injection）。脚本取值必须 globals() 优先 / 直接引用，os.environ 兜底。
       基础（必注入）：EASYOPS_SCRIPT_TYPE / EASYOPS_PARSER / EASYOPS_EXEC_USER / EASYOPS_TOOL_ID / EASYOPS_TOOL_NAME / EASYOPS_NEED_NOTIFY / EASYOPS_ORG / EASYOPS_USER / EASYOPS_AUTHORIZATION_TOKEN / EASYOPS_FLOW_TASK_ID（流程触发时）/ EASYOPS_AGENTS（feature flag）。
-      服务发现（脚本反查平台服务）：EASYOPS_CMDB_HOST / EASYOPS_CMDB_SERVICE_HOST / EASYOPS_TOOLS_HOST / EASYOPS_OPEN_API_HOST / EASYOPS_SECRET_HOST / EASYOPS_COMMAND_HOST / EASYOPS_NOTIFY_HOST / EASYOPS_DEPLOY_HOST / EASYOPS_EASYFLOW_HOST / EASYOPS_APPCONFIG_HOST / EASYOPS_CONSOLE_URL 等。
+      服务发现（脚本反查平台服务；🔴注入清单【不含 data_exchange】——连 8152 须借 EASYOPS_CMDB_HOST/EASYOPS_CMDB_SERVICE_HOST 的 host 拼）：EASYOPS_CMDB_HOST / EASYOPS_CMDB_SERVICE_HOST / EASYOPS_TOOLS_HOST / EASYOPS_OPEN_API_HOST / EASYOPS_SECRET_HOST / EASYOPS_COMMAND_HOST / EASYOPS_NOTIFY_HOST / EASYOPS_DEPLOY_HOST / EASYOPS_EASYFLOW_HOST / EASYOPS_APPCONFIG_HOST / EASYOPS_CONSOLE_URL 等。
       条件注入：EASYOPS_ENCRYPT_KEY/IV（仅当工具有 encryptedString 输入；脚本 DecryptString 用）/ EASYOPS_SCHEDULER_ID+TRIGGER（仅定时调度触发）。
       agent 自取：EASYOPS_LOCAL_IP（本机 IP，从 sysconf.ini）/ EASYOPS_BASE_PATH（默认 /usr/local/easyops）。
       实操：拿本机 IP 用 $EASYOPS_LOCAL_IP；拿 org/user/token 用 $EASYOPS_ORG/$EASYOPS_USER/$EASYOPS_AUTHORIZATION_TOKEN；要 CMDB 实例作输入就在 inputs 定义 type:cmdbInstance 参数（平台按目标注入），别在脚本写 ${cmdb.xxx}。
@@ -1712,6 +1714,10 @@ api_behavior:
       · gzip.compress 无（py3 才有）→ gzip.GzipFile(fileobj=StringIO(), mode="wb").write()
       · open("w").write(bytes) 在 py3 又炸 → 写文件用 "wb"+encode 或按 PY2 分支
       · py2 兼容代码里的前向引用：模块顶部配置段若调用后文才定义的 helper（如 _text）会 NameError
+      · json.dumps(ensure_ascii=False) 遇「unicode + 裸中文 str(bytes) 混树」在 ''.join(chunks)
+        UnicodeDecodeError（2026-09-23 告警转事件工单 v2.4 实测）→ 双保险：非 ASCII 字面量全 u''
+        前缀 + 脚本头 setdefaultencoding('utf-8') 兜底（对齐 onload 脚本家族惯例）
+      · py2 沙箱 json 输出防混树的检查法：源码级扫「非 u 前缀且含非 ASCII 的字符串字面量」为零残留
       本地调试兜底：脚本可加 EASYOPS_TOOL_INPUT(JSON)/argv k=v 双兜底，与平台变量注入共存。
   package_format:
     rule: |
@@ -1725,13 +1731,95 @@ api_behavior:
       字段序列化靠 Go struct 的 export tag 分流（export:"dat"→dat 文件，export:"config"→config 文件）。导入是 upsert（toolId 锚定）。
       无编译步骤——工具定义 ↔ tar.gz 是纯序列化往返；运行时执行器把 SDK 库（按 type 选 main.sh/main.py/...）+ EASYOPS_* header + 用户 content 拼成脚本下发 agent。
       开发新工具包（承接工具包开发需求）：产出 dat+config+script 三件套（+ 可选 libs）打成 tar.gz；script 须【自包含】（py2，不 import 外部 .py，见 platform_conventions.code），用 PutStr/PutRow 回吐输出。
-      ── dat/config 实操细节（2026-08-26 fintech 工具包开发实测）──
+      ── dat/config 实操细节（2026-08-26 fintech 工具包开发实测 + 2026-09-23 .26 告警工具系列复核）──
       · dat.package.type 写死 "3"（export.go:236 硬编码，与脚本语言无关，别动）；脚本语言标记在【config 的顶层 type 字段】（"python"/"shell"/...，ToolVersion 层 tool_version.go:108 export:"config"）——config 漏 type 平台按默认类型渲染脚本。
       · dat 结构 {package: {...}, version: {versionId, name, packageId...}}；顶层目录名=工具中文名。
+      · 🔴packageId 即 toolId（upsert 锚点，生成后不可变）：【新建工具必须预生成 32hex 填 dat.package.packageId + dat.version.packageId】——留空导入报 100011 ERR_INTERNAL（2026-09-23 实测）；已有工具升级时保持原值不动。
+      · 🔴versionId 双写律（改版重导）：config.vId 与 dat.version.versionId 必须【同次换成同一个新 32hex 值】——只换一处就撞线上已有 versionId，导入报 133039「工具导入时，存在冲突」（2026-09-23 实测）。版本号生成惯例 md5(用途-时间戳)。
+      · 🔴vName 也可能撞 133039：平台上有人用 UI 手工编辑保存过同名版本（vName 占位）——对策跳版本号（如 v2.3→v2.4），不动他人版本保留历史。dat.version.name 是时间戳字符串，每次重打换新（版本排序线索）。
+      · config 的 vName/vDesc 是 UI 版本列表显示名与说明——vDesc 写清变更内容（线上排查「这版改了啥」的唯一线索）。
       · config 需完整 ToolConfig 骨架（batchStrategy/containerSandbox/execPreAuth/blackList/whiteList/toolLibs 等空值也要给），inputs/outputDefs/tableDefs 按需——骨架缺字段导入可过但前端渲染异常。
       · cmdbInstance(s) 入参的候选过滤 cmdbQuery 见 autoops_tool_input 字段说明（$like 支持、$regex 不支持、query 是序列化 JSON 字符串）。
       · 实例选择器增强字段：selector=cmdb.range.instance.query（带查询过滤）/ cmdbSelector=simple-select+cmdbOptionSetting{displayFields,sortFields}（简表选择自定义列）。
       · 导入通道：SDK easyops_client.import_tool（multipart，api-cli 不支持）；upsert 同 packageId 更新并派生新版本，get_tool data 复核 type/cmdbQuery 生效。
+      · 🔴导入 code=0 ≠ 内容生效（响应 data.tools 恒空数组）——导入后必验：GET /tools/{toolId}?vId=$latest_version 的 content 与本地脚本逐字节比对（2026-09-23 v2.3 事故：线上内容≠包内容即靠此步发现）+ inputs 结构逐字段复核（cmdbInstances 的 cmdbObjectId/cmdbAttrId/multiple 可能不存活）。
+      · 导入版 envType=development 是常态——多数环境不走 production 发布（全历史版本均 development，执行取 latest 即生效）；$latest_production 对纯 development 工具报 100005，用 $latest_version/$latest_development。
+      · 打包卫生：tar 用 --numeric-owner --owner=0 --group=0 -m（去时间戳/属主）；本地 py_compile 测试后必须 rm -rf __pycache__ 再打包（曾打进 tar 污染包）；AppleDouble ._easyPackageConfig.dat 是正常成员（平台导出带的元信息），保留。
+      · 入参设计（实测有效）：cmdbInstances 多选配 cmdbAttrId=instanceId → 执行时平台解析成该字段值的数组注入脚本（parser.go:216-224；流程/API 注入可能是逗号串/JSON 串，脚本侧三形态兼容）；枚举入参首项放「所有」（默认）显式表达不过滤；入参解析三兜底 平台注入 globals → 同名 env → argv k=v。
+
+  package_dev_workflow:
+    rule: |
+      工具包开发全流程（2026-09-23 告警处理工具 v1→v6 六版迭代沉淀；承接「开发新工具/改版」需求的标准工序）：
+      ── 1. 开发 ──
+      · 脚本骨架：自包含 py2/3 兼容（见 tool_py2_pitfalls / tool_script_no_future）；参数解析三兜底
+        （globals 平台注入 → env → argv k=v）；取连接信息用 globals() 优先（见 tool_param_injection）。
+      · config inputs 按需选型：枚举（enum+「所有」哨兵）/ cmdbInstances 多选（cmdbAttrId 锚字段）/
+        string（regex 校验）；outputDefs 声明 PutStr 输出名（不声明不回流）。
+      ── 2. 本地验证（五级漏斗，每级各抓一类 bug）──
+      ① py3 编译 + py2 语法（lib2to3 parse）双过；
+      ② 编排侧功能测（env 注入形态，真网络只读探针）；
+      ③ agent 形态模拟测（globals 注入 exec，验证 host/org 解析）；
+      ④ 导入后 content 逐字节比对 + inputs 复核（见 package_format 导入必验）；
+      ⑤ agent 真跑（/tools/execution，见下）——编排侧全绿的包 agent 上连炸过三次
+        （globals 注入/写路径/写权限），不可省。
+      ── 3. agent 真跑（调试执行 API）──
+      · POST /tools/execution {toolId, vId: "$latest_development", needNotify: "false",
+        agents: ["<ip>"], inputs: {参数名: 值}}——🔴needNotify 必须传【字符串 'false'】
+        （传布尔 jsonpb 解析直接 100000：expects " or n, but found f）。
+      · 轮询 GET /tools/execution/result/{execId}（路径形态 result/{id} 非 {id}/result）；
+        每主机 stdout + 完整 traceback 在 data.agentData.{ip}.msg——报错排查看这里。
+      · 沙箱约束：以 nobody 用户运行 → /tmp 一级子目录可能无写权（导出目录需回退链：
+        指定目录→脚本缓存目录→cwd→/tmp）；沙箱 127.0.0.1 的服务视图可能与注入 host 不同
+        （实测 8152 报 No leader partition）——一律走注入的 EASYOPS_*_HOST。
+      ── 4. 测试纪律（流血换来的）──
+      · 🔴破坏性操作（删除/覆盖）测试只用精确 ID filter（探针行：唯一 eventId/instanceId）——
+        宽 filter + confirm 真删了 26 条告警且不可恢复（2026-09-23 事故）。验证后删除探针自证清理。
+      · 写路径验证顺序：先 count 空匹配探针（确认无副作用）→ upsert 探针行 → 查回 → 改 → 删 → count=0。
+
+  # ===========================================================================
+  # 告警事件（alert/monitor_event）—— 存储架构 + 策略溯源 + 枚举
+  # （2026-09-23 .26 告警处理工具 v1-v6 开发实测 + alert_service/alert_channel_go 源码定案）
+  # ===========================================================================
+  monitor_event:
+    description: |
+      告警事件的 columndb 存储架构与读删写契约。告警相关编排（读取/导出/删除/统计）的领域知识。
+    source: data/sources/backend/ITSM/alert_service/internal/monitoreventop/monitor_event.go:45-49 + main_start.go:465-491
+    fields:
+      表分工:
+        rule: |
+          三张表、库名=org 号（源码 fmt.Sprintf("%d", org)）：
+          · monitor_event@EASYOPS —— 全量历史告警【默认查这表】：含未恢复+已恢复，
+            按月分 partition（monthly.NewCollection）。前端告警列表页 SearchMonitorEvent
+            （monitor_event_custom）查的就是它，isRecover 字段过滤「全部/未恢复/已恢复」。
+          · monitor_event_last@EASYOPS —— 当前告警热视图：仅活跃（未恢复）告警；
+            🔴恢复后行被移走（归档到历史表）——not_recover 系列端点的数据源。
+            活跃期同一 eventId 两表并存（last 是热视图）。
+          · monitor_group_event@EASYOPS —— 聚合告警（本 org 可为空）。
+          ⚠️删除/清理告警须双表联动（删历史补删 last 或反之），单删一张另一张留残影。
+      时间双轨:
+        rule: "🔴表内 time 字段=毫秒；startTime/notifyTime/processTime/insertTime=Int32【秒】（塞毫秒溢出报 300313 overflowed for the type Int32）。请求参数 start_time/end_time=毫秒。CSV/展示渲染注意除 1000。"
+      必填列:
+        rule: "写 monitor_event* 表必填列：batchId/alertId/eventId（缺报 missing column）；batchId 形如 <alertId>-<秒级startTime>。"
+      user_vs_receivers:
+        rule: "user 字段=用户名列表（如 [\"ahuatan\",\"wwy\"]，告警责任人/待响应人语义）；alertReceivers=通知接收人列表（[{method,name,showName}]）——两个不同概念，处理人取 user、通知审计看 alertReceivers。"
+    strategy_traceability:
+      rule: |
+        告警行的策略溯源字段（「这告警是哪个策略产生的」）：
+        · ruleId → CMDB 模型 ALERT_RULE（告警规则；属性含 name/objectId 监控对象/enabled/priority）。
+          反查：POST /v3/object/ALERT_RULE/instance/_search {"query":{"instanceId":"<ruleId>"}}。
+        · alertRuleId → CMDB 模型 ALERT_CONDITION_STRATEGY（告警条件策略——阈值/持续时间）。
+        · alertRuleVersion=策略版本号快照；strategyType=策略类型（如 alertConditionStrategy）。
+        · triggeredCondition=触发条件完整快照 JSON（指标/阈值/比较符/级别）——不查 CMDB 直接看「为什么响」。
+        · 辅助：metricName/metricThreshold/metricThresholdComparator/metricUnit。
+        后端同路径佐证：alert_channel_go remotes/rule/rule.go:657 GetAlertRuleById 也是 instanceId 反查。
+      enum_constants:
+        rule: |
+          level/status 枚举全集（源 alert_channel_go/internal/event/constant/constant.go:173-176
+          + pkg/event/constant/constant.go:3-8）：
+          · level：critical(严重)/warning(警告)/info(通知)/message(消息)/emergency(紧急，预留)。
+          · status：unsent(未通知)/sent(已通知)/group(分组)/suppress(抑制-分组内原始事件)/
+            block(屏蔽)/converged(收敛)/inhibition(抑制)。
+          工具入参做枚举下拉时首项放「所有」=不过滤（填错值静默查 0 条）。
 
   # ===========================================================================
   # ITSM 表单接口级行为（flowable_service）—— 编排时必须知道

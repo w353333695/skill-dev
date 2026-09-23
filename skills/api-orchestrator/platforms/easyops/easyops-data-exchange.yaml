@@ -184,3 +184,125 @@ resources:
           properties:
             code: { type: integer }
             data: { type: object, additional_properties: true }
+
+# -----------------------------------------------------------------------------
+# 资源 3：tsdb_column CRUD —— 列存表直操作（读/写/删；2026-09-23 .26 告警工具实测接入）。
+# 与 column_history（聚合统计）同源 database_proxy/route.go:10-20，但这是行级 CRUD 视角。
+# 常驻表：monitor_event@EASYOPS（全量历史告警，按月 partition）、monitor_event_last@EASYOPS
+# （当前告警热视图——恢复后行被移走）、monitor_group_event@EASYOPS（聚合告警）等 @EASYOPS 表。
+# 🔴通用契约：
+#   · database=org 号字符串；object_id(s)=表名（含 @EASYOPS 后缀）。
+#   · 🔴时间双轨：请求 start_time/end_time 是【毫秒】；表内 time 字段毫秒、
+#     startTime/notifyTime/processTime/insertTime 是【Int32 秒】（塞毫秒溢出报 300313
+#     "has overflowed for the type Int32"）。
+#   · filter：精确值 + {$gte/$lte/$in} 操作符（对象直传）。
+#   · 响应双层 wrapper {code, data: {code, total/count, data}}——取数剥两层。
+#   · 必填列（写 monitor_event* 时）：batchId/alertId/eventId（缺报 missing column）。
+# -----------------------------------------------------------------------------
+  tsdb_column:
+    description: 列存表行级 CRUD（database_proxy tsdb_column/* 端点族）。检索/计数/按filter更新/按_row_id更新/upsert/物理删除——告警事件表直操作的主通道（2026-09-23 .26 告警处理工具 v1-v6 全链实测）。
+    path: ""
+
+    operations:
+      # ---------- 检索（POST search-with-skip）—— 行级查询主端点 ----------
+      search:
+        description: 行级检索（分页）。🔴分页参数是 skip/limit（传 page/page_size 不报错但静默失效，实测每页恒返 30）；字段列表 filed/fields 双名都认；sorts=[{field,descending}]；without_total 翻页优化。filter 支持精确+{$gte/$lte/$in}。响应 {code,data:{total,data[]}}。
+        method: POST
+        path: /api/v1/data_exchange/tsdb_column/search-with-skip
+        body:
+          type: object
+          required: [database, object_ids, start_time, end_time]
+          properties:
+            database:    { type: string, description: "库（org 号）" }
+            object_ids:  { type: array, items: { type: string }, description: "表名列表" }
+            start_time:  { type: integer, description: "毫秒（0 起）" }
+            end_time:    { type: integer, description: "毫秒（上限 9007199254740991）" }
+            filter:      { type: object, additional_properties: true, description: "过滤（精确值或 $gte/$lte/$in 操作符对象）" }
+            fields:      { type: array, items: { type: string }, description: "返回字段（['*'] 全量；别名 filed 亦认）" }
+            skip:        { type: integer, description: "偏移（🔴不是 page）" }
+            limit:       { type: integer, description: "页大小（🔴不是 page_size）" }
+            sorts:       { type: array, description: "[{field,descending}]" }
+            without_total: { type: boolean, description: "翻页时免 total 优化" }
+
+      # ---------- 计数（POST count）----------
+      count:
+        description: 行计数（同 filter/time 契约）。响应 data.count。
+        method: POST
+        path: /api/v1/data_exchange/tsdb_column/count
+        body:
+          type: object
+          required: [database, object_ids, start_time, end_time]
+          properties:
+            database:   { type: string }
+            object_ids: { type: array, items: { type: string } }
+            start_time: { type: integer, description: "毫秒" }
+            end_time:   { type: integer, description: "毫秒" }
+            filter:     { type: object, additional_properties: true }
+
+      # ---------- upsert（PUT upsert_by_search_keys）—— 可靠写入主路径 ----------
+      upsert:
+        description: 按搜索键 upsert（🔴写主路径；tsdb_column/insert 只进 tmp 表有 flush 延迟不可立查——实测 insert 返回行但 search 查不到）。search_keys 匹配（如 ['eventId']）命中则更新否则插入。响应 {insert_count, update_count, rids[]}。写 monitor_event* 必填 batchId/alertId/eventId + 时间双轨（time 毫秒、startTime 等秒）。
+        method: PUT
+        path: /api/v1/data_exchange/tsdb_column/upsert_by_search_keys
+        body:
+          type: object
+          required: [database, object_id, search_keys, start_time, end_time, data]
+          properties:
+            database:    { type: string }
+            object_id:   { type: string, description: "单表（非复数）" }
+            search_keys: { type: array, items: { type: string }, description: "匹配键字段名" }
+            start_time:  { type: integer, description: "毫秒（0）" }
+            end_time:    { type: integer, description: "毫秒（9007199254740991）" }
+            data:        { type: array, items: { type: object }, description: "行列表（必填列+时间双轨）" }
+
+      # ---------- 按 filter 更新（PUT update_by_filter）----------
+      update_by_filter:
+        description: 按 filter 批量更新。响应 data.update_count。
+        method: PUT
+        path: /api/v1/data_exchange/tsdb_column/update_by_filter
+        body:
+          type: object
+          required: [database, object_id, filter, update_data]
+          properties:
+            database:    { type: string }
+            object_id:   { type: string }
+            filter:      { type: object, additional_properties: true }
+            update_data: { type: object, additional_properties: true, description: "要改的字段值" }
+
+      # ---------- 按 _row_id 更新（PUT update_by_id_v2）----------
+      update_by_ids:
+        description: 按行 id 精确更新。data 每行必须带 _row_id（源码注释铁证 column_instance.pb.go:1733）+ 要改字段。响应 {update_count, update_fail_count}。
+        method: PUT
+        path: /api/v1/data_exchange/tsdb_column/update_by_id_v2
+        body:
+          type: object
+          required: [database, object_id, data]
+          properties:
+            database: { type: string }
+            object_id: { type: string }
+            data:      { type: array, items: { type: object }, description: "[{...,_row_id}]" }
+
+      # ---------- 删除（POST delete_by_filter）—— 物理删 ----------
+      delete:
+        description: 按 filter 物理删除（不可恢复；无按 id 删除端点）。空匹配返回 delete_count=0（可安全探针）。响应 data.delete_count。
+        method: POST
+        path: /api/v1/data_exchange/tsdb_column/delete_by_filter
+        body:
+          type: object
+          required: [database, object_id, filter]
+          properties:
+            database:  { type: string }
+            object_id: { type: string, description: "单表（非复数）" }
+            filter:    { type: object, additional_properties: true }
+
+      # ---------- 插入（POST insert）—— ⚠️只进 tmp 表，避免用 ----------
+      insert:
+        description: 批量插入。⚠️实测只写 tmp 表（tmp_table_config.enabled=true，flush 延迟）插入返回成功但 search-with-skip 立查不到——可靠写入走 upsert。record 是 {object_id, data} 嵌套结构（非平铺行）。
+        method: POST
+        path: /api/v1/data_exchange/tsdb_column/insert
+        body:
+          type: object
+          required: [database, record]
+          properties:
+            database: { type: string }
+            record:   { type: array, items: { type: object }, description: "[{object_id, data:{...}}]（嵌套非平铺）" }
