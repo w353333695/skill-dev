@@ -21,6 +21,8 @@ EasyOps 工具：告警处理（读取 / 导出 CSV / 删除 / columndb CRUD）
 
 入参（agent 平台注入 / CLI k=v 双兜底）：
     action      必填，枚举：导出 / 删除（CLI 另支持 查询）
+    alert_rule  可选，告警规则筛选（cmdbInstances 多选 ALERT_RULE；空=所有规则）
+                ——平台解析 cmdbAttrId=instanceId 注入 instanceId 列表，filter ruleId $in
     time_range  时间范围，\d+[y|m|d]（如 30d/6m/1y），不填=所有时间
     export_dir  导出位置，默认 /tmp/easyops/alert_export
     table       数据表，枚举 历史告警（默认·全状态）/ 当前告警（仅活跃）
@@ -84,6 +86,7 @@ CSV_COLUMNS = [
     'startTime', 'time', 'notifyTime', 'processTime', 'insertTime',
     'responseTime', 'suspendTime', 'suspendEndTime',
     'responder', 'handlers', 'notifies', 'relatedMetricData',
+    'ruleName',
     '_row_id',
 ]
 
@@ -95,6 +98,12 @@ CSV_RENDERERS = {
     'processTime': lambda v: fmt_sec(v),
     'insertTime': lambda v: fmt_sec(v),
 }
+
+# 告警规则 CMDB 反查（ruleId/alertRuleId → 名字）
+CMDB_PORT = 8079
+ALERT_RULE_OBJECT = 'ALERT_RULE'                  # 告警规则（ruleId 锚）
+ALERT_CONDITION_OBJECT = 'ALERT_CONDITION_STRATEGY'   # 告警条件策略（alertRuleId 锚）
+_RULE_NAME_CACHE = {}
 
 
 def fmt_ms(v):
@@ -317,6 +326,47 @@ class AlertToolClient(object):
         return int(inner.get('delete_count') or 0)
 
     # ------------------------------------------------------------------
+    # CMDB 反查：告警规则 / 条件策略名
+    # ------------------------------------------------------------------
+    def lookup_rule_names(self, rule_id):
+        """ruleId → ALERT_RULE 名（带缓存）。查不到返回 ''。"""
+        if not rule_id or rule_id in _RULE_NAME_CACHE:
+            return _RULE_NAME_CACHE.get(rule_id, '')
+        name = ''
+        try:
+            _, resp = self._request_cmdb('/v3/object/%s/instance/_search' % ALERT_RULE_OBJECT, {
+                'page': 1, 'page_size': 3, 'fields': ['instanceId', 'name'],
+                'query': {'instanceId': rule_id}})
+            lst = ((resp.get('data') or {}).get('list')
+                   if isinstance(resp, dict) else None) or []
+            if lst:
+                name = lst[0].get('name') or ''
+        except Exception:
+            pass
+        _RULE_NAME_CACHE[rule_id] = name
+        return name
+
+    def _request_cmdb(self, path, body):
+        """CMDB :8079 请求（复用 base_url host，换 CMDB 端口）。"""
+        u = self.base_url.split('//', 1)[1]
+        h = u.split(':', 1)[0]
+        conn = _http_client.HTTPConnection(h, CMDB_PORT, timeout=self.timeout)
+        try:
+            conn.request('POST', path, body=json.dumps(body),
+                         headers={'org': str(self.org), 'user': str(self.user),
+                                  'Host': self.host, 'Content-Type': 'application/json'})
+            resp = conn.getresponse()
+            raw = resp.read()
+            status = resp.status
+        finally:
+            conn.close()
+        text = raw.decode('utf-8', 'replace')
+        try:
+            return status, json.loads(text)
+        except ValueError:
+            return status, text
+
+    # ------------------------------------------------------------------
     # CSV 导出
     # ------------------------------------------------------------------
     def export_csv(self, rows, export_dir):
@@ -338,13 +388,18 @@ class AlertToolClient(object):
         for cand in candidates:
             try:
                 if not os.path.isdir(cand):
-                    os.makedirs(cand)
+                    os.path.isdir(cand) or os.makedirs(cand)
                 path = os.path.join(cand, 'alerts_%s.csv' % time.strftime('%Y%m%d_%H%M%S'))
                 with open(path, 'wb' if IS_PY2 else 'w') as f:
                     if not IS_PY2:
                         f.write(u'﻿')           # BOM（Excel 中文）
                     writer = csv.writer(f)
                     cols = list(CSV_COLUMNS)
+                    # join 规则名列（CSV_RENDERERS 无法表达跨行查，导出前预填 rows）
+                    for r in rows:
+                        rid = r.get('ruleId') or ''
+                        if rid and 'ruleName' not in r:
+                            r['ruleName'] = self.lookup_rule_names(rid)
                     for r in rows:
                         for k in r:
                             if k not in cols:
@@ -388,7 +443,8 @@ def parse_range(range_str):
 
 def parse_args(argv):
     cfg = {'action': u'导出', 'time_range': '', 'export_dir': '/tmp/easyops/alert_export',
-           'status': '', 'level': '', 'confirm': '', 'table': u'历史告警'}
+           'status': '', 'level': '', 'confirm': '', 'table': u'历史告警',
+           'alert_rule': ''}
 
     def _coerce(key, val):
         if IS_PY2 and isinstance(val, str):
@@ -419,6 +475,30 @@ def parse_args(argv):
     return cfg
 
 
+def parse_rule_ids(cfg):
+    """alert_rule 入参 → instanceId 列表。
+
+    形态兼容：平台 cmdbInstances 多选注入 list（cmdbAttrId=instanceId 解析后）；
+    CLI / 流程注入可能是 逗号串/单值/JSON串。空 → []（=所有规则）。
+    """
+    v = cfg.get('alert_rule')
+    if not v:
+        return []
+    if isinstance(v, (list, tuple)):
+        ids = v
+    else:
+        s = v.strip()
+        if s.startswith('['):
+            try:
+                ids = json.loads(s)
+            except ValueError:
+                ids = [x for x in s.strip('[]').split(',') if x.strip()]
+        else:
+            ids = s.split(',')
+        ids = [str(x).strip() for x in ids]
+    return [x for x in ids if x]
+
+
 TABLE_CHOICES = {u'历史告警': EVENT_HISTORY_TABLE, u'当前告警': EVENT_LAST_TABLE}
 
 
@@ -429,7 +509,8 @@ def pick_table(cfg):
 
 
 def build_filter(cfg, start_ms):
-    """入参 → columndb filter。时间【毫秒】$gte；status/level 精确。"""
+    """入参 → columndb filter。时间【毫秒】$gte；status/level 精确；
+    alert_rule（ALERT_RULE instanceId 列表）→ ruleId $in。"""
     f = {}
     if start_ms:
         f['time'] = {'$gte': start_ms}
@@ -437,6 +518,9 @@ def build_filter(cfg, start_ms):
         f['status'] = cfg['status']
     if cfg.get('level'):
         f['level'] = cfg['level']
+    rule_ids = parse_rule_ids(cfg)
+    if rule_ids:
+        f['ruleId'] = {'$in': rule_ids}
     return f
 
 
@@ -453,26 +537,34 @@ def main(argv=None):
     table = pick_table(cfg)
 
     action = cfg['action']
+    rule_desc = u''
+    rule_ids = parse_rule_ids(cfg)
+    if rule_ids:
+        names = [client.lookup_rule_names(r) or r for r in rule_ids]
+        rule_desc = u'，规则[%s]' % u'/'.join(names)
     if action == u'查询':
         rows, total = client.search_alerts(flt, table=table)
-        put_str(u'告警总数: %s（%s，%s）' % (total, range_desc, cfg.get('table') or u'历史告警'))
+        put_str(u'告警总数: %s（%s，%s%s）' % (total, range_desc,
+                                               cfg.get('table') or u'历史告警', rule_desc))
         for r in rows[:20]:
-            put_str(u'  %s [%s] %s' % (r.get('eventId'), r.get('level'),
-                                        (r.get('originContent') or '')[:60]))
+            put_str(u'  %s [%s] %s (%s)' % (r.get('eventId'), r.get('level'),
+                                             (r.get('originContent') or '')[:50],
+                                             client.lookup_rule_names(r.get('ruleId') or '') or r.get('ruleId')))
         return 0
     if action == u'导出':
         rows, total = client.search_alerts(flt, table=table)
-        put_str(u'导出告警: %d/%s 条（%s，%s）' % (len(rows), total, range_desc,
-                                                  cfg.get('table') or u'历史告警'))
+        put_str(u'导出告警: %d/%s 条（%s，%s%s）' % (len(rows), total, range_desc,
+                                                    cfg.get('table') or u'历史告警', rule_desc))
         path = client.export_csv(rows, cfg.get('export_dir'))
         put_str(u'导出完成: %s（%d 字段 x %d 行）' % (path, len(CSV_COLUMNS), len(rows)))
         PutStr('export_path', path)
         return 0
     if action == u'删除':
         n = client.count_alerts(flt, table=table)
-        put_str(u'待删除告警: %d 条（%s，%s）filter=%s' % (n, range_desc,
-                                                          cfg.get('table') or u'历史告警',
-                                                          json.dumps(flt, ensure_ascii=False)))
+        put_str(u'待删除告警: %d 条（%s，%s%s）filter=%s' % (n, range_desc,
+                                                             cfg.get('table') or u'历史告警',
+                                                             rule_desc,
+                                                             json.dumps(flt, ensure_ascii=False)))
         if cfg.get('confirm') not in (u'是', 'true', 'True', '1'):
             put_str(u'未确认（confirm != 是/true）——仅预览未删除。确认请加 confirm=是')
             return 0
