@@ -201,7 +201,8 @@ def lookup_user_fields(name):
 def build_form(alerts, cur_form, batch_id=None):
     """告警列表 → 表单 formData（cur_form 空时按表单模板结构生成）。
 
-    处理人取告警 user 字段（v2.2 改，单用户）——alertReceivers 仅通知接收人不再作处理人源。
+    处理人取批次内所有告警 user 字段合并去重（v2.3 改）——alertReceivers 仅通知
+    接收人不再作处理人源。
     """
     lv = (alerts[0].get("level") or "info").lower() if alerts else "info"
     rows = []
@@ -241,23 +242,18 @@ def build_form(alerts, cur_form, batch_id=None):
             # 🔴handler 必须带真实 instanceId——form_value 运行时只按 instanceId 反查 USER
             # （helper.go:66），空串查不到=下节点处理人为空（2026-09-20 .26 实测）。
             # 前端手动提交是完整实例序列化；脚本回填至少要 {instanceId, name}（instanceId 必须真）
-            # 处理人来源（v2.2 改）：告警 user 字段（单用户）→ 值班组当日班次 → 兜底人(easyops)，
-            # handlerType 记录命中级别。responser 只取一个用户（首人代表）。
-            # 批次内多条告警按序取首条非空 user（各告警 user 可能不同，不假定 alerts[0] 有值）
+            # 处理人来源（v2.3 改）：批次内【所有告警】的 user 字段合并去重（保序）→
+            # 空则值班组当日班次全员 → 兜底人(easyops)，handlerType 记录命中级别。
             import time as _t
             names = []
             for _a in alerts:
                 for _u in (_a.get("user") or []):
                     _u = (_to_unicode(_u) or "").strip()
-                    if _u:
+                    if _u and _u not in names:
                         names.append(_u)
-                if names:
-                    break
-            names = names[:1]
             htype = 'responder'
             if not names:
                 names = lookup_duty_members(_get_duty_group(), _t.strftime('%Y-%m-%d'))
-                names = [names[0]] if names else []
                 htype = 'duty'
             if not names:
                 names = ['easyops']
