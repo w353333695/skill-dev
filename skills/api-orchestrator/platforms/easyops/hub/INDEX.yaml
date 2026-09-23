@@ -481,6 +481,7 @@ items:
       - {date: "2026-09-22", change: "v2.2: 处理人改用告警 user 字段（用户名列表取首人，responser 单用户）；值班链同样取首人；检索 fields 补 user"}
       - {date: "2026-09-23", change: 已导入 .26（upsert v2.2 生效，线上 content 复核 user 链三标记齐全；导入坑同 batch-autofill-onload-package 133039）}
       - {date: "2026-09-23", change: "v2.3: 处理人改告警 user 字段全员去重（v2.2 误截 [:1]）——已导入 .26，线上 content 与包一致"}
+      - {date: "2026-09-23", change: "v2.4: 修 py2 agent 实报 json.dumps UnicodeDecodeError（''.join(chunks)）——PRIORITY/LEVEL_CN 裸中文 label 补 u 前缀 + setdefaultencoding(utf-8) 兜底；复刻报错路径实测过（同告警 syn_recv 表单构建成功，duty 链全员）"}
     scenario: 检索未恢复告警→构建识别和发起表单（等级/优先级/处理人=告警user字段全员/批次/关联告警行）→直接发起工单（事件处理服务）——区别于告警转故障工单（_batch+回填两步）
     notes: "toolId 453cf774e44bdf041a0a0a2feeb8d31f；sandboxRun=true；入参同告警转故障工单（range/auto_create/alert_level/alert_time/duty_group）；防重靠 hasOrder=false+orders 双保险"
     added: "2026-09-20"

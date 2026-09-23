@@ -29,6 +29,13 @@ import time
 
 IS_PY2 = sys.version_info[0] == 2
 
+if IS_PY2:
+    # py2 兜底：json.dumps(ensure_ascii=False) 遇「unicode+非ASCII bytes 混树」在
+    # ''.join(chunks) UnicodeDecodeError（2026-09-23 .26 agent 实测）——与 onload
+    # 填单脚本家族对齐，setdefaultencoding(utf-8) 让 bytes 隐式按 utf-8 解。
+    reload(sys)
+    sys.setdefaultencoding('utf-8')
+
 try:
     _string_types = (str, unicode)  # noqa: F821  (py2)
 except NameError:
@@ -58,12 +65,12 @@ ALERT_LEVEL_TO_INT = {u'info': 0, u'warning': 1, u'critical': 2}
 LEVEL_P = {"critical": {"key": "p1", "label": "P1", "value": "P1"},
            "warning": {"key": "p2", "label": "P2", "value": "P2"},
            "info": {"key": "p4", "label": "P4", "value": "P4"}}
-PRIORITY = {"critical": {"key": "urgent", "label": "紧急", "value": "紧急"},
-            "warning": {"key": "urgent", "label": "紧急", "value": "紧急"},
-            "info": {"key": "normal", "label": "普通", "value": "普通"}}
-LEVEL_CN = {"critical": {"key": "critical", "label": "严重", "value": "严重"},
-            "warning": {"key": "warning", "label": "警告", "value": "警告"},
-            "info": {"key": "notice", "label": "通知", "value": "通知"}}
+PRIORITY = {"critical": {"key": "urgent", "label": u"紧急", "value": u"紧急"},
+            "warning": {"key": "urgent", "label": u"紧急", "value": u"紧急"},
+            "info": {"key": "normal", "label": u"普通", "value": u"普通"}}
+LEVEL_CN = {"critical": {"key": "critical", "label": u"严重", "value": u"严重"},
+            "warning": {"key": "warning", "label": u"警告", "value": u"警告"},
+            "info": {"key": "notice", "label": u"通知", "value": u"通知"}}
 
 
 def _default_host():
