@@ -73,6 +73,11 @@
 * 跑测试：`cd projects/<name> && uv run pytest`。
 * 调 CLI 验证：`uv run --project projects/<name> <cli> ...`。
 * golang project：`cd projects/<name> && go run ./cmd/<name>` 调 CLI、`go test ./...` 跑测试（详见 §3.2）。
+* **CLI 必须有详尽的 `--help`（强制）**：凡命令行形式的程序（project 的 CLI、脚本工具），一律实现 `--help`（click/cobra 自动生成或手写 usage），且内容**尽量详尽**：
+  - 命令 docstring 讲清用途 + 关键语义（停止方式/退出码枚举/安全注意）；
+  - 每个旗子一行说明并注明默认值；安全相关的正确用法直接写进旗子 help（如「密码走环境变量，不落盘」）；
+  - **给 root 和核心子命令放示例命令块**（click 用 docstring 内 `\b` 段，cobra 用 `Example:` 字段）——让零文档使用者 `--help` 第一屏就知道典型用法与工作流链路（如 record → replay → drive）；
+  - 支持 `-h` 短旗子（click: `context_settings={"help_option_names": ["-h", "--help"]}`）；CLI 加 `--version`。
 * **改完立即手动 `git commit`**：工作空间有自动 `chore(ai):` 提交机制，会扫描工作区未提交改动并打包成 message 不准的 commit（还可能混入并发变更）。别留未提交改动去跑长任务。
 * **日志规范（错误必须可定位，fintech-report 实战教训）**：
   - **所有 `except` 分支的 error 日志必须带 `traceback.format_exc()`**——只打 `str(e)` 的话（如 `'unicode' object has no attribute 'get'`）完全无法定位是哪行/哪个函数炸的。

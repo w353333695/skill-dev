@@ -18,12 +18,23 @@ DEFAULT_CHROME = pathlib.Path(
                    str(pathlib.Path.home() / ".cache/ms-playwright/chromium-1208/chrome-linux/chrome")))
 
 
-@click.group()
+@click.group(context_settings={"help_option_names": ["-h", "--help"]})
+@click.version_option(package_name="browser-recorder", prog_name="browser-recorder")
 def main():
-    """browser-recorder：浏览器操作录制 → session.jsonl + 双截图 + PROMPT.md。"""
+    """browser-recorder：浏览器操作录制与重放引擎。
+
+    \b
+    三种用法（录一次 → 自动重放的完整链路）：
+      1. 录制:   browser-recorder record https://example.com
+      2. 转换:   browser-recorder replay sessions/<时间戳目录>
+      3. 重放:   browser-recorder drive flows/<name>.json --dry-run   # 先体检选择器
+                 browser-recorder drive flows/<name>.json             # 正式跑（默认跑即录）
+
+    详见 README（flow.json 全字段说明、退出码、失败协议证据包）。
+    """
 
 
-@main.command("record")
+@main.command("record", no_args_is_help=False)
 @click.argument("start_url", default="about:blank")
 @click.option("--out", "-o", "out_root", default="sessions",
               help="session 输出根目录（默认 sessions/，自动建时间戳子目录）")
@@ -43,6 +54,15 @@ def record_cmd(start_url, out_root, settle_timeout, port, headless, no_sandbox,
     """录制：拉起 Chromium，开始记录操作与网络请求。
 
     停止：页面内 Ctrl+Shift+F9 / 关闭浏览器窗口 / 终端输 q+回车
+
+    \b
+    示例：
+      # 首次录制（默认 profile 保留登录态，下次免登录）
+      browser-recorder record http://172.30.0.90/next/auth/login
+      # 敏感账号一次性录制（不留登录态）
+      browser-recorder record https://example.com --incognito
+      # CI/无 DISPLAY 环境
+      browser-recorder record https://example.com --headless --no-sandbox
     """
     if incognito:
         profile = None
@@ -75,7 +95,11 @@ def record_cmd(start_url, out_root, settle_timeout, port, headless, no_sandbox,
 @main.command("export")
 @click.argument("session_dir", type=click.Path(exists=True, file_okay=False))
 def export(session_dir):
-    """导出 session 目录为 zip（jsonl+screenshots+PROMPT.md）。"""
+    """导出 session 目录为 zip（jsonl+screenshots+PROMPT.md；自动排除 chrome-profile/）。
+
+    示例：browser-recorder export sessions/20260922-153000
+    → 生成 sessions/20260922-153000.zip（交给 browser-manual 生成图文指引/API 报告）
+    """
     src = pathlib.Path(session_dir)
     zip_path = src.with_suffix(".zip")
     with zipfile.ZipFile(zip_path, "w", zipfile.ZIP_DEFLATED) as z:
@@ -109,6 +133,15 @@ def drive_cmd(flow_file, out_root, profile, headless, no_record, vars_,
 
     退出码：0 成功 / 3 步失败（证据包已落盘）或运行中断（浏览器崩溃等）/
     4 flow 格式错误（含变量未定义）
+
+    \b
+    示例：
+      # 选择器体检（不真点，逐步报告命中）——flow 腐化/首跑前必做
+      browser-recorder drive flows/easyops.json --dry-run --headless
+      # 带登录态 + 密码走环境变量正式跑
+      BR_EASYOPS_PW=xxx browser-recorder drive flows/easyops.json -p easyops
+      # 从第 8 步断点续跑（自动补回起点导航）
+      browser-recorder drive flows/easyops.json --step-from 8
     """
     from .flow import FlowError, load_flow, run_flow
     from .harness import SessionHarness
@@ -229,6 +262,13 @@ def replay_cmd(session_dir, out, name, keep_fragile):
     兜底的步并出报告）。产物必须过 load_flow 校验。
 
     退出码：0 成功 / 1 转换产物未过校验（含 session.jsonl 缺失）
+
+    \b
+    示例：
+      # 录制 session 转可重放的 flow（产物 flows/<name>.json + .report.md）
+      browser-recorder replay sessions/20260922-153000 --name easyops-create
+      # 转完立刻 dry-run 体检命中率（自验证回路）
+      browser-recorder drive flows/easyops-create.json --dry-run
     """
     from .flow import FlowError, load_flow
     from .replay import session_to_flow
