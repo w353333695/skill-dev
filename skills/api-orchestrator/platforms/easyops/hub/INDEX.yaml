@@ -498,3 +498,23 @@ items:
     scenario: 按服务删除 ITSM 工单/服务/流程/表单——依赖顺序清理（工单作废→删、服务、流程解绑表单→删版本→删定义、表单删版本→删表单）；流程/表单删除前查多服务/多流程绑定保护（被引用跳过并提示）；dry_run 预检模式仅列出；工单查询走 /v1/service/{id}/ticket_list 专用端点+CMDB 逐张归属校验双保险
     notes: "toolId 544132045c7c09c3c41dc0e56dafdf7b；sandboxRun=true；入参 itsm_service(cmdbInstance _ITSC_SERVICE_INSTANCE)+clean_scope(enums 工单/服务/流程/表单)+dry_run(是/否)；源码 scripts/tools/clean_itsm.py；🔴安全设计源自 v4 filter serviceId 过滤误删事故（operator 陷阱见 objects.yaml ticket.list 纠偏）"
     added: "2026-09-20"
+  - id: alert-tool-package
+    name: 告警处理工具包
+    category: tools
+    files: [告警处理.tool.tar.gz]
+    history:
+      - {date: "2026-09-23", change: "v1 初版（columndb CRUD 全链 .26 实测：upsert/update/delete 探针行闭环）"}
+      - {date: "2026-09-23", change: "v2 修 agent 沙箱 host 解析——平台注入全局变量 EASYOPS_CMDB_HOST/EASYOPS_CMDB_SERVICE_HOST 优先于 env（127.0.0.1:8152 视图无 leader partition）；写路径统一 upsert_by_search_keys（tsdb_column/insert 只进 tmp 表 flush 延迟不可立查）"}
+      - {date: "2026-09-23", change: "v3 导出目录沙箱回退链（指定目录→脚本缓存目录→cwd→/tmp，nobody 无 /tmp/easyops 写权不炸）——agent 真跑 120 告警导出 63 字段 CSV 成功"}
+    scenario: 告警读取/CSV导出/删除 + columndb CRUD——monitor_event_last@EASYOPS 表直操作（data_exchange :8152 tsdb_column/* 端点族）；类 SDK 写法 AlertToolClient（search/count/insert=upsert/update_by_filter/update_by_row_id/upsert/delete/export_csv）
+    notes: "toolId 4174715cc819b92b9c4df65b61fc0d46；sandboxRun=true；入参 action(枚举 导出/删除)+time_range(\\d+[ymd] 空=全部)+export_dir(默认/tmp/easyops/alert_export)+status+level+confirm(删除须=是)；🔴时间双轨：time 字段毫秒、startTime/notifyTime 等 Int32 秒（毫秒塞 startTime 溢出 300313）；必填列 batchId/alertId/eventId；库名=org；删除走 delete_by_filter 物理删；CSV 63 列 utf-8+BOM 复杂结构压 JSON；源码 scripts/tools/alert_tool.py"
+    added: "2026-09-23"
+  - id: alert-tool-source
+    name: 告警处理脚本源码
+    category: scripts
+    files: [tools/alert_tool.py]
+    history:
+      - {date: "2026-09-23", change: 初版入库（与工具包 v3 同源）}
+    scenario: 告警处理工具源码（AlertToolClient——columndb CRUD + CSV 导出），工具包见 tools/告警处理
+    notes: "py2/3 兼容 stdlib only；时间双轨/必填列/upsert 写路径三坑见 alert-tool-package notes"
+    added: "2026-09-23"
