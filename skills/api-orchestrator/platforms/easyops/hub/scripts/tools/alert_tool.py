@@ -26,8 +26,10 @@ EasyOps 工具：告警处理（读取 / 导出 CSV / 删除 / columndb CRUD）
     time_range  时间范围，\d+[y|m|d]（如 30d/6m/1y），不填=所有时间
     export_dir  导出位置，默认 /tmp/easyops/alert_export
     table       数据表，枚举 历史告警（默认·全状态）/ 当前告警（仅活跃）
-    status      可选，告警状态过滤（如 unsent/sent）
-    level       可选，告警级别过滤（info/warning/critical）
+    status      可选，告警状态枚举（源码常量：unsent未通知/sent已通知/group分组/
+                suppress抑制/block屏蔽/converged收敛/inhibition抑制）
+    level       可选，告警级别枚举（critical严重/warning警告/info通知/message消息/
+                emergency紧急）——status/level 选「所有」或留空=不过滤
     confirm     删除二次确认（删除操作必须显式 confirm=是/true 才执行；
                 删除自动联动清理另一张表——活跃告警两表并存防残影）
 
@@ -509,15 +511,17 @@ def pick_table(cfg):
 
 
 def build_filter(cfg, start_ms):
-    """入参 → columndb filter。时间【毫秒】$gte；status/level 精确；
-    alert_rule（ALERT_RULE instanceId 列表）→ ruleId $in。"""
+    """入参 → columndb filter。时间【毫秒】$gte；status/level 精确（「所有」/空=不过滤，
+    枚举值源 alert_channel_go 常量）；alert_rule（ALERT_RULE instanceId 列表）→ ruleId $in。"""
     f = {}
     if start_ms:
         f['time'] = {'$gte': start_ms}
-    if cfg.get('status'):
-        f['status'] = cfg['status']
-    if cfg.get('level'):
-        f['level'] = cfg['level']
+    status = (cfg.get('status') or '').strip()
+    if status and status != u'所有':
+        f['status'] = status
+    level = (cfg.get('level') or '').strip()
+    if level and level != u'所有':
+        f['level'] = level
     rule_ids = parse_rule_ids(cfg)
     if rule_ids:
         f['ruleId'] = {'$in': rule_ids}
