@@ -1,6 +1,6 @@
 [project]
 name = "browser-recorder"
-version = "0.1.0"
+version = "0.1.1"
 description = "浏览器操作录制 CLI：裸 CDP 直连，真人操作+网络请求 → session.jsonl + 双截图 + 文档生成模板"
 requires-python = ">=3.11,<3.13"
 dependencies = [
