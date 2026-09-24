@@ -536,3 +536,22 @@ items:
     scenario: 告警处理工具源码（AlertToolClient——columndb CRUD + CSV 导出），工具包见 tools/告警处理
     notes: "py2/3 兼容 stdlib only；时间双轨/必填列/upsert 写路径三坑见 alert-tool-package notes；v4 起默认历史表全状态"
     added: "2026-09-23"
+  - id: ticket-form-tool-package
+    name: 流程表单修改工具包
+    category: tools
+    files: [流程表单修改.tool.tar.gz]
+    version: "1"
+    history:
+      - {ver: "1", date: "2026-09-24", change: 初版（冷热库全链 .26 平台真跑验证：查询/修改/dry-run/回读校验/沙箱备份回退链）}
+    scenario: 工单表单控件值查询/修改——进行中工单走热库 CMDB（_ITSC_INSTANCE_STEP PUT 全量回写）、已完结走冷库 data_exchange（itsm_task@EASYOPS update_by_id_v2），自动分派；控件中文名/ID 经 _ITSC_FORM_VERSION 表单定义解析（多匹配报错列候选）；修改默认改全部节点保持快照一致，表格列多值时 diff 出⚠️警告；安全闭环=改前备份（沙箱回退链永久保留）+confirm_yes 两段式确认+整体回写+写后回读双校验
+    notes: "toolId 0105a75e2c7f44e3beddd246689ad43a；sandboxRun=true；入参 ticket_url(task-list/ticket-list 两种格式正则提取工单ID)+field(中文名或modelField)+new_value(JSON)+action(枚举 查询/修改)+confirm_yes(枚举 是/否 默认否=只出diff)；热库表单版本解析链：工单→ITSC_PROCESS_VERSION→_ITSC_PROCESS_FORM_RELATION→_ITSC_FORM_VERSION（step 上无 formVersionId 字段）；🔴PUT 全量覆盖——绝构造局部 body（2026-09-24 调研期清空事故教训）；源码 scripts/tools/ticket_form_tool.py"
+    added: "2026-09-24"
+  - id: ticket-form-tool-source
+    name: 流程表单修改脚本源码
+    category: scripts
+    files: [tools/ticket_form_tool.py]
+    history:
+      - {date: "2026-09-24", change: 初版入库（与工具包 v1 同源）}
+    scenario: 流程表单修改工具源码（冷热库分派+控件解析+备份+diff+回读验证），工具包见 tools/流程表单修改
+    notes: "py2/3 兼容 stdlib only；本地直跑可 EASYOPS_CMDB_BACKEND_URL+kv 入参；平台跑走 globals 注入变量"
+    added: "2026-09-24"
