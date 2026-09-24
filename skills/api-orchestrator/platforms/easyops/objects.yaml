@@ -884,6 +884,9 @@ objects:
       ITSM 服务实例（服务目录条目）—— 用户在 ITSM 前端选服务发起工单；每个服务关联一个流程定义（associatedProcess）。CRUD 全在 /v1/service_instance。
       【坑】create 的 status 契约写『默认 enabled』但实测不传时为空串=前端不可见/未启用（2026-09-20 .26：新建服务前端不出现，须显式 status:"enabled"；
       edit(PUT) 修 status 时还要带必填 catalogId+name+category+associatedProcess——缺 catalogId 报『必填key catalogId 不存在』）。
+      【编排纪律（2026-09-24 用户立规）】建服务【默认开启】：create body 恒带 status:"enabled"；建完必验——get 回读 status=='enabled'，
+      再用 list catalogID+hideDisabled=true 确认在列（双验过了才算建好；spec create 段已标 status 必填）。
+      【坑2】owner 是 13 位用户 CMDB 实例 id 非用户名（传用户名报正则 ^[0-9a-z]{13}$ 校验错——object_instance search USER 按 name 查实例 id）。
     source: data/sources/backend/ITSM/flowable_service/service_catalog/service_catalog_service.go
     api: service_instance
     fields:
@@ -905,6 +908,7 @@ objects:
       - { to: itsm_process_definition, type: association, cardinality: "N:1", via: associatedProcess, desc: "服务关联一个流程定义" }
       - { to: itsm_sla, type: association, cardinality: "N:1", via: "sla_config.slaConfig[].slaId", desc: "服务绑定的 SLA 规则（inst 模式 1 个）。⚠️绑定关系存于独立端点 sla_config（非 slaRuleId 字段），见 api_behavior.bind_sla_via_subpath" }
     api_behavior:
+      status_not_default: "🔴create 不传 status 落库空串=未启用（前端不可见），契约『默认 enabled』不生效——spec create 已改 status 必填；编排纪律见 description【编排纪律】（建后 get+list 双验）。"
       bind_sla_via_subpath: "⚠️绑 SLA 到服务走【独立子路径端点】PUT /v1/service_instance/{instanceId}/sla_config（SetServiceSLAConfig，manager.go:559），body={scope, slaConfig:[{userTaskId, slaId}]}。**不是** service_instance.edit——edit body 不接受 slaRuleId 字段，实测传了也被静默忽略（code:0 但不落库）。源码：service_catalog/route.go 注册 PUT.../sla_config；validator api_validator.go:948 ValidateSetServiceSLAConfig。"
       slaRuleId_field_dead: "service_instance.get 返回的 slaRuleId 字段实测【恒为 null】（CMDB 透传字段，未被 sla_config 端点填充）——查服务绑了哪个 SLA 用 get_sla_config 端点，别看 slaRuleId。"
       inst_single_sla: "scope=inst（工单级）只允许绑 1 个 SLA（manager.go:560『服务模式下,只允许绑定一个sla协议』）；scope=step（任务节点级）可按 userTaskId 绑多个。解绑传 slaConfig:[]。e2e 实测 2026-08-12。"

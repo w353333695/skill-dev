@@ -608,22 +608,22 @@ resources:
         pagination: { type: offset, page_in: query, items_path: data.list, page_param: page, size_param: pageSize, size: 10 }
 
       create:
-        description: 创建服务实例。必填 name/category/associatedProcess。catalogId 指定所在目录（如服务请求.请求目录 的 catalog id）；owner 指定负责人（用户名）。associatedProcess=流程定义 instanceId（如主机申请流程的 definitionId）。场景②建 test-host 服务用它。
+        description: 创建服务实例。必填 name/category/associatedProcess。catalogId 指定所在目录（如服务请求.请求目录 的 catalog id）；owner 是 13 位用户 CMDB 实例 id（非用户名，传用户名报正则 ^[0-9a-z]{13}$ 校验错——object_instance search USER 按 name 查）。associatedProcess=流程定义 instanceId。🔴status 必须显式传 "enabled"——契约写『默认 enabled』实测不传为空串=未启用/前端不可见（objects.yaml#itsm_service_instance api_behavior.status_not_default）。
         method: POST
         path: /api/flowable_service/v1/service_instance
         body:
           type: object
-          required: [name, category, associatedProcess]
-          description: "创建服务请求。name/category/associatedProcess 必填。"
+          required: [name, category, associatedProcess, status]
+          description: "创建服务请求。name/category/associatedProcess/status 必填（status 恒传 enabled）。"
           properties:
             name:               { type: string, description: "服务名称" }
             category:           { type: string, description: "分类（如 服务请求.请求目录）" }
             associatedProcess:  { type: string, description: "关联流程定义 instanceId（如 658aa1ed3bbd2）" }
             catalogId:          { type: string, description: "所在目录实例 id" }
-            owner:              { type: string, description: "负责人用户名（如 easyops）" }
+            owner:              { type: string, description: "负责人：13 位用户 CMDB 实例 id（非用户名）" }
             description:        { type: string, description: "服务说明" }
             guide:              { type: string, description: "服务指引" }
-            status:             { type: string, enum: [enabled, disabled], description: "是否启用，默认 enabled" }
+            status:             { type: string, enum: [enabled, disabled], description: "🔴必填恒传 enabled——不传=空串=未启用（默认值不生效）" }
             icon:               { type: object, description: "图标 {name,lib}" }
             iconColor:          { type: string, description: "图标颜色" }
             url:                { type: string, description: "自定义服务 URL" }

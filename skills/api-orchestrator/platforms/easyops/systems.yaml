@@ -383,7 +383,7 @@ systems:
         set: "节点绑/解/换表单（userTaskId 绑到节点；formRelationInstanceId+formId 组合决定 绑/解/换；默认取表单主版本）"
       service_instance:
         list:   "服务列表（catalogID 过滤目录；Q 模糊搜索名；hideDisabled 隐藏禁用）"
-        create: "建服务（name/category/associatedProcess 必填；catalogId 目录；owner 负责人）"
+        create: "建服务（name/category/associatedProcess/status 必填——🔴status 恒传 enabled，不传=未启用前端不可见；catalogId 目录；owner=13位用户实例id）"
         get:    "服务详情（含关联流程/负责人/SLA）"
         edit:   "改服务（全量覆盖元信息）"
         delete: "删服务（有工单流转拒；builtIn 不可删）"
