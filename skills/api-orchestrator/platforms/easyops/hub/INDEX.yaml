@@ -459,8 +459,8 @@ items:
   - id: event-itsm-service
     name: 事件处理服务(前端手动提单方案)
     category: itsm-service
-    files: [事件处理_v1.2.11.zip]
-    version: "1.2.11"
+    files: [事件处理_v1.2.12.zip]
+    version: "1.2.12"
     history:
       - {date: "2026-09-20", change: 初版入库（.26 导出，含流程1.2.6+告警故障管理单1.0.4+告警处理单+两脚本工具随包）}
       - {date: "2026-09-20", change: "v1.2.7：postScript 补 operations=[pass]（原空=任意审批不触发）；批次控件改 ARRATINPUT（值=list[] 对齐 URL 透传）；表单 1.0.6"}
@@ -469,6 +469,7 @@ items:
       - {date: "2026-09-23", change: 已导入 .26（onlyCheck 过→正式导入 200；格式版本 version=1.2.1 是导出协议不可改，改高报『服务包版本不兼容』；内嵌工具 vId 与线上导入版对齐）}
       - {date: "2026-09-23", change: 内嵌 onload 工具对齐 v2.4（批次内所有告警 user 合并去重）；服务/流程/表单定义未动，仅换内包}
       - {date: "2026-09-23", change: "v1.2.11：线上全量重导出（GET export/service_instance）——流程/表单/触发器与 v1.2.10 逐字段一致，内嵌 onload=v2.4/postsubmit=v3.1；差异仅 PROCESS_FORM_RELATION mtime（当日导入副作用）。目的：以线上真源为准重存"}
+      - {date: "2026-09-23", change: "v1.2.12：流程派生 1.2.10 设主——告警处理节点 handling directly→claim_directly（先接单再处理，其余节点未动；create+baseVersionId 克隆表单绑定 state=done 后 set_main 部署）；线上重导出回存"}
     scenario: 【方案B·前端手动提单】events"告警转事件"能力——告警列表/详情点转工单按钮，URL formEventArgs 透传批次ID，表单 onPageLoad 脚本自动填单（等级/优先级/处理人=告警user字段全员/告警行），提交后 postScript 关联工单与告警批次；事件处理服务（enabled）走 events-work-order 个性化配置 workOrderCreateUrl（serviceId=该服务实例id，导入后按新环境改）。前置：开特性开关 events-work-order + events 个性化配置两 URL。方案A（自动转单）见 alert-itsm-service 条目
     notes: "两方案同流程同表单架构但独立交付：方案A=故障处理服务+alert2ticket 工具自动建单；方案B=事件处理服务+URL透传+onPageLoad 填单。导入后 events 个性化配置 serviceId 改为新环境服务实例id；脚本工具已随包（tools/ 内两 tar.gz，导入自动注册）"
     added: "2026-09-20"
