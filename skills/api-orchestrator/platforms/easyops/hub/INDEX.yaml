@@ -459,8 +459,8 @@ items:
   - id: event-itsm-service
     name: 事件处理服务(前端手动提单方案)
     category: itsm-service
-    files: [事件处理_v1.2.13.zip]
-    version: "1.2.13"
+    files: [事件处理_v1.2.14.zip]
+    version: "1.2.14"
     history:
       - {date: "2026-09-20", change: 初版入库（.26 导出，含流程1.2.6+告警故障管理单1.0.4+告警处理单+两脚本工具随包）}
       - {date: "2026-09-20", change: "v1.2.7：postScript 补 operations=[pass]（原空=任意审批不触发）；批次控件改 ARRATINPUT（值=list[] 对齐 URL 透传）；表单 1.0.6"}
@@ -471,6 +471,7 @@ items:
       - {date: "2026-09-23", change: "v1.2.11：线上全量重导出（GET export/service_instance）——流程/表单/触发器与 v1.2.10 逐字段一致，内嵌 onload=v2.4/postsubmit=v3.1；差异仅 PROCESS_FORM_RELATION mtime（当日导入副作用）。目的：以线上真源为准重存"}
       - {date: "2026-09-23", change: "v1.2.12：流程派生 1.2.10 设主——告警处理节点 handling directly→claim_directly（先接单再处理，其余节点未动；create+baseVersionId 克隆表单绑定 state=done 后 set_main 部署）；线上重导出回存"}
       - {date: "2026-09-24", change: "v1.2.13：主版本切 1.2.11（前端设计器保存版，修复 1.2.10 assigneeValue 缺 fields+ExtraData 双键致前端处理人栏渲染空——运行时正常纯展示问题，坑已入库 objects.yaml#itsm_process_bpmn）；1.2.11 全维度体检与 1.2.10 一致（拓扑/processSetting/表单绑定/触发器/allowedOps/memoLevel 零差异）；注意导出器不回填 isMain（全 False 属正常）"}
+      - {date: "2026-09-24", change: "v1.2.14：流程 1.2.12 设主——领导复核审批人=上节点告警处理表单 reviewLeader 决定（本就 formValue 链），assigneeValue 同步补 fields+ExtraData 双键（ExtraData=告警处理单 65b7d4b0e4ac9）——双节点双键齐全，前端渲染坑全修"}
     scenario: 【方案B·前端手动提单】events"告警转事件"能力——告警列表/详情点转工单按钮，URL formEventArgs 透传批次ID，表单 onPageLoad 脚本自动填单（等级/优先级/处理人=告警user字段全员/告警行），提交后 postScript 关联工单与告警批次；事件处理服务（enabled）走 events-work-order 个性化配置 workOrderCreateUrl（serviceId=该服务实例id，导入后按新环境改）。前置：开特性开关 events-work-order + events 个性化配置两 URL。方案A（自动转单）见 alert-itsm-service 条目
     notes: "两方案同流程同表单架构但独立交付：方案A=故障处理服务+alert2ticket 工具自动建单；方案B=事件处理服务+URL透传+onPageLoad 填单。导入后 events 个性化配置 serviceId 改为新环境服务实例id；脚本工具已随包（tools/ 内两 tar.gz，导入自动注册）"
     added: "2026-09-20"
