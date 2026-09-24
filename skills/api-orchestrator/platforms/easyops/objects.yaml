@@ -743,7 +743,20 @@ objects:
       assignType:        { type: string, desc: "指派类型 single(单签)/assigneeList(会签，legacy)" }
       handling:          { type: string, enum: [directly, send_directly, claim_directly, send_claim_directly], desc: "处理方式：directly直接/send_directly先派单/claim_directly先认领/send_claim_directly派单+认领" }
       presetAssigneeConf: { type: object, ref: itsm_process_assignee, desc: "审批人（后端按 userType 回查 name 的展示视图；真正来源在 BPMN flowable:assignee）" }
-      allowedOps:        { type: array, items: string, desc: "节点允许的操作按钮。取值：assignee(审批处理)/distribute(派单)/claim(认领)/withdraw(撤回)/cc(抄送)/SLAChange(SLA变更,首节点默认)/close(关单)/add(加签)/**jump(驳回跳转)**。⚠️done(通过)+convert(工单转换)默认开启不在列表配。V2 在 nodeSettings 配（非 BPMN XML）。【驳回权限=allowedOps 含 jump + rejectNodes 声明目标，两者缺一不可（2026-09-15 .26 用户手改 1.2.5 定案：只配 rejectNodes 不配 jump 驳回按钮不出现）】" }
+      allowedOps:        { type: array, items: string, desc: "节点允许的操作按钮。取值：assignee(审批处理)/distribute(派单)/claim(认领)/withdraw(撤回)/cc(抄送)/SLAChange(SLA变更,首节点默认)/close(关单)/add(加签)/**jump(驳回跳转)**/done(通过)/convert(工单转换)。V2 在 nodeSettings 配（非 BPMN XML）。🔴allowedOps 必须按 handling 矩阵显式配置（见下方 handling_ops_matrix）——空列表=节点无流转按钮（done 不会默认开启）。【驳回权限=allowedOps 含 jump + rejectNodes 声明目标，两者缺一不可（2026-09-15 .26 用户手改 1.2.5 定案：只配 rejectNodes 不配 jump 驳回按钮不出现）】" }
+      handling_ops_matrix:
+        rule: |
+          🔴allowedOps 按 handling 审批方式配置矩阵（2026-09-24 .26 定案；权威参照「测试流程」1.0.41
+          五节点五方式实存，事件处理 1.2.13 应用验证）——每个节点起码配齐流转按钮，否则节点无操作入口：
+          · directly 直接处理            → ['done']
+          · claim_directly 先认领再处理  → ['claim', 'done']
+          · send_directly 先派单         → ['distribute', 'done']
+          · send_claim_directly 派单+认领 → ['distribute', 'claim', 'done']
+          · turn 转办                    → ['done']
+          附加按需叠加：jump（驳回，须同时配 rejectNodes）/ withdraw 撤回 / cc 抄送 / close 关单 /
+          add 加签 / SLAChange（SLA 变更，首节点惯例）。
+          ⚠️done【必须显式配置】——空 allowedOps 的节点工单流转按钮缺失（此前「done 默认开启不配」
+          的记载不成立于空列表场景，已纠正）。API 派生版本若从旧版继承空列表，一律按矩阵补全。
       memoLevel:         { type: integer, enum: [-1, 0, 1], desc: "审批意见级别 -1隐藏/0非必填/1必填（驳回节点建议 1 强制填驳回理由）" }
       rejectNodes:       { type: array, items: string, desc: "可驳回/跳回的目标节点。格式 `节点id:线名`——【线名实测用数字索引（如 Activity_alert_handle:0），写中文线名不生效（2026-09-15 .26 用户手改 1.2.5 定案）】。⚠️驳回是运行时动态跳转，靠此字段声明，bpmnXML 不画反向 sequenceFlow（画了反而不对）。目标节点id须图中存在否则被 cleanSetting 清洗。⚠️生效前提：节点 allowedOps 须含 jump" }
       scriptSettings:    { type: object, ref: itsm_process_script, desc: "前后置脚本 {PreScript,PostScript}" }
