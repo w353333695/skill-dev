@@ -374,12 +374,13 @@ items:
   - id: machine-room-access-service
     name: 机房外部人员进出服务
     category: itsm-service
-    files: [机房外部人员进出_v1.0.0.zip]
-    version: "1.0.0"
+    files: [机房外部人员进出_v1.0.1.zip]
+    version: "1.0.1"
     history:
       - {date: "2026-09-24", change: 初版入库（.26 导出，onlyCheck 预检通过；API 全链创建：2 表单+3 节点流程+服务挂请求目录）}
+      - {date: "2026-09-28", change: "1.0.1：表单A派生 1.0.1 设主——访问区域 frontKey 改 [name,shortname]（名称+简称）；服务补 status=enabled（create 不传=空串未启用的坑，已立规）"}
     scenario: 机房外部人员进出申请——发起（申请进入日期/携带物品/访问区域[机房CMDB多选]/事由/外部人员信息[姓名/身份证号/联系方式/单位]动态多行）→科技处领导审批（可驳回发起，意见必填）→监控值班登记进出时间；审批人/值班处理人 emptyAssign 留空运行时指定
-    notes: "访问区域控件=CMDBINSTANCESELECT objectId=IDC@ONEMODEL frontKey=[number,name] isMore 多选；机房模型 number 属性是整型（非编码串），编号语义编入实例 name；导入 POST service_catalog/{目录id}/import（gzip 包内 cmdb_service_instance.json，17 对象组）；owner/审批人按新环境改；.26 环境 IDC 模型测试实例 3 条（JF-001~003）"
+    notes: "访问区域控件=CMDBINSTANCESELECT objectId=IDC@ONEMODEL frontKey=[name,shortname] isMore 多选（number 属性是整型不作显示字段）；导入 POST service_catalog/{目录id}/import（gzip 包内 cmdb_service_instance.json，17 对象组）；owner/审批人按新环境改；.26 环境 IDC 模型测试实例 3 条（JF-001~003）"
     added: "2026-09-24"
   - id: alert-itsm-service
     name: 故障处理服务(自动转单方案)
