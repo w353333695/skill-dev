@@ -392,6 +392,16 @@ def coerce_value(old, new):
     return new
 
 
+def _field_in_form_data(nodes, field):
+    """field 是否是某节点 formData 里的实际存储键（定义解析失败时的直连兜底判定）。"""
+    for n in nodes:
+        for cntr in parse_form_data(n.get('formData')):
+            for row in cntr.get('values') or []:
+                if isinstance(row, dict) and field in row:
+                    return True
+    return False
+
+
 def locate_and_set(data, model_field, new_value, auto_wrap=True):
     """在 formData 结构里定位控件并写新值。返回 (命中容器数, 命中行数)。"""
     n_cntr, n_row = 0, 0
@@ -520,8 +530,16 @@ def main(argv=None):
         try:
             model_field, types, where, how = resolve_field(cfg['field'], fvids)
         except RuntimeError as e:
-            put_str(u'❌ %s' % e)
-            return 2
+            # 兜底：定义未命中时，若 field 恰是某节点 formData 里的实际键（modelField），
+            # 按直连键继续（表单定义改版删除控件/工单用旧版发起等场景，数据键仍可直接操作）。
+            if _field_in_form_data(nodes, cfg['field']):
+                model_field = cfg['field']
+                types, where, how = [], [], u'直连键(formData实际键)'
+                put_str(u'⚠️ %s' % e)
+                put_str(u'兜底: 「%s」是节点 formData 里的实际存储键，按直连键继续' % cfg['field'])
+            else:
+                put_str(u'❌ %s' % e)
+                return 2
         put_str(u'控件命中: %s（按%s匹配，类型 %s）' % (model_field, how, u'/'.join(types) or u'?'))
 
     # 新值解析
@@ -545,7 +563,7 @@ def main(argv=None):
                 put_row('nodes', {'node': n['name'], 'status': n['status'], 'store': n['store'],
                                   'container': '-', 'field': '-', 'value': u'(空/坏 formData)'})
                 continue
-            if cfg['field'] and how != u'直连键':
+            if cfg['field'] and not how.startswith(u'直连键'):
                 shown = False
                 for cntr in data:
                     for row in cntr.get('values') or []:
