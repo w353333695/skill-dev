@@ -4,8 +4,10 @@
 EasyOps 工具：流程表单修改（工单表单控件值 查询/修改）
 
 能力：
-    查询——列工单全部节点×容器×控件的当前值（或只看指定控件）；
-    修改——把指定控件在【全部节点】的值统一改掉（每个节点一份 formData 快照，全改保持一致）。
+    查询——列工单全部节点×容器×控件的当前值（或只看指定控件），每行带定位唯一键 key
+          （节点ID:容器:行号）；
+    修改——把指定控件的值改掉。定位策略：控件全局唯一命中→直接改；多命中（表格多行/
+          多节点快照）→退出并列出全部 key，用户带 field_key=<key> 精确重跑。
 
 数据链路（无平台直接接口，操作持久层）：
     · 进行中工单（热库）：CMDB :8079
@@ -36,6 +38,9 @@ EasyOps 工具：流程表单修改（工单表单控件值 查询/修改）
                   https://host/next/itsc-ticket-center/task-list/<工单ID>/<任务ID>
                   https://host/next/itsc-ticket-center/ticket-list/<工单ID>
     field         表单控件名称或ID，字符串，必填（中文名或 modelField/key）
+    field_key     定位唯一键，字符串，修改可选。格式 节点ID:容器:行号（查询输出 key 列），
+                  如 6582eea3a0ef5:host_tables:3。不带时控件须全局唯一命中才改；
+                  多命中（表格多行/多节点）会退出并列出全部 key 供选择
     new_value     新值，字符串，修改时必填。JSON（纯值或完整对象，如
                   '{"value":"1","label":"是","key":"1"}'；SELECT/RADIO 传纯值时按
                   现有值结构自动包装）
@@ -402,22 +407,58 @@ def _field_in_form_data(nodes, field):
     return False
 
 
-def locate_and_set(data, model_field, new_value, auto_wrap=True):
-    """在 formData 结构里定位控件并写新值。返回 (命中容器数, 命中行数)。"""
+def locate_and_set(data, model_field, new_value, auto_wrap=True, only_at=None, node_id=None):
+    """在 formData 结构里定位控件并写新值。返回 (命中容器数, 命中行数)。
+
+    only_at=None 改全部命中行；only_at='容器key#元素序号:行号' 只改该位置。
+    node_id 配合 only_at 使用：field_key 定位时同时限定节点（同容器位置在不同节点
+    快照里都存在，必须节点+位置双段才能全局唯一）。
+    ⚠️表格多行的真实存储形态：同 key 容器在 formData 数组出现 N 次、每次 values 1 行
+    （2026-09-28 .26 实测 host_tables×40）。因此位置键 = 容器key#同key第几个元素:该容器内行号，
+    与查询输出 key 列去掉节点段后一致。
+    """
+    seen_c = {}   # 容器key -> 已遇元素个数（用于算元素序号）
     n_cntr, n_row = 0, 0
     for cntr in data:
+        ckey = cntr.get('key')
+        seen_c[ckey] = seen_c.get(ckey, -1) + 1
+        cidx = seen_c[ckey]
         vals = cntr.get('values')
         if not isinstance(vals, list):
             continue
         hit = False
-        for row in vals:
+        for ri, row in enumerate(vals):
             if isinstance(row, dict) and model_field in row:
+                if only_at is not None and (node_id is None or True):
+                    if u'%s#%d:%d' % (ckey, cidx, ri) != only_at:
+                        continue
                 row[model_field] = coerce_value(row.get(model_field), new_value) if auto_wrap else new_value
                 hit = True
                 n_row += 1
         if hit:
             n_cntr += 1
     return n_cntr, n_row
+
+
+def scan_hits(nodes, model_field):
+    """扫描控件全部命中位置。返回 [{'node':节点, 'key':'节点ID:容器#元素:行', 'value':旧值}]。
+
+    唯一键 = 节点ID:容器key#元素序号:行号（节点ID 热库=step instanceId / 冷库=_row_id；
+    容器 key + 同 key 元素序号 + 容器内行号 三段在节点内唯一定位一行数据）——与查询
+    输出 key 列完全同款。
+    """
+    hits = []
+    for n in nodes:
+        seen_c = {}
+        for cntr in parse_form_data(n.get('formData')):
+            ckey = cntr.get('key')
+            seen_c[ckey] = seen_c.get(ckey, -1) + 1
+            for ri, row in enumerate(cntr.get('values') or []):
+                if isinstance(row, dict) and model_field in row:
+                    hits.append({'node': n,
+                                 'key': u'%s:%s#%d:%d' % (n['node_id'], ckey, seen_c[ckey], ri),
+                                 'value': row.get(model_field)})
+    return hits
 
 
 def summarize_value(v, limit=120):
@@ -461,7 +502,7 @@ def write_backup(ticket_id, store, nodes):
 
 def parse_args(argv):
     cfg = {'ticket_url': '', 'field': '', 'new_value': '',
-           'action': u'查询', 'confirm_yes': u'否'}
+           'action': u'查询', 'confirm_yes': u'否', 'field_key': ''}
 
     def _coerce(key, val):
         if IS_PY2 and isinstance(val, str):
@@ -555,52 +596,101 @@ def main(argv=None):
             new_value = raw  # 非合法 JSON 按纯字符串值处理
         put_str(u'新值: %s' % summarize_value(new_value))
 
-    # ---- 查询：列全部控件值（或指定控件），逐节点输出 ----
+    # ---- 查询：列全部控件值（或指定控件），逐节点输出（key 列=定位唯一键）----
     if action == u'查询':
         for n in nodes:
             data = parse_form_data(n['formData'])
             if not data:
                 put_row('nodes', {'node': n['name'], 'status': n['status'], 'store': n['store'],
-                                  'container': '-', 'field': '-', 'value': u'(空/坏 formData)'})
+                                  'key': '-', 'container': '-', 'field': '-', 'value': u'(空/坏 formData)'})
                 continue
+            seen_c = {}
             if cfg['field'] and not how.startswith(u'直连键'):
                 shown = False
                 for cntr in data:
-                    for row in cntr.get('values') or []:
+                    ckey = cntr.get('key')
+                    seen_c[ckey] = seen_c.get(ckey, -1) + 1
+                    for ri, row in enumerate(cntr.get('values') or []):
                         if isinstance(row, dict) and model_field in row:
                             put_row('nodes', {'node': n['name'], 'status': n['status'], 'store': n['store'],
-                                              'container': cntr.get('key'), 'field': model_field,
+                                              'key': u'%s:%s#%d:%d' % (n['node_id'], ckey, seen_c[ckey], ri),
+                                              'container': ckey, 'field': model_field,
                                               'value': summarize_value(row.get(model_field))})
                             shown = True
                 if not shown:
                     put_row('nodes', {'node': n['name'], 'status': n['status'], 'store': n['store'],
-                                      'container': '-', 'field': model_field, 'value': u'(该节点无此控件)'})
+                                      'key': '-', 'container': '-', 'field': model_field, 'value': u'(该节点无此控件)'})
             else:
                 for cntr in data:
-                    for row in cntr.get('values') or []:
+                    ckey = cntr.get('key')
+                    seen_c[ckey] = seen_c.get(ckey, -1) + 1
+                    for ri, row in enumerate(cntr.get('values') or []):
                         if isinstance(row, dict):
                             for k, v in row.items():
                                 put_row('nodes', {'node': n['name'], 'status': n['status'], 'store': n['store'],
-                                                  'container': cntr.get('key'), 'field': k,
+                                                  'key': u'%s:%s#%d:%d' % (n['node_id'], ckey, seen_c[ckey], ri),
+                                                  'container': ckey, 'field': k,
                                                   'value': summarize_value(v)})
-        put_str(u'查询完成（%d 节点）' % len(nodes))
+        put_str(u'查询完成（%d 节点）。key 列=定位唯一键（节点ID:容器#元素序号:行号），修改多命中时带 field_key 参数精确指定。' % len(nodes))
         return 0
 
-    # ---- 修改：diff → 备份 → 写回 → 回读验证 ----
+    # ---- 修改：唯一定位 → diff → 备份 → 写回 → 回读验证 ----
+    # 定位策略（防误改）：不带 field_key 时，控件命中位置必须【全局唯一】才直接改；
+    # 多命中（表格多行/多节点快照）→ 退出并列出全部位置的 key，让用户带 field_key 重跑。
+    # field_key 格式与查询输出 key 列一致：节点ID:容器:行号（如 6582eea3a0ef5:host_tables:3）。
+    hits = scan_hits(nodes, model_field)
+    if not hits:
+        put_str(u'⚠️ 任何节点的 formData 里都没有控件 %s，无需修改' % model_field)
+        return 0
+
+    only_at = None
+    if cfg['field_key']:
+        full_key = cfg['field_key']
+        matched = [h for h in hits if h['key'] == full_key]
+        if not matched:
+            # 兼容短格式 容器:行号（节点内唯一性不足时仍要求全格式）
+            matched = [h for h in hits if full_key in h['key']]
+            if len(matched) == 1:
+                full_key = matched[0]['key']
+            else:
+                matched = []
+        if len(matched) != 1:
+            put_str(u'❌ field_key「%s」未唯一命中（匹配 %d 处）。可用 key 见下表：'
+                    % (cfg['field_key'], len(matched)))
+            for h in hits:
+                put_str(u'  %s = %s' % (h['key'], summarize_value(h['value'], 60)))
+            return 2
+        # full_key = 节点ID:容器#元素:行 → only_at = 容器#元素:行（去掉节点段）
+        only_at = full_key.split(':', 1)[1] if u':' in full_key else None
+        put_str(u'field_key 定位: %s（当前值 %s）' % (full_key, summarize_value(matched[0]['value'], 60)))
+    elif len(hits) > 1:
+        put_str(u'❌ 控件 %s 命中 %d 处（多行表格/多节点快照），为防误改不直接修改。'
+                u'请从下面 key 中选一个，带 field_key=<key> 重跑：' % (model_field, len(hits)))
+        for h in hits:
+            put_str(u'  %s = %s' % (h['key'], summarize_value(h['value'], 60)))
+        return 2
+
     plan = []   # [{'node':..., 'data':新结构, 'old_raw':..., 'new_raw':...}]
     skipped = []
+    target_node_id = None   # field_key 定位的节点段（只改该节点）
+    if cfg['field_key'] and u':' in cfg['field_key']:
+        target_node_id = cfg['field_key'].split(':', 1)[0]
     for n in nodes:
         data = parse_form_data(n['formData'])
         if not data:
             skipped.append(n)
             continue
+        if target_node_id is not None and n['node_id'] != target_node_id:
+            skipped.append(n)
+            continue
         probe = json.loads(dump_form_data(data))  # 深拷贝试算
-        n_cntr, n_row = locate_and_set(probe, model_field, new_value)
+        n_cntr, n_row = locate_and_set(probe, model_field, new_value, only_at=only_at)
         if not n_row:
             skipped.append(n)
             continue
         plan.append({'node': n, 'data': probe, 'old_raw': n['formData'],
-                     'new_raw': dump_form_data(probe), 'n_cntr': n_cntr, 'n_row': n_row})
+                     'new_raw': dump_form_data(probe), 'n_cntr': n_cntr, 'n_row': n_row,
+                     'hits': [h for h in hits if h['node']['node_id'] == n['node_id']]})
 
     if not plan:
         put_str(u'⚠️ 任何节点的 formData 里都没有控件 %s，无需修改（跳过节点 %d 个）'
@@ -610,24 +700,41 @@ def main(argv=None):
     put_str(u'变更计划: %d/%d 节点命中（跳过 %d 个无此控件的节点）' % (len(plan), len(nodes), len(skipped)))
     for p in plan:
         n = p['node']
-        old_vs, new_v = [], None
-        for cntr in parse_form_data(p['old_raw']):
-            for row in cntr.get('values') or []:
-                if isinstance(row, dict) and model_field in row:
-                    old_vs.append(row.get(model_field))
-        for cntr in p['data']:
-            for row in cntr.get('values') or []:
-                if isinstance(row, dict) and model_field in row and new_v is None:
-                    new_v = row.get(model_field)
+        node_hits = p.get('hits') or []
+        # diff 展示：field_key 定位→只展示被定位的那处；否则（唯一命中）展示全部命中
+        if only_at is not None:
+            node_hits = [h for h in node_hits if h['key'].split(':', 1)[1] == only_at] or node_hits[:1]
+        old_vs = [h['value'] for h in node_hits]
+        # 新值按同位置从试算结果取（field_key 场景）；否则首个命中
+        new_v = None
+        if only_at is not None:
+            _seen = {}
+            for cntr in p['data']:
+                ckey = cntr.get('key')
+                _seen[ckey] = _seen.get(ckey, -1) + 1
+                if u'%s#%d' % (ckey, _seen[ckey]) == only_at.rsplit(':', 1)[0]:
+                    for row in cntr.get('values') or []:
+                        if isinstance(row, dict) and model_field in row:
+                            new_v = row.get(model_field)
+                            break
+                    if new_v is not None:
+                        break
+        if new_v is None:
+            for cntr in p['data']:
+                for row in cntr.get('values') or []:
+                    if isinstance(row, dict) and model_field in row:
+                        new_v = row.get(model_field)
+                        break
+                if new_v is not None:
+                    break
         old_v = old_vs[0] if old_vs else None
-        distinct = set(json.dumps(v, ensure_ascii=False, sort_keys=True) for v in old_vs)
-        warn = u'  ⚠️ 原 %d 行有 %d 种不同值，将统一改为新值' % (len(old_vs), len(distinct)) if len(distinct) > 1 else u''
+        keys = u','.join(h['key'] for h in node_hits) if node_hits else u'-'
         put_row('diff', {'node': n['name'], 'status': n['status'], 'store': n['store'],
-                         'rows': p['n_row'],
+                         'key': keys, 'rows': p['n_row'],
                          'old': summarize_value(old_v), 'new': summarize_value(new_v)})
-        put_str(u'  [%s] %s（%s）: %s → %s（%d 容器 %d 行）%s'
+        put_str(u'  [%s] %s（%s）: %s → %s（%d 容器 %d 行）key=%s'
                 % (n['store'], n['name'], n['status'],
-                   summarize_value(old_v, 60), summarize_value(new_v, 60), p['n_cntr'], p['n_row'], warn))
+                   summarize_value(old_v, 60), summarize_value(new_v, 60), p['n_cntr'], p['n_row'], keys))
 
     if cfg['confirm_yes'] != u'是':
         put_str(u'confirm_yes=否：仅输出 diff 未写库。确认无误后带 confirm_yes=是 重跑执行修改。')
