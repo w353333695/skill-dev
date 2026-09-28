@@ -177,7 +177,7 @@ def cmdb_search(object_id, query, fields, page=1, page_size=100):
                             {'page': page, 'pageSize': page_size,
                              'fields': fields, 'query': query})
         if not isinstance(resp, dict) or resp.get('code') not in (0, None):
-            raise RuntimeError(u'CMDB search %s 失败: %s' % (object_id, json.dumps(resp, ensure_ascii=False)[:300]))
+            raise RuntimeError(u'CMDB search %s 失败: %s' % (object_id, json.dumps(resp, ensure_ascii=False)))
         data = resp.get('data') or {}
         rows = data.get('list') or []
         out.extend(rows)
@@ -194,7 +194,7 @@ def cmdb_put_step_formdata(step_id, form_data_str):
                         '/v2/object/%s/instance/%s' % (OBJ_STEP, step_id),
                         {'formData': form_data_str})
     if not isinstance(resp, dict) or resp.get('code') not in (0, None):
-        raise RuntimeError(u'CMDB PUT step %s 失败: %s' % (step_id, json.dumps(resp, ensure_ascii=False)[:300]))
+        raise RuntimeError(u'CMDB PUT step %s 失败: %s' % (step_id, json.dumps(resp, ensure_ascii=False)))
     return True
 
 
@@ -211,10 +211,10 @@ def cold_search_tasks(ticket_id):
                          'filter': {'ticketId': ticket_id},
                          'fields': ['*'], 'limit': 200})
     if not isinstance(resp, dict) or resp.get('code') not in (0, None):
-        raise RuntimeError(u'data_exchange search 失败: %s' % json.dumps(resp, ensure_ascii=False)[:300])
+        raise RuntimeError(u'data_exchange search 失败: %s' % json.dumps(resp, ensure_ascii=False))
     inner = resp.get('data') or {}
     if inner.get('code') not in (0, None):
-        raise RuntimeError(u'data_exchange search 内层失败: %s' % json.dumps(inner, ensure_ascii=False)[:300])
+        raise RuntimeError(u'data_exchange search 内层失败: %s' % json.dumps(inner, ensure_ascii=False))
     return inner.get('data') or []
 
 
@@ -225,10 +225,10 @@ def cold_update_formdata(row_id, form_data_str):
                         {'database': ORG, 'object_id': COLD_TASK_TABLE,
                          'data': [{'_row_id': row_id, 'formData': form_data_str}]})
     if not isinstance(resp, dict) or resp.get('code') not in (0, None):
-        raise RuntimeError(u'data_exchange update 失败: %s' % json.dumps(resp, ensure_ascii=False)[:300])
+        raise RuntimeError(u'data_exchange update 失败: %s' % json.dumps(resp, ensure_ascii=False))
     inner = resp.get('data') or {}
     if inner.get('update_fail_count'):
-        raise RuntimeError(u'data_exchange update 有失败行: %s' % json.dumps(inner, ensure_ascii=False)[:200])
+        raise RuntimeError(u'data_exchange update 有失败行: %s' % json.dumps(inner, ensure_ascii=False))
     return True
 
 
@@ -461,9 +461,13 @@ def scan_hits(nodes, model_field):
     return hits
 
 
-def summarize_value(v, limit=120):
+def summarize_value(v, limit=None):
+    """输出完整值，不截断（2026-09-28 用户立规：工具输出里的值必须完整）。
+    limit 显式传参才截断（防呆兜底用），默认 None=全量。"""
     s = v if isinstance(v, _string_types) else json.dumps(v, ensure_ascii=False)
-    return s[:limit] + (u'…' if len(s) > limit else u'')
+    if limit is not None and len(s) > limit:
+        return s[:limit] + u'…'
+    return s
 
 
 # ----------------------------------------------------------------------------
@@ -658,16 +662,16 @@ def main(argv=None):
             put_str(u'❌ field_key「%s」未唯一命中（匹配 %d 处）。可用 key 见下表：'
                     % (cfg['field_key'], len(matched)))
             for h in hits:
-                put_str(u'  %s = %s' % (h['key'], summarize_value(h['value'], 60)))
+                put_str(u'  %s = %s' % (h['key'], summarize_value(h['value'])))
             return 2
         # full_key = 节点ID:容器#元素:行 → only_at = 容器#元素:行（去掉节点段）
         only_at = full_key.split(':', 1)[1] if u':' in full_key else None
-        put_str(u'field_key 定位: %s（当前值 %s）' % (full_key, summarize_value(matched[0]['value'], 60)))
+        put_str(u'field_key 定位: %s（当前值 %s）' % (full_key, summarize_value(matched[0]['value'])))
     elif len(hits) > 1:
         put_str(u'❌ 控件 %s 命中 %d 处（多行表格/多节点快照），为防误改不直接修改。'
                 u'请从下面 key 中选一个，带 field_key=<key> 重跑：' % (model_field, len(hits)))
         for h in hits:
-            put_str(u'  %s = %s' % (h['key'], summarize_value(h['value'], 60)))
+            put_str(u'  %s = %s' % (h['key'], summarize_value(h['value'])))
         return 2
 
     plan = []   # [{'node':..., 'data':新结构, 'old_raw':..., 'new_raw':...}]
@@ -734,7 +738,7 @@ def main(argv=None):
                          'old': summarize_value(old_v), 'new': summarize_value(new_v)})
         put_str(u'  [%s] %s（%s）: %s → %s（%d 容器 %d 行）key=%s'
                 % (n['store'], n['name'], n['status'],
-                   summarize_value(old_v, 60), summarize_value(new_v, 60), p['n_cntr'], p['n_row'], keys))
+                   summarize_value(old_v), summarize_value(new_v), p['n_cntr'], p['n_row'], keys))
 
     if cfg['confirm_yes'] != u'是':
         put_str(u'confirm_yes=否：仅输出 diff 未写库。确认无误后带 confirm_yes=是 重跑执行修改。')
