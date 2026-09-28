@@ -737,6 +737,7 @@ objects:
     description: |
       节点配置 NodeSetting（processSetting.nodeSettings[]，按 userTaskId 关联 BPMN 节点）。每节点一套：审批人/审批方法/脚本/驳回/自动化/操作权限/文案。
       真实样例：抓现成流程 taskInfo[] + internal/bpmn/converter_test.go。
+      🔴processSetting 还有姊妹段 lineSettings（连线配置）——API 建版必读下方 api_create_line_settings 坑。
     source: data/sources/backend/ITSM/flowable_service/internal/models/def_version.go:350-364
     fields:
       userTaskId:        { type: string, desc: "对应 BPMN <userTask id>" }
@@ -757,6 +758,20 @@ objects:
           add 加签 / SLAChange（SLA 变更，首节点惯例）。
           ⚠️done【必须显式配置】——空 allowedOps 的节点工单流转按钮缺失（此前「done 默认开启不配」
           的记载不成立于空列表场景，已纠正）。API 派生版本若从旧版继承空列表，一律按矩阵补全。
+      api_create_line_settings:
+        rule: |
+          🔴【API 建版/派生必须补全 processSetting.lineSettings——前端连线视图配置，BPMN 替代不了】
+          （2026-09-24 .26 实测：事件处理 1.2.13 派生版工单流转正常但设计器「人员设置/连线条件」
+          渲染异常，1.2.14 用户前端手工保存后修复，diff 唯一差异即本段）：
+          · lineSettings=[{lineId, flowConfig}]——每条【有条件的分支线】一条记录；flowConfig 是 JSON 字符串：
+            {"advancedMode":true,"conditionList":[],"conditionExpression":"${need_review == '1'}"}。
+          · 分支条件只写在 BPMN conditionExpression 时【运行时正常】（后端读 XML），但前端设计器/
+            节点详情视图读 lineSettings——空数组=连线条件与人员设置渲染异常。
+          · 该段与 assigneeValue 双键（见 itsm_process_bpmn constraints）同属「前端设计器保存时
+            自动补全、API create 不补」一族；从旧版继承 processSetting 时若旧版本就空，会一路空下去。
+          ✅正确姿势：API 派生版 create 前，遍历 BPMN 全部 conditionExpression → 按 lineId 生成
+          lineSettings；或派生后在前端设计器打开保存一次（自动补全）。判断版本「前端保存过」：
+          lineSettings 非空 或 assigneeValue 带 ExtraData。
       memoLevel:         { type: integer, enum: [-1, 0, 1], desc: "审批意见级别 -1隐藏/0非必填/1必填（驳回节点建议 1 强制填驳回理由）" }
       rejectNodes:       { type: array, items: string, desc: "可驳回/跳回的目标节点。格式 `节点id:线名`——【线名实测用数字索引（如 Activity_alert_handle:0），写中文线名不生效（2026-09-15 .26 用户手改 1.2.5 定案）】。⚠️驳回是运行时动态跳转，靠此字段声明，bpmnXML 不画反向 sequenceFlow（画了反而不对）。目标节点id须图中存在否则被 cleanSetting 清洗。⚠️生效前提：节点 allowedOps 须含 jump" }
       scriptSettings:    { type: object, ref: itsm_process_script, desc: "前后置脚本 {PreScript,PostScript}" }
