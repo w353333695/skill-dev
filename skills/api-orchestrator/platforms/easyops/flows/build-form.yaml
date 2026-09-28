@@ -58,7 +58,7 @@ steps:
     body_hint: |
       { "name":"主机申请表单", "category":"ITSM",
         "formDefinition": <上面的 JSON 字符串>,
-        "state":"unfinished", "versionName":"1.0.0", "versionMemo":"初版" }
+        "state":"done", "versionName":"1.0.0", "versionMemo":"初版" }   # 🔴state 恒 done——开发完成即标记完成（2026-09-28 立规，缺这步前端显示未完成）
     expect: "code=0；data.instanceId=表单id，data.lastestVersion.instanceId=版本id"
     on_fail: "403 鉴权失败 → user 缺 itsc:form_management_create 权限；必填缺失 → 补 name/category/formDefinition/state/versionName"
   - n: 4

@@ -457,7 +457,7 @@ systems:
       delete_constraints: "删 form 须先清所有版本（有版本报『表单存在版本,无法删除』）。删版本路径参数是 versionIds（复数分号，契约误写单数 versionId）；代码只用第一个（批量是壳）。删版本被流程引用拒绝『表单已绑定节点』。⚠️删最后一个版本隐式级联删 form"
       set_main: "POST .../version/:versionId 设主版本=发布；目标须 state==done（unfinished 报错）；旧主自动降级；旧主被流程绑定时触发 ITSC_PROCESS_FORM_RELATION 换绑（业务连续）；已主版本幂等"
       form_definition_string: "formDefinition/businessRules 在 wire 层是 JSON 字符串（CMDB 存 string）。save/update 传 JSON.stringify([]Container)；get 返回需二次 parse。深层结构（5 容器/23 控件/5 脚本/条件显示/继承）见 objects.yaml#itsm_form_definition，后端透传前端解释"
-      version_state: "状态机两态：unfinished(草稿)/done(完成)；无 draft/published 叫法。done=可被引用/可设主版本。list 的 lastestMainVersion/lastestVersion 字段拼写少 t（API 如此）"
+      version_state: "状态机两态：unfinished(草稿)/done(完成)；无 draft/published 叫法。done=可被引用/可设主版本。🔴编排纪律：API 建/改表单版本 body 恒带 state:done——开发/修改完自动标记完成，缺这步前端显示「未完成」（objects.yaml#itsm_form_version description）。list 的 lastestMainVersion/lastestVersion 字段拼写少 t（API 如此）"
       process_integration_todo: "displayUserTaskId（监听节点）只在【跨节点条件显示】填（displayCondition 引用别的流程节点表单的控件时，指明从哪个 activity id 取值）；引用本节点控件【不填】（留空，误填反不生效）。流程接口已接入（见下 process_*），displayUserTaskId↔节点联动机制见 objects.yaml#itsm_process_form_flow"
       # ---- 流程定义（process）运维知识 ----
       process_bpmn: "bpmnXML 是标准 BPMN 2.0 XML（bpmn2:命名空间 + flowable:扩展属性挂 userTask）。节点拓扑靠 incoming/outgoing；分支条件在 <sequenceFlow><conditionExpression>${pass==1}</conditionExpression>；会签 multiInstanceLoopCharacteristics。userTaskId=BPMN<userTask id>=nodeSettings[].userTaskId（join 锚）。校验 11 项（validator.go）。完整见 objects.yaml#itsm_process_bpmn"

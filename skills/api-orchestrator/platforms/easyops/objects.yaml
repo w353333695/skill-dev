@@ -296,7 +296,13 @@ objects:
         rule: "无单 form 详情端点（GET /form/:formId 不存在）。state 过滤的是【版本状态】非 form；isMain=true 只取主版本。list 字段 lastestMainVersion/lastestVersion 拼写少 t（API 如此）。【取 form 元信息走 list 过滤还是 form_version.get 的子对象 属编排知识，见 flows/list-forms-and-versions.yaml】"
 
   itsm_form_version:
-    description: ITSM 表单版本（FormSchemaVersion）—— 一个表单的一个版本，持表单内容 formDefinition。状态机两态：unfinished(草稿)/done(完成)。同时仅一版 isMain=true（主版本=对外生效，流程默认引用）。
+    description: >-
+      ITSM 表单版本（FormSchemaVersion）—— 一个表单的一个版本，持表单内容 formDefinition。状态机两态：unfinished(草稿)/done(完成)。同时仅一版 isMain=true（主版本=对外生效，流程默认引用）。
+      🔴【编排纪律：API 建/改表单版本必须显式 state:"done"（2026-09-28 用户立规）】开发/修改完的表单版本【自动标记完成】——
+      form.save 与 form_version.update 的 body 恒带 state:"done"（新建即完成）；派生/遗留的 unfinished 版本，
+      收尾时 update state=done（unfinished 就地改，内容原样回写）+ 必要时 set_main。缺这步=表单在前端显示
+      「未完成」状态（2026-09-28 告警处理单 1.0.2 实踩：update 派生时只想着改内容，state 落 unfinished 主版本，
+      用户在表单管理页看到未完成）。
     source: data/sources/backend/ITSM/flowable_service/form_schema_version/form_schema_version_service.go
     api: form_version
     fields:

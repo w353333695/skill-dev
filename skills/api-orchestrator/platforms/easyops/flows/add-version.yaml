@@ -50,7 +50,7 @@ steps:
     body_hint: |
       { "name":"主机申请表单", "category":"ITSM",
         "formDefinition": <改造后的 JSON 字符串>,
-        "state":"unfinished", "versionName":"1.1.0", "versionMemo":"加主机类型多选+条件显示" }
+        "state":"done", "versionName":"1.1.0", "versionMemo":"加主机类型多选+条件显示" }   # 🔴state 恒 done——改完即完成（unfinished 是中间态，编排交付不逗留）
     expect: "code=0；done 版时 data 是新派生草稿版本的 instanceId/versionName"
     on_fail: "『重复的表单版本号』→ versionName 与已有重，改号（约束见 objects.yaml#itsm_form_version.side_effects）；403 → 缺 itsc:form_management_update 权限"
 
