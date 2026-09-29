@@ -11,6 +11,8 @@
     · 新选中的设备（表内无此 sn）→ 追加新行，自动字段填 CMDB 值，人工字段留空
     · 行内隐藏键 _instanceId/_objectId 始终刷新（回填 CMDB 用）
     · 表内已有但未选中的行不动（不删行）
+    · 填充目标容器（设备信息段）在 formData 里缺失 → 按 {key,values} 格式构造并回填
+      全部选中设备（不跳过）；值来源容器缺失才原样回吐
 
 入参（平台注入 globals 同名变量）：
     formData    整张表单 JSON 串（onValueChange 注入）
@@ -297,7 +299,10 @@ def main():
         logger.warning(u'formData 非容器数组形态，原样回吐')
         return 0
 
-    # 定位两容器
+    # 定位容器：
+    # · 值来源容器（基本信息）缺失 → 无从取选中值，原样回吐
+    # · 填充目标容器（设备信息）缺失 → 【按格式构造 {key,values} 并回填全部数据】不跳过
+    #   （2026-09-29 用户纠偏：formData 段按容器 key 分段，目标段可能缺失——空表单/未初始化场景）
     sec_base = None
     sec_dev = None
     for c in form:
@@ -305,10 +310,14 @@ def main():
             sec_base = c
         elif c.get('key') == SEC_DEV:
             sec_dev = c
-    if not sec_base or not sec_dev:
+    if not sec_base:
         put_str('formData', json.dumps(form, ensure_ascii=False))
-        logger.warning(u'未找到容器 %s/%s，原样回吐', SEC_BASE, SEC_DEV)
+        logger.warning(u'值来源容器 %s 不存在（无从取选中值），原样回吐', SEC_BASE)
         return 0
+    if not sec_dev:
+        sec_dev = {'key': SEC_DEV, 'values': []}
+        form.append(sec_dev)
+        logger.info(u'目标容器 %s 不存在，按格式构造并回填全部数据', SEC_DEV)
 
     base_vals = sec_base.get('values') or [{}]
     selected = parse_selected(base_vals[0].get(FIELD_POWER) if base_vals else None)
