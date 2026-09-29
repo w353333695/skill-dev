@@ -381,10 +381,19 @@ items:
     scenario: 机房设备进出及上下电审批——提单表单「上下电设备」实例选择（MODALSELECT 跨 BASE_ASSET 11 子模型拉候选）+值变化联动填充设备信息 table（sn 唯一键只补空不覆盖人工值）+设备类型列；验收节点 postScript 按 sn 唯一键全量回填 CMDB（mdl/name/startU/occupiedU+rack/assetOwner 关系；查无按设备类型映射新建）
     notes: "三工具 toolId：候选 3ed83d835160475bb605a8e12bc96b4c/联动填充 4576f66fe2b44dee9ab5e35cdc2487ab/回填 eb2ba16fe30a4794b7a4bcd8625d4b70（均 sandboxRun=true）；🔴子模型名称属性不统一——网络设备只有 deviceName 无 name（查 name 报 Can not find name relation），三工具已按 NAME_ATTRS 映射；导入 POST service_catalog/{目录id}/import（gzip 含 tools/ 三 tar.gz 自动注册）；.26 测试数据：RACK A01/物理服务器 SN-TEST-001/交换机 SN-TEST-002~003"
     added: "2026-09-29"
+  - id: power-device-scripts
+    name: 机房设备进出三脚本源码
+    category: scripts
+    files: [tools/power_device_source.py, tools/power_device_fill.py, tools/device_backfill_cmdb.py]
+    history:
+      - {date: "2026-09-29", change: 初版入库（与工具包 v1.1 同源；agent 真跑三工具全通过）}
+    scenario: 上下电设备候选数据源（componentLoad）/值变化联动填充（onValueChange，sn 只补空）/验收回填 CMDB（postScript，sn 唯一键全量同步）三脚本源码，工具包见 tools/ 三件
+    notes: "py2/3 兼容 stdlib only；🔴BASE_ASSET 子模型名称属性不统一——NAME_ATTRS 映射（objects.yaml#base_asset_models）"
+    added: "2026-09-29"
   - id: power-device-source-tool
     name: 上下电设备选择数据源工具包
     category: tools
-    files: [上下电设备选择数据源.tool.tar.gz, tools/power_device_source.py]
+    files: [上下电设备选择数据源.tool.tar.gz]
     history:
       - {date: "2026-09-29", change: "v1.1 初版入库（名称属性按模型解析 name/deviceName；agent 真跑 2 候选验证）"}
     scenario: 表单 componentLoad——MODALSELECT 实例选择控件数据源，跨 BASE_ASSET@ONEMODEL 11 子模型拉候选（instanceId/_object_id/deviceType/name/mdl/sn），keyword 可选过滤
@@ -393,7 +402,7 @@ items:
   - id: power-device-fill-tool
     name: 上下电设备联动填充工具包
     category: tools
-    files: [上下电设备联动填充.tool.tar.gz, tools/power_device_fill.py]
+    files: [上下电设备联动填充.tool.tar.gz]
     history:
       - {date: "2026-09-29", change: "v1.1 初版入库（sn 唯一键只补空合并——人工字段/人工改过值不覆盖；agent 真跑验证追加1/合并1）"}
     scenario: 表单 onValueChange（容器 listenEvents 挂载）——监听上下电设备值变化，反查 CMDB 详情合并填充设备信息 table；行内隐藏 _instanceId/_objectId 供回填
@@ -402,7 +411,7 @@ items:
   - id: device-backfill-tool
     name: 机房设备进出回填CMDB工具包
     category: tools
-    files: [机房设备进出回填CMDB.tool.tar.gz, tools/device_backfill_cmdb.py]
+    files: [机房设备进出回填CMDB.tool.tar.gz]
     history:
       - {date: "2026-09-29", change: "v1.1 初版入库（sn 查有 upsert/查无按设备类型映射新建；agent 真跑更新+新建双路径验证，关系 rack/assetOwner 落库正确）"}
     scenario: 流程节点 postScript（验收节点 operations=[pass] isAsync=false）——工单设备信息按 sn 唯一键全量同步回 CMDB；逐台报告完整输出
