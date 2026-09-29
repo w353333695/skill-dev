@@ -384,7 +384,7 @@ items:
   - id: power-device-source-tool
     name: 上下电设备选择数据源工具包
     category: tools
-    files: [上下电设备选择数据源.tool.tar.gz]
+    files: [上下电设备选择数据源.tool.tar.gz, tools/power_device_source.py]
     history:
       - {date: "2026-09-29", change: "v1.1 初版入库（名称属性按模型解析 name/deviceName；agent 真跑 2 候选验证）"}
     scenario: 表单 componentLoad——MODALSELECT 实例选择控件数据源，跨 BASE_ASSET@ONEMODEL 11 子模型拉候选（instanceId/_object_id/deviceType/name/mdl/sn），keyword 可选过滤
@@ -393,7 +393,7 @@ items:
   - id: power-device-fill-tool
     name: 上下电设备联动填充工具包
     category: tools
-    files: [上下电设备联动填充.tool.tar.gz]
+    files: [上下电设备联动填充.tool.tar.gz, tools/power_device_fill.py]
     history:
       - {date: "2026-09-29", change: "v1.1 初版入库（sn 唯一键只补空合并——人工字段/人工改过值不覆盖；agent 真跑验证追加1/合并1）"}
     scenario: 表单 onValueChange（容器 listenEvents 挂载）——监听上下电设备值变化，反查 CMDB 详情合并填充设备信息 table；行内隐藏 _instanceId/_objectId 供回填
@@ -402,7 +402,7 @@ items:
   - id: device-backfill-tool
     name: 机房设备进出回填CMDB工具包
     category: tools
-    files: [机房设备进出回填CMDB.tool.tar.gz]
+    files: [机房设备进出回填CMDB.tool.tar.gz, tools/device_backfill_cmdb.py]
     history:
       - {date: "2026-09-29", change: "v1.1 初版入库（sn 查有 upsert/查无按设备类型映射新建；agent 真跑更新+新建双路径验证，关系 rack/assetOwner 落库正确）"}
     scenario: 流程节点 postScript（验收节点 operations=[pass] isAsync=false）——工单设备信息按 sn 唯一键全量同步回 CMDB；逐台报告完整输出
