@@ -74,6 +74,9 @@ import sys
 #         🔴路径按控件类型严格区分（反编译 @1172444 Te 表 + 设置工厂实测）：
 #           SELECT/MULTIPLESELECT/CHECKBOX → extraProps.items
 #           RADIO/CASCADER/MODALSELECT     → extraProps.options
+#         ⚠️MODALSELECT 豁免（2026-09-29 实证）：options.remoteFunc.toolId 已配（脚本拉候选）
+#           时静态 extraProps.options 允许为空——设计器保存的现网表单（65989faf733c9 测试表单）
+#           即此形态，E-P4 对它是误报
 #         （迁移踩坑：RADIO 选项写成 items 前端保存报『的数据源未配置，请添加』——2026-08-15 用户实测）
 #    E-P5 枚举类选项配置完整     DATA_SOURCE_OPTIONS_INCOMPLETE  每项 label/value trim 非空
 #    E-P6 枚举类 value 无重复    DATA_SOURCE_DUPLICATE_VALUES
@@ -335,6 +338,9 @@ def validate_designer_form(form_definition):
             ctx = '%s' % (p.get('label') or '')
             # E-P4/P5/P6：枚举类数据源（按类型的字段路径）
             ds_key = ENUM_DS_PATH.get(ptype)
+            # MODALSELECT 配了 remoteFunc 脚本数据源时静态 options 允许为空（见头部 E-P4 豁免说明）
+            if ptype == 'MODALSELECT' and (opts.get('remoteFunc') or {}).get('toolId'):
+                ds_key = None
             if ds_key:
                 items = ep.get(ds_key) or []
                 if not items:

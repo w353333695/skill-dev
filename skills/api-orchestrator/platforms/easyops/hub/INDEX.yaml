@@ -371,6 +371,43 @@ items:
     scenario: 拉 CCPC 值班表同步 EasyOps ITSM 值班组日历配置（py2/3 兼容，可配 EasyOps agent 定时工具；班次动态归纳不写死、dutyCycle 未来一百年、upsert 幂等、班次变更自动更新）
     notes: "入参 ccpc_ip/ccpc_group_id/duty_group_name/sync_days；角色映射 dutys→users、maintainer+leader→leader（CCPC uid=easyops username 同名直用）；幂等回读走 v1 search（v2 user 增强在用户不存在时回空壳对象，永判不等——.26 实测坑）；CCPC_FIXTURE 环境变量切样例测试；端口 8880 ccpc + 8134 flowable"
     added: "2026-09-15"
+  - id: device-power-service
+    name: 机房设备进出及上下电服务
+    category: itsm-service
+    files: [机房设备进出及上下电_v1.0.4.zip]
+    version: "1.0.4"
+    history:
+      - {date: "2026-09-29", change: 初版入库（.26 导出，onlyCheck 预检通过；含表单1.0.3+流程1.0.4+三脚本工具随包）}
+    scenario: 机房设备进出及上下电审批——提单表单「上下电设备」实例选择（MODALSELECT 跨 BASE_ASSET 11 子模型拉候选）+值变化联动填充设备信息 table（sn 唯一键只补空不覆盖人工值）+设备类型列；验收节点 postScript 按 sn 唯一键全量回填 CMDB（mdl/name/startU/occupiedU+rack/assetOwner 关系；查无按设备类型映射新建）
+    notes: "三工具 toolId：候选 3ed83d835160475bb605a8e12bc96b4c/联动填充 4576f66fe2b44dee9ab5e35cdc2487ab/回填 eb2ba16fe30a4794b7a4bcd8625d4b70（均 sandboxRun=true）；🔴子模型名称属性不统一——网络设备只有 deviceName 无 name（查 name 报 Can not find name relation），三工具已按 NAME_ATTRS 映射；导入 POST service_catalog/{目录id}/import（gzip 含 tools/ 三 tar.gz 自动注册）；.26 测试数据：RACK A01/物理服务器 SN-TEST-001/交换机 SN-TEST-002~003"
+    added: "2026-09-29"
+  - id: power-device-source-tool
+    name: 上下电设备选择数据源工具包
+    category: tools
+    files: [上下电设备选择数据源.tool.tar.gz]
+    history:
+      - {date: "2026-09-29", change: "v1.1 初版入库（名称属性按模型解析 name/deviceName；agent 真跑 2 候选验证）"}
+    scenario: 表单 componentLoad——MODALSELECT 实例选择控件数据源，跨 BASE_ASSET@ONEMODEL 11 子模型拉候选（instanceId/_object_id/deviceType/name/mdl/sn），keyword 可选过滤
+    notes: "toolId 3ed83d835160475bb605a8e12bc96b4c；sandboxRun=true；agent 真跑过（.26）；配套机房设备进出及上下电服务"
+    added: "2026-09-29"
+  - id: power-device-fill-tool
+    name: 上下电设备联动填充工具包
+    category: tools
+    files: [上下电设备联动填充.tool.tar.gz]
+    history:
+      - {date: "2026-09-29", change: "v1.1 初版入库（sn 唯一键只补空合并——人工字段/人工改过值不覆盖；agent 真跑验证追加1/合并1）"}
+    scenario: 表单 onValueChange（容器 listenEvents 挂载）——监听上下电设备值变化，反查 CMDB 详情合并填充设备信息 table；行内隐藏 _instanceId/_objectId 供回填
+    notes: "toolId 4576f66fe2b44dee9ab5e35cdc2487ab；sandboxRun=true；🔴返回必须 PutStr('formData',...) 无改动也原样回吐；listenEvents 配置形态见该表单 1.0.3 formDefinition"
+    added: "2026-09-29"
+  - id: device-backfill-tool
+    name: 机房设备进出回填CMDB工具包
+    category: tools
+    files: [机房设备进出回填CMDB.tool.tar.gz]
+    history:
+      - {date: "2026-09-29", change: "v1.1 初版入库（sn 查有 upsert/查无按设备类型映射新建；agent 真跑更新+新建双路径验证，关系 rack/assetOwner 落库正确）"}
+    scenario: 流程节点 postScript（验收节点 operations=[pass] isAsync=false）——工单设备信息按 sn 唯一键全量同步回 CMDB；逐台报告完整输出
+    notes: "toolId eb2ba16fe30a4794b7a4bcd8625d4b70；sandboxRun=true；orderInfo.formData 三重 JSON 解析+stepList 兜底；名称写入按目标模型 name/deviceName"
+    added: "2026-09-29"
   - id: machine-room-access-service
     name: 机房外部人员进出服务
     category: itsm-service
