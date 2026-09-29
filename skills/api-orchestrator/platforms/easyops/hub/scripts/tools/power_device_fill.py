@@ -214,7 +214,9 @@ def _is_empty(v):
 
 
 def _norm_inst_list(v):
-    """CMDB 关系字段值归一 → [{instanceId, name}]。容忍 dict/str/混合列表/None。"""
+    """CMDB 关系/实例值 → 控件值列表。【全属性保留】（2026-09-29 用户定：CMDB 实例
+    全部属性都回填，不影响前端渲染）——dict 有 instanceId 原样保留（nickname/user_tel/
+    show_key 等全字段都在，frontKey 任取都能显示）；str/异常形态才补最小集。"""
     if v is None:
         return []
     if isinstance(v, dict):
@@ -226,7 +228,11 @@ def _norm_inst_list(v):
         if isinstance(item, dict):
             iid = item.get('instanceId') or item.get('id') or ''
             if iid:
-                out.append({'instanceId': iid, 'name': item.get('name') or iid})
+                # 原样保留完整实例对象（只确保 instanceId 存在）
+                item = dict(item)
+                item.setdefault('instanceId', iid)
+                item.setdefault('name', item.get('name') or iid)
+                out.append(item)
         elif isinstance(item, _string_types) and item:
             out.append({'instanceId': item, 'name': item})
     return out
