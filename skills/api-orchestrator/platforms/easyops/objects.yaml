@@ -13,6 +13,11 @@ objects:
       物理服务器/交换机/路由器/防火墙/存储设备/负载均衡器/刀箱/光纤交换机/F5/网络安全设备/光纤交换机(FC)。
       继承属性：assetsSn 资产编号/brand 品牌/mdl 设备型号/sn 序列号/startU 起始U位/occupiedU 占用U数/
       deviceStatus 设备状态等；继承关系：rack→RACK@ONEMODEL(所属机柜)、assetOwner→USER(负责人)。
+      【待投产属性/关系约定】（2026-09-29 用户定：投产后自己在父模型加，代码已按 id 预留自动生效）：
+      powerAction 上/下电（enum 上电/下电）/ powerPosition 用电位置（str）/ ratedPower 额定功率（str）/
+      useDepartment 关系 → _ITSC_DEPARTMENT@EASYOPS（ITSM 部门模型，show_key=[name]）。
+      配套工具（hub/scripts/tools/power_device_fill.py / device_backfill_cmdb.py）运行时按模型
+      attrList/relation_list 探测——存在才读/写，缺失自动跳过（投产前后都跑得通）。
       🔴【名称属性不统一坑】（2026-09-29 .26 实测）：抽象模型直搜 0 条（实例只在子模型）；
       子模型名称键三种形态——PHYSICAL_SERVER/STORAGE/FIBERCHANNEL_SWITCH 有 name，
       SWITCH/ROUTER/FIREWALL/LOADBALANCER/F5/SECURITY_DEVICE 只有 deviceName（search fields 带 name

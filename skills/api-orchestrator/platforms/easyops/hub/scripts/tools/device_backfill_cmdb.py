@@ -3,12 +3,16 @@
 机房设备进出回填CMDB（流程节点 postScript 钩子——验收节点通过时触发）
 
 机房设备进出及上下电审批流程：验收通过后把「设备信息」table 数据回填 CMDB。
-回填策略（2026-09-29 用户定案）：全部同步，sn 号为唯一键写入——
-    · 设备型号 mdl / 设备名称 name / 起始U位 startU / 占用U数 occupiedU 属性 + 机柜 rack /
-      负责人 assetOwner 关系，全部按工单终值写入
-    · CMDB 无对应字段的（上/下电/使用部门/用电位置/设备额定功率）不回填
+回填策略（2026-09-29 用户定案）：
+    · sn 号为唯一键全量写入——设备信息【所有属性】都处理：
+      名称（按模型 name/deviceName）/ 型号 mdl / 起始U位 startU / 占用U数 occupiedU /
+      机柜 rack / 负责人 assetOwner + 待投产项：上/下电 powerAction / 用电位置 powerPosition /
+      额定功率 ratedPower / 使用部门关系 useDepartment→_ITSC_DEPARTMENT@EASYOPS
+    · 【能力探测】写入字段按目标模型 attrList/relation_list 过滤——投产前模型缺的属性自动跳过
+      （不报错不阻断），投产后父模型加上即自动生效，无需改代码
+    · 设备类型列是模型元信息（模型中文名），不回填
     · sn 在 CMDB 已有实例 → upsert 更新；查无实例且设备类型可映射 → 在对应子模型新建
-      （缺设备类型或缺设备名称则跳过报告）；多实例命中取首个并在报告标注
+    · CMDB 无对应字段的除外（无）——全部列均有映射
 
 入参（平台注入 globals 同名变量）：
     orderInfo    工单全上下文 JSON 串（postScript 注入；formData 三重 JSON）
@@ -44,16 +48,19 @@ CMDB_PORT = 8079
 
 # ---- 表单锚点（机房设备进出及上下电审批流程-发起）----
 SEC_DEV = 'hhrx99izxm'           # 设备信息 table 容器
-F_TYPE = 'devType'               # 设备类型（模型中文名）
+F_ACTION = 'hhrx99izy1'          # 上/下电（RADIO）→ powerAction（🔴待投产属性）
+F_TYPE = 'devType'               # 设备类型（模型中文名，用于新建时定位模型）
 F_NAME = 'hhrx99izxn'            # 设备名称
-F_MDL = 'hhrxj4x1kp'             # 设备型号
-F_RACK = 'hhrx99izxw'            # 所属机柜
-F_STARTU = 'hhrx99izxx'          # 起始U位
-F_OCCU = 'hhrxogs2cp'            # 占用U位
+F_MDL = 'hhrxj4x1kp'             # 设备型号 → mdl
+F_DEPT = 'hhrxmwvszt'            # 使用部门 → useDepartment 关系（🔴待投产关系）
+F_RACK = 'hhrx99izxw'            # 所属机柜 → rack
+F_STARTU = 'hhrx99izxx'          # 起始U位 → startU
+F_OCCU = 'hhrxogs2cp'            # 占用U位 → occupiedU
+F_POWER_POS = 'hhrxj9i4h5'       # 用电位置 → powerPosition（🔴待投产属性）
+F_RATED = 'hhrxjy2wbt'           # 设备额定功率 → ratedPower（🔴待投产属性）
 F_SN = 'hhrxk4ooih'              # 设备序列号（唯一键）
-F_OPS = 'hhrx99izxs'             # 运维人
+F_OPS = 'hhrx99izxs'             # 运维人 → assetOwner
 
-# BASE_ASSET@ONEMODEL 子模型全集 + 设备类型中文名 → objectId 反映射（新建实例定位模型用）
 # 名称属性不统一（2026-09-29 .26 实测）：多数网络设备只有 deviceName；刀箱/FC 无名称属性
 NAME_ATTRS = {
     'PHYSICAL_SERVER@ONEMODEL': 'name',
@@ -83,6 +90,7 @@ HOST = '127.0.0.1'
 ORG = os.environ.get('EASYOPS_ORG', '1888')
 USER = os.environ.get('EASYOPS_USER', 'easyops')
 BASE_HEADERS = {}
+_model_cache = {}
 
 
 def _resolve_conn():
@@ -114,8 +122,8 @@ def _to_unicode(v):
     return v
 
 
-def http_json(method, path, body=None, timeout=30):
-    conn = _http_client.HTTPConnection(HOST, CMDB_PORT, timeout=timeout)
+def http_json(method, port, path, body=None, timeout=30):
+    conn = _http_client.HTTPConnection(HOST, port, timeout=timeout)
     data = json.dumps(body) if body is not None else None
     try:
         conn.request(method, path, body=data, headers=dict(BASE_HEADERS))
@@ -132,7 +140,7 @@ def http_json(method, path, body=None, timeout=30):
 
 
 def cmdb_search(object_id, query, fields):
-    _, resp = http_json('POST', '/v3/object/%s/instance/_search' % object_id,
+    _, resp = http_json('POST', CMDB_PORT, '/v3/object/%s/instance/_search' % object_id,
                         {'page': 1, 'pageSize': 50, 'fields': fields, 'query': query})
     if not isinstance(resp, dict) or resp.get('code') not in (0, None):
         raise RuntimeError(u'[cmdb_search] %s 失败: %s' % (object_id, json.dumps(resp, ensure_ascii=False)))
@@ -141,7 +149,7 @@ def cmdb_search(object_id, query, fields):
 
 def cmdb_import(object_id, keys, datas):
     """upsert 实例（POST /object/<id>/instance/_import）。返回 (insert, update, failed, err_text)。"""
-    _, resp = http_json('POST', '/object/%s/instance/_import' % object_id,
+    _, resp = http_json('POST', CMDB_PORT, '/object/%s/instance/_import' % object_id,
                         {'keys': keys, 'datas': datas})
     if not isinstance(resp, dict) or resp.get('code') not in (0, None):
         return 0, 0, len(datas), json.dumps(resp, ensure_ascii=False)
@@ -151,6 +159,29 @@ def cmdb_import(object_id, keys, datas):
         if isinstance(item, dict) and item.get('error'):
             errs.append(item.get('error'))
     return d.get('insert_count') or 0, d.get('update_count') or 0, d.get('failed_count') or 0, u'; '.join(errs)
+
+
+def model_caps(object_id):
+    """模型能力探测（GET /object/<id>，带缓存）→ (attrs set, rels set)。
+    投产前缺失的属性/关系在此被过滤——代码全量映射，运行时按实有生效（缺失不写不炸）。"""
+    if object_id in _model_cache:
+        return _model_cache[object_id]
+    attrs, rels = set(), set()
+    try:
+        _, resp = http_json('GET', CMDB_PORT, '/object/%s' % object_id)
+        data = resp.get('data') if isinstance(resp, dict) else None
+        if isinstance(data, dict):
+            for a in (data.get('attrList') or []):
+                if a.get('id'):
+                    attrs.add(a['id'])
+            for r in (data.get('relation_list') or []):
+                for k in ('left_id', 'right_id'):
+                    if r.get(k):
+                        rels.add(r[k])
+    except Exception as e:
+        logger.warning(u'[model_caps] %s 探测失败: %s', object_id, e)
+    _model_cache[object_id] = (attrs, rels)
+    return attrs, rels
 
 
 def put_str(key, value):
@@ -180,9 +211,15 @@ def _inst_ids(v):
 
 
 def _s(v):
-    """控件值 → 干净字符串。SELECT/RADIO 对象值取 .value/.label。"""
+    """控件值 → 干净字符串。SELECT/RADIO 枚举对象取 .value。"""
     if isinstance(v, dict):
-        return (v.get('value') or v.get('label') or '') if isinstance(v.get('value'), _string_types) or isinstance(v.get('label'), _string_types) else ''
+        vv = v.get('value')
+        if isinstance(vv, _string_types):
+            return vv.strip()
+        lv = v.get('label')
+        if isinstance(lv, _string_types):
+            return lv.strip()
+        return ''
     if isinstance(v, _string_types):
         return v.strip()
     return ''
@@ -257,6 +294,76 @@ def parse_form_rows(order_info):
     return []
 
 
+def build_row_data(row):
+    """工单行 → 回填 data dict（全量列；待投产项由调用方按模型能力过滤）。"""
+    data = {'sn': _s(row.get(F_SN))}
+    mdl = _s(row.get(F_MDL))
+    if mdl:
+        data['mdl'] = mdl
+    startu = _num(row.get(F_STARTU))
+    if startu is not None:
+        data['startU'] = startu
+    occu = _num(row.get(F_OCCU))
+    if occu is not None:
+        data['occupiedU'] = occu
+    ppos = _s(row.get(F_POWER_POS))
+    if ppos:
+        data['powerPosition'] = ppos
+    rated = _s(row.get(F_RATED))
+    if rated:
+        data['ratedPower'] = rated
+    action = _s(row.get(F_ACTION))
+    if action:
+        data['powerAction'] = action
+    rack_ids = _inst_ids(row.get(F_RACK))
+    if rack_ids:
+        data['rack'] = rack_ids
+    ops_ids = _inst_ids(row.get(F_OPS))
+    if ops_ids:
+        data['assetOwner'] = ops_ids
+    dept_ids = _inst_ids(row.get(F_DEPT))
+    if dept_ids:
+        data['useDepartment'] = dept_ids
+    return data
+
+
+# 已确认存在于全部子模型的属性/关系（投产验证过）；PENDING_* 为待投产项（探测到才写）
+KNOWN_ATTRS = {'sn', 'mdl', 'startU', 'occupiedU'}
+KNOWN_RELS = {'rack', 'assetOwner'}
+PENDING_ATTRS = {'powerPosition', 'ratedPower', 'powerAction'}
+PENDING_RELS = {'useDepartment'}
+
+
+def filter_by_caps(data, attrs, rels, name_attr, name_val):
+    """按模型能力过滤回填字段（投产前缺失自动跳过）+ 名称按模型键写入。
+    探测失败（空集）→ 只写已知字段、跳过全部待投产项（宁少写不报错）。"""
+    out = {}
+    skipped = []
+    for k, v in data.items():
+        if k in KNOWN_ATTRS:
+            out[k] = v
+        elif k in KNOWN_RELS:
+            if not rels or k in rels:
+                out[k] = v
+            else:
+                skipped.append(k)
+        elif k in PENDING_ATTRS:
+            if attrs and k in attrs:
+                out[k] = v
+            else:
+                skipped.append(k)
+        elif k in PENDING_RELS:
+            if rels and k in rels:
+                out[k] = v
+            else:
+                skipped.append(k)
+        else:
+            out[k] = v
+    if name_val and name_attr:
+        out[name_attr] = name_val
+    return out, skipped
+
+
 def main():
     _resolve_conn()
     order_info = globals().get('orderInfo') or globals().get('order_info') or ''
@@ -276,31 +383,15 @@ def main():
             skip_cnt += 1
             lines.append(u'  %d. ⚠️ 跳过（无序列号）：%s' % (i, name or u'(无名称)'))
             continue
-        # 组装回填数据（只带非空字段；CMDB 无对应的列不碰；名称键按目标模型 name/deviceName，定位模型后写入）
-        data = {'sn': sn}
-        mdl = _s(row.get(F_MDL))
-        if mdl:
-            data['mdl'] = mdl
-        startu = _num(row.get(F_STARTU))
-        if startu is not None:
-            data['startU'] = startu
-        occu = _num(row.get(F_OCCU))
-        if occu is not None:
-            data['occupiedU'] = occu
-        rack_ids = _inst_ids(row.get(F_RACK))
-        if rack_ids:
-            data['rack'] = rack_ids
-        ops_ids = _inst_ids(row.get(F_OPS))
-        if ops_ids:
-            data['assetOwner'] = ops_ids
+        data = build_row_data(row)
 
         found = find_by_sn(sn)
         if found and found[0]:
             object_id = found[1]
+            attrs, rels = model_caps(object_id)
             name_attr = NAME_ATTRS.get(object_id)
-            if name and name_attr:
-                data[name_attr] = name
-            ins, upd, fail, err = cmdb_import(object_id, ['sn'], [data])
+            final, skipped = filter_by_caps(data, attrs, rels, name_attr, name)
+            ins, upd, fail, err = cmdb_import(object_id, ['sn'], [final])
             if fail:
                 lines.append(u'  %d. ❌ %s(sn=%s) 更新失败 @%s：%s' % (i, name, sn, object_id, err))
                 skip_cnt += 1
@@ -308,29 +399,30 @@ def main():
                 ok_cnt += 1
                 action = u'新建' if ins else u'更新'
                 extra = u'（注意：sn 命中 %d 台，取首个）' % found[2] if found[2] > 1 else ''
-                lines.append(u'  %d. ✅ %s(sn=%s) %s @%s 字段=%s%s' % (
+                skip_note = u'；待投产未写=%s' % u','.join(skipped) if skipped else ''
+                lines.append(u'  %d. ✅ %s(sn=%s) %s @%s 字段=%s%s%s' % (
                     i, name, sn, action, object_id,
-                    u','.join(sorted(data.keys())), extra))
+                    u','.join(sorted(final.keys())), extra, skip_note))
         else:
-            # 查无实例 → 按设备类型映射子模型新建（缺类型或模型无名称属性且缺其它必填则跳过）
             object_id = NAME_TO_MODEL.get(dev_type) or ''
             name_attr = NAME_ATTRS.get(object_id) if object_id else None
             if object_id and (name_attr or not name):
-                if name and name_attr:
-                    data[name_attr] = name
-                ins, upd, fail, err = cmdb_import(object_id, ['sn'], [data])
+                attrs, rels = model_caps(object_id)
+                final, skipped = filter_by_caps(data, attrs, rels, name_attr, name)
+                ins, upd, fail, err = cmdb_import(object_id, ['sn'], [final])
                 if fail:
                     lines.append(u'  %d. ❌ %s(sn=%s) 新建失败 @%s：%s' % (i, name, sn, object_id, err))
                     skip_cnt += 1
                 else:
                     ok_cnt += 1
-                    lines.append(u'  %d. ✅ %s(sn=%s) 新建 @%s 字段=%s' % (i, name, sn, object_id, u','.join(sorted(data.keys()))))
+                    skip_note = u'；待投产未写=%s' % u','.join(skipped) if skipped else ''
+                    lines.append(u'  %d. ✅ %s(sn=%s) 新建 @%s 字段=%s%s' % (i, name, sn, object_id, u','.join(sorted(final.keys())), skip_note))
             else:
                 skip_cnt += 1
                 why = u'设备类型无法映射模型' if not object_id else u'该模型无名称属性且无法定位'
                 lines.append(u'  %d. ⚠️ 跳过（CMDB 查无此 sn 且%s）：%s(sn=%s)' % (i, why, name, sn))
 
-    lines.append(u'回填完成：成功 %d / 跳过或失败 %d' % (ok_cnt, skip_cnt))
+    lines.append(u'回填完成：成功 %d / 跳过或失败 %d（报告含待投产字段提示）' % (ok_cnt, skip_cnt))
     put_str('report', u'\n'.join(lines))
     return 0
 

@@ -6,13 +6,19 @@
 按选中设备反查 CMDB 详情，合并填充「设备信息」table。
 
 合并策略（2026-09-29 用户定案）：
-    · sn 为唯一键对齐行——已有该 sn 的行【只补空】：CMDB 能提供的字段里，行内已填的
-      （人工改过）不覆盖；CMDB 没有的字段（上/下电/使用部门/用电位置/设备额定功率）绝不碰
-    · 新选中的设备（表内无此 sn）→ 追加新行，自动字段填 CMDB 值，人工字段留空
-    · 行内隐藏键 _instanceId/_objectId 始终刷新（回填 CMDB 用）
+    · sn 为唯一键对齐行——已有该 sn 的行【只补空】：行内已填的（人工改过）不覆盖
+    · 新选中的设备（表内无此 sn）→ 追加新行，CMDB 能带的字段全带，其余留空
     · 表内已有但未选中的行不动（不删行）
     · 填充目标容器（设备信息段）在 formData 里缺失 → 按 {key,values} 格式构造并回填
       全部选中设备（不跳过）；值来源容器缺失才原样回吐
+
+全量字段映射（2026-09-29 用户要求：设备信息所有属性都处理）：
+    · 现有 CMDB 属性/关系直接映射：名称/型号/机柜 rack/起始U位 startU/占用U位 occupiedU/
+      序列号 sn/运维人 assetOwner
+    · 【待投产属性】（BASE_ASSET 父模型暂无，用户投产后自加，代码按 id 预留）：
+      上/下电 powerAction / 用电位置 powerPosition / 额定功率 ratedPower /
+      使用部门关系 useDepartment→_ITSC_DEPARTMENT@EASYOPS
+    · 运行时按模型 attrList/relation_list 探测——存在才查询/带出，缺失自动跳过（投产前后都跑得通）
 
 入参（平台注入 globals 同名变量）：
     formData    整张表单 JSON 串（onValueChange 注入）
@@ -48,24 +54,39 @@ CMDB_PORT = 8079
 
 # ---- 表单锚点（机房设备进出及上下电审批流程-发起）----
 SEC_BASE = 'hhrx99izxd'          # 基本信息容器
-FIELD_POWER = 'powerDevices'     # 上下电设备控件（本次新增）
+FIELD_POWER = 'powerDevices'     # 上下电设备控件
 SEC_DEV = 'hhrx99izxm'           # 设备信息 table 容器
 
-# 设备信息列 modelField
-F_TYPE = 'devType'               # 设备类型（本次新增）
-F_NAME = 'hhrx99izxn'            # 设备名称
-F_MDL = 'hhrxj4x1kp'             # 设备型号
-F_RACK = 'hhrx99izxw'            # 所属机柜（CMDBINSTANCESELECT RACK）
-F_STARTU = 'hhrx99izxx'          # 起始U位
-F_OCCU = 'hhrxogs2cp'            # 占用U位
-F_SN = 'hhrxk4ooih'              # 设备序列号（唯一键）
-F_OPS = 'hhrx99izxs'             # 运维人（USER_SELECTOR）
-# 人工字段（CMDB 无，绝不写入）：上/下电 hhrx99izy1 / 使用部门 hhrxmwvszt /
-# 用电位置 hhrxj9i4h5 / 设备额定功率 hhrxjy2wbt
+# 设备信息列 modelField → CMDB 属性/关系 id 全量映射
+F_ACTION = 'hhrx99izy1'          # 上/下电（RADIO）→ powerAction（🔴待投产属性）
+F_TYPE = 'devType'               # 设备类型（模型中文名，脚本填，不回填 CMDB）
+F_NAME = 'hhrx99izxn'            # 设备名称 → name/deviceName（按模型）
+F_MDL = 'hhrxj4x1kp'             # 设备型号 → mdl
+F_DEPT = 'hhrxmwvszt'            # 使用部门（CMDBINSTANCESELECT）→ useDepartment 关系（🔴待投产关系）
+F_RACK = 'hhrx99izxw'            # 所属机柜 → rack 关系
+F_STARTU = 'hhrx99izxx'          # 起始U位 → startU
+F_OCCU = 'hhrxogs2cp'            # 占用U位 → occupiedU
+F_POWER_POS = 'hhrxj9i4h5'       # 用电位置 → powerPosition（🔴待投产属性）
+F_RATED = 'hhrxjy2wbt'           # 设备额定功率 → ratedPower（🔴待投产属性）
+F_SN = 'hhrxk4ooih'              # 设备序列号 → sn（唯一键）
+F_OPS = 'hhrx99izxs'             # 运维人 → assetOwner 关系
 
-# BASE_ASSET@ONEMODEL 子模型全集（sn/型号等继承自抽象父模型）
-# 名称属性不统一（2026-09-29 .26 实测）：多数网络设备只有 deviceName 无 name
-# （查 name 报 "Can not find name relation"）；刀箱/FC 光纤交换机两者皆无（ip 兜底）
+CMDB_ATTR_MAP = {
+    F_MDL: 'mdl',
+    F_STARTU: 'startU',
+    F_OCCU: 'occupiedU',
+    F_POWER_POS: 'powerPosition',   # 待投产
+    F_RATED: 'ratedPower',          # 待投产
+    F_ACTION: 'powerAction',        # 待投产
+}
+CMDB_REL_MAP = {
+    F_RACK: 'rack',
+    F_OPS: 'assetOwner',
+    F_DEPT: 'useDepartment',        # 待投产（→_ITSC_DEPARTMENT@EASYOPS）
+}
+
+# BASE_ASSET@ONEMODEL 子模型全集；名称属性不统一（多数网络设备只有 deviceName 无 name，
+# 查 name 报 "Can not find name relation"；刀箱/FC 两者皆无，ip 兜底）
 NAME_ATTRS = {
     'PHYSICAL_SERVER@ONEMODEL': 'name',
     'SWITCH@ONEMODEL': 'deviceName',
@@ -79,12 +100,7 @@ NAME_ATTRS = {
     'BLADE_CHASSIS@ONEMODEL': None,
     'FIBRE_CHANNEL_SWITCH': None,
 }
-CHILD_MODELS = [
-    'PHYSICAL_SERVER@ONEMODEL', 'SWITCH@ONEMODEL', 'ROUTER@ONEMODEL', 'FIREWALL@ONEMODEL',
-    'STORAGE@ONEMODEL', 'LOADBALANCER@ONEMODEL', 'BLADE_CHASSIS@ONEMODEL',
-    'FIBERCHANNEL_SWITCH@ONEMODEL', 'F5_LB_DEVICE@ONEMODEL', 'SECURITY_DEVICE@ONEMODEL',
-    'FIBRE_CHANNEL_SWITCH',
-]
+CHILD_MODELS = list(NAME_ATTRS.keys())
 MODEL_TYPE_NAMES = {
     'PHYSICAL_SERVER@ONEMODEL': u'物理服务器', 'SWITCH@ONEMODEL': u'交换机',
     'ROUTER@ONEMODEL': u'路由器', 'FIREWALL@ONEMODEL': u'防火墙',
@@ -98,6 +114,7 @@ HOST = '127.0.0.1'
 ORG = os.environ.get('EASYOPS_ORG', '1888')
 USER = os.environ.get('EASYOPS_USER', 'easyops')
 BASE_HEADERS = {}
+_MODEL_CACHE = {}   # object_id → {'attrs': set, 'rels': set}
 
 
 def _resolve_conn():
@@ -129,8 +146,8 @@ def _to_unicode(v):
     return v
 
 
-def http_json(method, path, body=None, timeout=30):
-    conn = _http_client.HTTPConnection(HOST, CMDB_PORT, timeout=timeout)
+def http_json(method, port, path, body=None, timeout=30):
+    conn = _http_client.HTTPConnection(HOST, port, timeout=timeout)
     data = json.dumps(body) if body is not None else None
     try:
         conn.request(method, path, body=data, headers=dict(BASE_HEADERS))
@@ -147,11 +164,36 @@ def http_json(method, path, body=None, timeout=30):
 
 
 def cmdb_search(object_id, query, fields):
-    _, resp = http_json('POST', '/v3/object/%s/instance/_search' % object_id,
+    _, resp = http_json('POST', CMDB_PORT, '/v3/object/%s/instance/_search' % object_id,
                         {'page': 1, 'pageSize': 50, 'fields': fields, 'query': query})
     if not isinstance(resp, dict) or resp.get('code') not in (0, None):
         raise RuntimeError(u'[cmdb_search] %s 失败: %s' % (object_id, json.dumps(resp, ensure_ascii=False)))
     return (resp.get('data') or {}).get('list') or []
+
+
+def model_caps(object_id):
+    """模型能力探测（GET /object/<id>，带缓存）→ {'attrs': set(属性id), 'rels': set(关系id)}。
+    投产前缺失的属性/关系在此被过滤——代码全量映射，运行时按实有生效。"""
+    if object_id in _MODEL_CACHE:
+        return _MODEL_CACHE[object_id]
+    caps = {'attrs': set(), 'rels': set()}
+    try:
+        _, resp = http_json('GET', CMDB_PORT, '/object/%s' % object_id)
+        data = resp.get('data') if isinstance(resp, dict) else None
+        if isinstance(data, dict):
+            for a in (data.get('attrList') or []):
+                if a.get('id'):
+                    caps['attrs'].add(a['id'])
+            # 关系侧：relation_list 含继承关系（如 rack 定义于 BASE_ASSET 但子模型也返回），
+            # 双向键都收——设备侧键（right_id，如 rack/assetOwner/useDepartment）是我们用的
+            for r in (data.get('relation_list') or []):
+                for k in ('left_id', 'right_id'):
+                    if r.get(k):
+                        caps['rels'].add(r[k])
+    except Exception as e:
+        logger.warning(u'[model_caps] %s 探测失败（按空能力处理）: %s', object_id, e)
+    _MODEL_CACHE[object_id] = caps
+    return caps
 
 
 def put_str(key, value):
@@ -162,7 +204,6 @@ def put_str(key, value):
 
 
 def _is_empty(v):
-    """空判定：None/空串/空列表/空dict。数字 0 与 False 视为【有值】（U位可为0）。"""
     if v is None:
         return True
     if isinstance(v, _string_types):
@@ -192,7 +233,6 @@ def _norm_inst_list(v):
 
 
 def _load_json_maybe(v):
-    """字符串尝试二次 parse（值可能被序列化过）。"""
     if isinstance(v, _string_types):
         s = v.strip()
         if s.startswith('[') or s.startswith('{'):
@@ -205,7 +245,7 @@ def _load_json_maybe(v):
 
 
 def parse_selected(value_raw):
-    """上下电设备控件值 → 选中行列表（每行至少含 instanceId/_object_id/name/sn 中若干）。"""
+    """上下电设备控件值 → 选中行列表。"""
     v = _load_json_maybe(value_raw)
     if v is None:
         v = value_raw if isinstance(value_raw, list) else []
@@ -228,13 +268,26 @@ def parse_selected(value_raw):
     return rows
 
 
-def _detail_fields(object_id):
-    """按模型拼 search fields（名称属性按模型取 name/deviceName，皆无则不查名称）。"""
-    fields = ['mdl', 'sn', 'startU', 'occupiedU', 'rack', 'assetOwner', '_object_id', 'instanceId', 'ip']
+def _detail_fields(object_id, caps):
+    """按模型能力拼 search fields（属性在 attrList、关系在 rels 才带）。"""
+    fields = ['instanceId', 'ip']
     name_attr = NAME_ATTRS.get(object_id)
-    if name_attr:
+    if name_attr and (name_attr in caps['attrs'] or not caps['attrs']):
         fields.append(name_attr)
-    return fields, name_attr
+    for field_key, cmdb_id in CMDB_ATTR_MAP.items():
+        if not caps['attrs'] or cmdb_id in caps['attrs']:
+            fields.append(cmdb_id)
+    for field_key, cmdb_id in CMDB_REL_MAP.items():
+        if not caps['rels'] or cmdb_id in caps['rels']:
+            fields.append(cmdb_id)
+    # 去重保序
+    seen = set()
+    out = []
+    for f in fields:
+        if f not in seen:
+            seen.add(f)
+            out.append(f)
+    return out, name_attr
 
 
 def _resolve_name(ins, name_attr):
@@ -244,34 +297,42 @@ def _resolve_name(ins, name_attr):
 
 
 def fetch_device_detail(sel):
-    """选中行 → CMDB 实例详情 {name,mdl,sn,startU,occupiedU,rack,assetOwner,_object_id}。
-    优先 instanceId 直查；兜底 sn → 名称 跨子模型反查。查不到返 None。"""
+    """选中行 → CMDB 实例详情（带 _resolved_name）。优先 instanceId 直查；兜底 sn → 名称。"""
     try:
         if sel.get('instanceId') and sel.get('_object_id'):
-            fields, name_attr = _detail_fields(sel['_object_id'])
+            caps = model_caps(sel['_object_id'])
+            fields, name_attr = _detail_fields(sel['_object_id'], caps)
             lst = cmdb_search(sel['_object_id'], {'instanceId': sel['instanceId']}, fields)
             if lst:
                 ins = lst[0]
                 ins['_resolved_name'] = _resolve_name(ins, name_attr)
+                ins['_caps'] = caps
                 return ins
         if sel.get('sn'):
             for m in CHILD_MODELS:
-                fields, name_attr = _detail_fields(m)
+                caps = model_caps(m)
+                fields, name_attr = _detail_fields(m, caps)
                 lst = cmdb_search(m, {'sn': sel['sn']}, fields)
                 if lst:
                     ins = lst[0]
                     ins['_resolved_name'] = _resolve_name(ins, name_attr)
+                    ins['_caps'] = caps
                     return ins
         if sel.get('name'):
             for m in CHILD_MODELS:
-                fields, name_attr = _detail_fields(m)
+                name_attr = NAME_ATTRS.get(m)
                 if not name_attr:
                     continue
-                lst = cmdb_search(m, {name_attr: sel['name']}, fields)
+                lst = cmdb_search(m, {name_attr: sel['name']}, ['instanceId'])
                 if lst:
-                    ins = lst[0]
-                    ins['_resolved_name'] = _resolve_name(ins, name_attr)
-                    return ins
+                    caps = model_caps(m)
+                    fields, na2 = _detail_fields(m, caps)
+                    lst = cmdb_search(m, {'instanceId': lst[0].get('instanceId')}, fields)
+                    if lst:
+                        ins = lst[0]
+                        ins['_resolved_name'] = _resolve_name(ins, na2)
+                        ins['_caps'] = caps
+                        return ins
     except Exception as e:
         logger.warning(u'[fetch_device_detail] %s 反查失败: %s', sel.get('name') or sel.get('sn'), e)
     return None
@@ -291,7 +352,7 @@ def main():
     try:
         form = json.loads(raw)
     except ValueError:
-        put_str('formData', raw)  # 坏串原样回吐，不炸表单
+        put_str('formData', raw)
         logger.error(u'formData 非合法 JSON，原样回吐')
         return 0
     if not isinstance(form, list):
@@ -299,10 +360,7 @@ def main():
         logger.warning(u'formData 非容器数组形态，原样回吐')
         return 0
 
-    # 定位容器：
-    # · 值来源容器（基本信息）缺失 → 无从取选中值，原样回吐
-    # · 填充目标容器（设备信息）缺失 → 【按格式构造 {key,values} 并回填全部数据】不跳过
-    #   （2026-09-29 用户纠偏：formData 段按容器 key 分段，目标段可能缺失——空表单/未初始化场景）
+    # 定位容器：值来源缺失→回吐；填充目标缺失→构造（2026-09-29 用户纠偏：不跳过）
     sec_base = None
     sec_dev = None
     for c in form:
@@ -331,7 +389,6 @@ def main():
         dev_rows = []
         sec_dev['values'] = dev_rows
 
-    # 现有行按 sn 建索引（sn 空 → 不参与对齐，视为无键行）
     idx_by_sn = {}
     for i, row in enumerate(dev_rows):
         if isinstance(row, dict):
@@ -346,25 +403,36 @@ def main():
             skipped += 1
             logger.warning(u'设备 %s（sn=%s）CMDB 反查不到，跳过', sel.get('name'), sel.get('sn'))
             continue
-        sn = detail.get('sn') or sel.get('sn') or ''
-        sn = sn.strip() if isinstance(sn, _string_types) else sn
+        caps = detail.get('_caps') or {'attrs': set(), 'rels': set()}
         object_id = detail.get('_object_id') or sel.get('_object_id') or ''
+
+        # 全量 auto 映射（能力过滤后）
         auto = {
             F_TYPE: MODEL_TYPE_NAMES.get(object_id, sel.get('deviceType') or ''),
-            F_NAME: detail.get('_resolved_name') or detail.get('name') or '',
-            F_MDL: detail.get('mdl') or '',
-            F_RACK: _norm_inst_list(detail.get('rack')),
-            F_STARTU: detail.get('startU'),
-            F_OCCU: detail.get('occupiedU'),
-            F_SN: sn,
-            F_OPS: _norm_inst_list(detail.get('assetOwner')),
+            F_NAME: detail.get('_resolved_name') or '',
         }
+        for field_key, cmdb_id in CMDB_ATTR_MAP.items():
+            if caps['attrs'] and cmdb_id not in caps['attrs']:
+                continue
+            v = detail.get(cmdb_id)
+            if field_key == F_ACTION and not _is_empty(v):
+                # RADIO 枚举值包装 {key,label,value}（items 未配置时自等值包装）
+                v = {'key': v, 'label': v, 'value': v} if not isinstance(v, dict) else v
+            auto[field_key] = v
+        for field_key, cmdb_id in CMDB_REL_MAP.items():
+            if caps['rels'] and cmdb_id not in caps['rels']:
+                continue
+            auto[field_key] = _norm_inst_list(detail.get(cmdb_id))
+
+        sn = detail.get('sn') or sel.get('sn') or ''
+        sn = sn.strip() if isinstance(sn, _string_types) else sn
+        auto[F_SN] = sn
         pos = idx_by_sn.get(sn) if sn else None
         if pos is not None:
             row = dev_rows[pos]
             for k, v in auto.items():
                 if k == F_SN:
-                    continue  # 唯一键本身不对齐时已匹配
+                    continue
                 if _is_empty(row.get(k)) and not _is_empty(v):
                     row[k] = v
             row['_instanceId'] = detail.get('instanceId') or ''
