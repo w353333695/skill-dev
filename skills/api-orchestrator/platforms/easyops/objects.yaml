@@ -482,6 +482,12 @@ objects:
       - "无独立『子表』控件——多行靠 table 容器（容器实现，非控件本身）"
       - "table 容器内的控件运行期 IsPlural=true（多值）"
       - "⚠️ key 应 == modelField（设计器约定，真实表单两者同值）。displayCondition 的 #{容器ID.控件ID} 据此解析控件值——key≠modelField 会导致表达式取不到值（条件显示不生效）"
+      - |
+        【displayCondition 表达式语法实证】（2026-09-29 机房设备进出表单，容器级/控件级同语法，前端解释）：
+          单值控件（RADIO/SELECT）：#{容器key.控件key}.value == "0"
+          多值控件（CHECKBOX）：#{容器key.控件key}.some(item => item.value == "0")
+        容器级条件显示=容器 displayCondition 字段（整个 table/row 按上游控件值显隐）；
+        控件级=control options.displayCondition。引用本表单其它容器的控件直接写全路径。
 
   itsm_form_options:
     description: 控件配置（Options，component.go:51-73）—— 所有控件共享字段 + extraProps（控件特有）。
@@ -548,11 +554,16 @@ objects:
     description: |
       控件级脚本/数据源（RemoteFunc，component.go:128-135）。脚本不是内联代码——引用预注册的 EasyOps【工具】（toolId，python 工具），表单 schema 只存 toolId + 入参映射。
       服务 componentLoad（控件加载，如实例选择拉候选）+ instSelect（实例选择过滤）。
+      🔴【scriptInputs 必填坑】（2026-09-29 用户纠偏）：实例选择控件（MODALSELECT）的
+      options.remoteFunc.scriptInputs 空数组 = 前端【不会触发】脚本（候选拉不出来）——
+      必须至少配一条，无实际入参时随便写个静态值即可：
+      [{scriptType:"static", name:"<工具入参名>", scriptValue:""}]。toolId 正确但选择器
+      空白/不发起请求时先查这里。
     fields:
       toolId:        { type: string, desc: "EasyOps 工具 id（autoops_tool.toolId）" }
       toolVersionId: { type: string, desc: "工具版本 id" }
       modelField:    { type: string, desc: "对应表单字段 key" }
-      scriptInputs:  { type: array, items: itsm_form_script_input, desc: "入参定义（static/currentNode/history）" }
+      scriptInputs:  { type: array, items: itsm_form_script_input, desc: "🔴非空必配（空=前端不触发）——静态值兜底：[{scriptType:static,name:xx,scriptValue:''}]" }
       scriptOutput:  { type: object, ref: itsm_form_script_output, desc: "出参定义（dataPath + showKey）" }
 
   itsm_form_script_input:

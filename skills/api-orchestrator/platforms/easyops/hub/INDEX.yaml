@@ -374,10 +374,11 @@ items:
   - id: device-power-service
     name: 机房设备进出及上下电服务
     category: itsm-service
-    files: [机房设备进出及上下电_v1.0.4.zip]
-    version: "1.0.4"
+    files: [机房设备进出及上下电_v1.0.5.zip]
+    version: "1.0.5"
     history:
       - {date: "2026-09-29", change: 初版入库（.26 导出，onlyCheck 预检通过；含表单1.0.3+流程1.0.4+三脚本工具随包）}
+      - {date: "2026-09-29", change: "1.0.5：表单1.0.4——上下电设备 scriptInputs 配静态值（🔴空数组前端不触发，已立规）+ 条件显示同设备信息（是否上下架设备==0）"}
     scenario: 机房设备进出及上下电审批——提单表单「上下电设备」实例选择（MODALSELECT 跨 BASE_ASSET 11 子模型拉候选）+值变化联动填充设备信息 table（sn 唯一键只补空不覆盖人工值）+设备类型列；验收节点 postScript 按 sn 唯一键全量回填 CMDB（mdl/name/startU/occupiedU+rack/assetOwner 关系；查无按设备类型映射新建）
     notes: "三工具 toolId：候选 3ed83d835160475bb605a8e12bc96b4c/联动填充 4576f66fe2b44dee9ab5e35cdc2487ab/回填 eb2ba16fe30a4794b7a4bcd8625d4b70（均 sandboxRun=true）；🔴子模型名称属性不统一——网络设备只有 deviceName 无 name（查 name 报 Can not find name relation），三工具已按 NAME_ATTRS 映射；导入 POST service_catalog/{目录id}/import（gzip 含 tools/ 三 tar.gz 自动注册）；.26 测试数据：RACK A01/物理服务器 SN-TEST-001/交换机 SN-TEST-002~003"
     added: "2026-09-29"
