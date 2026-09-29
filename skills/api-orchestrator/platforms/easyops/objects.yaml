@@ -15,7 +15,8 @@ objects:
       deviceStatus 设备状态等；继承关系：rack→RACK@ONEMODEL(所属机柜)、assetOwner→USER(负责人)。
       【待投产属性/关系约定】（2026-09-29 用户定：投产后自己在父模型加，代码已按 id 预留自动生效）：
       powerAction 上/下电（enum 上电/下电）/ powerPosition 用电位置（str）/ ratedPower 额定功率（str）/
-      useDepartment 关系 → _ITSC_DEPARTMENT@EASYOPS（ITSM 部门模型，show_key=[name]）。
+      useDepartment 关系 → ORGANIZATION@EASYOPS（组织模型，show_key=[name]；2026-09-29 用户纠正——
+      不是 _ITSC_DEPARTMENT，部门语义用组织模型承载）。
       配套工具（hub/scripts/tools/power_device_fill.py / device_backfill_cmdb.py）运行时按模型
       attrList/relation_list 探测——存在才读/写，缺失自动跳过（投产前后都跑得通）。
       🔴【名称属性不统一坑】（2026-09-29 .26 实测）：抽象模型直搜 0 条（实例只在子模型）；
