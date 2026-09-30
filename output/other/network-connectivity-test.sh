@@ -80,8 +80,8 @@ split_csv() { IFS=',' read -r -a SPLIT_RESULT <<< "$1"; }
 print_target_inspection() {
   local target=$1
   log_section "目标 $target：端口监听与防火墙状态"
-  ssh_run_and_show "${target} 监听端口（ss -lntup）" "$target" \
-    'if command -v ss >/dev/null 2>&1; then ss -lntup; elif command -v netstat >/dev/null 2>&1; then netstat -lntup; else echo "未找到 ss/netstat" >&2; exit 127; fi' || true
+  ssh_run_and_show "${target} 监听端口" "$target" \
+    'if command -v ss >/dev/null 2>&1; then ss -lntup; elif [ "$(uname -s 2>/dev/null)" = Darwin ] && command -v netstat >/dev/null 2>&1; then netstat -anv -p tcp; netstat -anv -p udp; elif command -v netstat >/dev/null 2>&1; then netstat -lntup; else echo "未找到 ss/netstat" >&2; exit 127; fi' || true
   ssh_run_and_show "${target} iptables" "$target" \
     'if command -v iptables >/dev/null 2>&1; then iptables -L -n -v --line-numbers; else echo "未找到 iptables" >&2; exit 127; fi' || true
   ssh_run_and_show "${target} firewalld" "$target" \
@@ -138,7 +138,7 @@ while (($#)); do
     -d|--dest) [[ $# -ge 2 ]] || die "$1 需要参数"; DESTS=$2; shift 2;;
     -p|--ports) [[ $# -ge 2 ]] || die "$1 需要参数"; PORTS=$2; shift 2;;
     -s|--source) [[ $# -ge 2 ]] || die "$1 需要参数"; SOURCES=$2; shift 2;;
-    -P|--protocol) [[ $# -ge 2 ]] || die "$1 需要参数"; PROTOCOL=${2,,}; shift 2;;
+    -P|--protocol) [[ $# -ge 2 ]] || die "$1 需要参数"; PROTOCOL=$(printf '%s' "$2" | tr '[:upper:]' '[:lower:]'); shift 2;;
     -t|--timeout) [[ $# -ge 2 ]] || die "$1 需要参数"; TIMEOUT=$2; shift 2;;
     -u|--user) [[ $# -ge 2 ]] || die "$1 需要参数"; SSH_USER=$2; shift 2;;
     --ssh-port) [[ $# -ge 2 ]] || die "$1 需要参数"; SSH_PORT=$2; shift 2;;
