@@ -395,6 +395,24 @@ items:
     scenario: 上下电设备候选数据源（componentLoad）/值变化联动填充（onValueChange，sn 只补空）/验收回填 CMDB（postScript，sn 唯一键全量同步）三脚本源码，工具包见 tools/ 三件
     notes: "py2/3 兼容 stdlib only；🔴BASE_ASSET 子模型名称属性不统一——NAME_ATTRS 映射（objects.yaml#base_asset_models）"
     added: "2026-09-29"
+  - id: agent-conf-tool
+    name: Agent配置修改工具包
+    category: tools
+    files: [Agent配置修改.tool.tar.gz]
+    history:
+      - {date: "2026-09-30", change: "v1.0.2 初版入库（.26 agent 真跑：预览 4 处 ip/嵌套 port 路径/修改全链路 备份-回读-重启 验证）"}
+    scenario: 修改本机 EasyOps agent conf.yaml——默认改全深度 ip；xx.yy.zz 点路径精确指定（后缀语义，数字段=列表索引可省略）；动作 预览/修改；修改=备份→文本级替换（保留注释/格式）→回读验证→重启 agent；conf 路径按平台自动探测（win c:\easyops\agent\conf / linux /usr/local/easyops/agent/conf）
+    notes: "toolId 575acbb01ca040c39be6aa67decef7fd；🔴sandboxRun=false——主机运维工具需 agent 权限写 conf 目录（沙箱 nobody 只读，实测 IOErr 13）；先发主报告再重启（自重启终止进程不丢输出）；文本级 YAML 扫描（栈列管理还原嵌套路径+列表索引），py2 agent 实测；源码 scripts/tools/agent_conf_tool.py"
+    added: "2026-09-30"
+  - id: agent-conf-source
+    name: Agent配置修改脚本源码
+    category: scripts
+    files: [tools/agent_conf_tool.py]
+    history:
+      - {date: "2026-09-30", change: 初版入库（与工具包 v1.0.2 同源）}
+    scenario: agent conf.yaml 文本级修改脚本源码（YAML 栈扫描器/后缀路径匹配/备份回读/平台重启），工具包见 tools/Agent配置修改
+    notes: "py2/3 兼容 stdlib only；不依赖 yaml 库（保留注释与格式的文本编辑）"
+    added: "2026-09-30"
   - id: power-device-source-tool
     name: 上下电设备选择数据源工具包
     category: tools

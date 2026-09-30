@@ -197,7 +197,7 @@ objects:
       toolLibs:        { type: array, items: autoops_tool_lib, desc: "绑定的动态库" }
       timeout:         { type: integer, desc: "超时秒，默认 86400；0=不限" }
       defaultExecUser: { type: string, desc: "默认执行用户（Linux，如 root）" }
-      sandboxRun:      { type: bool, desc: "沙箱执行。🔴【ITSM 绑定的工具（表单生命周期脚本/流程前后置脚本/触发器）必须 sandboxRun=true——平台要求，非沙箱工具在 ITSM 脚本位不可选/不生效（2026-09-20 .26 用户纠偏）。ToolConfig 字段，tool.update 顶层直接改即生效不派生版本；沙箱不限制脚本内 HTTP 调用（实测 cmdb/alert_service 直连正常）】" }
+      sandboxRun:      { type: bool, desc: "沙箱执行。🔴【ITSM 绑定的工具（表单生命周期脚本/流程前后置脚本/触发器）必须 sandboxRun=true——平台要求，非沙箱工具在 ITSM 脚本位不可选/不生效（2026-09-20 .26 用户纠偏）。ToolConfig 字段，tool.update 顶层直接改即生效不派生版本；沙箱不限制脚本内 HTTP 调用（实测 cmdb/alert_service 直连正常）】⚠️反向边界（2026-09-30 Agent配置修改工具实测）：【主机运维类工具】（写 /usr/local/easyops 等系统路径/重启服务）必须 sandboxRun=false——沙箱以 nobody 运行对系统目录只读（备份即 IOError 13），agent 原生权限（root）才能写；判定口诀=ITSM 脚本位绑定→true，主机文件/服务操作→false" }
       disable:         { type: bool, desc: "禁用开关" }
       listVisible:     { type: bool, desc: "列表中是否显示，默认 true" }
       delete_me:       { type: bool, desc: "软删标记（true=已删）" }
