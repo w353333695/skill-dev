@@ -401,8 +401,9 @@ items:
     files: [Agent配置修改.tool.tar.gz]
     history:
       - {date: "2026-09-30", change: "v1.0.2 初版入库（.26 agent 真跑：预览 4 处 ip/嵌套 port 路径/修改全链路 备份-回读-重启 验证）"}
+      - {date: "2026-09-30", change: "v1.1.0/v1.1.1: 🔴重启目录修正为【组件包根】（.26 实测 easyops 对 cwd 敏感——conf 目录/位置参数报 not a valid package；自动推导 conf 上一级+restart_dir 可覆盖）；泛化为可改任意 EasyOps 组件配置（conf_path 任意指定）；修 restart_dir 入参 default 残留"}
     scenario: 修改本机 EasyOps agent conf.yaml——默认改全深度 ip；xx.yy.zz 点路径精确指定（后缀语义，数字段=列表索引可省略）；动作 预览/修改；修改=备份→文本级替换（保留注释/格式）→回读验证→重启 agent；conf 路径按平台自动探测（win c:\easyops\agent\conf / linux /usr/local/easyops/agent/conf）
-    notes: "toolId 575acbb01ca040c39be6aa67decef7fd；🔴sandboxRun=false——主机运维工具需 agent 权限写 conf 目录（沙箱 nobody 只读，实测 IOErr 13）；先发主报告再重启（自重启终止进程不丢输出）；文本级 YAML 扫描（栈列管理还原嵌套路径+列表索引），py2 agent 实测；源码 scripts/tools/agent_conf_tool.py"
+    notes: "toolId 575acbb01ca040c39be6aa67decef7fd；🔴sandboxRun=false——主机运维工具需 agent 权限写 conf 目录（沙箱 nobody 只读，实测 IOErr 13）；🔴重启目录=组件包根（非 conf 目录——easyops restart 对 cwd 敏感，conf 目录报 2004 not a valid package；v1.1.1 实测 .26 重启成功 easyAgent 进程刷新+status started；执行记录可能因 agent 自重启标 failed 属预期副作用，主报告先落袋可辨成败）；入参 default 残留坑——深拷贝模板会带旧 default（restart_dir 带 'ip' 平台注入覆盖推导，v1.1.1 清）；文本级 YAML 扫描（栈列管理还原嵌套路径+列表索引）；源码 scripts/tools/agent_conf_tool.py"
     added: "2026-09-30"
   - id: agent-conf-source
     name: Agent配置修改脚本源码

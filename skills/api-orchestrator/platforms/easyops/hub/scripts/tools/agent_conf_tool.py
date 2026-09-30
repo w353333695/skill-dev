@@ -2,11 +2,16 @@
 """
 Agent配置修改（EasyOps agent conf.yaml 修改工具）
 
-功能：修改本机 EasyOps agent 配置文件 conf.yaml（文本级编辑——保留注释/缩进/格式，不依赖 yaml 库）。
+功能：修改本机 EasyOps 组件配置文件（默认 agent 的 conf.yaml；conf_path 可指任何组件 yaml）。
+文本级编辑——保留注释/缩进/格式，不依赖 yaml 库。
 配置文件位置（自动探测，可用 conf_path 入参覆盖）：
     Windows: c:\\easyops\\agent\\conf\\conf.yaml
     Linux:   /usr/local/easyops/agent/conf/conf.yaml
-修改成功后自动重启 agent：cd <conf目录> && easyops restart（Windows 加 /d）。
+修改成功后自动重启组件：cd <组件包根> && easyops restart（Windows 加 /d）。
+🔴重启目录语义（2026-09-30 .26 实测）：easyops 是全局脚本（/usr/bin）但对 cwd 敏感——
+须 cd 组件包根（如 /usr/local/easyops/agent）；conf 目录或任意目录报
+"current path is not a valid package"(2004)；`easyops restart agent` 位置参数同样报错。
+自动推导：<配置文件在 组件根/conf/ 下 → 组件根=上两级>；restart_dir 入参可显式覆盖。
 
 定位规则（config_item 入参）：
     · 默认 "ip" —— 修改配置文件【所有深度】的 ip 键（command/report/collector_agent/
@@ -221,12 +226,29 @@ def apply_changes(text, targets, new_value):
     return '\n'.join(lines)
 
 
-def restart_agent(conf_dir):
-    """重启 agent：cd <conf目录> && easyops restart（win 加 /d）。返回 (rc, output)。"""
+def resolve_restart_dir(conf_path, override):
+    """重启执行目录推导（2026-09-30 .26 实测）：easyops restart 须 cd【组件包根】——
+    conf 目录/其它目录报 "current path is not a valid package"（2004）。
+    规则：配置文件在 <组件根>/conf/ 下 → 组件根=dirname(dirname(conf))；否则=dirname(conf)。
+    restart_dir 入参可显式覆盖。双端路径兼容：含反斜杠/盘符的按 windows 语义拆。"""
+    if override:
+        return override
+    if '\\' in conf_path or ':' in conf_path:
+        import ntpath
+        d = ntpath.dirname(conf_path)
+        return ntpath.dirname(d) if ntpath.basename(d).lower() == 'conf' else d
+    d = os.path.dirname(conf_path)
+    if os.path.basename(d) == 'conf':
+        return os.path.dirname(d)
+    return d
+
+
+def restart_agent(pkg_dir):
+    """重启组件：cd <组件包根> && easyops restart（win 加 /d）。返回 (rc, output)。"""
     if sys.platform.startswith('win'):
-        cmd = 'cd /d %s && easyops restart' % conf_dir
+        cmd = 'cd /d %s && easyops restart' % pkg_dir
     else:
-        cmd = 'cd %s && easyops restart' % conf_dir
+        cmd = 'cd %s && easyops restart' % pkg_dir
     p = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
     out = p.communicate()[0]
     if isinstance(out, bytes):
@@ -248,6 +270,7 @@ def main():
     if isinstance(action, bool):
         action = u'修改' if action else u'预览'
     conf_path = _to_unicode(g.get('conf_path') or g.get('confPath') or '') or detect_conf_path()
+    restart_dir_in = _to_unicode(g.get('restart_dir') or g.get('restartDir') or '')
 
     if action not in (u'预览', u'修改'):
         put_str('report', u'❌ 动作必须是 预览 或 修改，当前：%r' % action)
@@ -308,11 +331,11 @@ def main():
     report.append(u'备份：%s' % backup)
     report.append(u'回读验证：✅ %d 处新值全部落位' % len(check_targets))
     # 🔴先发主报告再重启（agent 自重启可能终止本进程——报告先落袋，重启结果二次输出）
-    report.append(u'即将重启 agent（cd conf目录 && easyops restart）……')
+    report.append(u'即将重启组件（cd 组件包根 %s && easyops restart）……' % resolve_restart_dir(conf_path, restart_dir_in))
     put_str('report', u'\n'.join(report))
 
-    rc, out = restart_agent(os.path.dirname(conf_path))
-    tail = [u'重启 agent：exit=%s' % rc]
+    rc, out = restart_agent(resolve_restart_dir(conf_path, restart_dir_in))
+    tail = [u'重启组件（cd 组件包根 && easyops restart，目录=%s）：exit=%s' % (resolve_restart_dir(conf_path, restart_dir_in), rc)]
     if out:
         tail.append(u'重启输出：\n%s' % out)
     if rc != 0:

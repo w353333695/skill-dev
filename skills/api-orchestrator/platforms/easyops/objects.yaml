@@ -7,6 +7,20 @@
 # =============================================================================
 objects:
   # ---------- 模型（object）本身 ----------
+  easyops_host_cli:
+    description: |
+      主机侧 easyops 命令（组件服务控制）——/usr/bin/easyops 是 sh 包装（硬编码
+      EASYOPS_BASE_PATH=/usr/local/easyops，调 agent/pkg/script/easyops.py），全局可用。
+      子命令：start/stop/status/restart/uninstall/monitor/clear/init/which/checkPackage。
+      🔴【目录语义】（2026-09-30 .26 探针实测）：命令对 cwd 敏感——须 cd【组件包根】执行
+      （如 /usr/local/easyops/agent）；conf 目录或任意目录报 2004 "current path is not a
+      valid package"；`easyops restart agent` 位置参数同样报错（不是组件名语义）。
+      restart 全程约 30s（stop 15s+start 12s）；重启会终止 agent 上的工具执行进程
+      （执行记录可能标 failed——主报告先输出再重启的写法可辨真实成败）。
+      `easyops status` 可探测组件健康（输出 [ok] agent status: started）。
+    fields:
+      bin: { type: string, desc: "/usr/bin/easyops（sh 包装，硬编码 base path）" }
+      workdir: { type: string, desc: "🔴组件包根（如 /usr/local/easyops/agent）——非 conf 目录" }
   base_asset_models:
     description: |
       BASE_ASSET@ONEMODEL（基础硬件设备，抽象父模型，基础设施.数据中心）——11 个子模型：
