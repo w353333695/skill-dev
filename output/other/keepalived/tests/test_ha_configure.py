@@ -20,7 +20,9 @@ spec.loader.exec_module(module)
 
 class HaTests(unittest.TestCase):
     def setUp(self):
-        self.temp = tempfile.TemporaryDirectory(dir=ROOT / ".local")
+        self.local = ROOT / ".local"
+        self.local.mkdir(exist_ok=True)
+        self.temp = tempfile.TemporaryDirectory(dir=self.local)
         self.addCleanup(self.temp.cleanup)
         self.directory = Path(self.temp.name)
         self.data = yaml.safe_load((ROOT / "ha.sample.yaml").read_text())
@@ -169,7 +171,7 @@ class HaTests(unittest.TestCase):
         data["health"]["checks"] = [data["health"]["checks"][0]]
         config_path = self.directory / "cli.yaml"
         config_path.write_text(yaml.safe_dump(data))
-        command = [str(ROOT / "setup-keepalived.sh"), "--config", str(config_path),
+        command = [sys.executable, str(ROOT / "ha-configure.py"), "--config", str(config_path),
                    "--node", "node-a", "--check", "--output-dir", str(self.directory / "generated")]
         environment = dict(os.environ, PATH=str(self.directory) + os.pathsep + os.environ.get("PATH", ""))
         passed = subprocess.run(command, capture_output=True, text=True, env=environment, timeout=10)
