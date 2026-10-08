@@ -295,7 +295,7 @@ vrrp_instance {vrrp['instance']} {{
 {peers}
     }}
     virtual_ipaddress {{
-        {vrrp['vip']} dev {node['interface']}
+        {vrrp['vip']}
     }}
     track_script {{
         ha_health
@@ -343,7 +343,21 @@ def apply(config_path, script_path, install_dir, node):
     try:
         shutil.copyfile(config_path, staged)
         staged.chmod(0o600)
-        run(["keepalived", "--config-test", "--use-file=" + str(staged)])
+        try:
+            run(["keepalived", "-t", "-f", str(staged)])
+        except subprocess.CalledProcessError as error:
+            failed = install_dir / ("keepalived.conf.config-test-failed-%s-%d" % (time.strftime("%Y%m%d-%H%M%S"), os.getpid()))
+            shutil.copy2(staged, failed)
+            version = subprocess.run(["keepalived", "--version"], capture_output=True, text=True, timeout=10)
+            if error.returncode < 0:
+                signal_number = -error.returncode
+                reason = "Keepalived 配置校验被信号 %d 终止（可能是旧版本/发行版二进制崩溃）" % signal_number
+            else:
+                reason = "Keepalived 配置校验失败，退出码 %d" % error.returncode
+            print("[apply] %s；失败配置已保留：%s\nKeepalived 版本信息：\n%s" %
+                  (reason, failed, version.stdout.strip() or version.stderr.strip() or "(无版本输出)"),
+                  file=sys.stderr)
+            raise
         if target.exists():
             backup = install_dir / ("keepalived.conf.bak-%s-%d" % (time.strftime("%Y%m%d-%H%M%S"), os.getpid()))
             shutil.copy2(target, backup)
