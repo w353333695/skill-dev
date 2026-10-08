@@ -255,15 +255,15 @@ def render(data, node_name, install_dir):
     spec = {key: health[key] for key in ("policy", "round_timeout", "checks")}
     if "min_success" in health:
         spec["min_success"] = health["min_success"]
-    runtime = "#!/usr/bin/env python3\n# 自动生成：本机服务健康检查，修改源 YAML 后重新生成。\nSPEC = " + repr(spec) + "\n" + HEALTH_PROGRAM
-    digest = hashlib.sha256(runtime.encode()).hexdigest()[:16]
-    script_name = "ha-check-" + digest + ".py"
     node, vrrp = data["nodes"][node_name], data["vrrp"]
-    # 显式使用生成时的解释器绝对路径，避免 daemon 的 PATH 与交互 shell 不同。
+    # 健康脚本由 Keepalived 直接执行；绝对 shebang 避免 daemon 的 PATH 与交互 shell 不同。
     python_path = str(Path(sys.executable).resolve())
     for value in (python_path, str(install_dir)):
         if not re.fullmatch(r"/[A-Za-z0-9_./-]+", value):
             fail("解释器或安装目录路径不支持空格及特殊字符：%s" % value)
+    runtime = "#!" + python_path + "\n# 自动生成：本机服务健康检查，修改源 YAML 后重新生成。\nSPEC = " + repr(spec) + "\n" + HEALTH_PROGRAM
+    digest = hashlib.sha256(runtime.encode()).hexdigest()[:16]
+    script_name = "ha-check-" + digest + ".py"
     peers = "\n".join("        " + item["address"] for name, item in data["nodes"].items() if name != node_name)
     config = f'''# 自动生成：节点 {node_name}。健康脚本 weight 0，失败进入 FAULT。
 # 所有节点初始 state BACKUP，便于 nopreempt 生效。
@@ -274,7 +274,7 @@ global_defs {{
 }}
 
 vrrp_script ha_health {{
-    script "{python_path} {install_dir / script_name} --quiet"
+    script "{install_dir / script_name} --quiet"
     interval {health['interval']}
     timeout {health['round_timeout'] + 2}
     fall {health['fall']}

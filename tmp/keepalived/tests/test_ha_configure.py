@@ -46,6 +46,8 @@ class HaTests(unittest.TestCase):
         self.assertIn("weight 0", config)
         self.assertIn("init_fail", config)
         self.assertIn(name, config)
+        self.assertIn("script \"/etc/keepalived/" + name + " --quiet\"", config)
+        self.assertTrue(runtime.startswith("#!" + str(Path(module.sys.executable).resolve())))
         compile(runtime, name, "exec")
         backup = module.render(data, "node-b", Path("/etc/keepalived"))[0]
         self.assertIn("priority 100", backup)
