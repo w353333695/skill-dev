@@ -138,7 +138,7 @@ def load_config(path, node_name):
     try:
         import yaml
     except ImportError:
-        fail("需要 PyYAML；请在独立 Python 环境安装，并用 HA_PYTHON 指向该环境的解释器")
+        fail("需要 PyYAML；请在目标 Python 环境中安装，或直接使用包含 PyYAML 的 Python 解释器")
     # 拒绝重复键，避免用户以为两条规则生效，实际后面的覆盖前面的。
     class UniqueLoader(yaml.SafeLoader):
         pass
