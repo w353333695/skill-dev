@@ -1,4 +1,4 @@
-# Keepalived 一键配置示例（输入给 setup-keepalived.sh，不是原生 keepalived.conf）。
+# Keepalived 一键配置示例（输入给 ha-configure.py，不是原生 keepalived.conf）。
 # 两台机器使用同一份 YAML，分别以 --node node-a / --node node-b 执行。
 # 请复制为 ha.yaml，再按实际环境修改；不要直接应用这些示例地址。
 # YAML 使用空格缩进，不要使用 Tab；字段拼错、重复字段会被拒绝。

@@ -372,9 +372,9 @@ def apply(config_path, script_path, install_dir, node):
 def main():
     parser = argparse.ArgumentParser(
         description="从 YAML 一键生成/校验/应用 Keepalived。健康检查支持进程、TCP、HTTP。",
-        epilog="示例：\n  ./setup-keepalived.sh --config ha.sample.yaml --node node-a --dry-run\n"
-               "  ./setup-keepalived.sh --config ha.yaml --node node-a --check\n"
-               "  sudo ./setup-keepalived.sh --config ha.yaml --node node-a --apply\n"
+        epilog="示例：\n  python3 ./ha-configure.py --config ha.sample.yaml --node node-a --dry-run\n"
+               "  python3 ./ha-configure.py --config ha.yaml --node node-a --check\n"
+               "  sudo python3 ./ha-configure.py --config ha.yaml --node node-a --apply\n"
                "退出码：0=成功，1=健康检查失败/整轮超时，2=配置或执行错误。\n"
                "--apply 会替换整个 keepalived.conf 并重启服务（VIP 可能短暂释放）；自动备份及失败恢复。\n"
                "依赖：Python 3.9+、PyYAML；应用需 Linux、root、已安装 keepalived 和 systemd。",

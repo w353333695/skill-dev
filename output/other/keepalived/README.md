@@ -1,6 +1,6 @@
 # Keepalived 配置工具
 
-本目录提供 Shell 入口 `setup-keepalived.sh`、同目录辅助程序 `ha-configure.py` 和详细注释示例 `ha.sample.yaml`。分发时三份文件一起拷贝。业务服务不需要注册到 systemd；部署 Keepalived 本身使用 Linux 默认 systemd 服务。
+本目录提供可直接运行的 Python 工具 `ha-configure.py` 和详细注释示例 `ha.sample.yaml`。部署时拷贝这两份文件即可，README 与 tests 用于说明和开发验证。业务服务不需要注册到 systemd；部署 Keepalived 本身使用 Linux 默认 systemd 服务。
 
 ## 依赖
 
@@ -12,10 +12,10 @@
 工具不会自动安装软件。可在本目录创建独立环境，避免污染系统 Python：
 
 ```bash
-cd tmp/keepalived
+cd output/other/keepalived
 python3 -m venv .venv
 UV_INDEX_URL=https://pypi.tuna.tsinghua.edu.cn/simple uv pip install --python .venv/bin/python PyYAML
-export HA_PYTHON="$PWD/.venv/bin/python"
+# 使用独立环境时直接通过 .venv/bin/python 调用 ha-configure.py。
 ```
 
 部署 root 运行时，应使用 root 管理且不可被普通用户写入的 Python 环境。生成配置固定引用生成时的 Python 解释器绝对路径，运行节点上该路径必须持续存在；不要使用随后会删除的临时 venv。
@@ -23,19 +23,19 @@ export HA_PYTHON="$PWD/.venv/bin/python"
 ## 使用
 
 ```bash
-cd tmp/keepalived
+cd output/other/keepalived
 cp ha.sample.yaml ha.yaml
 # 修改 ha.yaml 中的 VIP、真实地址、网卡和健康检查。
-./setup-keepalived.sh --help
-./setup-keepalived.sh --config ha.yaml --node node-a --dry-run
-./setup-keepalived.sh --config ha.yaml --node node-a --check
-sudo ./setup-keepalived.sh --config ha.yaml --node node-a --apply
+python3 ./ha-configure.py --help
+python3 ./ha-configure.py --config ha.yaml --node node-a --dry-run
+python3 ./ha-configure.py --config ha.yaml --node node-a --check
+sudo python3 ./ha-configure.py --config ha.yaml --node node-a --apply
 ```
 
-如果指定了 Python 环境，sudo 时显式传递：
+如果使用独立 Python 环境，请直接指定解释器路径：
 
 ```bash
-sudo HA_PYTHON=/实际/root管理环境/bin/python ./setup-keepalived.sh --config ha.yaml --node node-a --apply
+sudo /实际/root管理环境/bin/python ./ha-configure.py --config ha.yaml --node node-a --apply
 ```
 
 另一台机器使用同一 YAML，将 `--node` 改为 `node-b`。每次只作用于本机，不自动通过 SSH 安装其他节点。
