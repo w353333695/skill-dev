@@ -1,0 +1,128 @@
+# Keepalived 一键配置示例（输入给 setup-keepalived.sh，不是原生 keepalived.conf）。
+# 两台机器使用同一份 YAML，分别以 --node node-a / --node node-b 执行。
+# 请复制为 ha.yaml，再按实际环境修改；不要直接应用这些示例地址。
+# YAML 使用空格缩进，不要使用 Tab；字段拼错、重复字段会被拒绝。
+version: 1
+
+vrrp:
+  # VRRP 实例名称：英文、数字、下划线、点、连字符，避免中文或空格。
+  instance: app_vip
+
+  # 同一组节点必须相同；同一网络中的其他 VIP 组应使用不同 ID。
+  # 范围 1~255；这不是 TCP/UDP 端口号。
+  router_id: 51
+
+  # 虚拟 IPv4 地址及掩码。必须未被其他设备使用，与节点地址处于同一网段。
+  # VIP 绑定到当前节点 interface；本版只支持一个 IPv4 VIP。
+  vip: 192.168.10.100/24
+
+  # false：原主恢复后不主动抢回，减少切换；true：允许更高优先级节点抢占。
+  # 生成配置中所有节点初始 state 都为 BACKUP，便于 nopreempt 生效。
+  # 同时启动时仍按优先级选举；不要把“node-a”名称理解为永远持有 VIP。
+  preempt: false
+
+  # VRRP 通告间隔（整数秒，默认 1）。实际故障接管还受 VRRP 选举时间影响。
+  advert_int: 1
+
+nodes:
+  # 节点名用于 --node；每台机器只应用自己的配置，不需要脚本 SSH 登录其他节点。
+  node-a:
+    # 本机网卡已有的真实 IPv4 地址，不能填 VIP；必须与 VIP 同网段。
+    address: 192.168.10.11
+    # 按机器实际情况修改，例如 eth0、ens192、enp1s0，两台机器网卡名可以不同。
+    interface: eth0
+    # 优先级 1~254；数字越大越优先。允许相同，建议不同以明确优先顺序；不使用地址所有者优先级 255。
+    priority: 150
+  node-b:
+    address: 192.168.10.12
+    interface: eth0
+    priority: 100
+
+health:
+  # 组合策略：
+  # all：所有检查成功才健康；本例任意一项失败即算该轮失败。
+  # any：至少一项成功即健康，仅适用于这些服务确实可以相互替代的场景。
+  # quorum：至少 min_success 项成功才健康。
+  # 多个进程共同支撑同一个 VIP，通常选 all。
+  policy: all
+
+  # 只在 policy: quorum 时填写；all/any 下填写会报错。
+  # min_success: 2
+
+  # Keepalived 的检查间隔（整数秒，默认 2）。
+  interval: 2
+
+  # 一整轮检查的硬超时（整数秒，默认 5）；超时视为失败。
+  # 各项检查并行执行（最多 16 项），每项 timeout 必须小于该值。
+  # 为线程调度、启动解释器、DNS、读取 HTTP 正文等预留余量。
+  # 外层 vrrp_script timeout 自动设为 round_timeout + 2 秒。
+  round_timeout: 5
+
+  # 连续失败多少轮才判故障（默认 3），用来过滤短暂抖动。
+  # 不是“固定 6 秒漂移”：检查耗时、通告间隔与选举都会影响总时间。
+  fall: 3
+
+  # 连续成功多少轮才恢复健康（默认 2）。
+  # 启动时 init_fail，达到恢复条件后才允许该节点持有 VIP。
+  rise: 2
+
+  checks:
+    # 所有检查都在当前节点执行，不依赖服务注册到 systemd。
+    # 删除不需要的示例检查，避免 all 策略因不存在的示例服务始终失败。
+    # 每项名称必须唯一；timeout 单位秒，支持 0.5 等小数，默认 1。
+
+    - name: nginx_process
+      type: process
+      # name：pgrep -x，匹配进程名；cmdline：pgrep -f，匹配完整命令行。
+      # pattern 是 pgrep 的正则，不是 shell 命令；不要填 pgrep/curl 等命令。
+      # Linux 进程名常限制为 15 个字符，长名称建议使用 cmdline。
+      match: name
+      pattern: '^nginx$'
+      # 至少有几个匹配进程；检查会排除自身 PID，但应写足够具体的模式。
+      min_count: 1
+      timeout: 1
+
+    # 检查未注册到 systemd 的 Java 服务时可替换上面的规则，例如：
+    # - name: java_api_process
+    #   type: process
+    #   match: cmdline
+    #   pattern: 'java.*my-api[.]jar'
+    #   min_count: 1
+    #   timeout: 1
+    # 进程存在只能证明尚未退出，不能证明服务能正常处理请求。
+
+    - name: api_tcp
+      type: tcp
+      # 检查主动建立 TCP 连接，并立即关闭，不仅仅读取监听列表。
+      # 只接受 IP 字面量；不填默认 127.0.0.1。
+      # 服务若只绑定真实网卡地址，请改为该节点对应的本地地址。
+      # 为两台机器复用同一 YAML，优先让业务支持回环地址访问。
+      host: 127.0.0.1
+      port: 8080
+      timeout: 1
+
+    - name: api_ready
+      type: http
+      # HTTP/HTTPS GET。建议使用业务 readiness 接口，返回能否对外服务。
+      # 不要检查 VIP 地址：备用节点可能访问到主节点，掩盖本机故障。
+      # 不要把 URL 中嵌入用户名、密码；本版不支持鉴权请求。
+      # 禁用系统 HTTP 代理，禁止跟随重定向；HTTPS 保留默认 CA/主机名校验。
+      url: http://127.0.0.1:8080/ready
+      timeout: 1
+      # 必须是列表；默认 [200]。不接受 3xx 跳转作为自动成功。
+      expected_status: [200]
+      # 可选：正文 UTF-8 文本子串匹配，不是 JSON 字段语义比较。
+      # 最多检查前 64 KiB；空白不同会影响匹配，如 {"ready": true} 不匹配下面文本。
+      # 不需要正文检查时删除该字段，仅根据状态码判断。
+      body_contains: '"ready":true'
+
+# 部署语义与边界：
+# 1. health 不健康时通过 weight 0 让当前节点进入 FAULT；健康备用节点参与接管。
+# 2. 两台都不健康时，可能都不持有 VIP；脚本不会强行保留 VIP。
+# 3. 共用数据库等依赖同时故障，切换 VIP 通常不能解决；慎重纳入漂移条件。
+# 4. 本版生成单播 VRRP，nodes 中其他节点自动成为 unicast_peer。
+#    网络/防火墙应允许节点间 IP 协议 112（不是 TCP/UDP 112 端口）。脚本不改防火墙。
+# 5. Linux 目标机须先安装 Keepalived，使用默认 systemd 服务及 /etc/keepalived/keepalived.conf。
+# 6. --apply 会备份并替换整份 keepalived.conf，然后重启；已有其他实例不会被合并。
+#    重启会短暂影响 VIP，请逐台执行；先 --dry-run，再 --check，最后 --apply。
+# 7. macOS 可做参数校验/生成；--apply 仅支持 Linux + root + systemd。
