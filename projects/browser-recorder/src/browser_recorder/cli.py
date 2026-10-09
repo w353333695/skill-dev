@@ -5,6 +5,7 @@ import asyncio
 import json
 import os
 import pathlib
+import platform
 import shutil
 import zipfile
 from datetime import datetime
@@ -13,9 +14,50 @@ import click
 
 from .recorder import record
 
-DEFAULT_CHROME = pathlib.Path(
-    os.environ.get("BR_CHROME",
-                   str(pathlib.Path.home() / ".cache/ms-playwright/chromium-1208/chrome-linux/chrome")))
+def chrome_candidates() -> list[pathlib.Path]:
+    """返回按优先级排列的 Chromium 系浏览器候选路径。"""
+    override = os.environ.get("BR_CHROME")
+    if override:
+        return [pathlib.Path(override).expanduser()]
+    candidates = [pathlib.Path.home() / ".cache/ms-playwright/chromium-1208/chrome-linux/chrome"]
+    if platform.system() == "Darwin":
+        app_roots = [pathlib.Path("/Applications"), pathlib.Path.home() / "Applications"]
+        app_names = [
+            ("Google Chrome.app", "Google Chrome"),
+            ("Google Chrome Canary.app", "Google Chrome Canary"),
+            ("Chromium.app", "Chromium"),
+            ("Brave Browser.app", "Brave Browser"),
+            ("Microsoft Edge.app", "Microsoft Edge"),
+        ]
+        candidates.extend(root / app / "Contents/MacOS" / binary
+                          for root in app_roots for app, binary in app_names)
+    else:
+        candidates.extend(pathlib.Path(p) for p in (
+            "/usr/bin/google-chrome", "/usr/bin/google-chrome-stable",
+            "/usr/bin/chromium", "/usr/bin/chromium-browser"))
+    for name in ("google-chrome", "google-chrome-stable", "chromium",
+                 "chromium-browser", "brave", "microsoft-edge"):
+        found = shutil.which(name)
+        if found:
+            candidates.append(pathlib.Path(found))
+    return candidates
+
+
+def resolve_chrome() -> pathlib.Path | None:
+    """解析可执行浏览器；显式 BR_CHROME 不存在时不回退到其他路径。"""
+    for candidate in chrome_candidates():
+        if candidate.is_file() and os.access(candidate, os.X_OK):
+            return candidate
+    return None
+
+
+def chrome_error() -> str:
+    override = os.environ.get("BR_CHROME")
+    if override:
+        path = pathlib.Path(override).expanduser()
+        return f"chrome 未找到: {path}（BR_CHROME 指向的文件不存在或不可执行）"
+    shown = "、".join(str(p) for p in chrome_candidates()[:6])
+    return f"chrome 未找到（已检查: {shown}；可用 BR_CHROME 指定路径）"
 
 
 @click.group(context_settings={"help_option_names": ["-h", "--help"]})
@@ -55,6 +97,10 @@ def record_cmd(start_url, out_root, settle_timeout, port, headless, no_sandbox,
 
     停止：页面内 Ctrl+Shift+F9 / 关闭浏览器窗口 / 终端输 q+回车
 
+    浏览器路径：默认自动寻找 Playwright Chromium 和系统安装的 Chromium 系浏览器；
+    macOS 也会检查 /Applications 下的 Google Chrome、Chromium、Brave、Edge。
+    如需手动指定：BR_CHROME="/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"。
+
     \b
     示例：
       # 首次录制（默认 profile 保留登录态，下次免登录）
@@ -73,9 +119,9 @@ def record_cmd(start_url, out_root, settle_timeout, port, headless, no_sandbox,
     else:
         click.echo("profile: 一次性（不留登录态）")
     click.echo("停止方式：页面内 Ctrl+Shift+F9 ｜ 关闭浏览器窗口 ｜ 终端 q+回车")
-    chrome = DEFAULT_CHROME
-    if not chrome.exists():
-        raise click.ClickException(f"chrome 未找到: {chrome}（可用 BR_CHROME 环境变量指定）")
+    chrome = resolve_chrome()
+    if chrome is None:
+        raise click.ClickException(chrome_error())
     try:
         result = asyncio.run(record(out_dir, start_url, chrome,
                                     settle_timeout=settle_timeout, port=port,
@@ -168,11 +214,11 @@ def drive_cmd(flow_file, out_root, profile, headless, no_record, vars_,
         out_dir = pathlib.Path(out_root) / datetime.now().strftime("%Y%m%d-%H%M%S")
         out_dir.mkdir(parents=True, exist_ok=True)
         click.echo(f"session 目录: {out_dir}")
-    chrome = DEFAULT_CHROME
-    if not chrome.exists():
+    chrome = resolve_chrome()
+    if chrome is None:
         if no_record:
             shutil.rmtree(out_dir, ignore_errors=True)
-        raise click.ClickException(f"chrome 未找到: {chrome}（可用 BR_CHROME 指定）")
+        raise click.ClickException(chrome_error())
 
     async def _run():
         h = SessionHarness(out_dir, "about:blank", chrome, headless=headless,

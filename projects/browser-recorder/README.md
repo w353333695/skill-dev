@@ -27,7 +27,7 @@ uv run browser-recorder replay sessions/20260829-153000 --name demo
 uv run browser-recorder drive flows/demo.json --dry-run
 ```
 
-浏览器二进制默认找 Playwright 缓存的 Chromium（见下 `BR_CHROME`）；退出码 0=正常停止，2=异常（崩溃/被杀），130=Ctrl-C 中断（已录事件已落盘）。drive/replay 的退出码见各自章节。
+浏览器二进制会自动探测 Playwright 缓存及系统安装的 Chrome/Chromium（macOS 会检查 `/Applications/*.app/Contents/MacOS/`）；退出码 0=正常停止，2=异常（崩溃/被杀），130=Ctrl-C 中断（已录事件已落盘）。drive/replay 的退出码见各自章节。
 
 ## CLI 旗子
 
@@ -49,7 +49,7 @@ uv run browser-recorder drive flows/demo.json --dry-run
 
 ## 环境变量
 
-- `BR_CHROME`：浏览器二进制路径。默认 `~/.cache/ms-playwright/chromium-1208/chrome-linux/chrome`（可指向任何 Chromium 系二进制；chrome 不存在时启动即报错并提示用此变量）
+- `BR_CHROME`：浏览器二进制路径，优先级最高。macOS 示例：`export BR_CHROME="/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"`。未设置时自动寻找 Playwright Chromium、macOS 的 Google Chrome/Chromium/Brave/Edge，以及 PATH 中的 Chromium 系命令。
 
 ## 驱动与重放（drive / replay）
 
