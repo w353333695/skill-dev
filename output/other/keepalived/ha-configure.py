@@ -269,6 +269,8 @@ def render(data, node_name, install_dir):
 # 所有节点初始 state BACKUP，便于 nopreempt 生效。
 global_defs {{
     router_id {node_name}
+    script_user root
+    enable_script_security
 }}
 
 vrrp_script ha_health {{
@@ -278,6 +280,7 @@ vrrp_script ha_health {{
     fall {health['fall']}
     rise {health['rise']}
     weight 0
+    init_fail
 }}
 
 vrrp_instance {vrrp['instance']} {{
