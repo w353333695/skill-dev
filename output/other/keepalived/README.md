@@ -46,7 +46,7 @@ sudo /实际/root管理环境/bin/python ./ha-configure.py --config ha.yaml --no
 - `--check`：校验、生成，并执行一轮检查；逐项打印结果、异常堆栈及汇总。不需要 Keepalived 已安装。
 - `--apply`：确认真实 IP 在指定网卡上，安装健康脚本，运行 Keepalived 配置校验，备份旧配置，再替换并重启。重启失败时恢复旧配置，按原先是否运行恢复/停止服务。
 - 配置校验使用兼容旧版本的 `keepalived -t -f <文件>`。如果 Keepalived 自身以 `SIGSEGV`（退出码 139）崩溃，工具不会替换正式配置，会在 `/etc/keepalived/keepalived.conf.config-test-failed-*` 保留失败文件并打印版本信息；此时应升级或更换 Keepalived 二进制，不能跳过校验。
-- 生成的 `vrrp_script` 直接执行带绝对 shebang 的健康脚本，不把 Python 解释器拼在 Keepalived 的 `script` 字段中；这样可通过 `enable_script_security` 的脚本路径检查。健康脚本安装为 root 所有、权限 `0700`。
+- 生成的 `vrrp_script` 直接执行带绝对 shebang 的健康脚本，不把 Python 解释器拼在 Keepalived 的 `script` 字段中。配置刻意不生成 `script_user`、`enable_script_security`、`init_fail` 等较新指令，以兼容旧版 Keepalived；健康脚本仍安装为 root 所有、权限 `0700`。
 - 应用只检查配置和服务启动，不强制要求当前节点业务健康；备用节点业务暂时不健康时可以安装，是否持有 VIP 交给健康检查。生成的 VIP 使用 `IP/掩码` 的保守写法，不在 `virtual_ipaddress` 行追加 `dev`，因为 VRRP 实例已经声明网卡，兼容较老 Keepalived。
 - 默认产物目录：脚本目录 `generated/<node>/`；可用 `--output-dir` 修改。配置中记录的是部署路径，不是产物路径，不能直接拿产物配置启动而漏装健康脚本。
 - 健康脚本使用内容哈希命名；旧配置备份仍可引用旧脚本。工具不自动删除旧脚本和备份。

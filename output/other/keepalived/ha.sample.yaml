@@ -13,7 +13,7 @@ vrrp:
   router_id: 51
 
   # 虚拟 IPv4 地址及掩码。必须未被其他设备使用，与节点地址处于同一网段。
-  # VIP 绑定到当前节点 interface；本版只支持一个 IPv4 VIP。
+  # VIP 绑定到当前节点 interface；本版只支持一个 IPv4 VIP。生成配置时保留掩码，但不在 VIP 行追加 dev，适配较老 Keepalived。
   vip: 192.168.10.100/24
 
   # false：原主恢复后不主动抢回，减少切换；true：允许更高优先级节点抢占。
@@ -63,7 +63,7 @@ health:
   fall: 3
 
   # 连续成功多少轮才恢复健康（默认 2）。
-  # 启动时 init_fail，达到恢复条件后才允许该节点持有 VIP。
+  # 健康脚本失败时进入 FAULT；达到恢复条件后才恢复健康状态。
   rise: 2
 
   checks:
