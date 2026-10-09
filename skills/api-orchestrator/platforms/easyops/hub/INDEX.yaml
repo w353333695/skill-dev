@@ -395,6 +395,24 @@ items:
     scenario: 上下电设备候选数据源（componentLoad）/值变化联动填充（onValueChange，sn 只补空）/验收回填 CMDB（postScript，sn 唯一键全量同步）三脚本源码，工具包见 tools/ 三件
     notes: "py2/3 兼容 stdlib only；🔴BASE_ASSET 子模型名称属性不统一——NAME_ATTRS 映射（objects.yaml#base_asset_models）"
     added: "2026-09-29"
+  - id: env-backfill-host-tool
+    name: 基础环境资源回写主机工具包
+    category: tools
+    files: [回写主机.tool.tar.gz]
+    history:
+      - {date: "2026-10-09", change: "1.0.6 入库（现网工具 1.0.5 升级：加撤销删除分支——操作类型=2 删 HOST 实例；补 report 输出；.26 agent 真跑新增/撤销双场景验证）"}
+    scenario: 基础环境资源申请流程验收节点 preScript——按操作类型分派：新增/变更(0/1) upsert 新增主机 table 到 HOST（keys=ip，memSize/diskSize GB→MB 换算）；撤销(2) 删除「撤销主机」选中 HOST 实例（DELETE instance_batch）
+    notes: "toolId 07efacdbc60ce282f6792e646c4d5502；🔴py3 风格脚本（f-string/union 注解）在 .26 agent 实测可跑；表单 1.0.13 三字段 NUMBERINPUT 化后 int() 兼容字符串/数字、cpus 直传更规范（已评估无影响）；源码 scripts/tools/env_resource_backfill_host.py"
+    added: "2026-10-09"
+  - id: env-backfill-host-source
+    name: 基础环境资源回写主机脚本源码
+    category: scripts
+    files: [tools/env_resource_backfill_host.py]
+    history:
+      - {date: "2026-10-09", change: 初版入库（与工具包 1.0.6 同源）}
+    scenario: openapi AK/SK 双模式客户端（search/import/delete）+ orderInfo 表单值提取转换（extract_form_value transform 机制），工具包见 tools/回写主机
+    notes: "py3；EasyOpsClient 支持 openapi 签名与内网直连双模式"
+    added: "2026-10-09"
   - id: agent-conf-tool
     name: Agent配置修改工具包
     category: tools
