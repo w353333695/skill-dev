@@ -5,7 +5,7 @@ description: This skill should be used when the user asks to "生成操作指引
 
 # browser-manual：录制 session → 图文操作指引 / API 分析报告
 
-把 browser-recorder 录制的 session（`session.jsonl` + `screenshots/`）转成**图文操作指引 guide.md**（+可选 **api-report.md** / **api-calls.json**）。本 skill 只做分析与排版编排，不携带录制能力（录制用 `projects/browser-recorder` CLI）。
+把 browser-recorder 录制的 session（`session.jsonl` + `screenshots/`）转成**图文操作指引 guide.md**；用户明确要求 API 逆向时，另行生成 **api-report.md** / **api-calls.json**。本 skill 只做分析与排版编排，不携带录制能力（录制用 `projects/browser-recorder` CLI）。
 
 ## 何时使用
 
@@ -60,6 +60,13 @@ print('tabs', [l.get('tabs') for l in lines if l['kind']=='session_end'])
 
 **跳过引用**：`status=raced/failed` 的图。**零尺寸元素**（rect.w=0）没有红框，只有元素文字描述——引用时配文字说明位置。
 
+## URL 脱敏规则（guide 强制）
+
+- guide.md 中禁止明文输出 URL 的域名、IPv4/IPv6 地址或端口；页面地址、跳转地址、链接说明中的 authority（协议+域名/IP+端口）统一替换为 `${BASE_URL}`。
+- 若 session 涉及多个不同站点，按首次出现顺序使用 `${BASE_URL}`、`${BASE_URL_2}`、`${BASE_URL_3}`……；变量值代表完整的 `scheme://host[:port]`，路径、查询参数和片段按需保留。
+- URL 中的 query/path 若包含 token、password、secret 等敏感值，继续按脱敏规则写成 `***`；不要通过变量化恢复或暴露敏感值。
+- 该规则只约束 guide.md；用户明确要求 API 分析时，api-report/api-calls 仍按对应参考格式输出，但不得把 API 内容回填到 guide.md。
+
 ## 输出物与排版（固定模板，保证一致性）
 
 输出目录 = `<session_dir>/../guide-output/<文档名>/`（**自动命名**：用户指定名优先；否则从 nav URL 主题+核心动作提炼，如 `监控套件创建与删除`）。只**拷贝被引用的截图**到输出目录（session 原目录不动）。
@@ -80,10 +87,6 @@ print('tabs', [l.get('tabs') for l in lines if l['kind']=='session_end'])
 ## 二、<阶段名：主流程>
 ...
 
----
-
-# 附录：本录制涉及页面与接口概览   ← 仅概览表；详析在 api-report（若启用）
-| 步骤 | 接口 | 说明 |
 ````
 
 **排版硬规则**：①每步骤小节三要素（标题动词短语/一句操作说明/一张图）不增删；②连续 input 到同一表单合并为一小节（每字段一行）；③图注格式统一 `![<步骤名>](screenshots/<file>)`；④password 显示 `***`（保持脱敏，禁止还原）；⑤只用实际存在的事件，禁止臆测。
@@ -142,12 +145,12 @@ print('tabs', [l.get('tabs') for l in lines if l['kind']=='session_end'])
 3. **按截图选用规则**给每个动作定图；`raced/failed` 剔除
 4. **建输出目录**，拷贝选用截图到 `输出/screenshots/`
 5. **按固定骨架写 guide.md**（引用相对路径 `screenshots/...`）
-6. 用户要求 API 分析 → 追加 api-report.md（+api-calls.json）
-7. **自检**：引用的图都存在？每小节三要素齐？password 全 `***`？URL 未截断？
+6. 用户明确要求 API 分析 → 单独生成 api-report.md（+api-calls.json）；默认不生成，也不把接口概览写入 guide.md
+7. **自检**：引用的图都存在？每小节三要素齐？password 全 `***`？guide 中没有 API/接口信息？URL 的域名/IP 已替换为变量？
 
 ## 硬约束
 
-- 只用 session.jsonl 实际事件；URL/body 原样拷贝**不截断**
+- 只用 session.jsonl 实际事件；guide.md 中 URL 的域名/IP 必须变量化，不能明文保留；API 报告中的 URL/body 按 API 参考格式处理
 - 脱敏字段保持 `***`；敏感参数（token= 等）在报告中原样保留 `***` 形态
 - 输出目录独立于 session（`guide-output/<名>/`），session 原目录只读
 - 用户指定文档名 > 自动命名；自动名从内容提炼，禁止"未命名文档"类占位
