@@ -142,8 +142,8 @@ def test_record_session_flow(local_site, chrome_path, tmp_path):
     ins = [a for a in acts if a["type"] == "input"]
     assert any(a.get("value") == "alice" for a in ins)
     assert any(a.get("value") == "***" for a in ins)   # password 脱敏
-    # 截图文件存在
-    shots = list((out / "screenshots").glob("*.png"))
+    # 截图文件存在（录制端直出压缩 webp）
+    shots = list((out / "screenshots").glob("*.webp"))
     assert len(shots) >= 6                       # >=3 动作 x before/after
     # 网络：页面自身的请求被记录
     reqs = [l for l in lines if l["kind"] == "request"]

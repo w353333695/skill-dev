@@ -1100,7 +1100,7 @@ def test_cli_drive_crash_maps_to_exit3(tmp_path, monkeypatch):
     async def boom(*a, **k):
         raise RuntimeError("browser went away (connection reset)")
 
-    monkeypatch.setattr(cli_mod, "DEFAULT_CHROME", flow)   # exists() → True
+    monkeypatch.setattr(cli_mod, "resolve_chrome", lambda: flow)   # 跳过 chrome 探测
     monkeypatch.setattr(harness_mod, "SessionHarness", FakeHarness)
     monkeypatch.setattr(flow_mod, "run_flow", boom)
 
