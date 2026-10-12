@@ -1,4 +1,4 @@
-"""annotator 单测：红框几何与序号渲染。"""
+"""annotator 单测：红框几何（序号标记已移除）。"""
 import json
 
 from PIL import Image
@@ -12,7 +12,7 @@ def test_annotate_draws_box(tmp_path):
     p = tmp_path / "0001-before.png"
     img.save(p)
     rect = {"x": 10, "y": 20, "w": 30, "h": 40}
-    out = annotate(p, rect, dpr=1.0, seq=1)
+    out = annotate(p, rect, dpr=1.0)
     im = Image.open(out)
     assert im.size == (200, 100)
     # 框线上应有红色像素（矩形边缘中点）
@@ -23,3 +23,8 @@ def test_annotate_draws_box(tmp_path):
     # 框外远处不受影响
     r, g, b = im.getpixel((5, 5))[:3]
     assert abs(r - 128) < 30 and abs(g - 128) < 30
+    # 红框上方（原序号标记位置）不应有任何红色像素
+    for y in range(0, 18):
+        for x in range(0, 200):
+            r, g, b = im.getpixel((x, y))[:3]
+            assert not (r > 180 and g < 100 and b < 100), f"框上方 ({x},{y}) 出现红色：{r,g,b}"

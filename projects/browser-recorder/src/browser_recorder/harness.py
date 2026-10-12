@@ -652,6 +652,6 @@ def _annotate_safe(out_dir: pathlib.Path, seq: int, phase: str,
     try:
         f = out_dir / "screenshots" / f"{seq:04d}-{phase}.png"
         if f.exists() and rt.get("w") and rt.get("h"):
-            annotate(f, rt, dpr=dpr, seq=seq)
+            annotate(f, rt, dpr=dpr)
     except Exception:
         pass
