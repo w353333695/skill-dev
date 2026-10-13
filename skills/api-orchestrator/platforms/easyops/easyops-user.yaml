@@ -1,0 +1,174 @@
+# =============================================================================
+# EasyOps 用户服务（user_service 微服务）—— api-cli 清单
+# -----------------------------------------------------------------------------
+# 当前覆盖：用户账号管理能力（注册 / 注销 / 修改密码 / 重置密码 / 查询）。
+#
+# 数据来源（证据，2026-10-13）：
+#   • 契约 FLOW_BUILDER_API_CONTRACT@EASYOPS 命中的 5 条（serviceName=logic.user_service）：
+#       UserRegister  POST /api/v1/users/register
+#       UserDelete    DELETE /api/v1/users/:username
+#       AlterPassword POST /api/v1/users/alter_password
+#       AlterSelfPassword POST /api/v1/users/password
+#       ResetPassword POST /api/v1/users/password/reset
+#   • 实测探针（172.30.0.90 org=8888，空 body 无副作用）：
+#       ① register/alter_password → 「必填key name 不存在」
+#       ② password/reset         → 「必填key username 不存在」
+#       ③ DELETE /api/v1/users/<bad> → 「校验参数username失败，不符合正则
+#          ^[a-zA-Z0-9][.a-zA-Z0-9@_-]{0,99}$」
+#   • 真实录制（192.168.110.26 org=1888，session 20261010-133954）：
+#       UI 用户管理页 /next/permission-center/user-management/user；
+#       UI 自助注册走网关 POST /api/auth/register {name,email,password,invite}（需邀请码）
+#       —— 与 admin 建号的 /api/v1/users/register 不同，本清单覆盖后者。
+#
+# 接入面：
+#   • backend —— 直连 user_service :8111（HTTP，无 path 前缀）。org/user header 必需
+#     （缺报「获取用户 context 信息失败！」）；cookie 非必需（实测无 cookie 直 200，
+#     机制同 cmdb/itsm：engine/execute.go:135 auth=none 跳过 auth.Apply）。
+#
+# ⚠️ 为何独立 spec（不在 easyops-cmdb/itsm）：api-cli endpoint 是 service 级 + 运行时
+#   flag，不支持 per-resource 绑定不同端口。user_service 监听 8111 ≠ cmdb 8079 ≠ itsm 8134，
+#   故必须另起 spec + 在 systems.yaml 注册独立 system（同 sys_setting 的处理）。
+# =============================================================================
+spec: api-cli/v1
+service:
+  name: easyops-user
+  version: "1.0"
+  default_endpoint: backend
+  endpoints:
+    backend:
+      base_url: ${EASYOPS_USER_SERVICE_URL}   # 值在部署根 env.d/<dep>.env（含 IP+端口）；端口事实见 systems.yaml runtime.ports.user_service
+      host: admin.easyops.local               # IP 直连，Host 由 endpoint.Host 注入
+      path_prefix: ""                         # 路由挂在 /api/v1/...（每 op 持完整路径）
+      auth: none                              # 直连后端：auth=none 跳过 cookie 加载；org/user 由 endpoint.headers 注入
+      headers:                                # endpoint 级固定 header（orguser 中间件必需）
+        org: ${EASYOPS_ORG}                   # EasyOps 租户 org（int）；值在部署根 env.d/<dep>.env
+        user: ${EASYOPS_USER}                 # EasyOps 用户；值在部署根 env.d/<dep>.env
+
+# -----------------------------------------------------------------------------
+# 资源：user —— 用户账号（注册 / 注销 / 查询）。
+# user_service :8111。org 是租户 id（int，与 env 的 EASYOPS_ORG 同源）。
+# -----------------------------------------------------------------------------
+resources:
+  user:
+    description: 用户账号 —— 注册（admin 建号）/ 注销（删除）/ 列表 / 详情。org 为租户 id（int）。注册返回 instanceId（用户实例 id）。注销路径参数 username 须匹配 ^[a-zA-Z0-9][.a-zA-Z0-9@_-]{0,99}$。另注：UI 自助注册走网关 POST /api/auth/register（需邀请码 invite，与此不同）。
+    path: ""
+
+    operations:
+      list:
+        description: 用户列表（分页）。返回 data.list[]，每条含 name/email/instanceId/org/state 等。
+        method: GET
+        path: /api/v1/users
+        params:
+          page:     { in: query, type: integer, description: "页码，默认 1" }
+          pageSize: { in: query, type: integer, description: "每页条数" }
+        response:
+          type: object
+          description: "{ code, codeExplain, error, data: { page, pageSize, total, list[] } }"
+          properties:
+            code: { type: integer, description: "0=成功" }
+            data:
+              type: object
+              properties:
+                page:     { type: integer }
+                pageSize: { type: integer }
+                total:    { type: integer }
+                list:
+                  type: array
+                  items:
+                    type: object
+                    additional_properties: true
+        pagination:
+          type: offset
+          page_in: query
+          items_path: data.list
+          page_param: page
+          size_param: pageSize
+          size: 20
+
+      get:
+        description: 用户详情。返回 name/email/nickname/org/state/instanceId 等。
+        method: GET
+        path: /api/v1/users/detail/{username}
+        params:
+          username: { in: path, type: string, required: true, description: "用户名" }
+
+      register:
+        description: 注册用户（管理员建号，无需邀请码）。required：name/password/email/org。可选 isAdmin（是否管理员，默认 false）、nickname（昵称）。email 须合法邮箱。返回新建用户的 name/email/org/instanceId。
+        method: POST
+        path: /api/v1/users/register
+        body:
+          type: object
+          required: [name, password, email, org]
+          description: "注册用户。required：name/password/email/org。"
+          properties:
+            name:     { type: string, description: "用户名（须匹配 ^[a-zA-Z0-9][.a-zA-Z0-9@_-]{0,99}$）" }
+            password: { type: string, description: "初始密码" }
+            email:    { type: string, description: "邮箱" }
+            org:      { type: integer, description: "租户 org（与 EASYOPS_ORG 同源）" }
+            isAdmin:  { type: boolean, description: "是否管理员（默认 false）" }
+            nickname: { type: string, description: "昵称" }
+        response:
+          type: object
+          description: "{ code, data: { name, email, org, instanceId } }"
+          properties:
+            code: { type: integer }
+            data:
+              type: object
+              properties:
+                name:       { type: string }
+                email:      { type: string }
+                org:        { type: integer }
+                instanceId: { type: string, description: "用户实例 id" }
+
+      delete:
+        description: 注销用户 —— **步骤①（unregister）**。username 走 path，须匹配 ^[a-zA-Z0-9][.a-zA-Z0-9@_-]{0,99}$。🔴【实测纠正，2026-10-13 .90/.24】：本接口**清除的是凭据库里的账号记录**（调用后 GET /api/v1/users/simple_detail/{name} 变「查询无结果」），但**不删 CMDB USER 实例**——故单独调用后用户仍出现在 /api/v1/users 列表里（曾误判为「不生效」，实为漏了步骤②）。**完整注销 = ① 本接口（unregister） + ② 删 CMDB USER 实例**（DELETE /object/USER/instance_batch?instanceIds={instanceId}）。两步缺一，用户名不会释放（重注册报 133023「用户名已经存在」）。纠正前误删过实例但漏 unregister，同样重注册失败——两步都必须。
+        method: DELETE
+        path: /api/v1/users/{username}
+        params:
+          username: { in: path, type: string, required: true, description: "用户名（^[a-zA-Z0-9][.a-zA-Z0-9@_-]{0,99}$）" }
+
+# -----------------------------------------------------------------------------
+# 资源：password —— 密码管理（改密 / 重置）。
+# -----------------------------------------------------------------------------
+  password:
+    description: 密码管理 —— 修改（管理员改他人 alter / 改本人 alter_self）/ 重置（凭重置 key）。均 POST。
+    path: ""
+
+    operations:
+      alter:
+        description: 修改指定用户密码（管理员改他人）。required：name。🔴【实测，2026-10-13 .24】：传**明文 password 报 HTTP_500 `crypto/rsa 解密错误`** ——本接口要求 password 为 **RSA 公钥加密后的密文**（前端加密）。公钥来源未在接口契约中找到（疑打包在前端 JS），故当前 spec 直传明文**不可用**；需先补齐公钥+加密步骤。另注注册接口 register 接受明文密码（见 user.register）。
+        method: POST
+        path: /api/v1/users/alter_password
+        body:
+          type: object
+          required: [name]
+          description: "修改指定用户密码。required：name。"
+          properties:
+            name:     { type: string, description: "目标用户名" }
+            password: { type: string, description: "新密码" }
+
+      alter_self:
+        description: 修改本人密码。required：password（新）/ oldPassword（原）。
+        method: POST
+        path: /api/v1/users/password
+        body:
+          type: object
+          required: [password, oldPassword]
+          description: "修改本人密码。required：password/oldPassword。"
+          properties:
+            password:    { type: string, description: "新密码" }
+            oldPassword: { type: string, description: "原密码" }
+
+      reset:
+        description: 重置密码（凭重置 key，来自邮件重置链接；含防重放 ts）。required：username/ts/password/key。
+        method: POST
+        path: /api/v1/users/password/reset
+        body:
+          type: object
+          required: [username, ts, password, key]
+          description: "重置密码（凭 key）。required：username/ts/password/key。"
+          properties:
+            username: { type: string, description: "用户名" }
+            ts:       { type: integer, description: "时间戳（重置链接携带）" }
+            password: { type: string, description: "新密码" }
+            key:      { type: string, description: "重置密码 key" }

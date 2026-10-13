@@ -545,6 +545,67 @@ systems:
     acceptance_urls:
       work_calendar_list:   "${EASYOPS_CMDB_FRONTEND_URL}/next/work-calendar/list?page=1&q={name}"   # q 模糊搜名
       work_calendar_detail: "${EASYOPS_CMDB_FRONTEND_URL}/next/work-calendar/detail/{id}"   # 日历 id（24hex）
+
+  easyops-user:
+    description: |
+      EasyOps 用户服务（user_service:8111）—— 用户账号全生命周期管理：
+      • user      —— 注册（admin 建号）/ 注销（删除）/ 列表 / 详情
+      • password  —— 修改（管理员改他人 alter / 改本人 alter_self）/ 重置（凭邮件重置 key）
+      核心接口：POST /api/v1/users/register、DELETE /api/v1/users/{username}、
+      POST /api/v1/users/alter_password、POST /api/v1/users/password、
+      POST /api/v1/users/password/reset。
+      ⚠️与 UI 自助注册（网关 POST /api/auth/register，需邀请码 invite）不同——本 system 覆盖 admin 建号路径。
+
+    spec: easyops-user.yaml                 # api-cli 清单，相对本目录
+    default_endpoint: backend               # 直连 user_service :8111
+
+    endpoints:
+      backend:                              # 直连后端（HTTP，无 path 前缀；全 verb 通用）
+        base_url: ${EASYOPS_USER_SERVICE_URL}
+
+    auth: easyops-cookie                    # 与 cmdb/autoops/itsm 同一 cookie
+
+    env:                                    # 环境变量契约（值在部署根 env.d/<dep>.env，勿从此处取）
+      EASYOPS_USER_SERVICE_URL: ""          # user_service 后端完整 URL；端口见 runtime.ports.user_service
+      EASYOPS_CMDB_FRONTEND_URL: ""         # 前端页面完整 URL
+
+    capabilities:
+      user:
+        list:     "用户列表（分页；page/pageSize；返 data.list[]，含 name/email/instanceId/org/state）"
+        get:      "用户详情（GET /api/v1/users/detail/{username}）"
+        register: "注册用户（admin 建号，无需邀请码）——required name/password/email/org；可选 isAdmin/nickname；返 instanceId"
+        delete:   "注销用户（DELETE /api/v1/users/{username}；username 须 ^[a-zA-Z0-9][.a-zA-Z0-9@_-]{0,99}$）"
+      password:
+        alter:      "修改指定用户密码（管理员改他人）——POST /api/v1/users/alter_password，required name"
+        alter_self: "修改本人密码——POST /api/v1/users/password，required password/oldPassword"
+        reset:      "重置密码（凭重置 key，来自邮件重置链接）——POST /api/v1/users/password/reset，required username/ts/password/key"
+
+    runtime:
+      admin_user: easyops
+      env_required:                    # 调用前 export（值在部署根 env.d/<dep>.env）
+        - "EASYOPS_USER_SERVICE_URL"          # 完整 URL；端口见 runtime.ports.user_service
+        - "EASYOPS_ORG"                       # user_service 租户 org（int）
+        - "EASYOPS_USER"                      # 调用者用户名（orguser 中间件）
+      ports: { user_service: 8111, frontend: 80 }
+      host_header: admin.easyops.local      # IP 直连须带 Host 头
+      auth: "直连 backend（endpoint.auth=none）只需 org+user header（orguser 中间件；缺报『获取用户 context 信息失败！』）。cookie 非必需，见 cookie_optional_direct"
+      cookie_optional_direct: "实测（2026-10-13，172.30.0.90 org8888，curl 直连 user_service:8111）：无 cookie、仅 org+user+Host 三件即 200（GET /api/v1/users total=137）。机制同 cmdb：auth=none 跳过 auth.Apply，headers 独立注入"
+      username_regex: "用户名/路径参数须匹配 ^[a-zA-Z0-9][.a-zA-Z0-9@_-]{0,99}$（delete/register 均适用，不匹配报『校验参数username失败』）"
+      register_two_paths: "⚠️两条注册路径：① admin 建号 POST /api/v1/users/register（本 system，required name/password/email/org，**接受明文密码**）；② UI 自助注册网关 POST /api/auth/register（required name/email/password/invite，需邀请码）。选错会报缺字段"
+      password_policy: "密码策略（GET /api/v1/users/passconf 实测 .24）：regex ^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[!@#$%^&*()_+=\\-])[a-zA-Z0-9!@#$%^&*()_+=\\-]{10,30}$ —— 10~30 位，须同时含小写/大写/数字/特殊字符(!@#$%^&*()_+=-)。设置密码前先校验，勿传弱密码"
+      alter_password_rsa_gap: "🔴【能力缺口，2026-10-13 .24 实测】改密 POST /api/v1/users/alter_password 要求 password 为 **RSA 公钥加密密文**（传明文报 HTTP_500 `crypto/rsa: decryption error`）。公钥未在接口契约中找到（疑在前端 JS）——本 spec 当前**无法完成改密**，需先补齐公钥获取 + 加密。注册接口则接受明文，故『设初始密码』走 register 可行"
+      delete_two_step: "🔴【实测配方，2026-10-13 .90/.24】注销用户是**两步**，缺一不可：① DELETE /api/v1/users/{username}（unregister——清凭据库记录，simple_detail 随即『查询无结果』，但不动 CMDB 实例）② DELETE 目标机 cmdb:8079 /object/USER/instance_batch?instanceIds={instanceId}（删 CMDB USER 实例）。只做①→用户仍在列表；只做②→重注册仍报 133023『用户名已经存在』。两步都做后 register 同名校验才通过（.24 wwh 实测成功）。⚠️『state 置 invalid』只是软禁用，不释放用户名，不能用于重注册"
+      delete_trace: "误判纠正：曾因只调 DELETE（步骤①）见 code=0 但列表仍有该用户，判为『端点不生效』；实为漏步骤②。又误用 CMDB state=invalid 软删，重注册仍失败"
+      set_admin: "🔴【管理员设置，实测 2026-10-13】① 注册时 `isAdmin:true`（POST /api/v1/users/register body）→ 自动关联 `系统管理员`+`普通用户`（与内置 easyops 一致）。② 已有用户：改 USER 实例关系字段 `ROLE`（→ ROLE@ONEMODEL）——先搜 ROLE@ONEMODEL 拿角色 instanceId（名称字段是 `role`，带 name 报 133116），再 cmdb `object_instance import USER {keys:[instanceId],datas:[{instanceId,name,ROLE:[<系统管理员id>,<普通用户id>]}]}`。『管理员』= 角色含 `系统管理员`（不是名叫「管理员」的角色）。跨 system 操作（本 system 查 → cmdb 写）"
+      role_relation: "USER 实例的 `ROLE` 字段关联 ROLE@ONEMODEL 角色实例；`GET /api/v1/users/roles/{name}/all` 读回角色名列表。角色实例 id 逐环境不同（.24 系统管理员=6536d8f81de81/普通用户=6536d8f81dfad；.90 不同），须先搜不可硬编码"
+      response_wrapper: "标准响应 {code, codeExplain, error, data}；code=0 成功。list 的 data 为 {page, pageSize, total, list[]}（注意字段名 pageSize，非 page_size）"
+      org_source: "user_service 的 org 是租户 id（int），与 EASYOPS_ORG 同源——注册 body 的 org 应传部署根 env 的 EASYOPS_ORG"
+      why_separate_system: "user_service:8111 与 cmdb 8079/itsm 8134 不同端口；api-cli 不支持 per-resource endpoint 覆盖，故必须独立 spec+system（同 sys_setting:8271 的处理）"
+
+    acceptance_urls:
+      user_management_list:   "${EASYOPS_CMDB_FRONTEND_URL}/next/permission-center/user-management/user"   # 用户管理页（真实录制 20261010-133954 实测）
+      user_detail:            "${EASYOPS_CMDB_FRONTEND_URL}/next/permission-center/user-management/user?username={username}"
+
   collector_plugin_service:
     description: |
       EasyOps 采集套件管理（collector_plugin_service:8151）—— 4 能力域 23 端点：

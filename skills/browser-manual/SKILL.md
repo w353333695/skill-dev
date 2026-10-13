@@ -16,7 +16,7 @@ description: This skill should be used when the user asks to "生成操作指引
 ```
 <session_dir>/
 ├── session.jsonl      # 必需。事件流：action/screenshot/nav/request/response/response_body/...
-├── screenshots/       # 必需。NNNN-before.png / NNNN-after.png（红框标注）
+├── screenshots/       # 必需。NNNN-before.webp / NNNN-after.webp（红框标注；历史 session 为 png）
 └── PROMPT.md          # 可能有，忽略（本 skill 的规则更完整，取代它）
 ```
 
@@ -39,7 +39,7 @@ print('tabs', [l.get('tabs') for l in lines if l['kind']=='session_end'])
 | kind | 含义 | 关键字段 |
 |---|---|---|
 | `action` | 用户动作 | `type`(click/input/submit)、`element.rect`(视口CSS坐标)、`element.descriptor`(tag/id/text/dom_path)、`value`(输入值,**password已脱敏***)、`target_id`(t0/t1=第几个tab) |
-| `screenshot` | 截图登记 | `action_seq`→**关联动作的seq**、`phase`(before/after)、`file`（文件名=动作seq-阶段.png）、`status`(ok/stable/timeout/raced/failed) |
+| `screenshot` | 截图登记 | `action_seq`→**关联动作的seq**、`phase`(before/after)、`file`（文件名=动作seq-阶段.webp）、`status`(ok/stable/timeout/raced/failed) |
 | `nav` | 页面导航 | `url`、`target_id`、`recovered:true`=挂域晚补录 |
 | `request`/`response`/`response_body` | 网络 | `request_id` 三者互联；request 带 url/method/headers/post_body；response 带 status；response_body 带 body（body_base64=true 时是base64） |
 | `dom_mutations` | DOM 变化脉冲 | `count`（仅用于理解页面活跃度） |
@@ -49,7 +49,7 @@ print('tabs', [l.get('tabs') for l in lines if l['kind']=='session_end'])
 
 ## 截图选用规则（核心，保证效果）
 
-**每张图 = `文件名前缀(动作seq)` + `-before/after.png`**。按动作效果分三类选图：
+**每张图 = `文件名前缀(动作seq)` + `-before/after.webp`**。按动作效果分三类选图：
 
 | 动作性质 | 选用 | 理由 |
 |---|---|---|
@@ -81,17 +81,29 @@ print('tabs', [l.get('tabs') for l in lines if l['kind']=='session_end'])
 ## 一、<阶段名：登录>            ← 阶段=nav 大节点切分
 ### 1.1 <动词短语步骤名>
 <一句话：在哪点什么/输什么（值来自 action.value）>
-![步骤名](screenshots/<选用图>.png)
+![步骤名](screenshots/<选用图>.webp)
 ...（每小节 = 1 个动作，格式严格一致：标题/说明/图）
+#### 1.1.1 <子步骤名>            ← 按需：一节内动作多时可再分组；更深可用 ##### 1.1.1.1
 
 ## 二、<阶段名：主流程>
 ...
 
 ````
 
-**排版硬规则**：①每步骤小节三要素（标题动词短语/一句操作说明/一张图）不增删；②连续 input 到同一表单合并为一小节（每字段一行）；③图注格式统一 `![<步骤名>](screenshots/<file>)`；④password 显示 `***`（保持脱敏，禁止还原）；⑤只用实际存在的事件，禁止臆测。
+**排版硬规则**：①每步骤小节三要素（标题动词短语/一句操作说明/一张图）不增删，挂在最细一级标题下；标题层级按需细分：`## 一、`章 / `### 1.1`节 / `#### 1.1.1`子节 / `##### 1.1.1.1`更深（不强制用满，编号格式见 guide-template.md）；②步骤粒度=逐点击（每个动作独立成小节；仅三类合并：「同一控件的点击+录入/勾选」「下拉展开+选项点选」「无状态变化的冗余重复点击」）；③图注格式统一 `![<步骤名>](screenshots/<file>)`；④password 显示 `***`（保持脱敏，禁止还原）；⑤只用实际存在的事件，禁止臆测。
 
 **排版一致性机制**：上面的骨架是速览——**`references/guide-template.md` 是唯一排版真源**（文档级模板 + 3 种小节模板块 + 逐条自查硬规则 + 格式基准示例）。生成 = 填 «占位符» + 复制模板块，禁止自创结构。API 报告用 `references/api-report-format.md` 的七字段模板。
+
+### 图片压缩（固定步骤，脚本化）
+
+引用图拷贝后统一压缩，保证输出体积（UI 截图约省 80%~90%）：
+
+```bash
+bash scripts/run.sh <输出目录>        # dev 态（forward 到 projects/browser-recorder venv）
+python3 scripts/prepare_guide_images.py <输出目录>   # 分发态（需 Pillow）
+```
+
+默认宽 **1280**、webp **质量 80**；就地转换、改写 md 引用、删除原图（`--keep-png` 可保留）。模板与示例中的图片引用一律写 `.webp`。**新录制已由录制端直出 webp（annotator 落盘即压缩），本脚本主要用于历史 png session**；已为 webp 的引用自动跳过。
 
 ### api-report.md（可选，用户要求时）
 
@@ -144,9 +156,10 @@ print('tabs', [l.get('tabs') for l in lines if l['kind']=='session_end'])
 2. **提取动作骨架**：action 事件按 t_mono 排列，对照 nav 切阶段
 3. **按截图选用规则**给每个动作定图；`raced/failed` 剔除
 4. **建输出目录**，拷贝选用截图到 `输出/screenshots/`
-5. **按固定骨架写 guide.md**（引用相对路径 `screenshots/...`）
-6. 用户明确要求 API 分析 → 单独生成 api-report.md（+api-calls.json）；默认不生成，也不把接口概览写入 guide.md
-7. **自检**：引用的图都存在？每小节三要素齐？password 全 `***`？guide 中没有 API/接口信息？URL 的域名/IP 已替换为变量？
+5. **压缩图片（固定步骤）**：`bash scripts/run.sh <输出目录>` —— 就地转 webp（宽 1280 / q80）并改写 md 引用为 `.webp`
+6. **按固定骨架写 guide.md**（引用相对路径 `screenshots/....webp`）
+7. 用户明确要求 API 分析 → 单独生成 api-report.md（+api-calls.json）；默认不生成，也不把接口概览写入 guide.md
+8. **自检**：引用的图都存在？每小节三要素齐？password 全 `***`？guide 中没有 API/接口信息？URL 的域名/IP 已替换为变量？
 
 ## 硬约束
 

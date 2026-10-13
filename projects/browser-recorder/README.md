@@ -9,7 +9,7 @@
 ```
 sessions/20260829-153000/
 ├── session.jsonl     # 操作+网络事件单时钟混排（全量、脱敏、不截断）
-├── screenshots/      # NNNN-before.png / NNNN-after.png（红框=动作位置）
+├── screenshots/      # NNNN-before.webp / NNNN-after.webp（红框=操作位置；宽 1280 / q80 压缩直出）
 ├── PROMPT.md         # 给 Claude Code 的文档生成指令
 └── chrome-profile/   # 录制用临时浏览器配置（export 时自动排除）
 ```

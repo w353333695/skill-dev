@@ -303,14 +303,15 @@ class SessionHarness:
             _save_shot(self.out_dir, seq, "before", shot["data"])
         except Exception:
             before_status = "raced"
-        # 红框标注（零尺寸跳过，descriptor 文字兜底）
+        # 红框标注 + 压缩落盘（零尺寸只压缩不画框，descriptor 文字兜底）
         vp = payload.get("viewport") or {}
         dpr = vp.get("dpr") or 1.0
         rt = (payload.get("rect") or {})
-        if rt.get("w") and rt.get("h") and before_status == "ok":
-            _annotate_safe(self.out_dir, seq, "before", rt, dpr)
+        shot_file = f"{seq:04d}-before.webp"
+        if before_status == "ok":
+            shot_file = _annotate_safe(self.out_dir, seq, "before", rt, dpr)
         self.writer.emit("screenshot", {"action_seq": seq, "phase": "before",
-                                        "file": f"{seq:04d}-before.png",
+                                        "file": shot_file,
                                         "status": before_status, "target_id": tid})
         # after：独立任务等稳再拍——不阻塞下一个动作的 before
         self.schedule_after_shot(seq, tid, rt, dpr)
@@ -359,13 +360,13 @@ class SessionHarness:
             shot = await self.client.send("Page.captureScreenshot", {"format": "png"},
                                           session_id=sid)
             _save_shot(self.out_dir, seq, "after", shot["data"])
-            _annotate_safe(self.out_dir, seq, "after", rt, dpr)
+            shot_file = _annotate_safe(self.out_dir, seq, "after", rt, dpr)
             self.writer.emit("screenshot", {"action_seq": seq, "phase": "after",
-                                            "file": f"{seq:04d}-after.png",
+                                            "file": shot_file,
                                             "status": how, "target_id": tid})
         except Exception:
             self.writer.emit("screenshot", {"action_seq": seq, "phase": "after",
-                                            "file": f"{seq:04d}-after.png",
+                                            "file": f"{seq:04d}-after.webp",
                                             "status": "failed", "target_id": tid})
 
     async def _action_loop(self) -> None:
@@ -647,11 +648,16 @@ def _save_shot(out_dir: pathlib.Path, seq: int, phase: str, b64: str) -> None:
 
 
 def _annotate_safe(out_dir: pathlib.Path, seq: int, phase: str,
-                   rt: dict, dpr: float) -> None:
-    """红框标注（容错）：文件不存在/画框异常都吞掉——标注失败只降级观感，不致命。"""
+                   rt: dict | None, dpr: float) -> str:
+    """红框标注 + 压缩落盘（容错）：返回最终文件名（成功=webp，异常=保留原 png）。
+
+    文件不存在/画框/压缩异常都吞掉——只降级观感，不致命。
+    """
+    png = out_dir / "screenshots" / f"{seq:04d}-{phase}.png"
     try:
-        f = out_dir / "screenshots" / f"{seq:04d}-{phase}.png"
-        if f.exists() and rt.get("w") and rt.get("h"):
-            annotate(f, rt, dpr=dpr, seq=seq)
+        if png.exists():
+            rect = rt if (rt and rt.get("w") and rt.get("h")) else None
+            return annotate(png, rect, dpr=dpr).name
     except Exception:
         pass
+    return png.name

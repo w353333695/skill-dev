@@ -52,7 +52,9 @@ apps/fintech-sync/
 # SDD scratch
 .superpowers/
 
+# Claude Code 本地配置（各机器私有，不入库）
 .claude/settings.json
+.claude/settings.local.json
 
 # git worktree 本地目录（实现工作区，绝不入库——曾发生过嵌套快照误提交）
 .claude/worktrees/
