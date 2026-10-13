@@ -10,9 +10,11 @@
 | **easyops-autoops** | tool_service:8181 | easyops-autoops.yaml | 工具/版本/库 + 执行/导入导出 |
 | **easyops-itsm** | flowable_service:8134 | easyops-itsm.yaml | 表单/流程/服务/工单 + 触发器/通知/SLA/值班组（2026-08-11）+ sso-adapter provider 交付知识（2026-08-13）|
 | **easyops-sys-setting** | sys_setting:8271 | easyops-sys-setting.yaml | 工作日历 work_calendar（2026-08-11）|
+| **easyops-user** | user_service:8111 | easyops-user.yaml | 用户账号 user（注册/注销/列表/详情）+ password（改密/重置）（2026-10-13）|
 
 > ⚠️ itsm 的 notify_policy 前缀是 `/api/itsc_trigger/v1`（非 flowable_service）但仍走 8134。
 > ⚠️ sys-setting 独立 spec：sys_setting:8271 ≠ flowable_service:8134，api-cli endpoint 是 service 级不支持 per-resource 绑端口，故 work_calendar 另起 spec。work_calendar 被 itsm 的 sla（workingCalendarId, 24hex）跨 system 引用。
+> ⚠️ user 独立 spec：user_service:8111 亦独立端口（同 sys-setting 理由）。admin 建号走 `/api/v1/users/register`，与 UI 自助注册（网关 `/api/auth/register`，需邀请码）不同。
 
 ## 资料地图（知识在哪，按需查）
 

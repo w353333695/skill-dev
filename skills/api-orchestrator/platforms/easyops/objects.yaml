@@ -1711,6 +1711,73 @@ objects:
         rule: "无鉴权。data.alert_receivers=[{name(用户名),method}]，整个 data 作为 msg_data 透传脚本。仅支持 cmdbUserObjectColName 非空的通知方式。"
     source: "platform/msgsender/{mail_config/config_handler.py:62-371, custom_sender/message_handler.py:362-998}；实测 .90:8095 v1明文/v2脱敏对照"
 
+
+  # ---------- 用户账号（user_service） ----------
+  user_account:
+    description: |
+      EasyOps 用户账号（USER 对象，_object_id=USER）—— 由 user_service:8111 管理。
+      注册返回 instanceId（用户实例 id，13hex）；用户详情含 name/nickname/email/org/state（state=valid）。
+      两条注册路径：① admin 建号 POST /api/v1/users/register（required name/password/email/org，
+      本 platforms 覆盖）；② UI 自助注册网关 POST /api/auth/register（required name/email/password/invite，
+      需邀请码，未接入本 spec）。用户名/路径参数须匹配 ^[a-zA-Z0-9][.a-zA-Z0-9@_-]{0,99}$。
+      🔴【角色/管理员】USER 实例经关系字段 **`ROLE`** 关联 `ROLE@ONEMODEL` 角色实例（分配角色）。
+      「管理员」= 关联 `系统管理员` + `普通用户` 两个角色（实测 isAdmin:true 注册即得这两条，与内置 easyops 一致）。
+      ⚠️ `ROLE@ONEMODEL` 的名称字段是 **`role`**（不是 name）——search 带 name 报
+      133116「Can not find name relation of ROLE@ONEMODEL」；角色实例 id 逐环境不同，须先搜。
+    source: 契约 FLOW_BUILDER_API_CONTRACT@EASYOPS（5 条 user_service）+ 实测探针 172.30.0.90 org8888
+    api: user/password   # 走 systems.yaml#easyops-user 的 user / password 资源
+    fields:
+      name:       { type: string, desc: "用户名（登录名，^[a-zA-Z0-9][.a-zA-Z0-9@_-]{0,99}$）" }
+      nickname:   { type: string, desc: "昵称（显示名）" }
+      email:      { type: string, desc: "邮箱（user_email 同值）" }
+      org:        { type: integer, desc: "租户 org（int，与 EASYOPS_ORG 同源）" }
+      instanceId: { type: string, desc: "用户实例 id（13hex，注册响应返回）" }
+      state:      { type: string, desc: "账号状态（valid=有效）" }
+    relations:
+      - { to: flow_builder_api_contract, type: reference, cardinality: "N:1", via: "serviceName=logic.user_service" }
+    side_effects:
+      - op: user.register
+        rule: |
+          建号（写）。required name/password/email/org。org 传部署根 env 的 EASYOPS_ORG。
+          **password 传明文即可**（实测 2026-10-13 .24 org1888：明文注册成功，返回 instanceId）。
+          响应 data.instanceId = 新用户实例 id（后续角色/详情可用）。email 须合法邮箱格式。
+          密码须过策略（10~30 位，含大小写+数字+特殊字符，见 systems.yaml#easyops-user.runtime.password_policy）。
+          ⚠️不带邀请码——与 UI 自助注册（/api/auth/register，需 invite）是两条不同路径，混用报缺字段。
+      - op: user.delete
+        rule: |
+          🔴【实测配方，2026-10-13 .90/.24】注销用户 = **两步，缺一不可**：
+          ① DELETE /api/v1/users/{username}（unregister）——清**凭据库**账号记录
+             （调用后 GET /api/v1/users/simple_detail/{name} 变「查询无结果」），但**不删 CMDB 实例**，
+             故用户仍出现在 /api/v1/users 列表里（曾误判端点「不生效」，实为漏步骤②）。
+          ② DELETE {目标机}cmdb:8079 /object/USER/instance_batch?instanceIds={instanceId}——删 CMDB USER 实例。
+          只做①→用户仍在列表；只做②→重注册仍报 133023「用户名已经存在」。两步都做后同名校验才通过。
+          ⚠️『PUT state=invalid』只是软禁用，**不释放用户名**，不能用于重注册。
+          故「注销」是【跨 system】操作：user_service(unregister) + cmdb(删实例)。
+          ⚠️USER 模型 object_instance.import 直传 {instanceId,state} 报 300303「property name is required」——
+          删实例用 instance_batch，勿走 import。
+      - op: password.alter
+        rule: |
+          改指定用户密码（管理员改他人，写）。required name；password 为 **RSA 公钥加密密文**。
+          🔴【能力缺口，2026-10-13 .24 实测】传明文报 HTTP_500 `crypto/rsa: decryption error`；
+          公钥未在接口契约中找到（疑打包在前端 JS）——本 platforms 当前**无法完成改密**，
+          需先补齐公钥获取 + 加密步骤。与 register 不同（register 收明文）。
+      - op: password.reset
+        rule: "重置密码（写）。凭邮件重置链接的 key + ts（防重放）。required username/ts/password/key。POST /api/v1/users/password/reset"
+      - op: 密码策略
+        rule: "GET /api/v1/users/passconf 返回密码策略（实测 .24）：10~30 位，须同时含小写/大写/数字/特殊字符(!@#$%^&*()_+=-)。设密码前先按此校验"
+      - op: user.set_admin
+        rule: |
+          设为管理员（改已有用户，跨 system，写）。两条路：
+          ① **注册时**：POST /api/v1/users/register body 加 `isAdmin:true` → 自动关联
+             `系统管理员`+`普通用户`（实测 .90 2026-10-13，与内置 easyops 一致）。
+          ② **已有用户**：改 USER 实例的角色关系字段 `ROLE`（关联 ROLE@ONEMODEL）——
+             先搜 `ROLE@ONEMODEL` 拿「系统管理员」「普通用户」的 instanceId（**名称字段是 `role` 不是 name**），
+             再 CMDB upsert：object_instance import USER
+             body `{"keys":["instanceId"],"datas":[{"instanceId":"<用户>","name":"<用户名>","ROLE":["<系统管理员id>","<普通用户id>"]}]}`
+             （.24 实测 update_count=1，user_service `GET /api/v1/users/roles/{name}/all` 随即返回两角色）。
+             ⚠️USER 的 import 必须带 `name`（否则 300303「property name is required」）；ROLE 传 instanceId 数组。
+          「管理员」判定：角色列表含 `系统管理员` 即为平台管理员（非名为「管理员」的那个角色）。
+
 api_behavior:
   pagination:
     rule: "list/search 分页时 api-cli 以流式 NDJSON 输出——每行一个完整对象，非 {data:{list:[...]}} 包装。解析须逐行 json.loads。单对象接口（detail）才是 {code,data:{...}}。"
