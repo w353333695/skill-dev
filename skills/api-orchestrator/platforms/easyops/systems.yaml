@@ -124,6 +124,8 @@ systems:
         组织信息:
           - { name: 用户, aliases: [账号, 人员, 用户账号], objectId: USER }
           - { name: 用户组, aliases: [用户分组, 群组, 组, Team], objectId: USER_GROUP }
+          - { name: 供应商, aliases: [厂商, 供应方], objectId: SUPPLIER@ONEMODEL }
+          - { name: 合同, aliases: [CONTRACT, 合同台账], objectId: CONTRACT@ONEMODEL }
         应用资源.应用系统:
           - { name: 系统, aliases: [应用系统, 业务系统], objectId: APP_SYSTEM@ONEMODEL }
           - { name: 服务集, aliases: [集群, 环境], objectId: SERVICE_SET@ONEMODEL }

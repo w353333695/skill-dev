@@ -39,6 +39,14 @@ objects:
       报 133116 "Can not find name relation"），BLADE_CHASSIS/FIBRE_CHANNEL_SWITCH 两者皆无（ip/sn 兜底）。
       跨子模型查设备一律按 NAME_ATTRS 映射取名称键（实现参照 hub/scripts/tools/power_device_source.py）。
   cmdb_object:
+    dot24_pitfalls: |
+      🔴【.24 环境实测坑】（2026-10-13 建合同模型）：
+      ① 附件属性正确写法：value.type="attachment" 直接后端 500（import_check/object_attr.create
+         均空体炸，其余类型全 200）——正确形态是 structs + mode="attachment" + struct_define
+         四件套 [{name,str},{type,str},{url,str},{size,float}]（用户手建示例实证）。
+      ② 关系 left_name/right_name 存储对调：import 提交的 left_name 会落到右端显示
+         （detail 回读互换）——语义要正确须提交时互换填；另 right_name 不可重复（130314，
+         多关系挂不同对端模型时右端名称也要专名，如 supplierContracts/assetContracts）。
     description: CMDB 模型（object）—— 一个资源类的完整定义。
     source: data/sources/backend/CMDB/cmdb_service/object/message/response.pb.go
     api: object_model
