@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # 网络连通性探测工具：支持从本机或指定源主机探测多个目标 IP/端口。
 set -u
-readonly VERSION="1.0.0"
+readonly VERSION="1.0.1"
 readonly RED=$'\033[31m'
 readonly RESET=$'\033[0m'
 
@@ -9,8 +9,9 @@ usage() {
   cat <<'EOF'
 用法：network-connectivity-test.sh -d 目标IP[,目标IP...] -p 端口[,端口...] [选项]
 
-先通过 SSH 打印目标主机的监听端口、iptables 和 firewalld 状态，
-再按“源 IP × 目标 IP × 目标端口”逐项探测并输出最终 ASCII 表。
+默认不检查目标主机的端口监听及防火墙状态，也不 SSH 登录目标主机。
+按“源 IP × 目标 IP × 目标端口”逐项探测并输出最终 ASCII 表。
+使用 --inspect-target 可先通过 SSH 检查目标的监听端口、iptables 和 firewalld 状态。
 
 必填参数：
   -d, --dest        目标 IP/主机名，多个值用逗号分隔
@@ -21,15 +22,19 @@ usage() {
   -t, --timeout     探测超时（秒），默认 1
   -u, --user        SSH 用户，默认当前登录用户
       --ssh-port    SSH 端口，默认 22
+      --inspect-target  启用目标端口监听与防火墙检查，默认关闭；需 SSH 免密访问目标
       --no-color    不使用 ANSI 颜色
   -V, --version     打印版本
   -h, --help        打印帮助
 
-默认使用 SSH 免密密钥访问目标和远程源主机，不读取或保存密码。
-依赖：bash、ssh、nc（或 netcat）；远端需有 ss（无 ss 时尝试 netstat）。
+指定远程源主机或启用 --inspect-target 时使用 SSH 免密密钥，不读取或保存密码。
+依赖：bash、nc（或 netcat）；使用 SSH 时需 ssh，目标检查需 ss 或 netstat。
+UDP 无握手，nc 返回成功不保证目标服务已监听或能响应。
+退出码：0=所有探测命令成功，1=存在探测失败，2=参数或依赖错误。
 
 示例：
   network-connectivity-test.sh -d 10.0.0.10,10.0.0.11 -p 80,443
+  network-connectivity-test.sh -d 10.0.0.10 -p 443 -P tcp --inspect-target
   network-connectivity-test.sh -s 10.0.1.20,10.0.1.21 -d 10.0.0.10 -p 53 -P udp -t 2
 EOF
 }
@@ -131,7 +136,7 @@ print_results() {
   printf '+%-18s+%-18s+%-8s+%-8s+%-10s+%-48s+\n' '------------------' '------------------' '--------' '--------' '----------' '------------------------------------------------'
 }
 
-DESTS=''; PORTS=''; SOURCES=''; PROTOCOL=tcp; TIMEOUT=1
+DESTS=''; PORTS=''; SOURCES=''; PROTOCOL=tcp; TIMEOUT=1; INSPECT_TARGET=0
 SSH_USER=${USER:-$(id -un)}; SSH_PORT=22; SSH_CONNECT_TIMEOUT=5; COLOR=1
 while (($#)); do
   case $1 in
@@ -142,6 +147,7 @@ while (($#)); do
     -t|--timeout) [[ $# -ge 2 ]] || die "$1 需要参数"; TIMEOUT=$2; shift 2;;
     -u|--user) [[ $# -ge 2 ]] || die "$1 需要参数"; SSH_USER=$2; shift 2;;
     --ssh-port) [[ $# -ge 2 ]] || die "$1 需要参数"; SSH_PORT=$2; shift 2;;
+    --inspect-target) INSPECT_TARGET=1; shift;;
     --no-color) COLOR=0; shift;;
     -V|--version) printf '%s\n' "$VERSION"; exit 0;;
     -h|--help) usage; exit 0;;
@@ -153,13 +159,17 @@ validate_csv "$DESTS" '目标 IP'; validate_csv "$PORTS" '目标端口'; validat
 [[ $PROTOCOL == tcp || $PROTOCOL == udp ]] || die '协议只能是 tcp 或 udp'
 validate_timeout "$TIMEOUT"
 [[ $SSH_PORT =~ ^[0-9]+$ && $SSH_PORT -ge 1 && $SSH_PORT -le 65535 ]] || die "SSH 端口无效：$SSH_PORT"
-command -v ssh >/dev/null 2>&1 || die '本机未找到 ssh'
+if [[ -n $SOURCES || $INSPECT_TARGET == 1 ]]; then
+  command -v ssh >/dev/null 2>&1 || die '本机未找到 ssh'
+fi
 NC_BIN=$(command -v nc || command -v netcat || true)
 [[ -n $NC_BIN ]] || die '本机未找到 nc/netcat'
 split_csv "$DESTS"; DEST_ARRAY=("${SPLIT_RESULT[@]}"); split_csv "$PORTS"; PORT_ARRAY=("${SPLIT_RESULT[@]}")
 if [[ -n $SOURCES ]]; then split_csv "$SOURCES"; SOURCE_ARRAY=("${SPLIT_RESULT[@]}"); else SOURCE_ARRAY=(''); fi
 RESULTS=()
-for target in "${DEST_ARRAY[@]}"; do print_target_inspection "$target"; done
+if [[ $INSPECT_TARGET == 1 ]]; then
+  for target in "${DEST_ARRAY[@]}"; do print_target_inspection "$target"; done
+fi
 for source in "${SOURCE_ARRAY[@]}"; do for target in "${DEST_ARRAY[@]}"; do for port in "${PORT_ARRAY[@]}"; do probe_one "$source" "$target" "$port"; done; done; done
 print_results
 for row in "${RESULTS[@]}"; do [[ $row == *'|不通|'* ]] && exit 1; done
