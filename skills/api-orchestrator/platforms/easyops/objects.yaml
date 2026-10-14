@@ -7,6 +7,18 @@
 # =============================================================================
 objects:
   # ---------- 模型（object）本身 ----------
+  artifact_package:
+    description: |
+      制品包/版本（artifact 服务 :8175，_ARTIFACT/_ARTIFACT_VERSION）——cicd 资源同步实测（2026-10-14 .24）：
+      · 版本 conf（easyopsSpec）：_ARTIFACT_VERSION 实例的 easyopsSpec 属性 = {"conf": <yaml串>, ...}；
+        list_version 返回的 conf 直读该字段——【改 CMDB 即生效】（接口有秒级缓存，改后立即读可能拿旧值）。
+      · 🔴conf.user = 提交账号（服务端按鉴权 user 落，不从上传包 easyopsSpec.conf 取）——同步/恢复场景
+        版本属主会被同步账号污染；换 user header 提交会 403/500（"获取包版本权限数据异常"，账号须有
+        artifact 权限）——属主对齐只能走 CMDB 侧更新 easyopsSpec.conf（keys=name=versionId 32hex）。
+      · workspace：同内容重复 commit 报 103113 "工作区无变更"——重置 init+clear 或换内容（marker 文件）。
+      · _ARTIFACT_VERSION v3 search 的 fields 只能带模型实有字段（无 packageId/user——带了报
+        "Can not find xxx relation"）；版本实例 name=versionId(32hex)、versionName=版本名。
+      · create_package 同名包报 100307 已存在。
   easyops_host_cli:
     description: |
       主机侧 easyops 命令（组件服务控制）——/usr/bin/easyops 是 sh 包装（硬编码
