@@ -173,10 +173,11 @@ items:
   - id: sangfor-ad-monitor-kit
     name: 深信服AD负载均衡器监控套件
     category: monitor-kits
-    files: [深信服AD负载均衡器监控套件_v1.0.1.zip, 深信服AD负载均衡器监控_告警规则模板.xlsx]
-    version: "1.0.1"
+    files: [监控套件_深信服AD负载均衡器监控_1.0.2.zip, 深信服AD负载均衡器监控_告警规则模板.xlsx]
+    version: "1.0.2"
     history:
       - {ver: "1.0.1", date: "2026-08-29", change: 初版入库}
+      - {ver: "1.0.2", date: "2026-10-14", change: 采集前增加一次 SNMP 连通性检查（3秒超时、零重试），失败跳过本轮全量采集}
     scenario: 深信服 AD 负载均衡器监控指标套件+告警规则模板
     notes: 告警规则模板与套件配套，不单独成商品
     added: "2026-08-29"
