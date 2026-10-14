@@ -47,6 +47,16 @@ platform_conventions:
            需调 cmdb/easyops 用 py2 标准库（urllib2/httplib + EASYOPS_* 环境变量），不依赖第三方包；
         ③ py2/3 兼容写法（运行时判断 PY2、不用 f-string、logging 不直接 print、raise 不带 from）。
       适用对象：EasyOps agent 工具脚本（.tar.gz 里的 script）、编排挡交付给用户的示例/封装代码。
+    environment_defaults:
+      rule: |
+        套件开发读取环境变量或注入参数时，有默认值的字段使用 mapping.get(key) or default_value，
+        不用 mapping.get(key, default_value)：后者只处理键缺失，不能处理键存在但值为 None 或空字符串。
+        真实 os.environ 的值是字符串（缺失时 get 返回 None）；平台注入或中间参数字典也可能直接含 None。
+        先兜底再转换类型或调用 upper/strip 等方法，例如 int(os.environ.get('EASYOPS_COLLECTOR_port') or '161')。
+        or 会替换所有假值；0/False 是合法值的参数需显式区分 None/空字符串，不能无条件覆盖。
+        必填目标与凭证不得伪造默认 IP、public 团体名或密码；缺失/空值应快速失败并输出脱敏错误。
+        开发自检覆盖键缺失、None、空字符串、正常值，以及合法的 0/False（如适用）；.py/.orig 同步遵守。
+      source: "2026-10-14 用户补充的套件开发经验：环境变量默认值采用 get(key) or default_value。"
     exceptions:
       - domain: "编排侧 api-cli 缺口补丁（sdk/easyops_client.py）"
         why: "api-cli 不支持 multipart/binary（tool_package 导入导出真调）与 openapi AK/SK 签名编排侧调用；该 SDK 仅在编排侧/开发机运行，【不进 agent、不作为工具脚本依赖】。"

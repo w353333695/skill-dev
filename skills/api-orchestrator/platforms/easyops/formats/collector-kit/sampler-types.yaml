@@ -156,6 +156,7 @@ output_protocols:
 # ⚠️ 与 easyops-monitor 文档（py3）的差异点已按运行时修正。
 # -----------------------------------------------------------------------------
 python2_rules:
+  environment_defaults: "环境变量/注入参数默认值必须用 get(key) or default_value；合法的0/False、必填目标及凭证按 systems.yaml platform_conventions.code.environment_defaults 处理。"
   runtime: "Python 2.7（agent 默认解释器 /usr/local/easyops/python/bin/python）"
   vs_modern_doc: "easyops-monitor simple-script-guide.md 写的是 py3，但 agent 实际 py2，以运行时为准。下列规则覆盖文档的 py3 写法。"
 
