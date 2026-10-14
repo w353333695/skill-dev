@@ -16,6 +16,10 @@
 > ⚠️ sys-setting 独立 spec：sys_setting:8271 ≠ flowable_service:8134，api-cli endpoint 是 service 级不支持 per-resource 绑端口，故 work_calendar 另起 spec。work_calendar 被 itsm 的 sla（workingCalendarId, 24hex）跨 system 引用。
 > ⚠️ user 独立 spec：user_service:8111 亦独立端口（同 sys-setting 理由）。admin 建号走 `/api/v1/users/register`，与 UI 自助注册（网关 `/api/auth/register`，需邀请码）不同。
 
+## 采集、监控、巡检开发经验
+
+所有相关脚本和套件开发必须遵守 `systems.yaml` 的 `platform_conventions.collection_preflight`：正式采集前做一次同协议、同认证、短超时且有限重试的只读检查；失败跳过本轮，保持各自输出协议，不制造健康结果。详细规则和验证要求以该平台公约为准。
+
 ## 资料地图（知识在哪，按需查）
 
 | 文件 | 装什么 | 何时查 |

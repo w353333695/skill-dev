@@ -1,6 +1,7 @@
 # =============================================================================
 # formats/collector-kit/sampler-types.yaml
 # 采集套件两种 samplerType 的输出协议 + 采集脚本 Python2 规范。
+# 开发门禁：采集前协议级检查/失败快速退出/输出协议与脱敏要求，见 systems.yaml platform_conventions.collection_preflight（强制）。
 #
 # 职责：让套件开发能力据此写出「平台能正确解析」的采集脚本。
 # samplerType 决定 collector_service 路由到哪个 Collector，进而决定脚本必须输出

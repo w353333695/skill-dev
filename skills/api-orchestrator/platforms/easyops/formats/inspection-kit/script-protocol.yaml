@@ -1,6 +1,7 @@
 # =============================================================================
 # formats/inspection-kit/script-protocol.yaml
 # 巡检脚本协议（v1 体系）—— py2 脚本怎么写、参数怎么进、结果怎么出。
+# 开发门禁：采集前协议级检查/失败快速退出/输出协议与脱敏要求，见 systems.yaml platform_conventions.collection_preflight（强制）。
 #
 # ⚠️与采集套件（collector-kit）脚本协议【完全不同】：
 #   - 参数传递：采集=环境变量 EASYOPS_COLLECTOR_*；巡检=【脚本头部注入变量赋值】
