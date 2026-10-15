@@ -397,6 +397,15 @@ items:
     scenario: 上下电设备候选数据源（componentLoad）/值变化联动填充（onValueChange，sn 只补空）/验收回填 CMDB（postScript，sn 唯一键全量同步）三脚本源码，工具包见 tools/ 三件
     notes: "py2/3 兼容 stdlib only；🔴BASE_ASSET 子模型名称属性不统一——NAME_ATTRS 映射（objects.yaml#base_asset_models）"
     added: "2026-09-29"
+  - id: openapi-demo-tool
+    name: OpenAPI请求示例工具包
+    category: tools
+    files: [openapi_demo.tool.tar.gz]
+    history:
+      - {date: "2026-10-15", change: 初版入库（1.0.0 外来包原样归档；同日导入 .24 注册 toolId 765886c8d0da92475aaae348925590ce）}
+    scenario: EasyOps OpenAPI AK/SK 签名请求示例（py2 shell 型工具）——HMAC 签名封装 + 任意 url/method/data 请求；ACCESS_KEY/SECRET_KEY 入参为 cmdbInstance 类型（从 CMDB 实例属性注入）
+    notes: "toolId 765886c8d0da92475aaae348925590ce（packageId 不变 upsert）；timeout=86400；sandboxRun=true；示例/参考用途"
+    added: "2026-10-15"
   - id: env-backfill-host-tool
     name: 基础环境资源回写主机工具包
     category: tools
