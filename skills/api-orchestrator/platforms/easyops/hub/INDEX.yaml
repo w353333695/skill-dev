@@ -403,7 +403,7 @@ items:
     files: [openapi_demo.tool.tar.gz]
     history:
       - {date: "2026-10-15", change: 初版入库（1.0.0 外来包原样归档；同日导入 .24 注册 toolId 765886c8d0da92475aaae348925590ce）}
-      - {date: "2026-10.15", change: "1.0.1：config type shell→python（脚本本身即 py2 代码，声明修正后平台按 python 解释器执行）；已 upsert 导入 .24"}
+      - {date: "2026-10-15", change: "1.0.1：config type shell→python（脚本本身即 py2 代码，声明修正后平台按 python 解释器执行）；已 upsert 导入 .24"}
       - {date: "2026-10-15", change: "1.0.3：用户 .24 手动更新后导出归档——Host 域名修正（ospenapi→openapi.easyops-only.com）；ACCESS_KEY/SECRET_KEY 入参改普通 string+默认值、url/data 默认值改 CMDB HOST 查询示例；🔴归档包 AK/SK 默认值已脱敏为占位符（线上原值未动）"}
     scenario: EasyOps OpenAPI AK/SK 签名请求示例（py2 shell 型工具）——HMAC 签名封装 + 任意 url/method/data 请求；ACCESS_KEY/SECRET_KEY 入参为 cmdbInstance 类型（从 CMDB 实例属性注入）
     notes: "toolId 765886c8d0da92475aaae348925590ce（packageId 不变 upsert）；timeout=86400；sandboxRun=true；示例/参考用途"
