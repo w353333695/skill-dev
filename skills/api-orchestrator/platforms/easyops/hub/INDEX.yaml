@@ -400,19 +400,21 @@ items:
   - id: host-recover-tool
     name: CMDB误删实例恢复工具包
     category: tools
-    files: [host_recover.tool.tar.gz]
+    files: [CMDB实例恢复.tool.tar.gz]
     history:
       - {date: "2026-10-16", change: "1.1.1 入库（外来 1.0.0 通用化改造：模型ID/开始时间/删除时间段入参化+动作枚举+report 输出；.24 CONTRACT 测试模型全链调试——归档删恢复/时段覆盖与排除/0命中分支修复）"}
+      - {date: "2026-10-16", change: "1.1.2：更名 host_recover→CMDB实例恢复（通用化后原名不贴切；packageId/toolId 不变，已导入 .24 复核平台名生效）"}
     scenario: CMDB 误删实例通用恢复——按操作日志(topic=event.instance.archive)+可选时段(HH:MM:SS-HH:MM:SS)捞归档删除事件，从 history 接口取删除前快照，下载到 /tmp JSON 或按 instanceId 导回（upsert，可选剥离关系字段）；模型任意指定（默认 HOST）
     notes: "toolId f61ac555aff521b1db06359f1255b8d1；🔴只恢复【归档删除】（instance_archive_instances）——物理删(_batch delete)不产生 archive 事件（.24 实测），恢复不了；工具读 agent conf 定位服务端（agent 执行）；源码 scripts/tools/host_recover.py"
     added: "2026-10-16"
   - id: host-recover-source
     name: CMDB误删实例恢复脚本源码
     category: scripts
-    files: [tools/host_recover.py]
+    files: [tools/cmdb_instance_recover.py]
     history:
       - {date: "2026-10-16", change: 初版入库（与工具包 1.1.1 同源）}
-    scenario: 通用恢复脚本源码（EasyopsAPI 内网/签名双模式 + 操作日志分页 + history 快照 + import 恢复），工具包见 tools/host_recover
+      - {date: "2026-10-16", change: "1.1.2 同步更名（源码文件 host_recover.py→cmdb_instance_recover.py）"}
+    scenario: 通用恢复脚本源码（EasyopsAPI 内网/签名双模式 + 操作日志分页 + history 快照 + import 恢复），工具包见 tools/CMDB实例恢复
     notes: "py2/3 兼容"
     added: "2026-10-16"
   - id: openapi-demo-tool
