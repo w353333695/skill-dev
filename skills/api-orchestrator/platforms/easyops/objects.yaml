@@ -1929,6 +1929,11 @@ api_behavior:
       · 导入版 envType=development 是常态——多数环境不走 production 发布（全历史版本均 development，执行取 latest 即生效）；$latest_production 对纯 development 工具报 100005，用 $latest_version/$latest_development。
       · 打包卫生：tar 用 --numeric-owner --owner=0 --group=0 -m（去时间戳/属主）；本地 py_compile 测试后必须 rm -rf __pycache__ 再打包（曾打进 tar 污染包）；AppleDouble ._easyPackageConfig.dat 是正常成员（平台导出带的元信息），保留。
       · 入参设计（实测有效）：cmdbInstances 多选配 cmdbAttrId=instanceId → 执行时平台解析成该字段值的数组注入脚本（parser.go:216-224；流程/API 注入可能是逗号串/JSON 串，脚本侧三形态兼容）；枚举入参首项放「所有」（默认）显式表达不过滤；入参解析三兜底 平台注入 globals → 同名 env → argv k=v。
+      · 🔴【枚举入参正确定义】（2026-10-16 CMDB实例恢复 1.1.3 用户手改比对）：type="enum" 时
+        enum=【纯字符串数组】（如 ["下载","恢复"]）——不是 [{label,value}] 对象数组（那是 ITSM
+        表单 SELECT/RADIO 的 items 形态，套到 autoops 入参上前端渲染异常）；且 primitive 必须
+        true（枚举值=字符串本体注入脚本变量；cmdbInstance 型才 false）。非枚举入参 enum 置
+        None（不写 []）。打包生成 config 时勿深拷贝 cmdbInstance 模板残留 primitive/enum。
 
   package_dev_workflow:
     rule: |
