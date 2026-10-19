@@ -192,6 +192,16 @@ items:
     scenario: 深信服 AD 负载均衡器监控指标套件+告警规则模板
     notes: 告警规则模板与套件配套，不单独成商品
     added: "2026-08-29"
+  - id: router-monitor-kit
+    name: 路由器监控套件(通用)
+    category: monitor-kits
+    files: [路由器监控套件_v1.0.0.zip]
+    version: "1.0.0"
+    history:
+      - {date: "2026-10-19", change: "1.0.0 初版入库（simple-script 型品牌自适应：sysDescr 探测 Cisco/H3C/华为/回退；指标 OID 复用三家品牌套件；mock 冒烟全过；.24 已导入 instanceId 65e2943d3cbf9）"}
+    scenario: 通用路由器 SNMP 监控——跨品牌统一指标名（CPU/内存/运行时长/风扇/电源/温度/端口状态/入出流量/入出错误）；接口指标走 IF-MIB 全品牌通用；Cisco 内存按 used/(used+free) 计算利用率
+    notes: "instanceId 65e2943d3cbf9（.24）；目标模型 ROUTER@ONEMODEL；11 指标/3 指标集；OID 来源=Cisco(9.9.109/9.9.48/9.9.13)+H3C(25506.2.6/25506.8.35)+华为(2011.5.25.31)；品牌探测靠 sysDescr 关键字，新品牌加 VENDOR_MAP 条目即可"
+    added: "2026-10-19"
   # ---- scripts（19 商品）----
   - id: baseline-checker
     name: 配置基线管理
