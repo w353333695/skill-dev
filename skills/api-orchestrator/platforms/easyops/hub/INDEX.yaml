@@ -52,7 +52,7 @@ items:
     name: IBMSVC存储设备巡检(ONEMODEL)
     category: inspection-kits
     files: [IBMSVC存储设备巡检(ONEMODEL)_v1.0.1.tar.gz]
-    version: "1.0.2"
+    version: "1.0.1"
     history:
       - {ver: "1.0.1", date: "2026-08-29", change: 初版入库}
     scenario: IBM SVC 存储设备巡检（ONEMODEL 模型体系）
@@ -196,7 +196,7 @@ items:
     name: 路由器监控套件(通用)
     category: monitor-kits
     files: [路由器监控套件_v1.0.2.zip]
-    version: "1.0.1"
+    version: "1.0.2"
     history:
       - {date: "2026-10-19", change: "1.0.0 初版入库（simple-script 型品牌自适应：sysDescr 探测 Cisco/H3C/华为/回退；指标 OID 复用三家品牌套件；mock 冒烟全过；.24 已导入 instanceId 65e2943d3cbf9）"}
       - {date: "2026-10-19", change: "1.0.1：加迈普品牌（MAIPU-SMI 1.3.6.1.4.1.5651——CPU 表/内存标量 OID，使用率缺失按 used/total 计算；风扇/电源/温度无公开 OID 留空；mock 冒烟过；.24 已升级）"}
