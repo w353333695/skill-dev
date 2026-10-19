@@ -17,6 +17,75 @@
 #
 # 相关文件（本 kit 内）：
 #   providers-context.yaml —— 8 种数据源类型 + args DSL + 试查方法
+#
+# =============================================================================
+# 监控套件 dashboard 设计（kit_dashboard——随套件分发的盘，参考 MySQL/Redfish 套件实测结构）
+# =============================================================================
+kit_dashboard:
+  desc: |
+    监控套件 dashboard = 套件包内 dashboard/<盘名>.json 文件（随套件 import 分发），结构与独立
+    _DASHBOARD 实例一致（dashboard_schema），但有几个套件特有约定：
+  conventions:
+    - "文件位置：套件包根 dashboard/<中文盘名>.json（如 dashboard/概览.json——MySQL/Redfish 套件实证）"
+    - "namespace：resource-monitor.<objectId>（资源监控命名空间——Redfish 盘 resource-monitor.PHYSICAL_SERVER@ONEMODEL 实证；独立盘默认 dashboard）"
+    - "variables 通常空（0 个）——盘挂在资源监控详情页，QUERY.instanceId 由宿主页注入（context query: instanceId: <% QUERY.instanceId %>）"
+    - "template=normal + timerange=now-1h（顶部时间选择器驱动 QUERY.from/to）"
+    - "type/builtIn 等字段不携带（套件导入时由平台补）"
+  context_pattern:
+    cmdb_olap_metric: |
+      监控指标数据源（每指标一个 context，MySQL/Redfish 同款）：
+        name: <语义名>  type: cmdb-olap  provider: easyops.api.data_exchange.olap@Query:1.0.0
+        dataType: array
+        args: |
+          - model: easyops.<objectId>          # easyops. 前缀 + objectId
+            fillEmptyData: false
+            dims: [time(auto), <分组维度如 device_id/sql_stmt>]   # time(auto)=随时间选择器粒度
+            filters:
+              - {name: time, operator: '>=', value: '<% QUERY.from ?? "now-1h" %>'}
+              - {name: time, operator: '<=', value: '<% QUERY.to ?? "now-1s" %>'}
+            measures:
+              - name: <输出列名>
+                function: {expression: last|avg|max|min, args: [<指标字段名>]}
+            translate: []
+            query:
+              instanceId: <% QUERY.instanceId %>   # 资源实例过滤
+        transform: "<% DATA?.list ?? [] %>"
+      时间粒度固定写法：time(86400s)（按天）/ time(1200s)（20分钟）/ time(1m)（分钟）/ time(auto)
+      昨日全天：value: '<% moment().subtract(1, ''day'').startOf(''day'').unix() %>'
+    cmdb_instance_info: |
+      资源实例信息（盘头信息行用）：
+        type: cmdb-list + query instanceId: <% QUERY.instanceId %> + fields ['*'] + pageSize 10
+        transform: "<% DATA.list[0] %>"（取单对象）
+    transform_map_rows: |
+      行映射（含 time 格式化）：transform: |
+        <%
+        (DATA?.list ?? []).map(item => ({...item, "time": moment.unix(item["time"]).format('YYYY-MM-DD HH:mm:ss')}))
+        %>
+  panel_pattern:
+    trend_in_container: |
+      趋势图常嵌在 dynamic-grid-container 容器内（Redfish 卡片流布局）：
+      容器 properties.useBrick = [{brick: style, properties: {textContent: <CSS>}}, ..., 
+        {brick: div, ..., slots: {items: {bricks: [{brick: chart-v2.time-series-chart,
+          properties: {data: "<% CTX.DS.ping %>", xField: "time", yField: "<measure输出列名>",
+            showPoint: false, timeFormat: "MM/DD HH:mm", axis: {yAxis: {precision: 2, unit: "ms"}},
+            height: 240, style: {width: "98%"}}}]}}, ...}]
+      卡片 CSS 骨架可直接从 Redfish-ref 抄（card-header/card-label/card-value/card-status-dot 状态色族）
+    simple_trend: "非容器简单形态：panel 直接 chart-v2.time-series-chart（data/xField=time/yField=measure 列名）"
+    table: "明细表 brick-table（dataSource.list 绑 cmdb-olap context——MySQL 慢查/死锁两表盘实证）"
+  pattern_extras:
+    multi_measure_one_context: |
+      多指标单 context（MySQL监控套件 metricData 实证——N 图复用 1 个数据源）：
+      measures 数组列多个 {name: <中文输出列名>, function: {expression: rate|avg|last, args: [<指标名>]}}；
+      图侧 yFields: ["发送流量", "接收流量"]（复数数组——多序列；单序列图用 yField）。
+      rate=按时间求速率（流量类）、avg=均值、last=末值（状态类）。
+    statistic_item: |
+      当前值小卡（statistic-item——区别于 statistic-card）：text: '<% CTX.DS.lastMetric["cluster_status"] %>'
+      + itemTitle: "集群状态" + fontSize: 10px + showCard: false；通常配 last 类 context（time 粒度粗+last 函数取当前值）。
+      panel 常不设 title（卡片文案在 itemTitle），mode: yaml。
+    dashboard_files: "一套件可带多盘：MySQL监控套件 3 盘（InnoDB分析/请求分析/集群状态）各一 json——按分析主题拆盘"
+  e2e_note: "路由器监控套件 dashboard（e2e 实战）：dashboard/概览.json——CPU/内存趋势+风扇/电源状态+温度（context=每指标一个 cmdb-olap，dims 含实体名维度）"
+# =============================================================================
+
 # =============================================================================
 
 # -----------------------------------------------------------------------------
