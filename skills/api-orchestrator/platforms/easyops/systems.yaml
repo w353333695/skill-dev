@@ -47,10 +47,14 @@ platform_conventions:
            需调 cmdb/easyops 用 py2 标准库（urllib2/httplib + EASYOPS_* 环境变量），不依赖第三方包；
         ③ py2/3 兼容写法（运行时判断 PY2、不用 f-string、logging 不直接 print、raise 不带 from）。
       ④ 日志纪律（2026-10-19 用户立规，所有代码/套件开发通用）：logging 模块 + 【默认 logLevel=ERROR】
-         ——生产静默零噪音；调试用环境变量（EASYOPS_LOG_LEVEL/LOG_LEVEL=DEBUG）一键打明细
-         （OID 请求响应/品牌探测依据/表行数/过滤明细/最终输出）。目的：跨环境协同调试——
-         内部环境让用户开 DEBUG 抓详细日志回传，开发侧远程定位，不用改代码重发包。
-         参照实现：hub/monitor-kits 路由器监控套件 src（logging.basicConfig level 取 env）。
+         ——生产静默零噪音；调试用环境变量（EASYOPS_LOG_LEVEL/LOG_LEVEL=DEBUG）一键打明细。
+         🔴目标=LLM 拿日志+代码可直接分析定位，DEBUG 档必须完整展现代码运行过程：
+         a) 外部交互【原始输出全量】打出来（SNMP walk/get 的 stdout 原文、HTTP 响应体等）——
+            只打解析后摘要不够（解析丢的信息正是排障要的，2026-10-19 路由器调试用户手加 print 实证）；
+         b) 关键分支依据（品牌探测 sysDescr 原文、过滤命中、哨兵值跳过）；
+         c) 每阶段进出+中间结构行数；d) 最终输出全量。
+         目的：跨环境协同调试——内部环境开 DEBUG 抓日志回传，开发侧远程定位，不改代码不重发包。
+         参照实现：hub/monitor-kits 路由器监控套件 src（raw output 全量进 debug）。
       适用对象：EasyOps agent 工具脚本（.tar.gz 里的 script）、编排挡交付给用户的示例/封装代码。
     environment_defaults:
       rule: |
