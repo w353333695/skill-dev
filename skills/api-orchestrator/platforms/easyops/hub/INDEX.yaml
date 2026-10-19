@@ -40,10 +40,11 @@ items:
   - id: router-info-cmdb-kit
     name: 路由器信息采集
     category: cmdb-kits
-    files: [路由器信息采集_v1.1.11.zip]
-    version: "1.1.11"
+    files: [路由器信息采集_v1.1.12.zip]
+    version: "1.1.12"
     history:
       - {date: "2026-10-19", change: "1.1.11 入库（现网 1.1.10 修复版：run() 五阶段独立异常防护——collect_info 异常不再中断 name 生成，根因=NETDPORT 上报唯一键 name 缺失；ifName 空端口跳过；无 name 行不上报+WARN）"}
+      - {date: "2026-10-19", change: "1.1.12：加调试日志——默认 logLevel=ERROR，EASYOPS_LOG_LEVEL=DEBUG 打明细（sysName 探测/各阶段进出+res_If 行数/name 生成与过滤/上报与 drop 行 keys 全量）；.24 已升级复验 18 处 logger 落位；tmp 双落盘"}
     scenario: 路由器 SNMP 配置采集（品牌 Cisco/H3C/华为自适应）——设备信息+端口(NETDPORT，name={ip}:{ifName})+MAC/ARP/LLDP/网段/风扇电源
     notes: "套件 instanceId 65dc3da4abcc5（.24 已 import_update 升 1.1.11）；🔴教训=采集脚本 run() 阶段式流程必须有异常防护（name 生成在 collect_info 之后，中断即裸数据上报）；py2 脚本"
     added: "2026-10-19"
