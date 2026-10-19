@@ -37,6 +37,16 @@ items:
     scenario: 深信服 AD 负载均衡器 SNMP CMDB 信息采集
     notes: ""
     added: "2026-08-29"
+  - id: router-info-cmdb-kit
+    name: 路由器信息采集
+    category: cmdb-kits
+    files: [路由器信息采集_v1.1.11.zip]
+    version: "1.1.11"
+    history:
+      - {date: "2026-10-19", change: "1.1.11 入库（现网 1.1.10 修复版：run() 五阶段独立异常防护——collect_info 异常不再中断 name 生成，根因=NETDPORT 上报唯一键 name 缺失；ifName 空端口跳过；无 name 行不上报+WARN）"}
+    scenario: 路由器 SNMP 配置采集（品牌 Cisco/H3C/华为自适应）——设备信息+端口(NETDPORT，name={ip}:{ifName})+MAC/ARP/LLDP/网段/风扇电源
+    notes: "套件 instanceId 65dc3da4abcc5（.24 已 import_update 升 1.1.11）；🔴教训=采集脚本 run() 阶段式流程必须有异常防护（name 生成在 collect_info 之后，中断即裸数据上报）；py2 脚本"
+    added: "2026-10-19"
   # ---- inspection-kits（10 商品）----
   - id: ibmsvc-inspection-kit
     name: IBMSVC存储设备巡检(ONEMODEL)
