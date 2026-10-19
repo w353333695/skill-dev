@@ -83,7 +83,15 @@ kit_dashboard:
       + itemTitle: "集群状态" + fontSize: 10px + showCard: false；通常配 last 类 context（time 粒度粗+last 函数取当前值）。
       panel 常不设 title（卡片文案在 itemTitle），mode: yaml。
     dashboard_files: "一套件可带多盘：MySQL监控套件 3 盘（InnoDB分析/请求分析/集群状态）各一 json——按分析主题拆盘"
-  e2e_note: "路由器监控套件 dashboard（e2e 实战）：dashboard/概览.json——CPU/内存趋势+风扇/电源状态+温度（context=每指标一个 cmdb-olap，dims 含实体名维度）"
+  e2e_note: "路由器监控套件 dashboard（e2e 实战 v1.1.3）：dashboard/概览.json——CPU/内存/温度/风扇/电源趋势+当前值卡"
+  olap_field_pitfall: |
+    🔴【OLAP 指标字段名坑】（2026-10-19 路由器盘 300303 实测）：cmdb-olap 的 measures.args/dims 用
+    【OLAP 存储的原始字段名】= collector 指标目录 originalMetrics[0] / dims.originDimName——
+    metricbeat 型套件即 snmp.netware.*（字段）与 snmp.netware.*_name（维度），非 alias 目录名
+    （snmp_netware_*）也非 easyops simple-script 自注册名（m_*——目录里存在但从未写入数据，
+    OLAP schema 无此字段 → code:300303 Invalid field type）。
+    🔴collector_metric.list 只证【目录注册】不证【有数据】——指标名选型按【当前实际在跑的采集任务】
+    的套件类型定（metricbeat 型 → snmp.netware.* 族）；不确认时先查该模型有无运行中的采集任务及其套件型。
 # =============================================================================
 
 # =============================================================================
