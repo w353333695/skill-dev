@@ -1,0 +1,574 @@
+{
+ "name": null,
+ "_说明": "用户导入的交换机监控官方盘（.24 实测可用）——kit_dashboard 权威样例：概览=指标独享维度 groupField 多序列模式；端口状态=下拉变量 filters QUERY 联动多指标模式。OLAP 字段=origin_metric key 下划线化。",
+ "context": [
+  {
+   "args": null,
+   "data": [
+    {
+     "host_cpu_used_total": 54,
+     "objectId": "HOST",
+     "time": 1619539200
+    },
+    {
+     "host_cpu_used_total": 52,
+     "objectId": "HOST",
+     "time": 1619539260
+    },
+    {
+     "host_cpu_used_total": 48,
+     "objectId": "HOST",
+     "time": 1619539320
+    },
+    {
+     "host_cpu_used_total": 51,
+     "objectId": "HOST",
+     "time": 1619539380
+    },
+    {
+     "host_cpu_used_total": 60,
+     "objectId": "HOST",
+     "time": 1619539440
+    },
+    {
+     "host_cpu_used_total": 54,
+     "objectId": "HOST",
+     "time": 1619539500
+    },
+    {
+     "host_cpu_used_total": 53,
+     "objectId": "HOST",
+     "time": 1619539560
+    },
+    {
+     "host_cpu_used_total": 57,
+     "objectId": "HOST",
+     "time": 1619539620
+    },
+    {
+     "host_cpu_used_total": 73,
+     "objectId": "HOST",
+     "time": 1619539680
+    },
+    {
+     "host_cpu_used_total": 69,
+     "objectId": "HOST",
+     "time": 1619539740
+    },
+    {
+     "host_cpu_used_total": 65,
+     "objectId": "HOST",
+     "time": 1619539800
+    },
+    {
+     "host_cpu_used_total": 56,
+     "objectId": "HOST",
+     "time": 1619539860
+    },
+    {
+     "host_cpu_used_total": 57,
+     "objectId": "HOST",
+     "time": 1619539920
+    },
+    {
+     "host_cpu_used_total": 55,
+     "objectId": "HOST",
+     "time": 1619539980
+    },
+    {
+     "host_cpu_used_total": 57,
+     "objectId": "HOST",
+     "time": 1619540040
+    },
+    {
+     "host_cpu_used_total": 60,
+     "objectId": "HOST",
+     "time": 1619540100
+    }
+   ],
+   "dataType": "array",
+   "formData": {
+    "name": "时间序列数据Demo",
+    "type": "static"
+   },
+   "id": "data__DEMO_时间序列数据Demo",
+   "name": "时间序列数据Demo",
+   "outputFields": [
+    {
+     "alisa": "",
+     "key": "host_cpu_used_total"
+    },
+    {
+     "alisa": "",
+     "key": "objectId"
+    },
+    {
+     "alisa": "",
+     "key": "time"
+    }
+   ],
+   "transform": null,
+   "type": "static"
+  },
+  {
+   "args": null,
+   "data": [
+    {
+     "count": 40,
+     "os": "Windows",
+     "percent": 0.1
+    },
+    {
+     "count": 21,
+     "os": "Linux",
+     "percent": 0.7
+    },
+    {
+     "count": 17,
+     "os": "Mac",
+     "percent": 0.2
+    }
+   ],
+   "dataType": "array",
+   "formData": {
+    "name": "分类数据Demo",
+    "type": "static"
+   },
+   "id": "data__DEMO_分类数据Demo",
+   "name": "分类数据Demo",
+   "outputFields": [
+    {
+     "alisa": "",
+     "key": "count"
+    },
+    {
+     "alisa": "",
+     "key": "os"
+    },
+    {
+     "alisa": "",
+     "key": "percent"
+    }
+   ],
+   "transform": null,
+   "type": "static"
+  },
+  {
+   "args": "- model: easyops.SWITCH@ONEMODEL\n  fillEmptyData: true\n  dims:\n    - time(auto)\n  filters:\n    - name: time\n      operator: '>='\n      value: <% QUERY.from ?? \"now-1h\" %>\n    - name: time\n      operator: <=\n      value: <% QUERY.to ?? \"now-1s\" %>\n    - name: instanceId\n      operator: '=='\n      value: <% QUERY.instanceId %>\n    - name: snmp_netware_device_ifname\n      operator: '=='\n      value: <% QUERY.interfaceName %>\n  measures:\n    - name: snmp_netware_device_ifhcinoctets_per\n      function:\n        expression: avg\n        args:\n          - snmp_netware_device_ifhcinoctets_per\n    - name: snmp_netware_device_ifhcoutoctets_per\n      function:\n        expression: avg\n        args:\n          - snmp_netware_device_ifhcoutoctets_per\n    - name: snmp_netware_device_ifinerrors\n      function:\n        expression: avg\n        args:\n          - snmp_netware_device_ifinerrors\n    - name: snmp_netware_device_ifouterrors\n      function:\n        expression: avg\n        args:\n          - snmp_netware_device_ifouterrors\n  translate: []\n",
+   "data": null,
+   "dataType": "array",
+   "formData": {
+    "dims": [
+     "time(auto)"
+    ],
+    "measures": [
+     {
+      "args": "snmp_netware_device_ifhcinoctets_per",
+      "expression": "avg",
+      "name": "snmp_netware_device_ifhcinocte"
+     }
+    ],
+    "mode": "yaml",
+    "name": "trendData",
+    "objectId": "SWITCH@ONEMODEL",
+    "query": {
+     "instances": {
+      "extraType": "editor",
+      "query": "instanceId: <% QUERY.instanceId %>",
+      "type": "editor"
+     },
+     "objectId": "SWITCH@ONEMODEL"
+    },
+    "transform": "|-\n  <% DATA.list.map(i => ({\n    ...i,\n    snmp_netware_device_ifhcoutoctets_per: i.snmp_netware_device_ifhcoutoctets_per === undefined ? undefined : i.snmp_netware_device_ifhcoutoctets_per / 60,\n    snmp_netware_device_ifhcinoctets_per: i.snmp_netware_device_ifhcinoctets_per === undefined ? undefined : i.snmp_netware_device_ifhcinoctets_per / 60\n  })) %>",
+    "yamlArgs": "- model: easyops.SWITCH@ONEMODEL\n  fillEmptyData: true\n  dims:\n    - time(auto)\n  filters:\n    - name: time\n      operator: '>='\n      value: <% QUERY.from ?? \"now-1h\" %>\n    - name: time\n      operator: <=\n      value: <% QUERY.to ?? \"now-1s\" %>\n    - name: instanceId\n      operator: ==\n      value: <% QUERY.instanceId %>\n    - name: snmp_netware_device_ifname\n      operator: ==\n      value: <% QUERY.interfaceName %>\n  measures:\n    - name: snmp_netware_device_ifhcinoctets_per\n      function:\n        expression: avg\n        args:\n          - snmp_netware_device_ifhcinoctets_per\n    - name: snmp_netware_device_ifhcoutoctets_per\n      function:\n        expression: avg\n        args:\n          - snmp_netware_device_ifhcoutoctets_per\n    - name: snmp_netware_device_ifinerrors\n      function:\n        expression: avg\n        args:\n          - snmp_netware_device_ifinerrors\n    - name: snmp_netware_device_ifouterrors\n      function:\n        expression: avg\n        args:\n          - snmp_netware_device_ifouterrors\n  translate: []\n"
+   },
+   "id": "data_2_trendData115",
+   "name": "trendData",
+   "outputFields": [],
+   "provider": "easyops.api.data_exchange.olap@Query:1.0.0",
+   "transform": "|-\n  <% DATA.list.map(i => ({\n    ...i,\n    snmp_netware_device_ifhcoutoctets_per: i.snmp_netware_device_ifhcoutoctets_per === undefined ? undefined : i.snmp_netware_device_ifhcoutoctets_per / 60,\n    snmp_netware_device_ifhcinoctets_per: i.snmp_netware_device_ifhcinoctets_per === undefined ? undefined : i.snmp_netware_device_ifhcinoctets_per / 60\n  })) %>",
+   "type": "cmdb-olap"
+  },
+  {
+   "args": "- model: easyops.SWITCH@ONEMODEL\n  fillEmptyData: false\n  dims:\n    - time(1200s)\n    - snmp_netware_device_ifname\n  filters:\n    - name: time\n      operator: '>='\n      value: now-1h\n    - name: time\n      operator: <=\n      value: now-1s\n  measures:\n    - name: ifoperstatus\n      function:\n        expression: last\n        args:\n          - snmp_netware_device_ifoperstatus\n  translate: []\n  query:\n    instanceId: <% QUERY.instanceId %>\n",
+   "data": null,
+   "dataType": "array",
+   "formData": {
+    "mode": "yaml",
+    "name": "selectOptions",
+    "objectId": null,
+    "query": {
+     "instances": {
+      "query": {},
+      "type": "all"
+     },
+     "objectId": "HOST"
+    },
+    "transform": "|\r\n  <%\r\n  _.chain(DATA?.list ?? [])\r\n      .filter(v => /^(GigabitEthernet|TenGigabitEthernet|FastEthernet|XGigabitEthernet|Eth|GE||XGE|Te|Gi|Fa|Po|Ethernet)\\d+/i.test(v.snmp_netware_device_ifname))\r\n      .groupBy('snmp_netware_device_ifname')\r\n      .mapValues(items => _.maxBy(items, 'time'))\r\n      .map(item => ({label: item.snmp_netware_device_ifname, value: item.snmp_netware_device_ifname}))\r\n      .value()\r\n  %>",
+    "translate": [],
+    "yamlArgs": "- model: easyops.SWITCH@ONEMODEL\r\n  fillEmptyData: false\r\n  dims:\r\n    - time(1200s)\r\n    - snmp_netware_device_ifname\r\n  filters:\r\n    - name: time\r\n      operator: '>='\r\n      value: \"now-1h\"\r\n    - name: time\r\n      operator: <=\r\n      value: \"now-1s\"\r\n  measures:\r\n    - name: ifoperstatus\r\n      function:\r\n        expression: last\r\n        args:\r\n          - snmp_netware_device_ifoperstatus\r\n  translate: []\r\n  query:\r\n    instanceId: <% QUERY.instanceId %>"
+   },
+   "id": "data_3_selectOptions805",
+   "name": "selectOptions",
+   "outputFields": [
+    {
+     "alisa": "",
+     "key": "label"
+    },
+    {
+     "alisa": "",
+     "key": "value"
+    }
+   ],
+   "provider": "easyops.api.data_exchange.olap@Query:1.0.0",
+   "transform": "|\r\n  <%\r\n  _.chain(DATA?.list ?? [])\r\n      .filter(v => /^(GigabitEthernet|TenGigabitEthernet|FastEthernet|XGigabitEthernet|Eth|GE||XGE|Te|Gi|Fa|Po|Ethernet)\\d+/i.test(v.snmp_netware_device_ifname))\r\n      .groupBy('snmp_netware_device_ifname')\r\n      .mapValues(items => _.maxBy(items, 'time'))\r\n      .map(item => ({label: item.snmp_netware_device_ifname, value: item.snmp_netware_device_ifname}))\r\n      .value()\r\n  %>",
+   "type": "cmdb-olap"
+  }
+ ],
+ "panels": [
+  {
+   "brickConf": "{\"brick\":\"chart-v2.time-series-chart\",\"properties\":{\"usePublicThresholds\":true,\"showPoint\":false,\"timeFormat\":\"HH:mm\",\"labelSettings\":false,\"legends\":false,\"yField\":\"snmp_netware_device_ifhcinoctets_per\",\"xField\":\"time\",\"pointSize\":4,\"pointShape\":\"circle\",\"lineVisible\":true,\"showTooltip\":true,\"data\":\"<% CTX.DS.trendData %>\",\"axis\":{\"yAxis\":{\"unit\":\"kilobits/sec\",\"precision\":2,\"min\":0}},\"style\":{\"height\":\"100%\"}},\"slots\":{}}",
+   "brickContainerStyle": {},
+   "brickId": "chart-v2.time-series-chart",
+   "formData": {
+    "backgroundColor": "#ffffff",
+    "backgroundType": "color",
+    "borderColor": "#ffffff",
+    "borderPaddingBottom": 16,
+    "borderPaddingLeft": 16,
+    "borderPaddingRight": 16,
+    "borderPaddingTop": 16,
+    "borderRadius": 4,
+    "borderType": "solid",
+    "borderWidth": 1,
+    "column": 12,
+    "dataSource": "trendData",
+    "labelSettings": false,
+    "legends": false,
+    "lineVisible": true,
+    "min": 0,
+    "opacity": 100,
+    "pointShape": "circle",
+    "pointSize": 4,
+    "precision": 2,
+    "row": 7,
+    "showPoint": false,
+    "showTooltip": true,
+    "timeFormat": "HH:mm",
+    "title": "每秒入流量",
+    "titleFontColor": "#262626",
+    "titleFontSize": 16,
+    "unit": "kilobits/sec",
+    "xField": "time",
+    "yFields": [
+     "snmp_netware_device_ifhcinoctets_per"
+    ]
+   },
+   "height": 7,
+   "mode": "default",
+   "source": "brick",
+   "title": "每秒入流量",
+   "titleStyle": {
+    "color": "#262626",
+    "fontSize": 16
+   },
+   "toolbarConf": "\"undefined\"",
+   "type": "brick",
+   "width": 12,
+   "wrapped": true,
+   "wrappedConf": {
+    "background": {
+     "backgroundColor": "#ffffff",
+     "opacity": 100
+    },
+    "backgroundType": "color",
+    "border": {
+     "borderColor": "#ffffff",
+     "borderRadius": 4,
+     "borderWidth": 1,
+     "padding": {
+      "bottom": 16,
+      "left": 16,
+      "right": 16,
+      "top": 16
+     }
+    },
+    "borderType": "solid"
+   },
+   "x": 0,
+   "y": 2
+  },
+  {
+   "brickConf": "{\"brick\":\"chart-v2.time-series-chart\",\"properties\":{\"usePublicThresholds\":true,\"showPoint\":false,\"timeFormat\":\"HH:mm\",\"labelSettings\":false,\"legends\":false,\"yField\":\"snmp_netware_device_ifhcoutoctets_per\",\"xField\":\"time\",\"pointSize\":4,\"pointShape\":\"circle\",\"lineVisible\":true,\"showTooltip\":true,\"data\":\"<% CTX.DS.trendData %>\",\"axis\":{\"yAxis\":{\"unit\":\"kilobits/sec\",\"precision\":2,\"min\":0}},\"style\":{\"height\":\"100%\"}},\"slots\":{}}",
+   "brickContainerStyle": {},
+   "brickId": "chart-v2.time-series-chart",
+   "formData": {
+    "backgroundColor": "#ffffff",
+    "backgroundType": "color",
+    "borderColor": "#ffffff",
+    "borderPaddingBottom": 16,
+    "borderPaddingLeft": 16,
+    "borderPaddingRight": 16,
+    "borderPaddingTop": 16,
+    "borderRadius": 4,
+    "borderType": "solid",
+    "borderWidth": 1,
+    "column": 12,
+    "dataSource": "trendData",
+    "labelSettings": false,
+    "legends": false,
+    "lineVisible": true,
+    "min": 0,
+    "opacity": 100,
+    "pointShape": "circle",
+    "pointSize": 4,
+    "precision": 2,
+    "row": 6,
+    "showPoint": false,
+    "showTooltip": true,
+    "timeFormat": "HH:mm",
+    "title": "每秒出流量",
+    "titleFontColor": "#262626",
+    "titleFontSize": 16,
+    "unit": "kilobits/sec",
+    "xField": "time",
+    "yFields": [
+     "snmp_netware_device_ifhcoutoctets_per"
+    ]
+   },
+   "height": 7,
+   "mode": "default",
+   "source": "brick",
+   "title": "每秒出流量",
+   "titleStyle": {
+    "color": "#262626",
+    "fontSize": 16
+   },
+   "toolbarConf": "\"undefined\"",
+   "type": "brick",
+   "width": 12,
+   "wrapped": true,
+   "wrappedConf": {
+    "background": {
+     "backgroundColor": "#ffffff",
+     "opacity": 100
+    },
+    "backgroundType": "color",
+    "border": {
+     "borderColor": "#ffffff",
+     "borderRadius": 4,
+     "borderWidth": 1,
+     "padding": {
+      "bottom": 16,
+      "left": 16,
+      "right": 16,
+      "top": 16
+     }
+    },
+    "borderType": "solid"
+   },
+   "x": 12,
+   "y": 2
+  },
+  {
+   "brickConf": "{\"brick\":\"chart-v2.time-series-chart\",\"properties\":{\"usePublicThresholds\":true,\"showPoint\":false,\"timeFormat\":\"HH:mm\",\"labelSettings\":false,\"legends\":false,\"yField\":\"snmp_netware_device_ifinerrors\",\"xField\":\"time\",\"pointSize\":4,\"pointShape\":\"circle\",\"lineVisible\":true,\"showTooltip\":true,\"data\":\"<% CTX.DS.trendData %>\",\"axis\":{\"yAxis\":{\"unit\":\"个\",\"precision\":2,\"min\":0}},\"style\":{\"height\":\"100%\"}},\"slots\":{}}",
+   "brickContainerStyle": {},
+   "brickId": "chart-v2.time-series-chart",
+   "formData": {
+    "backgroundColor": "#ffffff",
+    "backgroundType": "color",
+    "borderColor": "#ffffff",
+    "borderPaddingBottom": 16,
+    "borderPaddingLeft": 16,
+    "borderPaddingRight": 16,
+    "borderPaddingTop": 16,
+    "borderRadius": 4,
+    "borderType": "solid",
+    "borderWidth": 1,
+    "column": 12,
+    "dataSource": "trendData",
+    "labelSettings": false,
+    "legends": false,
+    "lineVisible": true,
+    "min": 0,
+    "opacity": 100,
+    "pointShape": "circle",
+    "pointSize": 4,
+    "precision": 2,
+    "row": 7,
+    "showPoint": false,
+    "showTooltip": true,
+    "timeFormat": "HH:mm",
+    "title": "流入的错误报文数",
+    "titleFontColor": "#262626",
+    "titleFontSize": 16,
+    "unit": "个",
+    "xField": "time",
+    "yFields": [
+     "snmp_netware_device_ifinerrors"
+    ]
+   },
+   "height": 7,
+   "mode": "default",
+   "source": "brick",
+   "title": "流入的错误报文数",
+   "titleStyle": {
+    "color": "#262626",
+    "fontSize": 16
+   },
+   "toolbarConf": "\"undefined\"",
+   "type": "brick",
+   "width": 12,
+   "wrapped": true,
+   "wrappedConf": {
+    "background": {
+     "backgroundColor": "#ffffff",
+     "opacity": 100
+    },
+    "backgroundType": "color",
+    "border": {
+     "borderColor": "#ffffff",
+     "borderRadius": 4,
+     "borderWidth": 1,
+     "padding": {
+      "bottom": 16,
+      "left": 16,
+      "right": 16,
+      "top": 16
+     }
+    },
+    "borderType": "solid"
+   },
+   "x": 0,
+   "y": 9
+  },
+  {
+   "brickConf": "{\"brick\":\"chart-v2.time-series-chart\",\"properties\":{\"usePublicThresholds\":true,\"showPoint\":false,\"timeFormat\":\"HH:mm\",\"labelSettings\":false,\"legends\":false,\"yField\":\"snmp_netware_device_ifouterrors\",\"xField\":\"time\",\"pointSize\":4,\"pointShape\":\"circle\",\"lineVisible\":true,\"showTooltip\":true,\"data\":\"<% CTX.DS.trendData %>\",\"axis\":{\"yAxis\":{\"unit\":\"个\",\"precision\":2,\"min\":0}},\"style\":{\"height\":\"100%\"}},\"slots\":{}}",
+   "brickContainerStyle": {},
+   "brickId": "chart-v2.time-series-chart",
+   "formData": {
+    "backgroundColor": "#ffffff",
+    "backgroundType": "color",
+    "borderColor": "#ffffff",
+    "borderPaddingBottom": 16,
+    "borderPaddingLeft": 16,
+    "borderPaddingRight": 16,
+    "borderPaddingTop": 16,
+    "borderRadius": 4,
+    "borderType": "solid",
+    "borderWidth": 1,
+    "column": 12,
+    "dataSource": "trendData",
+    "labelSettings": false,
+    "legends": false,
+    "lineVisible": true,
+    "min": 0,
+    "opacity": 100,
+    "pointShape": "circle",
+    "pointSize": 4,
+    "precision": 2,
+    "row": 7,
+    "showPoint": false,
+    "showTooltip": true,
+    "timeFormat": "HH:mm",
+    "title": "流出的错误报文数",
+    "titleFontColor": "#262626",
+    "titleFontSize": 16,
+    "unit": "个",
+    "xField": "time",
+    "yFields": [
+     "snmp_netware_device_ifouterrors"
+    ]
+   },
+   "height": 7,
+   "mode": "default",
+   "source": "brick",
+   "title": "流出的错误报文数",
+   "titleStyle": {
+    "color": "#262626",
+    "fontSize": 16
+   },
+   "toolbarConf": "\"undefined\"",
+   "type": "brick",
+   "width": 12,
+   "wrapped": true,
+   "wrappedConf": {
+    "background": {
+     "backgroundColor": "#ffffff",
+     "opacity": 100
+    },
+    "backgroundType": "color",
+    "border": {
+     "borderColor": "#ffffff",
+     "borderRadius": 4,
+     "borderWidth": 1,
+     "padding": {
+      "bottom": 16,
+      "left": 16,
+      "right": 16,
+      "top": 16
+     }
+    },
+    "borderType": "solid"
+   },
+   "x": 12,
+   "y": 9
+  },
+  {
+   "brickConf": "{\"brick\":\"presentational-bricks.dynamic-grid-container\",\"properties\":{\"containerStyle\":{\"display\":\"flex\",\"alignItems\":\"center\",\"gap\":\"40px\"},\"useBrick\":[{\"brick\":\"forms.general-select\",\"events\":{\"general.select.change\":{\"action\":\"history.pushQuery\",\"args\":[{\"interfaceName\":\"<% EVENT.detail %>\"}]}},\"properties\":{\"inputBoxStyle\":{\"width\":200},\"label\":\"选择端口\",\"name\":\"ifName\",\"options\":\"<% CTX.DS.selectOptions %>\",\"placeholder\":\"请选择需要查询的端口\",\"value\":\"<% QUERY.interfaceName %>\"}}]},\"slots\":{}}",
+   "brickContainerStyle": {},
+   "brickId": "presentational-bricks.dynamic-grid-container",
+   "formData": {
+    "backgroundColor": "#ffffff",
+    "backgroundType": "color",
+    "borderColor": "#ffffff",
+    "borderPaddingBottom": 16,
+    "borderPaddingLeft": 16,
+    "borderPaddingRight": 16,
+    "borderPaddingTop": 16,
+    "borderRadius": 4,
+    "borderType": "solid",
+    "borderWidth": 1,
+    "column": 24,
+    "opacity": 100,
+    "row": 2,
+    "titleFontColor": "#262626",
+    "titleFontSize": 16,
+    "yamlProperties": "containerStyle:\n  display: flex\n  alignItems: center\n  # justifyContent: center\n  gap: 40px\nuseBrick:\n- brick: forms.general-select\n  events:\n    general.select.change:\n      action: history.pushQuery\n      args:\n        - interfaceName: <% EVENT.detail %>\n  properties:\n    inputBoxStyle:\n      width: 200\n    label: 选择端口\n    name: ifName\n    options: <% CTX.DS.selectOptions %>\n    placeholder: 请选择需要查询的端口\n    value: <% QUERY.interfaceName %>\n"
+   },
+   "height": 2,
+   "mode": "yaml",
+   "source": "brick",
+   "titleStyle": {
+    "color": "#262626",
+    "fontSize": 16
+   },
+   "toolbarConf": "\"undefined\"",
+   "type": "brick",
+   "width": 24,
+   "wrapped": true,
+   "wrappedConf": {
+    "background": {
+     "backgroundColor": "#ffffff",
+     "opacity": 100
+    },
+    "backgroundType": "color",
+    "border": {
+     "borderColor": "#ffffff",
+     "borderRadius": 4,
+     "borderWidth": 1,
+     "padding": {
+      "bottom": 16,
+      "left": 16,
+      "right": 16,
+      "top": 16
+     }
+    },
+    "borderType": "solid"
+   },
+   "x": 0,
+   "y": 0
+  }
+ ],
+ "variables": []
+}

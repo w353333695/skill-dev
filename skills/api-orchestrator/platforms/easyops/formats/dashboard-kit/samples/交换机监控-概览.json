@@ -1,0 +1,1470 @@
+{
+ "name": null,
+ "_说明": "用户导入的交换机监控官方盘（.24 实测可用）——kit_dashboard 权威样例：概览=指标独享维度 groupField 多序列模式；端口状态=下拉变量 filters QUERY 联动多指标模式。OLAP 字段=origin_metric key 下划线化。",
+ "context": [
+  {
+   "args": null,
+   "data": [
+    {
+     "host_cpu_used_total": 54,
+     "objectId": "HOST",
+     "time": 1619539200
+    },
+    {
+     "host_cpu_used_total": 52,
+     "objectId": "HOST",
+     "time": 1619539260
+    },
+    {
+     "host_cpu_used_total": 48,
+     "objectId": "HOST",
+     "time": 1619539320
+    },
+    {
+     "host_cpu_used_total": 51,
+     "objectId": "HOST",
+     "time": 1619539380
+    },
+    {
+     "host_cpu_used_total": 60,
+     "objectId": "HOST",
+     "time": 1619539440
+    },
+    {
+     "host_cpu_used_total": 54,
+     "objectId": "HOST",
+     "time": 1619539500
+    },
+    {
+     "host_cpu_used_total": 53,
+     "objectId": "HOST",
+     "time": 1619539560
+    },
+    {
+     "host_cpu_used_total": 57,
+     "objectId": "HOST",
+     "time": 1619539620
+    },
+    {
+     "host_cpu_used_total": 73,
+     "objectId": "HOST",
+     "time": 1619539680
+    },
+    {
+     "host_cpu_used_total": 69,
+     "objectId": "HOST",
+     "time": 1619539740
+    },
+    {
+     "host_cpu_used_total": 65,
+     "objectId": "HOST",
+     "time": 1619539800
+    },
+    {
+     "host_cpu_used_total": 56,
+     "objectId": "HOST",
+     "time": 1619539860
+    },
+    {
+     "host_cpu_used_total": 57,
+     "objectId": "HOST",
+     "time": 1619539920
+    },
+    {
+     "host_cpu_used_total": 55,
+     "objectId": "HOST",
+     "time": 1619539980
+    },
+    {
+     "host_cpu_used_total": 57,
+     "objectId": "HOST",
+     "time": 1619540040
+    },
+    {
+     "host_cpu_used_total": 60,
+     "objectId": "HOST",
+     "time": 1619540100
+    }
+   ],
+   "dataType": "array",
+   "formData": {
+    "name": "时间序列数据Demo",
+    "type": "static"
+   },
+   "id": "data__DEMO_时间序列数据Demo",
+   "name": "时间序列数据Demo",
+   "outputFields": [
+    {
+     "alisa": "",
+     "key": "host_cpu_used_total"
+    },
+    {
+     "alisa": "",
+     "key": "objectId"
+    },
+    {
+     "alisa": "",
+     "key": "time"
+    }
+   ],
+   "transform": null,
+   "type": "static"
+  },
+  {
+   "args": null,
+   "data": [
+    {
+     "count": 40,
+     "os": "Windows",
+     "percent": 0.1
+    },
+    {
+     "count": 21,
+     "os": "Linux",
+     "percent": 0.7
+    },
+    {
+     "count": 17,
+     "os": "Mac",
+     "percent": 0.2
+    }
+   ],
+   "dataType": "array",
+   "formData": {
+    "name": "分类数据Demo",
+    "type": "static"
+   },
+   "id": "data__DEMO_分类数据Demo",
+   "name": "分类数据Demo",
+   "outputFields": [
+    {
+     "alisa": "",
+     "key": "count"
+    },
+    {
+     "alisa": "",
+     "key": "os"
+    },
+    {
+     "alisa": "",
+     "key": "percent"
+    }
+   ],
+   "transform": null,
+   "type": "static"
+  },
+  {
+   "args": "- model: easyops.SWITCH@ONEMODEL\n  fillEmptyData: false\n  dims:\n    - time(auto)\n  filters:\n    - name: time\n      operator: '>='\n      value: <% QUERY.from ?? \"now-1h\" %>\n    - name: time\n      operator: <=\n      value: <% QUERY.to ?? \"now-1s\" %>\n  measures:\n    - name: ping\n      function:\n        expression: last\n        args:\n          - detect_time_cost\n  translate: []\n  query:\n    instanceId: <% QUERY.instanceId %>\n",
+   "data": null,
+   "dataType": "array",
+   "formData": {
+    "mode": "yaml",
+    "name": "ping",
+    "objectId": null,
+    "query": {
+     "instances": {
+      "query": {},
+      "type": "all"
+     },
+     "objectId": "HOST"
+    },
+    "transform": "<% DATA?.list ?? [] %>",
+    "translate": [],
+    "yamlArgs": "- model: easyops.SWITCH@ONEMODEL\n  fillEmptyData: false\n  dims:\n    - time(auto)\n  filters:\n    - name: time\n      operator: '>='\n      value: <% QUERY.from ?? \"now-1h\" %>\n    - name: time\n      operator: <=\n      value: <% QUERY.to ?? \"now-1s\" %>\n  measures:\n    - name: ping\n      function:\n        expression: last\n        args:\n          - detect_time_cost\n  translate: []\n  query:\n    instanceId: <% QUERY.instanceId %>\n"
+   },
+   "id": "data_2_ping396",
+   "name": "ping",
+   "outputFields": [],
+   "provider": "easyops.api.data_exchange.olap@Query:1.0.0",
+   "transform": "<% DATA?.list ?? [] %>",
+   "type": "cmdb-olap"
+  },
+  {
+   "args": "- model: easyops.SWITCH@ONEMODEL\n  fillEmptyData: false\n  dims:\n    - time(1200s)\n    - snmp_netware_device_ifname\n  filters:\n    - name: time\n      operator: '>='\n      value: now-1h\n    - name: time\n      operator: <=\n      value: now-1s\n  measures:\n    - name: ifoperstatus\n      function:\n        expression: last\n        args:\n          - snmp_netware_device_ifoperstatus\n  translate: []\n  query:\n    instanceId: <% QUERY.instanceId %>\n",
+   "data": null,
+   "dataType": "object",
+   "formData": {
+    "mode": "yaml",
+    "name": "ifoperstatus",
+    "objectId": null,
+    "query": {
+     "instances": {
+      "query": {},
+      "type": "all"
+     },
+     "objectId": "HOST"
+    },
+    "transform": "|\r\n  <%\r\n  _.chain(DATA?.list ?? [])\r\n      .filter(v => /^(GigabitEthernet|TenGigabitEthernet|FastEthernet|XGigabitEthernet|Eth|GE||XGE|Te|Gi|Fa|Po|Ethernet)\\d+/i.test(v.snmp_netware_device_ifname))\r\n      .groupBy('snmp_netware_device_ifname')\r\n      .mapValues(items => _.maxBy(items, 'time'))\r\n      .mapValues(item => item.ifoperstatus)\r\n      .value()\r\n  %>",
+    "translate": [],
+    "yamlArgs": "- model: easyops.SWITCH@ONEMODEL\r\n  fillEmptyData: false\r\n  dims:\r\n    - time(1200s)\r\n    - snmp_netware_device_ifname\r\n  filters:\r\n    - name: time\r\n      operator: '>='\r\n      value: \"now-1h\"\r\n    - name: time\r\n      operator: <=\r\n      value: \"now-1s\"\r\n  measures:\r\n    - name: ifoperstatus\r\n      function:\r\n        expression: last\r\n        args:\r\n          - snmp_netware_device_ifoperstatus\r\n  translate: []\r\n  query:\r\n    instanceId: <% QUERY.instanceId %>"
+   },
+   "id": "data_3_ifoperstatus224",
+   "name": "ifoperstatus",
+   "outputFields": [],
+   "provider": "easyops.api.data_exchange.olap@Query:1.0.0",
+   "transform": "|\r\n  <%\r\n  _.chain(DATA?.list ?? [])\r\n      .filter(v => /^(GigabitEthernet|TenGigabitEthernet|FastEthernet|XGigabitEthernet|Eth|GE||XGE|Te|Gi|Fa|Po|Ethernet)\\d+/i.test(v.snmp_netware_device_ifname))\r\n      .groupBy('snmp_netware_device_ifname')\r\n      .mapValues(items => _.maxBy(items, 'time'))\r\n      .mapValues(item => item.ifoperstatus)\r\n      .value()\r\n  %>",
+   "type": "cmdb-olap"
+  },
+  {
+   "args": "- model: easyops.SWITCH@ONEMODEL\n  fillEmptyData: false\n  dims:\n    - time(auto)\n    - snmp_netware_memory_name\n  filters:\n    - name: time\n      operator: '>='\n      value: <% QUERY.from ?? \"now-1h\" %>\n    - name: time\n      operator: <=\n      value: <% QUERY.to ?? \"now-1s\" %>\n  measures:\n    - name: memory_utilization\n      function:\n        expression: last\n        args:\n          - snmp_netware_memory_utilization\n  translate: []\n  query:\n    instanceId: <% QUERY.instanceId %>\n",
+   "data": null,
+   "dataType": "array",
+   "formData": {
+    "mode": "yaml",
+    "name": "memory_utilization",
+    "objectId": null,
+    "query": {
+     "instances": {
+      "query": {},
+      "type": "all"
+     },
+     "objectId": "HOST"
+    },
+    "transform": "<% DATA?.list ?? [] %>",
+    "translate": [],
+    "yamlArgs": "- model: easyops.SWITCH@ONEMODEL\n  fillEmptyData: false\n  dims:\n    - time(auto)\n    - snmp_netware_memory_name\n  filters:\n    - name: time\n      operator: '>='\n      value: <% QUERY.from ?? \"now-1h\" %>\n    - name: time\n      operator: <=\n      value: <% QUERY.to ?? \"now-1s\" %>\n  measures:\n    - name: memory_utilization\n      function:\n        expression: last\n        args:\n          - snmp_netware_memory_utilization\n  translate: []\n  query:\n    instanceId: <% QUERY.instanceId %>"
+   },
+   "id": "data_4_memory_utilization139",
+   "name": "memory_utilization",
+   "outputFields": [
+    {
+     "alisa": "",
+     "key": "_object_id"
+    },
+    {
+     "alisa": "",
+     "key": "memory_utilization"
+    },
+    {
+     "alisa": "",
+     "key": "objectId"
+    },
+    {
+     "alisa": "",
+     "key": "snmp_netware_memory_name"
+    },
+    {
+     "alisa": "",
+     "key": "time"
+    }
+   ],
+   "provider": "easyops.api.data_exchange.olap@Query:1.0.0",
+   "transform": "<% DATA?.list ?? [] %>",
+   "type": "cmdb-olap"
+  },
+  {
+   "args": "- model: easyops.SWITCH@ONEMODEL\n  fillEmptyData: false\n  dims:\n    - time(auto)\n    - snmp_netware_cpu_name\n  filters:\n    - name: time\n      operator: '>='\n      value: <% QUERY.from ?? \"now-1h\" %>\n    - name: time\n      operator: <=\n      value: <% QUERY.to ?? \"now-1s\" %>\n  measures:\n    - name: cpu_utilization\n      function:\n        expression: last\n        args:\n          - snmp_netware_cpu_utilization\n  translate: []\n  query:\n    instanceId: <% QUERY.instanceId %>\n",
+   "data": null,
+   "dataType": "array",
+   "formData": {
+    "mode": "yaml",
+    "name": "cpu_utilization",
+    "objectId": null,
+    "query": {
+     "instances": {
+      "query": {},
+      "type": "all"
+     },
+     "objectId": "HOST"
+    },
+    "transform": "<% DATA?.list ?? [] %>",
+    "translate": [],
+    "yamlArgs": "- model: easyops.SWITCH@ONEMODEL\n  fillEmptyData: false\n  dims:\n    - time(auto)\n    - snmp_netware_cpu_name\n  filters:\n    - name: time\n      operator: '>='\n      value: <% QUERY.from ?? \"now-1h\" %>\n    - name: time\n      operator: <=\n      value: <% QUERY.to ?? \"now-1s\" %>\n  measures:\n    - name: cpu_utilization\n      function:\n        expression: last\n        args:\n          - snmp_netware_cpu_utilization\n  translate: []\n  query:\n    instanceId: <% QUERY.instanceId %>"
+   },
+   "id": "data_5_cpu_utilization157",
+   "name": "cpu_utilization",
+   "outputFields": [
+    {
+     "alisa": "",
+     "key": "_object_id"
+    },
+    {
+     "alisa": "",
+     "key": "cpu_utilization"
+    },
+    {
+     "alisa": "",
+     "key": "objectId"
+    },
+    {
+     "alisa": "",
+     "key": "snmp_netware_cpu_name"
+    },
+    {
+     "alisa": "",
+     "key": "time"
+    }
+   ],
+   "provider": "easyops.api.data_exchange.olap@Query:1.0.0",
+   "transform": "<% DATA?.list ?? [] %>",
+   "type": "cmdb-olap"
+  },
+  {
+   "args": "- model: easyops.SWITCH@ONEMODEL\n  fillEmptyData: false\n  dims:\n    - time(86400s)\n    - snmp_netware_cpu_name\n  filters:\n    - name: time\n      operator: '>='\n      value: '<% moment().subtract(1, ''day'').startOf(''day'').unix() %>'\n    - name: time\n      operator: <=\n      value: '<% moment().subtract(1, ''day'').endOf(''day'').unix() %>'\n  measures:\n    - name: cpu_utilization\n      function:\n        expression: avg\n        args:\n          - snmp_netware_cpu_utilization\n  translate: []\n  query:\n    instanceId: <% QUERY.instanceId %>\n",
+   "data": null,
+   "dataType": "array",
+   "formData": {
+    "mode": "yaml",
+    "name": "last_cpu_utilization",
+    "objectId": null,
+    "query": {
+     "instances": {
+      "query": {},
+      "type": "all"
+     },
+     "objectId": "HOST"
+    },
+    "transform": "<% DATA?.list ?? [] %>",
+    "translate": [],
+    "yamlArgs": "- model: easyops.SWITCH@ONEMODEL\n  fillEmptyData: false\n  dims:\n    - time(86400s)\n    - snmp_netware_cpu_name\n  filters:\n    - name: time\n      operator: '>='\n      value: <% moment().subtract(1, 'day').startOf('day').unix() %>\n    - name: time\n      operator: <=\n      value: <% moment().subtract(1, 'day').endOf('day').unix() %>\n  measures:\n    - name: cpu_utilization\n      function:\n        expression: avg\n        args:\n          - snmp_netware_cpu_utilization\n  translate: []\n  query:\n    instanceId: <% QUERY.instanceId %>"
+   },
+   "id": "data_6_last_cpu_utilization392",
+   "name": "last_cpu_utilization",
+   "outputFields": [
+    {
+     "alisa": "",
+     "key": "_object_id"
+    },
+    {
+     "alisa": "",
+     "key": "cpu_utilization"
+    },
+    {
+     "alisa": "",
+     "key": "objectId"
+    },
+    {
+     "alisa": "",
+     "key": "snmp_netware_cpu_name"
+    },
+    {
+     "alisa": "",
+     "key": "time"
+    }
+   ],
+   "provider": "easyops.api.data_exchange.olap@Query:1.0.0",
+   "transform": "<% DATA?.list ?? [] %>",
+   "type": "cmdb-olap"
+  },
+  {
+   "args": "- model: easyops.SWITCH@ONEMODEL\n  fillEmptyData: false\n  dims:\n    - time(86400s)\n    - snmp_netware_memory_name\n  filters:\n    - name: time\n      operator: '>='\n      value: <% QUERY.from ?? \"now-1h\" %>\n    - name: time\n      operator: <=\n      value: <% QUERY.to ?? \"now-1s\" %>\n  measures:\n    - name: memory_utilization\n      function:\n        expression: avg\n        args:\n          - snmp_netware_memory_utilization\n  translate: []\n  query:\n    instanceId: <% QUERY.instanceId %>\n",
+   "data": null,
+   "dataType": "array",
+   "formData": {
+    "mode": "yaml",
+    "name": "last_memory_utilization",
+    "objectId": null,
+    "query": {
+     "instances": {
+      "query": {},
+      "type": "all"
+     },
+     "objectId": "HOST"
+    },
+    "transform": "<% DATA?.list ?? [] %>",
+    "translate": [],
+    "yamlArgs": "- model: easyops.SWITCH@ONEMODEL\n  fillEmptyData: false\n  dims:\n    - time(86400s)\n    - snmp_netware_memory_name\n  filters:\n    - name: time\n      operator: '>='\n      value: <% QUERY.from ?? \"now-1h\" %>\n    - name: time\n      operator: <=\n      value: <% QUERY.to ?? \"now-1s\" %>\n  measures:\n    - name: memory_utilization\n      function:\n        expression: avg\n        args:\n          - snmp_netware_memory_utilization\n  translate: []\n  query:\n    instanceId: <% QUERY.instanceId %>"
+   },
+   "id": "data_7_last_memory_utilization438",
+   "name": "last_memory_utilization",
+   "outputFields": [
+    {
+     "alisa": "",
+     "key": "_object_id"
+    },
+    {
+     "alisa": "",
+     "key": "memory_utilization"
+    },
+    {
+     "alisa": "",
+     "key": "objectId"
+    },
+    {
+     "alisa": "",
+     "key": "snmp_netware_memory_name"
+    },
+    {
+     "alisa": "",
+     "key": "time"
+    }
+   ],
+   "provider": "easyops.api.data_exchange.olap@Query:1.0.0",
+   "transform": "<% DATA?.list ?? [] %>",
+   "type": "cmdb-olap"
+  },
+  {
+   "args": "- model: easyops.SWITCH@ONEMODEL\n  fillEmptyData: false\n  dims:\n    - time(auto)\n    - snmp_netware_temperature_name\n  filters:\n    - name: time\n      operator: '>='\n      value: <% QUERY.from ?? \"now-1h\" %>\n    - name: time\n      operator: <=\n      value: <% QUERY.to ?? \"now-1s\" %>\n  measures:\n    - name: temperature\n      function:\n        expression: last\n        args:\n          - snmp_netware_temperature_val\n  translate: []\n  query:\n    instanceId: <% QUERY.instanceId %>\n",
+   "data": null,
+   "dataType": "array",
+   "formData": {
+    "dims": [],
+    "filters": [],
+    "measures": [],
+    "mode": "yaml",
+    "name": "temperature",
+    "objectId": "SWITCH@ONEMODEL",
+    "query": {
+     "instances": {
+      "query": {},
+      "type": "all"
+     },
+     "objectId": "SWITCH@ONEMODEL"
+    },
+    "transform": "<% DATA?.list??[] %>",
+    "translate": [],
+    "yamlArgs": "- model: easyops.SWITCH@ONEMODEL\n  fillEmptyData: false\n  dims:\n    - time(auto)\n    - snmp_netware_temperature_name\n  filters:\n    - name: time\n      operator: '>='\n      value: <% QUERY.from ?? \"now-1h\" %>\n    - name: time\n      operator: <=\n      value: <% QUERY.to ?? \"now-1s\" %>\n  measures:\n    - name: temperature\n      function:\n        expression: last\n        args:\n          - snmp_netware_temperature_val\n  translate: []\n  query:\n    instanceId: <% QUERY.instanceId %>"
+   },
+   "id": "data_8_temperature804",
+   "name": "temperature",
+   "outputFields": [
+    {
+     "alisa": "",
+     "key": "_object_id"
+    },
+    {
+     "alisa": "",
+     "key": "objectId"
+    },
+    {
+     "alisa": "",
+     "key": "snmp_netware_temperature_name"
+    },
+    {
+     "alisa": "",
+     "key": "temperature"
+    },
+    {
+     "alisa": "",
+     "key": "time"
+    }
+   ],
+   "provider": "easyops.api.data_exchange.olap@Query:1.0.0",
+   "transform": "<% DATA?.list??[] %>",
+   "type": "cmdb-olap"
+  },
+  {
+   "args": "- model: easyops.SWITCH@ONEMODEL\n  fillEmptyData: false\n  dims:\n    - time(auto)\n    - snmp_netware_device_ifname\n  filters:\n    - name: time\n      operator: '>='\n      value: <% \"now-10m\" %>\n    - name: time\n      operator: <=\n      value: <% \"now-1s\" %>\n  measures:\n    - name: out_speed\n      function:\n        expression: rate\n        args:\n          - snmp_netware_device_ifhcoutoctets\n    - name: in_speed\n      function:\n        expression: rate\n        args:\n          - snmp_netware_device_ifhcinoctets\n    - name: ifspeed\n      function:\n        expression: last\n        args:\n          - snmp_netware_device_ifspeed\n    - name: ifinerrors\n      function:\n        expression: rate\n        args:\n          - snmp_netware_device_ifinerrors\n    - name: ifouterrors\n      function:\n        expression: rate\n        args:\n          - snmp_netware_device_ifouterrors\n  translate: []\n  query:\n    instanceId: <% QUERY.instanceId %>\n",
+   "data": null,
+   "dataType": "array",
+   "formData": {
+    "mode": "yaml",
+    "name": "ports",
+    "objectId": null,
+    "query": {
+     "instances": {
+      "query": {},
+      "type": "all"
+     },
+     "objectId": "HOST"
+    },
+    "transform": "|\n  <%\n  _.chain(DATA?.list ?? [])\n      .filter(v => /^(GigabitEthernet|TenGigabitEthernet|FastEthernet|XGigabitEthernet|Eth|GE||XGE|Te|Gi|Fa|Po|Ethernet)\\d+/i.test(v.snmp_netware_device_ifname))\n      .groupBy('snmp_netware_device_ifname')\n      .mapValues(items => _.maxBy(items, 'time'))\n      .values()\n      .value()\n  %>",
+    "translate": [],
+    "yamlArgs": "- model: easyops.SWITCH@ONEMODEL\n  fillEmptyData: false\n  dims:\n    - time(auto)\n    - snmp_netware_device_ifname\n  filters:\n    - name: time\n      operator: '>='\n      value: <% \"now-10m\" %>\n    - name: time\n      operator: <=\n      value: <% \"now-1s\" %>\n  measures:\n    - name: out_speed\n      function:\n        expression: rate\n        args:\n          - snmp_netware_device_ifhcoutoctets\n    - name: in_speed\n      function:\n        expression: rate\n        args:\n          - snmp_netware_device_ifhcinoctets\n    - name: ifspeed\n      function:\n        expression: last\n        args:\n          - snmp_netware_device_ifspeed\n    - name: ifinerrors\n      function:\n        expression: rate\n        args:\n          - snmp_netware_device_ifinerrors\n    - name: ifouterrors\n      function:\n        expression: rate\n        args:\n          - snmp_netware_device_ifouterrors\n  translate: []\n  query:\n    instanceId: <% QUERY.instanceId %>"
+   },
+   "id": "data_9_ports230",
+   "name": "ports",
+   "outputFields": [],
+   "provider": "easyops.api.data_exchange.olap@Query:1.0.0",
+   "transform": "|\n  <%\n  _.chain(DATA?.list ?? [])\n      .filter(v => /^(GigabitEthernet|TenGigabitEthernet|FastEthernet|XGigabitEthernet|Eth|GE||XGE|Te|Gi|Fa|Po|Ethernet)\\d+/i.test(v.snmp_netware_device_ifname))\n      .groupBy('snmp_netware_device_ifname')\n      .mapValues(items => _.maxBy(items, 'time'))\n      .values()\n      .value()\n  %>",
+   "type": "cmdb-olap"
+  },
+  {
+   "args": "- SWITCH@ONEMODEL\n- page: 1\n  pageSize: 10\n  query:\n    instanceId: <% QUERY.instanceId  %>\n  fields:\n    - '*'\n  sort: []\n",
+   "data": null,
+   "dataType": "object",
+   "formData": {
+    "mode": "yaml",
+    "name": "instance",
+    "objectId": null,
+    "page": 1,
+    "pageSize": 20,
+    "query": {
+     "instances": {
+      "query": {},
+      "type": "all"
+     },
+     "objectId": "HOST"
+    },
+    "transform": "<% DATA.list[0] %>",
+    "yamlArgs": "- SWITCH@ONEMODEL\n- page: 1\n  pageSize: 10\n  query:\n    instanceId: <% QUERY.instanceId  %>\n  fields:\n    - \"*\"\n  sort: []\n"
+   },
+   "id": "data_10_instance803",
+   "name": "instance",
+   "outputFields": [
+    {
+     "alisa": "",
+     "key": "_impl_from"
+    },
+    {
+     "alisa": "",
+     "key": "_object_id"
+    },
+    {
+     "alisa": "",
+     "key": "_object_version"
+    },
+    {
+     "alisa": "",
+     "key": "_pre_ts"
+    },
+    {
+     "alisa": "",
+     "key": "_ts"
+    },
+    {
+     "alisa": "",
+     "key": "_version"
+    },
+    {
+     "alisa": "",
+     "key": "auth"
+    },
+    {
+     "alisa": "",
+     "key": "brand"
+    },
+    {
+     "alisa": "",
+     "key": "cBrand"
+    },
+    {
+     "alisa": "",
+     "key": "cMdl"
+    },
+    {
+     "alisa": "",
+     "key": "cSn"
+    },
+    {
+     "alisa": "",
+     "key": "cSysDescr"
+    },
+    {
+     "alisa": "",
+     "key": "cSysName"
+    },
+    {
+     "alisa": "",
+     "key": "cUpTime"
+    },
+    {
+     "alisa": "",
+     "key": "collectedJobIds"
+    },
+    {
+     "alisa": "",
+     "key": "collectedTs"
+    },
+    {
+     "alisa": "",
+     "key": "creator"
+    },
+    {
+     "alisa": "",
+     "key": "ctime"
+    },
+    {
+     "alisa": "",
+     "key": "deleteAuthorizers"
+    },
+    {
+     "alisa": "",
+     "key": "deviceName"
+    },
+    {
+     "alisa": "",
+     "key": "deviceStatus"
+    },
+    {
+     "alisa": "",
+     "key": "fanInfo"
+    },
+    {
+     "alisa": "",
+     "key": "groupType"
+    },
+    {
+     "alisa": "",
+     "key": "groupaaa"
+    },
+    {
+     "alisa": "",
+     "key": "importance"
+    },
+    {
+     "alisa": "",
+     "key": "instanceId"
+    },
+    {
+     "alisa": "",
+     "key": "ip"
+    },
+    {
+     "alisa": "",
+     "key": "ipRecords"
+    },
+    {
+     "alisa": "",
+     "key": "isMonitor"
+    },
+    {
+     "alisa": "",
+     "key": "microcode"
+    },
+    {
+     "alisa": "",
+     "key": "modifier"
+    },
+    {
+     "alisa": "",
+     "key": "mtime"
+    },
+    {
+     "alisa": "",
+     "key": "networkInfo"
+    },
+    {
+     "alisa": "",
+     "key": "org"
+    },
+    {
+     "alisa": "",
+     "key": "powersInfo"
+    },
+    {
+     "alisa": "",
+     "key": "readAuthorizers"
+    },
+    {
+     "alisa": "",
+     "key": "slaveSnList"
+    },
+    {
+     "alisa": "",
+     "key": "snmpPort"
+    },
+    {
+     "alisa": "",
+     "key": "sysVersion"
+    },
+    {
+     "alisa": "",
+     "key": "updateAuthorizers"
+    }
+   ],
+   "provider": "easyops.api.cmdb.instance@PostSearchV3:1.1.0",
+   "transform": "<% DATA.list[0] %>",
+   "type": "cmdb-list"
+  },
+  {
+   "args": "- model: easyops.SWITCH@ONEMODEL\n  fillEmptyData: false\n  dims:\n    - time(auto)\n  filters:\n    - name: time\n      operator: '>='\n      value: <% \"now-1h\" %>\n    - name: time\n      operator: <=\n      value: <% \"now-1s\" %>\n  measures:\n    - name: snmp_netware_uptime\n      function:\n        expression: last\n        args:\n          - snmp_netware_uptime\n  translate: []\n  query:\n    instanceId: <% QUERY.instanceId %>\n  order:\n    - name: snmp_netware_uptime\n      order: desc\n  limit:\n    limit: 1\n",
+   "data": null,
+   "dataType": "array",
+   "formData": {
+    "mode": "yaml",
+    "name": "uptime",
+    "objectId": null,
+    "query": {
+     "instances": {
+      "query": {},
+      "type": "all"
+     },
+     "objectId": "HOST"
+    },
+    "transform": "<% DATA?.list ?? [] %>",
+    "translate": [],
+    "yamlArgs": "- model: easyops.SWITCH@ONEMODEL\n  fillEmptyData: false\n  dims:\n    - time(auto)\n  filters:\n    - name: time\n      operator: '>='\n      value: <% \"now-1h\" %>\n    - name: time\n      operator: <=\n      value: <% \"now-1s\" %>\n  measures:\n    - name: snmp_netware_uptime\n      function:\n        expression: last\n        args:\n          - snmp_netware_uptime\n  translate: []\n  query:\n    instanceId: <% QUERY.instanceId %>\n  order:\n    - name: snmp_netware_uptime\n      order: desc\n  limit: \n    limit: 1"
+   },
+   "id": "data_11_uptime840",
+   "name": "uptime",
+   "outputFields": [
+    {
+     "alisa": "",
+     "key": "_object_id"
+    },
+    {
+     "alisa": "",
+     "key": "objectId"
+    },
+    {
+     "alisa": "",
+     "key": "snmp_netware_uptime"
+    },
+    {
+     "alisa": "",
+     "key": "time"
+    }
+   ],
+   "provider": "easyops.api.data_exchange.olap@Query:1.0.0",
+   "transform": "<% DATA?.list ?? [] %>",
+   "type": "cmdb-olap"
+  },
+  {
+   "args": "- model: easyops.SWITCH@ONEMODEL\n  fillEmptyData: false\n  dims:\n    - time(3600s)\n    - snmp_netware_power_name\n    - snmp_netware_power_index\n  filters:\n    - name: time\n      operator: '>='\n      value: <% \"now-1h\" %>\n    - name: time\n      operator: <=\n      value: <% \"now-1s\" %>\n  measures:\n    - name: powerstatus\n      function:\n        expression: last\n        args:\n          - snmp_netware_power_status\n  translate: []\n  query:\n    instanceId: <% QUERY.instanceId %>\n",
+   "data": null,
+   "dataType": "object",
+   "formData": {
+    "mode": "yaml",
+    "name": "powerstatus",
+    "objectId": null,
+    "query": {
+     "instances": {
+      "query": {},
+      "type": "all"
+     },
+     "objectId": "HOST"
+    },
+    "transform": "|\n  <%\n    _.chain(DATA?.list ?? [])\n        .map(v => ({...v, groupId: `${v.snmp_netware_power_name}_${v.snmp_netware_power_index}`}))\n        .groupBy('groupId')\n        .mapValues(items => _.maxBy(items, 'time'))\n        .values()\n        .thru(v => ({\n          total: v.length,\n          normal: _.sumBy(v, o => _.cond([\n            [\n              instance => /ruijie|锐捷/i.test(instance?.cBrand || instance?.brand || ''),\n              () => o.powerstatus === 4\n            ],\n            [\n              _.stubTrue,\n              () => o.powerstatus === 1 // 其他品牌默认 1=正常\n            ]\n          ])(CTX.DS.instance) ? 1 : 0)\n        }))\n        .thru(v => _.cond([\n            [x => !x.total, _.constant(({text: \"未知\", style: \"card-status-dot card-status-dot--error\"}))],\n            [x => x.normal === x.total, _.constant(({text: \"全部正常\", style: \"card-status-dot card-status-dot--normal\"}))],\n            [x => x.normal === 0, _.constant(({text: \"全部异常\", style: \"card-status-dot card-status-dot--error\"}))],\n            [x => x.normal !== x.total, _.constant(({text: \"部分异常\", style: \"card-status-dot card-status-dot--warning\"}))],\n            [_.stubTrue, _.constant(({text: \"未知\", style: \"card-status-dot card-status-dot--error\"}))]\n        ])(v))\n        .value()\n  %>",
+    "translate": [],
+    "yamlArgs": "- model: easyops.SWITCH@ONEMODEL\r\n  fillEmptyData: false\r\n  dims:\r\n    - time(3600s)\r\n    - snmp_netware_power_name\r\n    - snmp_netware_power_index\r\n  filters:\r\n    - name: time\r\n      operator: '>='\r\n      value: <% \"now-1h\" %>\r\n    - name: time\r\n      operator: <=\r\n      value: <% \"now-1s\" %>\r\n  measures:\r\n    - name: powerstatus\r\n      function:\r\n        expression: last\r\n        args:\r\n          - snmp_netware_power_status\r\n  translate: []\r\n  query:\r\n    instanceId: <% QUERY.instanceId %>"
+   },
+   "id": "data_12_powerstatus1017",
+   "name": "powerstatus",
+   "outputFields": [
+    {
+     "alisa": "",
+     "key": "text"
+    },
+    {
+     "alisa": "",
+     "key": "style"
+    }
+   ],
+   "provider": "easyops.api.data_exchange.olap@Query:1.0.0",
+   "transform": "|\n  <%\n    _.chain(DATA?.list ?? [])\n        .map(v => ({...v, groupId: `${v.snmp_netware_power_name}_${v.snmp_netware_power_index}`}))\n        .groupBy('groupId')\n        .mapValues(items => _.maxBy(items, 'time'))\n        .values()\n        .thru(v => ({\n          total: v.length,\n          normal: _.sumBy(v, o => _.cond([\n            [\n              instance => /ruijie|锐捷/i.test(instance?.cBrand || instance?.brand || ''),\n              () => o.powerstatus === 4\n            ],\n            [\n              _.stubTrue,\n              () => o.powerstatus === 1 // 其他品牌默认 1=正常\n            ]\n          ])(CTX.DS.instance) ? 1 : 0)\n        }))\n        .thru(v => _.cond([\n            [x => !x.total, _.constant(({text: \"未知\", style: \"card-status-dot card-status-dot--error\"}))],\n            [x => x.normal === x.total, _.constant(({text: \"全部正常\", style: \"card-status-dot card-status-dot--normal\"}))],\n            [x => x.normal === 0, _.constant(({text: \"全部异常\", style: \"card-status-dot card-status-dot--error\"}))],\n            [x => x.normal !== x.total, _.constant(({text: \"部分异常\", style: \"card-status-dot card-status-dot--warning\"}))],\n            [_.stubTrue, _.constant(({text: \"未知\", style: \"card-status-dot card-status-dot--error\"}))]\n        ])(v))\n        .value()\n  %>",
+   "type": "cmdb-olap"
+  },
+  {
+   "args": "- model: easyops.SWITCH@ONEMODEL\n  fillEmptyData: false\n  dims:\n    - time(3600s)\n    - snmp_netware_fan_name\n  filters:\n    - name: time\n      operator: '>='\n      value: <% \"now-1h\" %>\n    - name: time\n      operator: <=\n      value: <% \"now-1s\" %>\n  measures:\n    - name: fan_status\n      function:\n        expression: last\n        args:\n          - snmp_netware_fan_status\n  translate: []\n  query:\n    instanceId: <% QUERY.instanceId %>\n",
+   "data": null,
+   "dataType": "object",
+   "formData": {
+    "mode": "yaml",
+    "name": "fanstatus",
+    "objectId": null,
+    "query": {
+     "instances": {
+      "query": {},
+      "type": "all"
+     },
+     "objectId": "HOST"
+    },
+    "transform": "|\n  <%\n    _.chain(DATA?.list ?? [])\n        .groupBy('snmp_netware_fan_name')\n        .mapValues(items => _.maxBy(items, 'time'))\n        .values()\n        .thru(v => ({\n          total: v.length,\n          normal: _.sumBy(v, o => _.cond([\n            [\n              instance => /ruijie|锐捷/i.test(instance?.cBrand || instance?.brand || ''),\n              () => o.fan_status === 4\n            ],\n            [\n              instance => /digital china|神州数码/i.test(instance?.cBrand || instance?.brand || ''),\n              () => o.fan_status === 0\n            ],\n            [\n              _.stubTrue,\n              () => o.fan_status === 1 // 其他品牌默认 1=正常\n            ]\n          ])(CTX.DS.instance) ? 1 : 0)\n        }))\n        .thru(v => _.cond([\n            [x => !x.total, _.constant(({text: \"未知\", style: \"card-status-dot card-status-dot--error\"}))],\n            [x => x.normal === x.total, _.constant(({text: \"全部正常\", style: \"card-status-dot card-status-dot--normal\"}))],\n            [x => x.normal === 0, _.constant(({text: \"全部异常\", style: \"card-status-dot card-status-dot--error\"}))],\n            [x => x.normal !== x.total, _.constant(({text: \"部分异常\", style: \"card-status-dot card-status-dot--warning\"}))],\n            [_.stubTrue, _.constant(({text: \"未知\", style: \"card-status-dot card-status-dot--error\"}))]\n        ])(v))\n        .value()\n  \n  %>",
+    "translate": [],
+    "yamlArgs": "- model: easyops.SWITCH@ONEMODEL\r\n  fillEmptyData: false\r\n  dims:\r\n    - time(3600s)\r\n    - snmp_netware_fan_name\r\n  filters:\r\n    - name: time\r\n      operator: '>='\r\n      value: <% \"now-1h\" %>\r\n    - name: time\r\n      operator: <=\r\n      value: <% \"now-1s\" %>\r\n  measures:\r\n    - name: fan_status\r\n      function:\r\n        expression: last\r\n        args:\r\n          - snmp_netware_fan_status\r\n  translate: []\r\n  query:\r\n    instanceId: <% QUERY.instanceId %>"
+   },
+   "id": "data_13_fanstatus1070",
+   "name": "fanstatus",
+   "outputFields": [
+    {
+     "alisa": "",
+     "key": "text"
+    },
+    {
+     "alisa": "",
+     "key": "style"
+    }
+   ],
+   "provider": "easyops.api.data_exchange.olap@Query:1.0.0",
+   "transform": "|\n  <%\n    _.chain(DATA?.list ?? [])\n        .groupBy('snmp_netware_fan_name')\n        .mapValues(items => _.maxBy(items, 'time'))\n        .values()\n        .thru(v => ({\n          total: v.length,\n          normal: _.sumBy(v, o => _.cond([\n            [\n              instance => /ruijie|锐捷/i.test(instance?.cBrand || instance?.brand || ''),\n              () => o.fan_status === 4\n            ],\n            [\n              instance => /digital china|神州数码/i.test(instance?.cBrand || instance?.brand || ''),\n              () => o.fan_status === 0\n            ],\n            [\n              _.stubTrue,\n              () => o.fan_status === 1 // 其他品牌默认 1=正常\n            ]\n          ])(CTX.DS.instance) ? 1 : 0)\n        }))\n        .thru(v => _.cond([\n            [x => !x.total, _.constant(({text: \"未知\", style: \"card-status-dot card-status-dot--error\"}))],\n            [x => x.normal === x.total, _.constant(({text: \"全部正常\", style: \"card-status-dot card-status-dot--normal\"}))],\n            [x => x.normal === 0, _.constant(({text: \"全部异常\", style: \"card-status-dot card-status-dot--error\"}))],\n            [x => x.normal !== x.total, _.constant(({text: \"部分异常\", style: \"card-status-dot card-status-dot--warning\"}))],\n            [_.stubTrue, _.constant(({text: \"未知\", style: \"card-status-dot card-status-dot--error\"}))]\n        ])(v))\n        .value()\n  \n  %>",
+   "type": "cmdb-olap"
+  },
+  {
+   "args": "- model: easyops.SWITCH@ONEMODEL\n  fillEmptyData: false\n  dims:\n    - time(3600s)\n    - snmp_netware_temperature_name\n  filters:\n    - name: time\n      operator: '>='\n      value: <% \"now-1h\" %>\n    - name: time\n      operator: <=\n      value: <% \"now-1s\" %>\n  measures:\n    - name: status\n      function:\n        expression: last\n        args:\n          - snmp_netware_temperature_status\n    - name: val\n      function:\n        expression: last\n        args:\n          - snmp_netware_temperature_val\n    - name: threshold\n      function:\n        expression: last\n        args:\n          - snmp_netware_temperature_high_threshold\n  translate: []\n  query:\n    instanceId: <% QUERY.instanceId %>\n",
+   "data": null,
+   "dataType": "object",
+   "formData": {
+    "mode": "yaml",
+    "name": "temperaturestatus",
+    "objectId": null,
+    "query": {
+     "instances": {
+      "query": {},
+      "type": "all"
+     },
+     "objectId": "HOST"
+    },
+    "transform": "|\n  <%\n    _.chain(DATA?.list ?? [])\n        .groupBy('snmp_netware_temperature_name')\n        .mapValues(items => _.maxBy(items, 'time'))\n        .values()\n        .map(v => ({\n            ...v,\n            unknown: v.status === undefined && v.threshold === undefined,\n            isNormal: _.cond(\n                [\n                    [x => v.status !== undefined, _.constant(v.status === 1)],\n                    [x => v.threshold !== undefined, _.constant(v.val < v.threshold)],\n                    [_.stubTrue, _.constant(false)]\n                ]\n            )(v),\n        }))\n        .thru(v => ({\n            total: v.length,\n            normal: _.filter(v, o => o.isNormal).length,\n            unknown: _.filter(v, o => o.unknown).length\n            }))\n        .thru(v => _.cond([\n            [x => !x.total || x.unknown == x.total, _.constant(({text: \"未知\", style: \"card-status-dot card-status-dot--error\"}))],\n            [x => x.normal === x.total, _.constant(({text: \"全部正常\", style: \"card-status-dot card-status-dot--normal\"}))],\n            [x => x.normal === 0, _.constant(({text: \"全部异常\", style: \"card-status-dot card-status-dot--error\"}))],\n            [x => x.normal !== x.total, _.constant(({text: \"部分异常\", style: \"card-status-dot card-status-dot--warning\"}))],\n            [_.stubTrue, _.constant(({text: \"未知\", style: \"card-status-dot card-status-dot--error\"}))]\n        ])(v))\n        .value()\n  %>",
+    "translate": [],
+    "yamlArgs": "- model: easyops.SWITCH@ONEMODEL\r\n  fillEmptyData: false\r\n  dims:\r\n    - time(3600s)\r\n    - snmp_netware_temperature_name\r\n  filters:\r\n    - name: time\r\n      operator: '>='\r\n      value: <% \"now-1h\" %>\r\n    - name: time\r\n      operator: <=\r\n      value: <% \"now-1s\" %>\r\n  measures:\r\n    - name: status\r\n      function:\r\n        expression: last\r\n        args:\r\n          - snmp_netware_temperature_status\r\n    - name: val\r\n      function:\r\n        expression: last\r\n        args:\r\n          - snmp_netware_temperature_val\r\n    - name: threshold\r\n      function:\r\n        expression: last\r\n        args:\r\n          - snmp_netware_temperature_high_threshold\r\n  translate: []\r\n  query:\r\n    instanceId: <% QUERY.instanceId %>"
+   },
+   "id": "data_14_temperaturestatus1107",
+   "name": "temperaturestatus",
+   "outputFields": [
+    {
+     "alisa": "",
+     "key": "text"
+    },
+    {
+     "alisa": "",
+     "key": "style"
+    }
+   ],
+   "provider": "easyops.api.data_exchange.olap@Query:1.0.0",
+   "transform": "|\n  <%\n    _.chain(DATA?.list ?? [])\n        .groupBy('snmp_netware_temperature_name')\n        .mapValues(items => _.maxBy(items, 'time'))\n        .values()\n        .map(v => ({\n            ...v,\n            unknown: v.status === undefined && v.threshold === undefined,\n            isNormal: _.cond(\n                [\n                    [x => v.status !== undefined, _.constant(v.status === 1)],\n                    [x => v.threshold !== undefined, _.constant(v.val < v.threshold)],\n                    [_.stubTrue, _.constant(false)]\n                ]\n            )(v),\n        }))\n        .thru(v => ({\n            total: v.length,\n            normal: _.filter(v, o => o.isNormal).length,\n            unknown: _.filter(v, o => o.unknown).length\n            }))\n        .thru(v => _.cond([\n            [x => !x.total || x.unknown == x.total, _.constant(({text: \"未知\", style: \"card-status-dot card-status-dot--error\"}))],\n            [x => x.normal === x.total, _.constant(({text: \"全部正常\", style: \"card-status-dot card-status-dot--normal\"}))],\n            [x => x.normal === 0, _.constant(({text: \"全部异常\", style: \"card-status-dot card-status-dot--error\"}))],\n            [x => x.normal !== x.total, _.constant(({text: \"部分异常\", style: \"card-status-dot card-status-dot--warning\"}))],\n            [_.stubTrue, _.constant(({text: \"未知\", style: \"card-status-dot card-status-dot--error\"}))]\n        ])(v))\n        .value()\n  %>",
+   "type": "cmdb-olap"
+  },
+  {
+   "args": "- model: easyops.SWITCH@ONEMODEL\n  fillEmptyData: false\n  dims:\n    - time(auto)\n    - snmp_netware_power_name\n    - snmp_netware_power_index\n  filters:\n    - name: time\n      operator: '>='\n      value: <% QUERY.from ?? \"now-1h\" %>\n    - name: time\n      operator: <=\n      value: <% QUERY.to ?? \"now-1s\" %>\n  measures:\n    - name: status\n      function:\n        expression: last\n        args:\n          - snmp_netware_power_status\n  translate: []\n  query:\n    instanceId: <% QUERY.instanceId %>\n",
+   "data": null,
+   "dataType": "array",
+   "formData": {
+    "mode": "yaml",
+    "name": "powerstatus_slice",
+    "objectId": null,
+    "query": {
+     "instances": {
+      "query": {},
+      "type": "all"
+     },
+     "objectId": "HOST"
+    },
+    "transform": "<% DATA.list %>",
+    "translate": [],
+    "yamlArgs": "- model: easyops.SWITCH@ONEMODEL\r\n  fillEmptyData: false\r\n  dims:\r\n    - time(auto)\r\n    - snmp_netware_power_name\r\n    - snmp_netware_power_index\r\n  filters:\r\n    - name: time\r\n      operator: '>='\r\n      value: <% QUERY.from ?? \"now-1h\" %>\r\n    - name: time\r\n      operator: <=\r\n      value: <% QUERY.to ?? \"now-1s\" %>\r\n  measures:\r\n    - name: status\r\n      function:\r\n        expression: last\r\n        args:\r\n          - snmp_netware_power_status\r\n  translate: []\r\n  query:\r\n    instanceId: <% QUERY.instanceId %>"
+   },
+   "id": "data_15_powerstatus_slice215",
+   "name": "powerstatus_slice",
+   "outputFields": [
+    {
+     "alisa": "",
+     "key": "_object_id"
+    },
+    {
+     "alisa": "",
+     "key": "objectId"
+    },
+    {
+     "alisa": "",
+     "key": "snmp_netware_power_index"
+    },
+    {
+     "alisa": "",
+     "key": "snmp_netware_power_name"
+    },
+    {
+     "alisa": "",
+     "key": "status"
+    },
+    {
+     "alisa": "",
+     "key": "time"
+    }
+   ],
+   "provider": "easyops.api.data_exchange.olap@Query:1.0.0",
+   "transform": "<% DATA.list %>",
+   "type": "cmdb-olap"
+  }
+ ],
+ "panels": [
+  {
+   "brickConf": "{\"brick\":\"presentational-bricks.dynamic-grid-container\",\"properties\":{\"useBrick\":[{\"brick\":\"style\",\"properties\":{\"textContent\":\".card-header {\\n  display: flex;\\n  justify-content: space-between;\\n  align-items: center;\\n}\\n\\n.card-label {\\n  font-size: 15px;\\n  font-weight: 600;\\n  color: #333;\\n  margin: 0;\\n}\\n\\n.card-value {\\n  font-size: 28px;\\n  font-weight: 700;\\n  color: #1c1c1c;\\n  display: flex;\\n  align-items: center;\\n  gap: 8px;\\n}\\n\\n.card-status-dot {\\n  width: 10px;\\n  height: 10px;\\n  border-radius: 50%;\\n  display: inline-block;\\n}\\n\\n.card-meta {\\n  color: #666;\\n  font-size: 14px;\\n}\\n\\n.card-meta {\\n  color: #888;\\n}\\n\\n.card-status-dot--normal {\\n  background-color: var(--theme-green-color); /* 绿色 正常 */\\n}\\n\\n.card-status-dot--warning {\\n  background-color: var(--theme-orange-color); /* 黄色 警告 */\\n}\\n\\n.card-status-dot--error {\\n  background-color: var(--theme-red-color); /* 红色 错误 */\\n}\\n\"}},{\"brick\":\"div\",\"properties\":{\"classList\":[\"card-header\"]},\"slots\":{\"items\":{\"bricks\":[{\"brick\":\"div\",\"properties\":{\"classList\":[\"card-label\"],\"textContent\":\"交换机Ping状态\"}},{\"brick\":\"presentational-bricks.basic-icon\",\"properties\":{\"bg\":\"<%\\n  _.cond([\\n      [t => t < 0, _.constant(\\\"var(--theme-red-background)\\\")],\\n      [t => t >= 0 && t < 50, _.constant(\\\"var(--theme-green-background)\\\")],\\n      [t => t >= 50 && t < 150, _.constant(\\\"var(--theme-orange-background)\\\")],\\n      [_.stubTrue, _.constant(\\\"var(--theme-red-background)\\\")]\\n  ])(_.get(_.maxBy(CTX.DS.ping, 'time'), 'ping', -1))\\n%>\\n\",\"bgBorderRadius\":\"15px\",\"bgSize\":\"45px\",\"icon\":{\"lib\":\"antd\",\"icon\":\"<%\\n_.cond([\\n    [t => t < 0, _.constant(\\\"close-circle\\\")],\\n    [t => t < 150, _.constant(\\\"check-circle\\\")],\\n    [_.stubTrue, _.constant(\\\"close-circle\\\")]\\n])(_.get(_.maxBy(CTX.DS.ping, 'time'), 'ping', -1))\\n%>\\n\",\"theme\":\"outlined\",\"color\":\"<%\\n_.cond([\\n    [t => t < 0, _.constant(\\\"var(--theme-red-color)\\\")],\\n    [t => 0 <= t < 50, _.constant(\\\"var(--theme-green-color)\\\")],\\n    [t => t < 150, _.constant(\\\"var(--theme-orange-color)\\\")],\\n    [_.stubTrue, _.constant(\\\"var(--theme-red-color)\\\")]\\n])(_.get(_.maxBy(CTX.DS.ping, 'time'), 'ping', -1))\\n%>\\n\"},\"renderBg\":true,\"size\":\"24px\"}}]}}},{\"brick\":\"div\",\"properties\":{\"classList\":[\"card-value\"]},\"slots\":{\"items\":{\"bricks\":[{\"brick\":\"span\",\"properties\":{\"classList\":[\"<% `card-status-dot card-status-dot--${_.cond([[t=>t<0,_.constant(\\\"error\\\")],[t=>t>=0&&t<50,_.constant(\\\"normal\\\")],[t=>t>=50&&t<150,_.constant(\\\"warning\\\")],[_.stubTrue,_.constant(\\\"error\\\")]])(_.get(_.maxBy(CTX.DS.ping, 'time'), 'ping', -1))}` %>\"]}},{\"brick\":\"span\",\"properties\":{\"textContent\":\"<% _.round(_.get(_.maxBy(CTX.DS.ping, 'time'), 'ping', -1), 2) %>\"}},{\"brick\":\"span\",\"properties\":{\"textContent\":\"ms\"}}]}}},{\"brick\":\"div\",\"properties\":{\"textContent\":\"<% `上次检查：${moment.unix(_.maxBy(_.filter(CTX.DS.ping, o=>o.time), 'time').time).format(\\\"YYYY-MM-DD HH:mm\\\")}` %>\\n\",\"classList\":[\"card-meta\"]}}]},\"slots\":{}}",
+   "brickContainerStyle": {},
+   "brickId": "presentational-bricks.dynamic-grid-container",
+   "formData": {
+    "backgroundColor": "#ffffff",
+    "backgroundType": "color",
+    "borderColor": "#ffffff",
+    "borderPaddingBottom": 10,
+    "borderPaddingLeft": 15,
+    "borderPaddingRight": 15,
+    "borderPaddingTop": 10,
+    "borderRadius": 10,
+    "borderType": "solid",
+    "borderWidth": 1,
+    "column": 6,
+    "opacity": 100,
+    "row": 5,
+    "titleFontColor": "#262626",
+    "titleFontSize": 16,
+    "yamlProperties": "\nuseBrick:\n  - brick: style\n    properties:\n      textContent: |\n            .card-header {\n              display: flex;\n              justify-content: space-between;\n              align-items: center;\n            }\n\n            .card-label {\n              font-size: 15px;\n              font-weight: 600;\n              color: #333;\n              margin: 0;\n            }\n\n            .card-value {\n              font-size: 28px;\n              font-weight: 700;\n              color: #1c1c1c;\n              display: flex;\n              align-items: center;\n              gap: 8px;\n            }\n\n            .card-status-dot {\n              width: 10px;\n              height: 10px;\n              border-radius: 50%;\n              display: inline-block;\n            }\n\n            .card-meta {\n              color: #666;\n              font-size: 14px;\n            }\n\n            .card-meta {\n              color: #888;\n            }\n\n            .card-status-dot--normal {\n              background-color: var(--theme-green-color); /* 绿色 正常 */\n            }\n\n            .card-status-dot--warning {\n              background-color: var(--theme-orange-color); /* 黄色 警告 */\n            }\n\n            .card-status-dot--error {\n              background-color: var(--theme-red-color); /* 红色 错误 */\n            }\n\n  - brick: div\n    properties:\n      classList: [ card-header ]\n    slots:\n      items:\n        bricks:\n          - brick: div\n            properties:\n              classList: [ card-label ]\n              textContent: 交换机Ping状态\n          - brick: presentational-bricks.basic-icon\n            properties:\n              bg: |\n                <%\n                  _.cond([\n                      [t => t < 0, _.constant(\"var(--theme-red-background)\")],\n                      [t => t >= 0 && t < 50, _.constant(\"var(--theme-green-background)\")],\n                      [t => t >= 50 && t < 150, _.constant(\"var(--theme-orange-background)\")],\n                      [_.stubTrue, _.constant(\"var(--theme-red-background)\")]\n                  ])(_.get(_.maxBy(CTX.DS.ping, 'time'), 'ping', -1))\n                %>\n              bgBorderRadius: 15px\n              bgSize: 45px\n              icon:\n                lib: antd\n                icon: |\n                  <%\n                  _.cond([\n                      [t => t < 0, _.constant(\"close-circle\")],\n                      [t => t < 150, _.constant(\"check-circle\")],\n                      [_.stubTrue, _.constant(\"close-circle\")]\n                  ])(_.get(_.maxBy(CTX.DS.ping, 'time'), 'ping', -1))\n                  %>\n                theme: outlined\n                color: |\n                  <%\n                  _.cond([\n                      [t => t < 0, _.constant(\"var(--theme-red-color)\")],\n                      [t => 0 <= t < 50, _.constant(\"var(--theme-green-color)\")],\n                      [t => t < 150, _.constant(\"var(--theme-orange-color)\")],\n                      [_.stubTrue, _.constant(\"var(--theme-red-color)\")]\n                  ])(_.get(_.maxBy(CTX.DS.ping, 'time'), 'ping', -1))\n                  %>\n              renderBg: true\n              size: 24px\n\n  - brick: div\n    properties: \n      classList: [ card-value ]\n    slots:\n      items:\n        bricks:\n          - brick: span\n            properties:\n              classList: \n                - <% `card-status-dot card-status-dot--${_.cond([[t=>t<0,_.constant(\"error\")],[t=>t>=0&&t<50,_.constant(\"normal\")],[t=>t>=50&&t<150,_.constant(\"warning\")],[_.stubTrue,_.constant(\"error\")]])(_.get(_.maxBy(CTX.DS.ping, 'time'), 'ping', -1))}` %>\n          \n          - brick: span\n            properties: \n              textContent: <% _.round(_.get(_.maxBy(CTX.DS.ping, 'time'), 'ping', -1), 2) %>\n          - brick: span\n            properties: \n              textContent: ms\n  - brick: div\n    properties:\n      textContent: |\n        <% `上次检查：${moment.unix(_.maxBy(_.filter(CTX.DS.ping, o=>o.time), 'time').time).format(\"YYYY-MM-DD HH:mm\")}` %>\n      classList: [ card-meta ]"
+   },
+   "height": 5,
+   "mode": "yaml",
+   "source": "brick",
+   "titleStyle": {
+    "color": "#262626",
+    "fontSize": 16
+   },
+   "toolbarConf": "\"undefined\"",
+   "type": "brick",
+   "width": 6,
+   "wrapped": true,
+   "wrappedConf": {
+    "background": {
+     "backgroundColor": "#ffffff",
+     "opacity": 100
+    },
+    "backgroundType": "color",
+    "border": {
+     "borderColor": "#ffffff",
+     "borderRadius": 10,
+     "borderWidth": 1,
+     "padding": {
+      "bottom": 10,
+      "left": 15,
+      "right": 15,
+      "top": 10
+     }
+    },
+    "borderType": "solid"
+   },
+   "x": 0,
+   "y": 0
+  },
+  {
+   "brickConf": "{\"brick\":\"presentational-bricks.dynamic-grid-container\",\"properties\":{\"containerStyle\":{\"gridGap\":\"7px\"},\"useBrick\":[{\"brick\":\"div\",\"properties\":{\"classList\":[\"card-header\"]},\"slots\":{\"items\":{\"bricks\":[{\"brick\":\"div\",\"properties\":{\"classList\":[\"card-label\"],\"textContent\":\"UP状态端口数\"}},{\"brick\":\"presentational-bricks.basic-icon\",\"properties\":{\"bg\":\"var(--theme-blue-background)\",\"bgBorderRadius\":\"15px\",\"bgSize\":\"45px\",\"icon\":{\"lib\":\"fa\",\"icon\":\"ethernet\",\"prefix\":\"fas\",\"color\":\"var(--theme-blue-color)\"},\"renderBg\":true,\"size\":\"24px\"}}]}}},{\"brick\":\"div\",\"properties\":{\"classList\":[\"card-value\"],\"textContent\":\"<%\\n  `${_.chain(CTX.DS.ifoperstatus).values().filter(o=>o==1).value().length} / ${_.chain(CTX.DS.ifoperstatus).keys().value().length}`\\n%>\\n\"}},{\"brick\":\"div\",\"properties\":{\"classList\":[\"card-meta\"]},\"slots\":{\"items\":{\"bricks\":[{\"brick\":\"presentational-bricks.basic-progress\",\"properties\":{\"value\":\"<%\\n  _.chain(CTX.DS.ifoperstatus)\\n    .values()\\n    .thru(v => _.filter(v, o => o == 1).length / v.length * 100)\\n    .value()\\n%>\\n\",\"colorMap\":[{\"color\":\"blue\",\"progress\":100}]}}]}}}]},\"slots\":{}}",
+   "brickContainerStyle": {},
+   "brickId": "presentational-bricks.dynamic-grid-container",
+   "formData": {
+    "backgroundColor": "#ffffff",
+    "backgroundType": "color",
+    "borderColor": "#ffffff",
+    "borderPaddingBottom": 10,
+    "borderPaddingLeft": 15,
+    "borderPaddingRight": 15,
+    "borderPaddingTop": 10,
+    "borderRadius": 10,
+    "borderType": "solid",
+    "borderWidth": 1,
+    "column": 6,
+    "opacity": 100,
+    "row": 5,
+    "titleFontColor": "#262626",
+    "titleFontSize": 16,
+    "yamlProperties": "containerStyle:\n  gridGap: 7px\nuseBrick:\n  # 顶部标题 + 图标\n  - brick: div\n    properties:\n      classList: [ card-header ]\n    slots:\n      items:\n        bricks:\n          - brick: div\n            properties:\n              classList: [ card-label ]\n              textContent: UP状态端口数\n          - brick: presentational-bricks.basic-icon\n            properties:\n              bg: var(--theme-blue-background)\n              bgBorderRadius: 15px\n              bgSize: 45px\n              icon:\n                lib: fa\n                icon: ethernet\n                prefix: fas\n                color: var(--theme-blue-color)\n              renderBg: true\n              size: 24px\n\n  # 数值部分\n  - brick: div\n    properties:\n      classList: [ card-value ]\n      textContent: |\n          <%\n            `${_.chain(CTX.DS.ifoperstatus).values().filter(o=>o==1).value().length} / ${_.chain(CTX.DS.ifoperstatus).keys().value().length}`\n          %>\n  # 变化说明部分\n  - brick: div\n    properties:\n      classList: [ card-meta ]\n    slots:\n      items:\n        bricks:\n          - brick: presentational-bricks.basic-progress\n            properties:\n              value: |\n                  <%\n                    _.chain(CTX.DS.ifoperstatus)\n                      .values()\n                      .thru(v => _.filter(v, o => o == 1).length / v.length * 100)\n                      .value()\n                  %>\n              colorMap:\n                - color: blue\n                  progress: 100\n"
+   },
+   "height": 5,
+   "mode": "yaml",
+   "source": "brick",
+   "titleStyle": {
+    "color": "#262626",
+    "fontSize": 16
+   },
+   "toolbarConf": "\"undefined\"",
+   "type": "brick",
+   "width": 6,
+   "wrapped": true,
+   "wrappedConf": {
+    "background": {
+     "backgroundColor": "#ffffff",
+     "opacity": 100
+    },
+    "backgroundType": "color",
+    "border": {
+     "borderColor": "#ffffff",
+     "borderRadius": 10,
+     "borderWidth": 1,
+     "padding": {
+      "bottom": 10,
+      "left": 15,
+      "right": 15,
+      "top": 10
+     }
+    },
+    "borderType": "solid"
+   },
+   "x": 6,
+   "y": 0
+  },
+  {
+   "brickConf": "{\"brick\":\"presentational-bricks.dynamic-grid-container\",\"properties\":{\"containerStyle\":{\"gridGap\":\"7px\"},\"useBrick\":[{\"brick\":\"div\",\"properties\":{\"classList\":[\"card-header\"]},\"slots\":{\"items\":{\"bricks\":[{\"brick\":\"div\",\"properties\":{\"classList\":[\"card-label\"]},\"slots\":{\"items\":{\"bricks\":[{\"brick\":\"presentational-bricks.general-tooltip\",\"properties\":{\"content\":\"当交换机的工作模式为堆叠模式时，该值为：sum(交换机成员CPU使用率)/成员数\",\"dataset\":{\"testid\":\"basic-usage-demo\"},\"icon\":{\"icon\":\"info-circle\",\"lib\":\"fa\"},\"text\":\"CPU平均使用率\"}}]}}},{\"brick\":\"presentational-bricks.basic-icon\",\"properties\":{\"bg\":\"var(--theme-purple-background)\",\"bgBorderRadius\":\"15px\",\"bgSize\":\"45px\",\"icon\":{\"lib\":\"fa\",\"icon\":\"microchip\",\"prefix\":\"fas\",\"color\":\"var(--theme-purple-color)\"},\"renderBg\":true,\"size\":\"24px\"}}]}}},{\"brick\":\"div\",\"properties\":{\"classList\":[\"card-value\"],\"textContent\":\"<%\\n  _.chain(CTX.DS.cpu_utilization)\\n      .groupBy('snmp_netware_cpu_name')\\n      .mapValues(items => _.maxBy(items, 'time'))\\n      .values()\\n      .meanBy('cpu_utilization')\\n      .round(2)\\n      .thru(v => v + \\\" %\\\")\\n      .value()\\n%>\\n\"}},{\"brick\":\"div\",\"properties\":{\"classList\":[\"card-meta\"]},\"slots\":{\"items\":{\"bricks\":[{\"brick\":\"div\",\"properties\":{\"style\":{\"display\":\"flex\",\"alignItems\":\"center\"}},\"slots\":{\"items\":{\"bricks\":[{\"brick\":\"presentational-bricks.basic-icon\",\"properties\":{\"icon\":{\"lib\":\"antd\",\"icon\":\"<%\\n_.chain(CTX.DS)\\n    .thru(v => ({\\n        current: _.chain(v.cpu_utilization)\\n            .groupBy('snmp_netware_cpu_name')\\n            .mapValues(items => _.maxBy(items, 'time'))\\n            .values()\\n            .meanBy('cpu_utilization')\\n            .value(),\\n        last: _.chain(v.last_cpu_utilization)\\n            .groupBy('snmp_netware_cpu_name')\\n            .mapValues(items => _.maxBy(items, 'time'))\\n            .values()\\n            .meanBy('cpu_utilization')\\n            .value()\\n    }))\\n    .thru(v => v.current - v.last)\\n    .thru(diff => diff > 0 ? 'arrow-up' : diff < 0 ? 'arrow-down' : 'line')\\n    .value()\\n%>\\n\",\"theme\":\"outlined\",\"color\":\"var(--theme-orange-color)\"},\"size\":\"16px\"}},{\"brick\":\"span\",\"properties\":{\"style\":{\"color\":\"var(--theme-orange-color)\",\"fontWeight\":500,\"padding\":\"0 10px\"},\"textContent\":\"<%\\n  _.chain(null)\\n      .thru(v => ({\\n          current: _.chain(CTX.DS.cpu_utilization)\\n              .groupBy('snmp_netware_cpu_name')\\n              .mapValues(items => _.maxBy(items, 'time'))\\n              .values()\\n              .meanBy('cpu_utilization')\\n              .value(),\\n          last: _.chain(CTX.DS.last_cpu_utilization)\\n              .groupBy('snmp_netware_cpu_name')\\n              .mapValues(items => _.maxBy(items, 'time'))\\n              .values()\\n              .meanBy('cpu_utilization')\\n              .value()\\n      }))\\n      .thru(v => v.current - v.last)\\n      .round(2)\\n      .thru(v => v > 0 ? `较昨日上升${v}%` : v < 0 ? `较昨日下降${Math.abs(v)}%` : '与昨日持平')\\n      .value()\\n%>\\n\"}}]}}},{\"brick\":\"presentational-bricks.basic-progress\",\"properties\":{\"value\":\"<%\\n  _.chain(CTX.DS.cpu_utilization)\\n      .groupBy('snmp_netware_cpu_name')\\n      .mapValues(items => _.maxBy(items, 'time'))\\n      .values()\\n      .meanBy('cpu_utilization')   \\n      .value()\\n%>\\n\",\"colorMap\":[{\"color\":\"green\",\"progress\":70},{\"color\":\"orange\",\"progress\":85},{\"color\":\"red\",\"progress\":100}]}}]}}}]},\"slots\":{}}",
+   "brickContainerStyle": {},
+   "brickId": "presentational-bricks.dynamic-grid-container",
+   "formData": {
+    "backgroundColor": "#ffffff",
+    "backgroundType": "color",
+    "borderColor": "#ffffff",
+    "borderPaddingBottom": 10,
+    "borderPaddingLeft": 15,
+    "borderPaddingRight": 15,
+    "borderPaddingTop": 10,
+    "borderRadius": 10,
+    "borderType": "solid",
+    "borderWidth": 1,
+    "column": 6,
+    "opacity": 100,
+    "row": 5,
+    "titleFontColor": "#262626",
+    "titleFontSize": 16,
+    "yamlProperties": "containerStyle:\n  gridGap: 7px\nuseBrick:\n  # 顶部标题 + 图标\n  - brick: div\n    properties:\n      classList: [ card-header ]\n    slots:\n      items:\n        bricks:\n          - brick: div\n            properties:\n              classList: [ card-label ]\n            slots:\n              items:\n                bricks:\n                  - brick: presentational-bricks.general-tooltip\n                    properties:\n                      content: 当交换机的工作模式为堆叠模式时，该值为：sum(交换机成员CPU使用率)/成员数\n                      dataset:\n                        testid: basic-usage-demo\n                      icon:\n                        icon: info-circle\n                        lib: fa\n                      text: CPU平均使用率\n          - brick: presentational-bricks.basic-icon\n            properties:\n              bg: var(--theme-purple-background)\n              bgBorderRadius: 15px\n              bgSize: 45px\n              icon:\n                lib: fa\n                icon: microchip\n                prefix: fas\n                color: var(--theme-purple-color)\n              renderBg: true\n              size: 24px\n\n  # 数值部分\n  - brick: div\n    properties:\n      classList: [ card-value ]\n      textContent: |\n        <%\n          _.chain(CTX.DS.cpu_utilization)\n              .groupBy('snmp_netware_cpu_name')\n              .mapValues(items => _.maxBy(items, 'time'))\n              .values()\n              .meanBy('cpu_utilization')\n              .round(2)\n              .thru(v => v + \" %\")\n              .value()\n        %>\n\n  # 变化说明部分\n  - brick: div\n    properties:\n      classList: [ card-meta ]\n    slots:\n      items:\n        bricks:\n          - brick: div\n            properties:\n              style:\n                display: flex\n                alignItems: center\n            slots:\n              items:\n                bricks:\n                  - brick: presentational-bricks.basic-icon\n                    properties:\n                      icon:\n                        lib: antd\n                        icon: |\n                          <%\n                          _.chain(CTX.DS)\n                              .thru(v => ({\n                                  current: _.chain(v.cpu_utilization)\n                                      .groupBy('snmp_netware_cpu_name')\n                                      .mapValues(items => _.maxBy(items, 'time'))\n                                      .values()\n                                      .meanBy('cpu_utilization')\n                                      .value(),\n                                  last: _.chain(v.last_cpu_utilization)\n                                      .groupBy('snmp_netware_cpu_name')\n                                      .mapValues(items => _.maxBy(items, 'time'))\n                                      .values()\n                                      .meanBy('cpu_utilization')\n                                      .value()\n                              }))\n                              .thru(v => v.current - v.last)\n                              .thru(diff => diff > 0 ? 'arrow-up' : diff < 0 ? 'arrow-down' : 'line')\n                              .value()\n                          %>\n                        theme: outlined\n                        color: var(--theme-orange-color)\n                      size: 16px\n                  - brick: span\n                    properties:\n                      style: \n                        color: var(--theme-orange-color)\n                        fontWeight: 500\n                        padding: 0 10px\n                      textContent: |\n                        <%\n                          _.chain(null)\n                              .thru(v => ({\n                                  current: _.chain(CTX.DS.cpu_utilization)\n                                      .groupBy('snmp_netware_cpu_name')\n                                      .mapValues(items => _.maxBy(items, 'time'))\n                                      .values()\n                                      .meanBy('cpu_utilization')\n                                      .value(),\n                                  last: _.chain(CTX.DS.last_cpu_utilization)\n                                      .groupBy('snmp_netware_cpu_name')\n                                      .mapValues(items => _.maxBy(items, 'time'))\n                                      .values()\n                                      .meanBy('cpu_utilization')\n                                      .value()\n                              }))\n                              .thru(v => v.current - v.last)\n                              .round(2)\n                              .thru(v => v > 0 ? `较昨日上升${v}%` : v < 0 ? `较昨日下降${Math.abs(v)}%` : '与昨日持平')\n                              .value()\n                        %>\n          # 进度条部分\n          - brick: presentational-bricks.basic-progress\n            properties:\n              value: |\n                <%\n                  _.chain(CTX.DS.cpu_utilization)\n                      .groupBy('snmp_netware_cpu_name')\n                      .mapValues(items => _.maxBy(items, 'time'))\n                      .values()\n                      .meanBy('cpu_utilization')   \n                      .value()\n                %>\n              colorMap:\n                - color: green\n                  progress: 70\n                - color: orange\n                  progress: 85\n                - color: red\n                  progress: 100"
+   },
+   "height": 5,
+   "mode": "yaml",
+   "source": "brick",
+   "titleStyle": {
+    "color": "#262626",
+    "fontSize": 16
+   },
+   "toolbarConf": "\"undefined\"",
+   "type": "brick",
+   "width": 6,
+   "wrapped": true,
+   "wrappedConf": {
+    "background": {
+     "backgroundColor": "#ffffff",
+     "opacity": 100
+    },
+    "backgroundType": "color",
+    "border": {
+     "borderColor": "#ffffff",
+     "borderRadius": 10,
+     "borderWidth": 1,
+     "padding": {
+      "bottom": 10,
+      "left": 15,
+      "right": 15,
+      "top": 10
+     }
+    },
+    "borderType": "solid"
+   },
+   "x": 12,
+   "y": 0
+  },
+  {
+   "brickConf": "{\"brick\":\"presentational-bricks.dynamic-grid-container\",\"properties\":{\"containerStyle\":{\"gridGap\":\"4px\"},\"useBrick\":[{\"brick\":\"div\",\"properties\":{\"classList\":[\"card-label\"],\"style\":{\"fontSize\":\"18px\",\"fontWeight\":700,\"marginBottom\":\"10px\"},\"textContent\":\"CPU使用率趋势\"}},{\"brick\":\"div\",\"properties\":{\"style\":{\"display\":\"flex\",\"justifyContent\":\"center\",\"alignItems\":\"center\",\"width\":\"100%\",\"margin\":\"0 auto\",\"boxSizing\":\"border-box\",\"padding\":\"10px 0\"}},\"slots\":{\"items\":{\"bricks\":[{\"brick\":\"chart-v2.time-series-chart\",\"properties\":{\"style\":{\"width\":\"98%\"},\"groupField\":\"snmp_netware_cpu_name\",\"timeFormat\":\"MM/DD HH:mm\",\"axis\":{\"yAxis\":{\"precision\":2,\"unit\":\"percent(100)\",\"min\":0,\"max\":100}},\"data\":\"<% CTX.DS.cpu_utilization %>\",\"height\":240,\"showPoint\":false,\"xField\":\"time\",\"yField\":\"cpu_utilization\"}}]}}}]},\"slots\":{}}",
+   "brickContainerStyle": {},
+   "brickId": "presentational-bricks.dynamic-grid-container",
+   "formData": {
+    "backgroundColor": "#ffffff",
+    "backgroundType": "color",
+    "borderColor": "#ffffff",
+    "borderPaddingBottom": 10,
+    "borderPaddingLeft": 15,
+    "borderPaddingRight": 15,
+    "borderPaddingTop": 10,
+    "borderRadius": 10,
+    "borderType": "solid",
+    "borderWidth": 1,
+    "column": 12,
+    "opacity": 100,
+    "row": 9,
+    "titleFontColor": "#262626",
+    "titleFontSize": 16,
+    "yamlProperties": "containerStyle:\n  gridGap: 4px\nuseBrick:\n  - brick: div\n    properties:\n      classList: [ card-label ]\n      style:\n        fontSize: 18px\n        fontWeight: 700\n        marginBottom: 10px\n      textContent: CPU使用率趋势\n\n  - brick: div\n    properties:\n      style:\n        display: flex\n        justifyContent: center\n        alignItems: center\n        width: \"100%\"\n        margin: \"0 auto\"\n        boxSizing: border-box\n        padding: \"10px 0\"\n    slots:\n      items:\n        bricks:\n          - brick: chart-v2.time-series-chart\n            properties:\n              style:\n                width: \"98%\"\n              groupField: snmp_netware_cpu_name\n              timeFormat: 'MM/DD HH:mm'\n              axis:\n                yAxis:\n                  precision: 2\n                  unit: percent(100)\n                  min: 0\n                  max: 100\n              data: <% CTX.DS.cpu_utilization %>\n              height: 240\n              showPoint: false\n              xField: time\n              yField: cpu_utilization\n"
+   },
+   "height": 9,
+   "mode": "yaml",
+   "source": "brick",
+   "titleStyle": {
+    "color": "#262626",
+    "fontSize": 16
+   },
+   "toolbarConf": "\"undefined\"",
+   "type": "brick",
+   "width": 12,
+   "wrapped": true,
+   "wrappedConf": {
+    "background": {
+     "backgroundColor": "#ffffff",
+     "opacity": 100
+    },
+    "backgroundType": "color",
+    "border": {
+     "borderColor": "#ffffff",
+     "borderRadius": 10,
+     "borderWidth": 1,
+     "padding": {
+      "bottom": 10,
+      "left": 15,
+      "right": 15,
+      "top": 10
+     }
+    },
+    "borderType": "solid"
+   },
+   "x": 0,
+   "y": 12
+  },
+  {
+   "brickConf": "{\"brick\":\"presentational-bricks.dynamic-grid-container\",\"properties\":{\"containerStyle\":{\"gridGap\":\"4px\"},\"useBrick\":[{\"brick\":\"div\",\"properties\":{\"classList\":[\"card-label\"],\"style\":{\"fontSize\":\"18px\",\"fontWeight\":700,\"marginBottom\":\"10px\"},\"textContent\":\"内存使用率趋势\"}},{\"brick\":\"div\",\"properties\":{\"style\":{\"display\":\"flex\",\"justifyContent\":\"center\",\"alignItems\":\"center\",\"width\":\"100%\",\"margin\":\"0 auto\",\"boxSizing\":\"border-box\",\"padding\":\"10px 0\"}},\"slots\":{\"items\":{\"bricks\":[{\"brick\":\"chart-v2.time-series-chart\",\"properties\":{\"style\":{\"width\":\"98%\"},\"groupField\":\"snmp_netware_memory_name\",\"timeFormat\":\"MM/DD HH:mm\",\"axis\":{\"yAxis\":{\"precision\":2,\"unit\":\"percent(100)\",\"min\":0,\"max\":100}},\"data\":\"<% CTX.DS.memory_utilization %>\",\"height\":240,\"showPoint\":false,\"xField\":\"time\",\"yField\":\"memory_utilization\"}}]}}}]},\"slots\":{}}",
+   "brickContainerStyle": {},
+   "brickId": "presentational-bricks.dynamic-grid-container",
+   "formData": {
+    "backgroundColor": "#ffffff",
+    "backgroundType": "color",
+    "borderColor": "#ffffff",
+    "borderPaddingBottom": 10,
+    "borderPaddingLeft": 15,
+    "borderPaddingRight": 15,
+    "borderPaddingTop": 10,
+    "borderRadius": 10,
+    "borderType": "solid",
+    "borderWidth": 1,
+    "column": 12,
+    "opacity": 100,
+    "row": 9,
+    "titleFontColor": "#262626",
+    "titleFontSize": 16,
+    "yamlProperties": "containerStyle:\n  gridGap: 4px\nuseBrick:\n  - brick: div\n    properties:\n      classList: [ card-label ]\n      style:\n        fontSize: 18px\n        fontWeight: 700\n        marginBottom: 10px\n      textContent: 内存使用率趋势\n\n  - brick: div\n    properties:\n      style:\n        display: flex\n        justifyContent: center\n        alignItems: center\n        width: \"100%\"\n        margin: \"0 auto\"\n        boxSizing: border-box\n        padding: \"10px 0\"\n    slots:\n      items:\n        bricks:\n          - brick: chart-v2.time-series-chart\n            properties:\n              style:\n                width: \"98%\"\n              groupField: snmp_netware_memory_name\n              timeFormat: 'MM/DD HH:mm'\n              axis:\n                yAxis:\n                  precision: 2\n                  unit: percent(100)\n                  min: 0\n                  max: 100\n              data: <% CTX.DS.memory_utilization %>\n              height: 240\n              showPoint: false\n              xField: time\n              yField: memory_utilization\n"
+   },
+   "height": 9,
+   "mode": "yaml",
+   "source": "brick",
+   "titleStyle": {
+    "color": "#262626",
+    "fontSize": 16
+   },
+   "toolbarConf": "\"undefined\"",
+   "type": "brick",
+   "width": 12,
+   "wrapped": true,
+   "wrappedConf": {
+    "background": {
+     "backgroundColor": "#ffffff",
+     "opacity": 100
+    },
+    "backgroundType": "color",
+    "border": {
+     "borderColor": "#ffffff",
+     "borderRadius": 10,
+     "borderWidth": 1,
+     "padding": {
+      "bottom": 10,
+      "left": 15,
+      "right": 15,
+      "top": 10
+     }
+    },
+    "borderType": "solid"
+   },
+   "x": 12,
+   "y": 12
+  },
+  {
+   "brickConf": "{\"brick\":\"presentational-bricks.dynamic-grid-container\",\"properties\":{\"containerStyle\":{\"gridGap\":\"7px\"},\"useBrick\":[{\"brick\":\"div\",\"properties\":{\"classList\":[\"card-header\"]},\"slots\":{\"items\":{\"bricks\":[{\"brick\":\"div\",\"properties\":{\"classList\":[\"card-label\"]},\"slots\":{\"items\":{\"bricks\":[{\"brick\":\"presentational-bricks.general-tooltip\",\"properties\":{\"content\":\"当交换机的工作模式为堆叠模式时，该值为：sum(交换机成员内存使用率)/成员数\",\"dataset\":{\"testid\":\"basic-usage-demo\"},\"icon\":{\"icon\":\"info-circle\",\"lib\":\"fa\"},\"text\":\"内存平均使用率\"}}]}}},{\"brick\":\"presentational-bricks.basic-icon\",\"properties\":{\"bg\":\"var(--theme-orange-background)\",\"bgBorderRadius\":\"15px\",\"bgSize\":\"45px\",\"icon\":{\"lib\":\"fa\",\"icon\":\"memory\",\"prefix\":\"fas\",\"color\":\"var(--theme-orange-color)\"},\"renderBg\":true,\"size\":\"24px\"}}]}}},{\"brick\":\"div\",\"properties\":{\"classList\":[\"card-value\"],\"textContent\":\"<%\\n  _.chain(CTX.DS.memory_utilization)\\n      .groupBy('snmp_netware_memory_name')\\n      .mapValues(items => _.maxBy(items, 'time'))\\n      .values()\\n      .meanBy('memory_utilization')\\n      .round(2)\\n      .thru(v => v + \\\" %\\\")\\n      .value()\\n%>\\n\"}},{\"brick\":\"div\",\"properties\":{\"classList\":[\"card-meta\"]},\"slots\":{\"items\":{\"bricks\":[{\"brick\":\"div\",\"properties\":{\"style\":{\"display\":\"flex\",\"alignItems\":\"center\"}},\"slots\":{\"items\":{\"bricks\":[{\"brick\":\"presentational-bricks.basic-icon\",\"properties\":{\"icon\":{\"lib\":\"antd\",\"icon\":\"<%\\n_.chain(CTX.DS)\\n    .thru(v => ({\\n        current: _.chain(v.memory_utilization)\\n            .groupBy('snmp_netware_memory_name')\\n            .mapValues(items => _.maxBy(items, 'time'))\\n            .values()\\n            .meanBy('memory_utilization')\\n            .value(),\\n        last: _.chain(v.last_memory_utilization)\\n            .groupBy('snmp_netware_memory_name')\\n            .mapValues(items => _.maxBy(items, 'time'))\\n            .values()\\n            .meanBy('memory_utilization')\\n            .value()\\n    }))\\n    .thru(v => v.current - v.last)\\n    .thru(diff => diff > 0 ? 'arrow-up' : diff < 0 ? 'arrow-down' : 'line')\\n    .value()\\n%>\\n\",\"theme\":\"outlined\",\"color\":\"var(--theme-orange-color)\"},\"size\":\"16px\"}},{\"brick\":\"span\",\"properties\":{\"style\":{\"color\":\"var(--theme-orange-color)\",\"fontWeight\":500,\"padding\":\"0 10px\"},\"textContent\":\"<%\\n  _.chain(null)\\n      .thru(v => ({\\n          current: _.chain(CTX.DS.memory_utilization)\\n              .groupBy('snmp_netware_memory_name')\\n              .mapValues(items => _.maxBy(items, 'time'))\\n              .values()\\n              .meanBy('memory_utilization')\\n              .value(),\\n          last: _.chain(CTX.DS.last_memory_utilization)\\n              .groupBy('snmp_netware_memory_name')\\n              .mapValues(items => _.maxBy(items, 'time'))\\n              .values()\\n              .meanBy('memory_utilization')\\n              .value()\\n      }))\\n      .thru(v => v.current - v.last)\\n      .round(2)\\n      .thru(v => v > 0 ? `较昨日上升${v}%` : v < 0 ? `较昨日下降${Math.abs(v)}%` : '与昨日持平')\\n      .value()\\n%>\\n\"}}]}}},{\"brick\":\"presentational-bricks.basic-progress\",\"properties\":{\"value\":\"<%\\n  _.chain(CTX.DS.memory_utilization)\\n      .groupBy('snmp_netware_memory_name')\\n      .mapValues(items => _.maxBy(items, 'time'))\\n      .values()\\n      .meanBy('memory_utilization')\\n      .value()\\n%>\\n\",\"colorMap\":[{\"color\":\"green\",\"progress\":75},{\"color\":\"orange\",\"progress\":90},{\"color\":\"red\",\"progress\":100}]}}]}}}]},\"slots\":{}}",
+   "brickContainerStyle": {},
+   "brickId": "presentational-bricks.dynamic-grid-container",
+   "formData": {
+    "backgroundColor": "#ffffff",
+    "backgroundType": "color",
+    "borderColor": "#ffffff",
+    "borderPaddingBottom": 10,
+    "borderPaddingLeft": 15,
+    "borderPaddingRight": 15,
+    "borderPaddingTop": 10,
+    "borderRadius": 10,
+    "borderType": "solid",
+    "borderWidth": 1,
+    "column": 6,
+    "opacity": 100,
+    "row": 5,
+    "titleFontColor": "#262626",
+    "titleFontSize": 16,
+    "yamlProperties": "containerStyle:\n  gridGap: 7px\nuseBrick:\n  # 顶部标题 + 图标\n  - brick: div\n    properties:\n      classList: [ card-header ]\n    slots:\n      items:\n        bricks:\n          - brick: div\n            properties:\n              classList: [ card-label ]\n            slots:\n              items:\n                bricks:\n                  - brick: presentational-bricks.general-tooltip\n                    properties:\n                      content: 当交换机的工作模式为堆叠模式时，该值为：sum(交换机成员内存使用率)/成员数\n                      dataset:\n                        testid: basic-usage-demo\n                      icon:\n                        icon: info-circle\n                        lib: fa\n                      text: 内存平均使用率\n          - brick: presentational-bricks.basic-icon\n            properties:\n              bg: var(--theme-orange-background)\n              bgBorderRadius: 15px\n              bgSize: 45px\n              icon:\n                lib: fa\n                icon: memory\n                prefix: fas\n                color: var(--theme-orange-color)\n              renderBg: true\n              size: 24px\n\n  # 数值部分\n  - brick: div\n    properties:\n      classList: [ card-value ]\n      textContent: |\n        <%\n          _.chain(CTX.DS.memory_utilization)\n              .groupBy('snmp_netware_memory_name')\n              .mapValues(items => _.maxBy(items, 'time'))\n              .values()\n              .meanBy('memory_utilization')\n              .round(2)\n              .thru(v => v + \" %\")\n              .value()\n        %>\n\n  # 变化说明部分\n  - brick: div\n    properties:\n      classList: [ card-meta ]\n    slots:\n      items:\n        bricks:\n          - brick: div\n            properties:\n              style:\n                display: flex\n                alignItems: center\n            slots:\n              items:\n                bricks:\n                  - brick: presentational-bricks.basic-icon\n                    properties:\n                      icon:\n                        lib: antd\n                        icon: |\n                          <%\n                          _.chain(CTX.DS)\n                              .thru(v => ({\n                                  current: _.chain(v.memory_utilization)\n                                      .groupBy('snmp_netware_memory_name')\n                                      .mapValues(items => _.maxBy(items, 'time'))\n                                      .values()\n                                      .meanBy('memory_utilization')\n                                      .value(),\n                                  last: _.chain(v.last_memory_utilization)\n                                      .groupBy('snmp_netware_memory_name')\n                                      .mapValues(items => _.maxBy(items, 'time'))\n                                      .values()\n                                      .meanBy('memory_utilization')\n                                      .value()\n                              }))\n                              .thru(v => v.current - v.last)\n                              .thru(diff => diff > 0 ? 'arrow-up' : diff < 0 ? 'arrow-down' : 'line')\n                              .value()\n                          %>\n                        theme: outlined\n                        color: var(--theme-orange-color)\n                      size: 16px\n                  - brick: span\n                    properties:\n                      style: \n                        color: var(--theme-orange-color)\n                        fontWeight: 500\n                        padding: 0 10px\n                      textContent: |\n                        <%\n                          _.chain(null)\n                              .thru(v => ({\n                                  current: _.chain(CTX.DS.memory_utilization)\n                                      .groupBy('snmp_netware_memory_name')\n                                      .mapValues(items => _.maxBy(items, 'time'))\n                                      .values()\n                                      .meanBy('memory_utilization')\n                                      .value(),\n                                  last: _.chain(CTX.DS.last_memory_utilization)\n                                      .groupBy('snmp_netware_memory_name')\n                                      .mapValues(items => _.maxBy(items, 'time'))\n                                      .values()\n                                      .meanBy('memory_utilization')\n                                      .value()\n                              }))\n                              .thru(v => v.current - v.last)\n                              .round(2)\n                              .thru(v => v > 0 ? `较昨日上升${v}%` : v < 0 ? `较昨日下降${Math.abs(v)}%` : '与昨日持平')\n                              .value()\n                        %>\n\n          # 进度条部分\n          - brick: presentational-bricks.basic-progress\n            properties:\n              value: |\n                <%\n                  _.chain(CTX.DS.memory_utilization)\n                      .groupBy('snmp_netware_memory_name')\n                      .mapValues(items => _.maxBy(items, 'time'))\n                      .values()\n                      .meanBy('memory_utilization')\n                      .value()\n                %>\n\n              colorMap:\n                - color: green\n                  progress: 75\n                - color: orange\n                  progress: 90\n                - color: red\n                  progress: 100\n"
+   },
+   "height": 5,
+   "mode": "yaml",
+   "source": "brick",
+   "titleStyle": {
+    "color": "#262626",
+    "fontSize": 16
+   },
+   "toolbarConf": "\"undefined\"",
+   "type": "brick",
+   "width": 6,
+   "wrapped": true,
+   "wrappedConf": {
+    "background": {
+     "backgroundColor": "#ffffff",
+     "opacity": 100
+    },
+    "backgroundType": "color",
+    "border": {
+     "borderColor": "#ffffff",
+     "borderRadius": 10,
+     "borderWidth": 1,
+     "padding": {
+      "bottom": 10,
+      "left": 15,
+      "right": 15,
+      "top": 10
+     }
+    },
+    "borderType": "solid"
+   },
+   "x": 18,
+   "y": 0
+  },
+  {
+   "brickConf": "{\"brick\":\"presentational-bricks.dynamic-grid-container\",\"properties\":{\"containerStyle\":{\"gridGap\":\"4px\"},\"useBrick\":[{\"brick\":\"div\",\"properties\":{\"classList\":[\"card-label\"],\"style\":{\"fontSize\":\"18px\",\"fontWeight\":700,\"marginBottom\":\"10px\"}},\"slots\":{\"items\":{\"bricks\":[{\"brick\":\"presentational-bricks.general-tooltip\",\"properties\":{\"content\":\"指标值为1时表示状态正常，否则表示电源不可用或异常\",\"dataset\":{\"testid\":\"basic-usage-demo\"},\"icon\":{\"icon\":\"info-circle\",\"lib\":\"fa\"},\"text\":\"电源状态\"}}]}}},{\"brick\":\"div\",\"properties\":{\"style\":{\"display\":\"flex\",\"justifyContent\":\"center\",\"alignItems\":\"center\",\"width\":\"100%\",\"margin\":\"0 auto\",\"boxSizing\":\"border-box\",\"padding\":\"10px 0\"}},\"slots\":{\"items\":{\"bricks\":[{\"brick\":\"chart-v2.time-series-chart\",\"properties\":{\"style\":{\"width\":\"98%\"},\"groupField\":\"name\",\"timeFormat\":\"MM/DD HH:mm\",\"axis\":{\"yAxis\":{\"precision\":0,\"min\":0}},\"data\":\"<%\\n  _.chain(CTX.DS.powerstatus_slice)\\n    .map(o => ({\\n      ...o,\\n      name: 'Slot: ' + o.snmp_netware_power_index + '-' + o.snmp_netware_power_name,\\n      statusStr: _.cond([\\n        [\\n          instance => /ruijie|锐捷/i.test(instance?.cBrand || instance?.brand || ''),\\n          () => o.status === 4 ? '正常' : '异常'\\n        ],\\n        [\\n          _.stubTrue,\\n          () => o.status === 1 ? '正常' : '异常' // 其他品牌默认 1=正常\\n        ]\\n      ])(CTX.DS.instance)\\n    }))\\n    .value()\\n%>\\n\",\"height\":240,\"showPoint\":false,\"xField\":\"time\",\"yField\":\"statusStr\"}}]}}}]},\"slots\":{}}",
+   "brickContainerStyle": {},
+   "brickId": "presentational-bricks.dynamic-grid-container",
+   "formData": {
+    "backgroundColor": "#ffffff",
+    "backgroundType": "color",
+    "borderColor": "#ffffff",
+    "borderPaddingBottom": 10,
+    "borderPaddingLeft": 15,
+    "borderPaddingRight": 15,
+    "borderPaddingTop": 10,
+    "borderRadius": 10,
+    "borderType": "solid",
+    "borderWidth": 1,
+    "column": 24,
+    "links": [],
+    "opacity": 100,
+    "row": 9,
+    "titleFontColor": "#262626",
+    "titleFontSize": 16,
+    "tools": [],
+    "yamlProperties": "containerStyle:\n  gridGap: 4px\nuseBrick:\n\n  - brick: div\n    properties:\n      classList: [ card-label ]\n      style:\n        fontSize: 18px\n        fontWeight: 700\n        marginBottom: 10px\n    slots:\n      items:\n        bricks:\n          - brick: presentational-bricks.general-tooltip\n            properties:\n              content: 指标值为1时表示状态正常，否则表示电源不可用或异常\n              dataset:\n                testid: basic-usage-demo\n              icon:\n                icon: info-circle\n                lib: fa\n              text: 电源状态\n\n  - brick: div\n    properties:\n      style:\n        display: flex\n        justifyContent: center\n        alignItems: center\n        width: \"100%\"\n        margin: \"0 auto\"\n        boxSizing: border-box\n        padding: \"10px 0\"\n    slots:\n      items:\n        bricks:\n          - brick: chart-v2.time-series-chart\n            properties:\n              style:\n                width: \"98%\"\n              groupField: name\n              timeFormat: 'MM/DD HH:mm'\n              axis:\n                yAxis:\n                  precision: 0\n                  min: 0\n              data: |\n                <%\n                  _.chain(CTX.DS.powerstatus_slice)\n                    .map(o => ({\n                      ...o,\n                      name: 'Slot: ' + o.snmp_netware_power_index + '-' + o.snmp_netware_power_name,\n                      statusStr: _.cond([\n                        [\n                          instance => /ruijie|锐捷/i.test(instance?.cBrand || instance?.brand || ''),\n                          () => o.status === 4 ? '正常' : '异常'\n                        ],\n                        [\n                          _.stubTrue,\n                          () => o.status === 1 ? '正常' : '异常' // 其他品牌默认 1=正常\n                        ]\n                      ])(CTX.DS.instance)\n                    }))\n                    .value()\n                %>\n              height: 240\n              showPoint: false\n              xField: time\n              yField: statusStr\n"
+   },
+   "height": 9,
+   "mode": "yaml",
+   "source": "brick",
+   "titleStyle": {
+    "color": "#262626",
+    "fontSize": 16
+   },
+   "toolbarConf": "\"undefined\"",
+   "type": "brick",
+   "width": 24,
+   "wrapped": true,
+   "wrappedConf": {
+    "background": {
+     "backgroundColor": "#ffffff",
+     "opacity": 100
+    },
+    "backgroundType": "color",
+    "border": {
+     "borderColor": "#ffffff",
+     "borderRadius": 10,
+     "borderWidth": 1,
+     "padding": {
+      "bottom": 10,
+      "left": 15,
+      "right": 15,
+      "top": 10
+     }
+    },
+    "borderType": "solid"
+   },
+   "x": 0,
+   "y": 30
+  },
+  {
+   "brickConf": "{\"brick\":\"presentational-bricks.dynamic-grid-container\",\"properties\":{\"containerStyle\":{\"gridGap\":\"4px\"},\"useBrick\":[{\"brick\":\"div\",\"properties\":{\"classList\":[\"card-label\"],\"style\":{\"fontSize\":\"18px\",\"fontWeight\":700,\"marginBottom\":\"10px\"},\"textContent\":\"端口列表\"}},{\"brick\":\"div\",\"properties\":{\"style\":{\"width\":\"100%\",\"display\":\"flex\",\"flexDirection\":\"column\",\"overflowX\":\"hidden\",\"overflowY\":\"hidden\"}},\"slots\":{\"items\":{\"bricks\":[{\"brick\":\"presentational-bricks.brick-table\",\"properties\":{\"columns\":[{\"dataIndex\":\"snmp_netware_device_ifname\",\"key\":\"snmp_netware_device_ifname\",\"title\":\"名称\",\"useBrick\":{\"brick\":\"div\",\"properties\":{\"style\":{\"display\":\"flex\",\"alignItems\":\"center\",\"gap\":\"6px\",\"flexWrap\":\"wrap\",\"whiteSpace\":\"normal\",\"wordBreak\":\"break-all\",\"lineHeight\":1.5}},\"slots\":{\"items\":{\"bricks\":[{\"brick\":\"presentational-bricks.basic-icon\",\"properties\":{\"icon\":{\"lib\":\"fa\",\"icon\":\"ethernet\",\"prefix\":\"fas\",\"color\":\"var(--theme-blue-color)\"},\"size\":\"15px\",\"style\":{\"marginTop\":\"1px\"}}},{\"brick\":\"span\",\"properties\":{\"style\":{\"flex\":1,\"wordBreak\":\"break-all\",\"whiteSpace\":\"normal\"},\"textContent\":\"<% DATA.cellData %>\"}}]}}}},{\"dataIndex\":\"ifspeed\",\"key\":\"ifspeed\",\"title\":\"预估带宽(Gbps)\",\"useBrick\":{\"brick\":\"span\",\"properties\":{\"textContent\":\"<% _.round(DATA.cellData / 1000) %>\"}}},{\"dataIndex\":\"in_speed\",\"key\":\"in_speed\",\"title\":\"每秒入流量(Mbps)\",\"useBrick\":{\"brick\":\"span\",\"properties\":{\"textContent\":\"<% _.round(DATA.cellData*8/1000**2, 2) %>\"}}},{\"dataIndex\":\"out_speed\",\"key\":\"out_speed\",\"title\":\"每秒出流量(Mbps)\",\"useBrick\":{\"brick\":\"span\",\"properties\":{\"textContent\":\"<% _.round(DATA.cellData*8/1000**2, 2) %>\"}}},{\"dataIndex\":\"ifouterrors\",\"key\":\"ifinerrors\",\"title\":\"每秒入错误包(个)\",\"useBrick\":{\"brick\":\"span\",\"properties\":{\"textContent\":\"<% DATA.cellData %>\",\"style\":\"<%\\n  _.cond([\\n    [v => v > 10, _.constant({ color: '#E57373', fontWeight: 'bold' })],\\n    [v => v > 0, _.constant({ color: '#FFB74D', fontWeight: 'bold' })],\\n    [_.stubTrue, _.constant({ color: 'inherit', fontWeight: 'normal' })]\\n  ])(DATA.cellData)\\n%>\\n\"}}},{\"dataIndex\":\"ifouterrors\",\"key\":\"ifouterrors\",\"title\":\"每秒出错误包(个)\",\"useBrick\":{\"brick\":\"span\",\"properties\":{\"textContent\":\"<% DATA.cellData %>\",\"style\":\"<%\\n  _.cond([\\n    [v => v > 10, _.constant({ color: '#E57373', fontWeight: 'bold' })],\\n    [v => v > 0, _.constant({ color: '#FFB74D', fontWeight: 'bold' })],\\n    [_.stubTrue, _.constant({ color: 'inherit', fontWeight: 'normal' })]\\n  ])(DATA.cellData)\\n%>\\n\"}}},{\"dataIndex\":\"operstatus\",\"key\":\"operstatus\",\"title\":\"端口状态\",\"useBrick\":{\"brick\":\"presentational-bricks.brick-conditional-display\",\"properties\":{\"dataSource\":{\"ifoperstatus\":\"<% CTX.DS.ifoperstatus[DATA.rowData.snmp_netware_device_ifname] %>\"},\"rules\":[{\"condition\":{\"ifoperstatus\":1},\"label\":\"在线(Up)\",\"style\":{\"backgroundColor\":\"#C8E6C9\",\"color\":\"#256029\"}},{\"condition\":{\"ifoperstatus\":2},\"label\":\"离线(Down)\",\"style\":{\"backgroundColor\":\"#FFCDD2\",\"color\":\"#B71C1C\"}},{\"condition\":{\"ifoperstatus\":3},\"label\":\"测试中(Testing)\",\"style\":{\"backgroundColor\":\"#FFF9C4\",\"color\":\"#795548\"}},{\"condition\":{\"ifoperstatus\":5},\"label\":\"下层未启用(LowerLayerDown)\",\"style\":{\"backgroundColor\":\"#BBDEFB\",\"color\":\"#0D47A1\"}},{\"condition\":{\"ifoperstatus\":6},\"label\":\"管理关闭(Dormant)\",\"style\":{\"backgroundColor\":\"#E0E0E0\",\"color\":\"#424242\"}},{\"condition\":{\"$or\":[{\"ifoperstatus\":7},{\"ifoperstatus\":null},{\"$and\":[{\"ifoperstatus\":{\"$ne\":1}},{\"ifoperstatus\":{\"$ne\":2}},{\"ifoperstatus\":{\"$ne\":3}},{\"ifoperstatus\":{\"$ne\":5}},{\"ifoperstatus\":{\"$ne\":6}},{\"ifoperstatus\":{\"$ne\":7}}]}]},\"label\":\"未知状态(Unknown)\",\"style\":{\"backgroundColor\":\"#D7CCC8\",\"color\":\"#3E2723\"}}]}}}],\"dataSource\":{\"list\":\"<% CTX.DS.ports %>\\n\"},\"showCard\":false,\"pagination\":{\"pageSizeOptions\":[5,10,20,50]},\"frontSearch\":true,\"scrollConfigs\":{\"y\":\"430px\"}}}]}}}]},\"slots\":{}}",
+   "brickContainerStyle": {},
+   "brickId": "presentational-bricks.dynamic-grid-container",
+   "formData": {
+    "backgroundColor": "#ffffff",
+    "backgroundType": "color",
+    "borderColor": "#ffffff",
+    "borderPaddingBottom": 10,
+    "borderPaddingLeft": 15,
+    "borderPaddingRight": 15,
+    "borderPaddingTop": 10,
+    "borderRadius": 10,
+    "borderType": "solid",
+    "borderWidth": 1,
+    "column": 24,
+    "opacity": 100,
+    "row": 16,
+    "titleFontColor": "#262626",
+    "titleFontSize": 16,
+    "yamlProperties": "containerStyle:\n  gridGap: 4px\n\nuseBrick:\n  # 标题\n  - brick: div\n    properties:\n      classList: [ card-label ]\n      style:\n        fontSize: 18px\n        fontWeight: 700\n        marginBottom: 10px\n      textContent: 端口列表\n\n  # 包裹层：控制横向 & 纵向溢出都隐藏\n  - brick: div\n    properties:\n      style:\n        width: 100%\n        display: flex\n        flexDirection: column\n        overflowX: hidden\n        overflowY: hidden\n    slots:\n      items:\n        bricks:\n          - brick: presentational-bricks.brick-table\n            properties:\n              columns:\n                - dataIndex: snmp_netware_device_ifname\n                  key: snmp_netware_device_ifname\n                  title: 名称\n                  useBrick:\n                    brick: div\n                    properties:\n                      style:\n                        display: flex\n                        alignItems: center \n                        gap: 6px\n                        flexWrap: wrap\n                        whiteSpace: normal\n                        wordBreak: break-all\n                        lineHeight: 1.5\n                    slots:\n                      items:\n                        bricks:\n                          - brick: presentational-bricks.basic-icon\n                            properties:\n                              icon:\n                                lib: fa\n                                icon: ethernet\n                                prefix: fas\n                                color: var(--theme-blue-color)\n                              size: 15px\n                              style:\n                                marginTop: 1px    \n                          - brick: span\n                            properties:\n                              style:\n                                flex: 1\n                                wordBreak: break-all\n                                whiteSpace: normal\n                              textContent: <% DATA.cellData %>\n                - dataIndex: ifspeed\n                  key: ifspeed\n                  title: 预估带宽(Gbps)\n                  useBrick:\n                    brick: span\n                    properties:\n                      textContent: '<% _.round(DATA.cellData / 1000) %>'\n                - dataIndex: in_speed\n                  key: in_speed\n                  title: 每秒入流量(Mbps)\n                  useBrick:\n                    brick: span\n                    properties:\n                      textContent: '<% _.round(DATA.cellData*8/1000**2, 2) %>'\n                - dataIndex: out_speed\n                  key: out_speed\n                  title: 每秒出流量(Mbps)\n                  useBrick:\n                    brick: span\n                    properties:\n                      textContent: '<% _.round(DATA.cellData*8/1000**2, 2) %>'\n                - dataIndex: ifouterrors\n                  key: ifinerrors\n                  title: 每秒入错误包(个)\n                  useBrick:\n                    brick: span\n                    properties:\n                      textContent: <% DATA.cellData %>\n                      style: |\n                        <%\n                          _.cond([\n                            [v => v > 10, _.constant({ color: '#E57373', fontWeight: 'bold' })],\n                            [v => v > 0, _.constant({ color: '#FFB74D', fontWeight: 'bold' })],\n                            [_.stubTrue, _.constant({ color: 'inherit', fontWeight: 'normal' })]\n                          ])(DATA.cellData)\n                        %>\n                      \n                - dataIndex: ifouterrors\n                  key: ifouterrors\n                  title: 每秒出错误包(个)\n                  useBrick:\n                    brick: span\n                    properties:\n                      textContent: <% DATA.cellData %>\n                      style: |\n                        <%\n                          _.cond([\n                            [v => v > 10, _.constant({ color: '#E57373', fontWeight: 'bold' })],\n                            [v => v > 0, _.constant({ color: '#FFB74D', fontWeight: 'bold' })],\n                            [_.stubTrue, _.constant({ color: 'inherit', fontWeight: 'normal' })]\n                          ])(DATA.cellData)\n                        %>\n                - dataIndex: operstatus\n                  key: operstatus\n                  title: 端口状态\n                  useBrick:\n                    brick: presentational-bricks.brick-conditional-display\n                    properties:\n                      dataSource:\n                        ifoperstatus: <% CTX.DS.ifoperstatus[DATA.rowData.snmp_netware_device_ifname] %>\n                      rules:\n                        - condition:\n                            ifoperstatus: 1\n                          label: 在线(Up)\n                          style:\n                            backgroundColor: '#C8E6C9'\n                            color: '#256029'\n\n                        - condition:\n                            ifoperstatus: 2\n                          label: 离线(Down)\n                          style:\n                            backgroundColor: '#FFCDD2'\n                            color: '#B71C1C'\n\n                        - condition:\n                            ifoperstatus: 3\n                          label: 测试中(Testing)\n                          style:\n                            backgroundColor: '#FFF9C4'\n                            color: '#795548'\n\n                        - condition:\n                            ifoperstatus: 5\n                          label: 下层未启用(LowerLayerDown)\n                          style:\n                            backgroundColor: '#BBDEFB'\n                            color: '#0D47A1'\n\n                        - condition:\n                            ifoperstatus: 6\n                          label: 管理关闭(Dormant)\n                          style:\n                            backgroundColor: '#E0E0E0'\n                            color: '#424242'\n\n                        - condition:\n                            $or:\n                              - ifoperstatus: 7\n                              - ifoperstatus: null\n                              - $and:\n                                  - ifoperstatus: { $ne: 1 }\n                                  - ifoperstatus: { $ne: 2 }\n                                  - ifoperstatus: { $ne: 3 }\n                                  - ifoperstatus: { $ne: 5 }\n                                  - ifoperstatus: { $ne: 6 }\n                                  - ifoperstatus: { $ne: 7 }\n                          label: 未知状态(Unknown)\n                          style:\n                            backgroundColor: '#D7CCC8'\n                            color: '#3E2723'\n\n\n              dataSource:\n                list: |\n                  <% CTX.DS.ports %>\n              showCard: false\n              pagination: \n                pageSizeOptions: [5, 10, 20, 50]\n              frontSearch: true\n              scrollConfigs:\n                y: 430px \n"
+   },
+   "height": 16,
+   "mode": "yaml",
+   "source": "brick",
+   "titleStyle": {
+    "color": "#262626",
+    "fontSize": 16
+   },
+   "toolbarConf": "\"undefined\"",
+   "type": "brick",
+   "width": 24,
+   "wrapped": true,
+   "wrappedConf": {
+    "background": {
+     "backgroundColor": "#ffffff",
+     "opacity": 100
+    },
+    "backgroundType": "color",
+    "border": {
+     "borderColor": "#ffffff",
+     "borderRadius": 10,
+     "borderWidth": 1,
+     "padding": {
+      "bottom": 10,
+      "left": 15,
+      "right": 15,
+      "top": 10
+     }
+    },
+    "borderType": "solid"
+   },
+   "x": 0,
+   "y": 39
+  },
+  {
+   "brickConf": "{\"brick\":\"presentational-bricks.dynamic-grid-container\",\"properties\":{\"containerStyle\":{\"gridGap\":\"4px\"},\"useBrick\":[{\"brick\":\"style\",\"properties\":{\"textContent\":\"/* 信息行布局 */\\n.info-row {\\n  display: flex;\\n  justify-content: space-between;\\n  align-items: flex-start;\\n}\\n\\n/* 左侧标签 */\\n.info-label {\\n  color: #666;\\n  font-size: 15px;\\n  flex: 0 0 120px;\\n  gap: 12px;\\n}\\n\\n/* 右侧值 */\\n.info-value {\\n  color: #111;\\n  font-size: 15px;\\n  font-weight: 500;\\n  text-align: right;\\n  word-break: break-all;\\n  display: flex;\\n  align-items: center;\\n  gap: 12px;\\n}\\n\"}},{\"brick\":\"div\",\"properties\":{\"classList\":[\"card-label\"],\"style\":{\"fontSize\":\"18px\",\"fontWeight\":700,\"marginBottom\":\"10px\"},\"textContent\":\"交换机详细信息\"}},{\"brick\":\"div\",\"properties\":{\"classList\":[\"info-row\"]},\"slots\":{\"items\":{\"bricks\":[{\"brick\":\"span\",\"properties\":{\"classList\":[\"info-label\"],\"textContent\":\"设备名称\"}},{\"brick\":\"span\",\"properties\":{\"classList\":[\"info-value\"],\"textContent\":\"<% CTX.DS.instance.deviceName %>\"}}]}}},{\"brick\":\"div\",\"properties\":{\"classList\":[\"info-row\"]},\"slots\":{\"items\":{\"bricks\":[{\"brick\":\"span\",\"properties\":{\"classList\":[\"info-label\"],\"textContent\":\"型号\"}},{\"brick\":\"span\",\"properties\":{\"classList\":[\"info-value\"],\"textContent\":\"<% CTX.DS.instance.mdl %>\"}}]}}},{\"brick\":\"div\",\"properties\":{\"classList\":[\"info-row\"]},\"slots\":{\"items\":{\"bricks\":[{\"brick\":\"span\",\"properties\":{\"classList\":[\"info-label\"],\"textContent\":\"序列号\"}},{\"brick\":\"span\",\"properties\":{\"classList\":[\"info-value\"],\"textContent\":\"<% CTX.DS.instance.sn %>\"}}]}}},{\"brick\":\"div\",\"properties\":{\"classList\":[\"info-row\"]},\"slots\":{\"items\":{\"bricks\":[{\"brick\":\"span\",\"properties\":{\"classList\":[\"info-label\"],\"textContent\":\"软件版本\"}},{\"brick\":\"span\",\"properties\":{\"classList\":[\"info-value\"],\"textContent\":\"<% _.get(CTX.DS.instance, \\\"sysVersion\\\") %>\"}}]}}},{\"brick\":\"div\",\"properties\":{\"classList\":[\"info-row\"]},\"slots\":{\"items\":{\"bricks\":[{\"brick\":\"span\",\"properties\":{\"classList\":[\"info-label\"],\"textContent\":\"管理IP\"}},{\"brick\":\"span\",\"properties\":{\"classList\":[\"info-value\"],\"style\":{\"color\":\"var(--theme-blue-color)\"},\"textContent\":\"<% CTX.DS.instance.ip %>\"}}]}}},{\"brick\":\"div\",\"properties\":{\"classList\":[\"info-row\"]},\"slots\":{\"items\":{\"bricks\":[{\"brick\":\"span\",\"properties\":{\"classList\":[\"info-label\"],\"textContent\":\"端口数量\"}},{\"brick\":\"span\",\"properties\":{\"classList\":[\"info-value\"],\"textContent\":\"<% _.chain(CTX.DS.ifoperstatus).keys().value().length %>\"}}]}}},{\"brick\":\"div\",\"properties\":{\"classList\":[\"info-row\"]},\"slots\":{\"items\":{\"bricks\":[{\"brick\":\"span\",\"properties\":{\"classList\":[\"info-label\"],\"textContent\":\"正常运行时间\"}},{\"brick\":\"span\",\"properties\":{\"classList\":[\"info-value\"],\"textContent\":\"<%\\n  _.chain(moment.duration(_.get(CTX.DS.uptime, \\\"[0].snmp_netware_uptime\\\"), 'seconds'))\\n  .thru(d => ({\\n    d: d.days(),\\n    h: d.hours(),\\n    m: d.minutes(),\\n    s: d.seconds()\\n  }))\\n  .thru(v =>\\n    _.compact([\\n      v.d ? v.d + '天' : '',\\n      v.h ? v.h + '小时' : '',\\n      v.m ? v.m + '分' : '',\\n      (!v.d && !v.h && !v.m ? v.s + '秒' : (v.s ? v.s + '秒' : ''))\\n    ]).join('')\\n  )\\n  .value()\\n%>\\n\"}}]}}}]},\"slots\":{}}",
+   "brickContainerStyle": {},
+   "brickId": "presentational-bricks.dynamic-grid-container",
+   "formData": {
+    "backgroundColor": "#ffffff",
+    "backgroundType": "color",
+    "borderColor": "#ffffff",
+    "borderPaddingBottom": 10,
+    "borderPaddingLeft": 15,
+    "borderPaddingRight": 15,
+    "borderPaddingTop": 10,
+    "borderRadius": 10,
+    "borderType": "solid",
+    "borderWidth": 1,
+    "column": 12,
+    "opacity": 100,
+    "row": 8,
+    "titleFontColor": "#262626",
+    "titleFontSize": 16,
+    "yamlProperties": "containerStyle:\n  gridGap: 4px\nuseBrick:\n  # 样式定义\n  - brick: style\n    properties:\n      textContent: |\n        /* 信息行布局 */\n        .info-row {\n          display: flex;\n          justify-content: space-between;\n          align-items: flex-start;\n        }\n\n        /* 左侧标签 */\n        .info-label {\n          color: #666;\n          font-size: 15px;\n          flex: 0 0 120px;\n          gap: 12px;\n        }\n\n        /* 右侧值 */\n        .info-value {\n          color: #111;\n          font-size: 15px;\n          font-weight: 500;\n          text-align: right;\n          word-break: break-all;\n          display: flex;\n          align-items: center;\n          gap: 12px;\n        }\n\n  - brick: div\n    properties:\n      classList: [ card-label ]\n      style: \n        fontSize: 18px\n        fontWeight: 700\n        marginBottom: 10px\n      textContent: 交换机详细信息\n\n  # 明细行：服务器名称\n  - brick: div\n    properties:\n      classList: [ info-row ]\n    slots:\n      items:\n        bricks:\n          - brick: span\n            properties:\n              classList: [ info-label ]\n              textContent: 设备名称\n          - brick: span\n            properties:\n              classList: [ info-value ]\n              textContent: <% CTX.DS.instance.deviceName %>\n\n  # 型号\n  - brick: div\n    properties:\n      classList: [ info-row ]\n    slots:\n      items:\n        bricks:\n          - brick: span\n            properties:\n              classList: [ info-label ]\n              textContent: 型号\n          - brick: span\n            properties:\n              classList: [ info-value ]\n              textContent: <% CTX.DS.instance.mdl %>\n\n  # 序列号\n  - brick: div\n    properties:\n      classList: [ info-row ]\n    slots:\n      items:\n        bricks:\n          - brick: span\n            properties:\n              classList: [ info-label ]\n              textContent: 序列号\n          - brick: span\n            properties:\n              classList: [ info-value ]\n              textContent: <% CTX.DS.instance.sn %>\n\n  # 软件版本\n  - brick: div\n    properties:\n      classList: [ info-row ]\n    slots:\n      items:\n        bricks:\n          - brick: span\n            properties:\n              classList: [ info-label ]\n              textContent: 软件版本\n          - brick: span\n            properties:\n              classList: [ info-value ]\n              textContent: <% _.get(CTX.DS.instance, \"sysVersion\") %>\n  # 管理IP\n  - brick: div\n    properties:\n      classList: [ info-row ]\n    slots:\n      items:\n        bricks:\n          - brick: span\n            properties:\n              classList: [ info-label ]\n              textContent: 管理IP\n          - brick: span\n            properties:\n              classList: [ info-value ]\n              style:\n                color: var(--theme-blue-color)\n              textContent: <% CTX.DS.instance.ip %>\n  # 端口数量\n  - brick: div\n    properties:\n      classList: [ info-row ]\n    slots:\n      items:\n        bricks:\n          - brick: span\n            properties:\n              classList: [ info-label ]\n              textContent: 端口数量\n          - brick: span\n            properties:\n              classList: [ info-value ]\n              textContent: <% _.chain(CTX.DS.ifoperstatus).keys().value().length %>\n  - brick: div\n    properties:\n      classList: [ info-row ]\n    slots:\n      items:\n        bricks:\n          - brick: span\n            properties:\n              classList: [ info-label ]\n              textContent: 正常运行时间\n          - brick: span\n            properties:\n              classList: [ info-value ]\n              textContent: |\n                <%\n                  _.chain(moment.duration(_.get(CTX.DS.uptime, \"[0].snmp_netware_uptime\"), 'seconds'))\n                  .thru(d => ({\n                    d: d.days(),\n                    h: d.hours(),\n                    m: d.minutes(),\n                    s: d.seconds()\n                  }))\n                  .thru(v =>\n                    _.compact([\n                      v.d ? v.d + '天' : '',\n                      v.h ? v.h + '小时' : '',\n                      v.m ? v.m + '分' : '',\n                      (!v.d && !v.h && !v.m ? v.s + '秒' : (v.s ? v.s + '秒' : ''))\n                    ]).join('')\n                  )\n                  .value()\n                %>\n"
+   },
+   "height": 7,
+   "mode": "yaml",
+   "source": "brick",
+   "titleStyle": {
+    "color": "#262626",
+    "fontSize": 16
+   },
+   "toolbarConf": "\"undefined\"",
+   "type": "brick",
+   "width": 12,
+   "wrapped": true,
+   "wrappedConf": {
+    "background": {
+     "backgroundColor": "#ffffff",
+     "opacity": 100
+    },
+    "backgroundType": "color",
+    "border": {
+     "borderColor": "#ffffff",
+     "borderRadius": 10,
+     "borderWidth": 1,
+     "padding": {
+      "bottom": 10,
+      "left": 15,
+      "right": 15,
+      "top": 10
+     }
+    },
+    "borderType": "solid"
+   },
+   "x": 0,
+   "y": 5
+  },
+  {
+   "brickConf": "{\"brick\":\"presentational-bricks.dynamic-grid-container\",\"properties\":{\"containerStyle\":{\"gridGap\":\"4px\"},\"useBrick\":[{\"brick\":\"style\",\"properties\":{\"textContent\":\".info-label-icon {\\n  display: flex;\\n  align-items: center;\\n  gap: 6px;\\n}\\n\"}},{\"brick\":\"div\",\"properties\":{\"classList\":[\"card-label\"],\"style\":{\"fontSize\":\"18px\",\"fontWeight\":700,\"marginBottom\":\"10px\"},\"textContent\":\"硬件组件状态\"}},{\"brick\":\"div\",\"properties\":{\"classList\":[\"info-row\"]},\"slots\":{\"items\":{\"bricks\":[{\"brick\":\"div\",\"properties\":{\"classList\":[\"info-label info-label-icon\"]},\"slots\":{\"items\":{\"bricks\":[{\"brick\":\"presentational-bricks.basic-icon\",\"properties\":{\"icon\":{\"lib\":\"fa\",\"icon\":\"microchip\",\"prefix\":\"fas\",\"color\":\"var(--theme-blue-color)\"},\"size\":\"15px\"}},{\"brick\":\"span\",\"properties\":{\"textContent\":\"CPU\"}}]}}},{\"brick\":\"div\",\"properties\":{\"classList\":[\"info-value\"]},\"slots\":{\"items\":{\"bricks\":[{\"brick\":\"span\",\"properties\":{\"textContent\":\"<%\\n  _.chain(CTX.DS.cpu_utilization)\\n    .groupBy('snmp_netware_cpu_name')\\n    .mapValues(items => _.maxBy(items, 'time'))\\n    .values()\\n    .meanBy('cpu_utilization')\\n    .thru(v => _.cond([\\n        [x => x <= 70, _.constant(\\\"使用率正常\\\")],\\n        [x => x <= 85 && x > 70, _.constant(\\\"使用率偏高\\\")],\\n        [x => x >= 85, _.constant(\\\"使用率过高\\\")],\\n        [_.stubTrue, _.constant(\\\"未知\\\")]\\n    ])(v))\\n    .value()\\n%>\\n\"}},{\"brick\":\"span\",\"properties\":{\"classList\":[\"<%\\n  _.chain(CTX.DS.cpu_utilization)\\n      .groupBy('snmp_netware_cpu_name')\\n      .mapValues(items => _.maxBy(items, 'time'))\\n      .values()\\n      .meanBy('cpu_utilization')\\n      .thru(v => _.cond([\\n          [x => x <= 70, _.constant(\\\"card-status-dot card-status-dot--normal\\\")],\\n          [x => x <= 85 && x > 70, _.constant(\\\"card-status-dot card-status-dot--warning\\\")],\\n          [x => x >= 85, _.constant(\\\"card-status-dot card-status-dot--error\\\")],\\n          [_.stubTrue, _.constant(\\\"card-status-dot card-status-dot--error\\\")]\\n      ])(v))\\n    .value()\\n%>\\n\"]}}]}}}]}}},{\"brick\":\"div\",\"properties\":{\"classList\":[\"info-row\"]},\"slots\":{\"items\":{\"bricks\":[{\"brick\":\"div\",\"properties\":{\"classList\":[\"info-label info-label-icon\"]},\"slots\":{\"items\":{\"bricks\":[{\"brick\":\"presentational-bricks.basic-icon\",\"properties\":{\"icon\":{\"lib\":\"fa\",\"icon\":\"memory\",\"prefix\":\"fas\",\"color\":\"var(--theme-blue-color)\"},\"size\":\"15px\"}},{\"brick\":\"span\",\"properties\":{\"textContent\":\"内存\"}}]}}},{\"brick\":\"div\",\"properties\":{\"classList\":[\"info-value\"]},\"slots\":{\"items\":{\"bricks\":[{\"brick\":\"span\",\"properties\":{\"textContent\":\"<%\\n_.chain(CTX.DS.memory_utilization)\\n    .groupBy('snmp_netware_memory_name')\\n    .mapValues(items => _.maxBy(items, 'time'))\\n    .values()\\n    .meanBy('memory_utilization')\\n    .thru(v => _.cond([\\n        [x => x <= 75, _.constant(\\\"使用率正常\\\")],\\n        [x => x <= 90 && x > 75, _.constant(\\\"使用率偏高\\\")],\\n        [x => x >= 90, _.constant(\\\"使用率过高\\\")],\\n        [_.stubTrue, _.constant(\\\"未知\\\")]\\n    ])(v))\\n    .value()\\n%>\\n\"}},{\"brick\":\"span\",\"properties\":{\"classList\":[\"<%\\n_.chain(CTX.DS.memory_utilization)\\n    .groupBy('snmp_netware_memory_name')\\n    .mapValues(items => _.maxBy(items, 'time'))\\n    .values()\\n    .meanBy('memory_utilization')\\n    .thru(v => _.cond([\\n        [x => x <= 75, _.constant(\\\"card-status-dot card-status-dot--normal\\\")],\\n        [x => x <= 90 && x > 75, _.constant(\\\"card-status-dot card-status-dot--warning\\\")],\\n        [x => x >= 90, _.constant(\\\"card-status-dot card-status-dot--error\\\")],\\n        [_.stubTrue, _.constant(\\\"card-status-dot card-status-dot--error\\\")]\\n    ])(v))\\n    .value()\\n%>\\n\"]}}]}}}]}}},{\"brick\":\"div\",\"properties\":{\"classList\":[\"info-row\"]},\"slots\":{\"items\":{\"bricks\":[{\"brick\":\"div\",\"properties\":{\"classList\":[\"info-label info-label-icon\"]},\"slots\":{\"items\":{\"bricks\":[{\"brick\":\"presentational-bricks.basic-icon\",\"properties\":{\"icon\":{\"lib\":\"fa\",\"icon\":\"plug\",\"prefix\":\"fas\",\"color\":\"var(--theme-blue-color)\"},\"size\":\"15px\"}},{\"brick\":\"span\",\"properties\":{\"textContent\":\"电源\"}}]}}},{\"brick\":\"div\",\"properties\":{\"classList\":[\"info-value\"]},\"slots\":{\"items\":{\"bricks\":[{\"brick\":\"span\",\"properties\":{\"textContent\":\"<%\\n  CTX.DS.powerstatus.text\\n%>\\n\"}},{\"brick\":\"span\",\"properties\":{\"classList\":[\"<%\\n  CTX.DS.powerstatus.style\\n%>\\n\"]}}]}}}]}}},{\"brick\":\"div\",\"properties\":{\"classList\":[\"info-row\"]},\"slots\":{\"items\":{\"bricks\":[{\"brick\":\"div\",\"properties\":{\"classList\":[\"info-label info-label-icon\"]},\"slots\":{\"items\":{\"bricks\":[{\"brick\":\"presentational-bricks.basic-icon\",\"properties\":{\"icon\":{\"lib\":\"fa\",\"icon\":\"fan\",\"prefix\":\"fas\",\"color\":\"var(--theme-blue-color)\"},\"size\":\"15px\"}},{\"brick\":\"span\",\"properties\":{\"textContent\":\"风扇\"}}]}}},{\"brick\":\"div\",\"properties\":{\"classList\":[\"info-value\"]},\"slots\":{\"items\":{\"bricks\":[{\"brick\":\"span\",\"properties\":{\"textContent\":\"<% CTX.DS.fanstatus.text %>\"}},{\"brick\":\"span\",\"properties\":{\"classList\":[\"<% CTX.DS.fanstatus.style %>\"]}}]}}}]}}},{\"brick\":\"div\",\"properties\":{\"classList\":[\"info-row\"]},\"slots\":{\"items\":{\"bricks\":[{\"brick\":\"div\",\"properties\":{\"classList\":[\"info-label info-label-icon\"]},\"slots\":{\"items\":{\"bricks\":[{\"brick\":\"presentational-bricks.basic-icon\",\"properties\":{\"icon\":{\"lib\":\"fa\",\"icon\":\"thermometer-half\",\"prefix\":\"fas\",\"color\":\"var(--theme-blue-color)\"},\"size\":\"15px\"}},{\"brick\":\"span\",\"properties\":{\"textContent\":\"温度\"}}]}}},{\"brick\":\"div\",\"properties\":{\"classList\":[\"info-value\"]},\"slots\":{\"items\":{\"bricks\":[{\"brick\":\"span\",\"properties\":{\"textContent\":\"<% CTX.DS.temperaturestatus.text %>\"}},{\"brick\":\"span\",\"properties\":{\"classList\":[\"<% CTX.DS.temperaturestatus.style %>\"]}}]}}}]}}}]},\"slots\":{}}",
+   "brickContainerStyle": {},
+   "brickId": "presentational-bricks.dynamic-grid-container",
+   "formData": {
+    "backgroundColor": "#ffffff",
+    "backgroundType": "color",
+    "borderColor": "#ffffff",
+    "borderPaddingBottom": 10,
+    "borderPaddingLeft": 15,
+    "borderPaddingRight": 15,
+    "borderPaddingTop": 10,
+    "borderRadius": 10,
+    "borderType": "solid",
+    "borderWidth": 1,
+    "column": 12,
+    "opacity": 100,
+    "row": 7,
+    "titleFontColor": "#262626",
+    "titleFontSize": 16,
+    "yamlProperties": "containerStyle:\n  gridGap: 4px\nuseBrick:\n  - brick: style\n    properties:\n      textContent: |\n        .info-label-icon {\n          display: flex;\n          align-items: center;\n          gap: 6px;\n        }\n\n  - brick: div\n    properties:\n      classList: [ card-label ]\n      style:\n        fontSize: 18px\n        fontWeight: 700\n        marginBottom: 10px\n      textContent: 硬件组件状态\n\n  # 明细行：CPU\n  - brick: div\n    properties:\n      classList: [ info-row ]\n    slots:\n      items:\n        bricks:\n          - brick: div\n            properties:\n              classList: [ \"info-label info-label-icon\" ]\n            slots:\n              items:\n                bricks:\n                  - brick: presentational-bricks.basic-icon\n                    properties:\n                      icon:\n                        lib: fa\n                        icon: microchip\n                        prefix: fas\n                        color: var(--theme-blue-color)\n                      size: 15px\n                  - brick: span\n                    properties:\n                      textContent: CPU\n          - brick: div\n            properties:\n              classList: [ info-value ]\n            slots:\n              items:\n                bricks:\n                  - brick: span\n                    properties:\n                      textContent: |\n                        <%\n                          _.chain(CTX.DS.cpu_utilization)\n                            .groupBy('snmp_netware_cpu_name')\n                            .mapValues(items => _.maxBy(items, 'time'))\n                            .values()\n                            .meanBy('cpu_utilization')\n                            .thru(v => _.cond([\n                                [x => x <= 70, _.constant(\"使用率正常\")],\n                                [x => x <= 85 && x > 70, _.constant(\"使用率偏高\")],\n                                [x => x >= 85, _.constant(\"使用率过高\")],\n                                [_.stubTrue, _.constant(\"未知\")]\n                            ])(v))\n                            .value()\n                        %>\n                  - brick: span\n                    properties:\n                      classList: \n                        - |\n                          <%\n                            _.chain(CTX.DS.cpu_utilization)\n                                .groupBy('snmp_netware_cpu_name')\n                                .mapValues(items => _.maxBy(items, 'time'))\n                                .values()\n                                .meanBy('cpu_utilization')\n                                .thru(v => _.cond([\n                                    [x => x <= 70, _.constant(\"card-status-dot card-status-dot--normal\")],\n                                    [x => x <= 85 && x > 70, _.constant(\"card-status-dot card-status-dot--warning\")],\n                                    [x => x >= 85, _.constant(\"card-status-dot card-status-dot--error\")],\n                                    [_.stubTrue, _.constant(\"card-status-dot card-status-dot--error\")]\n                                ])(v))\n                              .value()\n                          %>\n\n  # 明细行：内存\n  - brick: div\n    properties:\n      classList: [ info-row ]\n    slots:\n      items:\n        bricks:\n          - brick: div\n            properties:\n              classList: [ \"info-label info-label-icon\" ]\n            slots:\n              items:\n                bricks:\n                  - brick: presentational-bricks.basic-icon\n                    properties:\n                      icon:\n                        lib: fa\n                        icon: memory\n                        prefix: fas\n                        color: var(--theme-blue-color)\n                      size: 15px\n                  - brick: span\n                    properties:\n                      textContent: 内存\n          - brick: div\n            properties:\n              classList: [ info-value ]\n            slots:\n              items:\n                bricks:\n                  - brick: span\n                    properties:\n                      textContent: |\n                        <%\n                        _.chain(CTX.DS.memory_utilization)\n                            .groupBy('snmp_netware_memory_name')\n                            .mapValues(items => _.maxBy(items, 'time'))\n                            .values()\n                            .meanBy('memory_utilization')\n                            .thru(v => _.cond([\n                                [x => x <= 75, _.constant(\"使用率正常\")],\n                                [x => x <= 90 && x > 75, _.constant(\"使用率偏高\")],\n                                [x => x >= 90, _.constant(\"使用率过高\")],\n                                [_.stubTrue, _.constant(\"未知\")]\n                            ])(v))\n                            .value()\n                        %>\n                  - brick: span\n                    properties:\n                      classList: \n                        - |\n                          <%\n                          _.chain(CTX.DS.memory_utilization)\n                              .groupBy('snmp_netware_memory_name')\n                              .mapValues(items => _.maxBy(items, 'time'))\n                              .values()\n                              .meanBy('memory_utilization')\n                              .thru(v => _.cond([\n                                  [x => x <= 75, _.constant(\"card-status-dot card-status-dot--normal\")],\n                                  [x => x <= 90 && x > 75, _.constant(\"card-status-dot card-status-dot--warning\")],\n                                  [x => x >= 90, _.constant(\"card-status-dot card-status-dot--error\")],\n                                  [_.stubTrue, _.constant(\"card-status-dot card-status-dot--error\")]\n                              ])(v))\n                              .value()\n                          %>\n\n  # 明细行：电源\n  - brick: div\n    properties:\n      classList: [ info-row ]\n    slots:\n      items:\n        bricks:\n          - brick: div\n            properties:\n              classList: [ \"info-label info-label-icon\" ]\n            slots:\n              items:\n                bricks:\n                  - brick: presentational-bricks.basic-icon\n                    properties:\n                      icon:\n                        lib: fa\n                        icon: plug\n                        prefix: fas\n                        color: var(--theme-blue-color)\n                      size: 15px\n                  - brick: span\n                    properties:\n                      textContent: 电源\n          - brick: div\n            properties:\n              classList: [ info-value ]\n            slots:\n              items:\n                bricks:\n                  - brick: span\n                    properties:\n                      textContent: |\n                        <%\n                          CTX.DS.powerstatus.text\n                        %>\n                  - brick: span\n                    properties:\n                      classList: \n                        - |\n                          <%\n                            CTX.DS.powerstatus.style\n                          %>\n\n  # 明细行：风扇\n  - brick: div\n    properties:\n      classList: [ info-row ]\n    slots:\n      items:\n        bricks:\n          - brick: div\n            properties:\n              classList: [ \"info-label info-label-icon\" ]\n            slots:\n              items:\n                bricks:\n                  - brick: presentational-bricks.basic-icon\n                    properties:\n                      icon:\n                        lib: fa\n                        icon: fan\n                        prefix: fas\n                        color: var(--theme-blue-color)\n                      size: 15px\n                  - brick: span\n                    properties:\n                      textContent: 风扇\n          - brick: div\n            properties:\n              classList: [ info-value ]\n            slots:\n              items:\n                bricks:\n                  - brick: span\n                    properties:\n                      textContent: <% CTX.DS.fanstatus.text %>\n                  - brick: span\n                    properties:\n                      classList: \n                        - <% CTX.DS.fanstatus.style %>\n\n  # 明细行：温度\n  - brick: div\n    properties:\n      classList: [ info-row ]\n    slots:\n      items:\n        bricks:\n          - brick: div\n            properties:\n              classList: [ \"info-label info-label-icon\" ]\n            slots:\n              items:\n                bricks:\n                  - brick: presentational-bricks.basic-icon\n                    properties:\n                      icon:\n                        lib: fa\n                        icon: thermometer-half\n                        prefix: fas\n                        color: var(--theme-blue-color)\n                      size: 15px\n                  - brick: span\n                    properties:\n                      textContent: 温度\n          - brick: div\n            properties:\n              classList: [ info-value ]\n            slots:\n              items:\n                bricks:\n                  - brick: span\n                    properties:\n                      textContent: <% CTX.DS.temperaturestatus.text %>\n                  - brick: span\n                    properties:\n                      classList: \n                        - <% CTX.DS.temperaturestatus.style %>\n"
+   },
+   "height": 7,
+   "mode": "yaml",
+   "source": "brick",
+   "titleStyle": {
+    "color": "#262626",
+    "fontSize": 16
+   },
+   "toolbarConf": "\"undefined\"",
+   "type": "brick",
+   "width": 12,
+   "wrapped": true,
+   "wrappedConf": {
+    "background": {
+     "backgroundColor": "#ffffff",
+     "opacity": 100
+    },
+    "backgroundType": "color",
+    "border": {
+     "borderColor": "#ffffff",
+     "borderRadius": 10,
+     "borderWidth": 1,
+     "padding": {
+      "bottom": 10,
+      "left": 15,
+      "right": 15,
+      "top": 10
+     }
+    },
+    "borderType": "solid"
+   },
+   "x": 12,
+   "y": 5
+  },
+  {
+   "brickConf": "{\"brick\":\"presentational-bricks.dynamic-grid-container\",\"properties\":{\"containerStyle\":{\"gridGap\":\"4px\"},\"useBrick\":[{\"brick\":\"div\",\"properties\":{\"classList\":[\"card-label\"],\"style\":{\"fontSize\":\"18px\",\"fontWeight\":700,\"marginBottom\":\"10px\"},\"textContent\":\"温度监控趋势\"}},{\"brick\":\"div\",\"properties\":{\"style\":{\"display\":\"flex\",\"justifyContent\":\"center\",\"alignItems\":\"center\",\"width\":\"100%\",\"margin\":\"0 auto\",\"boxSizing\":\"border-box\",\"padding\":\"10px 0\"}},\"slots\":{\"items\":{\"bricks\":[{\"brick\":\"chart-v2.time-series-chart\",\"properties\":{\"style\":{\"width\":\"98%\"},\"groupField\":\"snmp_netware_temperature_name\",\"timeFormat\":\"MM/DD HH:mm\",\"axis\":{\"yAxis\":{\"precision\":2,\"unit\":\"℃\",\"min\":0}},\"data\":\"<% CTX.DS.temperature %>\",\"height\":240,\"showPoint\":false,\"xField\":\"time\",\"yField\":\"temperature\"}}]}}}]},\"slots\":{}}",
+   "brickContainerStyle": {},
+   "brickId": "presentational-bricks.dynamic-grid-container",
+   "formData": {
+    "backgroundColor": "#ffffff",
+    "backgroundType": "color",
+    "borderColor": "#ffffff",
+    "borderPaddingBottom": 10,
+    "borderPaddingLeft": 15,
+    "borderPaddingRight": 15,
+    "borderPaddingTop": 10,
+    "borderRadius": 10,
+    "borderType": "solid",
+    "borderWidth": 1,
+    "column": 24,
+    "opacity": 100,
+    "row": 9,
+    "titleFontColor": "#262626",
+    "titleFontSize": 16,
+    "yamlProperties": "containerStyle:\n  gridGap: 4px\nuseBrick:\n  - brick: div\n    properties:\n      classList: [ card-label ]\n      style:\n        fontSize: 18px\n        fontWeight: 700\n        marginBottom: 10px\n      textContent: 温度监控趋势\n\n  - brick: div\n    properties:\n      style:\n        display: flex\n        justifyContent: center\n        alignItems: center\n        width: \"100%\"\n        margin: \"0 auto\"\n        boxSizing: border-box\n        padding: \"10px 0\"\n    slots:\n      items:\n        bricks:\n          - brick: chart-v2.time-series-chart\n            properties:\n              style:\n                width: \"98%\"\n              groupField: snmp_netware_temperature_name\n              timeFormat: 'MM/DD HH:mm'\n              axis:\n                yAxis:\n                  precision: 2\n                  unit: ℃\n                  min: 0\n              data: <% CTX.DS.temperature %>\n              height: 240\n              showPoint: false\n              xField: time\n              yField: temperature\n"
+   },
+   "height": 9,
+   "mode": "yaml",
+   "source": "brick",
+   "titleStyle": {
+    "color": "#262626",
+    "fontSize": 16
+   },
+   "toolbarConf": "\"undefined\"",
+   "type": "brick",
+   "width": 24,
+   "wrapped": true,
+   "wrappedConf": {
+    "background": {
+     "backgroundColor": "#ffffff",
+     "opacity": 100
+    },
+    "backgroundType": "color",
+    "border": {
+     "borderColor": "#ffffff",
+     "borderRadius": 10,
+     "borderWidth": 1,
+     "padding": {
+      "bottom": 10,
+      "left": 15,
+      "right": 15,
+      "top": 10
+     }
+    },
+    "borderType": "solid"
+   },
+   "x": 0,
+   "y": 21
+  }
+ ],
+ "variables": []
+}

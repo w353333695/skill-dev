@@ -85,8 +85,9 @@ kit_dashboard:
     dashboard_files: "一套件可带多盘：MySQL监控套件 3 盘（InnoDB分析/请求分析/集群状态）各一 json——按分析主题拆盘"
   e2e_note: "路由器监控套件 dashboard（e2e 实战 v1.1.5）：dashboard/概览.json——含两种维度消费模式（见 dim_consume_modes）"
   dim_consume_modes: |
-    🔴【带维度指标的两种消费模式】（2026-10-20 用户导入交换机盘指正，权威参照=_DASHBOARD 用户版
-    概览 6459698b801d2 / 端口状态 6434be6514f37）：
+    🔴【带维度指标的两种消费模式】（2026-10-20 用户导入交换机盘指正）——
+    📌完整盘样例已固化本目录 samples/（交换机监控-概览.json / 交换机监控-端口状态.json，
+    直接 cp 参考不依赖环境 instanceId）：
     模式A【指标独享维度→多序列】：context dims 带 *_name 实体维度 + 图 properties.groupField=<维度字段>
     ——同图按实体自动分多序列（概览盘 CPU 图：groupField: snmp_netware_cpu_name，实测）。
     不设 groupField 则多实体数据无法分层展示。
