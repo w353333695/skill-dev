@@ -196,8 +196,8 @@ items:
   - id: router-monitor-kit
     name: 路由器监控套件(通用)
     category: monitor-kits
-    files: [路由器监控套件_v1.1.7.zip]
-    version: "1.1.7"
+    files: [路由器监控套件_v1.1.8.zip]
+    version: "1.1.8"
     history:
       - {date: "2026-10-19", change: "1.0.0 初版入库（simple-script 型品牌自适应：sysDescr 探测 Cisco/H3C/华为/回退；指标 OID 复用三家品牌套件；mock 冒烟全过；.24 已导入 instanceId 65e2943d3cbf9）"}
       - {date: "2026-10-19", change: "1.0.1：加迈普品牌（MAIPU-SMI 1.3.6.1.4.1.5651——CPU 表/内存标量 OID，使用率缺失按 used/total 计算；风扇/电源/温度无公开 OID 留空；mock 冒烟过；.24 已升级）"}
@@ -210,6 +210,7 @@ items:
       - {date: "2026-10-20", change: "1.1.5：维度消费两模式重构（用户导入交换机盘指正）——A 指标独享维度 groupField 多序列（CPU/内存/风扇/电源）；B 温度传感器下拉（general-select→pushQuery→filters QUERY 联动）温度值+状态双指标共用；盘 _version 6"}
       - {date: "2026-10-20", change: "1.1.6：修 instanceId 引用——<%% %%> 转义残留 12 处还原 <% %>（python % 格式化生成表达式的坑，已立规 expr_escape_pitfall）；盘 _version 7"}
       - {date: "2026-10-20", change: "1.1.7：温度三优化（真机日志驱动）——华为 0 值=无传感器占位一并滤除；H3C 同名 Temperature Sensor 加实体 idx 后缀；UNIS 私有温度表 0 行走 ENTITY-SENSOR-MIB(99 表)兜底；三品牌 mock 复验"}
+      - {date: "2026-10-20", change: "1.1.8：walk_table 复合索引修复（华为风扇 13.1 截尾撞键）；fan/power 名 ENTITY 真名对齐（槽位匹配，fallback FAN slot N）；私有 OID 全空输出 sysObjectID 诊断（UNIS MIB 定位锚点）"}
     scenario: 通用路由器 SNMP 监控——跨品牌统一指标名（CPU/内存/运行时长/风扇/电源/温度/端口状态/入出流量/入出错误）；接口指标走 IF-MIB 全品牌通用；Cisco 内存按 used/(used+free) 计算利用率；迈普 CPU=5651.3.20.1.1.3.5.1.10 内存=.1.9.0（标量）
     notes: "instanceId 65e2943d3cbf9（.24）；目标模型 ROUTER@ONEMODEL；11 指标/3 指标集；OID 来源=Cisco(9.9.109/9.9.48/9.9.13)+H3C(25506.2.6/25506.8.35)+华为(2011.5.25.31)；品牌探测靠 sysDescr 关键字，新品牌加 VENDOR_MAP 条目即可"
     added: "2026-10-19"
