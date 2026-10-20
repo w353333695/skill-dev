@@ -99,6 +99,11 @@ kit_dashboard:
         operator: '==', value: <% QUERY.<参数> %>（端口状态盘 trendData 一个 context 供
         in/out 流量+出入错误四图共用，实测）。
     两种模式可共存（路由器盘：CPU/内存/风扇/电源用 A，温度值+温度状态共用温度传感器选择用 B）。
+  expr_escape_pitfall: |
+    🔴【<% %> 表达式生成坑】（2026-10-20 路由器盘 instanceId 报错实测）：用 python % 格式化生成
+    含 <% %> 表达式的配置时，% 必须转义成 <%% QUERY.xxx %%>——但产物 JSON 落盘前必须还原为
+    <% QUERY.xxx %>！<%% %%> 双百分号残留在 args/properties 里，表达式引擎不识别（QUERY.instanceId
+    解析为空 → 查询报错）。生成器统一用 .format() 或落盘前全局 replace('<%%','<%').replace('%%>','%>')。
   olap_field_pitfall: |
     🔴【OLAP 指标字段名坑×2】（2026-10-19 路由器盘 300303 两轮实测）：
     ① 字段名取套件包 origin_metric.json 的 key 的【下划线化形态】——key 含点号（snmp.netware.cpu_utilization）
