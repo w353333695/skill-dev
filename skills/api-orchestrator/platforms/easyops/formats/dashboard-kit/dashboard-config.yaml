@@ -100,6 +100,13 @@ kit_dashboard:
         operator: '==', value: <% QUERY.<参数> %>（端口状态盘 trendData 一个 context 供
         in/out 流量+出入错误四图共用，实测）。
     两种模式可共存（路由器盘：CPU/内存/风扇/电源用 A，温度值+温度状态共用温度传感器选择用 B）。
+  filter_empty_pitfall: |
+    🔴【模式B 下拉的空值坑】（2026-10-20 路由器盘温度不渲染实测）：filters 里
+    `name: <维度>, operator: '==', value: <% QUERY.<参数> %>` 在 URL 未带该参数时值为空
+    → 查询空 → 绑该 context 的卡片+图全部不渲染（静默空白）。模式B 仅适用于【必须先选才看数】
+    的场景（如交换机端口）；概览盘要默认有数 → 用模式A（groupField 多序列）不要用 filter 联动。
+    若要"默认全量+可选过滤"，filters 值须带空值回退：value: '<% QUERY.tempName ?? "" %>'
+    也不行（=="" 仍匹配空）——OLAP filter 无 nullify 语法，别这么设计。
   expr_escape_pitfall: |
     🔴【<% %> 表达式生成坑】（2026-10-20 路由器盘 instanceId 报错实测）：用 python % 格式化生成
     含 <% %> 表达式的配置时，% 必须转义成 <%% QUERY.xxx %%>——但产物 JSON 落盘前必须还原为
