@@ -83,7 +83,22 @@ kit_dashboard:
       + itemTitle: "集群状态" + fontSize: 10px + showCard: false；通常配 last 类 context（time 粒度粗+last 函数取当前值）。
       panel 常不设 title（卡片文案在 itemTitle），mode: yaml。
     dashboard_files: "一套件可带多盘：MySQL监控套件 3 盘（InnoDB分析/请求分析/集群状态）各一 json——按分析主题拆盘"
-  e2e_note: "路由器监控套件 dashboard（e2e 实战 v1.1.3）：dashboard/概览.json——CPU/内存/温度/风扇/电源趋势+当前值卡"
+  e2e_note: "路由器监控套件 dashboard（e2e 实战 v1.1.5）：dashboard/概览.json——含两种维度消费模式（见 dim_consume_modes）"
+  dim_consume_modes: |
+    🔴【带维度指标的两种消费模式】（2026-10-20 用户导入交换机盘指正，权威参照=_DASHBOARD 用户版
+    概览 6459698b801d2 / 端口状态 6434be6514f37）：
+    模式A【指标独享维度→多序列】：context dims 带 *_name 实体维度 + 图 properties.groupField=<维度字段>
+    ——同图按实体自动分多序列（概览盘 CPU 图：groupField: snmp_netware_cpu_name，实测）。
+    不设 groupField 则多实体数据无法分层展示。
+    模式B【变量（下拉选维度值）作用于多指标】：三件套——
+      ① 选项源 context：dims 带 <维度字段>（time 粗粒度）→ 拉维度值列表；
+      ② 容器嵌 forms.general-select：options: "<% CTX.DS.<选项源> %>"，value: "<% QUERY.<参数> %>"，
+        events.general.select.change → action: history.pushQuery, args: [{"<参数>": "<% EVENT.detail %>"}]
+        （选择即写 URL query）；
+      ③ 目标 context（可多指标共用）：dims 不带该维度，改【filters】: name=<维度字段>,
+        operator: '==', value: <% QUERY.<参数> %>（端口状态盘 trendData 一个 context 供
+        in/out 流量+出入错误四图共用，实测）。
+    两种模式可共存（路由器盘：CPU/内存/风扇/电源用 A，温度值+温度状态共用温度传感器选择用 B）。
   olap_field_pitfall: |
     🔴【OLAP 指标字段名坑×2】（2026-10-19 路由器盘 300303 两轮实测）：
     ① 字段名取套件包 origin_metric.json 的 key 的【下划线化形态】——key 含点号（snmp.netware.cpu_utilization）
