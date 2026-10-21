@@ -196,8 +196,8 @@ items:
   - id: router-monitor-kit
     name: 路由器监控套件(通用)
     category: monitor-kits
-    files: [路由器监控套件_v1.3.2.zip]
-    version: "1.3.2"
+    files: [路由器监控套件_v1.3.3.zip]
+    version: "1.3.3"
     history:
       - {date: "2026-10-19", change: "1.0.0 初版入库（simple-script 型品牌自适应：sysDescr 探测 Cisco/H3C/华为/回退；指标 OID 复用三家品牌套件；mock 冒烟全过；.24 已导入 instanceId 65e2943d3cbf9）"}
       - {date: "2026-10-19", change: "1.0.1：加迈普品牌（MAIPU-SMI 1.3.6.1.4.1.5651——CPU 表/内存标量 OID，使用率缺失按 used/total 计算；风扇/电源/温度无公开 OID 留空；mock 冒烟过；.24 已升级）"}
@@ -217,6 +217,7 @@ items:
       - {date: "2026-10-20", change: "1.3.0：统一端口监控——IF-MIB 8 指标（管理/运行状态、出入流量、错误/丢包）全品牌采集（m_port_* 族注册 origin/alias+端口指标集）；dashboard 端口区模式B（选端口下拉联动状态/流量/错误丢包三图）；UNIS 风扇/电源镜像候选（10519.256.8.35，全空时输出实体扩展表列地图定位）"}
       - {date: "2026-10-21", change: "1.3.1：修端口流量采集不到——HC 表(31.1.1.1.6/.10) 空时回退 32 位 ifIn/ifOutOctets(2.2.1.10/.16)（部分设备无 64 位 HC 表）；双轨冒烟验证"}
       - {date: "2026-10-21", change: "1.3.2：修端口下拉空白——选项源 portOptions 补 transform（lodash 链按 port_name 分组取最新→{label,value}）+outputFields（general-select 消费 {label,value} 数组，原始 OLAP 行无此字段恒空白——交换机端口盘实证写法）；坑入 select_options_pitfall"}
+      - {date: "2026-10-21", change: "1.3.3：盘拆双盘——端口区独立「端口状态」盘（用户决策：选端口 pushQuery 刷新全盘不合理），概览回退纯设备指标；双盘对齐交换机盘结构；盘实例 概览65e2e35b930d1(_v11)/端口65e4f829c0411"}
     scenario: 通用路由器 SNMP 监控——跨品牌统一指标名（CPU/内存/运行时长/风扇/电源/温度/端口状态/入出流量/入出错误）；接口指标走 IF-MIB 全品牌通用；Cisco 内存按 used/(used+free) 计算利用率；迈普 CPU=5651.3.20.1.1.3.5.1.10 内存=.1.9.0（标量）
     notes: "instanceId 65e2943d3cbf9（.24）；目标模型 ROUTER@ONEMODEL；11 指标/3 指标集；OID 来源=Cisco(9.9.109/9.9.48/9.9.13)+H3C(25506.2.6/25506.8.35)+华为(2011.5.25.31)；品牌探测靠 sysDescr 关键字，新品牌加 VENDOR_MAP 条目即可"
     added: "2026-10-19"
