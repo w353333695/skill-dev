@@ -480,18 +480,18 @@ resources:
           type: object
           required: [name, stepList]
           properties:
-            name: { type: string, required: true, description: "流程名称" }
+            name: { type: string, description: "流程名称" }
             type: { type: string, description: "流程类型，默认‘默认’" }
-            stepList: { type: array, required: true, description: "流程步骤；真实结构见 origin_*_flow.json fixture", items: { type: object, additional_properties: true } }
+            stepList: { type: array, description: "流程步骤；真实结构见 origin_*_flow.json fixture", items: { type: object, additional_properties: true } }
             flowInputs: { type: array, description: "流程输入定义（FlowInput[]）", items: { type: object, additional_properties: true } }
             flowOutputs: { type: object, description: "流程输出定义", additional_properties: true }
             tableDefs: { type: array, description: "表格输出定义", items: { type: object, additional_properties: true } }
             flowEnv: { type: array, description: "流程环境变量", items: { type: object, additional_properties: true } }
             metadata: { type: object, description: "元数据，如 desc/type/labels", additional_properties: true }
-            tags: { type: array, description: "流程标签", items: string }
+            tags: { type: array, description: "流程标签", items: { type: string } }
         response: { type: object, description: "标准 wrapper；data 通常含 flowId/version。", properties: { code: { type: integer }, data: { type: object, additional_properties: true } } }
       update:
-        description: "更新已有流程（V2）。高版本接口要求 body 使用 {flow:{...}} 包装；可更新 name/type/vName/stepList/flowInputs/flowOutputs/权限等字段。"
+        description: "更新已有流程（V2）。高版本接口要求 body 使用 {flow:{...}} 包装；当前后端 V2 仅支持有限元数据字段（name/level/type/flowEnv/notice/isSeparated/approvers），不支持 stepList/布局坐标修改。流程版本内容和节点布局需使用后端兼容的流程更新端点。"
         method: PUT
         path: /api/tool_service/v2/flows/{flowId}
         params: { flowId: { in: path, type: string, required: true, pattern: '^[a-fA-F0-9]{32}$', description: "流程 ID" } }
@@ -525,7 +525,7 @@ resources:
         method: POST
         path: /api/tool_service/v1/flows/{flowId}/approval
         params: { flowId: { in: path, type: string, required: true, pattern: '^[a-fA-F0-9]{32}$', description: "流程 ID" } }
-        body: { type: object, required: [version], properties: { version: { type: integer, required: true, description: "版本时间戳" }, comment: { type: string, description: "审批意见（后端按版本支持）" } } }
+        body: { type: object, required: [version], properties: { version: { type: integer, description: "版本时间戳" }, comment: { type: string, description: "审批意见（后端按版本支持）" } } }
         response: { type: object, properties: { code: { type: integer }, data: { type: object, additional_properties: true } } }
   flow_execution:
     description: "异步执行流程和查询任务结果。"
@@ -539,7 +539,7 @@ resources:
           type: object
           required: [flowId]
           properties:
-            flowId: { type: string, required: true, pattern: '^[a-fA-F0-9]{32}$', description: "流程 ID" }
+            flowId: { type: string, pattern: '^[a-fA-F0-9]{32}$', description: "流程 ID" }
             version: { type: integer, description: "版本时间戳；0/不传按默认版本" }
             flowInputs: { type: object, description: "流程输入对象，键名必须匹配 flowInputs；@agents 等目标字段按流程定义填写", additional_properties: true }
             flowEnv: { type: object, description: "本次执行覆盖的流程环境变量", additional_properties: true }
@@ -547,7 +547,7 @@ resources:
             needNotify: { type: boolean, description: "是否通知" }
             parentTaskId: { type: string, description: "父任务 ID" }
             metadata: { type: object, additional_properties: true }
-            tags: { type: array, items: string }
+            tags: { type: array, items: { type: string } }
         response: { type: object, description: "标准 wrapper；data.taskId 为异步任务 ID。", properties: { code: { type: integer }, data: { type: object, properties: { taskId: { type: string } }, additional_properties: true } } }
       get_result:
         description: "查询流程执行完整结果；按 taskId 读取总状态、步骤状态、每主机 outputs。"
