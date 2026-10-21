@@ -278,3 +278,18 @@ expression_framework:
     条件注入过滤   ： <% { ...(QUERY.ns ? {"ns": {"$in": QUERY.ns.split(",")}} : {}) } %>
                       （仅限表达式上下文：cmdb-olap query/transform 等；selectorQuery 禁用，见 syntax_by_field）
   source: "getOlapFiltersArg.yaml + getDefaultArgsOfDataType.yaml 表达式实例 + 现网盘实测（selectorQuery/统计卡踩坑 2026-08-14）"
+
+# =============================================================================
+# 告警规则模板（xlsx 配套，2026-10-21 真机样例校准）
+# =============================================================================
+alert_rule_template:
+  desc: |
+    监控套件配套告警规则模板 = hub monitor-kits <套件>_告警规则模板.xlsx（克隆光纤交换机模板
+    结构：两行表头 + 一行规则，复合告警条件在第 18 列 JSON）。Excel 导入告警规则页。
+  condition_types: |
+    指标条件两种形态（comparator JSON 的 type 键，位于 multiConditions[] 每条内）：
+    · 阈值类 bigger_than/smaller_than：threshold 标量 + comparator.type 同名（info/warning/critical 分级阈值）
+    · 值变化类 diff（🔴状态类指标必用——≠/unequal 会把备用/未启动状态误报，2026-10-21 用户纠偏）：
+      type="diff"，threshold=[x,null] 数组形（null=该级不设阈值=任意跃变），params=[{key:offset,value:0},
+      {key:window,value:8}]，comparators 无 type 键、displayThreshold 同为数组形；alertCount=1（变化即报）
+      recoverCount=3（3点恢复）detectWindow=1。样例真源：用户导出的 system_cpu_total_norm_pct diff 条件。
