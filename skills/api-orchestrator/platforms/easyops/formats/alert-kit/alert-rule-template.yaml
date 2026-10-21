@@ -1,0 +1,59 @@
+# =============================================================================
+# formats/alert-kit/alert-rule-template.yaml
+# 监控套件配套告警规则模板（xlsx）—— 结构/条件类型/导入用法。
+#
+# 归档说明（2026-10-21 用户纠偏）：告警规则模板是独立交付物形态，归 alert-kit，
+# 不挂 dashboard-kit（告警归告警、盘归盘）。xlsx 克隆源=光纤交换机监控模板。
+#
+# 相关文件（本格式包内）：
+#   （暂单文件；xlsx 列结构/条件 JSON/导入流程都在此，避免碎片化）
+# 相关 kit：dashboard-kit/dashboard-config.yaml（盘）；hub monitor-kits（<套件>_告警规则模板.xlsx 落位）
+# =============================================================================
+
+# -----------------------------------------------------------------------------
+# 一、模板形态与落位
+# -----------------------------------------------------------------------------
+template_form:
+  desc: |
+    监控套件配套告警规则模板 = hub/monitor-kits/<套件名>_告警规则模板.xlsx。
+    结构：两行表头 + 一行规则数据（克隆光纤交换机监控_告警规则模板.xlsx 实测结构）。
+    关键列（0 起）：
+      0=模板名称 | 1=资源模型(objectId) | 2=规则名称格式 | 3=优先级
+      17=复合告警条件（multiConditions JSON——核心，见 condition_types）
+      其余：告警条件策略/分组/丰富/通知策略列，从克隆源原样保留。
+  hub_convention: "与套件 zip 同 INDEX 条目 files（参照光纤交换机条目：套件+配套告警 xlsx 两件）"
+  import_usage: "管理端 → 事件中心 → 告警规则 → Excel 导入，选该 xlsx；资源模型列已锁定目标 objectId"
+
+# -----------------------------------------------------------------------------
+# 二、复合告警条件（multiConditions JSON，第 18 列）
+# -----------------------------------------------------------------------------
+condition_types: |
+  指标条件两种形态（multiConditions[] 每条 = 一个指标的告警条件）：
+  · 阈值类 type=bigger_than/smaller_than：threshold 标量 + comparator.type 同名，
+    info/warning/critical 分级阈值（如 CPU 60/70/90）。detectWindow=3、alertCount=3（连续命中）。
+  · 值变化类 type=diff（🔴状态类指标必用——unequal/≠ 会把备用/未启动等稳态误报，2026-10-21 用户纠偏）：
+      "type": "diff",
+      "threshold": [null, null],            // 数组形（阈值类是标量）；null=任意跃变都触发
+      "displayThreshold": [null, null],
+      "params": [{"key":"offset","value":0}, {"key":"window","value":8}],
+      "comparators": [{level, threshold:[x,null], displayThreshold, displayUnit, params, tolerance}]
+                                            // 🔴comparators 内【无 type 键】（与阈值类不同）
+      "alertCount": 1,                       // 🔴必须=1（用户立规：状态突变一旦变化就要告警，
+                                            //   等 N 点漏报/迟报；恢复侧才谈缓冲）
+      "recoverCount": 0,                     // 🔴必须=0=不自动恢复（用户立规：状态反复变化不能
+                                            //   作为恢复条件——防抖恢复会掩盖反复抖动；须人工确认后关闭）
+      "detectWindow": 1
+    样例真源：用户导出的 system_cpu_total_norm_pct diff 条件（2026-10-21）。
+  克隆法：load_workbook 克隆源 → 改第 1 列模型/第 0 列模板名/第 2 列规则名格式/第 18 列条件 JSON → save。
+
+# -----------------------------------------------------------------------------
+# 三、路由器监控模板现行条件（参照实例）
+# -----------------------------------------------------------------------------
+router_example: |
+  当前 hub 落位版本（路由器监控_告警规则模板.xlsx）6 条：
+    snmp_netware_cpu_utilization      bigger_than  info@60/warning@70/critical@90
+    snmp_netware_memory_utilization   bigger_than  info@70/warning@80/critical@90
+    snmp_netware_temperature_val      bigger_than  warning@60/critical@75
+    snmp_netware_fan_status           diff         alert=1/recover=0（任意跃变即报，不自动恢复）
+    snmp_netware_power_status         diff         alert=1/recover=0
+    m_port_oper_status               diff         alert=1/recover=0
