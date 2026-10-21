@@ -2,9 +2,14 @@
 set -e
 
 # 用法：
-#   bash ip.sh 172.30.0.232 172.30.0.233 172.30.0.234
+#   bash iptables-set.sh 172.30.0.232 172.30.0.233 172.30.0.234
 #
-# 也可以传入任意多个 IP
+# 传入任意多个 IP（目标 ip 列表）
+#
+# 目标（2026-10-21 调整）：
+#   · 目标 ip 之间：互访不限制（入出双向全通）
+#   · 目标 ip 对外：只对外开放这些 TCP 端口（PORTS）
+#   · 出站：不限制（OUTPUT 全通——服务端主动出站访问任意地址任意端口）
 
 IP_LIST=("$@")
 PORTS="80,443,5511,8820,1888"
@@ -22,20 +27,17 @@ iptables -Z
 # ====== 默认策略 ======
 iptables -P INPUT DROP
 iptables -P FORWARD DROP
-iptables -P OUTPUT DROP
+iptables -P OUTPUT ACCEPT
 
 # ====== 本地回环 ======
 iptables -A INPUT  -i lo -j ACCEPT
-iptables -A OUTPUT -o lo -j ACCEPT
 
 # ====== 已建立/相关连接 ======
-iptables -A INPUT  -m conntrack --ctstate ESTABLISHED,RELATED -j ACCEPT
-iptables -A OUTPUT -m conntrack --ctstate ESTABLISHED,RELATED -j ACCEPT
+iptables -A INPUT -m conntrack --ctstate ESTABLISHED,RELATED -j ACCEPT
 
-# ====== 参数传入的 IP 之间互访无限制 ======
+# ====== 目标 ip 之间互访无限制（其余目标 ip 进来的流量全放行）======
 for ip in "${IP_LIST[@]}"; do
-  iptables -A INPUT  -s "$ip" -j ACCEPT
-  iptables -A OUTPUT -d "$ip" -j ACCEPT
+  iptables -A INPUT -s "$ip" -j ACCEPT
 done
 
 # ====== 其他来源只允许访问本机这些 TCP 端口 ======
