@@ -20,6 +20,8 @@ app_route:
 
 要点：
 - 每个 uri 逐条放行；未放行 → nginx 405 或网关 `404 no matched uri`（`get servcie addr error,app:<app>,err:no matched uri`）
+- 🔴uri 必须放【对应 app 的 api_list】下（按 uri 的服务归属，不按调用顺序追加）——放错 app 块
+  （如 flowable 的 /api/flowable_service/... 放到 msgsender 下）则该 app 匹配不到 uri 依然 404（2026-10-21 用户纠偏实测）
 - 改完按网关重启/生效流程
 - app key 与前端网关路由名对应（前端 `/next/api/gateway/<app_key>/<uri>`；openapi 网关 `/<app_name>/<uri>`）
 
