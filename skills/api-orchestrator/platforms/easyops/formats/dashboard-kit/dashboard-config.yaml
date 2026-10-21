@@ -292,4 +292,6 @@ alert_rule_template:
     · 值变化类 diff（🔴状态类指标必用——≠/unequal 会把备用/未启动状态误报，2026-10-21 用户纠偏）：
       type="diff"，threshold=[x,null] 数组形（null=该级不设阈值=任意跃变），params=[{key:offset,value:0},
       {key:window,value:8}]，comparators 无 type 键、displayThreshold 同为数组形；alertCount=1（变化即报）
-      recoverCount=3（3点恢复）detectWindow=1。样例真源：用户导出的 system_cpu_total_norm_pct diff 条件。
+      recoverCount=3（3点恢复）detectWindow=1。🔴alertCount 必须=1（2026-10-21 用户立规：状态突变
+      一旦变化就要告警，等 N 个点会漏报/迟报——只在恢复侧用 recoverCount 缓冲防抖）。
+      样例真源：用户导出的 system_cpu_total_norm_pct diff 条件。
