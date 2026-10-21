@@ -234,6 +234,7 @@ object_model.list(查证objectId) → collector_metric.list(查证指标名) →
 - 文件包类型固定为 `4`；工作区上传使用 multipart，提交版本后再查询版本列表。
 - 文件分发使用 `easyflow.deploy.create`，必须用 `easyflow.deploy.get` 查询最终结果。
 - 目标目录必须是专用、可清空目录；不得使用系统目录或已有业务目录。
+- 完成后必须输出前端验收 URL：文件包版本 `/next/file-distrubute/file-pkg/<packageId>/version/<versionId>/file-tree?path=%2F`；部署任务 `/next/file-distrubute/task/<taskId>?type=fileDelivery&event=deploy`。
 
 ### 24 环境实测（2026-10-21）
 

@@ -1084,6 +1084,8 @@ systems:
         proxy: logic.deploy
       package_type: { file: 4, program: 1, config: 2 }
       version_env_type: { dev: 1, test: 3, pre_release: 7, production: 15 }
+    acceptance_urls:
+      file_package_version: "${EASYOPS_CMDB_FRONTEND_URL}/next/file-distrubute/file-pkg/<packageId>/version/<versionId>/file-tree?path=%2F"
 
   # ===========================================================================
   # easyflow —— 文件分发任务与结果查询
@@ -1127,3 +1129,5 @@ systems:
       service_name: logic.easyflow
       file_delivery_type: "4"
       file_delivery_operation: instance.fileDelivery
+    acceptance_urls:
+      deploy_task: "${EASYOPS_CMDB_FRONTEND_URL}/next/file-distrubute/task/<taskId>?type=fileDelivery&event=deploy"

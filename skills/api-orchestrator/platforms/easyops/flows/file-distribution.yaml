@@ -89,6 +89,9 @@ steps:
     action: read
     input: { taskId: "{{distribute_file_package.taskId}}" }
     expect: task status is terminal success and every target package status is successful
+    acceptance_urls:
+      file_package_version: "${EASYOPS_CMDB_FRONTEND_URL}/next/file-distrubute/file-pkg/{{create_package.packageId}}/version/{{commit_version_two.versionId}}/file-tree?path=%2F"
+      deploy_task: "${EASYOPS_CMDB_FRONTEND_URL}/next/file-distrubute/task/{{distribute_file_package.taskId}}?type=fileDelivery&event=deploy"
 rollback:
   - api: easyflow.deploy.terminate
     when: task is still running after timeout
