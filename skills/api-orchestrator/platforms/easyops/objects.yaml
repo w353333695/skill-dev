@@ -2352,3 +2352,43 @@ api_behavior:
     side_effects:
       - op: flow_execution.get_result
         rule: "taskId 不存在或尚未完成时返回服务错误/未完成状态；编排应轮询并设置超时，不能把提交成功当执行成功。"
+
+  artifact_file_package:
+    description: 文件包生命周期对象（artifact 包 type=4）
+    source:
+      - resources/源代码/artifact/pkgservice/route.go
+      - resources/源代码/collector_service/sdk/cmdb_sdk/model/artifact/package.proto
+    api: package
+    fields:
+      packageId: { type: string, anchor: true, desc: 32位包ID }
+      name: { type: string, required: true, desc: 包名称 }
+      type: { type: integer, required: true, desc: 文件包固定为4 }
+      cId: { type: integer, required: true, desc: 包分类ID，合法值依环境提供 }
+      installPath: { type: string, desc: 分发目标目录 }
+      platform: { type: string, desc: 默认linux }
+    side_effects:
+      - op: package.create
+        rule: 创建CMDB制品包实例；同名包会被拒绝。
+      - op: workspace.upload
+        rule: 写入工作区，multipart file字段必填。
+      - op: workspace.commit
+        rule: 提交工作区并创建版本，成功后归档工作区。
+      - op: package.version_delete
+        rule: 删除版本实例，并按deleteFile清理归档；有部署实例的版本可能被拒绝。
+  easyflow_file_delivery:
+    description: EasyFlow 文件分发任务对象
+    source:
+      - resources/源代码/EasyFlow-P/internal/deployModel/deploy.go
+      - resources/源代码/EasyFlow-P/internal/deployController/deploy.go
+    api: deploy
+    fields:
+      taskId: { type: string, anchor: true, desc: 分发任务ID }
+      packageList: { type: array, required: true, desc: 只能包含文件包type=4 }
+      targetList: { type: array, required: true, desc: 目标主机列表 }
+      installPath: { type: string, required: true, desc: 专用可清空目录 }
+      status: { type: string, desc: 任务状态，需查询到终态 }
+    side_effects:
+      - op: deploy.create
+        rule: 创建异步文件分发任务；创建成功不等于分发成功。
+      - op: deploy.get
+        rule: 返回任务、目标及包级状态，用于最终验收。

@@ -1,0 +1,175 @@
+spec: api-cli/v1
+service:
+  name: easyops-artifact
+  version: "1.0"
+  default_endpoint: backend
+  endpoints:
+    backend:
+      base_url: ${EASYOPS_ARTIFACT_BACKEND_URL}
+      host: admin.easyops.local
+      path_prefix: ""
+      auth: none
+      headers:
+        org: ${EASYOPS_ORG}
+        user: ${EASYOPS_USER}
+    gateway:
+      base_url: ${EASYOPS_OPENAPI_GATEWAY_URL}
+      host: admin.easyops.local
+      path_prefix: ""
+      auth: easyops-cookie
+resources:
+  package:
+    description: 制品文件包管理
+    operations:
+      search:
+        description: 搜索制品包；page/pageSize必填
+        method: GET
+        path: /package/search
+        params:
+          category: { in: query, type: string }
+          creator: { in: query, type: string }
+          exact: { in: query, type: boolean }
+          name: { in: query, type: string }
+          order: { in: query, type: string }
+          page: { in: query, type: integer, required: true }
+          pageSize: { in: query, type: integer, required: true }
+          type: { in: query, type: integer }
+      create:
+        description: 创建制品包；文件包type=4
+        method: POST
+        path: /package
+        body:
+          type: object
+          required: [name, type, cId]
+          properties:
+            packageId: { type: string }
+            name: { type: string }
+            type: { type: integer }
+            cId: { type: integer }
+            memo: { type: string }
+            installPath: { type: string }
+            platform: { type: string, default: linux }
+      detail:
+        description: 获取制品包详情
+        method: GET
+        path: /package/package/{packageId}
+        params:
+          packageId: { in: path, type: string, required: true }
+      update:
+        description: 更新制品包
+        method: PUT
+        path: /package/{packageId}
+        params:
+          packageId: { in: path, type: string, required: true }
+        body: { type: object }
+      delete:
+        description: 删除制品包；有版本时默认拒绝
+        method: DELETE
+        path: /package/package/{packageId}
+        params:
+          packageId: { in: path, type: string, required: true }
+          force: { in: query, type: boolean }
+      version_list:
+        description: 查询包版本列表
+        method: GET
+        path: /version/list
+        params:
+          page: { in: query, type: integer }
+          pageSize: { in: query, type: integer }
+          env_type: { in: query, type: integer }
+          name: { in: query, type: string }
+          packageId: { in: query, type: string }
+          versionIds: { in: query, type: string }
+          order: { in: query, type: string }
+      version_delete:
+        description: 批量删除版本；versionIds逗号分隔
+        method: DELETE
+        path: /versions/{packageId}
+        params:
+          packageId: { in: path, type: string, required: true }
+          versionIds: { in: query, type: string, required: true }
+          deleteFile: { in: query, type: boolean }
+      version_name_check:
+        description: 检查版本名
+        method: GET
+        path: /api/artifact/v1/version/check_name/{packageId}
+        params:
+          packageId: { in: path, type: string, required: true }
+          name: { in: query, type: string, required: true }
+      version_service:
+        description: 获取版本仓库服务信息
+        method: GET
+        path: /api/artifact/v1/version/service/{packageId}/{versionId}
+        params:
+          packageId: { in: path, type: string, required: true }
+          versionId: { in: path, type: string, required: true }
+      archive_download:
+        description: 下载版本归档；不传path下载整个归档
+        method: GET
+        path: /archive/{packageId}/{versionId}
+        params:
+          packageId: { in: path, type: string, required: true }
+          versionId: { in: path, type: string, required: true }
+          path: { in: query, type: string }
+          redirect: { in: query, type: boolean }
+        response: { format: binary }
+  workspace:
+    description: 制品包工作区
+    operations:
+      init:
+        description: 初始化工作区；不传versionId使用最新版本
+        method: PUT
+        path: /workspace/{packageId}
+        params:
+          packageId: { in: path, type: string, required: true }
+          versionId: { in: query, type: string }
+      status:
+        description: 查询工作区状态
+        method: GET
+        path: /api/artifact/v1/workspace/status/{packageId}
+        params:
+          packageId: { in: path, type: string, required: true }
+      clear:
+        description: 清空工作区；不可逆
+        method: DELETE
+        path: /workspace/{packageId}
+        params:
+          packageId: { in: path, type: string, required: true }
+      upload:
+        description: 上传文件到工作区；multipart file字段必填
+        method: POST
+        path: /workspace/{packageId}/upload
+        content_type: multipart-form-data
+        params:
+          packageId: { in: path, type: string, required: true }
+          file: { in: formData, format: binary, required: true }
+          path: { in: formData, type: string }
+          encoding: { in: formData, type: string }
+          filenameEncoding: { in: formData, type: string }
+          fileId: { in: formData, type: string }
+          decompress: { in: formData, type: boolean }
+          strip: { in: formData, type: boolean }
+          ignoreCase: { in: formData, type: boolean }
+      commit:
+        description: 提交工作区创建版本
+        method: POST
+        path: /v2/workspace/{packageId}
+        params:
+          packageId: { in: path, type: string, required: true }
+          workspaceBaseId: { in: query, type: string }
+        body:
+          type: object
+          required: [name, message, env_type]
+          properties:
+            name: { type: string }
+            message: { type: string }
+            env_type: { type: integer, enum: [1, 3, 7, 15] }
+            versionId: { type: string }
+            source: { type: object }
+      file_operation:
+        description: 工作区文件操作
+        method: POST
+        path: /v2/workspace/{packageId}/file
+        params:
+          packageId: { in: path, type: string, required: true }
+        body: { type: object }

@@ -1,0 +1,56 @@
+spec: api-cli/v1
+service:
+  name: easyops-easyflow
+  version: "1.0"
+  default_endpoint: backend
+  endpoints:
+    backend:
+      base_url: ${EASYOPS_EASYFLOW_BACKEND_URL}
+      host: admin.easyops.local
+      path_prefix: ""
+      auth: none
+      headers:
+        org: ${EASYOPS_ORG}
+        user: ${EASYOPS_USER}
+    gateway:
+      base_url: ${EASYOPS_OPENAPI_GATEWAY_URL}
+      host: admin.easyops.local
+      path_prefix: ""
+      auth: easyops-cookie
+resources:
+  deploy:
+    description: EasyFlow 文件分发与部署任务
+    operations:
+      create:
+        description: 创建部署/文件分发任务；文件包type=4且不可混包
+        method: POST
+        path: /deployTask
+        body: { type: object, required: [targetList, packageList] }
+      get:
+        description: 查询部署任务最终状态
+        method: GET
+        path: /deployTask/{taskId}
+        params:
+          taskId: { in: path, type: string, required: true }
+      get_list:
+        description: 批量查询部署任务
+        method: GET
+        path: /deployTaskList/{taskIdList}
+        params:
+          taskIdList: { in: path, type: string, required: true }
+      terminate:
+        description: 终止部署任务
+        method: PUT
+        path: /api/easy_flow/deployTask/terminate/{taskId}
+        params:
+          taskId: { in: path, type: string, required: true }
+      changed_list:
+        description: 查询部署变更列表
+        method: POST
+        path: /api/easy_flow/deployTask/changed/list
+        body: { type: object }
+      check_host_config:
+        description: 检查主机配置
+        method: POST
+        path: /api/easy_flow/deployTask/check/host/config
+        body: { type: object }

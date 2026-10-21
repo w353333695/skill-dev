@@ -226,3 +226,23 @@ object_model.list(查证objectId) → collector_metric.list(查证指标名) →
 - 包格式与兼容性：`formats/flow-kit/package-format.yaml`。
 - 24 环境包预处理：`formats/flow-kit/normalize_flow_package.py`；V2 导入链为 `flow_package.import_check` → 人工确认 `flows/tools` → `flow_package.import_v2`。
 - JDK 场景模板：`flows/build-jdk-install-flow.yaml`。
+
+### 文件包分发能力
+
+- API 清单：`easyops-artifact.yaml`、`easyops-easyflow.yaml`
+- 端到端流程：`flows/file-distribution.yaml`
+- 文件包类型固定为 `4`；工作区上传使用 multipart，提交版本后再查询版本列表。
+- 文件分发使用 `easyflow.deploy.create`，必须用 `easyflow.deploy.get` 查询最终结果。
+- 目标目录必须是专用、可清空目录；不得使用系统目录或已有业务目录。
+
+### 24 环境实测（2026-10-21）
+
+- 网关 `/next/api/gateway/...` 当前 cookie 返回 `ERR_UNAUTHENTICATED`；artifact/EasyFlow 编排改走后端直连。
+- artifact 直连：`${EASYOPS_ARTIFACT_BACKEND_URL}`，`Host: admin.easyops.local`，`org/user` 必填。
+- EasyFlow 直连：`${EASYOPS_EASYFLOW_BACKEND_URL}`，`Host: admin.easyops.local`，`org/user` 必填。
+- `artifact.package.search(type=4)` 实测返回现有文件包；`type=4,cId=1` 创建文件包成功。
+- `workspace.init → upload multipart(file,path) → commit(env_type=1)` 成功创建 v1/v2。
+- `version_delete(versionIds=<v1>,deleteFile=true)` 成功，版本列表只剩 v2。
+- `deploy.create` 文件包请求必须使用 `packageList[].type="4"`，目标 `targetList[].targetId` 使用主机 `_uuid`，不能使用 CMDB `instanceId`。
+- `deploy.get` 最终成功判定：任务 `status=ok` 且目标 `code=0`、包级 `code=0`。
+- 本次受控目录：`/opt/knodo-file-distribution-20261021-01`；任务成功：`202610_task18e0946e78a61d8d21b7`。

@@ -1029,3 +1029,101 @@ systems:
 
     acceptance_urls:
       dashboard_view: "${EASYOPS_CMDB_FRONTEND_URL}/next/dashboard/dashboard/v2/<instanceId>?from=<timerange>&_namespace_=<namespace>"   # 仪表盘验收 URL（dashboard CRUD 在 easyops-cmdb，此处关联验收）
+
+  # ===========================================================================
+  # artifact —— 文件包、工作区、版本与归档
+  # ===========================================================================
+  artifact:
+    description: |
+      制品文件包能力。文件包类型为 4；上传走工作区 multipart，提交工作区才生成版本。
+      归档下载/工作区清空涉及文件仓库副作用，详见 objects.yaml 与 flows/file-distribution.yaml。
+    spec: easyops-artifact.yaml
+    default_endpoint: backend
+    endpoints:
+      backend:
+        base_url: ${EASYOPS_ARTIFACT_BACKEND_URL}
+        host: admin.easyops.local
+        path_prefix: ""
+        auth: none
+        headers:
+          org: ${EASYOPS_ORG}
+          user: ${EASYOPS_USER}
+      gateway:
+        base_url: ${EASYOPS_OPENAPI_GATEWAY_URL}
+        host: admin.easyops.local
+        path_prefix: ""
+        auth: easyops-cookie
+    auth: easyops-cookie
+    env:
+      - EASYOPS_OPENAPI_GATEWAY_URL
+      - EASYOPS_ORG
+      - EASYOPS_USER
+    capabilities:
+      package:
+        search: "搜索文件包"
+        create: "创建文件包"
+        detail: "读取文件包详情"
+        update: "更新文件包"
+        delete: "删除文件包"
+        version_list: "查询文件包版本"
+        version_delete: "删除版本并按参数清理归档"
+      workspace:
+        init: "初始化工作区"
+        status: "查询工作区状态"
+        clear: "清空工作区"
+        upload: "上传文件到工作区"
+        commit: "提交工作区创建版本"
+        file_operation: "工作区文件操作"
+    runtime:
+      ports: { frontend: 80, artifact: 8175, deployrepo: 80 }
+      host_header: admin.easyops.local
+      service_names:
+        artifact: logic.artifact
+        archive: logic.deploy.repo.archive
+        workspace: logic.deploy.repo.workspace
+        proxy: logic.deploy
+      package_type: { file: 4, program: 1, config: 2 }
+      version_env_type: { dev: 1, test: 3, pre_release: 7, production: 15 }
+
+  # ===========================================================================
+  # easyflow —— 文件分发任务与结果查询
+  # ===========================================================================
+  easyflow:
+    description: |
+      EasyFlow 部署任务服务。文件包必须以 type=4 单独提交，任务创建成功不等于分发成功，
+      必须继续查询任务状态。源码：resources/源代码/EasyFlow-P。
+    spec: easyops-easyflow.yaml
+    default_endpoint: backend
+    endpoints:
+      backend:
+        base_url: ${EASYOPS_EASYFLOW_BACKEND_URL}
+        host: admin.easyops.local
+        path_prefix: ""
+        auth: none
+        headers:
+          org: ${EASYOPS_ORG}
+          user: ${EASYOPS_USER}
+      gateway:
+        base_url: ${EASYOPS_OPENAPI_GATEWAY_URL}
+        host: admin.easyops.local
+        path_prefix: ""
+        auth: easyops-cookie
+    auth: easyops-cookie
+    env:
+      - EASYOPS_OPENAPI_GATEWAY_URL
+      - EASYOPS_ORG
+      - EASYOPS_USER
+    capabilities:
+      deploy:
+        create: "创建程序包/文件包分发任务"
+        get: "查询分发任务结果"
+        get_list: "批量查询分发任务"
+        terminate: "终止运行中任务"
+        changed_list: "查询部署变更列表"
+        check_host_config: "检查主机配置"
+    runtime:
+      ports: { frontend: 80, easyflow: 8061 }
+      host_header: admin.easyops.local
+      service_name: logic.easyflow
+      file_delivery_type: "4"
+      file_delivery_operation: instance.fileDelivery

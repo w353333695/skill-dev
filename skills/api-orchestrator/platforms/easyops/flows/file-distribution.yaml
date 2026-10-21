@@ -1,0 +1,106 @@
+name: file-package-distribution
+desc: 文件包创建、双版本上传、删除一个版本并执行一次受控文件分发
+trigger: 用户明确要求文件包分发或文件包版本生命周期验证
+systems: [artifact, easyflow]
+steps:
+  - id: create_package
+    api: artifact.package.create
+    action: write
+    input:
+      type: 4
+      name: "{{package_name}}"
+      cId: "{{category_id}}"
+      memo: "{{memo}}"
+      installPath: "{{safe_install_path}}"
+      platform: linux
+    output: packageId
+  - id: init_workspace
+    api: artifact.workspace.init
+    action: write
+    input: { packageId: "{{create_package.packageId}}" }
+  - id: upload_version_one_file
+    api: artifact.workspace.upload
+    action: write
+    input:
+      packageId: "{{create_package.packageId}}"
+      file: "{{file_one}}"
+      path: "/"
+  - id: commit_version_one
+    api: artifact.workspace.commit
+    action: write
+    input:
+      packageId: "{{create_package.packageId}}"
+      name: "{{version_one_name}}"
+      message: "{{version_one_message}}"
+      env_type: 1
+    output: versionId
+  - id: clear_workspace_between_versions
+    api: artifact.workspace.clear
+    action: write
+    confirm: required
+    input: { packageId: "{{create_package.packageId}}" }
+  - id: init_workspace_for_version_two
+    api: artifact.workspace.init
+    action: write
+    input: { packageId: "{{create_package.packageId}}" }
+  - id: upload_version_two_file
+    api: artifact.workspace.upload
+    action: write
+    input:
+      packageId: "{{create_package.packageId}}"
+      file: "{{file_two}}"
+      path: "/"
+  - id: commit_version_two
+    api: artifact.workspace.commit
+    action: write
+    input:
+      packageId: "{{create_package.packageId}}"
+      name: "{{version_two_name}}"
+      message: "{{version_two_message}}"
+      env_type: 1
+    output: versionId
+  - id: list_versions_before_delete
+    api: artifact.package.version_list
+    action: read
+    input: { packageId: "{{create_package.packageId}}", page: 1, pageSize: 20 }
+  - id: delete_version_one
+    api: artifact.package.version_delete
+    action: delete
+    confirm: required
+    input:
+      packageId: "{{create_package.packageId}}"
+      versionIds: "{{commit_version_one.versionId}}"
+      deleteFile: true
+  - id: distribute_file_package
+    api: easyflow.deploy.create
+    action: write
+    confirm: required
+    input:
+      packageList:
+        - packageId: "{{create_package.packageId}}"
+          versionId: "{{commit_version_two.versionId}}"
+          type: "4"
+          installPath: "{{safe_install_path}}"
+          platform: linux
+      targetList: "{{target_list}}"
+    output: taskId
+  - id: wait_distribution_result
+    api: easyflow.deploy.get
+    action: read
+    input: { taskId: "{{distribute_file_package.taskId}}" }
+    expect: task status is terminal success and every target package status is successful
+rollback:
+  - api: easyflow.deploy.terminate
+    when: task is still running after timeout
+  - api: artifact.package.delete
+    when: package was created by this flow and user confirms cleanup
+constraints:
+  - safe_install_path must be a dedicated disposable directory, never a system or existing business directory
+  - package type 4 must not be mixed with type 1 or type 2 packages
+  - deleting a version with deployed instances is rejected by artifact
+source:
+  - resources/源代码/artifact/pkgservice/route.go
+  - resources/源代码/artifact/workspace_custom/route.go
+  - resources/源代码/artifact/version/route.go
+  - resources/源代码/EasyFlow-P/cmd/easy_flow/main.go
+  - resources/源代码/EasyFlow-P/internal/deployModel/deploy.go
