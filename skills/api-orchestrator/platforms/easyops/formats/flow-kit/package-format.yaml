@@ -33,3 +33,15 @@ known_issue:
   workaround: "上传前先展平唯一顶层目录；若仍失败，先调用 /flows/import/check，再将 check 返回的 flows/tools JSON 传给 /flows/v2/import。"
 security:
   note: "流程定义可能包含 webhook URL、凭证或通知地址；导入前必须审查 stepList/input 常量并对外泄露的 token 做轮换。"
+
+layout:
+  source: "24 环境流程手动调整后的 flowId=b8c43e1b9ba914e142423e2a8486fa34 版本=1792593537（前端保存回读证据）"
+  coordinate_fields: ["stepList[]._x", "stepList[]._y", "stepList[]._dx", "stepList[]._dy", "stepList[].styles.width"]
+  horizontal_chain:
+    rule: "同一条主链使用相同 _y；后续节点沿 _x 递增；parents[].sourcePoint=right、targetPoint=left。"
+    observed: "本次手动版：step1 x=288.6033,y=403.5,width=163；step2 x=500,y=403.5,width=135；step3 x=685.5311,y=403.5,width=100；节点边缘间距约 49-51px。"
+  start_node_clearance:
+    rule: "root=true 的首节点不要贴住或覆盖画布开始节点；首节点的 _dx 是相对开始节点的偏移，不能简单设为 0。先在前端拖动首节点避让开始节点，再回读保存后的 _x/_dx 作为模板。"
+    observed: "本次手动版首节点 _x=288.6033、_dx=-188.6033；下游节点 _dx=0。说明开始节点与首节点存在独立偏移关系。"
+  sizing: "styles.width 按节点标题长度保留前端实际值；不要把所有节点强制设成同一宽度，否则会改变前端自动布局和边距。"
+  update_method: "V2 update 当前不支持 stepList/坐标字段；布局调整应通过前端保存或兼容的流程版本更新端点完成，更新后必须 flow.get 回读坐标。"

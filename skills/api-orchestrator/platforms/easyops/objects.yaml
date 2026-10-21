@@ -2333,6 +2333,7 @@ api_behavior:
     api_behavior:
       package_v1_v2: "V1 /flows/import 读取 ._easyPackageConfig.dat；V2 /flows/v2/import 读取 _easyops_flow_info.json + _easyops_tar_meta.json + tool_batch_export.tar.gz。不要混用。"
       package_root: "V2 importer 解压后直接 Join(tempDir, filename)，不递归查找；单一顶层目录必须先展平。规范化工具见 formats/flow-kit/normalize_flow_package.py。"
+      layout: "流程节点布局由 stepList[].x/y/dx/dy/styles.width 和 parents[].sourcePoint/targetPoint 共同决定。水平链建议同一 y、x 递增、边缘间距约 50px；root 首节点必须避开前端开始节点，保留前端保存回读的非零 _dx，不要把首节点 _dx 强制归零。布局调整后必须 flow.get 回读确认。详见 formats/flow-kit/package-format.yaml#layout。"
       import_sequence: "推荐顺序：flow_package.import_check(file) → 人工确认/改名 → flow_package.import_v2(file, flows, tools) → flow.get(flowId) 验证。"
 
   autoops_flow_execution:
