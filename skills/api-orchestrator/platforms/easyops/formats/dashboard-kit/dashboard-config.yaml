@@ -100,6 +100,14 @@ kit_dashboard:
         operator: '==', value: <% QUERY.<参数> %>（端口状态盘 trendData 一个 context 供
         in/out 流量+出入错误四图共用，实测）。
     两种模式可共存（路由器盘：CPU/内存/风扇/电源用 A，温度值+温度状态共用温度传感器选择用 B）。
+  select_options_pitfall: |
+    🔴【下拉选项源必须有 transform→{label,value}】（2026-10-21 路由器盘端口下拉空白实测）：
+    forms.general-select 的 options 消费【{label, value} 对象数组】——选项源 context 若只
+    transform: DATA?.list（原始 OLAP 行没有 label/value 字段），下拉恒空白无法选择。
+    正确姿势（交换机端口盘实证）：transform 用 lodash 链
+    _.chain(DATA?.list).filter(物理口正则).groupBy('<端口维度>').mapValues(items=>_.maxBy(items,'time'))
+    .map(item=>({label: item.<端口维度>, value: item.<端口维度>})).value()
+    + outputFields: [{key:label},{key:value}]。groupBy 取每口最新点=去重。
   filter_empty_pitfall: |
     🔴【模式B 下拉的空值坑】（2026-10-20 路由器盘温度不渲染实测）：filters 里
     `name: <维度>, operator: '==', value: <% QUERY.<参数> %>` 在 URL 未带该参数时值为空
