@@ -196,7 +196,7 @@ items:
   - id: router-monitor-kit
     name: 路由器监控套件(通用)
     category: monitor-kits
-    files: [路由器监控套件_v1.3.3.zip]
+    files: [路由器监控套件_v1.3.3.zip, 路由器监控_告警规则模板.xlsx]
     version: "1.3.3"
     history:
       - {date: "2026-10-19", change: "1.0.0 初版入库（simple-script 型品牌自适应：sysDescr 探测 Cisco/H3C/华为/回退；指标 OID 复用三家品牌套件；mock 冒烟全过；.24 已导入 instanceId 65e2943d3cbf9）"}
@@ -218,6 +218,7 @@ items:
       - {date: "2026-10-21", change: "1.3.1：修端口流量采集不到——HC 表(31.1.1.1.6/.10) 空时回退 32 位 ifIn/ifOutOctets(2.2.1.10/.16)（部分设备无 64 位 HC 表）；双轨冒烟验证"}
       - {date: "2026-10-21", change: "1.3.2：修端口下拉空白——选项源 portOptions 补 transform（lodash 链按 port_name 分组取最新→{label,value}）+outputFields（general-select 消费 {label,value} 数组，原始 OLAP 行无此字段恒空白——交换机端口盘实证写法）；坑入 select_options_pitfall"}
       - {date: "2026-10-21", change: "1.3.3：盘拆双盘——端口区独立「端口状态」盘（用户决策：选端口 pushQuery 刷新全盘不合理），概览回退纯设备指标；双盘对齐交换机盘结构；盘实例 概览65e2e35b930d1(_v11)/端口65e4f829c0411"}
+      - {date: "2026-10-21", change: "配套告警规则模板 xlsx——6 指标条件（CPU 60/70/90、内存 70/80/90、温度 60/75、风扇/电源/端口状态 ≠1 critical）；克隆光纤交换机模板结构（复合告警条件 JSON 列），Excel 导入告警规则页用"}
     scenario: 通用路由器 SNMP 监控——跨品牌统一指标名（CPU/内存/运行时长/风扇/电源/温度/端口状态/入出流量/入出错误）；接口指标走 IF-MIB 全品牌通用；Cisco 内存按 used/(used+free) 计算利用率；迈普 CPU=5651.3.20.1.1.3.5.1.10 内存=.1.9.0（标量）
     notes: "instanceId 65e2943d3cbf9（.24）；目标模型 ROUTER@ONEMODEL；11 指标/3 指标集；OID 来源=Cisco(9.9.109/9.9.48/9.9.13)+H3C(25506.2.6/25506.8.35)+华为(2011.5.25.31)；品牌探测靠 sysDescr 关键字，新品牌加 VENDOR_MAP 条目即可"
     added: "2026-10-19"
