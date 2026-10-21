@@ -2292,3 +2292,62 @@ api_behavior:
     side_effects:
       - op: 查询
         rule: "未命中 contract = 快照内无此服务路由——如实告知用户，禁止猜端口/猜 IP。已剔除 easyops.api.*（网关路由型 port=0）与 deleted=true 条目"
+  # ---------- AutoOps 流程库（flow_basic / flow_execute） ----------
+  autoops_flow:
+    description: "AutoOps 流程定义与版本聚合。流程版本承载 stepList、flowInputs/flowOutputs、flowEnv 和审批/检查信息；真实 wire 样例见 flow-kit package-format 与 backend fixture。"
+    source: "resources/sources/backend/AutoOps/tool_service/internal/types/flow/flow.go:24-120; resources/sources/backend/AutoOps/tool_service/flow_basic/validators/api_validator.go:75-108"
+    api: flow
+    fields:
+      flowId: { type: string, anchor: true, pattern: '^[a-fA-F0-9]{32}$', desc: "流程 ID，服务端生成或导入保留" }
+      name: { type: string, required: true, desc: "流程名称；创建必填" }
+      type: { type: string, default: "默认", desc: "流程类型" }
+      category: { type: string, desc: "流程分类，如 flow" }
+      vName: { type: string, desc: "版本名称" }
+      version: { type: integer, desc: "版本时间戳" }
+      envType: { type: string, enum: [development, production], desc: "版本环境类型；以服务返回值为准" }
+      stepList: { type: array, required: true, items: object, desc: "流程步骤；每个步骤可引用 toolId/vId 或子流程" }
+      flowInputs: { type: array, items: object, desc: "流程输入定义，真实字段见 FlowInput" }
+      flowOutputs: { type: object, additional_properties: true, desc: "流程输出定义" }
+      flowEnv: { type: object, additional_properties: true, desc: "流程环境变量" }
+      metadata: { type: object, additional_properties: true, desc: "流程元数据" }
+      checkInfo: { type: object, additional_properties: true, desc: "执行前校验信息" }
+    relations:
+      - { to: autoops_tool, type: reference, cardinality: "N:M", via: "stepList[].toolId" }
+      - { to: autoops_flow, type: reference, cardinality: "N:M", via: "stepList[].toolId when subtype=flow" }
+    constraints:
+      - "创建接口要求 name、stepList；stepList 中引用的 toolId/vId 必须先从 tool.list/tool.get 查证。"
+      - "执行版本优先使用 versions 返回的具体 version；使用别名时必须确认后端环境支持。"
+    side_effects:
+      - op: flow.create
+        rule: "创建流程及首个版本；name/stepList 缺失由 validator 拒绝，type 不传默认‘默认’。"
+      - op: flow.update
+        rule: "更新已有流程；flowId 必须是 path 参数，body 平铺 Flow，不要包一层 flow。"
+      - op: flow.delete
+        rule: "有版本或引用时可能拒绝；删除前先 versions/get 确认影响。"
+      - op: flow_package.import_v2
+        rule: "V2 导入要求包内 _easyops_flow_info.json、_easyops_tar_meta.json、tool_batch_export.tar.gz 位于解压根部，并提交 import_check 返回的 flows/tools JSON；缺 tool_batch_export.tar.gz 直接 NotFound。"
+      - op: flow_execution.run
+        rule: "异步执行，成功返回 taskId；流程输入必须匹配 flowInputs，目标主机通常放在 @agents。"
+      - op: flow_package.export
+        rule: "导出为 tar.gz 二进制；24 环境已发现单一顶层目录布局与 V2 导入根路径要求不兼容，导入前须规范化。"
+    api_behavior:
+      package_v1_v2: "V1 /flows/import 读取 ._easyPackageConfig.dat；V2 /flows/v2/import 读取 _easyops_flow_info.json + _easyops_tar_meta.json + tool_batch_export.tar.gz。不要混用。"
+      package_root: "V2 importer 解压后直接 Join(tempDir, filename)，不递归查找；单一顶层目录必须先展平。规范化工具见 formats/flow-kit/normalize_flow_package.py。"
+      import_sequence: "推荐顺序：flow_package.import_check(file) → 人工确认/改名 → flow_package.import_v2(file, flows, tools) → flow.get(flowId) 验证。"
+
+  autoops_flow_execution:
+    description: "AutoOps 流程异步执行任务。"
+    source: "resources/sources/backend/AutoOps/tool_service/flow_execute/route.go:3-20; resources/sources/backend/AutoOps/tool_service/flow_execute/validators/api_validator.go:203-255"
+    api: flow_execution
+    fields:
+      taskId: { type: string, anchor: true, desc: "执行任务 ID" }
+      flowId: { type: string, ref: autoops_flow, desc: "被执行流程" }
+      totalStatus: { type: string, desc: "总状态；具体枚举以服务返回为准" }
+      stepStatus: { type: array, items: object, desc: "步骤状态与输出" }
+      outputs: { type: object, additional_properties: true, desc: "流程输出" }
+      flowOutputs: { type: object, additional_properties: true, desc: "声明的流程输出" }
+    relations:
+      - { to: autoops_flow, type: reference, cardinality: "N:1", via: flowId }
+    side_effects:
+      - op: flow_execution.get_result
+        rule: "taskId 不存在或尚未完成时返回服务错误/未完成状态；编排应轮询并设置超时，不能把提交成功当执行成功。"

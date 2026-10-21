@@ -433,3 +433,155 @@ resources:
           properties:
             code: { type: integer }
             data: { type: object, description: "{tools: [{versionId, versionName, importType: create|update, result, ...}]}", additional_properties: true }
+
+# -----------------------------------------------------------------------------
+# 资源 6：flow / flow_version / flow_execution / flow_package —— 流程库管理
+# 来源：resources/sources/backend/AutoOps/tool_service/flow_basic、flow_execute。
+# 与 tool 共用 tool_service:8181、org/user header；流程版本是流程聚合的一部分。
+# -----------------------------------------------------------------------------
+  flow:
+    description: "AutoOps 自动化流程定义与版本。流程对象由元信息 + stepList + 输入输出定义组成；创建要求 name、stepList，type 默认‘默认’。"
+    path: ""
+    operations:
+      list:
+        description: "分页查询流程库；name 模糊匹配，exactType=true 时精确匹配 type；可按 creator/category/tags/权限和是否仅生产版过滤。"
+        method: GET
+        path: /flows
+        params:
+          keyword:       { in: query, type: string, description: "流程名称关键词（网关参数名；后端模型对应 name）" }
+          name:          { in: query, type: string, description: "流程名称关键词（直连后端字段名）" }
+          page:          { in: query, type: integer, description: "页码，从 1 起" }
+          pageSize:      { in: query, type: integer, description: "分页大小" }
+          type:          { in: query, type: string, description: "流程类型/类别" }
+          exactType:     { in: query, type: boolean, description: "是否精确匹配 type" }
+          creator:        { in: query, type: string, description: "创建人" }
+          category:      { in: query, type: string, description: "流程分类" }
+          productionOnly: { in: query, type: boolean, description: "仅返回有生产版本的流程" }
+          execPreAuthOnly: { in: query, type: boolean, description: "仅返回启用执行前校验的流程" }
+          tags:           { in: query, type: string, description: "标签，按后端约定传数组/逗号串" }
+        response:
+          type: object
+          description: "标准 wrapper；data 含 list/total/page/pageSize（具体字段随 withBaseInfo/extraFields 变化）。"
+          properties: { code: { type: integer }, data: { type: object, additional_properties: true } }
+      get:
+        description: "获取流程定义及指定版本的完整 stepList、flowInputs、flowOutputs 等。version/versionMark 为空时按后端默认版本返回。"
+        method: GET
+        path: /flows/{flowId}
+        params:
+          flowId:     { in: path, type: string, required: true, pattern: '^[a-fA-F0-9]{32}$', description: "流程 ID（32 位 hex）" }
+          version:    { in: query, type: integer, description: "版本时间戳；不填使用默认版本" }
+          versionMark: { in: query, type: string, description: "版本别名/标记（如 $latest_production）" }
+        response: { type: object, description: "标准 wrapper，data 为完整 Flow。", properties: { code: { type: integer }, data: { type: object, additional_properties: true } } }
+      create:
+        description: "创建流程定义及首个版本。必填 name、stepList；type 不传默认‘默认’。stepList 中的 toolId/vId 必须先从 tool.list/tool.get 查证。"
+        method: POST
+        path: /flows
+        body:
+          type: object
+          required: [name, stepList]
+          properties:
+            name: { type: string, required: true, description: "流程名称" }
+            type: { type: string, description: "流程类型，默认‘默认’" }
+            stepList: { type: array, required: true, description: "流程步骤；真实结构见 origin_*_flow.json fixture", items: { type: object, additional_properties: true } }
+            flowInputs: { type: array, description: "流程输入定义（FlowInput[]）", items: { type: object, additional_properties: true } }
+            flowOutputs: { type: object, description: "流程输出定义", additional_properties: true }
+            tableDefs: { type: array, description: "表格输出定义", items: { type: object, additional_properties: true } }
+            flowEnv: { type: array, description: "流程环境变量", items: { type: object, additional_properties: true } }
+            metadata: { type: object, description: "元数据，如 desc/type/labels", additional_properties: true }
+            tags: { type: array, description: "流程标签", items: string }
+        response: { type: object, description: "标准 wrapper；data 通常含 flowId/version。", properties: { code: { type: integer }, data: { type: object, additional_properties: true } } }
+      update:
+        description: "更新已有流程（V2）。高版本接口要求 body 使用 {flow:{...}} 包装；可更新 name/type/vName/stepList/flowInputs/flowOutputs/权限等字段。"
+        method: PUT
+        path: /api/tool_service/v2/flows/{flowId}
+        params: { flowId: { in: path, type: string, required: true, pattern: '^[a-fA-F0-9]{32}$', description: "流程 ID" } }
+        body:
+          type: object
+          required: [flow]
+          properties:
+            flow: { type: object, required: [flowId], additional_properties: true, description: "完整 Flow；flowId 必须与 path 一致" }
+        response: { type: object, properties: { code: { type: integer }, data: { type: object, additional_properties: true } } }
+      delete:
+        description: "删除流程定义；有版本或被引用时可能被后端拒绝，先列版本并确认影响。"
+        method: DELETE
+        path: /flows/{flowId}
+        params: { flowId: { in: path, type: string, required: true, pattern: '^[a-fA-F0-9]{32}$', description: "流程 ID" } }
+        response: { type: object, properties: { code: { type: integer }, data: { type: object, additional_properties: true } } }
+      versions:
+        description: "列出流程所有版本，用于获取生产/开发版本、审计和执行前确认。"
+        method: GET
+        path: /flows/{flowId}/versions
+        params:
+          flowId: { in: path, type: string, required: true, pattern: '^[a-fA-F0-9]{32}$', description: "流程 ID" }
+          startTime: { in: query, type: string, description: "起始时间" }
+          endTime: { in: query, type: string, description: "结束时间" }
+          fields: { in: query, type: string, description: "返回字段逗号串，如 vName,vCreator,vDesc,updateTime,version,envType,checkInfo" }
+          order: { in: query, type: string, enum: [asc, desc], description: "版本排序，默认 desc" }
+          vName: { in: query, type: string, description: "版本名过滤" }
+          envType: { in: query, type: string, description: "环境类型过滤" }
+        response: { type: object, properties: { code: { type: integer }, data: { type: object, additional_properties: true } } }
+      approve:
+        description: "提交/处理流程版本审批；version 为必填版本时间戳，具体状态转换由后端审批策略决定。"
+        method: POST
+        path: /api/tool_service/v1/flows/{flowId}/approval
+        params: { flowId: { in: path, type: string, required: true, pattern: '^[a-fA-F0-9]{32}$', description: "流程 ID" } }
+        body: { type: object, required: [version], properties: { version: { type: integer, required: true, description: "版本时间戳" }, comment: { type: string, description: "审批意见（后端按版本支持）" } } }
+        response: { type: object, properties: { code: { type: integer }, data: { type: object, additional_properties: true } } }
+  flow_execution:
+    description: "异步执行流程和查询任务结果。"
+    path: ""
+    operations:
+      run:
+        description: "异步执行流程；必须提供 flowId，返回 taskId。version=0/不传按后端默认版本；flowInputs 为 protobuf Struct 对应 JSON 对象。"
+        method: POST
+        path: /flows/execution
+        body:
+          type: object
+          required: [flowId]
+          properties:
+            flowId: { type: string, required: true, pattern: '^[a-fA-F0-9]{32}$', description: "流程 ID" }
+            version: { type: integer, description: "版本时间戳；0/不传按默认版本" }
+            flowInputs: { type: object, description: "流程输入对象，键名必须匹配 flowInputs；@agents 等目标字段按流程定义填写", additional_properties: true }
+            flowEnv: { type: object, description: "本次执行覆盖的流程环境变量", additional_properties: true }
+            instanceMap: { type: object, description: "实例映射", additional_properties: true }
+            needNotify: { type: boolean, description: "是否通知" }
+            parentTaskId: { type: string, description: "父任务 ID" }
+            metadata: { type: object, additional_properties: true }
+            tags: { type: array, items: string }
+        response: { type: object, description: "标准 wrapper；data.taskId 为异步任务 ID。", properties: { code: { type: integer }, data: { type: object, properties: { taskId: { type: string } }, additional_properties: true } } }
+      get_result:
+        description: "查询流程执行完整结果；按 taskId 读取总状态、步骤状态、每主机 outputs。"
+        method: GET
+        path: /flows/execution/{taskId}
+        params: { taskId: { in: path, type: string, required: true, description: "执行任务 ID" } }
+        response: { type: object, properties: { code: { type: integer }, data: { type: object, additional_properties: true } } }
+      get_status:
+        description: "轻量轮询执行状态；与 get_result 共用 taskId。"
+        method: GET
+        path: /flows/execution/{taskId}
+        params: { taskId: { in: path, type: string, required: true, description: "执行任务 ID" } }
+        response: { type: object, properties: { code: { type: integer }, data: { type: object, additional_properties: true } } }
+  flow_package:
+    description: "流程包导入导出；导出为 tar.gz，导入为 multipart。api-cli 可描述/预览，真调需 curl 或 SDK。"
+    path: ""
+    operations:
+      export:
+        description: "导出流程包二进制 tar.gz（V2）。flowId path，versionId query 可选。api-cli 不保存二进制，使用 --print-curl/curl。"
+        method: GET
+        path: /flows/v2/{flowId}/export
+        params:
+          flowId: { in: path, type: string, required: true, pattern: '^[a-fA-F0-9]{32}$', description: "流程 ID" }
+          versionId: { in: query, type: string, description: "版本 ID/时间戳（按后端导出实现）" }
+        response: { type: file, description: "application/x-gzip tar.gz" }
+      import_check:
+        description: "导入前检查 V2 流程包；multipart 的 file 必填，返回流程/工具冲突检查结果。先调用此接口，再把 flows/tools JSON 传给 import_v2。"
+        method: POST
+        path: /flows/import/check
+        body: { type: multipart, required: [file], description: "file=.flow.tar.gz；包必须含 _easyops_flow_info.json、_easyops_tar_meta.json、tool_batch_export.tar.gz" }
+        response: { type: object, description: "data.flows/data.tools 为后续 import_v2 的选择结果。", properties: { code: { type: integer }, data: { type: object, additional_properties: true } } }
+      import_v2:
+        description: "导入 V2 流程包（推荐）。multipart 必须同时提交 file、tools、flows；先用 flow_package.import_check 获取后两个 JSON。24 环境若导出包带单一顶层目录，先运行 formats/flow-kit/normalize_flow_package.py。"
+        method: POST
+        path: /flows/v2/import
+        body: { type: multipart, required: [file, tools, flows], description: "file=.flow.tar.gz；tools/flows 是 JSON 字符串。" }
+        response: { type: object, properties: { code: { type: integer }, data: { type: object, additional_properties: true } } }

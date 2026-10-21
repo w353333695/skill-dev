@@ -218,3 +218,11 @@ CMDB 确认模型 → 开发套件包(tar.gz) → import → 建4对象 → insp
 object_model.list(查证objectId) → collector_metric.list(查证指标名) → olap_metric.query_v3(试查活性)
 → 组装配置(context+variables+panels) → dashboard.create → 前端 URL 验收 → update 迭代 → delete 清理
 ```
+
+# AutoOps 流程库（flow_basic / flow_execute）
+
+- API 清单：`easyops-autoops.yaml` 的 `flow`、`flow_execution`、`flow_package` 资源；流程更新/导出/导入统一使用 V2 接口。
+- 对象与副作用：`objects.yaml#autoops_flow`、`objects.yaml#autoops_flow_execution`。
+- 包格式与兼容性：`formats/flow-kit/package-format.yaml`。
+- 24 环境包预处理：`formats/flow-kit/normalize_flow_package.py`；V2 导入链为 `flow_package.import_check` → 人工确认 `flows/tools` → `flow_package.import_v2`。
+- JDK 场景模板：`flows/build-jdk-install-flow.yaml`。

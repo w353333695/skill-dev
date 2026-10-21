@@ -267,6 +267,24 @@ entities:
     anchor: true
     used_by: [column_history.aggregate, "dashboard context[cmdb-columndb].args[0].object_ids"]
 
+  # ---- AutoOps 流程库锚字段 ----
+  flow_id:
+    description: 流程定义主键。
+    format: "32 位 hex"
+    pattern: '^[a-fA-F0-9]{32}$'
+    anchor: true
+    used_by: [flow.get, flow.create, flow.update, flow.delete, flow.versions, flow.approve, flow_package.export, flow_execution.run]
+  flow_version:
+    description: 流程版本时间戳；用于 get/execute/approval。
+    format: "Unix 秒级时间戳或服务返回的版本整数"
+    anchor: true
+    used_by: [flow.get, flow.versions, flow.approve, flow_execution.run]
+  flow_task_id:
+    description: 流程异步执行任务 ID。
+    format: "服务返回字符串"
+    anchor: true
+    used_by: [flow_execution.run, flow_execution.get_result]
+
 transitions:
   - from: object_model.list
     pick: objectId
@@ -471,3 +489,22 @@ transitions:
         pick: "data.instanceId"
         to: [dashboard.update, dashboard.delete, 前端URL]
         how: "建盘返回 instanceId——迭代改盘 update 用、验收 URL 用、清理 delete 用"
+
+  - name: flow_package_import_v2
+    desc: "V2 流程包导入：规范化包 → 导入前检查 → 确认冲突 → V2 导入 → 读取验证"
+    steps:
+      - from: flow_package.import_check
+        pick: data.flows
+        to: [flow_package.import_v2]
+        how: "把 flows 检查结果 JSON 序列化为 multipart 字段 flows；data.tools 同理传 tools"
+      - from: flow_package.import_v2
+        pick: data.flowId
+        to: [flow.get, flow.versions]
+        how: "导入返回 flowId 后重新读取流程和版本，确认名称、版本、stepList 与预期一致"
+  - name: flow_execute_e2e
+    desc: "流程执行：flowId/version + flowInputs → taskId → 轮询结果"
+    steps:
+      - from: flow_execution.run
+        pick: data.taskId
+        to: [flow_execution.get_result]
+        how: "保存 taskId，按退避轮询；totalStatus 成功且每个关键步骤成功才算通过"

@@ -1,0 +1,35 @@
+name: easyops-flow-package
+version: 2
+intent: "描述 AutoOps flow.basic V2 导入导出包，并记录 24 环境导出包的兼容性处理。"
+source:
+  backend: "resources/sources/backend/AutoOps/tool_service/flow_basic/flow_basic_service.go:660-835"
+  export: "resources/sources/backend/AutoOps/tool_service/flow_basic/flow_basic_service.go:1160-1335"
+  fixture: "tmp/子目录and文件数量统计-Linuxfbac688008df74e13d3265bc920c9a5a.flow.tar.gz（开发期证据；知识已内联）"
+archive:
+  required_files:
+    - "_easyops_flow_info.json"
+    - "_easyops_tar_meta.json"
+    - "tool_batch_export.tar.gz"
+  optional_files:
+    - "<subFlowId>.json"
+  root_layout: "导入实现要求上述文件直接位于解压目录根部；若 tar.gz 只有一个顶层目录，先用 normalize_flow_package.py 展平。"
+  metadata:
+    _easyops_flow_info.json: "主流程完整定义；含 flowId、name、vName、stepList、flowInputs、envType 等。"
+    _easyops_tar_meta.json: "工具与子流程索引；tools 的 key 为 toolId_versionId，flows 记录子流程。"
+    tool_batch_export.tar.gz: "流程依赖工具的批量工具包；V2 导入缺失该文件会直接返回 NotFound。"
+compatibility:
+  import_endpoint: "/flows/v2/import"
+  multipart_fields:
+    file: "必填，流程包 tar.gz"
+    tools: "必填 JSON 字符串，来自 import_check 返回的工具选择结果；无工具时传 []"
+    flows: "必填 JSON 字符串，来自 import_check 返回的流程选择/改名结果"
+  check_endpoint: "/flows/import/check"
+  legacy_endpoint: "/flows/import"
+  legacy_layout: "仅适用于包含 ._easyPackageConfig.dat 的 V1 包，不适用于本包的 _easyops_flow_info.json + _easyops_tar_meta.json 布局。"
+known_issue:
+  environment: "24"
+  symptom: "导出的包无法直接导入。"
+  evidence: "给定包的 tar 列表显示单一顶层目录 子目录and文件数量统计-Linux/，其下才有三个必需文件。"
+  workaround: "上传前先展平唯一顶层目录；若仍失败，先调用 /flows/import/check，再将 check 返回的 flows/tools JSON 传给 /flows/v2/import。"
+security:
+  note: "流程定义可能包含 webhook URL、凭证或通知地址；导入前必须审查 stepList/input 常量并对外泄露的 token 做轮换。"
