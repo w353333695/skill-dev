@@ -512,6 +512,21 @@ resources:
     path: ""
 
     operations:
+      create:
+        description: |
+          发起工单（StartProcessInstanceV2）。body：serviceId/name/visibleRange/formData/handleWay/
+          source/isSupervision/variables。🔴formData 是【JSON 字符串】（proto string 类型，传数组报
+          400 expects " or n）。openapi 网关调用样例见 formats/openapi-kit/openapi-gateway.md（已验证 uri 清单）。
+        method: POST
+        path: /api/flowable_service/v2/process_instance
+      get:
+        description: |
+          工单详情（前端工单详情页 GetTicketDetail 同款）。返回聚合体 data：ticket(工单主体含
+          formData/status/orderNum)/serviceInstance(服务)/process+processVersion(流程与版本)/
+          progress(流转进度)/allowedOp+stepAllowedOp(当前步骤与可执行操作)/userInfoMap(用户信息)。
+          100005=工单不存在或网关未放行该 uri。
+        method: GET
+        path: /api/flowable_service/v1/ticket/{instanceId}
       list:
         description: 工单搜索（V4 高级搜索）。POST body 含 filter（standard_fields/process_fields 条件）+ 分页参数（token 翻页）。按 Q 模糊搜名称/状态/服务名；按 status/serviceCategory/creator/ctime 等精确过滤。返回 ProcessInstanceBasic 列表 + total + nextToken。
         method: POST
