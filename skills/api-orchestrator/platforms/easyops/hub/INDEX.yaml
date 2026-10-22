@@ -736,9 +736,9 @@ items:
     version: "1.0.0"
     based_on: native-client-install-flow
     history:
-      - {ver: "1.0.0", date: "2026-10-22", change: "另建三工具节点：文件分发、安装、验证；版本选择器仅显示描述与版本名称，保留旧九节点流程"}
+      - {ver: "1.0.0", date: "2026-10-22", change: "改名为“文件自动分发、安装、校验”，保留三工具节点：文件分发、安装、验证；版本选择器仅显示描述与版本名称，保留旧九节点流程"}
     scenario: Linux 客户端安装简版原生 Flow，仅三个工具节点；工具内部完成 CMDB 解析、文件分发、动态最新生产安装工具执行与轮询，复用统一可选安装后验证
-    notes: "24 环境 flowId=e27f9db0f6f27a8be95bf3b73f86624b，最新 version=1792646339；开发态未发布；simple-select 版本字段 description/versionName；原流程保留；真实试跑成功，未实际安装客户端。分发/安装失败时分别输出任务 URL 和日志最后20行，并写入执行详情 msg。"
+    notes: "24 环境 flowId=e27f9db0f6f27a8be95bf3b73f86624b，最新 version=1792650739；开发态未发布；simple-select 版本字段 description/versionName；原流程保留；真实试跑成功，未实际安装客户端。分发/安装失败时分别输出任务 URL 和日志最后20行，并写入执行详情 msg。"
     added: "2026-10-22"
   - id: native-client-install-flow
     name: 客户端安装原生自动化流程
