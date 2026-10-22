@@ -728,3 +728,18 @@ items:
     scenario: 流程表单修改工具源码（冷热库分派+控件解析+备份+diff+回读验证），工具包见 tools/流程表单修改
     notes: "py2/3 兼容 stdlib only；本地直跑可 EASYOPS_CMDB_BACKEND_URL+kv 入参；平台跑走 globals 注入变量"
     added: "2026-09-24"
+
+  - id: native-client-install-flow
+    name: 客户端安装原生自动化流程
+    category: other
+    files:
+    - 自动化流程_客户端安装_1.0.0.zip
+    - 自动化流程_客户端安装_导入说明.md
+    version: 1.0.0
+    history:
+    - ver: 1.0.0
+      date: '2026-10-22'
+      change: 初版：CMDB文件包/主机/工具选择，文件分发、动态最新生产工具执行与轮询、可选进程/端口/版本验证；24环境原生流程成功/失败链已验收
+    scenario: Linux客户端安装：文件包版本分发到多选HOST，调用用户安装工具最新生产版本，统一可选安装后验证；提供EasyOps原生Flow V2导入包
+    notes: 当前24环境flowId=19353f82a4bb2dfae182f1757de4ce9a，version=1792636628；development未发布；实际安装步骤仅/bin/true；包内含两个辅助开发工具；生产安装工具由用户提供。详见包内导入说明与formats/flow-kit/client-install-runtime-notes.md。
+    added: '2026-10-22'

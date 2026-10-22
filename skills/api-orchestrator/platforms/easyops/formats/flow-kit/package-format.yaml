@@ -45,3 +45,6 @@ layout:
     observed: "本次手动版首节点 _x=288.6033、_dx=-188.6033；下游节点 _dx=0。说明开始节点与首节点存在独立偏移关系。"
   sizing: "styles.width 按节点标题长度保留前端实际值；不要把所有节点强制设成同一宽度，否则会改变前端自动布局和边距。"
   update_method: "V2 update 当前不支持 stepList/坐标字段；布局调整应通过前端保存或兼容的流程版本更新端点完成，更新后必须 flow.get 回读坐标。"
+
+runtime_notes:
+  client_install: "client-install-runtime-notes.md（24 环境原生客户端安装实测：CMDB选择器、动态工具调用、CEL对象透传、结果映射、导出兼容）"
