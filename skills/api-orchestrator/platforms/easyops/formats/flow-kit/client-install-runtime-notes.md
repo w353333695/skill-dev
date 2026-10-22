@@ -48,7 +48,7 @@
 
 ## 前端验收 URL 模板
 
-- 流程：`https://{frontend}/next/flow/management/{flowId}/detail?version={version}`
+- 流程：`https://{frontend}/next/flow/{flowId}/detail?version={version}`
 - 文件包版本：`https://{frontend}/next/file-distrubute/file-pkg/{packageId}/version/{versionId}/file-tree?path=%2F`
 - 分发任务：`https://{frontend}/next/file-distrubute/task/{taskId}?type=fileDelivery&event=deploy`
 

@@ -396,7 +396,7 @@ systems:
       tool_list:   "${EASYOPS_AUTOOPS_FRONTEND_URL}/next/tool/management?page=1&category=ITSM&display=card&pageSize=50&type=&q=cmdb"   # q 是后端 name 的别名（模糊匹配 name+memo）；category 含子类
       tool_detail: "${EASYOPS_AUTOOPS_FRONTEND_URL}/next/tool/management/{toolId}/detail?vId={vId}"   # toolId=32hex（≠CMDB instanceId）；vId 不填=最新版本
       flow_list:   "${EASYOPS_AUTOOPS_FRONTEND_URL}/next/flow/management"
-      flow_detail: "${EASYOPS_AUTOOPS_FRONTEND_URL}/next/flow/management/{flowId}/detail?version={version}"
+      flow_detail: "${EASYOPS_AUTOOPS_FRONTEND_URL}/next/flow/{flowId}/detail?version={version}"
       flow_package_format: "formats/flow-kit/package-format.yaml"
       flow_package_normalizer: "formats/flow-kit/normalize_flow_package.py"
 
