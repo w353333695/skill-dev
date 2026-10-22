@@ -2,6 +2,18 @@
 
 记录日期：2026-10-22。范围：24 环境原生 AutoOps Flow + EasyFlow + CMDB。
 
+## 编排默认规范（后续需求优先遵循）
+
+- 不涉及外部接口时，原生流程默认使用工具节点或已有子流程。内部 API 请求、解析、轮询是工具/子流程内部细节，不应为了实现而把业务步骤拆成大量 HTTP 节点。
+- 三节点简版按「文件分发 → 安装 → 验证」组织，全部为工具节点；旧九节点流程保留作为实现细节参考，不再作为默认画布设计。
+- CMDB 实例选择类型输入的显示字段要简洁、可读，通常只留 1–2 个业务字段。文件包版本使用「描述 description、版本名称 versionName」；工具使用 name；主机使用 ip、hostname。不要默认展示业务 ID、instanceId、长哈希和重复字段。
+- displayFields 只影响显示，仍用 instanceId 查询版本、toolId 执行工具，不得把 description/versionName 当执行 ID。
+- 使用上述简洁显示字段时显式配置 cmdbSelector=simple-select；候选过滤按工具输入契约设置 selector=cmdb.range.instance.query、cmdbQuery={defaultInstanceId: [], query: "序列化查询 JSON"}，不要把原始查询对象直接塞到 cmdbQuery 顶层。
+- 分发和动态安装封装工具使用平台注入的 EASYOPS_CMDB_HOST、EASYOPS_EASYFLOW_HOST、EASYOPS_TOOLS_HOST 及租户用户上下文，不硬编码部署 IP。
+- 工具输出可通过 PutStr 返回空白分隔的主机 IP，供后续验证工具的 @agents 使用；该格式由工具执行目标解析器 parseRawAgent 原生支持。不要把未解析的 JSON 字符串直接当 @agents。
+- 24 环境名字服务 EASYOPS_CMDB_HOST 返回单值关联时，_ARTIFACT 可能是对象；直连 CMDB 8079 的同名接口返回数组。工具需把单对象归一成单元素数组后再解析，不要把协议差异当成无关联。
+- Python2 工具中，中文格式串与 JSON 返回的 unicode 字符串拼接时，中文格式串应写为 u"中文 %s"，否则可能在任务已提交后因日志格式化触发 UnicodeDecodeError。不要通过修改全局默认编码规避。
+
 ## 模型与接口
 
 - `_ARTIFACT_VERSION.name` 是版本业务 ID；关联 `_ARTIFACT[0].name` 是文件包业务 ID，不可用 instanceId 直接代替。

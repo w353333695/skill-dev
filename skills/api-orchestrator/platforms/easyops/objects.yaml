@@ -265,7 +265,7 @@ objects:
       selector:     { type: string, desc: "前端选择器类型；带范围过滤的实例选择用 cmdb.range.instance.query（配 cmdbQuery），2026-08-26 fintech 工具实测" }
       cmdbSelector: { type: string, desc: "实例选择器样式：cmdb（默认全功能）/ simple-select（简表选择）" }
       cmdbQuery:    { type: object, desc: "实例候选过滤。⚠️格式 {defaultInstanceId: [], query: \"<JSON字符串>\"}——query 是【序列化后的 v2 search query JSON 字符串】非嵌套对象（塞嵌套 dict 前端不识别）。操作符用 $like（如 {\\\"$and\\\":[{\\\"$or\\\":[{\\\"objectId\\\":{\\\"$like\\\":\\\"%@FINTECHDATA%\\\"}}]}]}）——【$regex 不支持】（实测前端不认，2026-08-26）" }
-      cmdbOptionSetting: { type: object, desc: "simple-select 样式的列配置：{displayFields: [展示属性id...], sortFields: [排序属性id...], sort: \"asc|desc|\"}" }
+      cmdbOptionSetting: { type: object, desc: "simple-select 样式的列配置：{displayFields: [展示属性id...], sortFields: [排序属性id...], sort: \"asc|desc|\"}，应配合 cmdbSelector=simple-select 显式使用。CMDB 实例选择器的显示字段默认简洁、可读，通常 1–2 个业务字段；不要默认展示内部 ID、长哈希或重复信息。文件包版本优先 description、versionName；工具优先 name；主机优先 ip、hostname。" }
       primitive:    { type: bool, desc: "是否原始类型入参（string/enum 等为 true；cmdbInstance(s) 为 false）" }
     constraints:
       - "cmdbQuery.query 用 $like 做包含匹配（'%xxx%'），不支持 mongo $regex（实测静默失效）"
@@ -2317,6 +2317,8 @@ api_behavior:
     constraints:
       - "创建接口要求 name、stepList；stepList 中引用的 toolId/vId 必须先从 tool.list/tool.get 查证。"
       - "执行版本优先使用 versions 返回的具体 version；使用别名时必须确认后端环境支持。"
+      - "原生流程不涉及外部接口时，步骤类型默认使用工具或已有子流程；平台内部 API 调用、参数解析和状态轮询封装到工具/子流程内，不拆成大量 HTTP 节点。只有确需对接外部接口时才按需使用 HTTP 节点。"
+      - "CMDB 实例选择类型输入的显示字段遵循 autoops_tool_input.cmdbOptionSetting 的简洁可读规则；业务显示字段与实际提交的 instanceId/toolId 分离，不能为可读性修改锚字段。"
     side_effects:
       - op: flow.create
         rule: "创建流程及首个版本；name/stepList 缺失由 validator 拒绝，type 不传默认‘默认’。"

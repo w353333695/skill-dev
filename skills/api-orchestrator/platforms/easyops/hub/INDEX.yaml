@@ -729,6 +729,17 @@ items:
     notes: "py2/3 兼容 stdlib only；本地直跑可 EASYOPS_CMDB_BACKEND_URL+kv 入参；平台跑走 globals 注入变量"
     added: "2026-09-24"
 
+  - id: native-client-install-simple-flow
+    name: 客户端安装原生自动化流程（三节点简版）
+    category: other
+    files: [自动化流程_客户端安装三节点简版_1.0.0.zip, 自动化流程_客户端安装三节点简版_导入说明.md]
+    version: "1.0.0"
+    based_on: native-client-install-flow
+    history:
+      - {ver: "1.0.0", date: "2026-10-22", change: "另建三工具节点：文件分发、安装、验证；版本选择器仅显示描述与版本名称，保留旧九节点流程"}
+    scenario: Linux 客户端安装简版原生 Flow，仅三个工具节点；工具内部完成 CMDB 解析、文件分发、动态最新生产安装工具执行与轮询，复用统一可选安装后验证
+    notes: "24 环境 flowId=e27f9db0f6f27a8be95bf3b73f86624b，version=1792639301；开发态未发布；simple-select 版本字段 description/versionName；原流程保留；真实试跑成功，未实际安装客户端。"
+    added: "2026-10-22"
   - id: native-client-install-flow
     name: 客户端安装原生自动化流程
     category: other

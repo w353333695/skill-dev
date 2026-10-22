@@ -48,3 +48,8 @@ layout:
 
 runtime_notes:
   client_install: "client-install-runtime-notes.md（24 环境原生客户端安装实测：CMDB选择器、动态工具调用、CEL对象透传、结果映射、导出兼容）"
+
+authoring_defaults:
+  node_types: "不涉及外部接口时默认使用工具节点或已有子流程；内部服务调用与轮询封装在工具/子流程，不为每个 API 请求创建 HTTP 节点。外部接口才按需使用 HTTP。"
+  cmdb_selector: "显示字段保持简洁，通常 1–2 个可读业务字段，不堆砌内部 ID/长哈希；文件包版本使用 description、versionName，工具使用 name，主机使用 ip、hostname。显示字段不改变执行锚字段。"
+  client_install: "推荐三节点：文件分发 → 安装 → 验证，全部 subtype=tool。保留旧流程，不为简化界面删除已有流程。"
