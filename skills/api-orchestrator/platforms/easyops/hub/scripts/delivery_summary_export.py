@@ -682,7 +682,9 @@ def _collect_collector_job(client: EasyOpsClient, host: str,
         rows.append({
             "模块": module,
             "类别": category,
-            "名称": ins.get("name") or iid,
+            # _COLLECTOR_JOB 的正式任务名字段是 jobName；部分旧数据仍使用 name。
+            # 实例 ID 只用于 URL，不作为交付清单中的显示名称。
+            "名称": ins.get("jobName") or ins.get("name") or "未命名采集任务",
             "URL": url_fn(host, iid),
             "描述": ins.get("description") or ins.get("objectId") or "",
         })
@@ -747,18 +749,47 @@ def collect_flow(client: EasyOpsClient, host: str) -> List[Dict]:
     return rows
 
 
+def _scheduler_task_text(task: Dict) -> str:
+    """拼接定时任务的分类/来源信息，用于识别巡检任务。"""
+    cmd_config = task.get("cmd_config") or task.get("cmdConfig") or {}
+    values = [
+        task.get("category"), task.get("job_type"), task.get("jobType"),
+        task.get("assignner"), task.get("origin"), task.get("src_id"),
+        task.get("srcId"), task.get("name"), task.get("task_name"),
+        cmd_config.get("service_name"), cmd_config.get("serviceName"),
+        cmd_config.get("url"),
+    ]
+    return " ".join(str(value).lower() for value in values if value not in (None, ""))
+
+
+def _is_inspection_scheduler_task(task: Dict) -> bool:
+    """巡检服务创建的任务可由 category、服务名或回调路径识别。"""
+    text = _scheduler_task_text(task)
+    return "inspection" in text or "巡检" in text
+
+
+def _is_archived_scheduler_task(task: Dict) -> bool:
+    """排除调度服务返回的归档标记，兼容 bool、字符串和状态字段。"""
+    if task.get("archived") is True or task.get("isArchived") is True:
+        return True
+    status = str(task.get("status") or "").strip().lower()
+    return status in {"archived", "archive", "deleted"}
+
+
 def collect_scheduler_task(client: EasyOpsClient, host: str) -> List[Dict]:
-    """自动化 - 定时任务（URL 使用任务 id）"""
+    """自动化 - 定时任务（排除巡检和归档任务，URL 使用任务 id）。"""
     rows = []
     insts = client.search_instances("_SCHEDULER_TASK@EASYOPS")
     for ins in insts:
         task_id = ins.get("id")
         if not task_id:
             continue
+        if _is_inspection_scheduler_task(ins) or _is_archived_scheduler_task(ins):
+            continue
         rows.append({
             "模块": "自动化",
             "类别": "定时任务",
-            "名称": ins.get("name") or task_id,
+            "名称": ins.get("name") or ins.get("task_name") or "未命名定时任务",
             "URL": _url_scheduler_task(host, task_id),
             "描述": ins.get("memo") or ins.get("description") or "",
         })
