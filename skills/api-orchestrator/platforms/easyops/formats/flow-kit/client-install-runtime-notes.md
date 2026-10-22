@@ -62,3 +62,4 @@
 - tool_service/static/objects/objects.json：工具配置模型 ID。
 - tool_service/flow_basic/flow_basic_service.go：V2 导出、默认工具版本查询及导入包结构。
 - tool_service/import_export/route.go、custom_controller.go：指定工具版本批量导出。
+- 中文错误与日志可能以字面量 `\\uXXXX` 返回，工具在截取日志和组装异常前应先解码；Python 2 不要直接 `raise RuntimeError(unicode_text)`，应将最终异常消息编码为 UTF-8 bytes，避免平台 `str()` 失败后再次展示成 Unicode 转义。
