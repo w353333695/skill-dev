@@ -13,6 +13,9 @@
 - 工具输出可通过 PutStr 返回空白分隔的主机 IP，供后续验证工具的 @agents 使用；该格式由工具执行目标解析器 parseRawAgent 原生支持。不要把未解析的 JSON 字符串直接当 @agents。
 - 24 环境名字服务 EASYOPS_CMDB_HOST 返回单值关联时，_ARTIFACT 可能是对象；直连 CMDB 8079 的同名接口返回数组。工具需把单对象归一成单元素数组后再解析，不要把协议差异当成无关联。
 - Python2 工具中，中文格式串与 JSON 返回的 unicode 字符串拼接时，中文格式串应写为 u"中文 %s"，否则可能在任务已提交后因日志格式化触发 UnicodeDecodeError。不要通过修改全局默认编码规避。
+- 失败诊断：失败工具的结构化 outputs 可能只保留已写入的任务 ID，流程层 error 也可能只显示通用的 tool exec error。需要把失败任务 URL 和日志最后 20 行同时写入工具的输出参数，并拼入抛出的 RuntimeError；平台执行详情的 `msg` 会保留这些参数标记和可读失败上下文。
+- 分发失败 URL 格式固定为 `https://{frontend}/next/file-distrubute/task/{taskId}?type=fileDelivery&event=deploy`；安装失败 URL 格式固定为 `https://{frontend}/next/tool/task/{execId}`。本次 24 环境前端基址为 `https://192.168.110.24`。
+- 部署日志从 `/deployTask/{taskId}` 的各 target `msg` 汇总后取最后 20 行；工具日志从 `/tools/execution/logs/{execId}` 读取后取最后 20 行。取日志失败时仍输出任务 URL 和失败原因，不能覆盖原始任务失败。
 
 ## 模型与接口
 
