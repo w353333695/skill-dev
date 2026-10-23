@@ -13,8 +13,8 @@ esayops应用配置修改（EasyOps 应用/组件配置修改工具）
 "current path is not a valid package"(2004)；`easyops restart agent` 位置参数同样报错。
 自动推导：<配置文件在 组件根/conf/ 下 → 组件根=上两级>；restart_dir 入参可显式覆盖。
 
-定位规则（config_item 入参）：
-    · 默认 "ip" —— 修改配置文件【所有深度】的 ip 键（command/report/collector_agent/
+定位规则（batch 每行的配置项）：
+    · "ip" —— 修改配置文件【所有深度】的 ip 键（command/report/collector_agent/
       plugin_manager 各 server_groups.hosts 全部命中）
     · "xx.yy.zz" 点路径精确指定——支持任意深度；路径中的纯数字段匹配列表索引
       （如 command.server_groups.0.hosts.0.ip 精确第一组第一台）；
@@ -22,16 +22,14 @@ esayops应用配置修改（EasyOps 应用/组件配置修改工具）
       = 该子树下所有 hosts 的 ip）
 
 入参（平台注入 globals 同名变量）：
-    batch        批量修改，多行文本，每行 "配置项=修改值"（空行与 # 注释忽略），如：
+    batch        批量修改（必填，多行字符串），每行 "配置项=修改值"（空行与 # 注释忽略），如：
                      ip=10.1.2.3
                      org=1888
                      command.server_groups.hosts.ip=10.1.2.9
-                 填了 batch 时忽略 config_item/value。批量语义（整体事务）：
+                 批量语义（整体事务）：
                  任一项未命中 / 多项命中同一行（冲突）→ 整体不落盘直接报错；
                  全部通过后只备份一次、批量替换、统一回读校验，最后只执行一次 init+restart；
                  任一校验失败整体从备份恢复，不重启。
-    config_item  配置项（单条模式），字符串，默认 "ip"（全深度 ip 键；或 xx.yy.zz 点路径精确指定）
-    value        修改值（单条模式），字符串，动作=修改 时必填（原样写入；含 " #" 时请加引号）
     action       动作，枚举 预览/修改，默认 预览——预览=列出命中项当前值不改动；
                  修改=备份→替换→回读验证→easyops init→easyops restart
     conf_path    配置文件完整路径，字符串，可选——默认按平台自动探测
@@ -310,37 +308,30 @@ def main():
         action = u'修改' if action else u'预览'
     conf_path = _to_unicode(g.get('conf_path') or g.get('confPath') or '') or detect_conf_path()
     restart_dir_in = _to_unicode(g.get('restart_dir') or g.get('restartDir') or '')
-    batch_raw = _to_unicode(g.get('batch') or '')
-    if not isinstance(batch_raw, _string_types):
-        batch_raw = _string_types[0](batch_raw)
+    batch_raw = g.get('batch')
+    if isinstance(batch_raw, (list, tuple)):
+        batch_raw = u'\n'.join(_to_unicode(x) for x in batch_raw)
+    else:
+        batch_raw = _to_unicode(batch_raw or '')
+        if not isinstance(batch_raw, _string_types):
+            batch_raw = _string_types[0](batch_raw)
 
     if action not in (u'预览', u'修改'):
         put_str('report', u'❌ 动作必须是 预览 或 修改，当前：%r' % action)
         return 1
 
-    mode_batch = bool(batch_raw.strip())
-    if mode_batch:
-        items, errors = parse_batch_items(batch_raw, allow_empty_value=(action == u'预览'))
-        if errors:
-            put_str('report', u'❌ batch 解析失败，未做任何修改：\n  ' + u'\n  '.join(errors) +
-                    u'\n格式：每行 "配置项=修改值"，如 ip=10.1.2.3；空行与 # 注释会被忽略。')
-            return 1
-        if not items:
-            put_str('report', u'❌ batch 为空（只含空行/注释），未做任何修改。')
-            return 1
-    else:
-        config_item = _to_unicode(g.get('config_item') or g.get('Config_item') or 'ip')
-        if not isinstance(config_item, _string_types):
-            config_item = _string_types[0](config_item)
-        config_item = config_item.strip() or 'ip'
-        new_value = _to_unicode(g.get('value') or g.get('new_value') or '')
-        if not isinstance(new_value, _string_types):
-            new_value = _string_types[0](new_value)
-        new_value = new_value.strip()
-        if action == u'修改' and not new_value:
-            put_str('report', u'❌ 动作=修改 时必须提供修改值（value，或改用 batch 多行写法）')
-            return 1
-        items = [(config_item, new_value)]
+    if not batch_raw.strip():
+        put_str('report', u'❌ 批量修改内容为空。请按多行格式填写，每行 "配置项=修改值"，如：\n'
+                u'  ip=10.1.2.3\n  org=1888\n（空行与 # 注释会被忽略）')
+        return 1
+    items, errors = parse_batch_items(batch_raw, allow_empty_value=(action == u'预览'))
+    if errors:
+        put_str('report', u'❌ batch 解析失败，未做任何修改：\n  ' + u'\n  '.join(errors) +
+                u'\n格式：每行 "配置项=修改值"，如 ip=10.1.2.3；空行与 # 注释会被忽略。')
+        return 1
+    if not items:
+        put_str('report', u'❌ batch 为空（只含空行/注释），未做任何修改。')
+        return 1
 
     if not os.path.isfile(conf_path):
         put_str('report', u'❌ 配置文件不存在：%s（可用 conf_path 入参指定完整路径）' % conf_path)
@@ -358,7 +349,7 @@ def main():
         if not tg:
             missing.append(key)
 
-    scope = u'批量 %d 项' % len(items) if mode_batch else u'配置项 %s' % items[0][0]
+    scope = u'批量 %d 项' % len(items)
 
     if action == u'预览':
         out = [u'预览（未做任何修改）——%s @%s：' % (scope, conf_path)]
@@ -368,7 +359,7 @@ def main():
                 out.append(u'  行%-4d %s = %s%s' % (no, full, cur, (u' → ' + val) if val else u''))
         if missing:
             out.append(u'⚠️ 修改模式下未命中会直接报错且整体不落盘：%s' % u', '.join(missing))
-        out.append(u'（执行修改：action=修改 + batch=<每行 配置项=修改值>；全部通过后统一备份、只执行一次 easyops init && easyops restart）')
+        out.append(u'（执行修改：action=修改 + 填写「批量修改」多行内容，每行 配置项=修改值；全部通过后统一备份、只执行一次 easyops init && easyops restart）')
         put_str('report', u'\n'.join(out))
         return 0
 
