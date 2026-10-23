@@ -52,7 +52,8 @@ description: 通用 API 编排 skill——自然语言需求 → 跨系统调用
        · 确认挡：查资料 → (search) → 展示确认 → 写 → 答（建/改类补完结交付）
        · 规划挡：解析需求 → 查 entities/objects/flows → 生成 plan → 确认 → 分步执行 → 接线 → 校验 → (失败)回滚
        · 完结交付（建/改/开发类默认收尾）：前端验收 URL + 离线交付物（{类别}_{名称}_{版本}.{ext}，
-         含导入说明）+ 导入方式提示——见 references/hub.md「完结交付」；纯查询/删除不触发
+         含导入说明）+ 导入方式提示 + tmp 双落盘（版本化副本 + .sha256，与 hub 包字节一致）
+         ——见 references/hub.md「完结交付」；纯查询/删除不触发
 ```
 
 ### 步 0 详解：环境就绪门禁（防 LLM 猜环境拼凑）
@@ -130,4 +131,4 @@ skill 两种模式，决定能否写 `platforms/`：
 - **onboarding 输入门禁**：契约 / API 文档 / 后端源码至少一个才开工；缺则停下问用户（详见 `references/onboarding.md` 步 1）。
 - **产物用 lint 自检**：onboarding 或更新 platforms 后跑 `scripts/lint-platforms.py <deployment>`，**0 ERR 才合格**（校验 schema + 引用闭合；详见 onboarding.md 步 7）。
 - **开发前查 hub、成品回流 hub**：涉及套件/脚本/工具开发的需求，规划挡开工前先读 `hub/INDEX.yaml` 查重（命中→复用/改造，未命中→开发后回流）；成品交付时落 `hub/<category>/` + 登记 INDEX（含 history 变更行）。详见 `references/hub.md`。
-- **完结交付三件套（建/改/开发类默认收尾）**：① 前端验收 URL（systems.yaml `acceptance_urls` 模板填实际 id）② 离线交付物（中文三段式命名 `{类别}_{名称}_{版本}.{ext}`，包内附导入说明）③ 导入方式提示。onboarding 录新域时必须提供 acceptance_urls + 导出说明（纯后端域可显式豁免），否则编排完结交不出。详见 `references/hub.md`「完结交付」+ `references/onboarding.md` 步 7。
+- **完结交付四件套（建/改/开发类默认收尾）**：① 前端验收 URL（systems.yaml `acceptance_urls` 模板填实际 id）② 离线交付物（中文三段式命名 `{类别}_{名称}_{版本}.{ext}`，包内附导入说明）③ 导入方式提示 ④ **tmp 双落盘**（`tmp/{类别}_{名称}_{版本}.{ext}` 版本化副本 + `.sha256`，用 `cp` 复制 hub 包并用 sha256 核对一致——hub 内是无版本名，tmp 是用户直达下载位，不可漏）。onboarding 录新域时必须提供 acceptance_urls + 导出说明（纯后端域可显式豁免），否则编排完结交不出。详见 `references/hub.md`「完结交付」+ `references/onboarding.md` 步 7。

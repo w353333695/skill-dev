@@ -194,7 +194,7 @@ uncovered:                            # 强制输出「我覆盖到了什么 / �
 - **成品回流 hub**：本次交付若产出可导入/可部署成品（套件包/脚本/工具），按 `references/hub.md` 回流流程落 `hub/<category>/` + 登记 INDEX.yaml（新商品 history 首行"初版入库"；命名中文三段式 `{类别}_{名称}_{版本}.{ext}`，包内附导入说明）。
 - README 作资料地图索引（指向各文件）。
 - e2e 场景逐条标注用哪个 resource.verb（覆盖标尺）。
-- **交付能力门禁（acceptance_urls + 导出说明，二者必录）**：编排完结时要交付「前端验收 URL + 离线交付物 + 导入方式」三件套（见 `references/hub.md`「完结交付」），其数据来源在 onboarding 录入——因此每个新接入 system 段**必须**提供：
+- **交付能力门禁（acceptance_urls + 导出说明，二者必录）**：编排完结时要交付「前端验收 URL + 离线交付物 + 导入方式」等内容（第 4 项 tmp 双落盘是执行期动作，不依赖 onboarding 数据；见 `references/hub.md`「完结交付」），其数据来源在 onboarding 录入——因此每个新接入 system 段**必须**提供：
   1. `acceptance_urls`：前端 URL format 模板（含 `{objectId}`/`{instanceId}` 等占位符）——实测拿到的真实 URL 模板化，不许凭路径规律编。**确无前端页的域**（纯后端服务/插件运行时，如 sso-adapter provider）显式写 `acceptance_urls: none  # 原因：…`，不许静默缺失。
   2. **离线交付物导出说明**：该域产物怎么导出成可导入包（哪个 verb/端点导出、包格式、怎么导入回去）——记在 `runtime` 段（如 `export_recipe`）或对应 flow 的导出步骤。无导出端点的域说明手工打包方式（如实例 search 全量导 JSON）。**实例类数据域优先调研/接入 Excel 导出端点**（人类友好格式是交付默认，参照 `references/hub.md`「交付物格式」；EasyOps CMDB 即 `instance_excel.export`，调研源码 `export_excel` 模块补的 spec）——没有 Excel 端点才算 gap，注明「当前只能 JSON 导出」。
   缺任一项 → onboarding 不算完成（lint WARN 提示），因为后续编排完结交付必然交不出。

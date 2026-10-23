@@ -76,9 +76,10 @@ echo "PLATFORMS_ROOT=${API_CLI_PLATFORMS_DIR:-$PWD/.api-orchestrator/platforms} 
 6. **分步执行** → bash 调 api-cli + 生成制品（BPMN/tar.gz）+ jq 数据流接线；中间产物写 `$PWD/tmp/<task>/state.json`。
 7. **校验** → 查 objects/formats 校验一致性。
 8. **失败回滚** → 按 state.json 反向调 remove/delete。
-9. **完结交付（默认，不可跳）** → 三件套：① 前端验收 URL（systems.yaml `acceptance_urls` 模板
+9. **完结交付（默认，不可跳）** → 四件套：① 前端验收 URL（systems.yaml `acceptance_urls` 模板
    填本次实际 id）；② 离线交付物（`{类别}_{名称}_{版本}.{ext}` 打包 + 导入说明，回流 hub）；
-   ③ 导入方式提示（API curl / 前端路径）。机制与豁免口径详见 `references/hub.md`「完结交付」。
+   ③ 导入方式提示（API curl / 前端路径）；④ tmp 双落盘（`tmp/{类别}_{名称}_{版本}.{ext}` 版本化
+   副本 + `.sha256`，`cp` 复制 hub 包并核对哈希一致）。机制与豁免口径详见 `references/hub.md`「完结交付」。
 
 多轮 bash，带状态，规划-执行分离。
 
