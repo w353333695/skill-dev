@@ -13,7 +13,7 @@ esayops应用配置修改（EasyOps 应用/组件配置修改工具）
 "current path is not a valid package"(2004)；`easyops restart agent` 位置参数同样报错。
 自动推导：<配置文件在 组件根/conf/ 下 → 组件根=上两级>；restart_dir 入参可显式覆盖。
 
-定位规则（batch 每行的配置项）：
+定位规则（修改方式=按参数路径 时，batch 每行的配置项）：
     · "ip" —— 修改配置文件【所有深度】的 ip 键（command/report/collector_agent/
       plugin_manager 各 server_groups.hosts 全部命中）
     · "xx.yy.zz" 点路径精确指定——支持任意深度；路径中的纯数字段匹配列表索引
@@ -21,15 +21,25 @@ esayops应用配置修改（EasyOps 应用/组件配置修改工具）
       【忽略数字段】模糊匹配命中全部列表元素（如 command.server_groups.hosts.ip
       = 该子树下所有 hosts 的 ip）
 
+替换规则（修改方式=直接替换 时，batch 每行的写法）：
+    "原文->新文本" —— 在整个配置文件里按【字面文本】替换全部命中处（不解释正则）；
+    多条规则按填写顺序依次执行；原文须非空，修改时新文本不能为空（不支持删成空）。
+
 入参（平台注入 globals 同名变量）：
-    batch        批量修改（必填，多行字符串），每行 "配置项=修改值"（空行与 # 注释忽略），如：
+    batch        批量修改（必填，多行字符串），每行格式随「修改方式」（空行与 # 注释忽略）：
+                  · 按参数路径：每行 "配置项=修改值"，如：
                      ip=10.1.2.3
                      org=1888
                      command.server_groups.hosts.ip=10.1.2.9
+                  · 直接替换：每行 "原文->新文本"，如：
+                     10.1.2.3->10.1.2.4
+                     port: 8079->port: 8080
                  批量语义（整体事务）：
-                 任一项未命中 / 多项命中同一行（冲突）→ 整体不落盘直接报错；
+                 任一项未命中 / 多项命中同一行（路径模式冲突）→ 整体不落盘直接报错；
                  全部通过后只备份一次、批量替换、统一回读校验，最后只执行一次 init+restart；
                  任一校验失败整体从备份恢复，不重启。
+    edit_mode    修改方式，枚举 按参数路径/直接替换，默认 按参数路径——
+                 按参数路径=按 YAML 点路径定位键并改值；直接替换=按字面文本全局替换
     action       动作，枚举 预览/修改，默认 预览——预览=列出命中项当前值不改动；
                  修改=备份→替换→回读验证→easyops init→easyops restart
     conf_path    配置文件完整路径，字符串，可选——默认按平台自动探测
@@ -301,11 +311,122 @@ def parse_batch_items(raw, allow_empty_value=False):
     return items, errors
 
 
+def parse_replace_items(raw, allow_empty_value=False):
+    """解析 batch 多行文本（直接替换模式）：每行 "原文->新文本"；忽略空行与 # 注释。
+    按首个 "->" 切分，两侧按字面使用（不额外 strip 内部空格）。返回 (items, errors)。"""
+    items = []
+    errors = []
+    seen = {}
+    for idx, line in enumerate((raw or '').split('\n')):
+        cur = line.strip()
+        if not cur or cur.startswith('#'):
+            continue
+        if '->' not in cur:
+            errors.append(u'第 %d 行缺少 "->"：%s' % (idx + 1, cur))
+            continue
+        old, new = cur.split('->', 1)
+        if not old:
+            errors.append(u'第 %d 行原文为空：%s' % (idx + 1, cur))
+            continue
+        if not new and not allow_empty_value:
+            errors.append(u'第 %d 行新文本为空：%s' % (idx + 1, cur))
+            continue
+        if old in seen:
+            errors.append(u'第 %d 行原文重复：%s（首次出现在第 %d 行）' % (idx + 1, old, seen[old]))
+            continue
+        seen[old] = idx + 1
+        items.append((old, new))
+    return items, errors
+
+
+def find_replace_hits(text, old):
+    """按字面查找 old 的全部命中，按行聚合。返回 [(line_no, count, line_text)]。"""
+    hits = []
+    start = 0
+    while True:
+        pos = text.find(old, start)
+        if pos < 0:
+            break
+        no = text.count('\n', 0, pos) + 1
+        if hits and hits[-1][0] == no:
+            hits[-1][1] += 1
+        else:
+            hits.append([no, 1, text.split('\n')[no - 1]])
+        start = pos + len(old)
+    return hits
+
+
+def run_replace_mode(text, conf_path, restart_dir_in, items, action):
+    """直接替换模式：预览或修改（字面文本全局替换，按填写顺序依次执行）。"""
+    scope = u'文本替换 %d 条' % len(items)
+    if action == u'预览':
+        out = [u'预览（直接替换，未做任何修改）——%s @%s：' % (scope, conf_path)]
+        cur = text
+        for old, new in items:
+            hits = find_replace_hits(cur, old)
+            out.append(u'【%s -> %s】命中 %d 处%s' % (old, new, sum(h[1] for h in hits),
+                                                    u'' if hits else u'  ⚠️ 未命中'))
+            for no, cnt, line in hits:
+                out.append(u'  行%-4d%s %s' % (no, (u'（×%d）' % cnt) if cnt > 1 else u'', line))
+            cur = cur.replace(old, new)
+        out.append(u'（执行修改：action=修改 + 修改方式=直接替换；全部命中后统一备份，只执行一次 easyops init && easyops restart）')
+        put_str('report', u'\n'.join(out))
+        return 0
+
+    cur = text
+    missing = []
+    detail = []
+    for old, new in items:
+        hits = find_replace_hits(cur, old)
+        if not hits:
+            missing.append(old)
+            continue
+        detail.append((old, new, sum(h[1] for h in hits), [h[0] for h in hits]))
+        cur = cur.replace(old, new)
+    if missing:
+        put_str('report', u'❌ 以下原文未命中任何内容，未做任何修改（整体不落盘）：%s\nconf=%s\n提示：直接替换按字面匹配，请检查原文是否与配置文件完全一致（含空格/标点）。'
+                % (u', '.join(missing), conf_path))
+        return 1
+
+    stamp = time.strftime('%Y%m%d_%H%M%S')
+    backup = '%s.bak.%s' % (conf_path, stamp)
+    shutil.copy2(conf_path, backup)
+
+    with open(conf_path, 'wb') as f:
+        f.write(cur.encode('utf-8'))
+
+    with open(conf_path, 'rb') as f:
+        check = f.read().decode('utf-8', 'replace')
+    if check != cur:
+        shutil.copy2(backup, conf_path)
+        put_str('report', u'❌ 回读验证失败（写入内容不一致），已从备份恢复：%s' % backup)
+        return 3
+
+    total = sum(d[2] for d in detail)
+    report = [u'修改完成——%s，共 %d 处 @%s：' % (scope, total, conf_path)]
+    for old, new, cnt, nos in detail:
+        report.append(u'  【%s -> %s】命中 %d 处（行 %s）' % (old, new, cnt, u', '.join(str(n) for n in nos)))
+    report.append(u'备份：%s' % backup)
+    report.append(u'回读验证：✅ 文件内容与预期完全一致')
+    report.append(u'即将使配置生效（cd 组件包根 %s && easyops init && easyops restart）……' % resolve_restart_dir(conf_path, restart_dir_in))
+    put_str('report', u'\n'.join(report))
+
+    rc, out = restart_agent(resolve_restart_dir(conf_path, restart_dir_in))
+    tail = [u'配置生效（cd 组件包根 && easyops init && easyops restart，目录=%s）：exit=%s' % (resolve_restart_dir(conf_path, restart_dir_in), rc)]
+    if out:
+        tail.append(u'重启输出：\n%s' % out)
+    if rc != 0:
+        tail.append(u'⚠️ 重启命令返回非 0——请人工确认 agent 状态（配置已改好，备份在 %s）' % backup)
+    put_str('report', u'\n'.join(tail))
+    return 0
+
+
 def main():
     g = globals()
     action = _to_unicode(g.get('action') or u'预览')
     if isinstance(action, bool):
         action = u'修改' if action else u'预览'
+    edit_mode = _to_unicode(g.get('edit_mode') or g.get('editMode') or u'按参数路径')
     conf_path = _to_unicode(g.get('conf_path') or g.get('confPath') or '') or detect_conf_path()
     restart_dir_in = _to_unicode(g.get('restart_dir') or g.get('restartDir') or '')
     batch_raw = g.get('batch')
@@ -319,15 +440,27 @@ def main():
     if action not in (u'预览', u'修改'):
         put_str('report', u'❌ 动作必须是 预览 或 修改，当前：%r' % action)
         return 1
+    if edit_mode not in (u'按参数路径', u'直接替换'):
+        put_str('report', u'❌ 修改方式必须是 按参数路径 或 直接替换，当前：%r' % edit_mode)
+        return 1
 
     if not batch_raw.strip():
-        put_str('report', u'❌ 批量修改内容为空。请按多行格式填写，每行 "配置项=修改值"，如：\n'
-                u'  ip=10.1.2.3\n  org=1888\n（空行与 # 注释会被忽略）')
+        if edit_mode == u'直接替换':
+            hint = u'每行 "原文->新文本"，如：\n  10.1.2.3->10.1.2.4\n  port: 8079->port: 8080'
+        else:
+            hint = u'每行 "配置项=修改值"，如：\n  ip=10.1.2.3\n  org=1888'
+        put_str('report', u'❌ 批量修改内容为空。请按多行格式填写，%s\n（空行与 # 注释会被忽略）' % hint)
         return 1
-    items, errors = parse_batch_items(batch_raw, allow_empty_value=(action == u'预览'))
+
+    if edit_mode == u'直接替换':
+        items, errors = parse_replace_items(batch_raw, allow_empty_value=(action == u'预览'))
+        fmt = u'每行 "原文->新文本"，如 10.1.2.3->10.1.2.4；空行与 # 注释会被忽略。'
+    else:
+        items, errors = parse_batch_items(batch_raw, allow_empty_value=(action == u'预览'))
+        fmt = u'每行 "配置项=修改值"，如 ip=10.1.2.3；空行与 # 注释会被忽略。'
     if errors:
         put_str('report', u'❌ batch 解析失败，未做任何修改：\n  ' + u'\n  '.join(errors) +
-                u'\n格式：每行 "配置项=修改值"，如 ip=10.1.2.3；空行与 # 注释会被忽略。')
+                u'\n格式：' + fmt)
         return 1
     if not items:
         put_str('report', u'❌ batch 为空（只含空行/注释），未做任何修改。')
@@ -340,6 +473,9 @@ def main():
     with open(conf_path, 'rb') as f:
         raw_text = f.read()
     text = raw_text.decode('utf-8', 'replace')
+
+    if edit_mode == u'直接替换':
+        return run_replace_mode(text, conf_path, restart_dir_in, items, action)
 
     resolved = []
     missing = []
@@ -359,7 +495,7 @@ def main():
                 out.append(u'  行%-4d %s = %s%s' % (no, full, cur, (u' → ' + val) if val else u''))
         if missing:
             out.append(u'⚠️ 修改模式下未命中会直接报错且整体不落盘：%s' % u', '.join(missing))
-        out.append(u'（执行修改：action=修改 + 填写「批量修改」多行内容，每行 配置项=修改值；全部通过后统一备份、只执行一次 easyops init && easyops restart）')
+        out.append(u'（执行修改：action=修改 + 修改方式=按参数路径 + 填写「批量修改」多行内容，每行 配置项=修改值；全部通过后统一备份、只执行一次 easyops init && easyops restart）')
         put_str('report', u'\n'.join(out))
         return 0
 
