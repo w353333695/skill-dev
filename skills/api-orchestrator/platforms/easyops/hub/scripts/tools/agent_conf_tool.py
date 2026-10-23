@@ -1,13 +1,13 @@
 # -*- coding: utf-8 -*-
 """
-Agent配置修改（EasyOps agent conf.yaml 修改工具）
+esayops应用配置修改（EasyOps 应用/组件配置修改工具）
 
 功能：修改本机 EasyOps 组件配置文件（默认 agent 的 conf.yaml；conf_path 可指任何组件 yaml）。
 文本级编辑——保留注释/缩进/格式，不依赖 yaml 库。
 配置文件位置（自动探测，可用 conf_path 入参覆盖）：
     Windows: c:\\easyops\\agent\\conf\\conf.yaml
     Linux:   /usr/local/easyops/agent/conf/conf.yaml
-修改成功后自动重启组件：cd <组件包根> && easyops restart（Windows 加 /d）。
+修改成功后自动使配置生效：cd <组件包根> && easyops init && easyops restart（Windows 加 /d）。
 🔴重启目录语义（2026-09-30 .26 实测）：easyops 是全局脚本（/usr/bin）但对 cwd 敏感——
 须 cd 组件包根（如 /usr/local/easyops/agent）；conf 目录或任意目录报
 "current path is not a valid package"(2004)；`easyops restart agent` 位置参数同样报错。
@@ -244,11 +244,11 @@ def resolve_restart_dir(conf_path, override):
 
 
 def restart_agent(pkg_dir):
-    """重启组件：cd <组件包根> && easyops restart（win 加 /d）。返回 (rc, output)。"""
+    """使配置生效：cd <组件包根> && easyops init && easyops restart（win 加 /d）。返回 (rc, output)。"""
     if sys.platform.startswith('win'):
-        cmd = 'cd /d %s && easyops restart' % pkg_dir
+        cmd = 'cd /d %s && easyops init && easyops restart' % pkg_dir
     else:
-        cmd = 'cd %s && easyops restart' % pkg_dir
+        cmd = 'cd %s && easyops init && easyops restart' % pkg_dir
     p = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
     out = p.communicate()[0]
     if isinstance(out, bytes):
@@ -295,7 +295,7 @@ def main():
         lines_out = [u'预览（未做任何修改）——配置项 %s 命中 %d 处 @%s：' % (config_item, len(targets), conf_path)]
         for no, full, val, _cmt in targets:
             lines_out.append(u'  行%-4d %s = %s' % (no, full, val))
-        lines_out.append(u'（执行修改：action=修改 + value=<新值>；修改后自动备份并重启 agent）')
+        lines_out.append(u'（执行修改：action=修改 + value=<新值>；修改后自动备份、执行 easyops init 并重启组件）')
         put_str('report', u'\n'.join(lines_out))
         return 0
 
@@ -331,11 +331,11 @@ def main():
     report.append(u'备份：%s' % backup)
     report.append(u'回读验证：✅ %d 处新值全部落位' % len(check_targets))
     # 🔴先发主报告再重启（agent 自重启可能终止本进程——报告先落袋，重启结果二次输出）
-    report.append(u'即将重启组件（cd 组件包根 %s && easyops restart）……' % resolve_restart_dir(conf_path, restart_dir_in))
+    report.append(u'即将使配置生效（cd 组件包根 %s && easyops init && easyops restart）……' % resolve_restart_dir(conf_path, restart_dir_in))
     put_str('report', u'\n'.join(report))
 
     rc, out = restart_agent(resolve_restart_dir(conf_path, restart_dir_in))
-    tail = [u'重启组件（cd 组件包根 && easyops restart，目录=%s）：exit=%s' % (resolve_restart_dir(conf_path, restart_dir_in), rc)]
+    tail = [u'配置生效（cd 组件包根 && easyops init && easyops restart，目录=%s）：exit=%s' % (resolve_restart_dir(conf_path, restart_dir_in), rc)]
     if out:
         tail.append(u'重启输出：\n%s' % out)
     if rc != 0:
