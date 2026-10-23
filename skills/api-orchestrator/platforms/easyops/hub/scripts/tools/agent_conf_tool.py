@@ -25,7 +25,7 @@ esayops应用配置修改（EasyOps 应用/组件配置修改工具）
     config_item  配置项，字符串，默认 "ip"（全深度 ip 键；或 xx.yy.zz 点路径精确指定）
     value        修改值，字符串，动作=修改 时必填（原样写入；带空格/特殊字符自行加引号）
     action       动作，枚举 预览/修改，默认 预览——预览=列出命中项当前值不改动；
-                 修改=备份→替换→回读验证→重启 agent
+                 修改=备份→替换→回读验证→easyops init→easyops restart
     conf_path    配置文件完整路径，字符串，可选——默认按平台自动探测
 输出：
     PutStr("report", <预览清单或修改报告>) —— 完整值不截断
