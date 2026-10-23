@@ -22,11 +22,20 @@ esayops应用配置修改（EasyOps 应用/组件配置修改工具）
       = 该子树下所有 hosts 的 ip）
 
 入参（平台注入 globals 同名变量）：
-    config_item  配置项，字符串，默认 "ip"（全深度 ip 键；或 xx.yy.zz 点路径精确指定）
-    value        修改值，字符串，动作=修改 时必填（原样写入；带空格/特殊字符自行加引号）
+    batch        批量修改，多行文本，每行 "配置项=修改值"（空行与 # 注释忽略），如：
+                     ip=10.1.2.3
+                     org=1888
+                     command.server_groups.hosts.ip=10.1.2.9
+                 填了 batch 时忽略 config_item/value。批量语义（整体事务）：
+                 任一项未命中 / 多项命中同一行（冲突）→ 整体不落盘直接报错；
+                 全部通过后只备份一次、批量替换、统一回读校验，最后只执行一次 init+restart；
+                 任一校验失败整体从备份恢复，不重启。
+    config_item  配置项（单条模式），字符串，默认 "ip"（全深度 ip 键；或 xx.yy.zz 点路径精确指定）
+    value        修改值（单条模式），字符串，动作=修改 时必填（原样写入；含 " #" 时请加引号）
     action       动作，枚举 预览/修改，默认 预览——预览=列出命中项当前值不改动；
                  修改=备份→替换→回读验证→easyops init→easyops restart
     conf_path    配置文件完整路径，字符串，可选——默认按平台自动探测
+    restart_dir  生效命令执行目录，字符串，可选——默认按 conf 路径推导组件包根
 输出：
     PutStr("report", <预览清单或修改报告>) —— 完整值不截断
 运行环境：EasyOps agent（py2）/ 编排侧 py3。stdlib only。
@@ -256,57 +265,144 @@ def restart_agent(pkg_dir):
     return p.returncode, (out or '').strip()
 
 
+def _unquote(raw):
+    """去掉 YAML 值的成对引号，用于回读比对（引号值落盘后仍能校验通过）。"""
+    v = (raw or '').strip()
+    if len(v) >= 2 and v[0] == v[-1] and v[0] in ('"', "'"):
+        return v[1:-1]
+    return v
+
+
+def parse_batch_items(raw, allow_empty_value=False):
+    """解析 batch 多行文本：每行 "配置项=修改值"；忽略空行与 # 注释。
+    返回 (items, errors)，items=[(config_item, value)]。"""
+    items = []
+    errors = []
+    seen = {}
+    for idx, line in enumerate((raw or '').split('\n')):
+        cur = line.strip()
+        if not cur or cur.startswith('#'):
+            continue
+        if '=' not in cur:
+            errors.append(u'第 %d 行缺少 "="：%s' % (idx + 1, cur))
+            continue
+        key, val = cur.split('=', 1)
+        key = key.strip()
+        val = val.strip()
+        if not key:
+            errors.append(u'第 %d 行配置项为空：%s' % (idx + 1, cur))
+            continue
+        if not val and not allow_empty_value:
+            errors.append(u'第 %d 行修改值为空：%s' % (idx + 1, cur))
+            continue
+        if key in seen:
+            errors.append(u'第 %d 行配置项重复：%s（首次出现在第 %d 行）' % (idx + 1, key, seen[key]))
+            continue
+        seen[key] = idx + 1
+        items.append((key, val))
+    return items, errors
+
+
 def main():
     g = globals()
-    config_item = _to_unicode(g.get('config_item') or g.get('Config_item') or 'ip')
-    if not isinstance(config_item, _string_types):
-        config_item = _string_types[0](config_item)
-    config_item = config_item.strip() or 'ip'
-    new_value = _to_unicode(g.get('value') or g.get('new_value') or '')
-    if not isinstance(new_value, _string_types):
-        new_value = _string_types[0](new_value)
-    new_value = new_value.strip()
     action = _to_unicode(g.get('action') or u'预览')
     if isinstance(action, bool):
         action = u'修改' if action else u'预览'
     conf_path = _to_unicode(g.get('conf_path') or g.get('confPath') or '') or detect_conf_path()
     restart_dir_in = _to_unicode(g.get('restart_dir') or g.get('restartDir') or '')
+    batch_raw = _to_unicode(g.get('batch') or '')
+    if not isinstance(batch_raw, _string_types):
+        batch_raw = _string_types[0](batch_raw)
 
     if action not in (u'预览', u'修改'):
         put_str('report', u'❌ 动作必须是 预览 或 修改，当前：%r' % action)
         return 1
-    if action == u'修改' and not new_value:
-        put_str('report', u'❌ 动作=修改 时必须提供修改值（value）')
-        return 1
+
+    mode_batch = bool(batch_raw.strip())
+    if mode_batch:
+        items, errors = parse_batch_items(batch_raw, allow_empty_value=(action == u'预览'))
+        if errors:
+            put_str('report', u'❌ batch 解析失败，未做任何修改：\n  ' + u'\n  '.join(errors) +
+                    u'\n格式：每行 "配置项=修改值"，如 ip=10.1.2.3；空行与 # 注释会被忽略。')
+            return 1
+        if not items:
+            put_str('report', u'❌ batch 为空（只含空行/注释），未做任何修改。')
+            return 1
+    else:
+        config_item = _to_unicode(g.get('config_item') or g.get('Config_item') or 'ip')
+        if not isinstance(config_item, _string_types):
+            config_item = _string_types[0](config_item)
+        config_item = config_item.strip() or 'ip'
+        new_value = _to_unicode(g.get('value') or g.get('new_value') or '')
+        if not isinstance(new_value, _string_types):
+            new_value = _string_types[0](new_value)
+        new_value = new_value.strip()
+        if action == u'修改' and not new_value:
+            put_str('report', u'❌ 动作=修改 时必须提供修改值（value，或改用 batch 多行写法）')
+            return 1
+        items = [(config_item, new_value)]
+
     if not os.path.isfile(conf_path):
         put_str('report', u'❌ 配置文件不存在：%s（可用 conf_path 入参指定完整路径）' % conf_path)
         return 1
 
     with open(conf_path, 'rb') as f:
-        raw = f.read()
-    text = raw.decode('utf-8', 'replace')
+        raw_text = f.read()
+    text = raw_text.decode('utf-8', 'replace')
 
-    targets = find_targets(text, config_item)
-    if not targets:
-        put_str('report', u'配置项 %s 未命中任何键（conf=%s）。\n提示：默认 ip=全深度 ip 键；精确指定用点路径（如 command.server_groups.hosts.ip，数字段可选用于精确列表索引）。' % (config_item, conf_path))
-        return 0
+    resolved = []
+    missing = []
+    for key, val in items:
+        tg = find_targets(text, key)
+        resolved.append((key, val, tg))
+        if not tg:
+            missing.append(key)
+
+    scope = u'批量 %d 项' % len(items) if mode_batch else u'配置项 %s' % items[0][0]
 
     if action == u'预览':
-        lines_out = [u'预览（未做任何修改）——配置项 %s 命中 %d 处 @%s：' % (config_item, len(targets), conf_path)]
-        for no, full, val, _cmt in targets:
-            lines_out.append(u'  行%-4d %s = %s' % (no, full, val))
-        lines_out.append(u'（执行修改：action=修改 + value=<新值>；修改后自动备份、执行 easyops init 并重启组件）')
-        put_str('report', u'\n'.join(lines_out))
+        out = [u'预览（未做任何修改）——%s @%s：' % (scope, conf_path)]
+        for key, val, tg in resolved:
+            out.append(u'【%s】命中 %d 处%s' % (key, len(tg), u'' if tg else u'  ⚠️ 未命中'))
+            for no, full, cur, _cmt in tg:
+                out.append(u'  行%-4d %s = %s%s' % (no, full, cur, (u' → ' + val) if val else u''))
+        if missing:
+            out.append(u'⚠️ 修改模式下未命中会直接报错且整体不落盘：%s' % u', '.join(missing))
+        out.append(u'（执行修改：action=修改 + batch=<每行 配置项=修改值>；全部通过后统一备份、只执行一次 easyops init && easyops restart）')
+        put_str('report', u'\n'.join(out))
         return 0
 
-    # ---- 修改：备份 → 替换 → 回读验证 → 重启 ----
+    if missing:
+        put_str('report', u'❌ 以下配置项未命中任何键，未做任何修改（整体不落盘）：%s\nconf=%s\n提示：默认 ip=全深度 ip 键；精确指定用点路径（如 command.server_groups.hosts.ip，数字段可选用于精确列表索引）。' % (u', '.join(missing), conf_path))
+        return 1
+
+    # 冲突检测：同一行被多个配置项命中 → 无法确定以谁为准，整体不落盘
+    line_owner = {}
+    conflicts = []
+    for key, _val, tg in resolved:
+        for no, full, _cur, _cmt in tg:
+            if no in line_owner:
+                prev_key, prev_full = line_owner[no]
+                conflicts.append(u'行%d 同时命中 %s(%s) 与 %s(%s)' % (no, prev_key, prev_full, key, full))
+            else:
+                line_owner[no] = (key, full)
+    if conflicts:
+        put_str('report', u'❌ 配置项相互冲突，未做任何修改（整体不落盘）：\n  ' + u'\n  '.join(conflicts) +
+                u'\n请改用更精确的点路径，避免宽泛项（如 ip）与具体路径同时命中同一行。')
+        return 1
+
+    # ---- 修改：一次备份 → 批量替换 → 统一回读验证 → 一次 init+restart ----
     stamp = time.strftime('%Y%m%d_%H%M%S')
     backup = '%s.bak.%s' % (conf_path, stamp)
     shutil.copy2(conf_path, backup)
 
-    old_vals = [(no, full, val) for no, full, val, _c in targets]
-    new_text = apply_changes(text, targets, new_value)
-    # 行数不变校验
+    old_vals = []
+    new_text = text
+    for key, val, tg in resolved:
+        for no, full, cur, _cmt in tg:
+            old_vals.append((no, full, cur, val))
+        new_text = apply_changes(new_text, tg, val)
+
     if len(new_text.split('\n')) != len(text.split('\n')):
         shutil.copy2(backup, conf_path)
         put_str('report', u'❌ 替换后行数变化（异常），已从备份恢复：%s' % backup)
@@ -315,21 +411,24 @@ def main():
     with open(conf_path, 'wb') as f:
         f.write(new_text.encode('utf-8'))
 
-    # 回读验证
     with open(conf_path, 'rb') as f:
         check_text = f.read().decode('utf-8', 'replace')
-    check_targets = find_targets(check_text, config_item)
-    ok = len(check_targets) == len(targets) and all(v[2] == new_value for v in check_targets)
-    if not ok:
+    failed = []
+    for key, val, tg in resolved:
+        check_tg = find_targets(check_text, key)
+        if len(check_tg) != len(tg) or any(_unquote(v[2]) != _unquote(val) for v in check_tg):
+            failed.append(key)
+    if failed:
         shutil.copy2(backup, conf_path)
-        put_str('report', u'❌ 回读验证失败（新值未全部落位），已从备份恢复：%s' % backup)
+        put_str('report', u'❌ 回读验证失败（%s），已从备份整体恢复：%s\n提示：修改值若含 " #" 请用引号包裹（如 \"a b # c\"）。' % (u', '.join(failed), backup))
         return 3
 
-    report = [u'修改完成——配置项 %s 共 %d 处 @%s：' % (config_item, len(targets), conf_path)]
-    for no, full, val in old_vals:
-        report.append(u'  行%-4d %s: %s → %s' % (no, full, val, new_value))
+    total = sum(len(tg) for _k, _v, tg in resolved)
+    report = [u'修改完成——%s，共 %d 处 @%s：' % (scope, total, conf_path)]
+    for no, full, cur, val in old_vals:
+        report.append(u'  行%-4d %s: %s → %s' % (no, full, cur, val))
     report.append(u'备份：%s' % backup)
-    report.append(u'回读验证：✅ %d 处新值全部落位' % len(check_targets))
+    report.append(u'回读验证：✅ %d 处新值全部落位' % total)
     # 🔴先发主报告再重启（agent 自重启可能终止本进程——报告先落袋，重启结果二次输出）
     report.append(u'即将使配置生效（cd 组件包根 %s && easyops init && easyops restart）……' % resolve_restart_dir(conf_path, restart_dir_in))
     put_str('report', u'\n'.join(report))
