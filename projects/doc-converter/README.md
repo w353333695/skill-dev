@@ -105,6 +105,7 @@ doc-converter convert 手册.md -t docx --options cover=true --options toc=true
 doc-converter convert 手册.md -t docx --options cover=true --options toc=true \
   --options toc_title=目录 --options toc_depth=3
 ```
+> 目录标题自动居中；封面标题、目录标题与各级标题统一使用默认黑色（不走 Word 模板主题蓝）。
 > 目录为 Word 原生 TOC 域，页码由 Word/WPS 打开时自动更新（已写入 `updateFields`）；
 > 若查看器不自动更新，右键目录 →「更新域」或按 F9。
 

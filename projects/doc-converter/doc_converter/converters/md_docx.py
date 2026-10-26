@@ -757,7 +757,7 @@ class MdToDocx(BaseConverter):
 
     def convert(self, input_path: Path, output_path: Path, **options) -> ConvertResult:
         from docx import Document
-        from docx.shared import Pt
+        from docx.shared import Pt, RGBColor
 
         global _CURRENT_INPUT_PATH, _MATH_CACHE, _FN_CACHE, _CHECKBOX_SEQ, _EMBEDDED_IMG_COUNT
         _CURRENT_INPUT_PATH = input_path
@@ -795,6 +795,7 @@ class MdToDocx(BaseConverter):
             heading_style = doc.styles[f"Heading {level}"]
             _set_style_font(heading_style, "Microsoft YaHei", Pt(self.HEADING_SIZES[level]))
             heading_style.font.bold = True
+            heading_style.font.color.rgb = RGBColor(0, 0, 0)  # 默认色（黑），不用模板蓝色
 
         # 预提取 mermaid 块并逐块渲染为图片（单块失败不影响其余，与 md-pdf 对齐）
         from .mermaid_image import extract_mermaid_blocks, render_mermaid_to_image
@@ -822,6 +823,10 @@ class MdToDocx(BaseConverter):
             from docx.enum.text import WD_ALIGN_PARAGRAPH
             from docx.enum.section import WD_SECTION
 
+            title_style = doc.styles["Title"]
+            _set_style_font(title_style, "Microsoft YaHei", Pt(30))
+            title_style.font.bold = True
+            title_style.font.color.rgb = RGBColor(0, 0, 0)  # 默认色（黑）
             p = doc.add_paragraph(style="Title")
             p.alignment = WD_ALIGN_PARAGRAPH.CENTER
             _add_inline_runs(p, cover_title, base_font_size=None)
@@ -833,10 +838,16 @@ class MdToDocx(BaseConverter):
 
         # 目录页：原生 TOC 域；与封面/正文之间用分页节隔开
         if toc_enabled:
+            from docx.enum.text import WD_ALIGN_PARAGRAPH
             from docx.enum.section import WD_SECTION
 
+            toc_style = doc.styles["TOC Heading"]
+            _set_style_font(toc_style, "Microsoft YaHei", Pt(18))
+            toc_style.font.bold = True
+            toc_style.font.color.rgb = RGBColor(0, 0, 0)  # 默认色（黑）
             toc_head = doc.add_paragraph(toc_title)
             toc_head.style = doc.styles["TOC Heading"]
+            toc_head.alignment = WD_ALIGN_PARAGRAPH.CENTER
             _add_toc_field(doc.add_paragraph(), toc_depth)
             _enable_update_fields(doc)
             if toc_page_break:

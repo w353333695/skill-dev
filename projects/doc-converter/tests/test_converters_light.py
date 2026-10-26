@@ -271,7 +271,13 @@ def test_md_to_docx_cover_and_toc(tmp_path: Path):
     d = Document(out)
     assert d.paragraphs[0].style.name == "Title"
     assert d.paragraphs[0].text == "文档标题"
-    assert any(p.style.name == "TOC Heading" and p.text == "目录" for p in d.paragraphs)
+    toc_head = next(p for p in d.paragraphs if p.style.name == "TOC Heading")
+    assert toc_head.text == "目录"
+    assert toc_head.alignment == 1  # WD_ALIGN_PARAGRAPH.CENTER
+    # 封面/目录/标题用默认色（黑），不用模板主题蓝
+    from docx.shared import RGBColor
+    for name in ("Title", "TOC Heading", "Heading 2"):
+        assert d.styles[name].font.color.rgb == RGBColor(0, 0, 0), name
     # 封面 / 目录 / 正文三节，只有封面节垂直居中
     assert len(d.sections) == 3
     vals = []
