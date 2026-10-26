@@ -930,6 +930,13 @@ class MdToDocx(BaseConverter):
             _set_style_font(toc_style, "Microsoft YaHei", Pt(18))
             toc_style.font.bold = True
             toc_style.font.color.rgb = RGBColor(0, 0, 0)  # 默认色（黑）
+            # TOC Heading 基于 Heading 1，会继承自动编号和段前分页——必须显式关闭，
+            # 否则「目录」会占掉编号 1，正文第一个 H1 变成 2
+            toc_style.paragraph_format.page_break_before = False
+            toc_p_pr = toc_style.element.get_or_add_pPr()
+            toc_num_pr = toc_p_pr.get_or_add_numPr()
+            toc_num_pr.get_or_add_ilvl().val = 0
+            toc_num_pr.get_or_add_numId().val = 0  # numId=0 表示无编号
             toc_head = doc.add_paragraph(toc_title)
             toc_head.style = doc.styles["TOC Heading"]
             toc_head.alignment = WD_ALIGN_PARAGRAPH.CENTER

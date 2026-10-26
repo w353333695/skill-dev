@@ -278,6 +278,11 @@ def test_md_to_docx_cover_and_toc(tmp_path: Path):
     from docx.shared import RGBColor
     for name in ("Title", "TOC Heading", "Heading 2"):
         assert d.styles[name].font.color.rgb == RGBColor(0, 0, 0), name
+    # TOC Heading 基于 Heading 1，必须显式关闭编号，否则「目录」会占掉编号 1
+    toc_num_pr = d.styles["TOC Heading"].element.pPr.find(qn("w:numPr"))
+    assert toc_num_pr is not None
+    assert toc_num_pr.find(qn("w:numId")).get(qn("w:val")) == "0"
+    assert d.styles["TOC Heading"].paragraph_format.page_break_before is False
     # 封面 / 目录 / 正文三节，只有封面节垂直居中
     assert len(d.sections) == 3
     vals = []
