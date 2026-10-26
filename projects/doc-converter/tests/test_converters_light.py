@@ -286,6 +286,12 @@ def test_md_to_docx_cover_and_toc(tmp_path: Path):
         vals.append(el.get(qn("w:val")) if el is not None else None)
     assert vals == ["center", None, None]
 
+    # 封面占用首个 H1 后，正文标题上提一级；H1 之间分页（首个 H1 由分节换页）
+    h1s = [p for p in d.paragraphs if p.style.name == "Heading 1"]
+    assert [p.text for p in h1s] == ["第一节", "第二节"]
+    assert h1s[0].paragraph_format.page_break_before is None
+    assert h1s[1].paragraph_format.page_break_before is True
+
     with zipfile.ZipFile(out) as z:
         xml = z.read("word/document.xml").decode("utf-8")
         settings = z.read("word/settings.xml").decode("utf-8")

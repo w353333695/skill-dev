@@ -16,9 +16,11 @@
 - 软换行（行尾两空格 → 段内换行）
 
 选项（`--options k=v`，均默认关闭，不影响既有输出）：
-- cover=true：首个 H1 转为封面页（Title 样式、垂直居中、不进入目录）
+- cover=true：首个 H1 转为封面页（Title 样式、垂直居中、不进入目录）；
+  正文标题整体上提一级（原 H2 → H1，原 H3 → H2）
 - toc=true：生成目录页（Word 原生 TOC 域，打开时自动更新页码）
 - toc_title=目录 / toc_depth=3（1-6）/ toc_page_break=true
+- h1_page_break=true：H1 之间分页（cover=true 时默认开启；每个 H1 另起一页）
 -- 封面页、目录页、正文之间用分页节隔开。
 """
 
@@ -784,6 +786,7 @@ class MdToDocx(BaseConverter):
             toc_depth = 3
         toc_depth = max(1, min(6, toc_depth))
         toc_page_break = _opt_bool(options.get("toc_page_break"), True)
+        h1_page_break_opt = options.get("h1_page_break")
 
         # 基础样式：统一微软雅黑
         style = doc.styles["Normal"]
@@ -819,6 +822,10 @@ class MdToDocx(BaseConverter):
 
         # 封面页：首个 H1 转为封面标题（Title 样式，不进入目录），节内垂直居中
         cover_title = _pop_first_h1(lines) if cover_enabled else None
+        # 封面占用首个 H1 后，正文标题整体上提一级；H1 之间分页（封面场景默认开启）
+        self._heading_shift = -1 if cover_title else 0
+        self._h1_page_break = _opt_bool(h1_page_break_opt, bool(cover_title))
+        self._seen_h1 = False
         if cover_title:
             from docx.enum.text import WD_ALIGN_PARAGRAPH
             from docx.enum.section import WD_SECTION
@@ -899,7 +906,16 @@ class MdToDocx(BaseConverter):
             m = re.match(r"^(#{1,6})\s+(.+)$", line)
             if m:
                 level = len(m.group(1))
+                # 首个 H1 做了封面时，正文标题整体上提一级（原 H2 → H1）
+                shift = getattr(self, "_heading_shift", 0)
+                if shift:
+                    level = max(1, min(6, level + shift))
                 heading = doc.add_heading(level=level)
+                # H1 之间分页：首个正文 H1 由目录页后分节自然换页，其余 H1 前插入分页
+                if level == 1 and quote_depth == 0:
+                    if getattr(self, "_h1_page_break", False) and getattr(self, "_seen_h1", False):
+                        heading.paragraph_format.page_break_before = True
+                    self._seen_h1 = True
                 _add_inline_runs(heading, m.group(2).strip(), base_font_size=None)
                 i += 1
                 continue

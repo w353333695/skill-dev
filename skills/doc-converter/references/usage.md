@@ -58,6 +58,7 @@ doc-converter convert 手册.docx -t md -o 手册.md --options media_dir=assets/
 --options toc_title=目录        # md->Word：目录标题
 --options toc_depth=3           # md->Word：目录收录级别（1-6）
 --options toc_page_break=true   # md->Word：目录后分页（默认 true）
+--options h1_page_break=true    # md->Word：H1 之间分页（cover=true 时默认开启）
 ```
 
 ## 依赖自检
