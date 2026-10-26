@@ -172,3 +172,27 @@ resources:
             ts:       { type: integer, description: "时间戳（重置链接携带）" }
             password: { type: string, description: "新密码" }
             key:      { type: string, description: "重置密码 key" }
+
+  apikey:
+    description: |
+      OpenAPI 密钥（AK/SK）管理。2026-10-26 .24 org=1888 实测：
+        GET /api/v1/apikey?q=&page=1&page_size=50
+        -> data.list[]，每项含 user / access_key / secret_key / state / org / ctime / ts
+      前端网关等价路径：
+        /next/api/gateway/user_service.apikey.ListApiKey/api/v1/apikey
+      🔴 secret_key 为明文返回，属敏感信息：仅在明确授权的取数场景调用，勿落盘、勿打印、勿外传。
+      创建/删除端点本次未验证，暂不收录（避免臆测契约）。
+    path: ""
+
+    operations:
+      list:
+        description: "列出 OpenAPI 密钥（含明文 access_key/secret_key）。默认返回全部；q 为关键词过滤。"
+        method: GET
+        path: /api/v1/apikey
+        params:
+          q:         { in: query, type: string, description: "搜索关键词（用户/密钥）" }
+          page:      { in: query, type: integer, description: "页码，默认 1" }
+          page_size: { in: query, type: integer, description: "每页条数，默认 50" }
+        response:
+          type: object
+          description: "{code,codeExplain,error,data:{page,page_size,total,list[]}}；list 项字段 user/access_key/secret_key/state/org/ctime/ts"

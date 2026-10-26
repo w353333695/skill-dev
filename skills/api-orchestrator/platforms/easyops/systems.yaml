@@ -628,9 +628,10 @@ systems:
       EasyOps 用户服务（user_service:8111）—— 用户账号全生命周期管理：
       • user      —— 注册（admin 建号）/ 注销（删除）/ 列表 / 详情
       • password  —— 修改（管理员改他人 alter / 改本人 alter_self）/ 重置（凭邮件重置 key）
+      • apikey    —— OpenAPI 密钥（AK/SK）列表（含明文 secret_key，敏感）
       核心接口：POST /api/v1/users/register、DELETE /api/v1/users/{username}、
       POST /api/v1/users/alter_password、POST /api/v1/users/password、
-      POST /api/v1/users/password/reset。
+      POST /api/v1/users/password/reset、GET /api/v1/apikey。
       ⚠️与 UI 自助注册（网关 POST /api/auth/register，需邀请码 invite）不同——本 system 覆盖 admin 建号路径。
 
     spec: easyops-user.yaml                 # api-cli 清单，相对本目录
@@ -656,6 +657,8 @@ systems:
         alter:      "修改指定用户密码（管理员改他人）——POST /api/v1/users/alter_password，required name"
         alter_self: "修改本人密码——POST /api/v1/users/password，required password/oldPassword"
         reset:      "重置密码（凭重置 key，来自邮件重置链接）——POST /api/v1/users/password/reset，required username/ts/password/key"
+      apikey:
+        list:       "OpenAPI 密钥列表（GET /api/v1/apikey?q=&page=&page_size=；返回 access_key/secret_key 明文，敏感，勿落盘/外传）"
 
     runtime:
       admin_user: easyops
@@ -676,6 +679,7 @@ systems:
       set_admin: "🔴【管理员设置，实测 2026-10-13】① 注册时 `isAdmin:true`（POST /api/v1/users/register body）→ 自动关联 `系统管理员`+`普通用户`（与内置 easyops 一致）。② 已有用户：改 USER 实例关系字段 `ROLE`（→ ROLE@ONEMODEL）——先搜 ROLE@ONEMODEL 拿角色 instanceId（名称字段是 `role`，带 name 报 133116），再 cmdb `object_instance import USER {keys:[instanceId],datas:[{instanceId,name,ROLE:[<系统管理员id>,<普通用户id>]}]}`。『管理员』= 角色含 `系统管理员`（不是名叫「管理员」的角色）。跨 system 操作（本 system 查 → cmdb 写）"
       role_relation: "USER 实例的 `ROLE` 字段关联 ROLE@ONEMODEL 角色实例；`GET /api/v1/users/roles/{name}/all` 读回角色名列表。角色实例 id 逐环境不同（.24 系统管理员=6536d8f81de81/普通用户=6536d8f81dfad；.90 不同），须先搜不可硬编码"
       response_wrapper: "标准响应 {code, codeExplain, error, data}；code=0 成功。list 的 data 为 {page, pageSize, total, list[]}（注意字段名 pageSize，非 page_size）"
+      apikey_list: "OpenAPI 密钥列表 GET /api/v1/apikey（实测 2026-10-26 .24 org=1888）：返回 data.list[]，字段 user/access_key/secret_key/state/org/ctime/ts；secret_key 为明文（敏感，勿落盘/外传）。前端网关等价路径 /next/api/gateway/user_service.apikey.ListApiKey/api/v1/apikey。创建/删除端点未验证，暂不收录"
       org_source: "user_service 的 org 是租户 id（int），与 EASYOPS_ORG 同源——注册 body 的 org 应传部署根 env 的 EASYOPS_ORG"
       why_separate_system: "user_service:8111 与 cmdb 8079/itsm 8134 不同端口；api-cli 不支持 per-resource endpoint 覆盖，故必须独立 spec+system（同 sys_setting:8271 的处理）"
 
