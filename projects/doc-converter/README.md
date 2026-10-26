@@ -104,8 +104,9 @@ doc-converter convert 手册.md -t docx --options cover=true --options toc=true
 # 可调目录标题/深度（默认 目录 / 3 级）
 doc-converter convert 手册.md -t docx --options cover=true --options toc=true \
   --options toc_title=目录 --options toc_depth=3
-# 封面占用首个 H1 后，正文标题自动上提一级（原 H2 → H1）；H1 之间默认分页
-# 如需关闭 H1 分页：--options h1_page_break=false
+# 封面占用首个 H1 后，正文标题自动上提一级（原 H2 → H1）
+# H1 分页写入 Heading 1 样式本身，设置标题一即自动段前分页
+# 如需关闭：--options h1_page_break=false
 ```
 > 目录标题自动居中；封面标题、目录标题与各级标题统一使用默认黑色（不走 Word 模板主题蓝）。
 > 目录为 Word 原生 TOC 域，页码由 Word/WPS 打开时自动更新（已写入 `updateFields`）；
@@ -133,7 +134,7 @@ doc-converter convert 手册.docx -t md -o 手册.md --options media_dir=assets/
 --options toc_title=目录        # md->Word：目录标题
 --options toc_depth=3           # md->Word：目录收录级别（1-6）
 --options toc_page_break=true   # md->Word：目录后分页（默认 true）
---options h1_page_break=true    # md->Word：H1 之间分页（cover=true 时默认开启）
+--options h1_page_break=true    # md->Word：H1 段前分页写入 Heading 1 样式（cover=true 时默认开启）
 --options cjk_font="Noto Serif CJK SC"  # md→pdf (pandoc) 中文字体
 ```
 

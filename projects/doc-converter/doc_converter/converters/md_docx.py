@@ -20,7 +20,8 @@
   正文标题整体上提一级（原 H2 → H1，原 H3 → H2）
 - toc=true：生成目录页（Word 原生 TOC 域，打开时自动更新页码）
 - toc_title=目录 / toc_depth=3（1-6）/ toc_page_break=true
-- h1_page_break=true：H1 之间分页（cover=true 时默认开启；每个 H1 另起一页）
+- h1_page_break=true：H1 自动段前分页（cover=true 时默认开启）；
+  该设置写入 Heading 1 样式本身，不依赖逐段手动加 `pageBreakBefore`
 -- 封面页、目录页、正文之间用分页节隔开。
 """
 
@@ -825,7 +826,8 @@ class MdToDocx(BaseConverter):
         # 封面占用首个 H1 后，正文标题整体上提一级；H1 之间分页（封面场景默认开启）
         self._heading_shift = -1 if cover_title else 0
         self._h1_page_break = _opt_bool(h1_page_break_opt, bool(cover_title))
-        self._seen_h1 = False
+        # 分页写进 Heading 1 样式：此后任何一级标题天然“段前分页”，无需逐段打补丁
+        doc.styles["Heading 1"].paragraph_format.page_break_before = bool(self._h1_page_break)
         if cover_title:
             from docx.enum.text import WD_ALIGN_PARAGRAPH
             from docx.enum.section import WD_SECTION
@@ -911,11 +913,6 @@ class MdToDocx(BaseConverter):
                 if shift:
                     level = max(1, min(6, level + shift))
                 heading = doc.add_heading(level=level)
-                # H1 之间分页：首个正文 H1 由目录页后分节自然换页，其余 H1 前插入分页
-                if level == 1 and quote_depth == 0:
-                    if getattr(self, "_h1_page_break", False) and getattr(self, "_seen_h1", False):
-                        heading.paragraph_format.page_break_before = True
-                    self._seen_h1 = True
                 _add_inline_runs(heading, m.group(2).strip(), base_font_size=None)
                 i += 1
                 continue
