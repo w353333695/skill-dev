@@ -53,6 +53,11 @@ doc-converter convert 手册.docx -t md -o 手册.md --options media_dir=assets/
 --options theme=dark            # Mermaid 主题
 --options encoding=gbk          # CSV 编码
 --options media_dir=assets/img  # Word->MD 图片目录
+--options cover=true            # md->Word：首个 H1 转封面页（垂直居中）
+--options toc=true              # md->Word：生成目录页（Word 原生 TOC 域）
+--options toc_title=目录        # md->Word：目录标题
+--options toc_depth=3           # md->Word：目录收录级别（1-6）
+--options toc_page_break=true   # md->Word：目录后分页（默认 true）
 ```
 
 ## 依赖自检

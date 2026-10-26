@@ -96,6 +96,18 @@ doc-converter convert doc.md -t json --extract code    -o code.json     # 所有
 doc-converter convert doc.md -t txt  -o doc.txt                         # 纯文本（去标记）
 ```
 
+**Markdown 转 Word（可选封面页 + 自动目录）**:
+```bash
+doc-converter convert 手册.md -t docx
+# 首个 H1 转为封面页；封面页 / 目录页 / 正文之间自动分页
+doc-converter convert 手册.md -t docx --options cover=true --options toc=true
+# 可调目录标题/深度（默认 目录 / 3 级）
+doc-converter convert 手册.md -t docx --options cover=true --options toc=true \
+  --options toc_title=目录 --options toc_depth=3
+```
+> 目录为 Word 原生 TOC 域，页码由 Word/WPS 打开时自动更新（已写入 `updateFields`）；
+> 若查看器不自动更新，右键目录 →「更新域」或按 F9。
+
 **Word 转 Markdown（提取图片）**:
 ```bash
 doc-converter convert 手册.docx -t md -o 手册.md
@@ -113,6 +125,11 @@ doc-converter convert 手册.docx -t md -o 手册.md --options media_dir=assets/
 --options theme=dark            # Mermaid 主题
 --options encoding=gbk          # CSV 编码
 --options media_dir=assets/img  # Word->MD 图片目录
+--options cover=true            # md->Word：首个 H1 转封面页
+--options toc=true              # md->Word：生成目录页（原生 TOC 域）
+--options toc_title=目录        # md->Word：目录标题
+--options toc_depth=3           # md->Word：目录收录级别（1-6）
+--options toc_page_break=true   # md->Word：目录后分页（默认 true）
 --options cjk_font="Noto Serif CJK SC"  # md→pdf (pandoc) 中文字体
 ```
 

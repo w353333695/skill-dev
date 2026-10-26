@@ -251,3 +251,58 @@ def test_md_to_docx_image_sizes(tmp_path: Path):
     assert widths[0] == 6.0
     assert widths[1] == 4.5
     assert widths[2] == 2.0
+
+
+def test_md_to_docx_cover_and_toc(tmp_path: Path):
+    """cover/toc 选项：H1 变封面页、目录域、封面/目录/正文三节分页。"""
+    import zipfile
+    from docx import Document
+    from docx.oxml.ns import qn
+
+    inp = tmp_path / "doc.md"
+    inp.write_text("# 文档标题\n\n## 第一节\n\n正文一\n\n## 第二节\n\n正文二\n", encoding="utf-8")
+    out = tmp_path / "doc.docx"
+
+    c = get_converter("md", "docx")
+    assert c is not None
+    res = c.convert(inp, out, cover=True, toc=True)
+    assert res.success, res.message
+
+    d = Document(out)
+    assert d.paragraphs[0].style.name == "Title"
+    assert d.paragraphs[0].text == "文档标题"
+    assert any(p.style.name == "TOC Heading" and p.text == "目录" for p in d.paragraphs)
+    # 封面 / 目录 / 正文三节，只有封面节垂直居中
+    assert len(d.sections) == 3
+    vals = []
+    for s in d.sections:
+        el = s._sectPr.find(qn("w:vAlign"))
+        vals.append(el.get(qn("w:val")) if el is not None else None)
+    assert vals == ["center", None, None]
+
+    with zipfile.ZipFile(out) as z:
+        xml = z.read("word/document.xml").decode("utf-8")
+        settings = z.read("word/settings.xml").decode("utf-8")
+    assert 'TOC \\o "1-3"' in xml
+    assert "updateFields" in settings
+
+
+def test_md_to_docx_default_has_no_cover_or_toc(tmp_path: Path):
+    """不带选项时保持原行为：无目录域、单节。"""
+    import zipfile
+    from docx import Document
+
+    inp = tmp_path / "doc.md"
+    inp.write_text("# 标题\n\n## 小节\n\n正文\n", encoding="utf-8")
+    out = tmp_path / "doc.docx"
+
+    c = get_converter("md", "docx")
+    res = c.convert(inp, out)
+    assert res.success, res.message
+
+    d = Document(out)
+    assert d.paragraphs[0].style.name == "Heading 1"
+    assert len(d.sections) == 1
+    with zipfile.ZipFile(out) as z:
+        xml = z.read("word/document.xml").decode("utf-8")
+    assert "TOC \\o" not in xml

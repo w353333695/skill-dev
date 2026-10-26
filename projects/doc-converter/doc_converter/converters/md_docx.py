@@ -14,6 +14,12 @@
 - 数学公式（$...$ / $$...$$ 防误解析，等宽斜体渲染）
 - Mermaid 图表（自动渲染为图片）
 - 软换行（行尾两空格 → 段内换行）
+
+选项（`--options k=v`，均默认关闭，不影响既有输出）：
+- cover=true：首个 H1 转为封面页（Title 样式、垂直居中、不进入目录）
+- toc=true：生成目录页（Word 原生 TOC 域，打开时自动更新页码）
+- toc_title=目录 / toc_depth=3（1-6）/ toc_page_break=true
+-- 封面页、目录页、正文之间用分页节隔开。
 """
 
 from __future__ import annotations
@@ -620,6 +626,82 @@ def _token_color(ttype) -> tuple[bool, bool, str | None]:
 
 
 # ---------------------------------------------------------------------------
+# 封面页 / 目录页辅助
+# ---------------------------------------------------------------------------
+def _opt_bool(value, default=False):
+    """选项布尔值解析（--options 值可能是 bool/int/字符串）。"""
+    if value is None:
+        return default
+    if isinstance(value, bool):
+        return value
+    if isinstance(value, (int, float)):
+        return bool(value)
+    return str(value).strip().lower() in ("1", "true", "yes", "y", "on")
+
+
+def _pop_first_h1(lines):
+    """取出并删除首个一级标题（# xxx），返回标题文本；没有则返回 None。"""
+    for idx, line in enumerate(lines):
+        m = re.match(r"^#\s+(.+?)\s*#*\s*$", line)
+        if m:
+            title = m.group(1).strip()
+            del lines[idx]
+            return title
+    return None
+
+
+def _set_section_vcenter(section, enabled=True):
+    """设置/清除节内容垂直居中（封面页用；新节会克隆上一节，须显式清除）。"""
+    from docx.oxml import OxmlElement
+    from docx.oxml.ns import qn
+
+    sect_pr = section._sectPr
+    for old in sect_pr.findall(qn("w:vAlign")):
+        sect_pr.remove(old)
+    if not enabled:
+        return
+    align = OxmlElement("w:vAlign")
+    align.set(qn("w:val"), "center")
+    sect_pr.append(align)
+
+
+def _add_toc_field(paragraph, depth):
+    """插入 Word 原生 TOC 域（打开后由 Word/WPS 计算页码）。"""
+    from docx.oxml import OxmlElement
+    from docx.oxml.ns import qn
+
+    def fld(kind):
+        el = OxmlElement("w:fldChar")
+        el.set(qn("w:fldCharType"), kind)
+        return el
+
+    run = paragraph.add_run()
+    run._r.append(fld("begin"))
+    instr = OxmlElement("w:instrText")
+    instr.set(qn("xml:space"), "preserve")
+    instr.text = ' TOC \\o "1-%d" \\h \\z \\u ' % depth
+    run._r.append(instr)
+    run._r.append(fld("separate"))
+    placeholder = OxmlElement("w:t")
+    placeholder.text = "打开文档后按 F9 更新域生成目录"
+    run._r.append(placeholder)
+    run._r.append(fld("end"))
+
+
+def _enable_update_fields(doc):
+    """Word 打开文档时自动更新域（让目录页码自动生成）。"""
+    from docx.oxml import OxmlElement
+    from docx.oxml.ns import qn
+
+    settings = doc.settings.element
+    el = settings.find(qn("w:updateFields"))
+    if el is None:
+        el = OxmlElement("w:updateFields")
+        settings.append(el)
+    el.set(qn("w:val"), "true")
+
+
+# ---------------------------------------------------------------------------
 # 表格列对齐解析
 # ---------------------------------------------------------------------------
 def _parse_table_align(separator: str) -> list[str]:
@@ -665,7 +747,7 @@ class MdToDocx(BaseConverter):
     name = "md-docx"
     source_formats = ["md", "markdown"]
     target_formats = ["docx"]
-    description = "Markdown 转 Word 文档 (Mermaid 自动转图片插入)"
+    description = "Markdown 转 Word 文档 (Mermaid 自动转图片插入；可选封面页/目录页)"
     dependencies = ["python-docx"]  # import 名 docx
 
     # 标题字号映射：h1 → h6
@@ -691,6 +773,17 @@ class MdToDocx(BaseConverter):
         text = _unescape_lt_gt_pipe(text)
 
         doc = Document()
+
+        # 封面页 / 目录页选项（默认关闭，保持既有输出不变）
+        cover_enabled = _opt_bool(options.get("cover"), False)
+        toc_enabled = _opt_bool(options.get("toc"), False)
+        toc_title = str(options.get("toc_title") or "目录")
+        try:
+            toc_depth = int(options.get("toc_depth", 3))
+        except (TypeError, ValueError):
+            toc_depth = 3
+        toc_depth = max(1, min(6, toc_depth))
+        toc_page_break = _opt_bool(options.get("toc_page_break"), True)
 
         # 基础样式：统一微软雅黑
         style = doc.styles["Normal"]
@@ -722,6 +815,33 @@ class MdToDocx(BaseConverter):
         self._mermaid_images = mermaid_images
         self._mermaid_idx = 0
         lines = text.split("\n")
+
+        # 封面页：首个 H1 转为封面标题（Title 样式，不进入目录），节内垂直居中
+        cover_title = _pop_first_h1(lines) if cover_enabled else None
+        if cover_title:
+            from docx.enum.text import WD_ALIGN_PARAGRAPH
+            from docx.enum.section import WD_SECTION
+
+            p = doc.add_paragraph(style="Title")
+            p.alignment = WD_ALIGN_PARAGRAPH.CENTER
+            _add_inline_runs(p, cover_title, base_font_size=None)
+            for run in p.runs:
+                _set_run_font(run, "Microsoft YaHei", Pt(30))
+            _set_section_vcenter(doc.sections[0])
+            doc.add_section(WD_SECTION.NEW_PAGE)
+            _set_section_vcenter(doc.sections[1], False)  # 新节克隆了封面节属性
+
+        # 目录页：原生 TOC 域；与封面/正文之间用分页节隔开
+        if toc_enabled:
+            from docx.enum.section import WD_SECTION
+
+            toc_head = doc.add_paragraph(toc_title)
+            toc_head.style = doc.styles["TOC Heading"]
+            _add_toc_field(doc.add_paragraph(), toc_depth)
+            _enable_update_fields(doc)
+            if toc_page_break:
+                doc.add_section(WD_SECTION.NEW_PAGE)
+
         self._render_blocks(doc, lines, quote_depth=0)
 
         # 文末脚注
@@ -732,6 +852,10 @@ class MdToDocx(BaseConverter):
 
         msg = "Markdown 已转为 Word 文档"
         parts = []
+        if cover_title:
+            parts.append("封面页")
+        if toc_enabled:
+            parts.append("目录页")
         if _EMBEDDED_IMG_COUNT:
             parts.append(f"{_EMBEDDED_IMG_COUNT} 张本地图片")
         img_count = len([v for v in mermaid_images.values() if v.exists()])
