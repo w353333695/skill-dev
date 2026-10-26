@@ -22,7 +22,7 @@
 - toc_title=目录 / toc_depth=3（1-6）/ toc_page_break=true
 - h1_page_break=true：H1 自动段前分页（cover=true 时默认开启）；
   该设置写入 Heading 1 样式本身，不依赖逐段手动加 `pageBreakBefore`
-- heading_numbering=true：标题自动多级编号（1 / 1.1 / 1.1.1）；
+- heading_numbering=true：标题自动多级编号（1. / 1.1. / 1.1.1.）；
   编号写入 Heading 1-6 样式，并剥离标题里手写的“一、/ 5.1”等序号，增删标题自动重排
 -- 封面页、目录页、正文之间用分页节隔开。
 """
@@ -742,7 +742,7 @@ def _install_heading_numbering(doc):
 
     lvl_parts = []
     for ilvl in range(6):
-        lvl_text = ".".join("%%%d" % i for i in range(1, ilvl + 2))
+        lvl_text = ".".join("%%%d" % i for i in range(1, ilvl + 2)) + "."
         lvl_parts.append(
             '<w:lvl w:ilvl="%d">'
             '<w:start w:val="1"/><w:numFmt w:val="decimal"/>'

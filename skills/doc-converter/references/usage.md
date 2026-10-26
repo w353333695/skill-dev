@@ -59,7 +59,7 @@ doc-converter convert 手册.docx -t md -o 手册.md --options media_dir=assets/
 --options toc_depth=3           # md->Word：目录收录级别（1-6）
 --options toc_page_break=true   # md->Word：目录后分页（默认 true）
 --options h1_page_break=true    # md->Word：H1 段前分页写入 Heading 1 样式（cover=true 时默认开启）
---options heading_numbering=true  # md->Word：标题自动编号 1/1.1/1.1.1（写入样式，增删自动重排）
+--options heading_numbering=true  # md->Word：标题自动编号 1./1.1./1.1.1.（写入样式，增删自动重排）
 ```
 
 ## 依赖自检

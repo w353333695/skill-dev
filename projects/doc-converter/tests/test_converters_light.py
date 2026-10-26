@@ -349,5 +349,5 @@ def test_md_to_docx_heading_numbering(tmp_path: Path):
 
     with zipfile.ZipFile(out) as z:
         numbering = z.read("word/numbering.xml").decode("utf-8")
-    for text in ('%1', '%1.%2', '%1.%2.%3'):
+    for text in ('%1.', '%1.%2.', '%1.%2.%3.'):
         assert 'w:lvlText w:val="%s"' % text in numbering
