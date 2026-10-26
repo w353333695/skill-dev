@@ -22,6 +22,8 @@
 - toc_title=目录 / toc_depth=3（1-6）/ toc_page_break=true
 - h1_page_break=true：H1 自动段前分页（cover=true 时默认开启）；
   该设置写入 Heading 1 样式本身，不依赖逐段手动加 `pageBreakBefore`
+- heading_numbering=true：标题自动多级编号（1 / 1.1 / 1.1.1）；
+  编号写入 Heading 1-6 样式，并剥离标题里手写的“一、/ 5.1”等序号，增删标题自动重排
 -- 封面页、目录页、正文之间用分页节隔开。
 """
 
@@ -705,6 +707,74 @@ def _enable_update_fields(doc):
 
 
 # ---------------------------------------------------------------------------
+# 标题自动编号（1 / 1.1 / 1.1.1）
+# ---------------------------------------------------------------------------
+_HEADING_NUM_RE = re.compile(
+    r"^\s*(?:"
+    r"[（(]?[一二三四五六七八九十百千]+[）)、.．]\s*"   # 一、 / （一） / 一.
+    r"|\d{1,3}(?:[.．]\d+)*\s+"                       # 5.1 标题 / 1 标题（避免误伤年份）
+    r"|\d+(?:[.．]\d+)*[、.．](?!\d)\s*"               # 1. / 1、 / 1.1.
+    r")"
+)
+
+
+def _strip_heading_number(text):
+    """去掉标题里手写的序号（一、/ 1. / 5.1 等），交给 Word 自动编号。"""
+    cleaned = _HEADING_NUM_RE.sub("", text, count=1).strip()
+    return cleaned or text
+
+
+def _install_heading_numbering(doc):
+    """安装多级编号定义（%1 / %1.%2 / …），并挂到 Heading 1-6 样式。
+
+    编号写进样式而非逐段设置：删除/调整标题后由 Word 自动重排。
+    返回 numId。
+    """
+    from docx.oxml import parse_xml
+    from docx.oxml.ns import nsdecls, qn
+
+    numbering = doc.part.numbering_part.element
+    abstract_ids = [
+        int(el.get(qn("w:abstractNumId")))
+        for el in numbering.findall(qn("w:abstractNum"))
+    ]
+    abstract_id = max(abstract_ids + [0]) + 1
+
+    lvl_parts = []
+    for ilvl in range(6):
+        lvl_text = ".".join("%%%d" % i for i in range(1, ilvl + 2))
+        lvl_parts.append(
+            '<w:lvl w:ilvl="%d">'
+            '<w:start w:val="1"/><w:numFmt w:val="decimal"/>'
+            '<w:suff w:val="space"/>'
+            '<w:lvlText w:val="%s"/><w:lvlJc w:val="left"/>'
+            '<w:pPr><w:ind w:left="0" w:firstLine="0"/></w:pPr>'
+            "</w:lvl>" % (ilvl, lvl_text)
+        )
+    abstract_xml = (
+        '<w:abstractNum %s w:abstractNumId="%d">'
+        '<w:multiLevelType w:val="multilevel"/>%s</w:abstractNum>'
+        % (nsdecls("w"), abstract_id, "".join(lvl_parts))
+    )
+    abstract = parse_xml(abstract_xml)
+    first_num = numbering.find(qn("w:num"))
+    if first_num is not None:
+        first_num.addprevious(abstract)  # schema: abstractNum* 必须在 num* 前
+    else:
+        numbering.append(abstract)
+
+    num = numbering.add_num(abstract_id)
+    num_id = int(num.get(qn("w:numId")))
+
+    for level in range(1, 7):
+        p_pr = doc.styles["Heading %d" % level].element.get_or_add_pPr()
+        num_pr = p_pr.get_or_add_numPr()
+        num_pr.get_or_add_ilvl().val = level - 1
+        num_pr.get_or_add_numId().val = num_id
+    return num_id
+
+
+# ---------------------------------------------------------------------------
 # 表格列对齐解析
 # ---------------------------------------------------------------------------
 def _parse_table_align(separator: str) -> list[str]:
@@ -788,6 +858,7 @@ class MdToDocx(BaseConverter):
         toc_depth = max(1, min(6, toc_depth))
         toc_page_break = _opt_bool(options.get("toc_page_break"), True)
         h1_page_break_opt = options.get("h1_page_break")
+        heading_numbering = _opt_bool(options.get("heading_numbering"), False)
 
         # 基础样式：统一微软雅黑
         style = doc.styles["Normal"]
@@ -800,6 +871,10 @@ class MdToDocx(BaseConverter):
             _set_style_font(heading_style, "Microsoft YaHei", Pt(self.HEADING_SIZES[level]))
             heading_style.font.bold = True
             heading_style.font.color.rgb = RGBColor(0, 0, 0)  # 默认色（黑），不用模板蓝色
+
+        # 标题自动编号：写进 Heading 1-6 样式（1 / 1.1 / 1.1.1）
+        if heading_numbering:
+            _install_heading_numbering(doc)
 
         # 预提取 mermaid 块并逐块渲染为图片（单块失败不影响其余，与 md-pdf 对齐）
         from .mermaid_image import extract_mermaid_blocks, render_mermaid_to_image
@@ -826,6 +901,7 @@ class MdToDocx(BaseConverter):
         # 封面占用首个 H1 后，正文标题整体上提一级；H1 之间分页（封面场景默认开启）
         self._heading_shift = -1 if cover_title else 0
         self._h1_page_break = _opt_bool(h1_page_break_opt, bool(cover_title))
+        self._heading_numbering = heading_numbering
         # 分页写进 Heading 1 样式：此后任何一级标题天然“段前分页”，无需逐段打补丁
         doc.styles["Heading 1"].paragraph_format.page_break_before = bool(self._h1_page_break)
         if cover_title:
@@ -913,7 +989,10 @@ class MdToDocx(BaseConverter):
                 if shift:
                     level = max(1, min(6, level + shift))
                 heading = doc.add_heading(level=level)
-                _add_inline_runs(heading, m.group(2).strip(), base_font_size=None)
+                heading_text = m.group(2).strip()
+                if getattr(self, "_heading_numbering", False):
+                    heading_text = _strip_heading_number(heading_text)
+                _add_inline_runs(heading, heading_text, base_font_size=None)
                 i += 1
                 continue
 

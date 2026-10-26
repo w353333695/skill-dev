@@ -318,3 +318,36 @@ def test_md_to_docx_default_has_no_cover_or_toc(tmp_path: Path):
     with zipfile.ZipFile(out) as z:
         xml = z.read("word/document.xml").decode("utf-8")
     assert "TOC \\o" not in xml
+
+
+def test_md_to_docx_heading_numbering(tmp_path: Path):
+    """heading_numbering：多级自动编号挂到 Heading 样式，手写序号被剥离。"""
+    import zipfile
+    from docx import Document
+    from docx.oxml.ns import qn
+
+    inp = tmp_path / "doc.md"
+    inp.write_text(
+        "# 文档标题\n\n## 一、第一节\n\n### 5.1 小节\n\n正文\n\n## 第二节\n\n正文\n",
+        encoding="utf-8",
+    )
+    out = tmp_path / "doc.docx"
+
+    c = get_converter("md", "docx")
+    res = c.convert(inp, out, cover=True, heading_numbering=True)
+    assert res.success, res.message
+
+    d = Document(out)
+    assert [p.text for p in d.paragraphs if p.style.name == "Heading 1"] == ["第一节", "第二节"]
+    assert [p.text for p in d.paragraphs if p.style.name == "Heading 2"] == ["小节"]
+
+    for level in (1, 2, 3):
+        num_pr = d.styles["Heading %d" % level].element.pPr.find(qn("w:numPr"))
+        assert num_pr is not None, level
+        assert num_pr.find(qn("w:ilvl")).get(qn("w:val")) == str(level - 1)
+        assert num_pr.find(qn("w:numId")).get(qn("w:val")) is not None
+
+    with zipfile.ZipFile(out) as z:
+        numbering = z.read("word/numbering.xml").decode("utf-8")
+    for text in ('%1', '%1.%2', '%1.%2.%3'):
+        assert 'w:lvlText w:val="%s"' % text in numbering
