@@ -25,7 +25,20 @@ compatibility:
     flows: "必填 JSON 字符串，来自 import_check 返回的流程选择/改名结果"
   check_endpoint: "/flows/import/check"
   legacy_endpoint: "/flows/import"
-  legacy_layout: "仅适用于包含 ._easyPackageConfig.dat 的 V1 包，不适用于本包的 _easyops_flow_info.json + _easyops_tar_meta.json 布局。"
+  legacy_layout: |
+    V1 包 = 压缩包根目录单个 ._easyPackageConfig.dat（内容=流程定义 JSON，与 V2
+    _easyops_flow_info.json 同源）。导入实现直接 filepath.Join(tempDir, "._easyPackageConfig.dat")，
+    **不递归子目录**；压缩包必须把该文件放在根。V1 只导入流程、不导入工具：
+    stepList 引用的 toolId/vId 必须已在目标环境存在，否则流程可导入但执行失败。
+    源码：flow_basic/flow_import_export_v1.go（导出）/ flow_basic_service.go:getImportFlowInfo（导入）。
+  dual_package: |
+    V1+V2 双兼容包 = V2 三件套 + ._easyPackageConfig.dat，全部放压缩包根目录：
+      ._easyPackageConfig.dat   # 内容 = _easyops_flow_info.json
+      _easyops_flow_info.json
+      _easyops_tar_meta.json
+      tool_batch_export.tar.gz
+    V1 只读 dat、忽略三件套；V2 只读三件套、忽略 dat。两边互不影响（2026-10-26 实测 V2 预检 code=0）。
+  error_missing_dat: "V1 导入报『解析导入流程文件[...]异常: ... ._easyPackageConfig.dat open ... no such file or directory』= 包根缺 dat（常见于只打了 V2 三件套）。"
 known_issue:
   environment: "24"
   symptom: "导出的包无法直接导入。"
