@@ -281,7 +281,9 @@ systems:
                 - frequency: 120                 # 限频次/分
                   method: POST
                   uri: /api/flowable_service/v2/process_definition
-        已知 app 映射：cmdbservice/logic.cmdb.service（CMDB）· flowable_service/logic.flowable_service（ITSM 工单，
+        🔴 api_list 条目必须使用上面的【块式 YAML】；**不支持** flow 式内联映射
+           `- {frequency: 120, method: POST, uri: /...}`——网关解析不接受（2026-10-26 实测）。
+           已知 app 映射：cmdbservice/logic.cmdb.service（CMDB）· flowable_service/logic.flowable_service（ITSM 工单，
         发起=POST /api/flowable_service/v2/process_instance）· msgsender/logic.msgsender（通知，configs=GET
         /api/v2/message_sender/configs，发送=POST /api/v1/message_sender/send_message）· tool_service（autoops）。
         uri 路径参数用 {xx} 形态（如 {objectId}/{instanceId}）。放行样例产物见 tmp（openapi-tool/openapi.yaml）。

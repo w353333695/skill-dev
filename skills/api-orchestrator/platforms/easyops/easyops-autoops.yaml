@@ -26,6 +26,10 @@
 #   • frontend —— 走前端网关（${EASYOPS_AUTOOPS_FRONTEND_URL}，值在部署根 env.d）+ Host 头。网关按 *每个 API* 路由
 #     （per-API path_prefix），一个 endpoint 只能持一个前缀，对 tool 域多 verb 不通用。
 #     仅作备选，默认不用。
+#   • OpenAPI —— api_gateway/conf/openapi.yaml 里 app_name=tool（不是 tool_service）、
+#     service_name=logic.tool_service；api_list 条目必须用块式 YAML
+#     （- frequency/method/uri 分行），**不支持** `- {frequency: 120, method: POST, uri: ...}`
+#     这种 flow 式内联映射（网关解析不接受，2026-10-26 实测）。
 #
 # 鉴权：auth: easyops-cookie（部署根 auth.d/easyops-cookie.yaml，API_CLI_AUTH_D 指向；原 home 目录位置已废弃；provider=cookie，
 #   持 PHPSESSID）。与 cmdb 完全一致——backend/frontend 均用同一 cookie。
