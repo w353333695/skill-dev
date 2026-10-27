@@ -1,6 +1,6 @@
 # 物理服务器SNMP资产采集：EasyOps原生套件
 
-版本：0.1.3；开发与导入方式：api-orchestrator编排现有EasyOps能力。
+版本：0.1.5；开发与导入方式：api-orchestrator编排现有EasyOps能力。
 
 ## 交付与维护边界
 
@@ -45,8 +45,20 @@
 配置采集目标范围、代理节点及加密凭证参数后，再给待验收实例设置snmp_conf.enabled=true。
 $.路径参数须按CMDB动态参数处理；proxyIp为空时显式选代理，不默认把物理机当agent。
 
-本次保持未激活、未建任务、未进行真实设备采集；没有设备清单不影响先交付套件。
-直接加载包内脚本的53项离线回归通过，另做Python2.7语法及远端导出一致性核对；不能替代设备与agent实机验收。
+本次不调用激活、不创建或修改采集任务、不进行真实设备采集；不推断用户已有任务状态。
+直接加载包内脚本的68项离线回归通过，含15项新增诊断测试；另通过Python2.7语法检查，未做Python2实际运行验收；不能替代设备与agent实机验收。
+
+## 0.1.5诊断增强与导出
+
+- 在现有采集任务中显式增加常量参数logLevel=DEBUG（paramType=const），确认agent收到EASYOPS_COLLECTOR_logLevel=DEBUG；默认ERROR。旧任务可能不会自动补新增参数。
+- 若使用既有手动执行方式，可在此次执行进程环境设置EASYOPS_LOG_LEVEL=DEBUG；有任务logLevel参数时优先使用任务值。不修改全局agent配置。
+- DEBUG新增整次trace、非密连接上下文、采集阶段、请求开始/结束、具体OID、GET/WALK程序名、超时/重试、耗时、退出码、剩余预算和结果汇总。
+- 修复外层预算超时跳过stdout/stderr日志的问题；回收子进程后仍记录已产生的受限输出。先脱敏再截断，每个输出最多记录末尾32768字符，单个输出超过8MiB时省略正文。
+- 区分no_response、budget_exhausted、unsupported、empty_or_inaccessible、missing_executable等状态；状态不是对网络或设备根因的最终判定。不自动增加请求、不降级SNMP版本、不修改OID或CMDB写入规则。
+- 复现后导出同一trace从collect.context到collect.summary的完整stderr/执行日志和stdout协议块，附品牌/型号、BMC固件及手工测试的请求方式。不要只发最后一行No Response，也不要发送凭证、完整环境或snmp.conf。
+- 日志仍包含目标、用户名和资产信息，分享前人工脱敏；排障后恢复ERROR。包内《诊断日志导出.md》说明字段与状态。
+
+ENTITY、INTERFACE、FC_PORT是标准表入口而非每台BMC必备实现，需WALK而非直接GET。IF可能仅含管理口，FC卡存在不保证BMC暴露FC-MGMT-MIB。先看preflight基础GET是否成功。
 
 验收页面：http://192.168.110.24/next/monitor-kit/kit/easyops/65ecd570203d1/detail
 
