@@ -13,6 +13,7 @@ archive:
   optional_files:
     - "<subFlowId>.json"
   root_layout: "导入实现要求上述文件直接位于解压目录根部；若 tar.gz 只有一个顶层目录，先用 normalize_flow_package.py 展平。"
+  inner_tool_tar: "tool_batch_export.tar.gz 是 gzip+tar 内层工具包；为兼容老环境，重打包用 GNU tar --numeric-owner --owner=0 --group=0 -m（gzip OS=3）。手工解压：tar -xzf；老 tar 不支持 -z 时用 gzip -dc file | tar -xf -；不要用 unzip（它不是 zip）。"
   metadata:
     _easyops_flow_info.json: "主流程完整定义；含 flowId、name、vName、stepList、flowInputs、envType 等。"
     _easyops_tar_meta.json: "工具与子流程索引；tools 的 key 为 toolId_versionId，flows 记录子流程。"
