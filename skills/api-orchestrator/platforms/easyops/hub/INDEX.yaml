@@ -6,7 +6,7 @@
 # 收录门槛: 仅成品交付物；命名规范（2026-09-17 起）{类别}_{名称}_{版本}.{扩展名}，中文人类可读，
 #   如「ITSM服务_主机申请_1.3.4.zip」；旧命名 <名称>_v<版本>.<ext> 存量不动，新版回流按新命名+删旧版文件
 items:
-  # ---- cmdb-kits（3 商品）----
+  # ---- cmdb-kits（5 商品）----
   - id: svc-cmdb-kit
     name: SVC监控采集(CMDB)
     category: cmdb-kits
@@ -48,6 +48,19 @@ items:
     scenario: 路由器 SNMP 配置采集（品牌 Cisco/H3C/华为自适应）——设备信息+端口(NETDPORT，name={ip}:{ifName})+MAC/ARP/LLDP/网段/风扇电源
     notes: "套件 instanceId 65dc3da4abcc5（.24 已 import_update 升 1.1.11）；🔴教训=采集脚本 run() 阶段式流程必须有异常防护（name 生成在 collect_info 之后，中断即裸数据上报）；py2 脚本"
     added: "2026-10-19"
+  - id: physical-server-snmp-inventory-kit
+    name: 物理服务器SNMP资产采集
+    category: cmdb-kits
+    files: [CMDB采集套件_物理服务器SNMP资产采集_0.1.3.zip, 物理服务器SNMP资产采集_使用说明.md]
+    version: "0.1.3"
+    history:
+      - {ver: "0.1.0", date: "2026-10-27", change: "初版：通用MIB加Dell iDRAC、IBM IMM、联想XCC、华为iBMC资产私有列；百信/浪潮仅通用回退；新增非密snmp_conf；离线55项回归"}
+      - {ver: "0.1.1", date: "2026-10-27", change: "补充凭证转义/十六进制日志脱敏及初始化清理回归，共57项；wheel独立构建携带交付文档"}
+      - {ver: "0.1.2", date: "2026-10-27", change: "对服务端未配置时注入的null结构按禁用静默处理；58项离线回归"}
+      - {ver: "0.1.3", date: "2026-10-27", change: "按用户要求改为仅维护EasyOps原生CMDB采集套件：移除独立项目/CLI/wheel，文档改为平台导入与参数配置，直接加载包内脚本53项回归"}
+    scenario: 纯SNMP物理服务器CMDB资产采集，CPU/内存/盘/业务网口/FC口，按BMC产品族识别，不依赖型号清单
+    notes: "EasyOps原生simple-script/process_sampler套件，instanceId=65ecd570203d1，已导入未激活；源码和内嵌产品族字典在ZIP内src/server_snmp_collect.py，无独立项目/CLI/wheel依赖；加密凭证不进CMDB；未实机验收；百信/浪潮暂仅通用回退；执行节点需Net-SNMP。"
+    added: "2026-10-27"
   # ---- inspection-kits（10 商品）----
   - id: ibmsvc-inspection-kit
     name: IBMSVC存储设备巡检(ONEMODEL)
