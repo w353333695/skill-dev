@@ -57,6 +57,12 @@ dollar_attr_syntax:
       mechanism: "cmdb_path_helper 本地只走 struct 字段递归；跨实例关联靠 SearchAllPaths 的 PathSearchV3 在 CMDB 端查，把 $.field 路径作为 Fields 让 CMDB 一次查回。"
       source: "cmdb_path_helper.go:113-162,190-230 SearchAllPaths"
 
+  process_sampler_parameter_shape:
+    rule: "现有CMDB process_sampler套件的动态参数元数据通常使用 use=collectParams；结构体字段按 $.结构体字段拆分并声明 valueType=cmdb。use=collectorParams 或把整段结构仅声明为 string 可能导致前端任务配置与网络套件行为不一致。"
+    example: "snmpVersion: valueType=cmdb, defaultValue=$.snmp_conf.snmpVersion, use=collectParams；snmpPort: valueType=int, defaultValue=$.snmp_conf.snmpPort, use=collectParams。"
+    diagnosis: "plugin.list 与 _COLLECTOR_EASYOPS_PLUGIN 的精简列表可能不返回完整defaultValue；对比时使用 plugin.detail/pluginYaml 或实例完整字段，核对 defaultValue、valueType、use。"
+    source: "当前环境路由器/防火墙 process_sampler 套件实例只读对比（2026-10-28）；collector_service 参数路径解析源码见本文件权威源"
+
   value_source_instance:
     rule: "取值对象 = 【采集目标实例】（_COLLECTOR_JOB 采集范围内的那个实例），不是套件实例"
     evidence:

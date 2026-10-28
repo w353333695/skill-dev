@@ -51,8 +51,8 @@ items:
   - id: physical-server-snmp-inventory-kit
     name: 物理服务器SNMP信息采集
     category: cmdb-kits
-    files: [CMDB采集套件_物理服务器SNMP信息采集_0.1.11.zip, 物理服务器SNMP信息采集_使用说明.md]
-    version: "0.1.11"
+    files: [CMDB采集套件_物理服务器SNMP信息采集_0.1.12.zip, 物理服务器SNMP信息采集_使用说明.md]
+    version: "0.1.12"
     history:
       - {ver: "0.1.0", date: "2026-10-27", change: "初版：通用MIB加Dell iDRAC、IBM IMM、联想XCC、华为iBMC资产私有列；百信/浪潮仅通用回退；新增非密snmp_conf；离线55项回归"}
       - {ver: "0.1.1", date: "2026-10-27", change: "补充凭证转义/十六进制日志脱敏及初始化清理回归，共57项；wheel独立构建携带交付文档"}
@@ -64,8 +64,9 @@ items:
       - {ver: "0.1.9", date: "2026-10-28", change: "readme改为面向使用者的采集原理、支持品牌产品族、采集条件、配置和验证、常见问题；保留技术细节在导入说明；远端升级及readme/源码/模型回读通过；91项回归，未激活、未改任务"}
       - {ver: "0.1.10", date: "2026-10-28", change: "按用户要求递增版本重新打包，避免复用早上已有的0.1.9；套件/脚本/说明版本统一0.1.10，采集逻辑不变；仅离线交付，未更新远端"}
       - {ver: "0.1.11", date: "2026-10-28", change: "套件更名物理服务器SNMP信息采集，补齐resource_discovery_define.json的物理机/网口/FC口三模型配置；归档CMDB采集前端命名与发现文件必填规则及写法；94项离线回归；仅离线交付，前端待导入验收"}
+      - {ver: "0.1.12", date: "2026-10-28", change: "对比网络process_sampler修正参数传递：collectParams、分拆$.snmp_conf字段、valueType=cmdb；脚本兼容旧整结构；95项回归；远端旧实例未更新"}
     scenario: 纯SNMP物理服务器CMDB资产采集，CPU/内存/盘/业务网口/FC口，按BMC产品族识别，不依赖型号清单
-    notes: "EasyOps原生套件，instanceId=65ecd570203d1，交付包0.1.11，名称物理服务器SNMP信息采集；远端此前为旧名0.1.9，本次未更新；资源发现覆盖PHYSICAL_SERVER/NETDPORT/FIBER_CHANNEL_PORT三个模型，前端待导入验收；未激活或修改任务。snmp_conf仅10字段，snmpPort保留结构内，脚本默认161，CMDB不保存struct默认值；模型导入合并子字段，升级旧结构需备份后object_attr.update精确替换。字段授权easyops（管理员例外，非存储加密），凭证可用平台加密参数覆盖；py内嵌品牌配置。完整模型快照跨环境先备份比较；百信/浪潮仅通用回退，所有品牌均未实机验收；readme以使用与验收为主。"
+    notes: "EasyOps原生套件，instanceId=65ecd570203d1，交付包0.1.12，名称物理服务器SNMP信息采集；远端此前仍为旧名0.1.9，本次未更新；资源发现覆盖PHYSICAL_SERVER/NETDPORT/FIBER_CHANNEL_PORT三个模型，前端待导入验收。参数按网络process_sampler使用collectParams及分拆cmdb动态字段，脚本兼容旧整结构；未激活或修改任务。snmp_conf仅10字段，snmpPort保留结构内，脚本默认161，CMDB不保存struct默认值；模型导入合并子字段，升级旧结构需备份后object_attr.update精确替换。字段授权easyops（管理员例外，非存储加密），凭证可用平台加密参数覆盖；py内嵌品牌配置。完整模型快照跨环境先备份比较；百信/浪潮仅通用回退，所有品牌均未实机验收；readme以使用与验收为主。"
     added: "2026-10-27"
   # ---- inspection-kits（10 商品）----
   - id: ibmsvc-inspection-kit

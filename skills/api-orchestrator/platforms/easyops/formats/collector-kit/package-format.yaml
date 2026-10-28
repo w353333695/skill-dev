@@ -92,6 +92,12 @@ cmdb_collection_requirements:
     - "导入后通过CMDB只读检查对应_COLLECTOR_EASYOPS_PLUGIN实例的pluginResConfig；plugin.detail未必返回该字段，不能因此判断未写入。"
     - "分别检查前端资源发现可看到该套件，以及配置采集任务时可选择预期采集对象；API返回200/code=0不能代替这两项前端验收。"
     - "改名/补文件/打包不自动激活，不擅自修改已有采集任务。未做前端验证时明确标待验收。"
+  parameter_delivery:
+    rule: "CMDB process_sampler 参数应沿用现有网络套件的 collectParams；$.attr 默认值的参数使用 valueType=cmdb（数值端口可用int），不要把整个结构体仅声明为普通string后期待前端自动展开。"
+    struct_example: "snmp_conf 结构字段的参数写成 $.snmp_conf.snmpVersion、$.snmp_conf.snmpPort 等；脚本可在运行时按环境变量组装连接配置。"
+    compatibility: "若历史任务已经传入整段结构JSON，脚本可保留兼容读取；新包的参数定义仍应以分拆CMDB动态参数为准。"
+    diagnosis: "_COLLECTOR_EASYOPS_PLUGIN 的list接口会精简参数元数据，比较参数时应读完整实例字段或plugin.detail/pluginYaml，检查defaultValue/valueType/use；不能只看list的null默认值。"
+    comparison_evidence: "当前环境路由器信息采集与防火墙信息采集实例均为process_sampler且使用collectParams、分拆cmdb参数；旧物理服务器0.1.9实例使用collectorParams、snmp_conf为string，已据此修正0.1.12。"
 
 # 二、打包格式冲突（⚠️ 待真调验证，关键坑）
 # -----------------------------------------------------------------------------
