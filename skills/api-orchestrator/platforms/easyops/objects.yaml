@@ -174,12 +174,26 @@ objects:
       unique:      { type: bool }
 
   view:
-    description: 模型视图/布局（google.protobuf.Struct，自由 JSON）。
+    description: 模型视图/布局（google.protobuf.Struct，自由 JSON）。除布局字段外，view.attr_authorizers支持字段级读取权限；该能力由CMDB对象服务实现，非attrList属性定义字段。
     fields:
       attr_category_order: { type: array, items: string, desc: "属性分组展示顺序" }
       attr_order:          { type: array, items: string, desc: "属性展示顺序（属性 id）" }
       show_key:            { type: array, items: string, desc: "实例列表显示键" }
       visible:             { type: bool, desc: "菜单可见" }
+      attr_authorizers:    { type: object, desc: "字段级读取权限映射：属性 id → {authorizers:[用户名称或用户组实例 ID]}；未配置字段不限制读取" }
+
+  view_attr_authorizers:
+    description: |
+      字段级读取权限配置，写在模型 view.attr_authorizers，不写在 attrList 的属性定义中。
+      示例：{"attr_authorizers":{"snmp_conf":{"authorizers":["easyops"]}}}。
+      authorizers 中的普通值按用户名称匹配；以冒号开头的值按用户组实例 ID 匹配（服务端匹配时去掉前导冒号）。
+      某字段 authorizers 为空数组或字段缺失表示不设置该字段限制；配置非空白名单后，不在白名单的非管理员用户不会得到该字段。
+      管理员用户绕过字段过滤。模型级 readAuthorizers 与字段级 attr_authorizers 是两层独立权限，不能用后者替代前者。
+      object_model.detail/list/instance 查询默认执行字段权限过滤；具备后端能力的内部调用可传 ignoreAttrPermission=true 跳过过滤，不能把该参数暴露给普通用户。
+      object_model.import 更新模型时 view 按顶层字段合并；更新单个字段授权时必须保留已有 view.attr_authorizers 的其它键，避免覆盖其它字段权限。
+    source:
+      - "resources/源代码/cmdb_service/internal/easy_core/object_service/util_object_msg.go:ObjectView.AttrAuthorizers"
+      - "resources/源代码/cmdb_service/internal/cmdb/util/objectutil.go:unsetNoPermissionAttr/hasAttrPermission"
 
   # ---------- 实例（instance）—— 模型下的具体数据记录 ----------
   cmdb_instance:

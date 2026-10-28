@@ -246,7 +246,9 @@ systems:
         ⚠️两个坑：① openpyxl read_only 模式对导出文件计数失真（max_row=1 假象，行数据其实在）——
         校验内容用正常模式 load_workbook 或数 sheet XML 的 <row> 数；② validate/import 的 multipart
         form 字段名固定 attachment（custom_controller.go:33 c.FormFile("attachment")），不是 file。
-        权限：非 admin 用户导出会按 readAuthorizers 过滤（util.go:43-53 query 注入 $and filter），
+        权限：模型级 readAuthorizers 控制模型/实例范围；字段级 view.attr_authorizers 控制属性读取。
+        非 admin 用户导出会按 readAuthorizers 过滤（util.go:43-53 query 注入 $and filter），
+        字段级过滤由 objectutil.unsetNoPermissionAttr 执行；管理员可绕过字段过滤。
         easyops 走 admin 白名单路径全量导出。
       test_org: 18832008               # 非系统测试 org（2026-07-31 建），写验证用
       list_pagination: "流式 NDJSON——每行一个完整对象，非 {data:{list:[...]}} 包装；逐行 json.loads"

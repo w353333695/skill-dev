@@ -222,12 +222,16 @@ resources:
                   view:
                     type: object
                     additional_properties: true
-                    description: "模型视图/布局配置（自由结构）。常见字段：attr_category_order(属性分组顺序)、attr_order(属性顺序)、show_key(列表显示键)、visible(是否可见)"
+                    description: "模型视图/布局配置（自由结构）。除布局字段外支持字段级读取权限attr_authorizers；详见objects.yaml#view_attr_authorizers。常见字段：attr_category_order(属性分组顺序)、attr_order(属性顺序)、show_key(列表显示键)、visible(是否可见)"
                     properties:
                       attr_category_order: { type: array, items: { type: string }, description: "属性分组(分类)的展示顺序" }
                       attr_order:           { type: array, items: { type: string }, description: "属性展示顺序（属性 id 列表）" }
                       show_key:             { type: array, items: { type: string }, description: "实例列表显示的键属性 id" }
                       visible:              { type: boolean, description: "模型是否在菜单可见" }
+                      attr_authorizers:
+                        type: object
+                        additional_properties: true
+                        description: "字段级读取权限映射；键为属性 id，值为{authorizers:[用户名称或用户组实例ID]}。非空白名单仅允许匹配用户/用户组及管理员读取；字段缺失不限制。不要与模型级readAuthorizers混淆。"
                   # —— 索引 indexList ——
                   indexList:
                     type: array
