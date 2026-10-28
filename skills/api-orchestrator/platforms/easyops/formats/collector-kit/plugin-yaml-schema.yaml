@@ -93,7 +93,7 @@ top_level_fields:
   name:
     type: string
     required: true
-    desc: "套件名称（中文）。⚠️zip 顶层目录名、上传 API name 参数必须与此完全一致，否则上传失败。命名建议「XXX监控套件」（监控）/「XXX信息采集」（CMDB 采集）。"
+    desc: "套件名称（中文）。zip顶层目录名、上传API name参数与此一致。监控建议XXX监控套件；CMDB采集的必需命名后缀见package-format.yaml#cmdb_collection_requirements.naming，不能当成可选建议。"
     source: "easyops_plugin_service.go:97（Create 构造）; upload.md:24"
 
   version:

@@ -1342,7 +1342,7 @@ objects:
       name:
         type: string
         required: true
-        desc: "套件名（中文）。⚠️zip顶层目录名/上传name参数/import_update 隐式必须与此一致。命名建议『XXX监控套件』（监控）/『XXX信息采集』（CMDB采集）"
+        desc: "套件名（中文）。zip顶层目录名/上传name参数须一致；CMDB采集前端必需命名规则见formats/collector-kit/package-format.yaml#cmdb_collection_requirements.naming。"
       agentType:
         type: string
         required: true
@@ -1383,6 +1383,7 @@ objects:
       extInfo: { type: "object|null", desc: "扩展信息" }
       collectAgent: { type: string, desc: "采集Agent取值，常用 $.ip（从CMDB实例动态取）" }
       collectType: { type: array, items: string, desc: "采集类型列表" }
+      pluginResConfig: { type: array, items: object, desc: "CMDB资源发现配置，写入_COLLECTOR_EASYOPS_PLUGIN；plugin.detail不保证返回。包内必填文件、字段及验收见formats/collector-kit/package-format.yaml#cmdb_collection_requirements。" }
       jobFilter: { type: "null", desc: "采集范围过滤，通常null" }
 
       # —— 元信息 ——

@@ -31,7 +31,7 @@ package_structure:
         ├── origin_metric.json      # 原始指标定义（监控套件必填，CMDB 采集为 []）
         ├── alias_metric.json       # 别名指标定义（监控套件必填）
         ├── config.template.yaml    # metricbeat 类型必填（Go template）
-        ├── resource_discovery_define.json  # 资源发现配置（CMDB 采集套件用）
+        ├── resource_discovery_define.json  # CMDB采集必填，必须有非空发现配置
         ├── readme                  # 使用说明（注意：无扩展名，可选）
         ├── image.png               # 套件图标（可选）
         ├── src/                    # 采集脚本目录（simple-script 必填）
@@ -58,13 +58,41 @@ package_structure:
     alias_metric_json: "ParsePluginAliasMetrics（imexport_service.go:509,824）"
     "<relateObjectId>.json": "关联 CMDB 模型定义，object_list 数组，ImportV3（imexport_service.go:848-880）"
     auto_discovery_strategy.json: "自动发现策略数组，每条注入 collectorPlugin，ImportInstance 到 COLLECTOR_CMDB_AUTO_STRATEGY@EASYOPS（imexport_service.go:882-921）"
-    resource_discovery_define.json: "资源发现配置数组（imexport_service.go:923-962）"
+    resource_discovery_define.json: "资源发现配置数组；CMDB采集虽然后端允许缺失，但前端使用必填，详见本文件cmdb_collection_requirements"
     readme: "升级时从包内 readme 文件读 readme 文本（无扩展名，imexport_service.go:633）"
     dashboard/: "目录有 JSON 文件→自动导入（ParsePluginMetadata 的 dashboards key）"
     alertRule/: "自动导入（ParsePluginMetadata 的 alertRules key，过 checkAlertRules 严格校验）"
     source: "imexport_service.go:754-817 importOther"
 
 # -----------------------------------------------------------------------------
+cmdb_collection_requirements:
+  scope: "面向当前EasyOps前端的CMDB信息采集套件；不是所有监控套件的通用限制"
+  naming:
+    rule: "套件名称必须为XXX信息采集，以信息采集结尾；否则前端配置采集任务时无法选择采集对象。不能仅叫XXX资产采集或XXX采集。"
+    consistency: "plugin.yaml.name、ZIP内部顶层目录及导入name保持一致；改名升级应选择既有套件并保留instanceId，不误建同功能副本。"
+    evidence: "用户当前环境前端反馈，2026-10-28；此为前端使用约束，不能以导入API成功反证其不需要。"
+  resource_discovery:
+    rule: "resource_discovery_define.json必填且为非空JSON数组；缺失或空数组会导致前端资源发现不显示对应套件。relateObjectId不能替代此文件。"
+    location: "与plugin.yaml同级，位于ZIP的套件顶层目录内。"
+    fields:
+      objectId: "必填，实际存在的CMDB模型ID，保留@命名空间；不是模型中文名。应覆盖主模型和脚本实际输出的关联模型。"
+      category: "必填，资源分类字符串；按当前环境模型分类/已知可用发现配置核实，不能填写任意占位文字。"
+      type: "必填，发现配置使用的类型分组模型ID；沿用当前环境已知可用同类套件的分组，不是SNMP版本或simple-script，也不能机械等同每个objectId的直接父模型。"
+    example: |
+      [
+        {"objectId":"PHYSICAL_SERVER@ONEMODEL","category":"基础设施.计算资源","type":"BASE_ASSET@ONEMODEL"},
+        {"objectId":"NETDPORT@ONEMODEL","category":"基础设施.网络资源","type":"BASE_ASSET@ONEMODEL"},
+        {"objectId":"FIBER_CHANNEL_PORT@ONEMODEL","category":"基础设施.网络资源","type":"BASE_ASSET@ONEMODEL"}
+      ]
+    example_scope: "本例覆盖物理机、网口和FC口；objectId/category已在当前环境只读核实。type沿用既有资产类套件样例BASE_ASSET@ONEMODEL；前端发现展示仍需导入后验收。其他环境必须重新核对，不能将此例三项照搬到所有套件。"
+    import_behavior: "imexport_service.go:923-962按JSON数组解析；非空时向_COLLECTOR_EASYOPS_PLUGIN以instanceId为键写入pluginResConfig。缺文件直接返回，空数组不写入，不代表清除已有配置。该文件不创建CMDB模型，也不等价于自动发现策略auto_discovery_strategy.json。"
+    evidence: "后端importResourceDiscoveryConfig源码及既有光纤交换机/负载均衡/存储采集包真实样例；前端缺失后不展示的现象来自用户2026-10-28反馈。以上关键写法已内联，无需分发源码。"
+  acceptance:
+    - "离线检查名称后缀、plugin.yaml与目录名称一致、发现文件非空、无重复objectId、主模型及关联模型覆盖。"
+    - "导入后通过CMDB只读检查对应_COLLECTOR_EASYOPS_PLUGIN实例的pluginResConfig；plugin.detail未必返回该字段，不能因此判断未写入。"
+    - "分别检查前端资源发现可看到该套件，以及配置采集任务时可选择预期采集对象；API返回200/code=0不能代替这两项前端验收。"
+    - "改名/补文件/打包不自动激活，不擅自修改已有采集任务。未做前端验证时明确标待验收。"
+
 # 二、打包格式冲突（⚠️ 待真调验证，关键坑）
 # -----------------------------------------------------------------------------
 packaging_format_conflict:

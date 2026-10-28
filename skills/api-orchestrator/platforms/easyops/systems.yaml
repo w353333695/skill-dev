@@ -767,6 +767,7 @@ systems:
       multipart_uses_sdk: "plugin_package.export/import/import_update 是 multipart/binary 流，api-cli 无法真调（params.in 无 formData）。真调走 Python SDK（sdk/easyops_client.py 扩展）或 curl -F。详见 formats/collector-kit/package-format.yaml"
       py2_runtime: "采集脚本默认 Python2.7（agent 运行时），py2 规范见 formats/collector-kit/sampler-types.yaml python2_rules（print语句/requests/subprocess无timeout）"
       sampler_type_decides_output: "samplerType 决定脚本输出协议：metric_sampler→直接[{dims,vals}]JSON（监控）；process_sampler→BEGIN/END GATHERING DATA标记包裹（CMDB采集）。详见 formats/collector-kit/sampler-types.yaml"
+      cmdb_collection_frontend_requirements: "开发CMDB采集套件必须检查命名及资源发现配置；规则、JSON写法、导入行为与验收清单见formats/collector-kit/package-format.yaml#cmdb_collection_requirements，不能只验证上传API成功。"
 
     # e2e 验收 URL（前端）
     acceptance_urls:
