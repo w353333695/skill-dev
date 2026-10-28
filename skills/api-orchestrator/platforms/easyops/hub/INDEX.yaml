@@ -51,8 +51,8 @@ items:
   - id: physical-server-snmp-inventory-kit
     name: 物理服务器SNMP资产采集
     category: cmdb-kits
-    files: [CMDB采集套件_物理服务器SNMP资产采集_0.1.7.zip, 物理服务器SNMP资产采集_使用说明.md]
-    version: "0.1.7"
+    files: [CMDB采集套件_物理服务器SNMP资产采集_0.1.9.zip, 物理服务器SNMP资产采集_使用说明.md]
+    version: "0.1.9"
     history:
       - {ver: "0.1.0", date: "2026-10-27", change: "初版：通用MIB加Dell iDRAC、IBM IMM、联想XCC、华为iBMC资产私有列；百信/浪潮仅通用回退；新增非密snmp_conf；离线55项回归"}
       - {ver: "0.1.1", date: "2026-10-27", change: "补充凭证转义/十六进制日志脱敏及初始化清理回归，共57项；wheel独立构建携带交付文档"}
@@ -60,8 +60,10 @@ items:
       - {ver: "0.1.3", date: "2026-10-27", change: "按用户要求改为仅维护EasyOps原生CMDB采集套件：移除独立项目/CLI/wheel，文档改为平台导入与参数配置，直接加载包内脚本53项回归"}
       - {ver: "0.1.5", date: "2026-10-27", change: "增强No Response诊断：logLevel参数、整次trace、非密连接上下文、请求阶段/开始/结束/耗时/退出码/预算、超时现场及脱敏输出、诊断导出说明；68项回归；远端脚本逐字节核对；不激活、不改任务"}
       - {ver: "0.1.7", date: "2026-10-27", change: "按用户要求全部默认$.attr动态取参，原生模型数组随包导入snmp_conf并设easyops字段可见；支持结构内凭证及日志级别、保持平台加密参数覆盖；品牌规则内嵌单文件py，隔离无JSON运行验证；79项回归；远端包/模型/源码回读通过"}
+      - {ver: "0.1.8", date: "2026-10-28", change: "参照网络设备auth简化为9项鉴权加结构内snmpPort；默认161由脚本兜底，平台不保存struct默认值；单属性PUT精确替换旧结构，easyops权限保留；logLevel任务常量ERROR；91项离线回归"}
+      - {ver: "0.1.9", date: "2026-10-28", change: "readme改为面向使用者的采集原理、支持品牌产品族、采集条件、配置和验证、常见问题；保留技术细节在导入说明；远端升级及readme/源码/模型回读通过；91项回归，未激活、未改任务"}
     scenario: 纯SNMP物理服务器CMDB资产采集，CPU/内存/盘/业务网口/FC口，按BMC产品族识别，不依赖型号清单
-    notes: "EasyOps原生simple-script/process_sampler套件，instanceId=65ecd570203d1，已升级0.1.7；未激活或修改任务；参数默认动态绑定snmp_conf，字段授权easyops（管理员内置权限除外，字段权限不是存储加密）；可改用平台加密常量。包内PHYSICAL_SERVER@ONEMODEL.json为当前完整模型快照，跨环境先备份比较；py内嵌品牌配置，无外部JSON运行依赖；未实机验收；百信/浪潮暂仅通用回退；执行节点需Net-SNMP。"
+    notes: "EasyOps原生套件，instanceId=65ecd570203d1，已升级0.1.9；未激活或修改任务。snmp_conf仅10字段，snmpPort保留结构内，脚本默认161，CMDB不保存struct默认值；模型导入合并子字段，升级旧结构需备份后object_attr.update精确替换。字段授权easyops（管理员例外，非存储加密），凭证可用平台加密参数覆盖；py内嵌品牌配置。完整模型快照跨环境先备份比较；百信/浪潮仅通用回退，所有品牌均未实机验收；readme以使用与验收为主。"
     added: "2026-10-27"
   # ---- inspection-kits（10 商品）----
   - id: ibmsvc-inspection-kit

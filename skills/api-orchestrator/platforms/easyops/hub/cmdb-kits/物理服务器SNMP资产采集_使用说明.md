@@ -1,80 +1,102 @@
-# 物理服务器SNMP资产采集：EasyOps原生套件
+# 物理服务器 SNMP 资产采集
 
-版本：0.1.7；套件instanceId：65ecd570203d1。
+适用场景：通过服务器管理口，以 SNMP 方式采集硬件资产并更新 CMDB。本套件用于资产清单维护，不负责性能监控、告警或自动下架。
 
-## 本版修正
+## 采集原理
 
-- 采集参数默认全部使用$.attr动态表达式。community/authKey/privKey/credentialBundle/logLevel分别绑定$.snmp_conf.<参数名>；完整配置绑定$.snmp_conf。
-- 包内增加平台原生识别的PHYSICAL_SERVER@ONEMODEL.json，内容为原生模型数组，包含现有物理服务器模型及扩展后的snmp_conf。注意不是API请求的object_list包装对象。原先只有snmp_conf.attribute.json，不会作为关联模型自动导入；现在两份均提供。
-- snmp_conf字段权限位于模型view.attr_authorizers.snmp_conf.authorizers，设置为["easyops"]。不是限制整个物理服务器模型。平台系统管理员保留内置访问权，不能承诺对管理员隐藏。
-- 品牌产品族与私有OID规则已直接内嵌src/server_snmp_collect.py，不读取oid-dictionary.json或外部品牌配置。该JSON仅供查阅。复制单个.py即可运行，但协议执行仍依赖已有Net-SNMP命令。
+1. 连接实例配置的管理 IP，识别服务器品牌和管理控制器类型。
+2. 先读取标准资产信息，再读取已适配厂商提供的硬件信息。
+3. 将有效数据更新至物理服务器及关联的网口、FC 端口记录。
 
-## 导入与模型范围
+设备没有提供的信息不会凭空补齐；某类部件采集失败时，不会因此清空原有资产。默认保留人工维护的整机名称、品牌、型号和序列号，不自动覆盖。
 
-在已有套件的升级入口导入ZIP，保留原instanceId；新环境通过CMDB采集套件导入入口上传。
-平台识别根目录PHYSICAL_SERVER@ONEMODEL.json并导入关联模型。该文件为当前环境完整模型快照，包含现有继承、属性、关系、视图及其他字段权限；只对snmp_conf定义和该字段授权作修改。
-跨环境必须先备份并比较目标模型，尤其是继承BASE_ASSET@ONEMODEL、RESOURCE@ONEMODEL及关系对端模型是否存在；不要把快照无条件覆盖到不同模型体系的环境。
-若只需在已有模型上增量修改，可使用snmp_conf.attribute.json更新单个属性，并在保留现有view及其他attr_authorizers的前提下只更新snmp_conf授权；不要设置整个模型readAuthorizers=["easyops"]。
-导入/升级可能更新模型和套件，但不等于agent已启用新版本。本次不激活、不建任务、不修改任务或实例凭证、不执行设备采集。
+## 可以采集什么
 
-## 默认动态参数
-
-|套件参数|默认值|任务paramType|
+|资产类别|采集内容|使用时需要注意|
 |---|---|---|
-|instanceId|$.instanceId|cmdb|
-|ip|$.ip|cmdb|
-|snmp_conf|$.snmp_conf|cmdb|
-|community|$.snmp_conf.community|cmdb|
-|authKey|$.snmp_conf.authKey|cmdb|
-|privKey|$.snmp_conf.privKey|cmdb|
-|credentialBundle|$.snmp_conf.credentialBundle|cmdb|
-|logLevel|$.snmp_conf.logLevel|cmdb|
-|old_cpuInfo等原有资产|$.cpuInfo等相应属性|cmdb|
+|CPU|物理 CPU 清单、型号及设备提供的核心/线程等信息|不把逻辑处理器数当作物理 CPU 颗数；汇总字段以明确的数据为准|
+|内存|内存条、容量及设备提供的部件信息|不同厂商单位可能不同，首次采集需对照管理页面核验|
+|磁盘|物理盘、逻辑盘及设备提供的容量等信息|取决于管理控制器和 RAID 控制器是否开放相应信息|
+|以太网口|接口、MAC、速率及设备提供的状态|部分管理控制器只提供管理口，不能保证覆盖全部业务网口|
+|FC 端口|端口标识、WWPN 及设备提供的速率/状态|安装了 FC 卡不代表管理口能够采到，需设备开放对应信息|
+|光以太网口|按以太网口采集；有明确依据时标识光口|不根据名称或速率猜测介质；当前不采集光功率、收发器温度等诊断指标|
 
-关键：创建/编辑任务时$.表达式必须配paramType=cmdb，不能当常量字符串。脚本不解析$.表达式，解析发生在collector_service。旧任务不会因为套件升级而自动替换已保存参数，须核对并重新选择动态参数。
-凭证参数仍为password、isEncrypt=true；如覆盖成任务加密常量，应使用paramType=const，不把真实密码混在普通字符串参数。
+实际可获得的字段受品牌、管理控制器、固件、硬件配置和 SNMP 权限影响，并非每台服务器均能返回全部内容。
 
-## snmp_conf示例与默认值
+## 支持品牌与型号范围
 
+套件按管理控制器产品族适配，不按服务器型号白名单限制。型号未知也会尝试采集，但不能据此承诺所有型号兼容。
+
+|品牌|适配范围|当前覆盖情况|
+|---|---|---|
+|Dell|使用 iDRAC、并提供对应 SNMP 资产信息的机型|已映射整机识别、CPU、内存、物理/逻辑盘、业务网口|
+|联想|使用 XCC 的机型；XCC/XCC2/XCC3 需按实际固件验证|已映射整机识别、CPU、内存、磁盘、网卡及部分以太网/FC 端口|
+|IBM|使用 IMM 的机型|已映射整机识别、CPU、内存等；不把 IMM 适配套用于 Power/AIX|
+|华为|使用 iBMC、并开放相应资产信息的机型|已映射 CPU、内存、物理/逻辑盘、网卡及业务网口|
+|百信|开放标准 SNMP 资产信息的机型|目前仅采集设备实际提供的通用信息，尚未完成厂商专用资产适配|
+|浪潮|开放标准 SNMP 资产信息的机型|目前仅采集设备实际提供的通用信息，尚未完成厂商专用资产适配|
+|其他品牌或 OEM|开放标准 SNMP 资产信息的机型|尝试通用信息采集，不保证部件清单完整|
+
+**验证状态：以上“已映射”基于 MIB 资料及离线测试，尚未进行真实服务器验收。没有设备清单和样本，不能给出逐型号已验证列表。** 新固件、OEM 版本和不同代际应分别选样验证。
+
+## 采集前的条件
+
+- **目标设备**：管理控制器已启用 SNMP，并开放资产信息的只读访问权限。支持 SNMP v1、v2c、v3，不自动切换版本或降低安全级别。
+- **网络连通**：执行采集的节点可以访问实例管理 IP 的 SNMP 端口，默认 UDP 161；防火墙、设备访问白名单允许该执行节点访问。能 ping 通不等于 SNMP 可用。
+- **鉴权一致**：协议版本、团体字或 v3 用户、安全级别及算法与设备配置一致。v3 算法还需执行节点的 SNMP 工具支持。
+- **执行节点**：已有 EasyOps 采集环境、Python 2.7 或 Python 3，以及 Net-SNMP 的 snmpget、snmpwalk、snmpbulkwalk 命令。本套件不自动安装这些依赖。
+- **CMDB 配置**：物理服务器已有管理 IP，执行节点选择正确，snmp_conf 已填写。配置该字段需有访问权限，默认授权 easyops；系统管理员保留内置访问权。
+
+## 如何配置
+
+在物理服务器的 snmp_conf 中填写鉴权信息。SNMP 端口保留在该结构体内，不需要新增单独的模型属性。
+
+v2c 示例，替换占位内容后使用：
 ```json
-{"enabled":false,"target":"","version":"3","port":161,
- "username":"inventory-user","securityLevel":"authPriv",
- "authProtocol":"SHA","privProtocol":"AES","contextName":"",
- "timeoutSec":3,"retries":0,"budgetSec":90,"vendorProfile":"auto",
- "updateIdentity":false,"logLevel":"ERROR"}
+{"snmpVersion":"2c","snmpPort":161,"community":"<在平台填写>"}
 ```
 
-- v1/v2c填写community；v3按安全级别填写authKey/privKey。示例不包含真实凭证或默认团体名，不尝试默认密码。
-- 默认从每台实例的snmp_conf读取；也支持只注入完整snmp_conf结构时由脚本拆出凭证。显式非空的独立参数优先于结构内对应字段。用于连接和上下文日志的配置会移除凭证字段，所有已知凭证参与日志脱敏。
-- credentialRef可选：只有使用凭证组时才填写。它精确匹配credentialBundle中组名，未匹配不回退到其他凭证。credentialBundle为JSON字符串，不是未经验证的平台密钥库ID；也可将凭证组放在平台加密常量参数中。
-- CMDB的str结构体子字段未声明存储加密；字段可见权限、套件password参数和isEncrypt均不能证明CMDB实例数据已加密。若不允许CMDB保存凭证，请留空敏感子字段，使用平台加密常量/凭证组方案。不要把实例导出、备份、日志当作可公开数据。
-- target为空时用实例ip；未配置、null、enabled=false时静默输出空数组，不发设备请求。结构体默认值不一定由平台保存，脚本自行兜底非密默认值。
-- 总预算1–300秒（默认90），单请求0.1–10秒（默认3），重试0–2（默认0）；前置基础GET仍为3秒、零重试。无SNMP版本或算法自动降级。
+v3 认证加密示例：
+```json
+{"snmpVersion":"3","snmpPort":161,"securityLevel":"authPriv",
+ "securityName":"<SNMP用户名>","authProtocol":"SHA256",
+ "authKey":"<认证密码>","privProtocol":"AES",
+ "privKey":"<加密密码>","contextName":""}
+```
 
-## 品牌与CMDB范围
+- v3 按设备要求选择安全级别；无认证或无加密时，不必照抄示例中的相应密钥字段。
+- 端口不填时，采集程序使用 **161**。当前平台不会自动将结构体默认值填入表单，界面中端口为空不影响这个运行时默认值。
+- 无需额外填写启用开关；缺失配置、空配置或仅有端口时，不执行设备采集。
+- 鉴权字段限制可见不等于加密存储。若不允许在 CMDB 保存密码，可使用套件的加密参数覆盖；不要将密码放进普通任务参数或报错附件。
 
-采集顺序：sysObjectID/sysDescr识别→通用表→产品族私有表，不依赖设备型号白名单。
-Dell iDRAC、IBM IMM、联想XCC、华为iBMC已有私有资产映射；百信、浪潮暂仅通用回退，不承诺全型号实测。IBM Power不套用IMM树。
-主模型PHYSICAL_SERVER@ONEMODEL；网口NETDPORT@ONEMODEL；FC口FIBER_CHANNEL_PORT@ONEMODEL，子记录通过physicalServer关联。
-ENTITY/INTERFACE/FC_PORT为标准表入口，不是所有BMC必备实现。用WALK而非GET表根，v2c/v3调用snmpbulkwalk。IF可能仅含管理口，FC卡存在不保证BMC暴露FC表。No Response不等于OID不支持。
-缺失资产不清除旧值，不把HOST-RESOURCES逻辑资源伪装物理资产；无介质证据时不猜光口。详细范围见compatibility.md与sources.md。
+导入后先检查任务的参数绑定：目标与鉴权从实例动态获取，日志级别默认 ERROR。旧任务不会自动采用新默认值。升级旧配置前先安全备份，并按《导入说明》处理，避免保存时丢失旧字段。
 
-## DEBUG及导出
+## 首次采集如何验证
 
-默认在实例snmp_conf中设置logLevel=ERROR；单台复现时改DEBUG，任务logLevel参数保持$.snmp_conf.logLevel、paramType=cmdb。
-也可临时把任务logLevel覆盖为常量DEBUG。优先级：独立任务logLevel参数→结构内logLevel→EASYOPS_LOG_LEVEL→LOG_LEVEL→ERROR。
-日志写stderr，stdout只输出GATHERING DATA协议。保留同trace的context、phase、snmp.begin/output/end、Traceback与summary，导出完整stderr和stdout协议块。
-日志先脱敏再限长；超时回收子进程后仍记录已产生的受限输出。单个输出超过8MiB时省略正文，否则最多记录脱敏后的末尾32768字符。外部SIGKILL/主机断电不保证有结束日志。
-不要提供真实凭证、snmp.conf或完整环境；资产日志仍含IP/SN/MAC/用户名，分享前人工复核。详细状态与导出方法见《诊断日志导出.md》。
+建议每个品牌、管理控制器及主要固件版本至少选一台样本，再逐步扩大范围。
 
-## 独立运行与验证
+1. **确认 SNMP 可读**：由运维在实际执行节点使用已批准的鉴权方式，验证能够读取目标的基础设备信息。不要只依据 ping、管理页面可登录或“进程执行成功”判断。
+2. **执行单台采集**：核对目标 IP、执行节点和鉴权后，先只运行一个实例，确认执行结果及 CMDB 更新情况。
+3. **核对硬件清单**：对照服务器管理页面或可信资产清单，逐项核对 CPU 颗数、内存条与容量、物理/逻辑盘及容量、网卡 MAC、FC WWPN 和关联关系。
+4. **确认覆盖范围**：区分“设备未开放信息”和“确实没有部件”；尤其检查是否只采到了管理口，不能把部分结果当作全量资产。
+5. **连续验证**：重复执行，检查无重复网口/FC 端口、容量单位合理、人工维护的信息未被意外覆盖，然后再扩大采集范围。
 
-单文件.py/.orig内容一致，品牌映射内嵌，无独立项目、CLI、wheel或外部配置JSON依赖。独立运行通过EASYOPS_COLLECTOR_snmp_conf、EASYOPS_COLLECTOR_instanceId及可选独立参数环境变量传入配置，不把凭证放命令行。
-需要已有Python2.7或3、snmpget/snmpwalk/snmpbulkwalk；本套件不安装系统依赖，不增加扫描。stdout协议退出0不是资产采集成功标志。
-本版79项离线回归通过，含动态参数、字段权限及模型保留检查，并在隔离目录仅复制.py、模拟Net-SNMP命令执行完整流程；这是离线模拟，不是真实BMC或真实Net-SNMP验收。Python2仅做语法检查。
+离线测试通过只能说明代码在模拟条件下符合预期，不能代替以上实机验收。
 
-## 回滚与验收
+## 常见问题与排障
 
-先备份目标模型和套件；升级后核对snmp_conf结构、字段授权、动态参数表达式、任务paramType和agent实际脚本版本。模型导入不是事务，套件更新成功不保证模型也成功，必须分别回读。
-回滚时保留已有实例配置与资产，使用备份恢复需要回退的snmp_conf定义及view中的对应授权；不要删除正在被引用的整个物理服务器模型或既有采集任务。
-验收页面：http://192.168.110.24/next/monitor-kit/kit/easyops/65ecd570203d1/detail
+|现象|优先检查|
+|---|---|
+|No Response / 超时|管理 IP、SNMP 是否启用、版本与鉴权、执行节点来源白名单、防火墙及端口；不能仅凭超时判定设备不支持|
+|基础信息可读，CPU/内存/磁盘缺失|管理控制器是否开放硬件资产信息、固件差异和权限范围|
+|只有一个网口|设备是否只暴露管理口，而不是全部业务网口|
+|FC 卡存在但没有 FC 端口|设备是否向 SNMP 开放该卡及端口信息|
+|运行结束但没有新增资产|检查是否未配置、无有效数据或部分请求失败；退出成功不等于采集成功|
+
+需要进一步排查时，将单台任务的日志级别临时改为 DEBUG，复现一次后恢复 ERROR。保存该次完整执行日志和采集结果，同时提供品牌型号、管理控制器与固件版本；分享前检查并隐藏密码及敏感资产信息。具体导出步骤见《诊断日志导出》。
+
+## 安装与使用边界
+
+在 EasyOps 的 CMDB 采集套件入口导入，升级时选择已有套件。跨环境导入前先备份并比较模型；具体步骤、旧结构升级注意事项见《导入说明》。
+
+导入或升级不会自动激活采集，也不会替用户修改已有任务或迁移实例密码。当前交付版本为 0.1.9；采集代码完成 91 项离线回归，尚未连接真实设备验证。
