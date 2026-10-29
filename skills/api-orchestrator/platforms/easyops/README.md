@@ -7,6 +7,7 @@
 | 系统 | service:端口 | spec | 三层 + verb |
 |---|---|---|---|
 | **easyops-cmdb** | cmdb_service:8079 | easyops-cmdb.yaml | 模型/关系/实例（19 verb）|
+| **easyops-cmdb-collector-debug** | CMDB 网关采集调试 | easyops-cmdb-collector-debug.yaml | 创建任务/立即执行/历史详情 |
 | **easyops-autoops** | tool_service:8181 | easyops-autoops.yaml | 工具/版本/库 + 执行/导入导出 |
 | **easyops-itsm** | flowable_service:8134 | easyops-itsm.yaml | 表单/流程/服务/工单 + 触发器/通知/SLA/值班组（2026-08-11）+ sso-adapter provider 交付知识（2026-08-13）|
 | **easyops-sys-setting** | sys_setting:8271 | easyops-sys-setting.yaml | 工作日历 work_calendar（2026-08-11）|
@@ -15,6 +16,14 @@
 > ⚠️ itsm 的 notify_policy 前缀是 `/api/itsc_trigger/v1`（非 flowable_service）但仍走 8134。
 > ⚠️ sys-setting 独立 spec：sys_setting:8271 ≠ flowable_service:8134，api-cli endpoint 是 service 级不支持 per-resource 绑端口，故 work_calendar 另起 spec。work_calendar 被 itsm 的 sla（workingCalendarId, 24hex）跨 system 引用。
 > ⚠️ user 独立 spec：user_service:8111 亦独立端口（同 sys-setting 理由）。admin 建号走 `/api/v1/users/register`，与 UI 自助注册（网关 `/api/auth/register`，需邀请码）不同。
+
+## CMDB 采集任务调试
+
+- 调试流程：`flows/debug-cmdb-collector.yaml`。
+- 接口清单：`easyops-cmdb-collector-debug.yaml`。
+- 创建任务响应 `data.id` 是 `_COLLECTOR_JOB.instanceId`；`scan-now` 返回的 `scanId` 才是历史详情查询 ID。
+- 历史详情包含状态、错误和写回计数，不包含 process_sampler 原始 stdout/stderr；原始输出需到 Agent 侧日志查看。
+- 创建 flow 内部是否预生成 Agent Job 尚缺运行环境 flow 本体，不能仅凭契约注册表确认。
 
 ## 采集、监控、巡检开发经验
 

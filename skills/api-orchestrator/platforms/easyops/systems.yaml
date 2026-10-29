@@ -299,6 +299,43 @@ systems:
       instance_detail: "${EASYOPS_CMDB_FRONTEND_URL}/next/next-cmdb-instance-management/next/{OBJECT_ID}/instance/{instanceId}"
 
   # ============================================================================
+  # EasyOps CMDB 采集任务调试面（资源发现创建/立即执行/历史详情）
+  # ============================================================================
+  easyops-cmdb-collector-debug:
+    description: |
+      CMDB 采集套件单次调试链路。创建资源发现任务后回读 _COLLECTOR_JOB，
+      调用 collector_service v2 scan-now，再按 scanId 查询历史详情。
+      创建和立即执行均是写/执行操作，必须确认目标实例和用户授权。
+    spec: easyops-cmdb-collector-debug.yaml
+    default_endpoint: frontend
+    endpoints:
+      frontend:
+        base_url: ${EASYOPS_CMDB_FRONTEND_URL}
+        host: admin.easyops.local
+        path_prefix: ""
+    auth: easyops-cookie
+    env:
+      EASYOPS_CMDB_FRONTEND_URL: ""
+    capabilities:
+      resource_discovery_job:
+        create: "创建资源发现采集任务；响应 data.id 为 _COLLECTOR_JOB.instanceId"
+        get: "按任务实例 ID读取任务详情"
+        delete: "删除指定资源发现任务"
+      scan:
+        now: "POST /api/v2/scan-now；jobIds 使用任务 ID，scanMethodList 使用套件 ID"
+      history:
+        detail: "按 scan-now 返回的 scanId 查询历史详情；返回 list/total"
+    runtime:
+      create_contract: "CreateResourceDiscoveryJob@1.0.9；源码快照契约为 1.0.8，需关注版本 diff"
+      history_contract: "ListJobHistoryDetail@1.0.0；id=scan-now 返回的 scanId；st/et 为 Unix 秒"
+      result_fields: "ScanTaskDetail 含 agentStatus/samplerStatus/pluginStatus/duration/status/errMsgs/scanResult/expectTotal/successTotal/failTotal"
+      stdout_stderr: "平台历史详情不包含 process_sampler 原始 stdout/stderr；原始输出需查 Agent 侧 sampler 日志"
+      agent_job_gap: "创建 flow 本体未在源码快照中，Agent Job 是否由创建链路预生成仍需运行环境 flow 导出确认"
+    acceptance_urls:
+      task_list: "${EASYOPS_CMDB_FRONTEND_URL}/next/auto-discovery/task-manager/list"
+      task_detail: "${EASYOPS_CMDB_FRONTEND_URL}/next/auto-discovery/task-manager/detail/{jobId}"
+
+  # ============================================================================
   # EasyOps AutoOps 工具管理（tool_service）—— 第二个接入的系统。
   # 与 cmdb 同属 EasyOps 平台：同 cookie 鉴权、同 org+user header、同测试 org。
   # 命令树/字段 schema 见 easyops-autoops.yaml；对象结构/内置变量/工具包格式见 objects.yaml。

@@ -1,0 +1,85 @@
+# 流程模板：调试 CMDB 采集套件（创建任务→校验→立即执行→查看历史）
+name: debug-cmdb-collector
+intent: 使用指定 process_sampler 套件对单个 CMDB 实例执行一次采集并核对结果
+trigger: ["调试CMDB采集套件", "执行一次采集套件", "查看采集历史", "验证物理服务器SNMP采集"]
+guard: 规划挡（创建任务、执行采集、读取结果；默认不自动删除任务）
+
+key_rule: |
+  只允许对用户明确指定的目标实例执行。创建前必须核对套件 instanceId、目标实例、执行 Agent 和 SNMP 鉴权来源。
+  `scan.now` 的 jobIds 使用创建接口返回的 `_COLLECTOR_JOB.instanceId`；`scanMethodList` 使用套件 instanceId。
+  `history.detail` 的 id 使用 scan-now 返回的 `scanId`，不能误用任务 ID。
+  process_sampler 原始 stdout/stderr 不回传平台；No Response、超时、鉴权错误从历史详情 `errMsgs` 查看，原始输出需到 Agent 侧日志查看。
+
+prerequisites:
+  env: [EASYOPS_CMDB_FRONTEND_URL, EASYOPS_ORG, EASYOPS_USER]
+  auth: "已登录 EasyOps Cookie（网关接口需要）"
+  payload: |
+    pluginId：_COLLECTOR_EASYOPS_PLUGIN.instanceId
+    objectId：PHYSICAL_SERVER@ONEMODEL 或用户指定目标模型
+    targetInstanceId：单个目标实例 ID
+    collectorParams：套件级参数；snmp_conf 整段覆盖时使用 key=snmp_conf,paramType=const
+    collectParams：采集目标动态参数，$.attr 使用 paramType=cmdb
+    collectAgent：执行采集的 Agent 表达式或代理地址
+
+steps:
+  - n: 1
+    op: object_instance.search
+    args: ["_COLLECTOR_EASYOPS_PLUGIN", "samplerType=process_sampler"]
+    desc: "查询 process_sampler 套件，按名称/版本确认目标套件"
+    expect: "取得 pluginId、版本、relateObjectId、参数定义"
+
+  - n: 2
+    op: object_instance.search
+    args: ["<objectId>", "instanceId=<targetInstanceId>"]
+    desc: "查询目标实例并确认 ip、snmp_conf、执行范围"
+    expect: "目标实例存在；动态字段可由 $.attr 解析；SNMP 鉴权不在日志中明文输出"
+
+  - n: 3
+    op: resource_discovery_job.create
+    args: ["debug-cmdb-collector.yaml"]
+    desc: |
+      创建单目标任务。jobFilter 推荐写法：
+      {objectId:<objectId>,instances:{type:constant,query:{instanceId:{$in:[<targetInstanceId>]}}}}
+      默认 interval=86400、timeout=600、enabled=true、collectTime 全时段。
+    expect: "响应 data.id，记录为 jobId"
+    confirm: "创建任务会写入远端 _COLLECTOR_JOB，是否继续？"
+
+  - n: 4
+    op: object_instance.search
+    args: ["_COLLECTOR_JOB", "instanceId=<jobId>"]
+    desc: "回读任务，检查 plugins/collectParams/collectorParams/agentType/enabled"
+    expect: |
+      jobId 存在；套件引用正确；$.attr 参数为 paramType=cmdb；常量参数为 const；
+      enabled=true；任务已生成或可生成 Agent Job。
+
+  - n: 5
+    op: scan.now
+    args: |
+      {jobIds:[<jobId>],scanMethodList:[<pluginId>],createMethod:manual}
+    desc: "立即执行一次 process_sampler 采集"
+    expect: "记录 data.scanInfo[].scanId、configId、errMsg"
+    confirm: "立即向目标 Agent 下发采集任务，是否继续？"
+
+  - n: 6
+    op: history.detail
+    args: ["<scanId>", "page=1&pageSize=20&st=<startUnix>&et=<endUnix>"]
+    desc: "查看单次采集历史详情"
+    expect: |
+      核对 status、agentStatus、samplerStatus、pluginStatus、duration、errMsgs、
+      scanResult、expectTotal、successTotal、failTotal；区分执行成功与 CMDB 写回成功。
+
+  - n: 7
+    desc: "输出诊断摘要"
+    expect: |
+      输出目标实例、套件版本、任务 ID、scanId、Agent 状态、采集状态、写回计数、errMsgs。
+      不输出 community、authKey、privKey 等凭证值。
+
+cleanup:
+  optional: true
+  rule: "仅删除本次创建且用户确认过的任务；保留失败任务便于复盘时默认不删除。"
+
+acceptance:
+  - "_COLLECTOR_JOB 回读确认参数绑定正确"
+  - "scan-now 返回 scanId 且无 errMsg"
+  - "历史详情能定位目标 Agent 和单目标错误"
+  - "scanResult/成功失败计数与 CMDB 实例变化一致"

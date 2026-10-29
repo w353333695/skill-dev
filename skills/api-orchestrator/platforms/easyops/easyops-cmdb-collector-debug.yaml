@@ -1,0 +1,135 @@
+# EasyOps CMDB 采集任务调试接口
+# 来源：tmp/CMDB采集套件调试-源码结论-20261029/contracts + frontend
+spec: api-cli/v1
+service:
+  name: easyops-cmdb-collector-debug
+  version: "1.0"
+  default_endpoint: frontend
+  endpoints:
+    frontend:
+      base_url: ${EASYOPS_CMDB_FRONTEND_URL}
+      host: admin.easyops.local
+      path_prefix: ""
+      auth: easyops-cookie
+      headers:
+        org: ${EASYOPS_ORG}
+        user: ${EASYOPS_USER}
+resources:
+  resource_discovery_job:
+    description: "CMDB 资源发现采集任务（创建、读取、删除）"
+    path: ""
+    operations:
+      create:
+        description: "创建资源发现采集任务。响应 data.id 是 _COLLECTOR_JOB 实例 ID。"
+        method: POST
+        path: /next/api/gateway/easyops.api.cmdb.job.CreateResourceDiscoveryJob@1.0.9/api/v1/create-resource-discovery-job
+        body:
+          type: object
+          required: [collectorJob, pluginId]
+          properties:
+            collectorJob:
+              type: object
+              required: [jobName, interval, timeout, enabled, objectId, collectParams, collectorParams, instanceMapping, jobFilter]
+              properties:
+                jobName: { type: string }
+                interval: { type: integer, description: "秒；前端默认 86400" }
+                timeout: { type: integer, description: "秒；前端常用 600" }
+                collectTime:
+                  type: object
+                  properties:
+                    startTime: { type: string }
+                    endTime: { type: string }
+                enabled: { type: boolean }
+                objectId: { type: string }
+                collectorParams:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      key: { type: string }
+                      value: { type: any }
+                      paramType: { type: string, enum: [const, cmdb] }
+                collectParams:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      key: { type: string }
+                      value: { type: any }
+                      paramType: { type: string, enum: [const, cmdb] }
+                instanceMapping: { type: array, items: { type: object } }
+                centralizedEnable: { type: boolean }
+                hostIds: { type: array, items: { type: string } }
+                centralizedCollectOnServer: { type: boolean }
+                collectAgent: { type: string }
+                jobFilter:
+                  type: object
+                  properties:
+                    objectId: { type: string }
+                    instances:
+                      type: object
+                      properties:
+                        type: { type: string, enum: [all, constant, search] }
+                        query: { type: object, additional_properties: true }
+                        defaultQuery: { type: object, additional_properties: true }
+                        defaultType: { type: string }
+                notifyParams: { type: object, additional_properties: true }
+            pluginId: { type: string, description: "_COLLECTOR_EASYOPS_PLUGIN.instanceId" }
+            notAttachIp: { type: boolean }
+        response:
+          type: object
+          properties:
+            id: { type: string, description: "新建的 _COLLECTOR_JOB.instanceId" }
+
+      get:
+        description: "按任务实例 ID 查询资源发现任务。"
+        method: GET
+        path: /next/api/gateway/easyops.api.cmdb.job.GetResourceDiscoveryJob@1.0.4/api/v1/get-resource-discovery-job/{instanceId}
+        params:
+          instanceId: { in: path, type: string, required: true }
+
+      delete:
+        description: "删除本次调试创建的资源发现任务。"
+        method: DELETE
+        path: /next/api/gateway/easyops.api.cmdb.job.DeleteResourceDiscoveryJob@1.0.0/api/v1/delete-resource-discovery-job/{instanceId}
+        params:
+          instanceId: { in: path, type: string, required: true }
+
+  scan:
+    description: "立即执行 CMDB 采集任务"
+    path: ""
+    operations:
+      now:
+        description: "按任务配置粒度创建采集历史并下发 process_sampler。"
+        method: POST
+        path: /next/api/gateway/logic.collector_service/api/v2/scan-now
+        body:
+          type: object
+          required: [jobIds, scanMethodList, createMethod]
+          properties:
+            jobIds: { type: array, items: { type: string } }
+            scanMethodList: { type: array, items: { type: string } }
+            createMethod: { type: string, enum: [manual, timer] }
+
+  history:
+    description: "CMDB 采集任务历史详情"
+    path: ""
+    operations:
+      detail:
+        description: "id 是 scan-now 返回的 scanId，不是 _COLLECTOR_JOB.instanceId。"
+        method: GET
+        path: /next/api/gateway/easyops.api.cmdb.collector_service.jobs.ListJobHistoryDetail@1.0.0/api/v1/job-history-detail/{id}
+        params:
+          id: { in: path, type: string, required: true, description: "scan-now 返回的 scanId" }
+          targetQuery: { in: query, type: string }
+          pageSize: { in: query, type: integer, default: 20, maximum: 1000 }
+          st: { in: query, type: integer, description: "Unix 秒" }
+          statusQuery: { in: query, type: string }
+          agentQuery: { in: query, type: string }
+          et: { in: query, type: integer, description: "Unix 秒" }
+          page: { in: query, type: integer, default: 1 }
+        response:
+          type: object
+          properties:
+            list: { type: array, items: { type: object, additional_properties: true } }
+            total: { type: integer }
