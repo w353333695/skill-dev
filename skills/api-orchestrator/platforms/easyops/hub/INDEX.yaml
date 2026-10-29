@@ -51,8 +51,8 @@ items:
   - id: physical-server-snmp-inventory-kit
     name: 物理服务器SNMP信息采集
     category: cmdb-kits
-    files: [CMDB采集套件_物理服务器SNMP信息采集_0.1.16.zip, 物理服务器SNMP信息采集_使用说明.md]
-    version: "0.1.16"
+    files: [CMDB采集套件_物理服务器SNMP信息采集_0.1.17.zip, 物理服务器SNMP信息采集_使用说明.md]
+    version: "0.1.17"
     history:
       - {ver: "0.1.0", date: "2026-10-27", change: "初版：通用MIB加Dell iDRAC、IBM IMM、联想XCC、华为iBMC资产私有列；百信/浪潮仅通用回退；新增非密snmp_conf；离线55项回归"}
       - {ver: "0.1.1", date: "2026-10-27", change: "补充凭证转义/十六进制日志脱敏及初始化清理回归，共57项；wheel独立构建携带交付文档"}
@@ -69,8 +69,9 @@ items:
       - {ver: "0.1.14", date: "2026-10-29", change: "增加配置/连接/每步采集/结果汇总日志；配置不全、请求异常、解析异常、零记录直接失败并返回非零退出码；修复异常日志中文编码问题；重新注入EASYOPS_COLLECTOR参数；未上传远端"}
       - {ver: "0.1.15", date: "2026-10-29", change: "修复CMDB空snmpPort注入字符串null导致的invalid numeric configuration；null-like端口默认161，非法端口仍失败；未上传远端"}
       - {ver: "0.1.16", date: "2026-10-29", change: "兼容设备返回空值STRING类型的sysDescr；解析失败时记录脱敏原始stdout片段；未上传远端"}
+      - {ver: "0.1.17", date: "2026-10-29", change: "修复OID响应解析：支持数字/符号OID，空OID和无类型响应绑定具体oid/payload报错；完成解析回归，未上传远端"}
     scenario: 纯SNMP物理服务器CMDB资产采集，CPU/内存/盘/业务网口/FC口，按BMC产品族识别，不依赖型号清单
-    notes: "EasyOps原生套件，instanceId=65ecd570203d1，交付包0.1.16，名称物理服务器SNMP信息采集；本次仅离线打包，未更新远端；修复空STRING响应解析并保留失败日志；资源发现覆盖PHYSICAL_SERVER/NETDPORT/FIBER_CHANNEL_PORT三个模型，前端待导入验收。参数按网络process_sampler使用collectParams及分拆cmdb动态字段，脚本兼容旧整结构；未激活或修改任务。snmp_conf仅10字段，snmpPort保留结构内，脚本默认161，CMDB不保存struct默认值；模型导入合并子字段，升级旧结构需备份后object_attr.update精确替换。字段授权easyops（管理员例外，非存储加密），凭证可用平台加密参数覆盖；py内嵌品牌配置。完整模型快照跨环境先备份比较；百信/浪潮仅通用回退，所有品牌均未实机验收；readme以使用与验收为主。"
+    notes: "EasyOps原生套件，instanceId=65ecd570203d1，交付包0.1.17，名称物理服务器SNMP信息采集；本次仅离线打包，未更新远端；修复OID响应解析并保留失败日志；资源发现覆盖PHYSICAL_SERVER/NETDPORT/FIBER_CHANNEL_PORT三个模型，前端待导入验收。参数按网络process_sampler使用collectParams及分拆cmdb动态字段，脚本兼容旧整结构；未激活或修改任务。snmp_conf仅10字段，snmpPort保留结构内，脚本默认161，CMDB不保存struct默认值；模型导入合并子字段，升级旧结构需备份后object_attr.update精确替换。字段授权easyops（管理员例外，非存储加密），凭证可用平台加密参数覆盖；py内嵌品牌配置。完整模型快照跨环境先备份比较；百信/浪潮仅通用回退，所有品牌均未实机验收；readme以使用与验收为主。"
     added: "2026-10-27"
   # ---- inspection-kits（10 商品）----
   - id: ibmsvc-inspection-kit
