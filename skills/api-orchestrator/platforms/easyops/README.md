@@ -160,6 +160,19 @@ scripts/run.sh --spec platforms/demo/easyops-cmdb.yaml object_instance search PH
 跨部署复用的套件包格式知识（在 `formats/collector-kit/`）：plugin-yaml-schema / sampler-types / param-mechanism / package-format。
 e2e 流程：`flows/develop-and-import-kit.yaml` / `upgrade-plugin.yaml` / `delete-plugin.yaml`。
 
+## CMDB 采集套件前端验收
+
+- 任务列表：`${EASYOPS_CMDB_FRONTEND_URL}/next/auto-discovery/task-manager/list`
+- 任务详情：`${EASYOPS_CMDB_FRONTEND_URL}/next/auto-discovery/task-manager/detail/{jobId}`
+- 采集历史：`${EASYOPS_CMDB_FRONTEND_URL}/next/auto-discovery/task-history/detail/{scanId}`
+- 已验证任务详情：`https://192.168.110.24/next/auto-discovery/task-manager/detail/65ef01175dd79`
+- 已验证采集历史：`https://192.168.110.24/next/auto-discovery/task-history/detail/000001a18523320d4f9b91a8fdfdb150`
+
+任务列表不可见的排查重点：必须使用 `CreateResourceDiscoveryJob` 前端编排接口创建，不能用
+`collector_service` 旧版直连接口代替。前端创建的 `_COLLECTOR_JOB` 通常包含
+`enableAgentJob`、`autoInstallPlugin`、`samplerType`、`params`、`effectiveTime`、`collectAgent`
+等关联字段；旧版直连可能只写入基础任务字段，导致单实例查询能看到、前端列表却不显示。
+
 ## e2e 真调状态（2026-08-13）
 
 - ✅ collector_plugin_service:8151 完整验证（import/export/import_update/delete/metricbeat_list）—— 真调结论已回流各 runtime/api_behavior 字段

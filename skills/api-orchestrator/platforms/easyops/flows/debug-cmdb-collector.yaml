@@ -8,6 +8,8 @@ key_rule: |
   只允许对用户明确指定的目标实例执行。创建前必须核对套件 instanceId、目标实例、执行 Agent 和 SNMP 鉴权来源。
   `scan.now` 的 jobIds 使用创建接口返回的 `_COLLECTOR_JOB.instanceId`；`scanMethodList` 使用套件 instanceId。
   `history.detail` 的 id 使用 scan-now 返回的 `scanId`，不能误用任务 ID。
+  创建任务必须调用 `CreateResourceDiscoveryJob` 前端编排接口；不要调用 collector_service 旧版
+  `collector_job.create` 直连接口。后者可能生成能被 CMDB 单实例查询到、但不出现在前端任务列表的基础任务。
   process_sampler 原始 stdout/stderr 不回传平台；No Response、超时、鉴权错误从历史详情 `errMsgs` 查看，原始输出需到 Agent 侧日志查看。
 
 prerequisites:
@@ -51,6 +53,8 @@ steps:
     expect: |
       jobId 存在；套件引用正确；$.attr 参数为 paramType=cmdb；常量参数为 const；
       enabled=true；任务已生成或可生成 Agent Job。
+      同时核对 `enableAgentJob/autoInstallPlugin/samplerType/params/effectiveTime` 等前端任务字段；
+      若只有 `collectorParams` 而没有这些关联字段，说明走错了旧版直连创建入口。
 
   - n: 5
     op: scan.now
@@ -79,6 +83,8 @@ cleanup:
   rule: "仅删除本次创建且用户确认过的任务；保留失败任务便于复盘时默认不删除。"
 
 acceptance:
+  - "前端任务列表可见；任务详情 URL 可打开"
+  - "历史详情 URL 使用 scanId，而不是 jobId"
   - "_COLLECTOR_JOB 回读确认参数绑定正确"
   - "scan-now 返回 scanId 且无 errMsg"
   - "历史详情能定位目标 Agent 和单目标错误"

@@ -326,7 +326,7 @@ systems:
       history:
         detail: "按 scan-now 返回的 scanId 查询历史详情；返回 list/total"
     runtime:
-      create_contract: "CreateResourceDiscoveryJob@1.0.9；源码快照契约为 1.0.8，需关注版本 diff"
+      create_contract: "前端验收环境当前抓包为 CreateResourceDiscoveryJob@1.0.8；1.0.9 可作为兼容版本，但必须以实际网关契约为准"
       history_contract: "ListJobHistoryDetail@1.0.0；id=scan-now 返回的 scanId；st/et 为 Unix 秒"
       result_fields: "ScanTaskDetail 含 agentStatus/samplerStatus/pluginStatus/duration/status/errMsgs/scanResult/expectTotal/successTotal/failTotal"
       stdout_stderr: "平台历史详情不包含 process_sampler 原始 stdout/stderr；原始输出需查 Agent 侧 sampler 日志"
@@ -334,6 +334,10 @@ systems:
     acceptance_urls:
       task_list: "${EASYOPS_CMDB_FRONTEND_URL}/next/auto-discovery/task-manager/list"
       task_detail: "${EASYOPS_CMDB_FRONTEND_URL}/next/auto-discovery/task-manager/detail/{jobId}"
+      history_detail: "${EASYOPS_CMDB_FRONTEND_URL}/next/auto-discovery/task-history/detail/{scanId}"
+      verified_examples:
+        task_detail: "https://192.168.110.24/next/auto-discovery/task-manager/detail/65ef01175dd79"
+        history_detail: "https://192.168.110.24/next/auto-discovery/task-history/detail/000001a18523320d4f9b91a8fdfdb150"
 
   # ============================================================================
   # EasyOps AutoOps 工具管理（tool_service）—— 第二个接入的系统。

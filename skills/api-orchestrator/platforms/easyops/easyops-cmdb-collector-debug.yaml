@@ -20,9 +20,9 @@ resources:
     path: ""
     operations:
       create:
-        description: "创建资源发现采集任务。响应 data.id 是 _COLLECTOR_JOB 实例 ID。"
+        description: "通过 CMDB 资源发现编排创建前端可见的采集任务。禁止用 collector_service 旧版直连创建替代；响应 data.id 是 _COLLECTOR_JOB 实例 ID。"
         method: POST
-        path: /next/api/gateway/easyops.api.cmdb.job.CreateResourceDiscoveryJob@1.0.9/api/v1/create-resource-discovery-job
+        path: /next/api/gateway/easyops.api.cmdb.job.CreateResourceDiscoveryJob@1.0.8/api/v1/create-resource-discovery-job
         body:
           type: object
           required: [collectorJob, pluginId]
@@ -128,8 +128,32 @@ resources:
           agentQuery: { in: query, type: string }
           et: { in: query, type: integer, description: "Unix 秒" }
           page: { in: query, type: integer, default: 1 }
+
         response:
           type: object
           properties:
             list: { type: array, items: { type: object, additional_properties: true } }
             total: { type: integer }
+
+diagnostics:
+  frontend_visibility:
+    description: |
+      前端任务列表展示的是 CreateResourceDiscoveryJob 编排生成的资源发现任务。
+      不要用 collector_service:8125/api/v1/collector_job 或其它旧版直连接口代替创建；
+      该入口可能只写入基础 _COLLECTOR_JOB，缺少前端任务所需的插件、参数和 Agent Job 关联。
+    frontend_created_example:
+      instanceId: "65ef01175dd79"
+      task_detail: "${EASYOPS_CMDB_FRONTEND_URL}/next/auto-discovery/task-manager/detail/65ef01175dd79"
+    direct_created_counterexample:
+      instanceId: "65eef9a465521"
+      reason: "直连旧服务创建的基础任务；回读可见但不保证出现在前端任务列表，也不能据此判断 SNMP 执行链路。"
+  field_comparison:
+    frontend_task_should_have:
+      - enableAgentJob
+      - autoInstallPlugin
+      - samplerType
+      - params
+      - effectiveTime
+      - collectAgent
+      - hostIds
+    note: "这些字段由 CreateResourceDiscoveryJob 编排根据请求补全；请求体本身不直接传 enableAgentJob/samplerType。"
