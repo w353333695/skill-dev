@@ -290,3 +290,14 @@ script_templates:
 
     if __name__ == '__main__':
         main()
+
+
+# CMDB process_sampler 可观测性与失败语义（2026-10-29）
+cmdb_process_sampler_diagnostics:
+  rule: "采集脚本不能把配置错误、连接错误、SNMP请求异常或最终零记录当作成功空结果；应记录阶段日志、完整traceback并以非零退出码结束。"
+  phases: [configuration, preflight, standard.ENTITY, standard.INTERFACE, standard.IFX, standard.FC_PORT, private.scalar, private.table, result, summary]
+  required_logs: ["配置版本/目标/端口/版本", "每个阶段开始", "每个请求的OID/耗时/状态", "跳过的unsupported OID", "记录数/字段数", "最终summary"]
+  error_logs: "所有except使用函数/阶段前缀和traceback.format_exc()；敏感凭证先脱敏。"
+  exit_code: "失败返回非零退出码；即使输出GATHERING DATA空数组，也不能让平台将其判为成功。"
+  exceptions: "仅UnsupportedOID可按兼容性记录warning后继续；配置不全、无效鉴权、连接超时/No Response、命令失败、解析异常和零记录必须失败。"
+  no_records: "采集完成但无任何CMDB记录时抛出CollectionError，提示检查collect.skip和SNMP请求日志。"

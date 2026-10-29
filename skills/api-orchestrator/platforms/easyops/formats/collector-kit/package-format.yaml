@@ -92,6 +92,8 @@ cmdb_collection_requirements:
     - "导入后通过CMDB只读检查对应_COLLECTOR_EASYOPS_PLUGIN实例的pluginResConfig；plugin.detail未必返回该字段，不能因此判断未写入。"
     - "分别检查前端资源发现可看到该套件，以及配置采集任务时可选择预期采集对象；API返回200/code=0不能代替这两项前端验收。"
     - "改名/补文件/打包不自动激活，不擅自修改已有采集任务。未做前端验证时明确标待验收。"
+  python_script_diagnostics: "process_sampler必须记录阶段、请求状态、结果计数；异常和零记录返回非零退出码，具体规则见sampler-types.yaml#cmdb_process_sampler_diagnostics。"
+  python_script_injection: "CMDB采集Python打包前必须显式注入EASYOPS_COLLECTOR_*同名变量，保留.orig；具体规则和验收见param-mechanism.yaml#cmdb_python_environment_injection。"
   parameter_delivery:
     rule: "CMDB process_sampler 参数应沿用现有网络套件的 collectParams；$.attr 默认值的参数使用 valueType=cmdb（数值端口可用int），不要把整个结构体仅声明为普通string后期待前端自动展开。"
     struct_example: "snmp_conf 结构字段的参数写成 $.snmp_conf.snmpVersion、$.snmp_conf.snmpPort 等；脚本可在运行时按环境变量组装连接配置。"

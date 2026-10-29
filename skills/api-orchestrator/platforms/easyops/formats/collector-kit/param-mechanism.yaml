@@ -205,3 +205,30 @@ host_model_fields:
     common_misuse: "把 agent 运行环境相关的东西（CLI 命令路径/installPath/工具目录）当成设备属性用 $.installPath 引用——这些不是被采集设备属性，模型中没有，必报错"
     correct_handling: "作为普通自定义入参（defaultValue=\"\", display=true 用户填），或脚本内依赖系统 PATH 不设为参数"
     source: "create-params.md:78-82"
+
+# CMDB Python 采集脚本的打包前注入约定（2026-10-29）
+cmdb_python_environment_injection:
+  scope: "EasyOps CMDB simple-script/process_sampler 的 Python 脚本"
+  rule: |
+    发布包 src/*.py 必须显式包含环境变量取参前导：import os，随后按
+    plugin.yaml 的 params/paramDefine 为每个参数生成同名变量，读取
+    EASYOPS_COLLECTOR_<参数名>。编码声明保留在文件头；存在 __future__
+    导入时将取参代码放在其后，且必须先于使用这些变量的业务代码。
+    平台将参数传到环境变量不等于 Python 已定义同名变量，不能只声明参数就省略此步骤。
+  example: |
+    # -*- coding: utf-8 -*-
+    import os
+    ip = os.environ.get("EASYOPS_COLLECTOR_ip")
+    snmpPort = os.environ.get("EASYOPS_COLLECTOR_snmpPort")
+    community = os.environ.get("EASYOPS_COLLECTOR_community")
+  packaging: |
+    以参数清单生成注入段，不硬编码仅 ip 等少数字段。保留未注入的 .orig 原始脚本；
+    src/*.py 为原始正文加注入段，重新打包从 .orig 生成，不能重复叠加注入段。
+    command.collect.scriptPath 必须指向带注入的 .py，脚本改名时同步路径。
+    os.environ.get 返回字符串或 None；缺省值、类型转换和结构JSON解析仍由业务代码处理。
+    此注入步骤不修复字符串 "null"、编码异常或其它采集逻辑问题。
+  acceptance:
+    - "解包检查实际执行的 .py，注入变量名与参数清单完整一致，逐项大小写匹配。"
+    - "设置模拟 EASYOPS_COLLECTOR_* 环境变量，离线执行注入段确认同名变量取值，不调用采集或访问设备。"
+    - "检查 .orig 不包含生成的注入段、.py 未重复注入，且可通过目标 Python 版本语法检查。"
+  evidence: "用户提供的物理服务器SNMP信息采集.zip：src/物理服务器SNMP信息采集.py 含19个环境变量绑定，.orig 保留未注入正文；此约定自包含，无需分发源码。"
