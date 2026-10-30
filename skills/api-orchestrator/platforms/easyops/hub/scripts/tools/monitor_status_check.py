@@ -36,9 +36,12 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s %(levelname)s %(mess
 LOGGER = logging.getLogger('monitor_status_check')
 CMDB_PORT = 8079
 DEFAULT_PAGE_SIZE = 300
-MONITOR_JOB_PATH = '/next/api/gateway/easyops.api.collector_service.job.ListResourceMonitorJob@1.0.37/api/v1/list-resource-monitor-job'
-MONITOR_INSTANCES_PATH = '/next/api/gateway/easyops.api.collector_service.job.ListJobInstances@1.0.6/api/v1/list-resource-monitor-job-instances'
-STATUS_PATH = '/next/api/gateway/collector_service.job_status.GetStatus/v1/job_status/get'
+MONITOR_BACKEND_PATH = '/api/v1/list-resource-monitor-job'
+MONITOR_INSTANCES_BACKEND_PATH = '/api/v1/list-resource-monitor-job-instances'
+STATUS_BACKEND_PATH = '/api/v1/job_status/get'
+MONITOR_JOB_CONTRACT = 'easyops.api.collector_service.job.ListResourceMonitorJob'
+MONITOR_INSTANCES_CONTRACT = 'easyops.api.collector_service.job.ListJobInstances'
+STATUS_CONTRACT = 'easyops.api.collector_service.job_status.GetStatus'
 
 
 def _text(value):
@@ -147,6 +150,36 @@ def _headers():
     if cookie:
         headers['Cookie'] = _text(cookie) if 'PHPSESSID=' in _text(cookie) else 'PHPSESSID=' + _text(cookie)
     return headers
+
+
+def _monitor_backend():
+    value = (globals().get('EASYOPS_COLLECTOR_SERVICE_BACKEND_URL') or
+             os.environ.get('EASYOPS_COLLECTOR_SERVICE_BACKEND_URL') or
+             globals().get('EASYOPS_COLLECTOR_SERVICE_HOST') or
+             os.environ.get('EASYOPS_COLLECTOR_SERVICE_HOST'))
+    if value:
+        return value
+    # 沙箱默认只注入 *_SERVICE_HOST；采集服务与 CMDB 共用集群地址，端口固定 12000。
+    value = (globals().get('EASYOPS_CMDB_SERVICE_HOST') or
+             os.environ.get('EASYOPS_CMDB_SERVICE_HOST'))
+    if value:
+        host = _host(value)
+        return 'http://%s:12000' % host
+    raise RuntimeError('缺少采集服务内网地址（EASYOPS_COLLECTOR_SERVICE_HOST/EASYOPS_CMDB_SERVICE_HOST）')
+
+
+def _monitor_get(path, contract, query):
+    backend = _monitor_backend()
+    headers = _headers()
+    headers['giraffe-contract-name'] = contract
+    return _http('GET', _host(backend), _port(backend, 12000), path,
+                  query=query, headers=headers)
+
+
+def _port(value, default):
+    text = _text(value or '')
+    match = re.search(r':(\d+)(?:/|$)', text)
+    return int(match.group(1)) if match else default
 
 
 def _http(method, host, port, path, body=None, query=None, headers=None, timeout=30):
@@ -299,60 +332,46 @@ def _instance_url(model_id, instance_id):
 
 
 def _model_jobs(model_id):
-    bodies = [
-        {'objectId': model_id, 'page': 1, 'pageSize': 300},
-        {'objectIds': [model_id], 'page': 1, 'pageSize': 300},
-        {'objectId': model_id},
-    ]
-    errors = []
-    for body in bodies:
-        try:
-            response = gateway('POST', MONITOR_JOB_PATH, body)
-            jobs = _list(response)
-            if jobs:
-                return jobs
-        except Exception as error:
-            errors.append(_text(error))
-    if errors:
-        LOGGER.warning('query monitor jobs failed model=%s: %s', _log_text(model_id), _log_text(errors[-1]))
-    return []
+    # 监控服务内网接口：GET :12000/api/v1/list-resource-monitor-job。
+    # 该接口要求完整 query 字段；不再调用 /next/api/gateway 前端代理。
+    query = {'page': 1, 'pageSize': DEFAULT_PAGE_SIZE, 'nameQ': '',
+             'objectIdQ': model_id, 'statusQ': '', 'agentQ': '',
+             'typeQ': '', 'enableQ': ''}
+    try:
+        response = _monitor_get(MONITOR_BACKEND_PATH, MONITOR_JOB_CONTRACT, query)
+        return _list(response)
+    except Exception as error:
+        LOGGER.warning('query monitor jobs failed model=%s: %s', _log_text(model_id), _log_text(error))
+        return []
 
 
 def _job_instances(job):
     job_id = _job_id(job)
     if not job_id:
         return []
-    bodies = [
-        {'jobId': job_id, 'page': 1, 'pageSize': 300},
-        {'instanceId': job_id, 'page': 1, 'pageSize': 300},
-        {'jobIds': [job_id], 'page': 1, 'pageSize': 300},
-    ]
-    for body in bodies:
-        try:
-            rows = _list(gateway('POST', MONITOR_INSTANCES_PATH, body))
-            if rows:
-                return rows
-        except Exception as error:
-            LOGGER.debug('query job instances failed %s: %s', _log_text(job_id), _log_text(error))
-    return []
+    query = {'page': 1, 'pageSize': DEFAULT_PAGE_SIZE, 'statusFilter': '',
+             'configId': job_id, 'jobId': job_id, 'objectId': '',
+             'agentId': '', 'startTime': '', 'endTime': ''}
+    try:
+        return _list(_monitor_get(MONITOR_INSTANCES_BACKEND_PATH,
+                                  MONITOR_INSTANCES_CONTRACT, query))
+    except Exception as error:
+        LOGGER.debug('query job instances failed %s: %s', _log_text(job_id), _log_text(error))
+        return []
 
 
 def _status(job, instance_id):
     job_id = _job_id(job)
-    bodies = [
-        {'jobId': job_id, 'instanceId': instance_id},
-        {'job_id': job_id, 'instance_id': instance_id},
-        {'jobId': job_id},
-    ]
-    for body in bodies:
-        try:
-            response = gateway('POST', STATUS_PATH, body)
-            data = _data(response)
-            if isinstance(data, dict):
-                return data
-        except Exception as error:
-            LOGGER.debug('query status failed job=%s instance=%s: %s', _log_text(job_id), _log_text(instance_id), _log_text(error))
-    return {}
+    if not job_id:
+        return {}
+    query = {'jobId': job_id, 'instanceId': instance_id}
+    try:
+        data = _data(_monitor_get(STATUS_BACKEND_PATH, STATUS_CONTRACT, query))
+        return data if isinstance(data, dict) else {}
+    except Exception as error:
+        LOGGER.debug('query status failed job=%s instance=%s: %s',
+                     _log_text(job_id), _log_text(instance_id), _log_text(error))
+        return {}
 
 
 def _status_text(value):
@@ -391,10 +410,26 @@ def _job_instance_map(job):
     return mapping
 
 
+_ROW_SEQ = 0
+
 def put_row(table, values):
+    global _ROW_SEQ
     try:
-        encoded = '&'.join('%s=%s' % (_output_text(key), _output_text(value).replace('&', '%26').replace('=', '%3D')) for key, value in values.items())
-        PutRow(table, encoded)
+        _ROW_SEQ += 1
+        values = dict(values)
+        # 先写入稳定且唯一的行时间戳；SDK 仍会追加自身 _E_TS，兼容两种解析器。
+        values['_E_TS'] = str(int(time.time() * 1000) + _ROW_SEQ)
+        pairs = []
+        for key, value in values.items():
+            text = _output_text(value)
+            if IS_PY2:
+                encoded = urllib.quote_plus(text)
+            else:
+                encoded = _url_parse.quote_plus(text)
+            pairs.append('%s=%s' % (key, encoded))
+        PutRow(table, '&'.join(pairs))
+        # 平台 SDK 以毫秒级 _E_TS 作为行标识；连续 PutRow 可能覆盖同毫秒的上一行。
+        time.sleep(0.002)
     except NameError:
         print(json.dumps({'table': table, 'values': values}, ensure_ascii=False))
 
@@ -410,8 +445,19 @@ def main():
     models = _selected_models()
     all_rows = []
     task_count = 0
+    limit_value = _input('instance_limit', '1000')
+    try:
+        instance_limit = max(1, int(_text(limit_value)))
+    except Exception:
+        raise ValueError('instance_limit 必须是正整数')
+    omitted = 0
     for model_id, model_name in models:
         instances = _search_instances(model_id)
+        if len(instances) > instance_limit:
+            omitted += len(instances) - instance_limit
+            LOGGER.warning('模型 %s 实例数=%d，按 instance_limit=%d 输出前 %d 行',
+                           _log_text(model_id), len(instances), instance_limit, instance_limit)
+            instances = instances[:instance_limit]
         jobs = _model_jobs(model_id)
         task_count += len(jobs)
         maps = [(job, _job_instance_map(job)) for job in jobs]
@@ -450,11 +496,13 @@ def main():
                    'isMonitored': monitor, 'monitorJob': task_url, 'monitorStatus': state,
                    'error': error}
             all_rows.append(row)
-            put_row('monitor_status', row)
-    summary = u'模型=%d，实例=%d，监控任务=%d，已监控=%d，失败/部分=%d' % (
+    for row in all_rows:
+        put_row('monitor_status', row)
+    LOGGER.info('完成采集：模型数=%d，实例行数=%d，监控任务数=%d，跳过实例=%d', len(models), len(all_rows), task_count, omitted)
+    summary = u'模型=%d，实例=%d，监控任务=%d，已监控=%d，失败/部分=%d，跳过=%d' % (
         len(models), len(all_rows), task_count,
         len([row for row in all_rows if row['isMonitored'] == u'是']),
-        len([row for row in all_rows if row['monitorStatus'] in (u'失败', u'部分成功')]))
+        len([row for row in all_rows if row['monitorStatus'] in (u'失败', u'部分成功')]), omitted)
     put_str('summary', summary)
     return 0
 
