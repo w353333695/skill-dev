@@ -24,17 +24,22 @@
   该设置写入 Heading 1 样式本身，不依赖逐段手动加 `pageBreakBefore`
 - heading_numbering=true：标题自动多级编号（1. / 1.1. / 1.1.1.）；
   编号写入 Heading 1-6 样式，并剥离标题里手写的“一、/ 5.1”等序号，增删标题自动重排
+- mermaid_js=/path/to/mermaid.min.js：本地 Mermaid JS（离线渲染）；也可用 MERMAID_JS_PATH。
+  未提供时回退 jsdelivr CDN；渲染失败会输出 warning 并回退为代码块。
 -- 封面页、目录页、正文之间用分页节隔开。
 """
 
 from __future__ import annotations
 
 import html as _html_lib
+import logging
 import re
 import tempfile
 from html.parser import HTMLParser
 from pathlib import Path
 from .base import BaseConverter, ConvertResult, register
+
+logger = logging.getLogger(__name__)
 
 
 # ---------------------------------------------------------------------------
@@ -885,11 +890,12 @@ class MdToDocx(BaseConverter):
             for i, code in enumerate(mermaid_blocks):
                 try:
                     img = tmp_dir / f"mermaid_{i}.png"
-                    render_mermaid_to_image(code, img)
+                    render_mermaid_to_image(code, img, mermaid_js=options.get("mermaid_js"))
                     if img.exists():
                         mermaid_images[i] = img
-                except Exception:
-                    pass  # 该块渲染失败 → _render_blocks 回退为代码块
+                except Exception as exc:
+                    # 该块渲染失败 → _render_blocks 回退为代码块（记录原因，勿静默）
+                    logger.warning("Mermaid 图表 #%d 渲染失败，回退为代码块：%s", i + 1, exc)
 
         # 块级渲染（递归，引用块内部会递归调用）
         self._mermaid_images = mermaid_images

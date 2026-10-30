@@ -356,3 +356,33 @@ def test_md_to_docx_heading_numbering(tmp_path: Path):
         numbering = z.read("word/numbering.xml").decode("utf-8")
     for text in ('%1.', '%1.%2.', '%1.%2.%3.'):
         assert 'w:lvlText w:val="%s"' % text in numbering
+
+
+def test_mermaid_html_uses_local_js(tmp_path: Path, monkeypatch):
+    """mermaid_js 参数优先内联本地 JS，不走 CDN。"""
+    from doc_converter.converters.mermaid_image import _build_mermaid_html
+    monkeypatch.delenv("MERMAID_JS_PATH", raising=False)
+    js = tmp_path / "mermaid.min.js"
+    js.write_text("window.__localMermaid=true;", encoding="utf-8")
+    html = _build_mermaid_html("graph TB\n A-->B", mermaid_js=str(js))
+    assert "window.__localMermaid=true;" in html
+    assert "cdn.jsdelivr.net" not in html
+
+
+def test_mermaid_html_uses_env_js(tmp_path: Path, monkeypatch):
+    """MERMAID_JS_PATH 环境变量也可启用离线 Mermaid。"""
+    from doc_converter.converters.mermaid_image import _build_mermaid_html
+    js = tmp_path / "mermaid.min.js"
+    js.write_text("window.__envMermaid=true;", encoding="utf-8")
+    monkeypatch.setenv("MERMAID_JS_PATH", str(js))
+    html = _build_mermaid_html("graph TB\n A-->B")
+    assert "window.__envMermaid=true;" in html
+    assert "cdn.jsdelivr.net" not in html
+
+
+def test_mermaid_html_defaults_to_cdn(monkeypatch):
+    """未提供本地 JS 时保持原行为：CDN。"""
+    from doc_converter.converters.mermaid_image import _build_mermaid_html
+    monkeypatch.delenv("MERMAID_JS_PATH", raising=False)
+    html = _build_mermaid_html("graph TB\n A-->B")
+    assert "cdn.jsdelivr.net" in html

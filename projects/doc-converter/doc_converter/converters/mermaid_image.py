@@ -1,19 +1,41 @@
 """Mermaid → PNG/SVG 转换器"""
 
 import json
+import logging
+import os
 import re
 import tempfile
 from pathlib import Path
 from .base import BaseConverter, ConvertResult, register
 
+logger = logging.getLogger(__name__)
 
-def _build_mermaid_html(code: str, theme: str = "default") -> str:
+
+def _mermaid_script_tag(mermaid_js=None) -> str:
+    """优先用本地 Mermaid JS（参数或 MERMAID_JS_PATH），否则回退 CDN。"""
+    path = mermaid_js or os.environ.get("MERMAID_JS_PATH")
+    if path:
+        try:
+            js_path = Path(path)
+            if js_path.is_file():
+                js = js_path.read_text(encoding="utf-8")
+                # 防止 JS 里的 </script> 提前结束 script 块
+                js = js.replace("</script>", "<\\/script>")
+                return "<script>%s</script>" % js
+            logger.warning("Mermaid JS 文件不存在，回退 CDN: %s", path)
+        except Exception as exc:
+            logger.warning("读取本地 Mermaid JS 失败，回退 CDN: %s (%s)", path, exc)
+    return '<script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>'
+
+
+def _build_mermaid_html(code: str, theme: str = "default", mermaid_js=None) -> str:
     """构建 Mermaid 渲染 HTML，使用 mermaid.render() API 确保完整渲染"""
     code_json = json.dumps(code.strip())
+    script_tag = _mermaid_script_tag(mermaid_js)
     return f"""<!DOCTYPE html>
 <html><head>
 <meta charset="UTF-8">
-<script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+{script_tag}
 <style>
   body {{ margin: 0; padding: 40px; background: #fff; }}
   #container {{ display: inline-block; }}
@@ -46,9 +68,13 @@ def extract_mermaid_blocks(text: str) -> list[str]:
 
 
 def render_mermaid_to_image(code: str, output_path: Path, theme: str = "default", **options) -> Path:
-    """将单个 mermaid 代码渲染为高清图片，返回输出路径"""
+    """将单个 mermaid 代码渲染为高清图片，返回输出路径。
+
+    options 支持 mermaid_js=/path/to/mermaid.min.js（优先级高于 MERMAID_JS_PATH）。
+    """
     from .renderer import html_to_image
-    html = _build_mermaid_html(code, theme)
+    mermaid_js = options.pop("mermaid_js", None)
+    html = _build_mermaid_html(code, theme, mermaid_js=mermaid_js)
     # 默认高清参数
     options.setdefault("width", 3200)
     options.setdefault("device_scale_factor", 4)
@@ -99,8 +125,9 @@ def inline_mermaid_as_images(md_text: str, out_dir, theme: str = "default", **op
             render_mermaid_to_image(code, img, theme, **options)
             images.append(img)
             text = text.replace(placeholder, f"![mermaid 图 {i + 1}]({img.name})")
-        except Exception:
+        except Exception as exc:
             # 该块渲染失败 → 还原为代码块，不阻断其余块
+            logger.warning("Mermaid 图表 #%d 渲染失败，回退为代码块：%s", i + 1, exc)
             text = text.replace(placeholder, f"```mermaid\n{code}\n```")
     return text, images
 
