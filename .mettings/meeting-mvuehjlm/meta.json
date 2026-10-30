@@ -5,5 +5,6 @@
   "workflow_id": "bd9b647a-7451-436d-aece-6937c2466eba",
   "workflow_revision": 2,
   "workflow_status": "recording",
-  "projection_version": 1
+  "projection_version": 2,
+  "processing_error": "ASR_FINAL_TRANSCRIPT_UNAVAILABLE"
 }
