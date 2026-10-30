@@ -51,8 +51,8 @@ items:
   - id: physical-server-snmp-inventory-kit
     name: 物理服务器SNMP信息采集
     category: cmdb-kits
-    files: [CMDB采集套件_物理服务器SNMP信息采集_0.1.20.zip, 物理服务器SNMP信息采集_使用说明.md]
-    version: "0.1.20"
+    files: [CMDB采集套件_物理服务器SNMP信息采集_0.1.21.zip, 物理服务器SNMP信息采集_使用说明.md, tests/test_physical_server_snmp.py]
+    version: "0.1.21"
     history:
       - {ver: "0.1.0", date: "2026-10-27", change: "初版：通用MIB加Dell iDRAC、IBM IMM、联想XCC、华为iBMC资产私有列；百信/浪潮仅通用回退；新增非密snmp_conf；离线55项回归"}
       - {ver: "0.1.1", date: "2026-10-27", change: "补充凭证转义/十六进制日志脱敏及初始化清理回归，共57项；wheel独立构建携带交付文档"}
@@ -73,8 +73,9 @@ items:
       - {ver: "0.1.18", date: "2026-10-29", change: "按真实stdout精确兼容省略类型的空字符串响应；从最终ZIP加载脚本完成18项解析回归及19项参数绑定核对，未上传远端"}
       - {ver: "0.1.19", date: "2026-10-30", change: "非阻塞SNMP varbind解析差异记录warning并继续，兼容无类型数字/空字符串；整张表尽可能收集后统一汇总，失败时保留全部问题；未上传远端"}
       - {ver: "0.1.20", date: "2026-10-30", change: "单个OID/整表No Such Object不再阻断，记录warning后继续其它阶段；整次无记录仍失败；未上传远端"}
+      - {ver: "0.1.21", date: "2026-10-30", change: "可选标准表及私有列超时继续并保留部分数据；CPU核数按完整有效列求和；扩充电源/风扇/GPU/HBA/身份/版本/FC，修正Dell线程及华为逻辑盘列，修复UUID无缩进续行；PROFILES原生dict/list可折叠，增加3项old_*参数；35项最终ZIP回归，仅离线交付未上传"}
     scenario: 纯SNMP物理服务器CMDB资产采集，CPU/内存/盘/业务网口/FC口，按BMC产品族识别，不依赖型号清单
-    notes: "EasyOps原生套件，instanceId=65ecd570203d1，交付包0.1.20，名称物理服务器SNMP信息采集；本次仅离线打包，未更新远端；单OID/整表不可用继续采集并汇总warning；资源发现覆盖PHYSICAL_SERVER/NETDPORT/FIBER_CHANNEL_PORT三个模型，前端待导入验收。参数按网络process_sampler使用collectParams及分拆cmdb动态字段，脚本兼容旧整结构；未激活或修改任务。snmp_conf仅10字段，snmpPort保留结构内，脚本默认161，CMDB不保存struct默认值；模型导入合并子字段，升级旧结构需备份后object_attr.update精确替换。字段授权easyops（管理员例外，非存储加密），凭证可用平台加密参数覆盖；py内嵌品牌配置。完整模型快照跨环境先备份比较；百信/浪潮仅通用回退，所有品牌均未实机验收；readme以使用与验收为主。"
+    notes: "EasyOps原生套件，instanceId=65ecd570203d1，交付包0.1.21，名称物理服务器SNMP信息采集；本次仅离线打包，未更新远端；可选单OID/整表不可用继续采集，部分结果摘要partial；身份非空默认写入；CPU核数完整求和；GPU/HBA按明确证据采集；不臆造微码/宿主OS/交换机对端；PROFILES原生dict/list可折叠，22项参数前导；资源发现覆盖PHYSICAL_SERVER/NETDPORT/FIBER_CHANNEL_PORT三个模型，前端待导入验收。参数按网络process_sampler使用collectParams及分拆cmdb动态字段，脚本兼容旧整结构；未激活或修改任务。snmp_conf仅10字段，snmpPort保留结构内，脚本默认161，CMDB不保存struct默认值；模型导入合并子字段，升级旧结构需备份后object_attr.update精确替换。字段授权easyops（管理员例外，非存储加密），凭证可用平台加密参数覆盖；py内嵌品牌配置。完整模型快照跨环境先备份比较；百信/浪潮仅通用回退，所有品牌均未实机验收；readme以使用与验收为主。"
     added: "2026-10-27"
   # ---- inspection-kits（10 商品）----
   - id: ibmsvc-inspection-kit
