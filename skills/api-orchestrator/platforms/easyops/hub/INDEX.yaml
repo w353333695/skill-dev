@@ -765,6 +765,18 @@ items:
     notes: "py2/3 兼容 stdlib only；本地直跑可 EASYOPS_CMDB_BACKEND_URL+kv 入参；平台跑走 globals 注入变量"
     added: "2026-09-24"
 
+  - id: cmdb-model-monitor-status-check
+    name: CMDB模型监控状态检查
+    category: scripts
+    files: [tools/monitor_status_check.py]
+    version: "1.0.1"
+    history:
+      - {ver: "1.0.0", date: "2026-10-30", change: "注册 AutoOps 沙箱工具；输入 HOST 执行主机与 CMDB_MODEL@EASYOPS 模型多选，递归查询模型实例、监控任务和执行状态"}
+      - {ver: "1.0.1", date: "2026-10-30", change: "修复 agent Python 2.7 中文 unicode 输出导致 PutRow/PutStr 失败；保留非阻塞错误并输出可诊断结果"}
+    scenario: 查询指定 CMDB 模型（父模型自动展开子模型）及实例是否配置监控、所属监控任务、监控状态和实际报错
+    notes: "AutoOps toolId=0d0a4e02b4c60aaab64b1c8510d37423；vId=0f41979b087f13b4da01e272032c7cea；sandboxRun=true；E2E 使用 HOST=6536dc5d1e0ad、BASE_ASSET@ONEMODEL=6536dc5d2576d。监控网关接口在无会话的 agent 沙箱中可能返回 401，脚本将该错误按实例结果保留，不阻断其他模型/实例。"
+    added: "2026-10-30"
+
   - id: native-client-install-simple-flow
     name: 文件自动分发、安装、校验
     category: flow
