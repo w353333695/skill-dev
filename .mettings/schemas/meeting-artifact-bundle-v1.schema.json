@@ -1,0 +1,30 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "meeting-artifact-bundle-v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "meeting_id",
+    "minutes",
+    "chapters"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "1.0"
+    },
+    "meeting_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "minutes": {
+      "type": "object"
+    },
+    "chapters": {
+      "type": "object"
+    },
+    "viewpoint_tree": {
+      "type": "object"
+    }
+  }
+}
