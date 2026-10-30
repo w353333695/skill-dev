@@ -4,10 +4,10 @@
     {
       "meeting_id": "meeting-mvuehjlm",
       "title": "新会议 1",
-      "status": "recording",
+      "status": "failed",
       "source_type": "recording",
       "created_at": "2026-10-30T03:16:20.986Z",
-      "updated_at": "2026-10-30T03:17:25.459Z",
+      "updated_at": "2026-10-30T03:18:42.584Z",
       "duration": 0,
       "speaker_count": 0,
       "meta_file_path": ".mettings/meeting-mvuehjlm/meta.json",
@@ -15,9 +15,9 @@
       "initiator_email": "wenhuawang@easyops.cn",
       "initiator_name": "Wenhua Wang 汪文华",
       "workflow_id": "bd9b647a-7451-436d-aece-6937c2466eba",
-      "workflow_revision": 2,
-      "workflow_status": "recording",
-      "projection_version": 1
+      "workflow_revision": 5,
+      "workflow_status": "attention_required",
+      "projection_version": 2
     }
   ]
 }
