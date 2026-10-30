@@ -6,5 +6,22 @@
   "workflow_revision": 2,
   "workflow_status": "recording",
   "projection_version": 2,
-  "processing_error": "ASR_FINAL_TRANSCRIPT_UNAVAILABLE"
+  "processing_error": "ASR_FINAL_TRANSCRIPT_UNAVAILABLE",
+  "audio_contract_version": 2,
+  "audio_archive_status": "complete",
+  "audio_settlement_state": "complete",
+  "audio_playback_availability": "full",
+  "audio_playback_mode": "canonical",
+  "audio_settlement_revision": 2,
+  "audio_playback_duration_ms": 23408,
+  "audio_playback_duration_finalized": true,
+  "audio_truncation_kept_through_part_number": null,
+  "audio_truncation_discarded_part_numbers": [],
+  "audio_truncated_at": null,
+  "audio_truncated_by_user_id": null,
+  "audio_finalized_object_key": "minutes/a9c15b9b-2a4c-4483-9225-6777e9da7376/cmlyrhj3t008q30s5p9w7ahu5/0b358c22-c8ad-41fa-9e10-c1781c25b70c/meeting-mvuehjlm/archives/5d678d8b-4691-4bb1-862e-36a0e2b38aad/finalized/audio.webm",
+  "audio_finalized_byte_length": 158986,
+  "audio_finalized_sha256": "adeb151b50fc5838409e4faabede61d4fc5d5b78e56a6b50194aaa3b08a913a3",
+  "audio_finalized_revision": 1,
+  "audio_projection_version": 1
 }
