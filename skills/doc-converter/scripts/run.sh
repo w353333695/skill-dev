@@ -8,6 +8,12 @@ SKILL_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
 # shellcheck disable=SC1091
 source "$SKILL_DIR/manifest.sh"
 
+# 随 skill 分发的 Mermaid JS：默认注入，离线渲染 md→docx/pdf 图表
+# 用户显式设置 MERMAID_JS_PATH 时以用户为准。
+if [ -z "${MERMAID_JS_PATH:-}" ] && [ -f "$SKILL_DIR/assets/mermaid.min.js" ]; then
+  export MERMAID_JS_PATH="$SKILL_DIR/assets/mermaid.min.js"
+fi
+
 if [ $# -lt 1 ]; then
   echo "用法: run.sh <cli> [args...]（dev 壳，转发到 uv run --project）" >&2
   echo "  已注册 CLI:" >&2

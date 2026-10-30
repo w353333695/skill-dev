@@ -11,20 +11,53 @@ from .base import BaseConverter, ConvertResult, register
 logger = logging.getLogger(__name__)
 
 
+def _inline_mermaid_js(path) -> str:
+    js = Path(path).read_text(encoding="utf-8")
+    # 防止 JS 里的 </script> 提前结束 script 块
+    js = js.replace("</script>", "<\\/script>")
+    return "<script>%s</script>" % js
+
+
+def _default_mermaid_js_path():
+    """按约定位置自动发现随 skill 分发的 mermaid.min.js。
+
+    优先级由调用方决定；这里只负责找文件：
+      - 开发态：projects/doc-converter/doc_converter/converters/../../../../skills/doc-converter/assets/
+      - 分发态：从 cwd 及上 5 级查找 skills/doc-converter/assets/ 或 .claude/skills/doc-converter/assets/
+    """
+    candidates = []
+    try:
+        candidates.append(Path(__file__).resolve().parents[4] /
+                          "skills/doc-converter/assets/mermaid.min.js")
+    except IndexError:
+        pass
+    cwd = Path.cwd()
+    for base in [cwd] + list(cwd.parents)[:5]:
+        candidates.append(base / "skills/doc-converter/assets/mermaid.min.js")
+        candidates.append(base / ".claude/skills/doc-converter/assets/mermaid.min.js")
+    for candidate in candidates:
+        if candidate.is_file():
+            return str(candidate)
+    return None
+
+
 def _mermaid_script_tag(mermaid_js=None) -> str:
-    """优先用本地 Mermaid JS（参数或 MERMAID_JS_PATH），否则回退 CDN。"""
-    path = mermaid_js or os.environ.get("MERMAID_JS_PATH")
-    if path:
+    """优先用本地 Mermaid JS（参数/环境变量/自动发现），否则回退 CDN。"""
+    explicit = mermaid_js or os.environ.get("MERMAID_JS_PATH")
+    if explicit:
         try:
-            js_path = Path(path)
+            js_path = Path(explicit)
             if js_path.is_file():
-                js = js_path.read_text(encoding="utf-8")
-                # 防止 JS 里的 </script> 提前结束 script 块
-                js = js.replace("</script>", "<\\/script>")
-                return "<script>%s</script>" % js
-            logger.warning("Mermaid JS 文件不存在，回退 CDN: %s", path)
+                return _inline_mermaid_js(js_path)
+            logger.warning("Mermaid JS 文件不存在: %s；尝试自动发现/回退 CDN", explicit)
         except Exception as exc:
-            logger.warning("读取本地 Mermaid JS 失败，回退 CDN: %s (%s)", path, exc)
+            logger.warning("读取本地 Mermaid JS 失败: %s (%s)", explicit, exc)
+    discovered = _default_mermaid_js_path()
+    if discovered:
+        try:
+            return _inline_mermaid_js(discovered)
+        except Exception as exc:
+            logger.warning("读取默认 Mermaid JS 失败: %s (%s)", discovered, exc)
     return '<script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>'
 
 

@@ -381,8 +381,30 @@ def test_mermaid_html_uses_env_js(tmp_path: Path, monkeypatch):
 
 
 def test_mermaid_html_defaults_to_cdn(monkeypatch):
-    """未提供本地 JS 时保持原行为：CDN。"""
-    from doc_converter.converters.mermaid_image import _build_mermaid_html
+    """既无本地 JS、也无法自动发现时保持原行为：CDN。"""
+    import doc_converter.converters.mermaid_image as mi
     monkeypatch.delenv("MERMAID_JS_PATH", raising=False)
-    html = _build_mermaid_html("graph TB\n A-->B")
+    monkeypatch.setattr(mi, "_default_mermaid_js_path", lambda: None)
+    html = mi._build_mermaid_html("graph TB\n A-->B")
     assert "cdn.jsdelivr.net" in html
+
+
+def test_mermaid_html_auto_discovers_default_js(tmp_path: Path, monkeypatch):
+    """自动发现路径（skill 资产）应被默认内联。"""
+    import doc_converter.converters.mermaid_image as mi
+    monkeypatch.delenv("MERMAID_JS_PATH", raising=False)
+    js = tmp_path / "mermaid.min.js"
+    js.write_text("window.__autoMermaid=true;", encoding="utf-8")
+    monkeypatch.setattr(mi, "_default_mermaid_js_path", lambda: str(js))
+    html = mi._build_mermaid_html("graph TB\n A-->B")
+    assert "window.__autoMermaid=true;" in html
+    assert "cdn.jsdelivr.net" not in html
+
+
+def test_mermaid_skill_asset_is_discoverable(monkeypatch):
+    """仓库内 skill 自带的 assets/mermaid.min.js 应能被自动发现。"""
+    import doc_converter.converters.mermaid_image as mi
+    monkeypatch.delenv("MERMAID_JS_PATH", raising=False)
+    path = mi._default_mermaid_js_path()
+    assert path is not None
+    assert path.endswith("skills/doc-converter/assets/mermaid.min.js")
