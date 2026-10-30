@@ -7,8 +7,8 @@
       "status": "failed",
       "source_type": "recording",
       "created_at": "2026-10-30T03:16:20.986Z",
-      "updated_at": "2026-10-30T03:19:10.644Z",
-      "duration": 0,
+      "updated_at": "2026-10-30T03:19:43.636Z",
+      "duration": 23.408,
       "speaker_count": 0,
       "meta_file_path": ".mettings/meeting-mvuehjlm/meta.json",
       "initiator_user_id": "0b358c22-c8ad-41fa-9e10-c1781c25b70c",
@@ -17,12 +17,12 @@
       "workflow_id": "bd9b647a-7451-436d-aece-6937c2466eba",
       "workflow_revision": 5,
       "workflow_status": "attention_required",
-      "projection_version": 2,
+      "projection_version": 3,
       "audio_contract_version": 2,
       "audio_archive_status": "complete",
       "audio_settlement_state": "complete",
       "audio_playback_availability": "full",
-      "audio_playback_mode": "canonical",
+      "audio_playback_mode": "single_file",
       "audio_settlement_revision": 2,
       "audio_playback_duration_ms": 23408,
       "audio_playback_duration_finalized": true,
@@ -34,7 +34,12 @@
       "audio_finalized_byte_length": 158986,
       "audio_finalized_sha256": "adeb151b50fc5838409e4faabede61d4fc5d5b78e56a6b50194aaa3b08a913a3",
       "audio_finalized_revision": 1,
-      "audio_projection_version": 1
+      "audio_projection_version": 2,
+      "duration_source": "server_finalized_file",
+      "duration_revision": 1,
+      "duration_finalized_at": "2026-10-30T03:18:35.339Z",
+      "audio_duration_status": "finalized",
+      "audio_storage_mode": "single_file"
     }
   ]
 }
