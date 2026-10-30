@@ -1,0 +1,16 @@
+{
+  "version": 2,
+  "revision": 0,
+  "meeting_id": "meeting-mvuehjlm",
+  "runtime": {
+    "conversation_status": "ready",
+    "round_number": 0,
+    "last_completed_sequence": 0,
+    "applied_speaker_names": {},
+    "last_error": null,
+    "updated_at": "2026-10-30T03:16:43.058Z",
+    "conversation_id": "559d1b1e-cac4-44d6-8b55-9e21ad515e34",
+    "applied_context_sha256": "1f12c06fc0466722ecc7faed74d38575f0011cb74a2550ea9e6740a98182714a"
+  },
+  "summary": null
+}
