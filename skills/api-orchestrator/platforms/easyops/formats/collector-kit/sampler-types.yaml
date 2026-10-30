@@ -302,3 +302,4 @@ cmdb_process_sampler_diagnostics:
   exceptions: "仅UnsupportedOID可按兼容性记录warning后继续；配置不全、无效鉴权、连接超时/No Response、命令失败、解析异常和零记录必须失败。"
   no_records: "采集完成但无任何CMDB记录时抛出CollectionError，提示检查collect.skip和SNMP请求日志。"
   null_values: "CMDB 空结构字段可能以字符串 null 注入；端口等可选数值先按 null-like 视为未设置并应用明确默认值（SNMP port=161），真正非数字值仍必须失败。"
+  nonblocking_varbinds: "SNMP walk 中单个 varbind 可能省略类型（如 = 0）或返回空字符串（如 = \"\"）；解析器应记录 oid/payload warning、跳过或按可判定基础类型解析并继续整表，最终统一汇总 warnings。只有命令失败、完全无可用varbind、配置/鉴权错误或最终无CMDB记录才阻断。"
