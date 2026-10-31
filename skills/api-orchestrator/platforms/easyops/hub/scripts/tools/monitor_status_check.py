@@ -6,16 +6,23 @@
     cmdb_models：CMDB_MODEL@EASYOPS 多选，选中模型实例；也兼容直接传模型 ID
 
 输出：
-    monitor_status 表格：模型名称、实例、是否监控、所属监控任务、监控状态、报错。
+    CSV 文件：模型名称、实例、是否监控、所属监控任务、监控状态、报错；仅返回 CSV 绝对路径和汇总。
 
 脚本只读调用 CMDB、资源监控任务和任务状态接口；沙箱运行不需要主机文件权限。
 """
 import json
 import logging
+import io
+import platform
 import os
 import re
 import sys
 import time
+
+try:
+    import yaml
+except ImportError:
+    yaml = None
 
 IS_PY2 = sys.version_info[0] == 2
 if IS_PY2:
@@ -142,8 +149,47 @@ def _base_url():
     return 'http://127.0.0.1'
 
 
+_AGENT_CONFIG_CACHE = None
+
+
+def _agent_config_host_org():
+    """读取 agent conf.yaml 的 command server host 与 base client_id。"""
+    global _AGENT_CONFIG_CACHE
+    if _AGENT_CONFIG_CACHE is not None:
+        return _AGENT_CONFIG_CACHE
+    path = r'C:\easyOps\agent\conf\conf.yaml' if platform.system().lower() == 'windows' else '/usr/local/easyops/agent/conf/conf.yaml'
+    try:
+        with open(path, 'r') as stream:
+            raw = stream.read()
+        data = None
+        if yaml is not None:
+            try:
+                data = yaml.safe_load(raw) or {}
+            except Exception:
+                data = None
+        if isinstance(data, dict):
+            org = ((data.get('base') or {}).get('client_id'))
+            groups = ((data.get('command') or {}).get('server_groups') or [])
+            hosts = (groups[0].get('hosts') or []) if groups else []
+            host_value = hosts[0].get('ip') if hosts else ''
+            host = _text(host_value).split(',')[0].strip()
+            if host and org not in (None, ''):
+                _AGENT_CONFIG_CACHE = (host, _text(org))
+                return _AGENT_CONFIG_CACHE
+        # 无 yaml 库时按示例配置路径做最小解析，仍不依赖第三方包。
+        org_match = re.search(r'(?m)^\s*client_id\s*:\s*["\']?([^#\s"\']+)', raw)
+        ip_match = re.search(r'(?m)^\s*ip\s*:\s*["\']?([^#\s"\']+)', raw)
+        if org_match and ip_match:
+            _AGENT_CONFIG_CACHE = (ip_match.group(1).split(',')[0], org_match.group(1))
+            return _AGENT_CONFIG_CACHE
+    except Exception as error:
+        LOGGER.debug('read agent conf failed path=%s: %s', path, _log_text(error))
+    return ('', '')
+
+
 def _headers():
-    org = globals().get('EASYOPS_ORG') or os.environ.get('EASYOPS_ORG') or '1888'
+    agent_host, agent_org = _agent_config_host_org()
+    org = agent_org or globals().get('EASYOPS_ORG') or os.environ.get('EASYOPS_ORG') or '1888'
     user = globals().get('EASYOPS_USER') or os.environ.get('EASYOPS_USER') or 'easyops'
     headers = {'Content-Type': 'application/json', 'org': _text(org), 'user': _text(user), 'Host': 'admin.easyops.local'}
     cookie = globals().get('EASYOPS_COOKIE') or os.environ.get('EASYOPS_COOKIE') or os.environ.get('PHPSESSID')
@@ -153,25 +199,33 @@ def _headers():
 
 
 def _monitor_backend():
+    agent_host, agent_org = _agent_config_host_org()
+    if agent_host:
+        return 'http://%s:12000' % _host(agent_host)
     value = (globals().get('EASYOPS_COLLECTOR_SERVICE_BACKEND_URL') or
              os.environ.get('EASYOPS_COLLECTOR_SERVICE_BACKEND_URL') or
              globals().get('EASYOPS_COLLECTOR_SERVICE_HOST') or
              os.environ.get('EASYOPS_COLLECTOR_SERVICE_HOST'))
     if value:
         return value
-    # 沙箱默认只注入 *_SERVICE_HOST；采集服务与 CMDB 共用集群地址，端口固定 12000。
     value = (globals().get('EASYOPS_CMDB_SERVICE_HOST') or
              os.environ.get('EASYOPS_CMDB_SERVICE_HOST'))
     if value:
-        host = _host(value)
-        return 'http://%s:12000' % host
-    raise RuntimeError('缺少采集服务内网地址（EASYOPS_COLLECTOR_SERVICE_HOST/EASYOPS_CMDB_SERVICE_HOST）')
+        return 'http://%s:12000' % _host(value)
+    raise RuntimeError('缺少 agent conf.yaml 或采集服务内网地址')
+
+
+_MONITOR_TARGET_LOGGED = False
 
 
 def _monitor_get(path, contract, query):
+    global _MONITOR_TARGET_LOGGED
     backend = _monitor_backend()
     headers = _headers()
     headers['giraffe-contract-name'] = contract
+    if not _MONITOR_TARGET_LOGGED:
+        LOGGER.info('monitor internal target host=%s port=%s org=%s', _log_text(_host(backend)), _port(backend, 12000), _log_text(headers.get('org')))
+        _MONITOR_TARGET_LOGGED = True
     return _http('GET', _host(backend), _port(backend, 12000), path,
                   query=query, headers=headers)
 
@@ -441,19 +495,40 @@ def put_str(key, value):
         LOGGER.info('%s: %s', _log_text(key), _log_text(value))
 
 
+def _write_csv(rows):
+    path = '/tmp/cmdb_monitor_status_%s.csv' % time.strftime('%Y%m%d_%H%M%S')
+    columns = ['modelName', 'instance', 'isMonitored', 'monitorJob', 'monitorStatus', 'error']
+    try:
+        stream = io.open(path, 'w', encoding='utf-8', newline='')
+        try:
+            stream.write(u'\ufeff')
+            stream.write(u','.join([u'"%s"' % column for column in columns]) + u'\n')
+            for row in rows:
+                values = []
+                for column in columns:
+                    value = _text(row.get(column, '')).replace(u'"', u'""').replace(u'\r', u' ').replace(u'\n', u' ')
+                    values.append(u'"%s"' % value)
+                stream.write(u','.join(values) + u'\n')
+        finally:
+            stream.close()
+    except Exception as error:
+        raise RuntimeError('写入 CSV 失败 path=%s: %s' % (path, _text(error)))
+    return path
+
+
 def main():
     models = _selected_models()
     all_rows = []
     task_count = 0
-    limit_value = _input('instance_limit', '1000')
+    limit_value = _input('instance_limit', '0')
     try:
-        instance_limit = max(1, int(_text(limit_value)))
+        instance_limit = max(0, int(_text(limit_value)))
     except Exception:
-        raise ValueError('instance_limit 必须是正整数')
+        raise ValueError('instance_limit 必须是非负整数，0 表示全量')
     omitted = 0
     for model_id, model_name in models:
         instances = _search_instances(model_id)
-        if len(instances) > instance_limit:
+        if instance_limit and len(instances) > instance_limit:
             omitted += len(instances) - instance_limit
             LOGGER.warning('模型 %s 实例数=%d，按 instance_limit=%d 输出前 %d 行',
                            _log_text(model_id), len(instances), instance_limit, instance_limit)
@@ -496,13 +571,13 @@ def main():
                    'isMonitored': monitor, 'monitorJob': task_url, 'monitorStatus': state,
                    'error': error}
             all_rows.append(row)
-    for row in all_rows:
-        put_row('monitor_status', row)
+    csv_path = _write_csv(all_rows)
     LOGGER.info('完成采集：模型数=%d，实例行数=%d，监控任务数=%d，跳过实例=%d', len(models), len(all_rows), task_count, omitted)
-    summary = u'模型=%d，实例=%d，监控任务=%d，已监控=%d，失败/部分=%d，跳过=%d' % (
+    summary = u'模型=%d，实例=%d，监控任务=%d，已监控=%d，失败/部分=%d，跳过=%d，CSV=%s' % (
         len(models), len(all_rows), task_count,
         len([row for row in all_rows if row['isMonitored'] == u'是']),
-        len([row for row in all_rows if row['monitorStatus'] in (u'失败', u'部分成功')]), omitted)
+        len([row for row in all_rows if row['monitorStatus'] in (u'失败', u'部分成功')]), omitted, csv_path)
+    put_str('csv_path', csv_path)
     put_str('summary', summary)
     return 0
 

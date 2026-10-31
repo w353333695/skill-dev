@@ -1885,6 +1885,13 @@ api_behavior:
       条件注入：EASYOPS_ENCRYPT_KEY/IV（仅当工具有 encryptedString 输入；脚本 DecryptString 用）/ EASYOPS_SCHEDULER_ID+TRIGGER（仅定时调度触发）。
       agent 自取：EASYOPS_LOCAL_IP（本机 IP，从 sysconf.ini）/ EASYOPS_BASE_PATH（默认 /usr/local/easyops）。
       实操：拿本机 IP 用 $EASYOPS_LOCAL_IP；拿 org/user/token 用 $EASYOPS_ORG/$EASYOPS_USER/$EASYOPS_AUTHORIZATION_TOKEN；要 CMDB 实例作输入就在 inputs 定义 type:cmdbInstance 参数（平台按目标注入），别在脚本写 ${cmdb.xxx}。
+  agent_config_discovery:
+    rule: |
+      工具脚本需要调用内部 EasyOps API 时，IP 和 org 优先从 agent 配置文件读取，不要把部署 IP/org 写死，也不要只依赖执行器注入的 EASYOPS_ORG。
+      Linux 配置文件：/usr/local/easyops/agent/conf/conf.yaml；Windows 配置文件：C:\easyOps\agent\conf\conf.yaml。
+      读取路径：org 取 base.client_id；服务 IP 取 command.server_groups[0].hosts[0].ip，逗号分隔时取第一个地址。
+      代码可参考 hub/scripts/sync_instance_field.py 的 __get_host_and_org；工具脚本须自包含，优先使用 agent 已有 yaml 能力，缺少 yaml 时提供最小文本解析兜底。
+      读取失败时才回退 EASYOPS_* 注入变量；内部请求的 Host/org 必须与 agent 配置保持一致，避免 agent 在 A 环境执行却把请求发到 B 环境。
   tool_param_injection:
     rule: |
       ⚠️变量注入形态纠偏（2026-08-26 fintech 工具平台真跑实测，关键）：
