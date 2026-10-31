@@ -498,7 +498,7 @@ def put_str(key, value):
 
 def _write_csv(rows):
     path = '/tmp/cmdb_monitor_status_%s.csv' % time.strftime('%Y%m%d_%H%M%S')
-    columns = ['modelName', 'instance', 'isMonitored', 'monitorJob', 'monitorStatus', 'error']
+    columns = ['modelName', 'ip', 'instance', 'isMonitored', 'monitorJob', 'monitorStatus', 'error']
     try:
         stream = io.open(path, 'w', encoding='utf-8', newline='')
         try:
@@ -568,7 +568,7 @@ def main():
                 state = u'失败' if u'失败' in uniq else (u'部分成功' if u'部分成功' in uniq or len(uniq) > 1 else (u'成功' if u'成功' in uniq else u'未知'))
                 error = '; '.join(x for x in errors if x)
                 task_url = _job_url(_job_id(matched[0]))
-            row = {'modelName': model_name, 'instance': _instance_url(model_id, instance_id),
+            row = {'modelName': model_name, 'ip': _text(instance.get('ip') or ''), 'instance': _instance_url(model_id, instance_id),
                    'isMonitored': monitor, 'monitorJob': task_url, 'monitorStatus': state,
                    'error': error}
             all_rows.append(row)
