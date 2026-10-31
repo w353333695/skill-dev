@@ -769,7 +769,7 @@ items:
     name: CMDB模型监控状态检查
     category: scripts
     files: [tools/monitor_status_check.py]
-    version: "1.1.10"
+    version: "1.1.12"
     history:
       - {ver: "1.0.0", date: "2026-10-30", change: "注册 AutoOps 沙箱工具；输入 HOST 执行主机与 CMDB_MODEL@EASYOPS 模型多选，递归查询模型实例、监控任务和执行状态"}
       - {ver: "1.0.1", date: "2026-10-30", change: "修复 agent Python 2.7 中文 unicode 输出导致 PutRow/PutStr 失败；保留非阻塞错误并输出可诊断结果"}
@@ -783,8 +783,10 @@ items:
       - {ver: "1.1.8", date: "2026-10-31", change: "修复 Python 2 中文监控状态值匹配的 ASCII 解码异常；24环境全量验证1926/1926已监控"}
       - {ver: "1.1.9", date: "2026-10-31", change: "监控状态只采信任务详情中的实例级状态；任务 filter 仅判断覆盖关系"}
       - {ver: "1.1.10", date: "2026-10-31", change: "实例与监控任务 URL 未注入前端地址时改用 agent conf.yaml 内网 IP，避免生成127.0.0.1链接"}
+      - {ver: "1.1.11", date: "2026-10-31", change: "修复 HTTPS 网关调用与采集器 UUID 回退，解析任务状态接口返回的 lastErr/status"}
+      - {ver: "1.1.12", date: "2026-10-31", change: "沙箱无前端 Cookie 时优先走 collector_service:8125 内网 GetStatus，实例级状态不再因 401 丢失"}
     scenario: 查询指定 CMDB 模型（父模型自动展开子模型）及实例是否配置监控、所属监控任务、实例级监控状态和实际报错
-    notes: "AutoOps toolId=0d0a4e02b4c60aaab64b1c8510d37423；最新版本 v1.1.10（以线上 tool version 列表为准）；sandboxRun=true；E2E 使用 HOST=6536dc5d1e0ad、BASE_ASSET@ONEMODEL=6536dc5d2576d。监控任务 filter.instances.type=all 仅用于判断覆盖，实例级状态来自任务详情/状态接口；24环境任务202610_task18e37a8a109dffcef49d 验证：实例1926、监控任务1、已监控1926、失败/部分0、跳过0。工具执行历史需 needNotify=\"true\"，URL=${EASYOPS_AUTOOPS_FRONTEND_URL}/next/tool/task/{execId}；最近验证历史可打开 https://192.168.110.24/next/tool/task/202610_task18e37a8a109dffcef49d。CSV由agent写入 /tmp。"
+    notes: "AutoOps toolId=0d0a4e02b4c60aaab64b1c8510d37423；最新版本 v1.1.12（以线上 tool version 列表为准）；sandboxRun=true；E2E 使用 HOST=6536dc5d1e0ad、BASE_ASSET@ONEMODEL=6536dc5d2576d。监控任务 filter.instances.type=all 仅用于判断覆盖，实例级状态来自任务详情/状态接口（优先 collector_service:8125 POST /v1/job_status/get，需 configId/list[{instanceId,uuid},sampler]；uuid 优先任务实例采集器 UUID，缺失时用任务 pluginId）；24环境任务202610_task18e37a8a109dffcef49d 验证：实例1926、监控任务1、已监控1926、失败/部分0、跳过0。工具执行历史需 needNotify=\"true\"，URL=${EASYOPS_AUTOOPS_FRONTEND_URL}/next/tool/task/{execId}；最近验证历史可打开 https://192.168.110.24/next/tool/task/202610_task18e37a8a109dffcef49d。CSV由agent写入 /tmp。"
     added: "2026-10-30"
 
   - id: native-client-install-simple-flow

@@ -19,6 +19,10 @@ import os
 import re
 import sys
 import time
+try:
+    import ssl
+except ImportError:
+    ssl = None
 
 try:
     import yaml
@@ -46,10 +50,12 @@ CMDB_PORT = 8079
 DEFAULT_PAGE_SIZE = 300
 MONITOR_BACKEND_PATH = '/api/v1/list-resource-monitor-job'
 MONITOR_INSTANCES_BACKEND_PATH = '/api/v1/list-resource-monitor-job-instances'
-STATUS_BACKEND_PATH = '/api/v1/job_status/get'
+STATUS_BACKEND_PATH = '/v1/job_status/get'
+STATUS_GATEWAY_PATH = '/next/api/gateway/collector_service.job_status.GetStatus/v1/job_status/get'
+STATUS_CONTRACT = 'easyops.api.collector_service.job_status.GetStatus'
 MONITOR_JOB_CONTRACT = 'easyops.api.collector_service.job.ListResourceMonitorJob'
 MONITOR_INSTANCES_CONTRACT = 'easyops.api.collector_service.job.ListJobInstances'
-STATUS_CONTRACT = 'easyops.api.collector_service.job_status.GetStatus'
+MONITOR_INSTANCES_GATEWAY_PATH = '/next/api/gateway/easyops.api.collector_service.job.ListJobInstances@1.0.6/api/v1/list-resource-monitor-job-instances'
 
 
 def _text(value):
@@ -146,15 +152,18 @@ def _base_url():
     for key in ('EASYOPS_CMDB_FRONTEND_URL', 'EASYOPS_OPENAPI_GATEWAY_URL', 'EASYOPS_COLLECTOR_FRONTEND_URL'):
         value = globals().get(key) or os.environ.get(key)
         if value:
-            return _text(value).rstrip('/')
+            # 前端入口会把 HTTP 重定向到 HTTPS；工具 HTTP 客户端不跟随
+            # 重定向，因此统一使用 HTTPS，避免网关请求被 301 截断。
+            value = _text(value).rstrip('/')
+            return re.sub(r'^http://', 'https://', value, flags=re.I)
     # 沙箱没有前端 URL 注入时，复用 agent conf.yaml 中的内网地址，避免生成 127.0.0.1 链接。
     try:
         agent_host, _ = _agent_config_host_org()
         if agent_host:
-            return 'http://%s' % _host(agent_host)
+            return 'https://%s' % _host(agent_host)
     except Exception as error:
         LOGGER.debug('resolve frontend base url from agent conf failed: %s', _log_text(error))
-    return 'http://127.0.0.1'
+    return 'https://127.0.0.1'
 
 
 _AGENT_CONFIG_CACHE = None
@@ -203,7 +212,35 @@ def _headers():
     cookie = globals().get('EASYOPS_COOKIE') or os.environ.get('EASYOPS_COOKIE') or os.environ.get('PHPSESSID')
     if cookie:
         headers['Cookie'] = _text(cookie) if 'PHPSESSID=' in _text(cookie) else 'PHPSESSID=' + _text(cookie)
+    token = globals().get('EASYOPS_AUTHORIZATION_TOKEN') or os.environ.get('EASYOPS_AUTHORIZATION_TOKEN')
+    if token:
+        token = _text(token)
+        headers['Authorization'] = token if token.lower().startswith('bearer ') else 'Bearer ' + token
     return headers
+
+
+def _status_backend():
+    agent_host, agent_org = _agent_config_host_org()
+    if agent_host:
+        return 'http://%s:8125' % _host(agent_host)
+    value = (globals().get('EASYOPS_COLLECTOR_SERVICE_LEGACY_URL') or
+             os.environ.get('EASYOPS_COLLECTOR_SERVICE_LEGACY_URL'))
+    if value:
+        return value
+    value = (globals().get('EASYOPS_COLLECTOR_SERVICE_BACKEND_URL') or
+             os.environ.get('EASYOPS_COLLECTOR_SERVICE_BACKEND_URL'))
+    if value:
+        return 'http://%s:8125' % _host(value)
+    raise RuntimeError('缺少 agent conf.yaml 或采集服务旧版内网地址')
+
+
+def _status_get(body):
+    backend = _status_backend()
+    headers = _headers()
+    headers['giraffe-contract-name'] = STATUS_CONTRACT
+    LOGGER.info('query status internal target host=%s port=%s', _log_text(_host(backend)), _port(backend, 8125))
+    return _http('POST', _host(backend), _port(backend, 8125), STATUS_BACKEND_PATH,
+                 body=body, headers=headers)
 
 
 def _monitor_backend():
@@ -244,13 +281,22 @@ def _port(value, default):
     return int(match.group(1)) if match else default
 
 
-def _http(method, host, port, path, body=None, query=None, headers=None, timeout=30):
+def _http(method, host, port, path, body=None, query=None, headers=None, timeout=30, scheme='http'):
     params = query or {}
     if params:
         encoded = urllib.urlencode(params) if IS_PY2 else _url_parse.urlencode(params)
         path += ('&' if '?' in path else '?') + encoded
     payload = json.dumps(body, ensure_ascii=False).encode('utf-8') if body is not None else None
-    conn = _http_client.HTTPConnection(host, port, timeout=timeout)
+    connection = _http_client.HTTPSConnection if scheme.lower() == 'https' else _http_client.HTTPConnection
+    if scheme.lower() == 'https' and ssl is not None:
+        try:
+            conn = connection(host, port, timeout=timeout,
+                              context=ssl._create_unverified_context())
+        except TypeError:
+            # Python 2.7 的 HTTPSConnection 可能不支持 context 参数。
+            conn = connection(host, port, timeout=timeout)
+    else:
+        conn = connection(host, port, timeout=timeout)
     try:
         conn.request(method, path, payload, headers or {})
         response = conn.getresponse()
@@ -282,7 +328,7 @@ def cmdb(method, path, body=None, query=None):
 
 
 def gateway(method, path, body=None, query=None):
-    return _http(method, _host(_base_url()), 80, path, body, query, _headers())
+    return _http(method, _host(_base_url()), 443, path, body, query, _headers(), scheme='https')
 
 
 def _data(response):
@@ -439,21 +485,59 @@ def _job_instances(job):
         return _list(_monitor_get(MONITOR_INSTANCES_BACKEND_PATH,
                                   MONITOR_INSTANCES_CONTRACT, query))
     except Exception as error:
-        LOGGER.debug('query job instances failed %s: %s', _log_text(job_id), _log_text(error))
-        return []
+        LOGGER.warning('query job instances internal failed job=%s: %s; fallback gateway',
+                       _log_text(job_id), _log_text(error))
+        try:
+            return _list(gateway('GET', MONITOR_INSTANCES_GATEWAY_PATH, query=query))
+        except Exception as gateway_error:
+            LOGGER.warning('query job instances gateway failed job=%s: %s',
+                           _log_text(job_id), _log_text(gateway_error))
+            return []
 
 
-def _status(job, instance_id):
+def _status_map(job, instance_ids, instance_mapping=None):
+    """批量读取任务详情中的实例状态，返回 instanceId -> {status,lastErr,...}。"""
     job_id = _job_id(job)
-    if not job_id:
+    if not job_id or not instance_ids:
         return {}
-    query = {'jobId': job_id, 'instanceId': instance_id}
+    instance_mapping = instance_mapping or {}
+    status_list = []
+    for value in instance_ids:
+        detail = instance_mapping.get(_text(value)) or {}
+        uuid = _extract_uuid(detail) or _extract_uuid(job)
+        status_list.append({'instanceId': _text(value), 'uuid': _text(uuid)})
+    uuid_count = len([item for item in status_list if item.get('uuid')])
+    if uuid_count == 0:
+        LOGGER.warning('query instance status job=%s has no collector uuid; status API may return no data',
+                       _log_text(job_id))
+    body = {'configId': _text(job_id), 'list': status_list, 'sampler': 'metric_sampler'}
     try:
-        data = _data(_monitor_get(STATUS_BACKEND_PATH, STATUS_CONTRACT, query))
-        return data if isinstance(data, dict) else {}
+        try:
+            response = _status_get(body)
+        except Exception as internal_error:
+            LOGGER.warning('query instance status internal failed job=%s: %s; fallback gateway',
+                           _log_text(job_id), _log_text(internal_error))
+            response = gateway('POST', STATUS_GATEWAY_PATH, body=body)
+        rows = _list(response)
+        result = {}
+        for row in rows:
+            if not isinstance(row, dict):
+                continue
+            instance_id = row.get('instanceId') or row.get('instance_id') or row.get('id')
+            if instance_id:
+                # 兼容网关把状态包在 collectStatus/status 对象中的返回格式。
+                nested = row.get('collectStatus') or row.get('collect_status')
+                if isinstance(nested, dict):
+                    merged = dict(nested)
+                    merged.update(row)
+                    row = merged
+                result[_text(instance_id)] = row
+        LOGGER.info('query instance status job=%s requested=%d returned=%d',
+                    _log_text(job_id), len(instance_ids), len(result))
+        return result
     except Exception as error:
-        LOGGER.debug('query status failed job=%s instance=%s: %s',
-                     _log_text(job_id), _log_text(instance_id), _log_text(error))
+        LOGGER.warning('query instance status failed job=%s requested=%d: %s',
+                       _log_text(job_id), len(instance_ids), _log_text(error))
         return {}
 
 
@@ -463,12 +547,19 @@ def _status_text(value):
         return u'成功'
     if any(x in text for x in (u'partial', u'部分', u'warning', u'warn')):
         return u'部分成功'
-    if any(x in text for x in (u'fail', u'error', u'failed', u'失败', u'异常')):
+    if any(x in text for x in (u'fail', u'error', u'failed', u'nodata', u'no data', u'失败', u'异常')):
         return u'失败'
     return u'未知'
 
 
 def _row_status(row):
+    if not isinstance(row, dict):
+        return _status_text(row)
+    nested = row.get('collectStatus') or row.get('collect_status')
+    if isinstance(nested, dict):
+        nested_status = _row_status(nested)
+        if nested_status != u'未知':
+            return nested_status
     for key in ('status', 'jobStatus', 'taskStatus', 'state', 'resultStatus', 'monitorStatus'):
         if row.get(key) not in (None, ''):
             return _status_text(row.get(key))
@@ -482,6 +573,44 @@ def _error_text(value):
                 return _text(value[key])
         return _safe_error(value)
     return _text(value)
+
+
+def _status_error(row):
+    if not isinstance(row, dict):
+        return _error_text(row)
+    nested = row.get('collectStatus') or row.get('collect_status')
+    if isinstance(nested, dict):
+        nested_error = _status_error(nested)
+        if nested_error:
+            return nested_error
+    return _error_text(row.get('lastErr') or row.get('last_err') or row.get('errMsg') or
+                       row.get('error') or row.get('errorMsg') or row.get('message'))
+
+
+def _extract_uuid(row):
+    """兼容任务实例、插件和状态接口的采集器 UUID 字段命名。"""
+    if not isinstance(row, dict):
+        return ''
+    for key in ('uuid', 'samplerUuid', 'samplerUUID', 'agentJobUuid', 'collectorInstanceId',
+                'collector_instance_id', '_uuid', 'pluginId'):
+        value = row.get(key)
+        if value not in (None, ''):
+            return _text(value)
+    collector = row.get('collector')
+    if isinstance(collector, dict):
+        for key in ('instanceId', 'instance_id', 'InstanceId', 'uuid', '_uuid'):
+            value = collector.get(key)
+            if value not in (None, ''):
+                return _text(value)
+        fields = collector.get('fields')
+        if isinstance(fields, dict):
+            for key in ('instanceId', 'InstanceId', 'uuid', '_uuid'):
+                value = fields.get(key)
+                if isinstance(value, dict):
+                    value = value.get('stringValue') or value.get('StringValue') or value.get('value')
+                if value not in (None, ''):
+                    return _text(value)
+    return ''
 
 
 def _job_instance_map(job):
@@ -564,7 +693,11 @@ def main():
             instances = instances[:instance_limit]
         jobs = _model_jobs(model_id)
         task_count += len(jobs)
-        maps = [(job, _job_instance_map(job)) for job in jobs]
+        instance_ids = [_text(instance.get('instanceId') or instance.get('id')) for instance in instances]
+        maps = []
+        for job in jobs:
+            mapping = _job_instance_map(job)
+            maps.append((job, mapping, _status_map(job, instance_ids, mapping)))
         for instance in instances:
             instance_id = _text(instance.get('instanceId') or instance.get('id'))
             if not instance_id:
@@ -572,31 +705,31 @@ def main():
             matched = []
             statuses = []
             errors = []
-            for job, mapping in maps:
+            for job, mapping, status_map in maps:
                 if instance_id in mapping:
                     detail = mapping[instance_id]
                     matched.append(job)
                     statuses.append(_row_status(detail))
-                    errors.append(_error_text(detail.get('errMsg') or detail.get('error') or detail.get('errorMsg')))
+                    errors.append(_status_error(detail))
                     continue
                 # 先按任务 filter 判断覆盖范围；明细接口暂时无返回时不能误判为未监控。
                 if _job_filter_matches(job, instance_id):
                     matched.append(job)
                     # 任务 filter 只能证明实例被覆盖，不能代表实例执行状态；状态必须来自任务详情/实例状态接口。
-                    status = _status(job, instance_id)
+                    status = status_map.get(instance_id)
                     if status:
                         statuses.append(_row_status(status))
-                        errors.append(_error_text(status.get('errMsg') or status.get('error') or status.get('message')))
+                        errors.append(_status_error(status))
                     else:
                         statuses.append(u'未知')
                         errors.append(u'任务覆盖该实例，但未返回实例级监控状态')
                     continue
                 # 非覆盖任务仍补查状态接口，兼容接口不返回 filter 的环境。
-                status = _status(job, instance_id)
+                status = status_map.get(instance_id)
                 if status:
                     matched.append(job)
                     statuses.append(_row_status(status))
-                    errors.append(_error_text(status.get('errMsg') or status.get('error') or status.get('message')))
+                    errors.append(_status_error(status))
             if not matched:
                 monitor = u'否'
                 state = u'未知'
