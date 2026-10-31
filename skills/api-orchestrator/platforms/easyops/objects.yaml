@@ -1973,8 +1973,8 @@ api_behavior:
       ⑤ agent 真跑（/tools/execution，见下）——编排侧全绿的包 agent 上连炸过三次
         （globals 注入/写路径/写权限），不可省。
       ── 3. agent 真跑（调试执行 API）──
-      · POST /tools/execution {toolId, vId: "$latest_development", needNotify: "false",
-        agents: ["<ip>"], inputs: {参数名: 值}}——🔴needNotify 必须传【字符串 'false'】
+      · POST /tools/execution {toolId, vId: "$latest_development", needNotify: "true",
+        agents: ["<ip>"], inputs: {参数名: 值}}——需要在工具历史中可见时传【字符串 'true'】；仅调试且不写历史才传 'false'。
         （传布尔 jsonpb 解析直接 100000：expects " or n, but found f）。
       · 轮询 GET /tools/execution/result/{execId}（路径形态 result/{id} 非 {id}/result）；
         每主机 stdout + 完整 traceback 在 data.agentData.{ip}.msg——报错排查看这里。

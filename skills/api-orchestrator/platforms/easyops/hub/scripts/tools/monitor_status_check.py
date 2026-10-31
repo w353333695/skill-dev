@@ -147,6 +147,13 @@ def _base_url():
         value = globals().get(key) or os.environ.get(key)
         if value:
             return _text(value).rstrip('/')
+    # 沙箱没有前端 URL 注入时，复用 agent conf.yaml 中的内网地址，避免生成 127.0.0.1 链接。
+    try:
+        agent_host, _ = _agent_config_host_org()
+        if agent_host:
+            return 'http://%s' % _host(agent_host)
+    except Exception as error:
+        LOGGER.debug('resolve frontend base url from agent conf failed: %s', _log_text(error))
     return 'http://127.0.0.1'
 
 
@@ -575,14 +582,14 @@ def main():
                 # 先按任务 filter 判断覆盖范围；明细接口暂时无返回时不能误判为未监控。
                 if _job_filter_matches(job, instance_id):
                     matched.append(job)
-                    statuses.append(_row_status(job))
-                    job_error = job.get('errMsg') or job.get('error') or job.get('errorMsg') or job.get('jobStatus')
-                    errors.append(_error_text(job_error))
-                    # 有覆盖关系后再尝试取实例级状态，成功时覆盖任务级未知状态。
+                    # 任务 filter 只能证明实例被覆盖，不能代表实例执行状态；状态必须来自任务详情/实例状态接口。
                     status = _status(job, instance_id)
                     if status:
-                        statuses[-1] = _row_status(status)
-                        errors[-1] = _error_text(status.get('errMsg') or status.get('error') or status.get('message'))
+                        statuses.append(_row_status(status))
+                        errors.append(_error_text(status.get('errMsg') or status.get('error') or status.get('message')))
+                    else:
+                        statuses.append(u'未知')
+                        errors.append(u'任务覆盖该实例，但未返回实例级监控状态')
                     continue
                 # 非覆盖任务仍补查状态接口，兼容接口不返回 filter 的环境。
                 status = _status(job, instance_id)

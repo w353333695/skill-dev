@@ -769,7 +769,7 @@ items:
     name: CMDB模型监控状态检查
     category: scripts
     files: [tools/monitor_status_check.py]
-    version: "1.1.8"
+    version: "1.1.10"
     history:
       - {ver: "1.0.0", date: "2026-10-30", change: "注册 AutoOps 沙箱工具；输入 HOST 执行主机与 CMDB_MODEL@EASYOPS 模型多选，递归查询模型实例、监控任务和执行状态"}
       - {ver: "1.0.1", date: "2026-10-30", change: "修复 agent Python 2.7 中文 unicode 输出导致 PutRow/PutStr 失败；保留非阻塞错误并输出可诊断结果"}
@@ -781,8 +781,10 @@ items:
       - {ver: "1.1.6", date: "2026-10-31", change: "CMDB_MODEL@EASYOPS 选择器显示与排序改用 objectName（模型名称）+ objectId；脚本名称解析同步修正"}
       - {ver: "1.1.7", date: "2026-10-31", change: "任务 filter=all 时按任务覆盖范围判断实例已监控，避免实例明细接口为空导致1926台主机全部误报未监控"}
       - {ver: "1.1.8", date: "2026-10-31", change: "修复 Python 2 中文监控状态值匹配的 ASCII 解码异常；24环境全量验证1926/1926已监控"}
-    scenario: 查询指定 CMDB 模型（父模型自动展开子模型）及实例是否配置监控、所属监控任务、监控状态和实际报错
-    notes: "AutoOps toolId=0d0a4e02b4c60aaab64b1c8510d37423；最新版本 v1.1.8（以线上 tool version 列表为准）；sandboxRun=true；E2E 使用 HOST=6536dc5d1e0ad、BASE_ASSET@ONEMODEL=6536dc5d2576d。监控任务 filter.instances.type=all 时按任务覆盖范围计入实例，实例级状态可覆盖任务级状态；Python 2 状态匹配使用 unicode 字面量。24环境任务202610_task18e379cc928e932cb430验证：实例1926、监控任务1、已监控1926、失败/部分0、跳过0。CSV由agent写入 /tmp。"
+      - {ver: "1.1.9", date: "2026-10-31", change: "监控状态只采信任务详情中的实例级状态；任务 filter 仅判断覆盖关系"}
+      - {ver: "1.1.10", date: "2026-10-31", change: "实例与监控任务 URL 未注入前端地址时改用 agent conf.yaml 内网 IP，避免生成127.0.0.1链接"}
+    scenario: 查询指定 CMDB 模型（父模型自动展开子模型）及实例是否配置监控、所属监控任务、实例级监控状态和实际报错
+    notes: "AutoOps toolId=0d0a4e02b4c60aaab64b1c8510d37423；最新版本 v1.1.10（以线上 tool version 列表为准）；sandboxRun=true；E2E 使用 HOST=6536dc5d1e0ad、BASE_ASSET@ONEMODEL=6536dc5d2576d。监控任务 filter.instances.type=all 仅用于判断覆盖，实例级状态来自任务详情/状态接口；24环境任务202610_task18e37a8a109dffcef49d 验证：实例1926、监控任务1、已监控1926、失败/部分0、跳过0。工具执行历史需 needNotify=\"true\"，URL=${EASYOPS_AUTOOPS_FRONTEND_URL}/next/tool/task/{execId}；最近验证历史可打开 https://192.168.110.24/next/tool/task/202610_task18e37a8a109dffcef49d。CSV由agent写入 /tmp。"
     added: "2026-10-30"
 
   - id: native-client-install-simple-flow

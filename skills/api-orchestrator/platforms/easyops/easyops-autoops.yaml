@@ -336,6 +336,25 @@ resources:
                 execId: { type: string, description: "执行 ID（轮询用）" }
                 taskId: { type: string, description: "easy_command 任务 ID" }
 
+      # ---------- 执行历史（GET /tools/result/list）----------
+      list_result:
+        description: "查询工具执行历史。tool_service 源码显示该接口转调 notify ListOperationLog，固定 system=tool、topic=task.run、targetId=toolId；执行请求必须 needNotify=true 才会写入操作日志，否则历史列表为空。"
+        method: GET
+        path: /tools/result/list
+        params:
+          startTime: { in: query, type: string, required: true, description: "开始时间，格式 YYYY-MM-DD HH:mm:ss" }
+          endTime: { in: query, type: string, description: "结束时间，格式 YYYY-MM-DD HH:mm:ss" }
+          toolId: { in: query, type: string, required: true, description: "工具 ID（32 位 hex）" }
+          vId: { in: query, type: string, description: "版本 ID（32 位 hex，可选）" }
+          page: { in: query, type: integer, description: "页码，默认 1" }
+          pageSize: { in: query, type: integer, description: "页大小" }
+        response:
+          type: object
+          description: "标准 wrapper；data.list 为执行历史，execId 即执行任务 ID。"
+          properties:
+            code: { type: integer }
+            data: { type: object, additional_properties: true }
+
       # ---------- 执行结果（GET /tools/execution/result/:execId）----------
       get_result:
         description: 取执行的完整结果（每主机的 outputs/status/exitStatus/msg）。执行完成后调它拿每台主机的 stdout/输出。

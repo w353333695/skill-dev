@@ -425,6 +425,7 @@ systems:
       rewrite_paths: "后端原始注册单数 /tool/:toolId，rewrite 中间件改写复数 /tools/:toolId——直连后端用复数即可命中（两边都挂 rewrite）。list/execution/lib 等本就是复数"
       create_version: "新建版本无独立端点：PUT /tools/:toolId 改 version 字段即派生新版本。⚠️(1) body **flat**（不要套 {tool:{}}）；(2) 派生版 envType=development、vName 默认=vId；(3) 响应只返 {toolId}（无新 vId）——须 tool_version.list 复查。场景3：get 当前 → flat body 改 inputs/content → update → version.list 复查"
       delete_semantics: "删除软删（置 delete_me=true，非物理删）。force=true（query 字符串 \"true\"）仅绕 ReadOnly。versionId 不填=删整个工具，填=只删该版本。'有实例不删模型'那层在被清理的 CMDB 侧，不在 tool_service"
+      execution_history: "工具执行历史由 tool_service GET /tools/result/list 转调 notify ListOperationLog，固定 system=tool、topic=task.run、targetId=toolId；POST /tools/execution 只有 needNotify=\"true\" 才写入操作日志。传 \"false\" 时任务仍可执行但不会出现在 notify.oplog 的 operation/log，也没有历史详情页。历史 URL=${EASYOPS_AUTOOPS_FRONTEND_URL}/next/tool/task/{execId}，示例 https://192.168.110.24/next/tool/task/202610_task18e379cc928e932cb430。"
       run_cmd_is_tool: "run_cmd 是预置工具非端点（toolId=e292a31864662200d85a6a72ec89854a，type=python，content=os.system(cmd)）。场景4 = tool.list 找 run_cmd 的 toolId → tool_execution.run（⚠️inputs 是 map；vId 用具体——run_cmd 只有 development 版本，$latest_production 报『工具版本不存在 100005』）→ 轮询 get_table/get_status。依赖：run_cmd 存在 + 目标主机 agent 在线 + easy_command（实测 172.30.0.232 agent 响应 success；outputs 空是 run_cmd 用 os.system 不回吐 stdout，非接入问题）"
       export_trap: "导出是 GET /tools/:toolId/export?versionId=<32hex>（⚠️GET 非 POST；参数名 versionId 非 vId，正则 ^[a-fA-F0-9]{32}$）。返回 tar.gz 二进制流——api-cli 无法存文件，走 Python SDK export_tool 流式下载"
       import_upsert: "导入是 upsert（toolId 存在→更新即加新版本；不存在→新建）。multipart——api-cli 不支持 formData，走 Python SDK import_tool 或 curl -F"
@@ -440,6 +441,7 @@ systems:
     acceptance_urls:
       tool_list:   "${EASYOPS_AUTOOPS_FRONTEND_URL}/next/tool/management?page=1&category=ITSM&display=card&pageSize=50&type=&q=cmdb"   # q 是后端 name 的别名（模糊匹配 name+memo）；category 含子类
       tool_detail: "${EASYOPS_AUTOOPS_FRONTEND_URL}/next/tool/management/{toolId}/detail?vId={vId}"   # toolId=32hex（≠CMDB instanceId）；vId 不填=最新版本
+      tool_execution_history: "${EASYOPS_AUTOOPS_FRONTEND_URL}/next/tool/task/{execId}"   # execId=POST /tools/execution 返回的执行 ID；示例 /next/tool/task/202610_task18e379cc928e932cb430
       flow_list:   "${EASYOPS_AUTOOPS_FRONTEND_URL}/next/flow/management"
       flow_detail: "${EASYOPS_AUTOOPS_FRONTEND_URL}/next/flow/{flowId}/detail?version={version}"
       flow_package_format: "formats/flow-kit/package-format.yaml"
