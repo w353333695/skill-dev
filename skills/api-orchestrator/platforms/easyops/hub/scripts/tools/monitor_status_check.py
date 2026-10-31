@@ -353,7 +353,7 @@ def _search_instances(object_id, query=None):
     page = 1
     while True:
         body = {'page': page, 'page_size': DEFAULT_PAGE_SIZE,
-                'fields': ['instanceId', 'name', 'deviceName', 'objectId', 'modelId', 'modelName', 'ip', 'status'],
+                'fields': ['instanceId', '_uuid', 'name', 'deviceName', 'objectId', 'modelId', 'modelName', 'ip', 'status'],
                 'query': query or {}, 'ignore_missing_field_error': True}
         response = cmdb('POST', '/v3/object/%s/instance/_search' % object_id, body)
         batch = _list(response)
@@ -592,7 +592,7 @@ def _extract_uuid(row):
     if not isinstance(row, dict):
         return ''
     for key in ('uuid', 'samplerUuid', 'samplerUUID', 'agentJobUuid', 'collectorInstanceId',
-                'collector_instance_id', '_uuid', 'pluginId'):
+                'collector_instance_id', '_uuid'):
         value = row.get(key)
         if value not in (None, ''):
             return _text(value)
@@ -695,8 +695,17 @@ def main():
         task_count += len(jobs)
         instance_ids = [_text(instance.get('instanceId') or instance.get('id')) for instance in instances]
         maps = []
+        instance_mapping = {}
+        for instance in instances:
+            instance_id = _text(instance.get('instanceId') or instance.get('id'))
+            if instance_id:
+                instance_mapping[instance_id] = instance
         for job in jobs:
-            mapping = _job_instance_map(job)
+            # 状态接口要求采集器实例 UUID；优先使用 CMDB 实例的 _uuid，
+            # 任务详情返回的 collector UUID 仅作为补充，不能用 pluginId 代替。
+            job_mapping = _job_instance_map(job)
+            mapping = dict(instance_mapping)
+            mapping.update(job_mapping)
             maps.append((job, mapping, _status_map(job, instance_ids, mapping)))
         for instance in instances:
             instance_id = _text(instance.get('instanceId') or instance.get('id'))
