@@ -447,7 +447,7 @@ items:
     name: 机房设备进出及上下电服务
     category: itsm-service
     files: [机房设备进出及上下电_v1.0.9.zip]
-    version: "1.1.5"
+    version: "1.1.6"
     history:
       - {date: "2026-09-29", change: 初版入库（.26 导出，onlyCheck 预检通过；含表单1.0.3+流程1.0.4+三脚本工具随包）}
       - {date: "2026-09-29", change: "1.0.5：表单1.0.4——上下电设备 scriptInputs 配静态值（🔴空数组前端不触发，已立规）+ 条件显示同设备信息（是否上下架设备==0）"}
@@ -778,8 +778,9 @@ items:
       - {ver: "1.1.3", date: "2026-10-31", change: "切回 192.168.110.24/org=1888，使用 agent 配置自动定位内部 API；HOST 与 BASE_ASSET@ONEMODEL 全量执行验证"}
       - {ver: "1.1.4", date: "2026-10-31", change: "改为沙箱自动选择内部 agent；移除 @agents 与 instance_limit 入参；仅保留 CMDB 模型选择，全量写入 CSV"}
       - {ver: "1.1.5", date: "2026-10-31", change: "CSV 增加 ip 列，取 CMDB 实例 ip 属性"}
+      - {ver: "1.1.6", date: "2026-10-31", change: "CMDB_MODEL@EASYOPS 选择器显示与排序改用 objectName（模型名称）+ objectId；脚本名称解析同步修正"}
     scenario: 查询指定 CMDB 模型（父模型自动展开子模型）及实例是否配置监控、所属监控任务、监控状态和实际报错
-    notes: "AutoOps toolId=0d0a4e02b4c60aaab64b1c8510d37423；最新版本 v1.1.5（以线上 tool version 列表为准）；sandboxRun=true；E2E 使用 HOST=6536dc5d1e0ad、BASE_ASSET@ONEMODEL=6536dc5d2576d。监控网关接口在无会话的 agent 沙箱中可能返回 401，脚本将该错误按实例结果保留，不阻断其他模型/实例。"
+    notes: "AutoOps toolId=0d0a4e02b4c60aaab64b1c8510d37423；最新版本 v1.1.6（以线上 tool version 列表为准）；sandboxRun=true；E2E 使用 HOST=6536dc5d1e0ad、BASE_ASSET@ONEMODEL=6536dc5d2576d。监控网关接口在无会话的 agent 沙箱中可能返回 401，脚本将该错误按实例结果保留，不阻断其他模型/实例。"
     added: "2026-10-30"
 
   - id: native-client-install-simple-flow

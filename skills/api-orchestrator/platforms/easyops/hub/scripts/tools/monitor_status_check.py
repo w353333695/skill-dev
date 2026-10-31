@@ -317,7 +317,7 @@ def _model_name(model_id):
     try:
         response = cmdb('GET', '/object/%s' % model_id)
         data = _data(response) or {}
-        return data.get('name') or data.get('displayName') or data.get('objectName') or model_id
+        return data.get('objectName') or data.get('name') or data.get('displayName') or model_id
     except Exception:
         return model_id
 
@@ -357,7 +357,7 @@ def _selected_models():
             row = rows[0]
             model_id = row.get('objectId') or row.get('modelId') or row.get('object_id') or row.get('id')
             if model_id:
-                model_rows.append((model_id, row.get('name') or row.get('displayName') or model_id))
+                model_rows.append((model_id, row.get('objectName') or row.get('name') or row.get('displayName') or model_id))
         elif '@' in instance_id:
             direct.append(instance_id)
     if not model_rows and direct:
