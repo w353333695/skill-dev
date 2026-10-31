@@ -374,6 +374,27 @@ def _selected_models():
     return models
 
 
+def _job_filter_matches(job, instance_id):
+    """按监控任务 filter 判断实例是否被任务覆盖，兼容 all/constant 两种形态。"""
+    raw = job.get('filter')
+    spec = _json_load(raw, {}) if isinstance(raw, (str, unicode) if IS_PY2 else (str,)) else (raw or {})
+    if not isinstance(spec, dict):
+        return False
+    instances = spec.get('instances') or {}
+    mode = instances.get('type') or instances.get('extraType')
+    query = instances.get('query') or {}
+    if mode == 'all':
+        return True
+    values = query.get('instanceId') if isinstance(query, dict) else None
+    if isinstance(values, dict):
+        values = values.get('$in') or values.get('in')
+    if isinstance(values, (list, tuple)):
+        return _text(instance_id) in [_text(value) for value in values]
+    if values not in (None, ''):
+        return _text(instance_id) == _text(values)
+    return False
+
+
 def _job_id(job):
     return job.get('jobId') or job.get('instanceId') or job.get('id') or job.get('configId')
 
@@ -431,11 +452,11 @@ def _status(job, instance_id):
 
 def _status_text(value):
     text = _text(value).lower()
-    if any(x in text for x in ('success', 'succeed', 'successful', '正常', '成功', 'ok', 'done')):
+    if any(x in text for x in (u'success', u'succeed', u'successful', u'正常', u'成功', u'ok', u'done')):
         return u'成功'
-    if any(x in text for x in ('partial', '部分', 'warning', 'warn')):
+    if any(x in text for x in (u'partial', u'部分', u'warning', u'warn')):
         return u'部分成功'
-    if any(x in text for x in ('fail', 'error', 'failed', '失败', '异常')):
+    if any(x in text for x in (u'fail', u'error', u'failed', u'失败', u'异常')):
         return u'失败'
     return u'未知'
 
@@ -551,7 +572,19 @@ def main():
                     statuses.append(_row_status(detail))
                     errors.append(_error_text(detail.get('errMsg') or detail.get('error') or detail.get('errorMsg')))
                     continue
-                # 任务实例接口有的环境只返回任务级状态，再补查状态接口。
+                # 先按任务 filter 判断覆盖范围；明细接口暂时无返回时不能误判为未监控。
+                if _job_filter_matches(job, instance_id):
+                    matched.append(job)
+                    statuses.append(_row_status(job))
+                    job_error = job.get('errMsg') or job.get('error') or job.get('errorMsg') or job.get('jobStatus')
+                    errors.append(_error_text(job_error))
+                    # 有覆盖关系后再尝试取实例级状态，成功时覆盖任务级未知状态。
+                    status = _status(job, instance_id)
+                    if status:
+                        statuses[-1] = _row_status(status)
+                        errors[-1] = _error_text(status.get('errMsg') or status.get('error') or status.get('message'))
+                    continue
+                # 非覆盖任务仍补查状态接口，兼容接口不返回 filter 的环境。
                 status = _status(job, instance_id)
                 if status:
                     matched.append(job)
