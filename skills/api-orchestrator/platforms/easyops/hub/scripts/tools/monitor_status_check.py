@@ -704,9 +704,11 @@ def main():
             # 状态接口要求采集器实例 UUID；优先使用 CMDB 实例的 _uuid，
             # 任务详情返回的 collector UUID 仅作为补充，不能用 pluginId 代替。
             job_mapping = _job_instance_map(job)
-            mapping = dict(instance_mapping)
-            mapping.update(job_mapping)
-            maps.append((job, mapping, _status_map(job, instance_ids, mapping)))
+            status_mapping = dict(instance_mapping)
+            status_mapping.update(job_mapping)
+            # job_mapping 只用于判断任务实例是否命中；status_mapping 仅供
+            # 状态接口提取 UUID，不能把 CMDB 的业务 status 当成监控状态。
+            maps.append((job, job_mapping, _status_map(job, instance_ids, status_mapping)))
         for instance in instances:
             instance_id = _text(instance.get('instanceId') or instance.get('id'))
             if not instance_id:
