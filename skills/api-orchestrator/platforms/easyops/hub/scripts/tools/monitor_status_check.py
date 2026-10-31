@@ -2,8 +2,9 @@
 """EasyOps 工具：查看 CMDB 模型监控覆盖和最近执行状态。
 
 输入：
-    @agents：HOST cmdbInstances（工具执行目标，不参与统计）
     cmdb_models：CMDB_MODEL@EASYOPS 多选，选中模型实例；也兼容直接传模型 ID
+
+沙箱执行：不需要 @agents，平台自动选择内部 agent。
 
 输出：
     CSV 文件：模型名称、实例、是否监控、所属监控任务、监控状态、报错；仅返回 CSV 绝对路径和汇总。
