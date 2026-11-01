@@ -16,6 +16,18 @@ deployment: demo
 # 某领域确需例外时，在 exceptions 里声明（例外只对声明领域生效，不泛化）。
 # =============================================================================
 platform_conventions:
+  internal_api_requests:
+    rule: |
+      EasyOps 工具、脚本和套件的接口调用只能使用 OpenAPI 或内部 API，禁止请求 /next/api/gateway 前端接口，也禁止将其作为失败回退。
+      内部 API 请求一律仿照 platforms/easyops/sdk/easyops_client.py（EasyOpsClient internal 模式）构建：
+      base_url 为目标组件真实地址与端口，path 使用组件原生 API 路径；JSON body 编码为 UTF-8，query 独立编码。
+      headers 按 _internal_headers 构建：Content-Type=application/json，Host=admin.easyops.local，org/user 转为字符串。
+      org 与服务 IP 优先读 agent conf.yaml（base.client_id、command.server_groups[0].hosts[0].ip）；失败才回退显式 EASYOPS_* 配置，缺失必须报错，不默认连 127.0.0.1。
+      内部 API 不依赖前端 Cookie/PHPSESSID；仅特定服务明确需要时才传鉴权。12000 契约路由按接口设置 giraffe-contract-name，不能给所有接口套同一契约。
+      OpenAPI 使用 SDK 的 AK/SK 签名协议，不能把前端网关 Cookie 请求称为 OpenAPI。
+      单文件 agent 脚本保持自包含、Python 2/3 兼容，可按 SDK 语义实现标准库客户端；禁止强制依赖项目 SDK 或 requests。
+      所有接口检查 HTTP 状态与业务 code，日志带函数标记及脱敏 traceback；CSV 采集参数按任务保留 collectorParams/collectParams 等配置，敏感字段及 isEncrypt/isFromSecret 参数值脱敏。
+    source: "2026-11-01 用户要求；SDK _internal_headers/call 与 agent_config_discovery 约定"
   collection_preflight:
     rule: |
       所有采集、监控、巡检类脚本与套件开发，远程批量读取前必须先做一次低成本、只读的协议级连通性/认证检查。

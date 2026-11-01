@@ -1887,6 +1887,7 @@ api_behavior:
       实操：拿本机 IP 用 $EASYOPS_LOCAL_IP；拿 org/user/token 用 $EASYOPS_ORG/$EASYOPS_USER/$EASYOPS_AUTHORIZATION_TOKEN；要 CMDB 实例作输入就在 inputs 定义 type:cmdbInstance 参数（平台按目标注入），别在脚本写 ${cmdb.xxx}。
   agent_config_discovery:
     rule: |
+      内部请求统一仿照 sdk/easyops_client.py 的 internal 模式构建；仅允许内部 API 或 AK/SK OpenAPI，不允许 /next/api/gateway 前端接口及其 fallback（详见 systems.yaml platform_conventions.internal_api_requests）。
       工具脚本需要调用内部 EasyOps API 时，IP 和 org 优先从 agent 配置文件读取，不要把部署 IP/org 写死，也不要只依赖执行器注入的 EASYOPS_ORG。
       Linux 配置文件：/usr/local/easyops/agent/conf/conf.yaml；Windows 配置文件：C:\easyOps\agent\conf\conf.yaml。
       读取路径：org 取 base.client_id；服务 IP 取 command.server_groups[0].hosts[0].ip，逗号分隔时取第一个地址。

@@ -7,7 +7,7 @@
 沙箱执行：不需要 @agents，平台自动选择内部 agent。
 
 输出：
-    CSV 文件：模型名称、实例、是否监控、所属监控任务、监控状态、报错；仅返回 CSV 绝对路径和汇总。
+    CSV 文件：模型名称、实例、是否监控、所属监控任务、监控状态、报错、采集参数（敏感值脱敏）；仅返回 CSV 绝对路径和汇总。
 
 脚本只读调用 CMDB、资源监控任务和任务状态接口；沙箱运行不需要主机文件权限。
 """
@@ -19,6 +19,7 @@ import os
 import re
 import sys
 import time
+import traceback
 try:
     import ssl
 except ImportError:
@@ -51,11 +52,9 @@ DEFAULT_PAGE_SIZE = 300
 MONITOR_BACKEND_PATH = '/api/v1/list-resource-monitor-job'
 MONITOR_INSTANCES_BACKEND_PATH = '/api/v1/list-resource-monitor-job-instances'
 STATUS_BACKEND_PATH = '/v1/job_status/get'
-STATUS_GATEWAY_PATH = '/next/api/gateway/collector_service.job_status.GetStatus/v1/job_status/get'
 STATUS_CONTRACT = 'easyops.api.collector_service.job_status.GetStatus'
 MONITOR_JOB_CONTRACT = 'easyops.api.collector_service.job.ListResourceMonitorJob'
 MONITOR_INSTANCES_CONTRACT = 'easyops.api.collector_service.job.ListJobInstances'
-MONITOR_INSTANCES_GATEWAY_PATH = '/next/api/gateway/easyops.api.collector_service.job.ListJobInstances@1.0.6/api/v1/list-resource-monitor-job-instances'
 
 
 def _text(value):
@@ -206,16 +205,11 @@ def _agent_config_host_org():
 
 def _headers():
     agent_host, agent_org = _agent_config_host_org()
-    org = agent_org or globals().get('EASYOPS_ORG') or os.environ.get('EASYOPS_ORG') or '1888'
+    org = agent_org or globals().get('EASYOPS_ORG') or os.environ.get('EASYOPS_ORG')
+    if org in (None, ''):
+        raise RuntimeError('缺少 agent 配置或 EASYOPS_ORG，无法构建内部请求')
     user = globals().get('EASYOPS_USER') or os.environ.get('EASYOPS_USER') or 'easyops'
     headers = {'Content-Type': 'application/json', 'org': _text(org), 'user': _text(user), 'Host': 'admin.easyops.local'}
-    cookie = globals().get('EASYOPS_COOKIE') or os.environ.get('EASYOPS_COOKIE') or os.environ.get('PHPSESSID')
-    if cookie:
-        headers['Cookie'] = _text(cookie) if 'PHPSESSID=' in _text(cookie) else 'PHPSESSID=' + _text(cookie)
-    token = globals().get('EASYOPS_AUTHORIZATION_TOKEN') or os.environ.get('EASYOPS_AUTHORIZATION_TOKEN')
-    if token:
-        token = _text(token)
-        headers['Authorization'] = token if token.lower().startswith('bearer ') else 'Bearer ' + token
     return headers
 
 
@@ -236,11 +230,9 @@ def _status_backend():
 
 def _status_get(body):
     backend = _status_backend()
-    headers = _headers()
-    headers['giraffe-contract-name'] = STATUS_CONTRACT
     LOGGER.info('query status internal target host=%s port=%s', _log_text(_host(backend)), _port(backend, 8125))
-    return _http('POST', _host(backend), _port(backend, 8125), STATUS_BACKEND_PATH,
-                 body=body, headers=headers)
+    return _internal_request('POST', backend, STATUS_BACKEND_PATH, body=body,
+                             contract=STATUS_CONTRACT)
 
 
 def _monitor_backend():
@@ -271,8 +263,7 @@ def _monitor_get(path, contract, query):
     if not _MONITOR_TARGET_LOGGED:
         LOGGER.info('monitor internal target host=%s port=%s org=%s', _log_text(_host(backend)), _port(backend, 12000), _log_text(headers.get('org')))
         _MONITOR_TARGET_LOGGED = True
-    return _http('GET', _host(backend), _port(backend, 12000), path,
-                  query=query, headers=headers)
+    return _internal_request('GET', backend, path, query=query, contract=contract)
 
 
 def _port(value, default):
@@ -322,13 +313,28 @@ def _safe_error(data):
     return _text(data)[:1000]
 
 
+def _internal_request(method, base_url, path, body=None, query=None, contract=None):
+    if not base_url or not re.match(r'^https?://', _text(base_url)):
+        raise RuntimeError('内部 API 缺少有效的服务地址')
+    if path.startswith('/next/'):
+        raise ValueError('内部 API 禁止使用前端网关路径')
+    headers = _headers()
+    if contract:
+        headers['giraffe-contract-name'] = contract
+    scheme = 'https' if _text(base_url).lower().startswith('https://') else 'http'
+    return _http(method, _host(base_url), _port(base_url, 443 if scheme == 'https' else 80),
+                 path, body=body, query=query, headers=headers, scheme=scheme)
+
+
 def cmdb(method, path, body=None, query=None):
-    base = globals().get('EASYOPS_CMDB_BACKEND_URL') or os.environ.get('EASYOPS_CMDB_BACKEND_URL')
-    return _http(method, _host(base), CMDB_PORT, path, body, query, _headers())
-
-
-def gateway(method, path, body=None, query=None):
-    return _http(method, _host(_base_url()), 443, path, body, query, _headers(), scheme='https')
+    agent_host, agent_org = _agent_config_host_org()
+    base = ('http://%s:%s' % (_host(agent_host), CMDB_PORT)) if agent_host else (
+        globals().get('EASYOPS_CMDB_BACKEND_URL') or os.environ.get('EASYOPS_CMDB_BACKEND_URL'))
+    if not base:
+        injected = globals().get('EASYOPS_CMDB_SERVICE_HOST') or os.environ.get('EASYOPS_CMDB_SERVICE_HOST')
+        if injected:
+            base = 'http://%s:%s' % (_host(injected), _port(injected, CMDB_PORT))
+    return _internal_request(method, base, path, body=body, query=query)
 
 
 def _data(response):
@@ -478,21 +484,25 @@ def _job_instances(job):
     job_id = _job_id(job)
     if not job_id:
         return []
-    query = {'page': 1, 'pageSize': DEFAULT_PAGE_SIZE, 'statusFilter': '',
-             'configId': job_id, 'jobId': job_id, 'objectId': '',
-             'agentId': '', 'startTime': '', 'endTime': ''}
+    rows = []
+    page = 1
     try:
-        return _list(_monitor_get(MONITOR_INSTANCES_BACKEND_PATH,
-                                  MONITOR_INSTANCES_CONTRACT, query))
-    except Exception as error:
-        LOGGER.warning('query job instances internal failed job=%s: %s; fallback gateway',
-                       _log_text(job_id), _log_text(error))
-        try:
-            return _list(gateway('GET', MONITOR_INSTANCES_GATEWAY_PATH, query=query))
-        except Exception as gateway_error:
-            LOGGER.warning('query job instances gateway failed job=%s: %s',
-                           _log_text(job_id), _log_text(gateway_error))
-            return []
+        while True:
+            query = {'page': page, 'pageSize': DEFAULT_PAGE_SIZE, 'jobId': job_id,
+                     'status': '', 'showKey': ''}
+            response = _internal_request('GET', _status_backend(), '/api/v1/list-job-instances',
+                                         query=query, contract=MONITOR_INSTANCES_CONTRACT)
+            batch = _list(response)
+            rows.extend(batch)
+            data = _data(response)
+            total = data.get('total') if isinstance(data, dict) else None
+            if not batch or len(batch) < DEFAULT_PAGE_SIZE or (total is not None and len(rows) >= int(total)):
+                return rows
+            page += 1
+    except Exception:
+        LOGGER.warning('[_job_instances] 查询任务实例失败 job=%s，继续查询实例状态: %s',
+                       _log_text(job_id), _log_text(traceback.format_exc()))
+        return rows
 
 
 def _status_map(job, instance_ids, instance_mapping=None):
@@ -512,12 +522,7 @@ def _status_map(job, instance_ids, instance_mapping=None):
                        _log_text(job_id))
     body = {'configId': _text(job_id), 'list': status_list, 'sampler': 'metric_sampler'}
     try:
-        try:
-            response = _status_get(body)
-        except Exception as internal_error:
-            LOGGER.warning('query instance status internal failed job=%s: %s; fallback gateway',
-                           _log_text(job_id), _log_text(internal_error))
-            response = gateway('POST', STATUS_GATEWAY_PATH, body=body)
+        response = _status_get(body)
         rows = _list(response)
         result = {}
         for row in rows:
@@ -536,8 +541,8 @@ def _status_map(job, instance_ids, instance_mapping=None):
                     _log_text(job_id), len(instance_ids), len(result))
         return result
     except Exception as error:
-        LOGGER.warning('query instance status failed job=%s requested=%d: %s',
-                       _log_text(job_id), len(instance_ids), _log_text(error))
+        LOGGER.warning('[_status_map] 查询实例状态失败 job=%s requested=%d: %s',
+                       _log_text(job_id), len(instance_ids), _log_text(traceback.format_exc()))
         return {}
 
 
@@ -653,9 +658,37 @@ def put_str(key, value):
         LOGGER.info('%s: %s', _log_text(key), _log_text(value))
 
 
+def _redact_params(value):
+    if isinstance(value, list):
+        return [_redact_params(item) for item in value]
+    if not isinstance(value, dict):
+        return value
+    sensitive = re.compile(r'password|passwd|community|authkey|privkey|token|secret|credential|cookie|authorization|privatekey|accesskey', re.I)
+    encrypted = value.get('isEncrypt') in (True, 'true', 'True', 1) or value.get('isFromSecret') in (True, 'true', 'True', 1)
+    named_secret = sensitive.search(_text(value.get('key') or value.get('name') or ''))
+    result = {}
+    for key, item in value.items():
+        if sensitive.search(_text(key)) or ((encrypted or named_secret) and key in ('value', 'paramValue', 'default')):
+            result[key] = '******'
+        else:
+            result[key] = _redact_params(item)
+    return result
+
+
+def _collection_params(jobs):
+    result = []
+    for job in jobs:
+        entry = {'jobId': _job_id(job), 'jobName': job.get('jobName') or ''}
+        for key in ('collectAgent', 'collectorParams', 'collectParams', 'params'):
+            if key in job:
+                entry[key] = _redact_params(job[key])
+        result.append(entry)
+    return json.dumps(result, ensure_ascii=False, sort_keys=True)
+
+
 def _write_csv(rows):
     path = '/tmp/cmdb_monitor_status_%s.csv' % time.strftime('%Y%m%d_%H%M%S')
-    columns = ['modelName', 'ip', 'instance', 'isMonitored', 'monitorJob', 'monitorStatus', 'error']
+    columns = ['modelName', 'ip', 'instance', 'isMonitored', 'monitorJob', 'monitorStatus', 'error', 'collectionParams']
     try:
         stream = io.open(path, 'w', encoding='utf-8', newline='')
         try:
@@ -718,7 +751,7 @@ def main():
             errors = []
             for job, mapping, status_map in maps:
                 if instance_id in mapping:
-                    detail = mapping[instance_id]
+                    detail = status_map.get(instance_id) or mapping[instance_id]
                     matched.append(job)
                     statuses.append(_row_status(detail))
                     errors.append(_status_error(detail))
@@ -754,7 +787,7 @@ def main():
                 task_url = _job_url(_job_id(matched[0]))
             row = {'modelName': model_name, 'ip': _text(instance.get('ip') or ''), 'instance': _instance_url(model_id, instance_id),
                    'isMonitored': monitor, 'monitorJob': task_url, 'monitorStatus': state,
-                   'error': error}
+                   'error': error, 'collectionParams': _collection_params(matched)}
             all_rows.append(row)
     csv_path = _write_csv(all_rows)
     LOGGER.info('完成采集：模型数=%d，实例行数=%d，监控任务数=%d，跳过实例=%d', len(models), len(all_rows), task_count, omitted)
