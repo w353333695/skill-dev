@@ -769,7 +769,7 @@ items:
     name: CMDB模型监控状态检查
     category: scripts
     files: [tools/monitor_status_check.py]
-    version: "1.1.16"
+    version: "1.1.17"
     history:
       - {ver: "1.0.0", date: "2026-10-30", change: "注册 AutoOps 沙箱工具；输入 HOST 执行主机与 CMDB_MODEL@EASYOPS 模型多选，递归查询模型实例、监控任务和执行状态"}
       - {ver: "1.0.1", date: "2026-10-30", change: "修复 agent Python 2.7 中文 unicode 输出导致 PutRow/PutStr 失败；保留非阻塞错误并输出可诊断结果"}
@@ -789,19 +789,21 @@ items:
       - {ver: "1.1.14", date: "2026-10-31", change: "修复状态映射覆盖：分离 CMDB 实例字段与任务实例映射，避免业务 status=运营中覆盖监控 status=ok"}
       - {ver: "1.1.15", date: "2026-11-01", change: "所有请求统一内部API，仿照 easyops_client.py internal 构建；删除前端网关/Cookie依赖，CSV新增脱敏采集参数 collectionParams；110.24沙箱全量及远端CSV回读验证"}
       - {ver: "1.1.16", date: "2026-11-01", change: "CMDB实例链接取实例 _object_id（普通模型），不使用父模型ID或业务objectId属性"}
+      - {ver: "1.1.17", date: "2026-11-01", change: "按实例_object_id普通模型分组查询监控任务，名称/URL/状态/参数使用同一模型分组；父子模型重复实例去重"}
     scenario: 查询指定 CMDB 模型（父模型自动展开子模型）及实例是否配置监控、所属监控任务、实例级监控状态和实际报错；工具包已归档，可直接导入
-    notes: "AutoOps toolId=0d0a4e02b4c60aaab64b1c8510d37423；v1.1.16/vId=0eac988b7be084ed0c2de666b055cad1；sandboxRun=true。内部API按 sdk/easyops_client.py internal 语义构建，IP/org优先读取agent conf.yaml，不调用前端网关。任务列表12000，实例详情8125 GET /api/v1/list-job-instances，状态8125 POST /v1/job_status/get，body={configId,list:[{instanceId,uuid}],sampler}；UUID取目标采集器真实_uuid，禁止用pluginId代替。CMDB实例URL模型ID取实例_object_id，不取查询父模型或业务objectId；任务filter仅判断覆盖，监控status只来自实例监控状态。collectionParams为每个匹配任务的JSON数组（jobId/jobName/collectAgent/collectorParams/collectParams/params），保留任务参数原始表达式，不冒充已解析运行值，敏感值脱敏。2026-11-01 HOST全量1926行：成功1、失败1925，110.24行成功且lastErr为空，CSV回读确认新增参数列。执行needNotify=\"true\"；验收 https://192.168.110.24/next/tool/task/202611_task18e3cc6a0e7b5dda257a；CSV写agent /tmp；工具包见cmdb-model-monitor-status-package。"
+    notes: "AutoOps toolId=0d0a4e02b4c60aaab64b1c8510d37423；v1.1.17/vId=d2edfbcb7f1ba148699b3728b7cc0cb6；sandboxRun=true。内部API按 sdk/easyops_client.py internal 语义构建，IP/org优先读取agent conf.yaml，不调用前端网关。任务列表12000，实例详情8125 GET /api/v1/list-job-instances，状态8125 POST /v1/job_status/get，body={configId,list:[{instanceId,uuid}],sampler}；UUID取目标采集器真实_uuid，禁止用pluginId代替。父模型只用于发现实例；按实例_object_id普通模型分组，用普通模型查询监控任务objectIdQ，同一分组贯穿名称/URL/状态/参数；按(_object_id,instanceId)全局去重，避免父子模型或多选重复输出；任务filter仅判断覆盖，监控status只来自实例监控状态。collectionParams为每个匹配任务的JSON数组（jobId/jobName/collectAgent/collectorParams/collectParams/params），保留任务参数原始表达式，不冒充已解析运行值，敏感值脱敏。2026-11-01 同选BASE_ASSET@ONEMODEL和HOST全量验收：8个实际模型、11477行，去除9551次重复命中；CSV回读11477个唯一实例链接，父模型链接为0，110.24行成功且lastErr为空；26个防火墙实例缺采集器UUID导致状态未知，未纳入本次修复。执行needNotify=\"true\"；验收 https://192.168.110.24/next/tool/task/202611_task18e3cfaa50897373a172；CSV写agent /tmp；工具包见cmdb-model-monitor-status-package。"
     added: "2026-10-30"
 
   - id: cmdb-model-monitor-status-package
     name: CMDB模型监控状态检查工具包
     category: tools
     files: [CMDB模型监控状态检查.tool.tar.gz]
-    version: "1.1.16"
+    version: "1.1.17"
     history:
       - {ver: "1.1.14", date: "2026-10-31", change: "从线上导出原生工具包归档"}
       - {ver: "1.1.15", date: "2026-11-01", change: "纯内部API调用，增加CSV采集参数列；导出包script与线上源码一致"}
       - {ver: "1.1.16", date: "2026-11-01", change: "实例URL使用所属普通模型_object_id，避免父模型详情页链接错误"}
+      - {ver: "1.1.17", date: "2026-11-01", change: "监控任务按实例所属普通模型查询，父子模型重复实例去重"}
     scenario: 导入沙箱工具，按CMDB模型汇总实例监控覆盖、状态、报错与采集参数
     notes: "原生tar.gz工具包（dat/config/script）；工具管理导入使用。源码及验收见cmdb-model-monitor-status-check，导入不包含测试执行历史与agent上的CSV。"
     added: "2026-10-31"

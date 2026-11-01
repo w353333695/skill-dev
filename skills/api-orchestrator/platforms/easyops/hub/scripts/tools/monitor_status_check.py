@@ -707,8 +707,36 @@ def _write_csv(rows):
     return path
 
 
+def _instance_groups(models):
+    """按实例实际所属模型分组，父子模型或多选重复命中的实例只处理一次。"""
+    grouped = {}
+    model_order = []
+    names = dict(models)
+    seen = set()
+    duplicates = 0
+    for query_model, query_name in models:
+        for instance in _search_instances(query_model):
+            instance_id = _text(instance.get('instanceId') or instance.get('id'))
+            if not instance_id:
+                continue
+            actual_model = _text(instance.get('_object_id') or query_model)
+            identity = (actual_model, instance_id)
+            if identity in seen:
+                duplicates += 1
+                continue
+            seen.add(identity)
+            if actual_model not in grouped:
+                grouped[actual_model] = []
+                model_order.append(actual_model)
+            grouped[actual_model].append(instance)
+    LOGGER.info('[_instance_groups] 查询模型=%d，实际模型=%d，去重实例=%d，重复命中=%d',
+                len(models), len(model_order), len(seen), duplicates)
+    return [(model_id, names.get(model_id) or _model_name(model_id), grouped[model_id])
+            for model_id in model_order]
+
+
 def main():
-    models = _selected_models()
+    models = _instance_groups(_selected_models())
     all_rows = []
     task_count = 0
     limit_value = _input('instance_limit', '0')
@@ -717,13 +745,14 @@ def main():
     except Exception:
         raise ValueError('instance_limit 必须是非负整数，0 表示全量')
     omitted = 0
-    for model_id, model_name in models:
-        instances = _search_instances(model_id)
+    for model_id, model_name, instances in models:
         if instance_limit and len(instances) > instance_limit:
             omitted += len(instances) - instance_limit
             LOGGER.warning('模型 %s 实例数=%d，按 instance_limit=%d 输出前 %d 行',
                            _log_text(model_id), len(instances), instance_limit, instance_limit)
             instances = instances[:instance_limit]
+        LOGGER.info('[main] 查询普通模型监控任务 model=%s instances=%d',
+                    _log_text(model_id), len(instances))
         jobs = _model_jobs(model_id)
         task_count += len(jobs)
         instance_ids = [_text(instance.get('instanceId') or instance.get('id')) for instance in instances]
