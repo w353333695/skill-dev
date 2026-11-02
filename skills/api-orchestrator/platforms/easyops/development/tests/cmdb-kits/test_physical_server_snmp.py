@@ -13,7 +13,7 @@ import unittest
 import zipfile
 from pathlib import Path
 
-HUB = Path(__file__).resolve().parents[1]
+HUB = Path(__file__).resolve().parents[3] / 'hub' / 'cmdb-kits'
 PACKAGES = list(HUB.glob('CMDB采集套件_物理服务器SNMP信息采集_*.zip'))
 PACKAGE = max(PACKAGES, key=lambda path: tuple(map(int, path.stem.rsplit('_', 1)[1].split('.'))))
 with zipfile.ZipFile(PACKAGE) as archive:

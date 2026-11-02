@@ -12,7 +12,7 @@ import zipfile
 class PackageImportTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        default = Path(__file__).resolve().parent.parent / "物理服务器SNMP监控套件_0.1.2.zip"
+        default = Path(__file__).resolve().parents[3] / "hub" / "monitor-kits" / "物理服务器SNMP监控套件_0.1.2.zip"
         cls.archive = zipfile.ZipFile(os.environ.get("MONITOR_PACKAGE", str(default)))
         cls.root = "物理服务器SNMP监控/"
 

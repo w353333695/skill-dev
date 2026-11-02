@@ -43,13 +43,13 @@ objects:
       powerAction 上/下电（enum 上电/下电）/ powerPosition 用电位置（str）/ ratedPower 额定功率（str）/
       useDepartment 关系 → ORGANIZATION@EASYOPS（组织模型，show_key=[name]；2026-09-29 用户纠正——
       不是 _ITSC_DEPARTMENT，部门语义用组织模型承载）。
-      配套工具（hub/scripts/tools/power_device_fill.py / device_backfill_cmdb.py）运行时按模型
+      配套工具（development/scripts/tools/power_device_fill.py / device_backfill_cmdb.py）运行时按模型
       attrList/relation_list 探测——存在才读/写，缺失自动跳过（投产前后都跑得通）。
       🔴【名称属性不统一坑】（2026-09-29 .26 实测）：抽象模型直搜 0 条（实例只在子模型）；
       子模型名称键三种形态——PHYSICAL_SERVER/STORAGE/FIBERCHANNEL_SWITCH 有 name，
       SWITCH/ROUTER/FIREWALL/LOADBALANCER/F5/SECURITY_DEVICE 只有 deviceName（search fields 带 name
       报 133116 "Can not find name relation"），BLADE_CHASSIS/FIBRE_CHANNEL_SWITCH 两者皆无（ip/sn 兜底）。
-      跨子模型查设备一律按 NAME_ATTRS 映射取名称键（实现参照 hub/scripts/tools/power_device_source.py）。
+      跨子模型查设备一律按 NAME_ATTRS 映射取名称键（实现参照 development/scripts/tools/power_device_source.py）。
   cmdb_object:
     dot24_pitfalls: |
       🔴【.24 环境实测坑】（2026-10-13 建合同模型）：
@@ -518,7 +518,7 @@ objects:
         【完整实例对象】（search 关系字段天然返回对端全属性），不要归一成 {instanceId,name} 最小集
         ——frontKey 无论配什么字段都渲染得出，改显示字段也不用改脚本（.26 机房设备运维人
         frontKey=[nickname,user_tel] 归一化致渲染空白 → v1.4 全属性保留修复，实现参照
-        hub/scripts/tools/power_device_fill.py _norm_inst_list）。
+        development/scripts/tools/power_device_fill.py _norm_inst_list）。
         CMDBINSTANCESELECT/CMDBCASCADER → [{instanceId,name}]——🔴instanceId 必须真实（查 USER/目标模型），
         空串=运行时 formValue 处理人解析为空（2026-09-20 .26 实测：onload 脚本回填 {instanceId:"",name} 导致
         告警处理节点无处理人；前端手动提交是完整实例序列化，脚本回填最小集 {真instanceId,name} 即生效）
@@ -1891,7 +1891,7 @@ api_behavior:
       工具脚本需要调用内部 EasyOps API 时，IP 和 org 优先从 agent 配置文件读取，不要把部署 IP/org 写死，也不要只依赖执行器注入的 EASYOPS_ORG。
       Linux 配置文件：/usr/local/easyops/agent/conf/conf.yaml；Windows 配置文件：C:\easyOps\agent\conf\conf.yaml。
       读取路径：org 取 base.client_id；服务 IP 取 command.server_groups[0].hosts[0].ip，逗号分隔时取第一个地址。
-      代码可参考 hub/scripts/sync_instance_field.py 的 __get_host_and_org；工具脚本须自包含，优先使用 agent 已有 yaml 能力，缺少 yaml 时提供最小文本解析兜底。
+      代码可参考 development/scripts/sync_instance_field.py 的 __get_host_and_org；工具脚本须自包含，优先使用 agent 已有 yaml 能力，缺少 yaml 时提供最小文本解析兜底。
       读取失败时才回退 EASYOPS_* 注入变量；内部请求的 Host/org 必须与 agent 配置保持一致，避免 agent 在 A 环境执行却把请求发到 B 环境。
   tool_param_injection:
     rule: |

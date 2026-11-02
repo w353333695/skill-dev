@@ -22,7 +22,7 @@ package_structure:
   top_level_rule:
     rule: "zip 顶层目录名必须与 plugin.yaml 的 name 完全一致，否则上传失败；目录条目（mode 755）+ 文件 mode 664，否则上传后会报错permission denied"
     source: "upload.md:24"
-    zipfile_regression: "2026-11-02在110.24复现：仅用ZipFile.write逐个写文件，没有显式目录条目，会导致plugin.yaml解压permission denied。必须显式写顶层/所有父目录，ZipInfo.create_system=3，目录external_attr=((S_IFDIR|0755)<<16)|0x10，文件external_attr=(S_IFREG|0664)<<16；根目录与plugin.yaml name一致。结构测试见hub/monitor-kits/tests/test_physical_server_monitor_package.py。"
+    zipfile_regression: "2026-11-02在110.24复现：仅用ZipFile.write逐个写文件，没有显式目录条目，会导致plugin.yaml解压permission denied。必须显式写顶层/所有父目录，ZipInfo.create_system=3，目录external_attr=((S_IFDIR|0755)<<16)|0x10，文件external_attr=(S_IFREG|0664)<<16；根目录与plugin.yaml name一致。结构测试见development/tests/monitor-kits/test_physical_server_monitor_package.py。"
     import_environment_blocker: "2026-11-02修复结构后进入repoMetaClient.ImportArchive，但制品存储返回logic.object_store_service的ens_get_all_v2 NotFound(-100005)，外层HTTP500/code100010；这是环境依赖阻塞，不代表导入成功，不应改OID规避或自动启用任务。"
 
   tree: |
@@ -59,7 +59,7 @@ package_structure:
     trigger: "ScriptType非空且导入表单name不同于包内name，或更新时包名与已有套件名不同，触发handleScriptTypePlugin。"
     behavior: "updatePluginScript先删除scriptPath指向的.py，再读src/<包内name>.orig；缺失时回退src/<scriptPath文件名去扩展名>.orig，然后按params生成环境变量前导。"
     python_safety: ".orig不得含生成的取参前导；避免future导入被平台前置代码破坏；.py仍须完整注入所有参数。验收须包含改名再生成后的编译及模拟参数取值，不能仅检查原.py语法。"
-    evidence: "export_import_custom/imexport_service.go:390,596,692-724；2026-11-02在110.24复现0.1.1改名导入orig缺失，0.1.2修复后越过该阶段；回归见hub/monitor-kits/tests/test_physical_server_monitor_package.py。"
+    evidence: "export_import_custom/imexport_service.go:390,596,692-724；2026-11-02在110.24复现0.1.1改名导入orig缺失，0.1.2修复后越过该阶段；回归见development/tests/monitor-kits/test_physical_server_monitor_package.py。"
 
   optional_files_recognized_on_import:
     # 这些文件 import 时若存在会被特殊处理（imexport_service.go importOther）

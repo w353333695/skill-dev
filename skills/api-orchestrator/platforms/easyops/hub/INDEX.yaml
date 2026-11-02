@@ -1,10 +1,11 @@
 # EasyOps hub 平台商店索引 —— 查重载体 + 变更日志（机制见 skill references/hub.md）
 # 类目语义: cmdb-kits=CMDB采集套件包 inspection-kits=巡检套件包(tar.gz)
-#   monitor-kits=监控套件包+配套告警规则模板(xlsx) scripts=可交付脚本(按域分子目录)
+#   monitor-kits=监控套件包+配套告警规则模板(xlsx) scripts=历史脚本成品包（仅压缩包）
 #   tools=autoops 工具成品 sso-adapter-providers=sso provider 成品
 #   itsm-service=ITSM 服务/流程交付包 custom-msg-sender=自定义消息发送器 other=未归类交付物
 # 收录门槛: 仅成品交付物；命名规范（2026-09-17 起）{类别}_{名称}_{版本}.{扩展名}，中文人类可读，
 #   如「ITSM服务_主机申请_1.3.4.zip」；旧命名 <名称>_v<版本>.<ext> 存量不动，新版回流按新命名+删旧版文件
+# 存放规则: 仅收录成品包及可导入模板；源码、tests、开发文档位于 ../development/，不得混入 hub。
 items:
   # ---- cmdb-kits（5 商品）----
   - id: svc-cmdb-kit
@@ -20,7 +21,7 @@ items:
   - id: fc-switch-cmdb-kit
     name: 光纤交换机SNMP信息采集
     category: cmdb-kits
-    files: [光纤交换机SNMP信息采集_v1.0.11.zip, fc_switch_snmp_mib_oid_reference.md]
+    files: [光纤交换机SNMP信息采集_v1.0.11.zip]
     version: "1.0.11"
     history:
       - {ver: "1.0.11", date: "2026-08-29", change: 初版入库}
@@ -51,7 +52,7 @@ items:
   - id: physical-server-snmp-inventory-kit
     name: 物理服务器SNMP信息采集
     category: cmdb-kits
-    files: [CMDB采集套件_物理服务器SNMP信息采集_0.1.21.zip, 物理服务器SNMP信息采集_使用说明.md, tests/test_physical_server_snmp.py]
+    files: [CMDB采集套件_物理服务器SNMP信息采集_0.1.21.zip]
     version: "0.1.21"
     history:
       - {ver: "0.1.0", date: "2026-10-27", change: "初版：通用MIB加Dell iDRAC、IBM IMM、联想XCC、华为iBMC资产私有列；百信/浪潮仅通用回退；新增非密snmp_conf；离线55项回归"}
@@ -225,7 +226,7 @@ items:
   - id: physical-server-snmp-monitor-kit
     name: 物理服务器SNMP监控套件
     category: monitor-kits
-    files: [物理服务器SNMP监控套件_0.1.2.zip, tests/test_physical_server_monitor_package.py]
+    files: [物理服务器SNMP监控套件_0.1.2.zip]
     version: "0.1.2"
     history:
       - {ver: "0.1.0", date: "2026-11-02", change: "初版：华为/浪潮/联想/百信/戴尔/H3C品牌识别；标准MIB与厂商私有MIB候选；CPU/内存/磁盘/电源/风扇/温度/网口/光口统一指标；MIB证据随包保留"}
@@ -265,42 +266,6 @@ items:
     notes: "instanceId 65e2943d3cbf9（.24）；目标模型 ROUTER@ONEMODEL；11 指标/3 指标集；OID 来源=Cisco(9.9.109/9.9.48/9.9.13)+H3C(25506.2.6/25506.8.35)+华为(2011.5.25.31)；品牌探测靠 sysDescr 关键字，新品牌加 VENDOR_MAP 条目即可"
     added: "2026-10-19"
   # ---- scripts（19 商品）----
-  - id: baseline-checker
-    name: 配置基线管理
-    category: scripts
-    files: [baseline-managment/README.md, baseline-managment/baseline_checker.py, baseline-managment/baseline_models.json]
-    history:
-      - {date: "2026-08-29", change: 初版入库}
-    scenario: EasyOps CMDB 声明式配置基线检查引擎（BASELINE_RULE/RESULT 模型+通用检查脚本+结果落 CMDB）
-    notes: 三件配套（README/脚本/模型定义）为同一商品
-    added: "2026-08-29"
-  - id: build-model-from-data
-    name: 数据驱动建模
-    category: scripts
-    files: [cmdb/build_model_from_data.py]
-    history:
-      - {date: "2026-09-02", change: 初版入库}
-    scenario: 从 list[dict] 存量数据反推 CMDB 模型定义（属性类型推断+导入预检+可选实例 upsert）
-    notes: ""
-    added: "2026-09-02"
-  - id: import-and-register-users
-    name: 用户导入注册
-    category: scripts
-    files: [cmdb/import_and_register_users.py]
-    history:
-      - {date: "2026-08-29", change: 初版入库}
-    scenario: 读用户登记表 Excel 批量导入 CMDB 用户实例并注册 EasyOps 账号
-    notes: ""
-    added: "2026-08-29"
-  - id: delivery-summary-export
-    name: 交付清单导出
-    category: scripts
-    files: [delivery_summary_export.py]
-    history:
-      - {date: "2026-08-29", change: 初版入库}
-    scenario: 汇总 CMDB/监控/自动化/ITSM 各模块交付成果导出 CSV（内网 agent/OpenAPI AK-SK 双认证）
-    notes: ""
-    added: "2026-08-29"
   - id: hardware-collect-readiness
     name: 硬件采集条件统计
     category: scripts
@@ -308,96 +273,6 @@ items:
     history:
       - {date: "2026-08-29", change: 初版入库}
     scenario: 主机硬件采集就绪度检查+离线依赖包（pysnmp/openpyxl 等 whl）
-    notes: ""
-    added: "2026-08-29"
-  - id: iptables-set
-    name: iptables 防火墙配置
-    category: scripts
-    files: [iptables-set.sh]
-    history:
-      - {date: "2026-08-30", change: 初版入库}
-    scenario: EasyOps 主机 iptables 集群 IP 互信放行脚本
-    notes: ""
-    added: "2026-08-30"
-  - id: itsm-cmdb-import
-    name: ITSM 导入 CMDB
-    category: scripts
-    files: [itsm/itsm-import-cmdb.py, itsm/itsm_api_client.py, itsm/itsm_process_doc.py, itsm/pillow-12.2.0-cp312-cp312-manylinux2014_aarch64.manylinux_2_17_aarch64.whl]
-    history:
-      - {date: "2026-08-29", change: 初版入库}
-    scenario: ITSM 流程说明文档生成 Excel+API 客户端+CMDB 导入（内网/OpenAPI 双认证）
-    notes: whl 为 aarch64 离线依赖，随包分发
-    added: "2026-08-29"
-  - id: easyops-migration
-    name: EasyOps 迁移工具
-    category: scripts
-    files: [platform/easyops-migration/conf.sample.yaml, platform/easyops-migration/migration_tool.py]
-    history:
-      - {date: "2026-08-29", change: 初版入库}
-    scenario: EasyOps 跨环境迁移（YAML 配置驱动 CMDB 模型/实例/用户/工具导出导入，Py2/3 兼容）
-    notes: ""
-    added: "2026-08-29"
-  - id: check-auth-token-disable
-    name: 鉴权 token 检查
-    category: scripts
-    files: [platform/check_auth_token_disable.sh]
-    history:
-      - {date: "2026-08-29", change: 初版入库}
-    scenario: config_tool 关闭 EasyOps check_auth_token 鉴权开关
-    notes: ""
-    added: "2026-08-29"
-  - id: curl-sample
-    name: curl 样例
-    category: scripts
-    files: [platform/curl_sample.sh]
-    history:
-      - {date: "2026-08-29", change: 初版入库}
-    scenario: EasyOps API curl 调用样例（org/user 头+实例 _search）
-    notes: ""
-    added: "2026-08-29"
-  - id: easyops-hardening
-    name: EasyOps 加固
-    category: scripts
-    files: [platform/easyops_hardening.sh]
-    history:
-      - {date: "2026-08-31", change: 初版入库}
-    scenario: EasyOps 集群安全加固（iptables 端口封闭+基线，批量版）
-    notes: ""
-    added: "2026-08-31"
-  - id: init-easyops-python3
-    name: Python3 环境初始化
-    category: scripts
-    files: [platform/init_easyops_python3.sh]
-    history:
-      - {date: "2026-08-29", change: 初版入库}
-    scenario: EasyOps 主机初始化内置 python3 并建 /usr/local/bin/python3 软链
-    notes: ""
-    added: "2026-08-29"
-  - id: snmpwalk-alarm-pusher
-    name: snmpwalk 告警推送
-    category: scripts
-    files: [snmpwalk_alarm_pusher.py]
-    history:
-      - {date: "2026-08-29", change: 初版入库}
-    scenario: snmpwalk 轮询共济系统告警事件表解析推送 EasyOps 三方告警（适合 cron 定时）
-    notes: ""
-    added: "2026-08-29"
-  - id: sync-instance-field
-    name: 实例字段同步
-    category: scripts
-    files: [sync_instance_field.py]
-    history:
-      - {date: "2026-08-29", change: 初版入库}
-    scenario: CMDB 实例属性/（多层）关系字段批量同步（first/join 聚合）
-    notes: ""
-    added: "2026-08-29"
-  - id: webhook
-    name: webhook 接收器
-    category: scripts
-    files: [webhook.py]
-    history:
-      - {date: "2026-08-29", change: 初版入库}
-    scenario: Flask 通用 webhook 接收器（请求落 webhook.log）
     notes: ""
     added: "2026-08-29"
   - id: gongji-alarm-access
@@ -409,17 +284,6 @@ items:
     scenario: 共济基础设施监控告警接入（V2.23 接入标准 PDF+gongji_alarm_pusher 推送脚本）
     notes: 与 snmpwalk-alarm-pusher 同源场景，本条为含接入标准 PDF 的打包版
     added: "2026-08-29"
-  - id: search-artifact-package
-    name: CICD程序包搜索
-    category: scripts
-    files: [cicd/search_artifact_package.py]
-    version: "1.0.0"
-    history:
-      - {ver: "1.0.0", date: "2026-09-11", change: 初版入库}
-    scenario: CICD artifact 制品组件程序包搜索（GET /package/search，logic.artifact:8175 直连，模糊/精确/类型/标签过滤+分页表格输出，py2/3 兼容）
-    notes: 免 cookie 直连（org/user/Host 三件 header）；接口契约来源 FLOW_BUILDER_API_CONTRACT Search
-    added: "2026-09-11"
-  # ---- other（1 商品）----
   - id: cluster-deploy-checklists
     name: EasyOps集群部署清单-合集
     category: other
@@ -429,32 +293,6 @@ items:
     scenario: EasyOps 集群 1/3/5/7 节点部署清单 md 合集
     notes: ""
     added: "2026-08-29"
-  - id: alert2ticket
-    name: 告警转故障工单
-    category: scripts
-    files: [tools/alert2ticket.py, tools/alert2event.py, tools/clean_itsm.py]
-    history:
-      - {date: "2026-09-14", change: 初版入库（.232 实测端到端通过）}
-      - {date: "2026-09-14", change: 注册为 autoops 工具（toolId a0014959...，v5）；py2 stdlib http 层+平台 header 变量注入取参}
-      - {date: "2026-09-15", change: "v6 表单赋值协议修正——COMMONDATE 传 RFC3339（非时间戳）/SELECT 枚举传 {key,label,value} 对象/alertUrl 改事件详情页 /next/events/{eventId}/detail；连接解析支持 EASYOPS_CMDB_BACKEND_URL"}
-      - {date: "2026-09-15", change: 导出终态工具包 tools/告警转工单.tool.tar.gz（v6，round-trip 导入验证通过）}
-      - {date: "2026-09-15", change: v7 handler 取告警待响应人（多告警去重）+duty_group 兜底值班组（默认 test，查当日排班 users+leader）；工具包同步 v7}
-      - {date: "2026-09-15", change: "v8 表格行级取告警事件自身详情（originContent/level/target），同工单多告警各行不同；事件索引合并为 detail_index 一次拉全"}
-      - {date: "2026-09-18", change: "v9 查单改 hasOrder=true 事件接口（incident ticket 部分版本缺失）；处理人改 alertReceivers 通知接收人优先+值班组【当日班次】兜底；修 py2 中文入参 ascii 编码"}
-      - {date: "2026-09-18", change: v9.2 建单 handlerName 取接收人首个（工单列表处理人显示真实接收人，无接收人值班组当日首人兜底；实测 INC26091800011 operator=ahuatan）}
-    scenario: 【方案A·自动转故障单】alert2ticket：_batch 建单+表单回填两步（故障处理服务）；【新增 alert2event.py·一步发起】见 tools/告警转事件工单——StartProcessInstanceV2 直接带表单发起（事件处理服务），两脚本同入参
-    notes: "入参 range/auto_create/alert_level/alert_time；端口 8131 alert_service + 8134 flowable + 8079 cmdb；防重靠 _batch 消费事件（移出 not_recover）"
-    added: "2026-09-14"
-  - id: sync-ccpc-duty
-    name: 同步CCPC值班表
-    category: scripts
-    files: [tools/sync_ccpc_duty.py]
-    history:
-      - {date: "2026-09-15", change: 初版入库（.26 端到端通过：建组/幂等/upsert/换班纠正/班次变更自动更新；注册 autoops toolId 9612...fdc7 v1；导出工具包）}
-      - {date: "2026-09-15", change: v2 值班组 flexTime=5（交接班弹性时间）——建组自带/已有组自动补设；工具包同步 v2}
-    scenario: 拉 CCPC 值班表同步 EasyOps ITSM 值班组日历配置（py2/3 兼容，可配 EasyOps agent 定时工具；班次动态归纳不写死、dutyCycle 未来一百年、upsert 幂等、班次变更自动更新）
-    notes: "入参 ccpc_ip/ccpc_group_id/duty_group_name/sync_days；角色映射 dutys→users、maintainer+leader→leader（CCPC uid=easyops username 同名直用）；幂等回读走 v1 search（v2 user 增强在用户不存在时回空壳对象，永判不等——.26 实测坑）；CCPC_FIXTURE 环境变量切样例测试；端口 8880 ccpc + 8134 flowable"
-    added: "2026-09-15"
   - id: device-power-service
     name: 机房设备进出及上下电服务
     category: itsm-service
@@ -470,15 +308,6 @@ items:
     scenario: 机房设备进出及上下电审批——提单表单「上下电设备」实例选择（MODALSELECT 跨 BASE_ASSET 11 子模型拉候选）+值变化联动填充设备信息 table（sn 唯一键只补空不覆盖人工值）+设备类型列；验收节点 postScript 按 sn 唯一键全量回填 CMDB（mdl/name/startU/occupiedU+rack/assetOwner 关系；查无按设备类型映射新建）
     notes: "三工具 toolId：候选 3ed83d835160475bb605a8e12bc96b4c/联动填充 4576f66fe2b44dee9ab5e35cdc2487ab/回填 eb2ba16fe30a4794b7a4bcd8625d4b70（均 sandboxRun=true）；🔴子模型名称属性不统一——网络设备只有 deviceName 无 name（查 name 报 Can not find name relation），三工具已按 NAME_ATTRS 映射；导入 POST service_catalog/{目录id}/import（gzip 含 tools/ 三 tar.gz 自动注册）；.26 测试数据：RACK A01/物理服务器 SN-TEST-001/交换机 SN-TEST-002~003"
     added: "2026-09-29"
-  - id: power-device-scripts
-    name: 机房设备进出三脚本源码
-    category: scripts
-    files: [tools/power_device_source.py, tools/power_device_fill.py, tools/device_backfill_cmdb.py]
-    history:
-      - {date: "2026-09-29", change: 初版入库（与工具包 v1.1 同源；agent 真跑三工具全通过）}
-    scenario: 上下电设备候选数据源（componentLoad）/值变化联动填充（onValueChange，sn 只补空）/验收回填 CMDB（postScript，sn 唯一键全量同步）三脚本源码，工具包见 tools/ 三件
-    notes: "py2/3 兼容 stdlib only；🔴BASE_ASSET 子模型名称属性不统一——NAME_ATTRS 映射（objects.yaml#base_asset_models）"
-    added: "2026-09-29"
   - id: host-recover-tool
     name: CMDB误删实例恢复工具包
     category: tools
@@ -488,17 +317,7 @@ items:
       - {date: "2026-10-16", change: "1.1.2：更名 host_recover→CMDB实例恢复（通用化后原名不贴切；packageId/toolId 不变，已导入 .24 复核平台名生效）"}
       - {date: "2026-10-16", change: "1.1.3：用户手改枚举入参定义后导出归档——enum=[纯字符串数组]（非 {label,value} 对象数组）+type=enum 须 primitive=true（1.1.2 打包错误修正；坑已入库 objects.yaml）"}
     scenario: CMDB 误删实例通用恢复——按操作日志(topic=event.instance.archive)+可选时段(HH:MM:SS-HH:MM:SS)捞归档删除事件，从 history 接口取删除前快照，下载到 /tmp JSON 或按 instanceId 导回（upsert，可选剥离关系字段）；模型任意指定（默认 HOST）
-    notes: "toolId f61ac555aff521b1db06359f1255b8d1；🔴只恢复【归档删除】（instance_archive_instances）——物理删(_batch delete)不产生 archive 事件（.24 实测），恢复不了；工具读 agent conf 定位服务端（agent 执行）；源码 scripts/tools/host_recover.py"
-    added: "2026-10-16"
-  - id: host-recover-source
-    name: CMDB误删实例恢复脚本源码
-    category: scripts
-    files: [tools/cmdb_instance_recover.py]
-    history:
-      - {date: "2026-10-16", change: 初版入库（与工具包 1.1.1 同源）}
-      - {date: "2026-10-16", change: "1.1.2 同步更名（源码文件 host_recover.py→cmdb_instance_recover.py）"}
-    scenario: 通用恢复脚本源码（EasyopsAPI 内网/签名双模式 + 操作日志分页 + history 快照 + import 恢复），工具包见 tools/CMDB实例恢复
-    notes: "py2/3 兼容"
+    notes: "toolId f61ac555aff521b1db06359f1255b8d1；🔴只恢复【归档删除】（instance_archive_instances）——物理删(_batch delete)不产生 archive 事件（.24 实测），恢复不了；工具读 agent conf 定位服务端（agent 执行）；源码 ../development/scripts/tools/host_recover.py"
     added: "2026-10-16"
   - id: openapi-demo-tool
     name: OpenAPI请求示例工具包
@@ -518,16 +337,7 @@ items:
     history:
       - {date: "2026-10-09", change: "1.0.6 入库（现网工具 1.0.5 升级：加撤销删除分支——操作类型=2 删 HOST 实例；补 report 输出；.26 agent 真跑新增/撤销双场景验证）"}
     scenario: 基础环境资源申请流程验收节点 preScript——按操作类型分派：新增/变更(0/1) upsert 新增主机 table 到 HOST（keys=ip，memSize/diskSize GB→MB 换算）；撤销(2) 删除「撤销主机」选中 HOST 实例（DELETE instance_batch）
-    notes: "toolId 07efacdbc60ce282f6792e646c4d5502；🔴py3 风格脚本（f-string/union 注解）在 .26 agent 实测可跑；表单 1.0.13 三字段 NUMBERINPUT 化后 int() 兼容字符串/数字、cpus 直传更规范（已评估无影响）；源码 scripts/tools/env_resource_backfill_host.py"
-    added: "2026-10-09"
-  - id: env-backfill-host-source
-    name: 基础环境资源回写主机脚本源码
-    category: scripts
-    files: [tools/env_resource_backfill_host.py]
-    history:
-      - {date: "2026-10-09", change: 初版入库（与工具包 1.0.6 同源）}
-    scenario: openapi AK/SK 双模式客户端（search/import/delete）+ orderInfo 表单值提取转换（extract_form_value transform 机制），工具包见 tools/回写主机
-    notes: "py3；EasyOpsClient 支持 openapi 签名与内网直连双模式"
+    notes: "toolId 07efacdbc60ce282f6792e646c4d5502；🔴py3 风格脚本（f-string/union 注解）在 .26 agent 实测可跑；表单 1.0.13 三字段 NUMBERINPUT 化后 int() 兼容字符串/数字、cpus 直传更规范（已评估无影响）；源码 ../development/scripts/tools/env_resource_backfill_host.py"
     added: "2026-10-09"
   - id: agent-conf-tool
     name: esayops应用配置修改
@@ -544,16 +354,7 @@ items:
       - {ver: "1.1.7", date: "2026-10-23", change: "新增「修改方式」参数：按参数路径（原逻辑）/ 直接替换（batch 每行 原文->新文本，字面全局替换、按顺序执行）"}
     version: "1.1.7"
     scenario: 修改本机 EasyOps 应用/组件 YAML 配置——两种修改方式：①按参数路径（批量多行填写「配置项=修改值」，配置项支持全深度 ip 或 xx.yy.zz 点路径精确指定）②直接替换（批量多行填写「原文->新文本」，字面全局替换）；动作 预览/修改；整体校验+冲突检测，只 init+restart 一次，失败整体回滚；修改=备份→文本级替换（保留注释/格式）→回读验证→easyops init→easyops restart；conf 路径按平台自动探测（win c:\easyops\agent\conf / linux /usr/local/easyops/agent/conf）
-    notes: "toolId 575acbb01ca040c39be6aa67decef7fd；🔴sandboxRun=false——主机运维工具需 agent 权限写 conf 目录（沙箱 nobody 只读，实测 IOErr 13）；🔴重启目录=组件包根（非 conf 目录——easyops restart 对 cwd 敏感，conf 目录报 2004 not a valid package；v1.1.1 实测 .26 重启成功 easyAgent 进程刷新+status started；执行记录可能因 agent 自重启标 failed 属预期副作用，主报告先落袋可辨成败）；修改后先 init 再 restart；文本级 YAML 扫描（栈列管理还原嵌套路径+列表索引）；源码 scripts/tools/agent_conf_tool.py"
-    added: "2026-09-30"
-  - id: agent-conf-source
-    name: esayops应用配置修改脚本源码
-    category: scripts
-    files: [tools/agent_conf_tool.py]
-    history:
-      - {date: "2026-09-30", change: 初版入库（与工具包 v1.0.2 同源）}
-    scenario: EasyOps 应用/组件 YAML 配置文本级修改脚本源码（YAML 栈扫描器/后缀路径匹配/备份回读/平台重启），工具包见 tools/esayops应用配置修改
-    notes: "py2/3 兼容 stdlib only；不依赖 yaml 库（保留注释与格式的文本编辑）"
+    notes: "toolId 575acbb01ca040c39be6aa67decef7fd；🔴sandboxRun=false——主机运维工具需 agent 权限写 conf 目录（沙箱 nobody 只读，实测 IOErr 13）；🔴重启目录=组件包根（非 conf 目录——easyops restart 对 cwd 敏感，conf 目录报 2004 not a valid package；v1.1.1 实测 .26 重启成功 easyAgent 进程刷新+status started；执行记录可能因 agent 自重启标 failed 属预期副作用，主报告先落袋可辨成败）；修改后先 init 再 restart；文本级 YAML 扫描（栈列管理还原嵌套路径+列表索引）；源码 ../development/scripts/tools/agent_conf_tool.py"
     added: "2026-09-30"
   - id: power-device-source-tool
     name: 上下电设备选择数据源工具包
@@ -605,7 +406,7 @@ items:
     version: "1.2.5"
     history:
       - {date: "2026-09-15", change: 初版入库（.26 导出，onlyCheck 校验通过）}
-    scenario: 【方案A·自动转单】alert2ticket 工具定时检索未恢复告警自动建单——故障处理服务（SERVICE_ID=60c33d948bf61）+流程1.2.5+两表单；导入后配 hub/scripts/tools/alert2ticket 即闭环。方案B（前端手动提单）见 event-itsm-service 条目，两套方案独立存储互不依赖
+    scenario: 【方案A·自动转单】alert2ticket 工具定时检索未恢复告警自动建单——故障处理服务（SERVICE_ID=60c33d948bf61）+流程1.2.5+两表单；导入后配 development/scripts/tools/alert2ticket 即闭环。方案B（前端手动提单）见 event-itsm-service 条目，两套方案独立存储互不依赖
     notes: "导入 POST service_catalog/{目录id}/import（gzip 包内 cmdb_service_instance.json，17 对象）；导入 upsert 同 org 重导即更新；新环境导入后注意——SERVICE_ID 需按新环境重查（服务 instanceId 可能变）、告警处理单 needReview/reviewLeader 必填+条件显示已含"
     added: "2026-09-15"
   - id: alert2ticket-tool-package
@@ -618,7 +419,7 @@ items:
       - {date: "2026-09-18", change: v9.2 终态包（handlerName=接收人首个）}
       - {date: "2026-09-20", change: sandboxRun=true（ITSM 绑定工具必须沙箱）}
     scenario: EasyOps autoops 工具包——告警转工单 v8（检索未恢复告警转工单+表单回填+值班组兜底），配合故障处理服务包使用
-    notes: "toolId a00149590a1c9d38444cd208edf480f5；sandboxRun=true（ITSM 绑定工具必须沙箱）；导入同 org 重导即更新（upsert）；源码见 scripts/tools/alert2ticket.py"
+    notes: "toolId a00149590a1c9d38444cd208edf480f5；sandboxRun=true（ITSM 绑定工具必须沙箱）；导入同 org 重导即更新（upsert）；源码见 ../development/scripts/tools/alert2ticket.py"
     added: "2026-09-15"
   - id: sync-ccpc-duty-tool-package
     name: 同步CCPC值班表工具包
@@ -627,7 +428,7 @@ items:
     history:
       - {date: "2026-09-15", change: v2 终态包（flexTime=5；.26 导出）}
     scenario: EasyOps autoops 工具包——同步CCPC值班表 v2（拉 CCPC 值班表同步 ITSM 值班组日历）
-    notes: "源码见 scripts/tools/sync_ccpc_duty.py"
+    notes: "源码见 ../development/scripts/tools/sync_ccpc_duty.py"
     added: "2026-09-15"
   - id: batch-autofill-suite
     name: 手动提单批次ID自动填充套件
@@ -637,16 +438,6 @@ items:
       - {date: "2026-09-18", change: 初版入库（onload v1.4 + associate v1.1，agent 实测填单输出验证通过）}
     scenario: 手动提故障单只填批次ID即自动填表（URL formEventArgs 透传 batchId 为 list[] 已兼容）——①onPageLoad 脚本按批次查告警填等级/优先级/处理人(接收人)/关联告警行 ②识别和发起节点 postScript 提交后 PUT event_last/order 关联工单与告警批次；配套告警故障管理单 1.0.4（batchId 只读控件+容器挂 onPageLoadId）与故障处理流程 1.2.6
     notes: "工具包在 tools/（表单按批次ID自动填单脚本/工单关联告警批次脚本）；ens_api 返回 list 形态须兼容取值；agent 无 ALERT 专用 env 时回退 CMDB host 同机 8131；event_center 服务 ens 发现失败回退 logic.event_center:8080"
-    added: "2026-09-18"
-  - id: batch-autofill-scripts
-    name: 批次ID自动填单脚本源码
-    category: scripts
-    files: [itsm/onload_fill_by_batch.py, itsm/postsubmit_associate.py]
-    history:
-      - {date: "2026-09-18", change: 初版入库（onload v1.4 + associate v1.1）}
-      - {date: "2026-09-22", change: "onload 同步工具包 v2.2（修 _to_unicode 未定义；处理人改告警 user 字段单用户+三级链+handlerType）——源码此前停在 v1.4 落后包"}
-    scenario: 手动提单批次ID自动填充的两端脚本源码（加载后填表+提交后关联），工具包见 tools/ 两件
-    notes: "py2；配套表单 1.0.4+流程 1.2.6"
     added: "2026-09-18"
   - id: batch-autofill-onload-package
     name: 表单按批次ID自动填单脚本工具包
@@ -729,7 +520,7 @@ items:
       - {date: "2026-09-21", change: "v1.3 itsm_service 改 cmdbInstances 多选+可为空（空=清理全部非内置服务，内置 builtIn 跳过）；同轮互绑流程不再互相保护（清理全部时可删）"}
       - {date: "2026-09-23", change: "v1.4 重导修复：hub 源码 v1.3 变更从未导入 .26（线上旧版 itsm_service 空=报『缺少必填入参』退出）——从 hub 源码重打包导入，agent dry-run 实测 56 服务遍历通过"}
     scenario: 按服务删除 ITSM 工单/服务/流程/表单——依赖顺序清理（工单作废→删、服务、流程解绑表单→删版本→删定义、表单删版本→删表单）；流程/表单删除前查多服务/多流程绑定保护（被引用跳过并提示）；dry_run 预检模式仅列出；工单查询走 /v1/service/{id}/ticket_list 专用端点+CMDB 逐张归属校验双保险
-    notes: "toolId 544132045c7c09c3c41dc0e56dafdf7b；sandboxRun=true；入参 itsm_service(cmdbInstance _ITSC_SERVICE_INSTANCE)+clean_scope(enums 工单/服务/流程/表单)+dry_run(是/否)；源码 scripts/tools/clean_itsm.py；🔴安全设计源自 v4 filter serviceId 过滤误删事故（operator 陷阱见 objects.yaml ticket.list 纠偏）"
+    notes: "toolId 544132045c7c09c3c41dc0e56dafdf7b；sandboxRun=true；入参 itsm_service(cmdbInstance _ITSC_SERVICE_INSTANCE)+clean_scope(enums 工单/服务/流程/表单)+dry_run(是/否)；源码 ../development/scripts/tools/clean_itsm.py；🔴安全设计源自 v4 filter serviceId 过滤误删事故（operator 陷阱见 objects.yaml ticket.list 纠偏）"
     added: "2026-09-20"
   - id: alert-tool-package
     name: 告警处理工具包
@@ -743,16 +534,7 @@ items:
       - {date: "2026-09-23", change: "v5 加 alert_rule 入参（cmdbInstances 多选 ALERT_RULE、cmdbAttrId=instanceId，空=所有规则）→ filter ruleId $in；查询/CSV join 规则名（CMDB ALERT_RULE 反查带缓存）；CSV 加 ruleName 列——agent 真跑 list 注入筛选 8 条规则名显示成功"}
       - {date: "2026-09-23", change: "v6 status/level 改枚举下拉（源码常量全集：level critical/warning/info/message/emergency；status unsent/sent/group/suppress/block/converged/inhibition；首项「所有」默认=不过滤）——agent 真跑枚举筛选 14 条成功"}
     scenario: 告警读取/CSV导出/删除 + columndb CRUD——默认历史表 monitor_event@EASYOPS（全状态含已恢复），可切 monitor_event_last@EASYOPS（当前活跃热视图）；alert_rule 多选筛规则（ruleId $in）+ 规则名反查；data_exchange :8152 tsdb_column/* 端点族；类 SDK 写法 AlertToolClient（search/count/insert=upsert/update_by_filter/update_by_row_id/upsert/delete/export_csv）
-    notes: "toolId 4174715cc819b92b9c4df65b61fc0d46；sandboxRun=true；入参 action(枚举 导出/删除)+alert_rule(cmdbInstances 多选 ALERT_RULE 空=所有)+time_range(\\d+[ymd] 空=全部)+export_dir(默认/tmp/easyops/alert_export)+table(枚举 历史告警/当前告警 默认历史)+status+level+confirm(删除须=是)；🔴时间双轨：time 字段毫秒、startTime/notifyTime 等 Int32 秒（毫秒塞 startTime 溢出 300313）；必填列 batchId/alertId/eventId；库名=org；删除走 delete_by_filter 物理删+双表联动；🔴策略溯源字段：ruleId→ALERT_RULE(告警规则)/alertRuleId→ALERT_CONDITION_STRATEGY(条件策略)/alertRuleVersion/strategyType/triggeredCondition(触发快照JSON)；CSV 64 列 utf-8+BOM 复杂结构压 JSON；源码 scripts/tools/alert_tool.py"
-    added: "2026-09-23"
-  - id: alert-tool-source
-    name: 告警处理脚本源码
-    category: scripts
-    files: [tools/alert_tool.py]
-    history:
-      - {date: "2026-09-23", change: 初版入库（与工具包 v3 同源）}
-    scenario: 告警处理工具源码（AlertToolClient——columndb CRUD + CSV 导出），工具包见 tools/告警处理
-    notes: "py2/3 兼容 stdlib only；时间双轨/必填列/upsert 写路径三坑见 alert-tool-package notes；v4 起默认历史表全状态"
+    notes: "toolId 4174715cc819b92b9c4df65b61fc0d46；sandboxRun=true；入参 action(枚举 导出/删除)+alert_rule(cmdbInstances 多选 ALERT_RULE 空=所有)+time_range(\\d+[ymd] 空=全部)+export_dir(默认/tmp/easyops/alert_export)+table(枚举 历史告警/当前告警 默认历史)+status+level+confirm(删除须=是)；🔴时间双轨：time 字段毫秒、startTime/notifyTime 等 Int32 秒（毫秒塞 startTime 溢出 300313）；必填列 batchId/alertId/eventId；库名=org；删除走 delete_by_filter 物理删+双表联动；🔴策略溯源字段：ruleId→ALERT_RULE(告警规则)/alertRuleId→ALERT_CONDITION_STRATEGY(条件策略)/alertRuleVersion/strategyType/triggeredCondition(触发快照JSON)；CSV 64 列 utf-8+BOM 复杂结构压 JSON；源码 ../development/scripts/tools/alert_tool.py"
     added: "2026-09-23"
   - id: ticket-form-tool-package
     name: 流程表单修改工具包
@@ -765,49 +547,8 @@ items:
       - {ver: "1.2", date: "2026-09-28", change: "唯一键定位——查询/diff 输出 key(节点ID:容器#元素序号:行号)；修改唯一命中直接改、多命中退出列全部 key、field_key 参数精确定位（🔴表格多行真实形态=同key容器N个各1行，key 用元素序号才唯一；vId 5ef802681443402596ff07587f2f8a55 平台真跑）"}
       - {ver: "1.3", date: "2026-09-28", change: "输出值不截断——查询/diff/多命中列 key 的值全量展示（vId 8402a213ac524474929a6a7f37adaf83 平台真跑 361 字符长值完整）"}
     scenario: 工单表单控件值查询/修改——进行中工单走热库 CMDB（_ITSC_INSTANCE_STEP PUT 全量回写）、已完结走冷库 data_exchange（itsm_task@EASYOPS update_by_id_v2），自动分派；控件中文名/ID 经 _ITSC_FORM_VERSION 表单定义解析（多匹配报错列候选）；修改默认改全部节点保持快照一致，表格列多值时 diff 出⚠️警告；安全闭环=改前备份（沙箱回退链永久保留）+confirm_yes 两段式确认+整体回写+写后回读双校验
-    notes: "toolId 0105a75e2c7f44e3beddd246689ad43a；sandboxRun=true；入参 ticket_url(task-list/ticket-list 两种格式正则提取工单ID)+field(中文名或modelField)+field_key(定位唯一键=查询输出key列)+new_value(JSON)+action(枚举 查询/修改)+confirm_yes(枚举 是/否 默认否=只出diff)；热库表单版本解析链：工单→ITSC_PROCESS_VERSION→_ITSC_PROCESS_FORM_RELATION→_ITSC_FORM_VERSION（step 上无 formVersionId 字段）；🔴PUT 全量覆盖——绝构造局部 body（2026-09-24 调研期清空事故教训）；源码 scripts/tools/ticket_form_tool.py"
+    notes: "toolId 0105a75e2c7f44e3beddd246689ad43a；sandboxRun=true；入参 ticket_url(task-list/ticket-list 两种格式正则提取工单ID)+field(中文名或modelField)+field_key(定位唯一键=查询输出key列)+new_value(JSON)+action(枚举 查询/修改)+confirm_yes(枚举 是/否 默认否=只出diff)；热库表单版本解析链：工单→ITSC_PROCESS_VERSION→_ITSC_PROCESS_FORM_RELATION→_ITSC_FORM_VERSION（step 上无 formVersionId 字段）；🔴PUT 全量覆盖——绝构造局部 body（2026-09-24 调研期清空事故教训）；源码 ../development/scripts/tools/ticket_form_tool.py"
     added: "2026-09-24"
-  - id: ticket-form-tool-source
-    name: 流程表单修改脚本源码
-    category: scripts
-    files: [tools/ticket_form_tool.py]
-    history:
-      - {date: "2026-09-24", change: 初版入库（与工具包 v1 同源）}
-    scenario: 流程表单修改工具源码（冷热库分派+控件解析+备份+diff+回读验证），工具包见 tools/流程表单修改
-    notes: "py2/3 兼容 stdlib only；本地直跑可 EASYOPS_CMDB_BACKEND_URL+kv 入参；平台跑走 globals 注入变量"
-    added: "2026-09-24"
-
-  - id: cmdb-model-monitor-status-check
-    name: CMDB模型监控状态检查
-    category: scripts
-    files: [tools/monitor_status_check.py, tools/tests/test_monitor_status_check.py]
-    version: "1.1.19"
-    history:
-      - {ver: "1.0.0", date: "2026-10-30", change: "注册 AutoOps 沙箱工具；输入 HOST 执行主机与 CMDB_MODEL@EASYOPS 模型多选，递归查询模型实例、监控任务和执行状态"}
-      - {ver: "1.0.1", date: "2026-10-30", change: "修复 agent Python 2.7 中文 unicode 输出导致 PutRow/PutStr 失败；保留非阻塞错误并输出可诊断结果"}
-      - {ver: "1.0.9", date: "2026-10-30", change: "监控查询改为 collector_service 内网直连 GET；兼容沙箱 SERVICE_HOST 注入；PutRow 增加唯一行时间戳与限速；增加 instance_limit 防止大模型输出堵塞"}
-      - {ver: "1.1.2", date: "2026-10-31", change: "内部 API 的 IP/org 改为读取 agent conf.yaml（command.server_groups[0].hosts[0].ip、base.client_id）；结果改写 agent /tmp CSV，不再输出 output table"}
-      - {ver: "1.1.3", date: "2026-10-31", change: "切回 192.168.110.24/org=1888，使用 agent 配置自动定位内部 API；HOST 与 BASE_ASSET@ONEMODEL 全量执行验证"}
-      - {ver: "1.1.4", date: "2026-10-31", change: "改为沙箱自动选择内部 agent；移除 @agents 与 instance_limit 入参；仅保留 CMDB 模型选择，全量写入 CSV"}
-      - {ver: "1.1.5", date: "2026-10-31", change: "CSV 增加 ip 列，取 CMDB 实例 ip 属性"}
-      - {ver: "1.1.6", date: "2026-10-31", change: "CMDB_MODEL@EASYOPS 选择器显示与排序改用 objectName（模型名称）+ objectId；脚本名称解析同步修正"}
-      - {ver: "1.1.7", date: "2026-10-31", change: "任务 filter=all 时按任务覆盖范围判断实例已监控，避免实例明细接口为空导致1926台主机全部误报未监控"}
-      - {ver: "1.1.8", date: "2026-10-31", change: "修复 Python 2 中文监控状态值匹配的 ASCII 解码异常；24环境全量验证1926/1926已监控"}
-      - {ver: "1.1.9", date: "2026-10-31", change: "监控状态只采信任务详情中的实例级状态；任务 filter 仅判断覆盖关系"}
-      - {ver: "1.1.10", date: "2026-10-31", change: "实例与监控任务 URL 未注入前端地址时改用 agent conf.yaml 内网 IP，避免生成127.0.0.1链接"}
-      - {ver: "1.1.11", date: "2026-10-31", change: "修复 HTTPS 网关调用与采集器 UUID 回退，解析任务状态接口返回的 lastErr/status"}
-      - {ver: "1.1.12", date: "2026-10-31", change: "沙箱无前端 Cookie 时优先走 collector_service:8125 内网 GetStatus，实例级状态不再因 401 丢失"}
-      - {ver: "1.1.13", date: "2026-10-31", change: "修复状态 UUID：从 CMDB 实例 _uuid 传递采集器 UUID，禁止用插件 instanceId 代替；前端抓包 status=ok/lastErr 结果可复现"}
-      - {ver: "1.1.14", date: "2026-10-31", change: "修复状态映射覆盖：分离 CMDB 实例字段与任务实例映射，避免业务 status=运营中覆盖监控 status=ok"}
-      - {ver: "1.1.15", date: "2026-11-01", change: "所有请求统一内部API，仿照 easyops_client.py internal 构建；删除前端网关/Cookie依赖，CSV新增脱敏采集参数 collectionParams；110.24沙箱全量及远端CSV回读验证"}
-      - {ver: "1.1.16", date: "2026-11-01", change: "CMDB实例链接取实例 _object_id（普通模型），不使用父模型ID或业务objectId属性"}
-      - {ver: "1.1.17", date: "2026-11-01", change: "按实例_object_id普通模型分组查询监控任务，名称/URL/状态/参数使用同一模型分组；父子模型重复实例去重"}
-      - {ver: "1.1.18", date: "2026-11-02", change: "实例明细改12000内部ListJobInstances，configId/statusFilter=all/name查询；按目标instanceId关联executionHosts.uuid；禁止目标_uuid/任务UUID/CMDB instanceId冒充执行主机UUID，空UUID不请求；多执行主机汇总；8项回归及FIREWALL/HOST沙箱1952行CSV回读通过"}
-      - {ver: "1.1.19", date: "2026-11-02", change: "CSV新增zabbix_memo列，CMDB可选属性不存在或为null留空；11项回归及FIREWALL/HOST沙箱1952行CSV回读通过"}
-    scenario: 查询指定 CMDB 模型（父模型自动展开子模型）及实例是否配置监控、所属监控任务、实例级监控状态和实际报错；工具包已归档，可直接导入
-    notes: "AutoOps toolId=0d0a4e02b4c60aaab64b1c8510d37423；v1.1.19/vId=d7a89eccf278848fe0b545f889c16fe5；sandboxRun=true。所有请求仿照sdk/easyops_client.py internal，IP/org优先读agent conf.yaml，无前端网关。任务列表12000，实例明细12000 GET /api/v1/list-resource-monitor-job-instances，query={configId,statusFilter:all,name:'',page,pageSize}，data.instances按instanceId关联；旧8125/api/v1/list-job-instances对当前任务返回空，不能用它代替前端任务明细。状态8125 POST /v1/job_status/get，body={configId,list:[{instanceId,uuid}],sampler:metric_sampler}；instanceId是目标资产主键，uuid是任务明细executionHosts中的执行主机UUID，不是目标资产_uuid、任务UUID、pluginId或CMDB instanceId。无执行主机只标记未知并写诊断，不发送空UUID，避免后端空MGET；多执行主机去重后分批查询，混合结果汇总部分成功。父模型仅发现实例，普通模型分组查任务；按(_object_id,instanceId)全局去重。任务filter只判断覆盖，不代替监控status；CSV collectionParams保留脱敏的任务参数表达式，zabbix_memo读取目标实例同名可选属性，缺失/null为空；查询开启ignore_missing_field_error。2026-11-02 FIREWALL/HOST全量：1952行且链接唯一，已监控1952；防火墙26失败，真实lastErr为SNMP目标null:161；HOST 1成功/1925未知，110.24成功且lastErr空；无mget错误，远端CSV回读通过，zabbix_memo列存在且本批1952行均为空，与CMDB查询一致；11项离线回归覆盖非空中文、引号及缺属性场景。执行needNotify=\"true\"；验收 https://192.168.110.24/next/tool/task/202611_task18e426760ca1c64fbe10；CSV=/tmp/cmdb_monitor_status_20261102_142740.csv；原生包script与线上及本地一致。"
-    added: "2026-10-30"
-
   - id: cmdb-model-monitor-status-package
     name: CMDB模型监控状态检查工具包
     category: tools
