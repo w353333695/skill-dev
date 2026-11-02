@@ -488,10 +488,9 @@ def _job_instances(job):
     page = 1
     try:
         while True:
-            query = {'page': page, 'pageSize': DEFAULT_PAGE_SIZE, 'jobId': job_id,
-                     'status': '', 'showKey': ''}
-            response = _internal_request('GET', _status_backend(), '/api/v1/list-job-instances',
-                                         query=query, contract=MONITOR_INSTANCES_CONTRACT)
+            query = {'page': page, 'pageSize': DEFAULT_PAGE_SIZE, 'configId': job_id,
+                     'statusFilter': 'all', 'name': ''}
+            response = _monitor_get(MONITOR_INSTANCES_BACKEND_PATH, MONITOR_INSTANCES_CONTRACT, query)
             batch = _list(response)
             rows.extend(batch)
             data = _data(response)
@@ -506,44 +505,87 @@ def _job_instances(job):
 
 
 def _status_map(job, instance_ids, instance_mapping=None):
-    """批量读取任务详情中的实例状态，返回 instanceId -> {status,lastErr,...}。"""
+    """按目标 instanceId 关联任务明细，使用实际执行主机查询状态。"""
     job_id = _job_id(job)
     if not job_id or not instance_ids:
         return {}
     instance_mapping = instance_mapping or {}
     status_list = []
+    requested = {}
+    result = {}
     for value in instance_ids:
-        detail = instance_mapping.get(_text(value)) or {}
-        uuid = _extract_uuid(detail) or _extract_uuid(job)
-        status_list.append({'instanceId': _text(value), 'uuid': _text(uuid)})
-    uuid_count = len([item for item in status_list if item.get('uuid')])
-    if uuid_count == 0:
-        LOGGER.warning('query instance status job=%s has no collector uuid; status API may return no data',
-                       _log_text(job_id))
-    body = {'configId': _text(job_id), 'list': status_list, 'sampler': 'metric_sampler'}
-    try:
-        response = _status_get(body)
-        rows = _list(response)
-        result = {}
-        for row in rows:
-            if not isinstance(row, dict):
-                continue
-            instance_id = row.get('instanceId') or row.get('instance_id') or row.get('id')
-            if instance_id:
-                # 兼容网关把状态包在 collectStatus/status 对象中的返回格式。
+        instance_id = _text(value)
+        detail = instance_mapping.get(instance_id)
+        if not isinstance(detail, dict):
+            continue
+        executors = detail.get('executionHosts') or []
+        uuids = []
+        if executors:
+            for executor in executors:
+                uuid = _text(executor.get('uuid')) if isinstance(executor, dict) else ''
+                if uuid and uuid not in uuids:
+                    uuids.append(uuid)
+        else:
+            uuid = _extract_uuid(detail)
+            if uuid:
+                uuids.append(uuid)
+        if not uuids:
+            result[instance_id] = {'instanceId': instance_id, 'status': 'unknown',
+                                   'lastErr': u'任务覆盖该实例，但任务明细未返回可用执行主机，无法查询监控状态'}
+            continue
+        requested[instance_id] = uuids
+        for uuid in uuids:
+            status_list.append({'instanceId': instance_id, 'uuid': uuid})
+    LOGGER.info('[_status_map] job=%s targets=%d executorPairs=%d missingExecutor=%d',
+                _log_text(job_id), len(instance_ids), len(status_list), len(result))
+    grouped = {}
+    for offset in range(0, len(status_list), DEFAULT_PAGE_SIZE):
+        batch = status_list[offset:offset + DEFAULT_PAGE_SIZE]
+        body = {'configId': _text(job_id), 'list': batch, 'sampler': 'metric_sampler'}
+        try:
+            response = _status_get(body)
+            for row in _list(response):
+                if not isinstance(row, dict):
+                    continue
+                instance_id = _text(row.get('instanceId') or row.get('instance_id') or row.get('id'))
+                if instance_id not in requested:
+                    continue
                 nested = row.get('collectStatus') or row.get('collect_status')
                 if isinstance(nested, dict):
                     merged = dict(nested)
                     merged.update(row)
                     row = merged
-                result[_text(instance_id)] = row
-        LOGGER.info('query instance status job=%s requested=%d returned=%d',
-                    _log_text(job_id), len(instance_ids), len(result))
-        return result
-    except Exception as error:
-        LOGGER.warning('[_status_map] 查询实例状态失败 job=%s requested=%d: %s',
-                       _log_text(job_id), len(instance_ids), _log_text(traceback.format_exc()))
-        return {}
+                grouped.setdefault(instance_id, []).append(row)
+        except Exception:
+            tb = traceback.format_exc()
+            LOGGER.warning('[_status_map] 查询实例状态失败 job=%s requested=%d: %s',
+                           _log_text(job_id), len(batch), _log_text(tb))
+            for item in batch:
+                grouped.setdefault(item['instanceId'], []).append({
+                    'instanceId': item['instanceId'], 'uuid': item['uuid'], 'status': 'unknown',
+                    'lastErr': u'[_status_map] 状态查询失败: %s' % _text(tb.strip().splitlines()[-1])})
+    returned = len(grouped)
+    for instance_id, uuids in requested.items():
+        rows = grouped.get(instance_id, [])
+        if len(rows) < len(uuids):
+            rows.append({'instanceId': instance_id, 'status': 'unknown',
+                         'lastErr': u'状态接口未返回全部执行主机的实例级监控状态'})
+        if len(rows) == 1:
+            result[instance_id] = rows[0]
+            continue
+        states = set(_row_status(row) for row in rows)
+        state = 'partial' if len(states) > 1 else {
+            u'成功': 'ok', u'失败': 'failed', u'部分成功': 'partial'}.get(next(iter(states)), 'unknown')
+        errors = []
+        for row in rows:
+            error = _status_error(row)
+            if error and error not in errors:
+                errors.append(error)
+        result[instance_id] = {'instanceId': instance_id, 'status': state,
+                               'lastErr': u'; '.join(errors)}
+    LOGGER.info('[_status_map] job=%s targets=%d returned=%d missingExecutor=%d',
+                _log_text(job_id), len(instance_ids), returned, len(result) - len(requested))
+    return result
 
 
 def _status_text(value):
@@ -593,23 +635,23 @@ def _status_error(row):
 
 
 def _extract_uuid(row):
-    """兼容任务实例、插件和状态接口的采集器 UUID 字段命名。"""
+    """兼容任务明细返回的执行采集器 UUID，不使用目标资产 _uuid。"""
     if not isinstance(row, dict):
         return ''
     for key in ('uuid', 'samplerUuid', 'samplerUUID', 'agentJobUuid', 'collectorInstanceId',
-                'collector_instance_id', '_uuid'):
+                'collector_instance_id'):
         value = row.get(key)
         if value not in (None, ''):
             return _text(value)
     collector = row.get('collector')
     if isinstance(collector, dict):
-        for key in ('instanceId', 'instance_id', 'InstanceId', 'uuid', '_uuid'):
+        for key in ('uuid', '_uuid'):
             value = collector.get(key)
             if value not in (None, ''):
                 return _text(value)
         fields = collector.get('fields')
         if isinstance(fields, dict):
-            for key in ('instanceId', 'InstanceId', 'uuid', '_uuid'):
+            for key in ('uuid', '_uuid'):
                 value = fields.get(key)
                 if isinstance(value, dict):
                     value = value.get('stringValue') or value.get('StringValue') or value.get('value')
@@ -757,20 +799,9 @@ def main():
         task_count += len(jobs)
         instance_ids = [_text(instance.get('instanceId') or instance.get('id')) for instance in instances]
         maps = []
-        instance_mapping = {}
-        for instance in instances:
-            instance_id = _text(instance.get('instanceId') or instance.get('id'))
-            if instance_id:
-                instance_mapping[instance_id] = instance
         for job in jobs:
-            # 状态接口要求采集器实例 UUID；优先使用 CMDB 实例的 _uuid，
-            # 任务详情返回的 collector UUID 仅作为补充，不能用 pluginId 代替。
             job_mapping = _job_instance_map(job)
-            status_mapping = dict(instance_mapping)
-            status_mapping.update(job_mapping)
-            # job_mapping 只用于判断任务实例是否命中；status_mapping 仅供
-            # 状态接口提取 UUID，不能把 CMDB 的业务 status 当成监控状态。
-            maps.append((job, job_mapping, _status_map(job, instance_ids, status_mapping)))
+            maps.append((job, job_mapping, _status_map(job, instance_ids, job_mapping)))
         for instance in instances:
             instance_id = _text(instance.get('instanceId') or instance.get('id'))
             if not instance_id:

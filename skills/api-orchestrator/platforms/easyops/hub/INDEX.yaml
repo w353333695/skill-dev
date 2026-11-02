@@ -779,8 +779,8 @@ items:
   - id: cmdb-model-monitor-status-check
     name: CMDB模型监控状态检查
     category: scripts
-    files: [tools/monitor_status_check.py]
-    version: "1.1.17"
+    files: [tools/monitor_status_check.py, tools/tests/test_monitor_status_check.py]
+    version: "1.1.18"
     history:
       - {ver: "1.0.0", date: "2026-10-30", change: "注册 AutoOps 沙箱工具；输入 HOST 执行主机与 CMDB_MODEL@EASYOPS 模型多选，递归查询模型实例、监控任务和执行状态"}
       - {ver: "1.0.1", date: "2026-10-30", change: "修复 agent Python 2.7 中文 unicode 输出导致 PutRow/PutStr 失败；保留非阻塞错误并输出可诊断结果"}
@@ -801,20 +801,22 @@ items:
       - {ver: "1.1.15", date: "2026-11-01", change: "所有请求统一内部API，仿照 easyops_client.py internal 构建；删除前端网关/Cookie依赖，CSV新增脱敏采集参数 collectionParams；110.24沙箱全量及远端CSV回读验证"}
       - {ver: "1.1.16", date: "2026-11-01", change: "CMDB实例链接取实例 _object_id（普通模型），不使用父模型ID或业务objectId属性"}
       - {ver: "1.1.17", date: "2026-11-01", change: "按实例_object_id普通模型分组查询监控任务，名称/URL/状态/参数使用同一模型分组；父子模型重复实例去重"}
+      - {ver: "1.1.18", date: "2026-11-02", change: "实例明细改12000内部ListJobInstances，configId/statusFilter=all/name查询；按目标instanceId关联executionHosts.uuid；禁止目标_uuid/任务UUID/CMDB instanceId冒充执行主机UUID，空UUID不请求；多执行主机汇总；8项回归及FIREWALL/HOST沙箱1952行CSV回读通过"}
     scenario: 查询指定 CMDB 模型（父模型自动展开子模型）及实例是否配置监控、所属监控任务、实例级监控状态和实际报错；工具包已归档，可直接导入
-    notes: "AutoOps toolId=0d0a4e02b4c60aaab64b1c8510d37423；v1.1.17/vId=d2edfbcb7f1ba148699b3728b7cc0cb6；sandboxRun=true。内部API按 sdk/easyops_client.py internal 语义构建，IP/org优先读取agent conf.yaml，不调用前端网关。任务列表12000，实例详情8125 GET /api/v1/list-job-instances，状态8125 POST /v1/job_status/get，body={configId,list:[{instanceId,uuid}],sampler}；UUID取目标采集器真实_uuid，禁止用pluginId代替。父模型只用于发现实例；按实例_object_id普通模型分组，用普通模型查询监控任务objectIdQ，同一分组贯穿名称/URL/状态/参数；按(_object_id,instanceId)全局去重，避免父子模型或多选重复输出；任务filter仅判断覆盖，监控status只来自实例监控状态。collectionParams为每个匹配任务的JSON数组（jobId/jobName/collectAgent/collectorParams/collectParams/params），保留任务参数原始表达式，不冒充已解析运行值，敏感值脱敏。2026-11-01 同选BASE_ASSET@ONEMODEL和HOST全量验收：8个实际模型、11477行，去除9551次重复命中；CSV回读11477个唯一实例链接，父模型链接为0，110.24行成功且lastErr为空；26个防火墙实例缺采集器UUID导致状态未知，未纳入本次修复。执行needNotify=\"true\"；验收 https://192.168.110.24/next/tool/task/202611_task18e3cfaa50897373a172；CSV写agent /tmp；工具包见cmdb-model-monitor-status-package。"
+    notes: "AutoOps toolId=0d0a4e02b4c60aaab64b1c8510d37423；v1.1.18/vId=12ecabb40e5864c7328f2d391f6fe552；sandboxRun=true。所有请求仿照sdk/easyops_client.py internal，IP/org优先读agent conf.yaml，无前端网关。任务列表12000，实例明细12000 GET /api/v1/list-resource-monitor-job-instances，query={configId,statusFilter:all,name:'',page,pageSize}，data.instances按instanceId关联；旧8125/api/v1/list-job-instances对当前任务返回空，不能用它代替前端任务明细。状态8125 POST /v1/job_status/get，body={configId,list:[{instanceId,uuid}],sampler:metric_sampler}；instanceId是目标资产主键，uuid是任务明细executionHosts中的执行主机UUID，不是目标资产_uuid、任务UUID、pluginId或CMDB instanceId。无执行主机只标记未知并写诊断，不发送空UUID，避免后端空MGET；多执行主机去重后分批查询，混合结果汇总部分成功。父模型仅发现实例，普通模型分组查任务；按(_object_id,instanceId)全局去重。任务filter只判断覆盖，不代替监控status；CSV collectionParams保留脱敏的任务参数表达式。2026-11-02 FIREWALL/HOST全量：1952行且链接唯一，已监控1952；防火墙26失败，真实lastErr为SNMP目标null:161；HOST 1成功/1925未知，110.24成功且lastErr空；无mget错误，远端CSV回读通过。执行needNotify=\"true\"；验收 https://192.168.110.24/next/tool/task/202611_task18e4263f331e56bb22c1；CSV=/tmp/cmdb_monitor_status_20261102_142343.csv；原生包script与线上及本地一致。"
     added: "2026-10-30"
 
   - id: cmdb-model-monitor-status-package
     name: CMDB模型监控状态检查工具包
     category: tools
     files: [CMDB模型监控状态检查.tool.tar.gz]
-    version: "1.1.17"
+    version: "1.1.18"
     history:
       - {ver: "1.1.14", date: "2026-10-31", change: "从线上导出原生工具包归档"}
       - {ver: "1.1.15", date: "2026-11-01", change: "纯内部API调用，增加CSV采集参数列；导出包script与线上源码一致"}
       - {ver: "1.1.16", date: "2026-11-01", change: "实例URL使用所属普通模型_object_id，避免父模型详情页链接错误"}
       - {ver: "1.1.17", date: "2026-11-01", change: "监控任务按实例所属普通模型查询，父子模型重复实例去重"}
+      - {ver: "1.1.18", date: "2026-11-02", change: "从线上导出修复版：目标instanceId关联实际executionHosts，禁止空UUID状态查询，FIREWALL/HOST沙箱及CSV回读验收通过"}
     scenario: 导入沙箱工具，按CMDB模型汇总实例监控覆盖、状态、报错与采集参数
     notes: "原生tar.gz工具包（dat/config/script）；工具管理导入使用。源码及验收见cmdb-model-monitor-status-check，导入不包含测试执行历史与agent上的CSV。"
     added: "2026-10-31"
