@@ -1,8 +1,9 @@
 """验证物理服务器 SNMP 监控套件的导入目录、权限和元数据。"""
 import json
+import re
+from unittest.mock import patch
 import os
 from pathlib import Path
-import re
 import stat
 import unittest
 import zipfile
@@ -11,7 +12,7 @@ import zipfile
 class PackageImportTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        default = Path(__file__).resolve().parent.parent / "物理服务器SNMP监控套件_0.1.1.zip"
+        default = Path(__file__).resolve().parent.parent / "物理服务器SNMP监控套件_0.1.2.zip"
         cls.archive = zipfile.ZipFile(os.environ.get("MONITOR_PACKAGE", str(default)))
         cls.root = "物理服务器SNMP监控/"
 
@@ -23,7 +24,7 @@ class PackageImportTests(unittest.TestCase):
         plugin = self.archive.read(self.root + "plugin.yaml").decode("utf-8")
         name = re.search(r"(?m)^name: (.+)$", plugin).group(1)
         self.assertEqual(self.root, name + "/")
-        self.assertIn('version: "0.1.1"', plugin)
+        self.assertIn('version: "%s"' % os.environ.get('MONITOR_PACKAGE_VERSION', '0.1.2'), plugin)
         self.assertIn("samplerType: metric_sampler", plugin)
         self.assertIn("scriptType: python", plugin)
 
@@ -38,6 +39,34 @@ class PackageImportTests(unittest.TestCase):
             if parent != ".":
                 self.assertIn(parent + "/", names)
             self.assertNotIn("__pycache__", entry.filename)
+
+    def test_original_script_survives_backend_regeneration(self):
+        original = self.archive.read(self.root + "src/物理服务器SNMP监控.orig").decode("utf-8")
+        params = ["ip", "port", "version", "community", "username", "auth_key", "auth_protocol", "priv_key", "priv_protocol"]
+        prefix = "import os\n" + "".join('%s = os.environ.get("EASYOPS_COLLECTOR_%s")\n' % (name, name) for name in params)
+        namespace = {"__name__": "rename_test"}
+        environment = {"EASYOPS_COLLECTOR_" + name: "example" for name in params}
+        environment["EASYOPS_COLLECTOR_ip"] = "192.0.2.8"
+        environment["EASYOPS_COLLECTOR_port"] = "1161"
+        environment["EASYOPS_COLLECTOR_version"] = "2c"
+        regenerated = compile(prefix + original, "renamed-monitor.py", "exec")
+        with patch.dict(os.environ, environment):
+            exec(regenerated, namespace)
+        for name in params:
+            self.assertEqual(namespace[name], environment["EASYOPS_COLLECTOR_" + name])
+        self.assertIn("huawei", namespace["PROFILES"])
+        self.assertIn("dell", namespace["PROFILES"])
+
+    def test_original_has_no_generated_bindings(self):
+        original = self.archive.read(self.root + "src/物理服务器SNMP监控.orig").decode("utf-8")
+        self.assertNotIn("from __future__ import", original)
+        self.assertNotRegex(original, r'(?m)^\w+\s*=\s*os\.environ\.get\("EASYOPS_COLLECTOR_')
+
+    def test_published_script_retains_environment_bindings(self):
+        script = self.archive.read(self.root + "src/物理服务器SNMP监控.py").decode("utf-8")
+        for name in ["ip", "port", "version", "community", "username", "auth_key", "auth_protocol", "priv_key", "priv_protocol"]:
+            binding = '%s = os.environ.get("EASYOPS_COLLECTOR_%s")' % (name, name)
+            self.assertEqual(script.count(binding), 1)
 
     def test_metric_files_and_script(self):
         for name in ("metric_set.json", "origin_metric.json", "alias_metric.json"):

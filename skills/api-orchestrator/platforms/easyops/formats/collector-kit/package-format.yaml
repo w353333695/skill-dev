@@ -49,10 +49,17 @@ package_structure:
         └── bin/                    # 二进制（exporter 类型必填）
 
   files_by_type:
-    simple-script: [plugin.yaml, src/<script>.py, origin_metric.json, alias_metric.json, metric_set.json, readme]
+    simple-script: [plugin.yaml, src/<script>.py, src/<script>.orig, origin_metric.json, alias_metric.json, metric_set.json, readme]
     metricbeat: [plugin.yaml, config.template.yaml, origin_metric.json, alias_metric.json, metric_set.json]
     exporter: [plugin.yaml, deploy/*, bin/*, origin_metric.json, alias_metric.json, metric_set.json]
     prometheus: [plugin.yaml, origin_metric.json, alias_metric.json, metric_set.json]   # noPackage，最简
+
+  script_regeneration:
+    rule: "所有simple-script发布包必须保留.orig未注入正文，不能只交付.py；监控metric_sampler和CMDB process_sampler均适用。"
+    trigger: "ScriptType非空且导入表单name不同于包内name，或更新时包名与已有套件名不同，触发handleScriptTypePlugin。"
+    behavior: "updatePluginScript先删除scriptPath指向的.py，再读src/<包内name>.orig；缺失时回退src/<scriptPath文件名去扩展名>.orig，然后按params生成环境变量前导。"
+    python_safety: ".orig不得含生成的取参前导；避免future导入被平台前置代码破坏；.py仍须完整注入所有参数。验收须包含改名再生成后的编译及模拟参数取值，不能仅检查原.py语法。"
+    evidence: "export_import_custom/imexport_service.go:390,596,692-724；2026-11-02在110.24复现0.1.1改名导入orig缺失，0.1.2修复后越过该阶段；回归见hub/monitor-kits/tests/test_physical_server_monitor_package.py。"
 
   optional_files_recognized_on_import:
     # 这些文件 import 时若存在会被特殊处理（imexport_service.go importOther）
