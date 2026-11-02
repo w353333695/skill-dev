@@ -222,6 +222,16 @@ items:
     scenario: 深信服 AD 负载均衡器监控指标套件+告警规则模板
     notes: 告警规则模板与套件配套，不单独成商品
     added: "2026-08-29"
+  - id: physical-server-snmp-monitor-kit
+    name: 物理服务器SNMP监控套件
+    category: monitor-kits
+    files: [物理服务器SNMP监控套件_0.1.0.zip]
+    version: "0.1.0"
+    history:
+      - {ver: "0.1.0", date: "2026-11-02", change: "初版：华为/浪潮/联想/百信/戴尔/H3C品牌识别；标准MIB与厂商私有MIB候选；CPU/内存/磁盘/电源/风扇/温度/网口/光口统一指标；MIB证据随包保留"}
+    scenario: 物理服务器BMC SNMP硬件与接口监控
+    notes: "脚本内置Python dict/list配置，SNMP基础连通性失败直接报错，单OID无响应非阻塞；MIB资料见mib-evidence.json、oid-dictionary.json、mib-catalog.json、sources.md；浪潮/百信私有OID需按具体BMC型号实测补充。"
+    added: "2026-11-02"
   - id: router-monitor-kit
     name: 路由器监控套件(通用)
     category: monitor-kits
