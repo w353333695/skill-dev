@@ -1,5 +1,7 @@
 """实例明细、执行主机关联和无执行主机状态回归。"""
 import importlib.util
+import csv
+import io
 from pathlib import Path
 import unittest
 from unittest.mock import patch
@@ -11,6 +13,35 @@ SPEC.loader.exec_module(monitor)
 
 
 class MonitorStatusTests(unittest.TestCase):
+    def test_cmdb_requests_optional_zabbix_memo(self):
+        with patch.object(monitor, 'cmdb', return_value={'data': {'list': []}}) as request:
+            monitor._search_instances('HOST')
+        body = request.call_args.args[2]
+        self.assertIn('zabbix_memo', body['fields'])
+        self.assertTrue(body['ignore_missing_field_error'])
+
+    def test_main_preserves_memo_and_blanks_missing_values(self):
+        instances = [{'instanceId': 'present', 'zabbix_memo': '来自Zabbix,备注'},
+                     {'instanceId': 'absent'}, {'instanceId': 'null', 'zabbix_memo': None}]
+        captured = []
+        with patch.object(monitor, '_selected_models', return_value=[]), \
+             patch.object(monitor, '_instance_groups', return_value=[('HOST', '主机', instances)]), \
+             patch.object(monitor, '_model_jobs', return_value=[]), \
+             patch.object(monitor, '_write_csv', side_effect=lambda rows: captured.extend(rows) or 'memory.csv'), \
+             patch.object(monitor, '_base_url', return_value='http://example.invalid'), \
+             patch.object(monitor, 'put_str'):
+            monitor.main()
+        self.assertEqual([row['zabbix_memo'] for row in captured], ['来自Zabbix,备注', '', ''])
+
+    def test_csv_contains_optional_memo_column(self):
+        stream = io.StringIO()
+        with patch.object(monitor.io, 'open', return_value=stream), patch.object(stream, 'close'):
+            monitor._write_csv([{'instance': 'one', 'zabbix_memo': '备注,"引号"'}, {'instance': 'two'}])
+        rows = list(csv.DictReader(io.StringIO(stream.getvalue().lstrip('\ufeff'))))
+        self.assertIn('zabbix_memo', rows[0])
+        self.assertEqual(rows[0]['zabbix_memo'], '备注,"引号"')
+        self.assertEqual(rows[1]['zabbix_memo'], '')
+
     def test_instance_detail_uses_config_id_and_internal_monitor_api(self):
         pages = [{'data': {'instances': [{'instanceId': 'one'}, {'instanceId': 'two'}], 'total': 3}},
                  {'data': {'instances': [{'instanceId': 'three'}], 'total': 3}}]

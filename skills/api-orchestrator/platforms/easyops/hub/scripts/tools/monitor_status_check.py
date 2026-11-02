@@ -7,7 +7,7 @@
 沙箱执行：不需要 @agents，平台自动选择内部 agent。
 
 输出：
-    CSV 文件：模型名称、实例、是否监控、所属监控任务、监控状态、报错、采集参数（敏感值脱敏）；仅返回 CSV 绝对路径和汇总。
+    CSV 文件：模型名称、实例、是否监控、所属监控任务、监控状态、报错、采集参数（敏感值脱敏）、zabbix_memo（无属性或无值留空）；仅返回 CSV 绝对路径和汇总。
 
 脚本只读调用 CMDB、资源监控任务和任务状态接口；沙箱运行不需要主机文件权限。
 """
@@ -359,7 +359,7 @@ def _search_instances(object_id, query=None):
     page = 1
     while True:
         body = {'page': page, 'page_size': DEFAULT_PAGE_SIZE,
-                'fields': ['instanceId', '_object_id', '_uuid', 'name', 'deviceName', 'objectId', 'modelId', 'modelName', 'ip', 'status'],
+                'fields': ['instanceId', '_object_id', '_uuid', 'name', 'deviceName', 'objectId', 'modelId', 'modelName', 'ip', 'status', 'zabbix_memo'],
                 'query': query or {}, 'ignore_missing_field_error': True}
         response = cmdb('POST', '/v3/object/%s/instance/_search' % object_id, body)
         batch = _list(response)
@@ -730,7 +730,7 @@ def _collection_params(jobs):
 
 def _write_csv(rows):
     path = '/tmp/cmdb_monitor_status_%s.csv' % time.strftime('%Y%m%d_%H%M%S')
-    columns = ['modelName', 'ip', 'instance', 'isMonitored', 'monitorJob', 'monitorStatus', 'error', 'collectionParams']
+    columns = ['modelName', 'ip', 'instance', 'isMonitored', 'monitorJob', 'monitorStatus', 'error', 'collectionParams', 'zabbix_memo']
     try:
         stream = io.open(path, 'w', encoding='utf-8', newline='')
         try:
@@ -847,7 +847,8 @@ def main():
                 task_url = _job_url(_job_id(matched[0]))
             row = {'modelName': model_name, 'ip': _text(instance.get('ip') or ''), 'instance': _instance_url(_text(instance.get('_object_id') or model_id), instance_id),
                    'isMonitored': monitor, 'monitorJob': task_url, 'monitorStatus': state,
-                   'error': error, 'collectionParams': _collection_params(matched)}
+                   'error': error, 'collectionParams': _collection_params(matched),
+                   'zabbix_memo': _text(instance.get('zabbix_memo'))}
             all_rows.append(row)
     csv_path = _write_csv(all_rows)
     LOGGER.info('完成采集：模型数=%d，实例行数=%d，监控任务数=%d，跳过实例=%d', len(models), len(all_rows), task_count, omitted)
