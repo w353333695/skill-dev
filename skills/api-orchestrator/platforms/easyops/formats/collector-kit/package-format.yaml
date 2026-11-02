@@ -22,6 +22,8 @@ package_structure:
   top_level_rule:
     rule: "zip 顶层目录名必须与 plugin.yaml 的 name 完全一致，否则上传失败；目录条目（mode 755）+ 文件 mode 664，否则上传后会报错permission denied"
     source: "upload.md:24"
+    zipfile_regression: "2026-11-02在110.24复现：仅用ZipFile.write逐个写文件，没有显式目录条目，会导致plugin.yaml解压permission denied。必须显式写顶层/所有父目录，ZipInfo.create_system=3，目录external_attr=((S_IFDIR|0755)<<16)|0x10，文件external_attr=(S_IFREG|0664)<<16；根目录与plugin.yaml name一致。结构测试见hub/monitor-kits/tests/test_physical_server_monitor_package.py。"
+    import_environment_blocker: "2026-11-02修复结构后进入repoMetaClient.ImportArchive，但制品存储返回logic.object_store_service的ens_get_all_v2 NotFound(-100005)，外层HTTP500/code100010；这是环境依赖阻塞，不代表导入成功，不应改OID规避或自动启用任务。"
 
   tree: |
     {套件名}.zip
