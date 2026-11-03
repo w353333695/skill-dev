@@ -1,6 +1,8 @@
 """验证物理服务器 SNMP 监控套件的导入目录、权限和元数据。"""
 import json
 import io
+import logging
+import yaml
 from contextlib import redirect_stdout
 import re
 from unittest.mock import patch
@@ -14,7 +16,7 @@ import zipfile
 class PackageImportTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        default = Path(__file__).resolve().parents[3] / "hub" / "monitor-kits" / "物理服务器SNMP监控套件_0.1.4.zip"
+        default = Path(__file__).resolve().parents[3] / "hub" / "monitor-kits" / "物理服务器SNMP监控套件_0.1.5.zip"
         cls.archive = zipfile.ZipFile(os.environ.get("MONITOR_PACKAGE", str(default)))
         cls.root = "物理服务器SNMP监控/"
 
@@ -26,7 +28,7 @@ class PackageImportTests(unittest.TestCase):
         plugin = self.archive.read(self.root + "plugin.yaml").decode("utf-8")
         name = re.search(r"(?m)^name: (.+)$", plugin).group(1)
         self.assertEqual(self.root, name + "/")
-        self.assertIn('version: "%s"' % os.environ.get('MONITOR_PACKAGE_VERSION', '0.1.4'), plugin)
+        self.assertIn('version: "%s"' % os.environ.get('MONITOR_PACKAGE_VERSION', '0.1.5'), plugin)
         self.assertIn("samplerType: metric_sampler", plugin)
         self.assertIn("scriptType: python", plugin)
 
@@ -44,7 +46,7 @@ class PackageImportTests(unittest.TestCase):
 
     def test_original_script_survives_backend_regeneration(self):
         original = self.archive.read(self.root + "src/物理服务器SNMP监控.orig").decode("utf-8")
-        params = ["ip", "port", "version", "community", "username", "auth_key", "auth_protocol", "priv_key", "priv_protocol"]
+        params = ["ip", "port", "version", "community", "username", "auth_key", "auth_protocol", "priv_key", "priv_protocol", "log_level"]
         prefix = "import os\n" + "".join('%s = os.environ.get("EASYOPS_COLLECTOR_%s")\n' % (name, name) for name in params)
         namespace = {"__name__": "rename_test"}
         environment = {"EASYOPS_COLLECTOR_" + name: "example" for name in params}
@@ -66,7 +68,7 @@ class PackageImportTests(unittest.TestCase):
 
     def test_published_script_retains_environment_bindings(self):
         script = self.archive.read(self.root + "src/物理服务器SNMP监控.py").decode("utf-8")
-        for name in ["ip", "port", "version", "community", "username", "auth_key", "auth_protocol", "priv_key", "priv_protocol"]:
+        for name in ["ip", "port", "version", "community", "username", "auth_key", "auth_protocol", "priv_key", "priv_protocol", "log_level"]:
             binding = '%s = os.environ.get("EASYOPS_COLLECTOR_%s")' % (name, name)
             self.assertEqual(script.count(binding), 1)
 
@@ -127,6 +129,103 @@ class PackageImportTests(unittest.TestCase):
             key = next(iter(record["vals"]))
             self.assertEqual(set(record["dims"]), {tag["name"] for tag in origins[key]["tagDefine"]})
         self.assertNotIn("GATHERING DATA", output.getvalue())
+
+    def load_runtime(self, environment=None):
+        namespace = {"__name__": "runtime_test"}
+        with patch.dict(os.environ, environment or {}, clear=True):
+            exec(compile(self.archive.read(self.root + "src/物理服务器SNMP监控.py"), "monitor.py", "exec"), namespace)
+        return namespace
+
+    def test_cmdb_parameters_do_not_use_encryption_or_secret(self):
+        plugin = yaml.safe_load(self.archive.read(self.root + "plugin.yaml"))
+        for parameter in plugin["paramDefine"]:
+            if str(parameter.get("defaultValue", "")).startswith("$."):
+                self.assertFalse(parameter["isEncrypt"], parameter["name"])
+                self.assertFalse(parameter["isFromSecret"], parameter["name"])
+        port = next(parameter for parameter in plugin["paramDefine"] if parameter["name"] == "port")
+        self.assertTrue(port["optional"])
+
+    def test_port_normalizes_missing_values_and_preserves_configured_value(self):
+        for value in ("", "null", "None", "undefined", "  null  ", "$.snmp_conf.snmpPort"):
+            with self.subTest(value=value):
+                runtime = self.load_runtime({"EASYOPS_COLLECTOR_port": value})
+                self.assertEqual(runtime["port"], "161")
+        self.assertEqual(self.load_runtime()["port"], "161")
+        self.assertEqual(self.load_runtime({"EASYOPS_COLLECTOR_port": "1161"})["port"], "1161")
+        self.assertEqual(self.load_runtime({"EASYOPS_COLLECTOR_port": "null", "EASYOPS_COLLECTOR_snmpPort": "1161"})["port"], "1161")
+
+    def test_log_level_is_configurable_with_error_default(self):
+        plugin = yaml.safe_load(self.archive.read(self.root + "plugin.yaml"))
+        parameter = next(parameter for parameter in plugin["paramDefine"] if parameter["name"] == "log_level")
+        self.assertEqual(parameter["defaultValue"], "ERROR")
+        self.assertIn("log_level", plugin["params"])
+        runtime = self.load_runtime()
+        self.assertEqual(runtime["LOG"].level, logging.ERROR)
+        runtime = self.load_runtime({"EASYOPS_COLLECTOR_log_level": "debug"})
+        self.assertEqual(runtime["LOG"].level, logging.DEBUG)
+        self.load_runtime()
+
+    def test_missing_metric_value_is_warned(self):
+        runtime = self.load_runtime()
+        with self.assertLogs(runtime["LOG"], level="WARNING") as captured:
+            self.assertIsNone(runtime["metric"]("snmp.server.cpu.utilization", None, "cpu0"))
+        self.assertIn("snmp.server.cpu.utilization", " ".join(captured.output))
+        self.assertIn("cpu0", " ".join(captured.output))
+
+    def test_partial_collection_warns_for_missing_metrics_without_blocking(self):
+        runtime = self.load_runtime({"EASYOPS_COLLECTOR_ip": "192.0.2.1"})
+        runtime["vendor"] = lambda response: "fixture"
+        runtime["PROFILES"]["fixture"] = {"cpu": ["1.1"]}
+        class PartialTransport:
+            def get(self, requested):
+                return "fixture"
+            def walk(self, requested):
+                return {"1.1.1": "INTEGER: 10"} if requested == "1.1" else {}
+        runtime["SNMP"] = PartialTransport
+        output = io.StringIO()
+        with self.assertLogs(runtime["LOG"], level="WARNING") as captured, redirect_stdout(output):
+            runtime["main"]()
+        self.assertEqual(len(json.loads(output.getvalue())), 1)
+        warnings = " ".join(captured.output)
+        for key in runtime["METRIC_DIMENSIONS"]:
+            if key != "snmp.server.cpu.utilization":
+                self.assertIn(key, warnings)
+
+    def test_snmp_nonzero_exit_and_empty_output_are_warned_and_redacted(self):
+        runtime = self.load_runtime({"EASYOPS_COLLECTOR_community": "private-fixture-token"})
+        process = type("Process", (), {"returncode": 1, "communicate": lambda self: (b"", b"private-fixture-token: timeout")})()
+        with patch.object(runtime["subprocess"], "Popen", return_value=process), self.assertLogs(runtime["LOG"], level="WARNING") as captured:
+            self.assertEqual(runtime["SNMP"]().walk("1.2.3"), {})
+        messages = " ".join(captured.output)
+        self.assertIn("1.2.3", messages)
+        self.assertNotIn("private-fixture-token", messages)
+
+    def test_debug_logs_complete_redacted_command_response_and_parsing(self):
+        secret = 'debug-secret-"quoted"'
+        runtime = self.load_runtime({"EASYOPS_COLLECTOR_log_level": "DEBUG", "EASYOPS_COLLECTOR_community": secret})
+        raw = ('1.2.3.0 = INTEGER: 42\n' + 'diagnostic-line-' * 150 + secret + '\n').encode()
+        process = type("Process", (), {"returncode": 0, "communicate": lambda self: (raw, secret.encode())})()
+        with patch.object(runtime["subprocess"], "Popen", return_value=process), self.assertLogs(runtime["LOG"], level="DEBUG") as captured:
+            result = runtime["SNMP"]().get("1.2.3.0")
+        messages = " ".join(captured.output)
+        self.assertEqual(result, 42)
+        for marker in ("command=", "raw_stdout_begin", "raw_stdout_end", "raw_stderr_begin", "parsed=", "[value]", "elapsed_seconds=", "<redacted>"):
+            self.assertIn(marker, messages)
+        self.assertIn('diagnostic-line-' * 150, messages)
+        self.assertNotIn(secret, messages)
+        self.assertNotIn(json.dumps(secret)[1:-1], messages)
+        self.load_runtime()
+
+    def test_snmp_exception_includes_traceback_without_secret(self):
+        secret = "failure-secret"
+        runtime = self.load_runtime({"EASYOPS_COLLECTOR_community": secret})
+        with patch.object(runtime["subprocess"], "Popen", side_effect=OSError(secret)), self.assertLogs(runtime["LOG"], level="ERROR") as captured:
+            result = runtime["SNMP"]().get("1.2.3.0")
+        self.assertIsNone(result)
+        messages = " ".join(captured.output)
+        self.assertIn("Traceback", messages)
+        self.assertIn("[SNMP.run]", messages)
+        self.assertNotIn(secret, messages)
 
     def test_metric_files_and_script(self):
         for name in ("metric_set.json", "origin_metric.json", "alias_metric.json"):

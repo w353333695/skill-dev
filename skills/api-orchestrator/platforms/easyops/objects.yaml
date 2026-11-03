@@ -1471,8 +1471,8 @@ objects:
       description: { type: string, desc: "参数描述" }
       use: { type: string, required: true, enum: [collectorParams, instanceMapping], desc: "用途。collectorParams=连接参数，instanceMapping=实例映射" }
       optional: { type: bool, desc: "是否可选。false=必填" }
-      isEncrypt: { type: bool, desc: "是否加密存储。Update 时对已存在参数强制保留旧值（不可改）" }
-      isFromSecret: { type: bool, desc: "是否从密钥管理获取。Update 时强制保留旧值。任一 true 且无 secretName→自动注入 secretName" }
+      isEncrypt: { type: bool, desc: "$.属性引用必须false；手填常量凭证应加密。Update对已存在参数强制保留旧值，升级须回读核对；见param-mechanism.yaml#cmdb_dynamic_parameter_safety" }
+      isFromSecret: { type: bool, desc: "$.属性引用必须false；仅显式密钥引用为true。Update保留旧值；任一true且无secretName会自动注入该参数" }
       secretName: { type: string, desc: "密钥实例名（isFromSecret=true 时平台填充）" }
       extraArgs: { type: "object|null", desc: "额外参数{isSingleChoice,srcObjectId,isDisplayLink,linkText,query}" }
 

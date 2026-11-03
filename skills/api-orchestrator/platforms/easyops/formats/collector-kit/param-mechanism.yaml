@@ -232,3 +232,18 @@ cmdb_python_environment_injection:
     - "设置模拟 EASYOPS_COLLECTOR_* 环境变量，离线执行注入段确认同名变量取值，不调用采集或访问设备。"
     - "检查 .orig 不包含生成的注入段、.py 未重复注入，且可通过目标 Python 版本语法检查。"
   evidence: "用户提供的物理服务器SNMP信息采集.zip：src/物理服务器SNMP信息采集.py 含19个环境变量绑定，.orig 保留未注入正文；此约定自包含，无需分发源码。"
+
+cmdb_dynamic_parameter_safety:
+  rule: "defaultValue/value 以 $. 开头表示从 CMDB 实例取值，isEncrypt 和 isFromSecret 必须同时为 false；即使引用 community/authKey/privKey 等敏感属性，也不能按参数名把它改成密钥参数。敏感性由CMDB属性权限保护，日志仍须脱敏。"
+  separation: "常量/用户手填凭证与CMDB属性引用是两条取值路径：手填凭证仍使用平台加密，显式密钥引用才启用isFromSecret；不可将两者与$.表达式混用。"
+  validation: "发布回归逐项遍历paramDefine；默认值以$.开头则断言两标志为false。创建任务时collectParams也遵守相同约束，并核对paramType=cmdb。"
+  upgrade: "更新/导入升级可能继承已存在参数的旧isEncrypt/isFromSecret。包内标志改为false不足以证明线上已改变；升级后回读套件及已有任务参数，按平台支持的迁移机制处理，未经确认不能删旧套件/任务或直接改CMDB绕过服务。"
+  defaults: "模型属性可缺失且脚本有兜底时，参数optional=true以免在脚本前被校验阻断；先把None、空串、null/None/undefined及未解析$.路径归一为空，再取默认值。SNMP端口缺省161，明确配置的非整数/越界值应报错，不默默覆盖。"
+  evidence: "2026-11-03用户要求物理机SNMP监控套件$.参数关闭加密与密钥引用；17项套件回归含端口空值和鉴权日志脱敏。"
+
+collector_diagnostic_logging:
+  parameter: "声明可见常量参数log_level，默认ERROR，并由EASYOPS_COLLECTOR_log_level注入；允许DEBUG/WARNING，用户可自行调试，不把日志级别声明成$.设备属性。"
+  levels: "缺失OID、空响应、解析不出值、组件缺值及未采到的最终指标记录WARN，继续其他指标。ERROR默认会过滤WARN，说明中应告知切换WARNING/DEBUG；基础前置条件失败/全无指标记录ERROR并raise，不能仅输出空数组冒充成功。"
+  debug: "DEBUG记录运行ID、请求序号、脱敏命令参数数组、耗时、退出码、完整原始响应/stdout/stderr、解析行和类型转换、候选MIB及回退、逐条指标和最终输出。存在HTTP API调用的脚本也应记录脱敏响应和状态；没有API的套件不要声称记录了API响应。日志量大，调试结束恢复ERROR。"
+  safety: "所有日志到stderr，stdout仅遵循采样器协议。严禁输出环境变量全集、完整认证header或明文凭证；命令-c/-A/-X对应值、原始响应和traceback中的已知密钥都要脱敏。except错误日志带函数名和traceback，用户分享日志前仍检查资产信息。"
+  regression: "回归验证默认ERROR与DEBUG切换、缺失指标WARN且部分结果不中断、原始响应不截断、命令/响应/异常均脱敏，以及日志不污染JSON stdout。"

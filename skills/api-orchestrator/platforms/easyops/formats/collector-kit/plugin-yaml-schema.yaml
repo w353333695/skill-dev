@@ -321,13 +321,13 @@ param_define_fields:
   isEncrypt:
     type: bool
     required: false
-    desc: "是否加密存储。密码/凭证类字段必须 true（即使 isFromSecret:false 用户自己手填，也必须 isEncrypt:true，禁止明文 string——否则 detail 回显/任务参数/日志会泄漏密码）。⚠️Update 时对已存在参数强制保留旧值（不可修改）。"
+    desc: "是否加密存储。手填常量密码/凭证须true；$.属性引用必须false，即使属性是密码也不能加密表达式，详见param-mechanism.yaml#cmdb_dynamic_parameter_safety。日志一律脱敏。⚠️Update 时对已存在参数强制保留旧值（不可修改）。"
     source: "plugin-config.md:84; easyops_plugin_service.go:199-202,715-718"
 
   isFromSecret:
     type: bool
     required: false
-    desc: "是否从密钥管理获取。true 时平台从密钥库引用。⚠️Update 时强制保留旧值。任一 param isFromSecret=true 且无 secretName 参数时，平台自动注入 secretName（见 param-mechanism.yaml）。"
+    desc: "是否从密钥管理获取。仅显式密钥引用用true；$.属性引用必须false，不与CMDB取值混用。⚠️Update 时强制保留旧值。任一 param isFromSecret=true 且无 secretName 参数时，平台自动注入 secretName（见 param-mechanism.yaml）。"
     source: "plugin-config.md:85; easyops_plugin_service.go:138-165"
 
   secretName:

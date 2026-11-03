@@ -17,6 +17,11 @@ key_rule: |
   ③ 参数设计（$.attr 动态取参见 param-mechanism.yaml：$.开头配 paramType=cmdb，取值对象=采集目标实例）
   打包（见 package-format.yaml）：ZIP_STORED + UTF-8 flag，zip顶层目录名=plugin.yaml name（必须一致）。
 
+parameter_and_log_preflight:
+  reference: "formats/collector-kit/param-mechanism.yaml#cmdb_dynamic_parameter_safety"
+  logging: "formats/collector-kit/param-mechanism.yaml#collector_diagnostic_logging"
+  required: "$.参数两鉴权标志均false；允许缺省的参数须optional并由脚本归一空值后兜底；升级后回读套件与已有任务以检查旧加密标志继承。日志默认ERROR，可选DEBUG查看脱敏命令、完整响应和转换；缺失指标有WARN且不中断其他指标。"
+
 activation_preflight:
   reference: "formats/collector-kit/package-format.yaml#package_structure.activation_preflight"
   required: "开发/升级打包前执行指标引用及真实stdout/维度回归；导入激活前查询目标模型现有别名，预检跨套件(displayName,objectId)唯一性；升级保留内部指标标识并检查历史项归属和引用。"
