@@ -48,7 +48,21 @@ package_structure:
         │   └── package.conf.yaml
         └── bin/                    # 二进制（exporter 类型必填）
 
-  metric_agent_type_consistency: "simple-script/metric_sampler 套件的 plugin.yaml.agentType 必须为 easyops；origin_metric.json 与 alias_metric.json 中每个指标的 agentType 也必须为 easyops。metricbeat 仅适用于 metricbeat 类型套件，混用会导致指标导入或运行态路由不一致，可能出现激活无报错但无实际采集。发布回归必须校验三处一致。"
+  metric_agent_type_consistency: "simple-script/metric_sampler 套件的 plugin.yaml.agentType 必须为 easyops；origin_metric.json 的 agentType 必须为 easyops；alias_metric.json 若显式包含 agentType 也须一致，原生别名文件通常不含此字段，不要为一致性强行添加。metricbeat 仅适用于 metricbeat 类型套件，混用会导致指标导入或运行态路由不一致，可能出现激活无报错但无实际采集。发布回归必须校验三处一致。"
+
+  activation_preflight:
+    scope: "开发、首次导入、升级、重新激活都必须检查；只校验 ZIP 或上传接口成功不算激活验收。"
+    alias_display_uniqueness:
+      index: "_COLLECTOR_ALIAS_METRIC 唯一索引 u&displayName&objectId，键为 (displayName, objectId)，作用域跨套件和指标集。"
+      prevention: "别名 displayName 使用稳定套件/协议前缀（如物理机SNMP-电源状态）。打包时查包内重复，激活前通过内部 CMDB API 分页查询目标模型下现有别名，比较 objectId/displayName/name；前缀不能替代环境预检。"
+      cmdb_query: '{"query":{"objectId":"<目标模型ID>"},"fields":{"name":true,"displayName":true,"objectId":true},"page":1,"page_size":300}'
+      upgrade: "相同 objectId/displayName 但内部 name 不同视为冲突；相同 name 的历史项先查归属及仪表盘/告警引用，走平台既有更新流程。保留稳定原始 key 和别名 name，勿复制其他套件 instanceId、盲删既有指标或删除唯一索引；改套件名/指标集名不能解决这个索引冲突。"
+      evidence: "2026-11-03 用户 ActivateCollectorKit 抓包：HTTP成功/code=0但totalStatus=fail，metricSet资源报300306 Duplicated index value，电源状态与PHYSICAL_SERVER@ONEMODEL冲突。批次错误在11项重复附带同一冲突，不表示11项都重名。原请求含会话凭证，不归档或复述凭证。"
+    metric_graph: "metric_set 为数组，每项 name；alias.metricSet 为名称数组，originalMetrics 引用原始 key，dims.originDimName 对应原始 tagDefine.name。静态校验引用闭合，执行脚本并逐条校验 vals/dims；不能仅编译通过。"
+    stdout: "metric_sampler stdout 必须是纯 JSON 数组，不能输出 process_sampler 的 BEGIN/END GATHERING DATA 标记或调试文本；日志输出 stderr。"
+    activation_response: "同时检查 code、data.totalStatus、resources[].result/error；totalStatus=fail 或任一资源失败都判失败，wait/缺失字段不算完成，保留阶段名称和真实错误。不能只以HTTP200或totalStatus!=fail认定全部成功。"
+    runtime_acceptance: "区分导入定义、激活指标集、创建任务、分配执行Agent、实例采集成功；对notRequireJob=true的激活请求不要宣称创建了任务。激活后再查_COLLECTOR_JOB/实例executionHosts及job_status.status/lastErr；没有执行证据必须标待验收。"
+    regression: "development/tests/monitor-kits/test_physical_server_monitor_package.py 覆盖前缀唯一性、指标引用、运行时维度与纯JSON输出、.orig重新生成及ZIP权限；模拟测试不能代替目标环境同名预检及真机验收。"
 
   files_by_type:
     simple-script: [plugin.yaml, src/<script>.py, src/<script>.orig, origin_metric.json, alias_metric.json, metric_set.json, readme]

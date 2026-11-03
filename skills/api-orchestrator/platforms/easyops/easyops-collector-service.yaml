@@ -69,7 +69,7 @@ resources:
       plugin 管「套件定义的 CRUD」，kit 管「把定义激活成运行中的采集任务」。
       ⚠️激活机制：activate 不直接建任务，而是触发 collector_service 的 AssignJobs
       （CMDB 事件驱动 + 600s 定时兜底，assign_job.go:28；详见 systems.yaml runtime.activation_mechanism）。
-      成功判定：HTTP 成功且响应 totalStatus != "fail"（kits.go:134）。
+      必须检查code、totalStatus和resources逐项结果；历史CLI只检查fail不足以确认激活完成。
     path: ""
 
     operations:
@@ -79,7 +79,7 @@ resources:
           激活套件（把套件定义变成运行中的采集任务）。proto: ActivateCollectorKit@1.0.19。
           必填 instanceId。可选 objectId（关联模型）/params（采集参数 JSON）/centralizedEnable（集中式）/hostIds（目标主机）/collectAgent。
           ⚠️同一端点也用于「更新套件同步到任务」（kits update 复用本端点，body 加 syncToJobs/dashboards/dashboardStrategy）。
-          成功判定：HTTP 200 且响应 totalStatus != "fail"（fail 报 KITS_005）。
+          必须检查code、totalStatus和resources逐项结果；fail/wait不可判为完成，fail报KITS_005。
           激活是异步的（触发 AssignJobs），激活后采集任务实际生效可能需轮询 collector_job 状态。
           权威实现：tmp/easyops-cli/.../platform/kits.go:95-139（registerKitsActivate）。
         method: POST

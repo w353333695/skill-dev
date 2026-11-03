@@ -17,6 +17,11 @@ key_rule: |
   ③ 参数设计（$.attr 动态取参见 param-mechanism.yaml：$.开头配 paramType=cmdb，取值对象=采集目标实例）
   打包（见 package-format.yaml）：ZIP_STORED + UTF-8 flag，zip顶层目录名=plugin.yaml name（必须一致）。
 
+activation_preflight:
+  reference: "formats/collector-kit/package-format.yaml#package_structure.activation_preflight"
+  required: "开发/升级打包前执行指标引用及真实stdout/维度回归；导入激活前查询目标模型现有别名，预检跨套件(displayName,objectId)唯一性；升级保留内部指标标识并检查历史项归属和引用。"
+  acceptance: "上传成功不等于激活成功；检查totalStatus及每项resources.result/error，再验证实际采集任务与实例status/lastErr。目标环境未执行则明确待验收。"
+
 prerequisites:
   env: [EASYOPS_CMDB_BACKEND_URL, EASYOPS_COLLECTOR_PLUGIN_BACKEND_URL, EASYOPS_ORG, EASYOPS_USER]
   payload: "套件需求（采集对象/采集内容/采集方式/参数来源）；目标 CMDB 模型ID（如 HOST，若无则 step 3 新建）"
@@ -105,7 +110,7 @@ steps:
   - n: 10
     args: ["<PLUGIN_ID>", "--header giraffe-contract-name:<contract@版本>"]
     desc: "(可选) 激活套件→生成采集任务。⚠️kit.activate 在 collector_service:12000，需 giraffe-contract-name header（contract 版本待探测，见 systems.yaml runtime.contract_version_gap）"
-    expect: "HTTP 200 且 totalStatus!=fail。激活异步，需轮询 collector_job 验证任务生效"
+    expect: "检查code、totalStatus及resources逐项状态；fail/wait不可判为完整成功。激活异步，需轮询collector_job及实例status/lastErr验证实际执行"
 
 note: |
   api-cli 对 plugin_package.import/export/import_update 仅 --print-curl 预览（multipart/binary 不支持），

@@ -395,7 +395,7 @@ transitions:
       - from: kit.activate
         pick: data.totalStatus
         to: []
-        how: "body.instanceId=${PLUGIN_ID}；成功判定 totalStatus!=fail"
+        how: "body.instanceId=${PLUGIN_ID}；检查code、totalStatus和resources逐项结果，fail/wait不能判为完成"
 
   # —— CMDB 采集套件 e2e（process_sampler）——
   - name: develop_import_activate_process

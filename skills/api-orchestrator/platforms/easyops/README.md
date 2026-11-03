@@ -148,7 +148,7 @@ scripts/run.sh --spec platforms/demo/easyops-cmdb.yaml object_instance search PH
 ## 关键认知（collector 域）
 
 1. **无启用/禁用端点** —— collector_plugin_service 无 enable/disable/activate。激活在 collector_service.kit.activate（:12000）。
-2. **激活机制** —— activate 触发 AssignJobs（CMDB事件驱动+600s兜底）。成功判定 totalStatus!=fail。
+2. **激活机制** —— activate 触发 AssignJobs（CMDB事件驱动+600s兜底）。检查code、totalStatus和resources逐项结果，fail/wait不能判为完成。
 3. **multipart 走 SDK** —— plugin_package.export/import/import_update 是 multipart/binary，api-cli 仅 --print-curl，真调走 curl -F / Python SDK。
 4. **list 计数坑** —— plugin.list 的 total 在 data.total（body内），非 stderr _meta.total。
 5. **采集脚本 py2.7** —— print 语句/requests/subprocess 无 timeout（详见 formats/collector-kit/sampler-types.yaml）。

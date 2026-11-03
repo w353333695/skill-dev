@@ -911,9 +911,9 @@ systems:
           3. AssignJobs 前置：EnableAgentJob=true、Plugins 非空、Enabled=true（任一不满足静默失败）
           4. 生成采集任务下发给 collector_proxy_server + 刷新 kit 统计
           兜底：HyperInsightJobRefreshTask 每 PollInterval（默认 600s）refresh 全量任务。
-        成功判定：HTTP 200 且响应 totalStatus != "fail"（kits.go:134）。
+        成功判定：HTTP 200/code=0仅代表接口层；还需确认totalStatus为成功且resources逐项无fail/wait（历史kits.go仅检查fail不足以验收完整链路）。
 
-      activate_response_success: "成功判定：HTTP 200 且 data.totalStatus != 'fail'（fail 报 KITS_005 套件激活失败）"
+      activate_response_success: "成功判定：code=0、totalStatus为成功且resources逐项成功；fail/wait或缺失结果不算完成。参见formats/collector-kit/package-format.yaml#package_structure.activation_preflight"
       update_reuses_activate: "kit.update 复用 activate 端点（同 URL），body 不同（syncToJobs/dashboards/dashboardStrategy，dashboardStrategy 仅 overwrite|rename）"
 
       collector_job_association: "_COLLECTOR_JOB.plugins 字段存 pluginInstanceId 列表；AssignJobs 取 Plugins[0].InstanceId 作 kitId（assign_job.go:34）"

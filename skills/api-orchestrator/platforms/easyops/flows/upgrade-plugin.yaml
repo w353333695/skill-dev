@@ -9,6 +9,11 @@ key_rule: |
   本文件不复述规则全文，只列【操作顺序】：detail 确认现状 → export 旧包 → 改 version/script/指标重打 → import_update 上传。
   version 建议：用 .version 文件管理，每次递增 patch（1.0.0→1.0.1）。
 
+activation_preflight:
+  reference: "formats/collector-kit/package-format.yaml#package_structure.activation_preflight"
+  required: "开发/升级打包前执行指标引用及真实stdout/维度回归；导入激活前查询目标模型现有别名，预检跨套件(displayName,objectId)唯一性；升级保留内部指标标识并检查历史项归属和引用。"
+  acceptance: "上传成功不等于激活成功；检查totalStatus及每项resources.result/error，再验证实际采集任务与实例status/lastErr。目标环境未执行则明确待验收。"
+
 prerequisites:
   env: [EASYOPS_COLLECTOR_PLUGIN_BACKEND_URL, EASYOPS_ORG, EASYOPS_USER]
   payload: "目标 instanceId + 新版本号 + 修改后的套件包"
@@ -39,5 +44,5 @@ steps:
 
 note: "升级走 import_update（PUT），不是 import（POST）。import_update 的 instanceId 在 path，version 在 form 必填。"
 side_effects: "见 objects.yaml#collector_plugin.side_effects plugin_package.import_update（agentType不可变/版本唯一/参数加密位继承/无回滚）"
-rollback: "无显式回滚。若需还原：导出旧版本（步骤2的 zip）重新 import_update 回旧 version（只要旧 version 还在版本历史）"
+rollback: "无显式回滚。需还原时以步骤2备份包内容重新发布一个未使用的新版本号；不能复用旧version，不能自动删除共享指标。"
 acceptance: "plugin.detail <instanceId> 确认 packageVersion 已更新；前端 kit_detail URL"

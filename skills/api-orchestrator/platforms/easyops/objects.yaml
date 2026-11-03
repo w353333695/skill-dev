@@ -1489,12 +1489,12 @@ objects:
       dataType: { type: string, enum: [double, string, long], desc: "数据类型" }
       type: { type: string, desc: "指标类型" }
       dims: { type: array, items: object, desc: "维度定义[{dimName,originDimName,isArray,dimDisplayName}]" }
-      metricSet: { type: string, desc: "所属指标集（默认『默认指标集』）" }
+      metricSet: { type: array, items: string, desc: "所属指标集名称数组（alias_metric.json），引用metric_set.json的name" }
       originalMetrics: { type: array, desc: "关联原始指标（origin_metric 的 key）" }
       unit: { type: string, desc: "单位" }
       expression: { type: string, desc: "计算表达式（PromQL 风格）" }
     constraints:
-      - "displayName 在同 objectId 内不能重复（pluginutil.go:390-393）"
+      - "displayName 在同 objectId 内跨套件/指标集唯一（pluginutil.go:390-393）；激活实测唯一索引u&displayName&objectId冲突会令totalStatus=fail，即使HTTP200/code=0。开发和升级环境预检见formats/collector-kit/package-format.yaml#package_structure.activation_preflight"
       - "name 不能与 CMDB 模型属性ID/关系ID 同名（否则激活失败）"
 
   # ===========================================================================
