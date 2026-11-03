@@ -1,0 +1,3133 @@
+{
+  "templates": [
+    {
+      "host": "Template PBC OS for Linux by Zabbix agent", 
+      "name": "Template PBC OS for Linux by Zabbix agent", 
+      "parentTemplates": [
+        {
+          "host": "Zabbix agent", 
+          "name": "Zabbix agent", 
+          "templateid": "10050"
+        }, 
+        {
+          "host": "Linux CPU by Zabbix agent", 
+          "name": "Linux CPU by Zabbix agent", 
+          "templateid": "10272"
+        }, 
+        {
+          "host": "Linux filesystems by Zabbix agent", 
+          "name": "Linux filesystems by Zabbix agent", 
+          "templateid": "10273"
+        }, 
+        {
+          "host": "Linux memory by Zabbix agent", 
+          "name": "Linux memory by Zabbix agent", 
+          "templateid": "10274"
+        }, 
+        {
+          "host": "Linux block devices by Zabbix agent", 
+          "name": "Linux block devices by Zabbix agent", 
+          "templateid": "10275"
+        }, 
+        {
+          "host": "Linux network interfaces by Zabbix agent", 
+          "name": "Linux network interfaces by Zabbix agent", 
+          "templateid": "10276"
+        }, 
+        {
+          "host": "Linux generic by Zabbix agent", 
+          "name": "Linux generic by Zabbix agent", 
+          "templateid": "10277"
+        }
+      ], 
+      "templateid": "10001"
+    }, 
+    {
+      "host": "TEMP_PBC_MID_ZBXSERVER_BASE", 
+      "name": "TEMP_PBC_MID_ZBXSERVER_BASE", 
+      "parentTemplates": [], 
+      "templateid": "10047"
+    }, 
+    {
+      "host": "TEMP_PBC_MID_ZBXPROXY_BASE", 
+      "name": "TEMP_PBC_MID_ZBXPROXY_BASE", 
+      "parentTemplates": [], 
+      "templateid": "10048"
+    }, 
+    {
+      "host": "Zabbix agent", 
+      "name": "Zabbix agent", 
+      "parentTemplates": [], 
+      "templateid": "10050"
+    }, 
+    {
+      "host": "OpenBSD", 
+      "name": "OpenBSD", 
+      "parentTemplates": [
+        {
+          "host": "Zabbix agent", 
+          "name": "Zabbix agent", 
+          "templateid": "10050"
+        }
+      ], 
+      "templateid": "10074"
+    }, 
+    {
+      "host": "FreeBSD", 
+      "name": "FreeBSD", 
+      "parentTemplates": [
+        {
+          "host": "Zabbix agent", 
+          "name": "Zabbix agent", 
+          "templateid": "10050"
+        }
+      ], 
+      "templateid": "10075"
+    }, 
+    {
+      "host": "AIX", 
+      "name": "AIX", 
+      "parentTemplates": [
+        {
+          "host": "Zabbix agent", 
+          "name": "Zabbix agent", 
+          "templateid": "10050"
+        }
+      ], 
+      "templateid": "10076"
+    }, 
+    {
+      "host": "HP-UX", 
+      "name": "HP-UX", 
+      "parentTemplates": [
+        {
+          "host": "Zabbix agent", 
+          "name": "Zabbix agent", 
+          "templateid": "10050"
+        }
+      ], 
+      "templateid": "10077"
+    }, 
+    {
+      "host": "Solaris", 
+      "name": "Solaris", 
+      "parentTemplates": [
+        {
+          "host": "Zabbix agent", 
+          "name": "Zabbix agent", 
+          "templateid": "10050"
+        }
+      ], 
+      "templateid": "10078"
+    }, 
+    {
+      "host": "Mac OS X", 
+      "name": "Mac OS X", 
+      "parentTemplates": [
+        {
+          "host": "Zabbix agent", 
+          "name": "Zabbix agent", 
+          "templateid": "10050"
+        }
+      ], 
+      "templateid": "10079"
+    }, 
+    {
+      "host": "Windows by Zabbix agent", 
+      "name": "Windows by Zabbix agent", 
+      "parentTemplates": [
+        {
+          "host": "Zabbix agent", 
+          "name": "Zabbix agent", 
+          "templateid": "10050"
+        }, 
+        {
+          "host": "Windows CPU by Zabbix agent", 
+          "name": "Windows CPU by Zabbix agent", 
+          "templateid": "10286"
+        }, 
+        {
+          "host": "Windows memory by Zabbix agent", 
+          "name": "Windows memory by Zabbix agent", 
+          "templateid": "10287"
+        }, 
+        {
+          "host": "Windows filesystems by Zabbix agent", 
+          "name": "Windows filesystems by Zabbix agent", 
+          "templateid": "10288"
+        }, 
+        {
+          "host": "Windows physical disks by Zabbix agent", 
+          "name": "Windows physical disks by Zabbix agent", 
+          "templateid": "10289"
+        }, 
+        {
+          "host": "Windows generic by Zabbix agent", 
+          "name": "Windows generic by Zabbix agent", 
+          "templateid": "10290"
+        }, 
+        {
+          "host": "Windows network by Zabbix agent", 
+          "name": "Windows network by Zabbix agent", 
+          "templateid": "10291"
+        }, 
+        {
+          "host": "Windows services by Zabbix agent", 
+          "name": "Windows services by Zabbix agent", 
+          "templateid": "10314"
+        }
+      ], 
+      "templateid": "10081"
+    }, 
+    {
+      "host": "FTP Service", 
+      "name": "FTP Service", 
+      "parentTemplates": [], 
+      "templateid": "10093"
+    }, 
+    {
+      "host": "HTTP Service", 
+      "name": "HTTP Service", 
+      "parentTemplates": [], 
+      "templateid": "10094"
+    }, 
+    {
+      "host": "HTTPS Service", 
+      "name": "HTTPS Service", 
+      "parentTemplates": [], 
+      "templateid": "10095"
+    }, 
+    {
+      "host": "IMAP Service", 
+      "name": "IMAP Service", 
+      "parentTemplates": [], 
+      "templateid": "10096"
+    }, 
+    {
+      "host": "LDAP Service", 
+      "name": "LDAP Service", 
+      "parentTemplates": [], 
+      "templateid": "10097"
+    }, 
+    {
+      "host": "NNTP Service", 
+      "name": "NNTP Service", 
+      "parentTemplates": [], 
+      "templateid": "10098"
+    }, 
+    {
+      "host": "NTP Service", 
+      "name": "NTP Service", 
+      "parentTemplates": [], 
+      "templateid": "10099"
+    }, 
+    {
+      "host": "POP Service", 
+      "name": "POP Service", 
+      "parentTemplates": [], 
+      "templateid": "10100"
+    }, 
+    {
+      "host": "SMTP Service", 
+      "name": "SMTP Service", 
+      "parentTemplates": [], 
+      "templateid": "10101"
+    }, 
+    {
+      "host": "SSH Service", 
+      "name": "SSH Service", 
+      "parentTemplates": [], 
+      "templateid": "10102"
+    }, 
+    {
+      "host": "Telnet Service", 
+      "name": "Telnet Service", 
+      "parentTemplates": [], 
+      "templateid": "10103"
+    }, 
+    {
+      "host": "Generic Java JMX", 
+      "name": "Generic Java JMX", 
+      "parentTemplates": [], 
+      "templateid": "10169"
+    }, 
+    {
+      "host": "Intel SR1530 IPMI", 
+      "name": "Intel SR1530 IPMI", 
+      "parentTemplates": [], 
+      "templateid": "10171"
+    }, 
+    {
+      "host": "Intel SR1630 IPMI", 
+      "name": "Intel SR1630 IPMI", 
+      "parentTemplates": [], 
+      "templateid": "10172"
+    }, 
+    {
+      "host": "TEMP_PBC_OS_VMware", 
+      "name": "TEMP_PBC_OS_VMware", 
+      "parentTemplates": [
+        {
+          "host": "TEMP_PBC_ICMP_PINGv4_BASE", 
+          "name": "TEMP_PBC_ICMP_PINGv4_BASE", 
+          "templateid": "10186"
+        }, 
+        {
+          "host": "TEMP_PBC_OS_VMware macros", 
+          "name": "TEMP_PBC_OS_VMware macros", 
+          "templateid": "10332"
+        }
+      ], 
+      "templateid": "10173"
+    }, 
+    {
+      "host": "TEMP_PBC_OS_VMware Guest_PROD", 
+      "name": "TEMP_PBC_OS_VMware Guest_PROD", 
+      "parentTemplates": [
+        {
+          "host": "TEMP_PBC_OS_VMware macros_PROD", 
+          "name": "TEMP_PBC_OS_VMware macros_PROD", 
+          "templateid": "10589"
+        }
+      ], 
+      "templateid": "10174"
+    }, 
+    {
+      "host": "TEMP_PBC_OS_VMware_Hypervisor_PROD", 
+      "name": "TEMP_PBC_OS_VMware_Hypervisor_PROD", 
+      "parentTemplates": [
+        {
+          "host": "TEMP_PBC_OS_VMware macros_PROD", 
+          "name": "TEMP_PBC_OS_VMware macros_PROD", 
+          "templateid": "10589"
+        }
+      ], 
+      "templateid": "10175"
+    }, 
+    {
+      "host": "EtherLike-MIB SNMP", 
+      "name": "EtherLike-MIB SNMP", 
+      "parentTemplates": [], 
+      "templateid": "10183"
+    }, 
+    {
+      "host": "HOST-RESOURCES-MIB SNMP", 
+      "name": "HOST-RESOURCES-MIB SNMP", 
+      "parentTemplates": [
+        {
+          "host": "HOST-RESOURCES-MIB CPU SNMP", 
+          "name": "HOST-RESOURCES-MIB CPU SNMP", 
+          "templateid": "10305"
+        }, 
+        {
+          "host": "HOST-RESOURCES-MIB memory SNMP", 
+          "name": "HOST-RESOURCES-MIB memory SNMP", 
+          "templateid": "10306"
+        }, 
+        {
+          "host": "HOST-RESOURCES-MIB storage SNMP", 
+          "name": "HOST-RESOURCES-MIB storage SNMP", 
+          "templateid": "10307"
+        }
+      ], 
+      "templateid": "10185"
+    }, 
+    {
+      "host": "TEMP_PBC_ICMP_PINGv4_BASE", 
+      "name": "TEMP_PBC_ICMP_PINGv4_BASE", 
+      "parentTemplates": [], 
+      "templateid": "10186"
+    }, 
+    {
+      "host": "Interfaces Simple SNMP", 
+      "name": "Interfaces Simple SNMP", 
+      "parentTemplates": [], 
+      "templateid": "10188"
+    }, 
+    {
+      "host": "Interfaces SNMP", 
+      "name": "Interfaces SNMP", 
+      "parentTemplates": [], 
+      "templateid": "10190"
+    }, 
+    {
+      "host": "Interfaces Windows SNMP", 
+      "name": "Interfaces Windows SNMP", 
+      "parentTemplates": [], 
+      "templateid": "10192"
+    }, 
+    {
+      "host": "Generic SNMP", 
+      "name": "Generic SNMP", 
+      "parentTemplates": [
+        {
+          "host": "TEMP_PBC_ICMP_PINGv4_BASE", 
+          "name": "TEMP_PBC_ICMP_PINGv4_BASE", 
+          "templateid": "10186"
+        }
+      ], 
+      "templateid": "10204"
+    }, 
+    {
+      "host": "Alcatel Timetra TiMOS SNMP", 
+      "name": "Alcatel Timetra TiMOS SNMP", 
+      "parentTemplates": [
+        {
+          "host": "EtherLike-MIB SNMP", 
+          "name": "EtherLike-MIB SNMP", 
+          "templateid": "10183"
+        }, 
+        {
+          "host": "Interfaces SNMP", 
+          "name": "Interfaces SNMP", 
+          "templateid": "10190"
+        }, 
+        {
+          "host": "Generic SNMP", 
+          "name": "Generic SNMP", 
+          "templateid": "10204"
+        }
+      ], 
+      "templateid": "10207"
+    }, 
+    {
+      "host": "Brocade FC SNMP", 
+      "name": "Brocade FC SNMP", 
+      "parentTemplates": [
+        {
+          "host": "Interfaces SNMP", 
+          "name": "Interfaces SNMP", 
+          "templateid": "10190"
+        }, 
+        {
+          "host": "Generic SNMP", 
+          "name": "Generic SNMP", 
+          "templateid": "10204"
+        }
+      ], 
+      "templateid": "10208"
+    }, 
+    {
+      "host": "Brocade_Foundry Performance SNMP", 
+      "name": "Brocade_Foundry Performance SNMP", 
+      "parentTemplates": [], 
+      "templateid": "10209"
+    }, 
+    {
+      "host": "Brocade_Foundry Nonstackable SNMP", 
+      "name": "Brocade_Foundry Nonstackable SNMP", 
+      "parentTemplates": [
+        {
+          "host": "Interfaces SNMP", 
+          "name": "Interfaces SNMP", 
+          "templateid": "10190"
+        }, 
+        {
+          "host": "Generic SNMP", 
+          "name": "Generic SNMP", 
+          "templateid": "10204"
+        }, 
+        {
+          "host": "Brocade_Foundry Performance SNMP", 
+          "name": "Brocade_Foundry Performance SNMP", 
+          "templateid": "10209"
+        }
+      ], 
+      "templateid": "10210"
+    }, 
+    {
+      "host": "Brocade_Foundry Stackable SNMP", 
+      "name": "Brocade_Foundry Stackable SNMP", 
+      "parentTemplates": [
+        {
+          "host": "Interfaces SNMP", 
+          "name": "Interfaces SNMP", 
+          "templateid": "10190"
+        }, 
+        {
+          "host": "Generic SNMP", 
+          "name": "Generic SNMP", 
+          "templateid": "10204"
+        }, 
+        {
+          "host": "Brocade_Foundry Performance SNMP", 
+          "name": "Brocade_Foundry Performance SNMP", 
+          "templateid": "10209"
+        }
+      ], 
+      "templateid": "10211"
+    }, 
+    {
+      "host": "Cisco CISCO-MEMORY-POOL-MIB SNMP", 
+      "name": "Cisco CISCO-MEMORY-POOL-MIB SNMP", 
+      "parentTemplates": [], 
+      "templateid": "10212"
+    }, 
+    {
+      "host": "Cisco CISCO-PROCESS-MIB SNMP", 
+      "name": "Cisco CISCO-PROCESS-MIB SNMP", 
+      "parentTemplates": [], 
+      "templateid": "10213"
+    }, 
+    {
+      "host": "Cisco OLD-CISCO-CPU-MIB SNMP", 
+      "name": "Cisco OLD-CISCO-CPU-MIB SNMP", 
+      "parentTemplates": [], 
+      "templateid": "10215"
+    }, 
+    {
+      "host": "Cisco Inventory SNMP", 
+      "name": "Cisco Inventory SNMP", 
+      "parentTemplates": [], 
+      "templateid": "10216"
+    }, 
+    {
+      "host": "Cisco CISCO-ENVMON-MIB SNMP", 
+      "name": "Cisco CISCO-ENVMON-MIB SNMP", 
+      "parentTemplates": [], 
+      "templateid": "10217"
+    }, 
+    {
+      "host": "Cisco IOS SNMP", 
+      "name": "Cisco IOS SNMP", 
+      "parentTemplates": [
+        {
+          "host": "EtherLike-MIB SNMP", 
+          "name": "EtherLike-MIB SNMP", 
+          "templateid": "10183"
+        }, 
+        {
+          "host": "Interfaces SNMP", 
+          "name": "Interfaces SNMP", 
+          "templateid": "10190"
+        }, 
+        {
+          "host": "Generic SNMP", 
+          "name": "Generic SNMP", 
+          "templateid": "10204"
+        }, 
+        {
+          "host": "Cisco CISCO-MEMORY-POOL-MIB SNMP", 
+          "name": "Cisco CISCO-MEMORY-POOL-MIB SNMP", 
+          "templateid": "10212"
+        }, 
+        {
+          "host": "Cisco CISCO-PROCESS-MIB SNMP", 
+          "name": "Cisco CISCO-PROCESS-MIB SNMP", 
+          "templateid": "10213"
+        }, 
+        {
+          "host": "Cisco Inventory SNMP", 
+          "name": "Cisco Inventory SNMP", 
+          "templateid": "10216"
+        }, 
+        {
+          "host": "Cisco CISCO-ENVMON-MIB SNMP", 
+          "name": "Cisco CISCO-ENVMON-MIB SNMP", 
+          "templateid": "10217"
+        }
+      ], 
+      "templateid": "10218"
+    }, 
+    {
+      "host": "Cisco IOS prior to 12.0_3_T SNMP", 
+      "name": "Cisco IOS prior to 12.0_3_T SNMP", 
+      "parentTemplates": [
+        {
+          "host": "Generic SNMP", 
+          "name": "Generic SNMP", 
+          "templateid": "10204"
+        }, 
+        {
+          "host": "Cisco CISCO-MEMORY-POOL-MIB SNMP", 
+          "name": "Cisco CISCO-MEMORY-POOL-MIB SNMP", 
+          "templateid": "10212"
+        }, 
+        {
+          "host": "Cisco OLD-CISCO-CPU-MIB SNMP", 
+          "name": "Cisco OLD-CISCO-CPU-MIB SNMP", 
+          "templateid": "10215"
+        }, 
+        {
+          "host": "Cisco Inventory SNMP", 
+          "name": "Cisco Inventory SNMP", 
+          "templateid": "10216"
+        }, 
+        {
+          "host": "Cisco CISCO-ENVMON-MIB SNMP", 
+          "name": "Cisco CISCO-ENVMON-MIB SNMP", 
+          "templateid": "10217"
+        }
+      ], 
+      "templateid": "10220"
+    }, 
+    {
+      "host": "Dell Force S-Series SNMP", 
+      "name": "Dell Force S-Series SNMP", 
+      "parentTemplates": [
+        {
+          "host": "EtherLike-MIB SNMP", 
+          "name": "EtherLike-MIB SNMP", 
+          "templateid": "10183"
+        }, 
+        {
+          "host": "Interfaces SNMP", 
+          "name": "Interfaces SNMP", 
+          "templateid": "10190"
+        }, 
+        {
+          "host": "Generic SNMP", 
+          "name": "Generic SNMP", 
+          "templateid": "10204"
+        }
+      ], 
+      "templateid": "10221"
+    }, 
+    {
+      "host": "D-Link DES 7200 SNMP", 
+      "name": "D-Link DES 7200 SNMP", 
+      "parentTemplates": [
+        {
+          "host": "Interfaces SNMP", 
+          "name": "Interfaces SNMP", 
+          "templateid": "10190"
+        }, 
+        {
+          "host": "Generic SNMP", 
+          "name": "Generic SNMP", 
+          "templateid": "10204"
+        }
+      ], 
+      "templateid": "10222"
+    }, 
+    {
+      "host": "D-Link DES_DGS Switch SNMP", 
+      "name": "D-Link DES_DGS Switch SNMP", 
+      "parentTemplates": [
+        {
+          "host": "EtherLike-MIB SNMP", 
+          "name": "EtherLike-MIB SNMP", 
+          "templateid": "10183"
+        }, 
+        {
+          "host": "Interfaces SNMP", 
+          "name": "Interfaces SNMP", 
+          "templateid": "10190"
+        }, 
+        {
+          "host": "Generic SNMP", 
+          "name": "Generic SNMP", 
+          "templateid": "10204"
+        }
+      ], 
+      "templateid": "10223"
+    }, 
+    {
+      "host": "Extreme EXOS SNMP", 
+      "name": "Extreme EXOS SNMP", 
+      "parentTemplates": [
+        {
+          "host": "EtherLike-MIB SNMP", 
+          "name": "EtherLike-MIB SNMP", 
+          "templateid": "10183"
+        }, 
+        {
+          "host": "Interfaces SNMP", 
+          "name": "Interfaces SNMP", 
+          "templateid": "10190"
+        }, 
+        {
+          "host": "Generic SNMP", 
+          "name": "Generic SNMP", 
+          "templateid": "10204"
+        }
+      ], 
+      "templateid": "10224"
+    }, 
+    {
+      "host": "Network Generic Device SNMP", 
+      "name": "Network Generic Device SNMP", 
+      "parentTemplates": [
+        {
+          "host": "EtherLike-MIB SNMP", 
+          "name": "EtherLike-MIB SNMP", 
+          "templateid": "10183"
+        }, 
+        {
+          "host": "Interfaces Simple SNMP", 
+          "name": "Interfaces Simple SNMP", 
+          "templateid": "10188"
+        }, 
+        {
+          "host": "Generic SNMP", 
+          "name": "Generic SNMP", 
+          "templateid": "10204"
+        }
+      ], 
+      "templateid": "10226"
+    }, 
+    {
+      "host": "HP Comware HH3C SNMP", 
+      "name": "HP Comware HH3C SNMP", 
+      "parentTemplates": [
+        {
+          "host": "EtherLike-MIB SNMP", 
+          "name": "EtherLike-MIB SNMP", 
+          "templateid": "10183"
+        }, 
+        {
+          "host": "Interfaces SNMP", 
+          "name": "Interfaces SNMP", 
+          "templateid": "10190"
+        }, 
+        {
+          "host": "Generic SNMP", 
+          "name": "Generic SNMP", 
+          "templateid": "10204"
+        }
+      ], 
+      "templateid": "10227"
+    }, 
+    {
+      "host": "Huawei VRP SNMP", 
+      "name": "Huawei VRP SNMP", 
+      "parentTemplates": [
+        {
+          "host": "EtherLike-MIB SNMP", 
+          "name": "EtherLike-MIB SNMP", 
+          "templateid": "10183"
+        }, 
+        {
+          "host": "Interfaces SNMP", 
+          "name": "Interfaces SNMP", 
+          "templateid": "10190"
+        }, 
+        {
+          "host": "Generic SNMP", 
+          "name": "Generic SNMP", 
+          "templateid": "10204"
+        }
+      ], 
+      "templateid": "10229"
+    }, 
+    {
+      "host": "Intel_Qlogic Infiniband SNMP", 
+      "name": "Intel_Qlogic Infiniband SNMP", 
+      "parentTemplates": [
+        {
+          "host": "Interfaces SNMP", 
+          "name": "Interfaces SNMP", 
+          "templateid": "10190"
+        }, 
+        {
+          "host": "Generic SNMP", 
+          "name": "Generic SNMP", 
+          "templateid": "10204"
+        }
+      ], 
+      "templateid": "10230"
+    }, 
+    {
+      "host": "Juniper SNMP", 
+      "name": "Juniper SNMP", 
+      "parentTemplates": [
+        {
+          "host": "EtherLike-MIB SNMP", 
+          "name": "EtherLike-MIB SNMP", 
+          "templateid": "10183"
+        }, 
+        {
+          "host": "Interfaces SNMP", 
+          "name": "Interfaces SNMP", 
+          "templateid": "10190"
+        }, 
+        {
+          "host": "Generic SNMP", 
+          "name": "Generic SNMP", 
+          "templateid": "10204"
+        }
+      ], 
+      "templateid": "10231"
+    }, 
+    {
+      "host": "Mikrotik SNMP", 
+      "name": "Mikrotik SNMP", 
+      "parentTemplates": [
+        {
+          "host": "Interfaces SNMP", 
+          "name": "Interfaces SNMP", 
+          "templateid": "10190"
+        }, 
+        {
+          "host": "Generic SNMP", 
+          "name": "Generic SNMP", 
+          "templateid": "10204"
+        }
+      ], 
+      "templateid": "10233"
+    }, 
+    {
+      "host": "Netgear Fastpath SNMP", 
+      "name": "Netgear Fastpath SNMP", 
+      "parentTemplates": [
+        {
+          "host": "Interfaces SNMP", 
+          "name": "Interfaces SNMP", 
+          "templateid": "10190"
+        }, 
+        {
+          "host": "Generic SNMP", 
+          "name": "Generic SNMP", 
+          "templateid": "10204"
+        }
+      ], 
+      "templateid": "10234"
+    }, 
+    {
+      "host": "QTech QSW SNMP", 
+      "name": "QTech QSW SNMP", 
+      "parentTemplates": [
+        {
+          "host": "EtherLike-MIB SNMP", 
+          "name": "EtherLike-MIB SNMP", 
+          "templateid": "10183"
+        }, 
+        {
+          "host": "Interfaces SNMP", 
+          "name": "Interfaces SNMP", 
+          "templateid": "10190"
+        }, 
+        {
+          "host": "Generic SNMP", 
+          "name": "Generic SNMP", 
+          "templateid": "10204"
+        }
+      ], 
+      "templateid": "10235"
+    }, 
+    {
+      "host": "TP-LINK SNMP", 
+      "name": "TP-LINK SNMP", 
+      "parentTemplates": [
+        {
+          "host": "Interfaces Simple SNMP", 
+          "name": "Interfaces Simple SNMP", 
+          "templateid": "10188"
+        }, 
+        {
+          "host": "Generic SNMP", 
+          "name": "Generic SNMP", 
+          "templateid": "10204"
+        }
+      ], 
+      "templateid": "10236"
+    }, 
+    {
+      "host": "Ubiquiti AirOS SNMP", 
+      "name": "Ubiquiti AirOS SNMP", 
+      "parentTemplates": [
+        {
+          "host": "Interfaces Simple SNMP", 
+          "name": "Interfaces Simple SNMP", 
+          "templateid": "10188"
+        }, 
+        {
+          "host": "Generic SNMP", 
+          "name": "Generic SNMP", 
+          "templateid": "10204"
+        }
+      ], 
+      "templateid": "10237"
+    }, 
+    {
+      "host": "Linux SNMP", 
+      "name": "Linux SNMP", 
+      "parentTemplates": [
+        {
+          "host": "EtherLike-MIB SNMP", 
+          "name": "EtherLike-MIB SNMP", 
+          "templateid": "10183"
+        }, 
+        {
+          "host": "Interfaces SNMP", 
+          "name": "Interfaces SNMP", 
+          "templateid": "10190"
+        }, 
+        {
+          "host": "Generic SNMP", 
+          "name": "Generic SNMP", 
+          "templateid": "10204"
+        }, 
+        {
+          "host": "Linux memory SNMP", 
+          "name": "Linux memory SNMP", 
+          "templateid": "10268"
+        }, 
+        {
+          "host": "Linux block devices SNMP", 
+          "name": "Linux block devices SNMP", 
+          "templateid": "10269"
+        }, 
+        {
+          "host": "Linux CPU SNMP", 
+          "name": "Linux CPU SNMP", 
+          "templateid": "10270"
+        }, 
+        {
+          "host": "Linux filesystems SNMP", 
+          "name": "Linux filesystems SNMP", 
+          "templateid": "10271"
+        }
+      ], 
+      "templateid": "10248"
+    }, 
+    {
+      "host": "Windows SNMP", 
+      "name": "Windows SNMP", 
+      "parentTemplates": [
+        {
+          "host": "HOST-RESOURCES-MIB SNMP", 
+          "name": "HOST-RESOURCES-MIB SNMP", 
+          "templateid": "10185"
+        }, 
+        {
+          "host": "Interfaces Windows SNMP", 
+          "name": "Interfaces Windows SNMP", 
+          "templateid": "10192"
+        }, 
+        {
+          "host": "Generic SNMP", 
+          "name": "Generic SNMP", 
+          "templateid": "10204"
+        }
+      ], 
+      "templateid": "10249"
+    }, 
+    {
+      "host": "HP Enterprise Switch SNMP", 
+      "name": "HP Enterprise Switch SNMP", 
+      "parentTemplates": [
+        {
+          "host": "EtherLike-MIB SNMP", 
+          "name": "EtherLike-MIB SNMP", 
+          "templateid": "10183"
+        }, 
+        {
+          "host": "Interfaces SNMP", 
+          "name": "Interfaces SNMP", 
+          "templateid": "10190"
+        }, 
+        {
+          "host": "Generic SNMP", 
+          "name": "Generic SNMP", 
+          "templateid": "10204"
+        }
+      ], 
+      "templateid": "10250"
+    }, 
+    {
+      "host": "Mellanox SNMP", 
+      "name": "Mellanox SNMP", 
+      "parentTemplates": [], 
+      "templateid": "10251"
+    }, 
+    {
+      "host": "Cisco CISCO-PROCESS-MIB IOS versions 12.0_3_T-12.2_3.5 SNMP", 
+      "name": "Cisco CISCO-PROCESS-MIB IOS versions 12.0_3_T-12.2_3.5 SNMP", 
+      "parentTemplates": [], 
+      "templateid": "10252"
+    }, 
+    {
+      "host": "Cisco IOS versions 12.0_3_T-12.2_3.5 SNMP", 
+      "name": "Cisco IOS versions 12.0_3_T-12.2_3.5 SNMP", 
+      "parentTemplates": [
+        {
+          "host": "Interfaces SNMP", 
+          "name": "Interfaces SNMP", 
+          "templateid": "10190"
+        }, 
+        {
+          "host": "Generic SNMP", 
+          "name": "Generic SNMP", 
+          "templateid": "10204"
+        }, 
+        {
+          "host": "Cisco CISCO-MEMORY-POOL-MIB SNMP", 
+          "name": "Cisco CISCO-MEMORY-POOL-MIB SNMP", 
+          "templateid": "10212"
+        }, 
+        {
+          "host": "Cisco Inventory SNMP", 
+          "name": "Cisco Inventory SNMP", 
+          "templateid": "10216"
+        }, 
+        {
+          "host": "Cisco CISCO-ENVMON-MIB SNMP", 
+          "name": "Cisco CISCO-ENVMON-MIB SNMP", 
+          "templateid": "10217"
+        }, 
+        {
+          "host": "Cisco CISCO-PROCESS-MIB IOS versions 12.0_3_T-12.2_3.5 SNMP", 
+          "name": "Cisco CISCO-PROCESS-MIB IOS versions 12.0_3_T-12.2_3.5 SNMP", 
+          "templateid": "10252"
+        }
+      ], 
+      "templateid": "10253"
+    }, 
+    {
+      "host": "Arista SNMP", 
+      "name": "Arista SNMP", 
+      "parentTemplates": [
+        {
+          "host": "EtherLike-MIB SNMP", 
+          "name": "EtherLike-MIB SNMP", 
+          "templateid": "10183"
+        }, 
+        {
+          "host": "HOST-RESOURCES-MIB SNMP", 
+          "name": "HOST-RESOURCES-MIB SNMP", 
+          "templateid": "10185"
+        }, 
+        {
+          "host": "Interfaces SNMP", 
+          "name": "Interfaces SNMP", 
+          "templateid": "10190"
+        }, 
+        {
+          "host": "Generic SNMP", 
+          "name": "Generic SNMP", 
+          "templateid": "10204"
+        }
+      ], 
+      "templateid": "10254"
+    }, 
+    {
+      "host": "Dell iDRAC SNMP", 
+      "name": "Dell iDRAC SNMP", 
+      "parentTemplates": [
+        {
+          "host": "Generic SNMP", 
+          "name": "Generic SNMP", 
+          "templateid": "10204"
+        }
+      ], 
+      "templateid": "10255"
+    }, 
+    {
+      "host": "HP iLO SNMP", 
+      "name": "HP iLO SNMP", 
+      "parentTemplates": [
+        {
+          "host": "Generic SNMP", 
+          "name": "Generic SNMP", 
+          "templateid": "10204"
+        }
+      ], 
+      "templateid": "10256"
+    }, 
+    {
+      "host": "IBM IMM SNMP", 
+      "name": "IBM IMM SNMP", 
+      "parentTemplates": [
+        {
+          "host": "Generic SNMP", 
+          "name": "Generic SNMP", 
+          "templateid": "10204"
+        }
+      ], 
+      "templateid": "10258"
+    }, 
+    {
+      "host": "Supermicro Aten SNMP", 
+      "name": "Supermicro Aten SNMP", 
+      "parentTemplates": [
+        {
+          "host": "Generic SNMP", 
+          "name": "Generic SNMP", 
+          "templateid": "10204"
+        }
+      ], 
+      "templateid": "10259"
+    }, 
+    {
+      "host": "Apache Tomcat JMX", 
+      "name": "Apache Tomcat JMX", 
+      "parentTemplates": [], 
+      "templateid": "10260"
+    }, 
+    {
+      "host": "Remote Zabbix server", 
+      "name": "Remote Zabbix server", 
+      "parentTemplates": [], 
+      "templateid": "10261"
+    }, 
+    {
+      "host": "TEMP_PBC_ZBX_CHECKING_BASE", 
+      "name": "TEMP_PBC_ZBX_CHECKING_BASE", 
+      "parentTemplates": [], 
+      "templateid": "10262"
+    }, 
+    {
+      "host": "Apache by Zabbix agent", 
+      "name": "Apache by Zabbix agent", 
+      "parentTemplates": [], 
+      "templateid": "10264"
+    }, 
+    {
+      "host": "Apache by HTTP", 
+      "name": "Apache by HTTP", 
+      "parentTemplates": [], 
+      "templateid": "10265"
+    }, 
+    {
+      "host": "TEMP_ZABBIX_MID_NGINX_BASE", 
+      "name": "TEMP_ZABBIX_MID_NGINX_BASE", 
+      "parentTemplates": [], 
+      "templateid": "10266"
+    }, 
+    {
+      "host": "Nginx by HTTP", 
+      "name": "Nginx by HTTP", 
+      "parentTemplates": [], 
+      "templateid": "10267"
+    }, 
+    {
+      "host": "Linux memory SNMP", 
+      "name": "Linux memory SNMP", 
+      "parentTemplates": [], 
+      "templateid": "10268"
+    }, 
+    {
+      "host": "Linux block devices SNMP", 
+      "name": "Linux block devices SNMP", 
+      "parentTemplates": [], 
+      "templateid": "10269"
+    }, 
+    {
+      "host": "Linux CPU SNMP", 
+      "name": "Linux CPU SNMP", 
+      "parentTemplates": [], 
+      "templateid": "10270"
+    }, 
+    {
+      "host": "Linux filesystems SNMP", 
+      "name": "Linux filesystems SNMP", 
+      "parentTemplates": [], 
+      "templateid": "10271"
+    }, 
+    {
+      "host": "Linux CPU by Zabbix agent", 
+      "name": "Linux CPU by Zabbix agent", 
+      "parentTemplates": [], 
+      "templateid": "10272"
+    }, 
+    {
+      "host": "Linux filesystems by Zabbix agent", 
+      "name": "Linux filesystems by Zabbix agent", 
+      "parentTemplates": [], 
+      "templateid": "10273"
+    }, 
+    {
+      "host": "Linux memory by Zabbix agent", 
+      "name": "Linux memory by Zabbix agent", 
+      "parentTemplates": [], 
+      "templateid": "10274"
+    }, 
+    {
+      "host": "Linux block devices by Zabbix agent", 
+      "name": "Linux block devices by Zabbix agent", 
+      "parentTemplates": [], 
+      "templateid": "10275"
+    }, 
+    {
+      "host": "Linux network interfaces by Zabbix agent", 
+      "name": "Linux network interfaces by Zabbix agent", 
+      "parentTemplates": [], 
+      "templateid": "10276"
+    }, 
+    {
+      "host": "Linux generic by Zabbix agent", 
+      "name": "Linux generic by Zabbix agent", 
+      "parentTemplates": [], 
+      "templateid": "10277"
+    }, 
+    {
+      "host": "Linux by Prom", 
+      "name": "Linux by Prom", 
+      "parentTemplates": [], 
+      "templateid": "10285"
+    }, 
+    {
+      "host": "Windows CPU by Zabbix agent", 
+      "name": "Windows CPU by Zabbix agent", 
+      "parentTemplates": [], 
+      "templateid": "10286"
+    }, 
+    {
+      "host": "Windows memory by Zabbix agent", 
+      "name": "Windows memory by Zabbix agent", 
+      "parentTemplates": [], 
+      "templateid": "10287"
+    }, 
+    {
+      "host": "Windows filesystems by Zabbix agent", 
+      "name": "Windows filesystems by Zabbix agent", 
+      "parentTemplates": [], 
+      "templateid": "10288"
+    }, 
+    {
+      "host": "Windows physical disks by Zabbix agent", 
+      "name": "Windows physical disks by Zabbix agent", 
+      "parentTemplates": [], 
+      "templateid": "10289"
+    }, 
+    {
+      "host": "Windows generic by Zabbix agent", 
+      "name": "Windows generic by Zabbix agent", 
+      "parentTemplates": [], 
+      "templateid": "10290"
+    }, 
+    {
+      "host": "Windows network by Zabbix agent", 
+      "name": "Windows network by Zabbix agent", 
+      "parentTemplates": [], 
+      "templateid": "10291"
+    }, 
+    {
+      "host": "Zabbix agent active", 
+      "name": "Zabbix agent active", 
+      "parentTemplates": [], 
+      "templateid": "10292"
+    }, 
+    {
+      "host": "RabbitMQ cluster by Zabbix agent", 
+      "name": "RabbitMQ cluster by Zabbix agent", 
+      "parentTemplates": [], 
+      "templateid": "10300"
+    }, 
+    {
+      "host": "RabbitMQ node by Zabbix agent", 
+      "name": "RabbitMQ node by Zabbix agent", 
+      "parentTemplates": [], 
+      "templateid": "10301"
+    }, 
+    {
+      "host": "RabbitMQ cluster by HTTP", 
+      "name": "RabbitMQ cluster by HTTP", 
+      "parentTemplates": [], 
+      "templateid": "10302"
+    }, 
+    {
+      "host": "RabbitMQ node by HTTP", 
+      "name": "RabbitMQ node by HTTP", 
+      "parentTemplates": [], 
+      "templateid": "10303"
+    }, 
+    {
+      "host": "Cisco UCS SNMP", 
+      "name": "Cisco UCS SNMP", 
+      "parentTemplates": [
+        {
+          "host": "Generic SNMP", 
+          "name": "Generic SNMP", 
+          "templateid": "10204"
+        }
+      ], 
+      "templateid": "10304"
+    }, 
+    {
+      "host": "HOST-RESOURCES-MIB CPU SNMP", 
+      "name": "HOST-RESOURCES-MIB CPU SNMP", 
+      "parentTemplates": [], 
+      "templateid": "10305"
+    }, 
+    {
+      "host": "HOST-RESOURCES-MIB memory SNMP", 
+      "name": "HOST-RESOURCES-MIB memory SNMP", 
+      "parentTemplates": [], 
+      "templateid": "10306"
+    }, 
+    {
+      "host": "HOST-RESOURCES-MIB storage SNMP", 
+      "name": "HOST-RESOURCES-MIB storage SNMP", 
+      "parentTemplates": [], 
+      "templateid": "10307"
+    }, 
+    {
+      "host": "HAProxy by Zabbix agent", 
+      "name": "HAProxy by Zabbix agent", 
+      "parentTemplates": [], 
+      "templateid": "10308"
+    }, 
+    {
+      "host": "HAProxy by HTTP", 
+      "name": "HAProxy by HTTP", 
+      "parentTemplates": [], 
+      "templateid": "10309"
+    }, 
+    {
+      "host": "Redis", 
+      "name": "Redis", 
+      "parentTemplates": [], 
+      "templateid": "10310"
+    }, 
+    {
+      "host": "Windows services by Zabbix agent", 
+      "name": "Windows services by Zabbix agent", 
+      "parentTemplates": [], 
+      "templateid": "10314"
+    }, 
+    {
+      "host": "TEMP_PBC_DB_MYSQL_BASE", 
+      "name": "TEMP_PBC_DB_MYSQL_BASE", 
+      "parentTemplates": [], 
+      "templateid": "10316"
+    }, 
+    {
+      "host": "MySQL ODBC", 
+      "name": "MySQL ODBC", 
+      "parentTemplates": [], 
+      "templateid": "10317"
+    }, 
+    {
+      "host": "Docker", 
+      "name": "Docker", 
+      "parentTemplates": [], 
+      "templateid": "10318"
+    }, 
+    {
+      "host": "Memcached", 
+      "name": "Memcached", 
+      "parentTemplates": [], 
+      "templateid": "10319"
+    }, 
+    {
+      "host": "TEMP_PBC_DB_MySQL_CLUSTER_BASE", 
+      "name": "TEMP_PBC_DB_MySQL_CLUSTER_BASE", 
+      "parentTemplates": [], 
+      "templateid": "10320"
+    }, 
+    {
+      "host": "Chassis by IPMI", 
+      "name": "Chassis by IPMI", 
+      "parentTemplates": [], 
+      "templateid": "10321"
+    }, 
+    {
+      "host": "Elasticsearch Cluster by HTTP", 
+      "name": "Elasticsearch Cluster by HTTP", 
+      "parentTemplates": [], 
+      "templateid": "10322"
+    }, 
+    {
+      "host": "ClickHouse by HTTP", 
+      "name": "ClickHouse by HTTP", 
+      "parentTemplates": [], 
+      "templateid": "10323"
+    }, 
+    {
+      "host": "Etcd by HTTP", 
+      "name": "Etcd by HTTP", 
+      "parentTemplates": [], 
+      "templateid": "10324"
+    }, 
+    {
+      "host": "IIS by Zabbix agent", 
+      "name": "IIS by Zabbix agent", 
+      "parentTemplates": [], 
+      "templateid": "10325"
+    }, 
+    {
+      "host": "IIS by Zabbix agent active", 
+      "name": "IIS by Zabbix agent active", 
+      "parentTemplates": [], 
+      "templateid": "10326"
+    }, 
+    {
+      "host": "MSSQL by ODBC", 
+      "name": "MSSQL by ODBC", 
+      "parentTemplates": [], 
+      "templateid": "10327"
+    }, 
+    {
+      "host": "Oracle by ODBC", 
+      "name": "Oracle by ODBC", 
+      "parentTemplates": [], 
+      "templateid": "10328"
+    }, 
+    {
+      "host": "PostgreSQL Agent 2", 
+      "name": "PostgreSQL Agent 2", 
+      "parentTemplates": [], 
+      "templateid": "10329"
+    }, 
+    {
+      "host": "PHP-FPM by Zabbix agent", 
+      "name": "PHP-FPM by Zabbix agent", 
+      "parentTemplates": [], 
+      "templateid": "10330"
+    }, 
+    {
+      "host": "PHP-FPM by HTTP", 
+      "name": "PHP-FPM by HTTP", 
+      "parentTemplates": [], 
+      "templateid": "10331"
+    }, 
+    {
+      "host": "TEMP_PBC_OS_VMware macros", 
+      "name": "TEMP_PBC_OS_VMware macros", 
+      "parentTemplates": [], 
+      "templateid": "10332"
+    }, 
+    {
+      "host": "Oracle by Zabbix Agent 2", 
+      "name": "Oracle by Zabbix Agent 2", 
+      "parentTemplates": [], 
+      "templateid": "10335"
+    }, 
+    {
+      "host": "Asterisk by HTTP", 
+      "name": "Asterisk by HTTP", 
+      "parentTemplates": [], 
+      "templateid": "10336"
+    }, 
+    {
+      "host": "Linux block devices by Zabbix agent active", 
+      "name": "Linux block devices by Zabbix agent active", 
+      "parentTemplates": [], 
+      "templateid": "10337"
+    }, 
+    {
+      "host": "Linux CPU by Zabbix agent active", 
+      "name": "Linux CPU by Zabbix agent active", 
+      "parentTemplates": [], 
+      "templateid": "10338"
+    }, 
+    {
+      "host": "Linux filesystems by Zabbix agent active", 
+      "name": "Linux filesystems by Zabbix agent active", 
+      "parentTemplates": [], 
+      "templateid": "10339"
+    }, 
+    {
+      "host": "Linux generic by Zabbix agent active", 
+      "name": "Linux generic by Zabbix agent active", 
+      "parentTemplates": [], 
+      "templateid": "10340"
+    }, 
+    {
+      "host": "Linux memory by Zabbix agent active", 
+      "name": "Linux memory by Zabbix agent active", 
+      "parentTemplates": [], 
+      "templateid": "10341"
+    }, 
+    {
+      "host": "Linux network interfaces by Zabbix agent active", 
+      "name": "Linux network interfaces by Zabbix agent active", 
+      "parentTemplates": [], 
+      "templateid": "10342"
+    }, 
+    {
+      "host": "Linux by Zabbix agent active", 
+      "name": "Linux by Zabbix agent active", 
+      "parentTemplates": [
+        {
+          "host": "Zabbix agent", 
+          "name": "Zabbix agent", 
+          "templateid": "10050"
+        }, 
+        {
+          "host": "Linux block devices by Zabbix agent active", 
+          "name": "Linux block devices by Zabbix agent active", 
+          "templateid": "10337"
+        }, 
+        {
+          "host": "Linux CPU by Zabbix agent active", 
+          "name": "Linux CPU by Zabbix agent active", 
+          "templateid": "10338"
+        }, 
+        {
+          "host": "Linux filesystems by Zabbix agent active", 
+          "name": "Linux filesystems by Zabbix agent active", 
+          "templateid": "10339"
+        }, 
+        {
+          "host": "Linux generic by Zabbix agent active", 
+          "name": "Linux generic by Zabbix agent active", 
+          "templateid": "10340"
+        }, 
+        {
+          "host": "Linux memory by Zabbix agent active", 
+          "name": "Linux memory by Zabbix agent active", 
+          "templateid": "10341"
+        }, 
+        {
+          "host": "Linux network interfaces by Zabbix agent active", 
+          "name": "Linux network interfaces by Zabbix agent active", 
+          "templateid": "10342"
+        }
+      ], 
+      "templateid": "10343"
+    }, 
+    {
+      "host": "Windows CPU by Zabbix agent active", 
+      "name": "Windows CPU by Zabbix agent active", 
+      "parentTemplates": [], 
+      "templateid": "10344"
+    }, 
+    {
+      "host": "Windows filesystems by Zabbix agent active", 
+      "name": "Windows filesystems by Zabbix agent active", 
+      "parentTemplates": [], 
+      "templateid": "10345"
+    }, 
+    {
+      "host": "Windows generic by Zabbix agent active", 
+      "name": "Windows generic by Zabbix agent active", 
+      "parentTemplates": [], 
+      "templateid": "10346"
+    }, 
+    {
+      "host": "Windows memory by Zabbix agent active", 
+      "name": "Windows memory by Zabbix agent active", 
+      "parentTemplates": [], 
+      "templateid": "10347"
+    }, 
+    {
+      "host": "Windows network by Zabbix agent active", 
+      "name": "Windows network by Zabbix agent active", 
+      "parentTemplates": [], 
+      "templateid": "10348"
+    }, 
+    {
+      "host": "Windows physical disks by Zabbix agent active", 
+      "name": "Windows physical disks by Zabbix agent active", 
+      "parentTemplates": [], 
+      "templateid": "10349"
+    }, 
+    {
+      "host": "Windows services by Zabbix agent active", 
+      "name": "Windows services by Zabbix agent active", 
+      "parentTemplates": [], 
+      "templateid": "10350"
+    }, 
+    {
+      "host": "Windows by Zabbix agent active", 
+      "name": "Windows by Zabbix agent active", 
+      "parentTemplates": [
+        {
+          "host": "Zabbix agent", 
+          "name": "Zabbix agent", 
+          "templateid": "10050"
+        }, 
+        {
+          "host": "Windows CPU by Zabbix agent active", 
+          "name": "Windows CPU by Zabbix agent active", 
+          "templateid": "10344"
+        }, 
+        {
+          "host": "Windows filesystems by Zabbix agent active", 
+          "name": "Windows filesystems by Zabbix agent active", 
+          "templateid": "10345"
+        }, 
+        {
+          "host": "Windows generic by Zabbix agent active", 
+          "name": "Windows generic by Zabbix agent active", 
+          "templateid": "10346"
+        }, 
+        {
+          "host": "Windows memory by Zabbix agent active", 
+          "name": "Windows memory by Zabbix agent active", 
+          "templateid": "10347"
+        }, 
+        {
+          "host": "Windows network by Zabbix agent active", 
+          "name": "Windows network by Zabbix agent active", 
+          "templateid": "10348"
+        }, 
+        {
+          "host": "Windows physical disks by Zabbix agent active", 
+          "name": "Windows physical disks by Zabbix agent active", 
+          "templateid": "10349"
+        }, 
+        {
+          "host": "Windows services by Zabbix agent active", 
+          "name": "Windows services by Zabbix agent active", 
+          "templateid": "10350"
+        }
+      ], 
+      "templateid": "10351"
+    }, 
+    {
+      "host": "Ceph by Zabbix Agent2", 
+      "name": "Ceph by Zabbix Agent2", 
+      "parentTemplates": [], 
+      "templateid": "10353"
+    }, 
+    {
+      "host": "Squid SNMP", 
+      "name": "Squid SNMP", 
+      "parentTemplates": [], 
+      "templateid": "10355"
+    }, 
+    {
+      "host": "PostgreSQL", 
+      "name": "PostgreSQL", 
+      "parentTemplates": [], 
+      "templateid": "10357"
+    }, 
+    {
+      "host": "Apache Kafka by JMX", 
+      "name": "Apache Kafka by JMX", 
+      "parentTemplates": [], 
+      "templateid": "10358"
+    }, 
+    {
+      "host": "Apache Cassandra by JMX", 
+      "name": "Apache Cassandra by JMX", 
+      "parentTemplates": [], 
+      "templateid": "10359"
+    }, 
+    {
+      "host": "Aranet Cloud", 
+      "name": "Aranet Cloud", 
+      "parentTemplates": [], 
+      "templateid": "10360"
+    }, 
+    {
+      "host": "Hadoop by HTTP", 
+      "name": "Hadoop by HTTP", 
+      "parentTemplates": [], 
+      "templateid": "10361"
+    }, 
+    {
+      "host": "TEMP_PBC_OS_VMware FQDN", 
+      "name": "TEMP_PBC_OS_VMware FQDN", 
+      "parentTemplates": [
+        {
+          "host": "TEMP_PBC_OS_VMware macros", 
+          "name": "TEMP_PBC_OS_VMware macros", 
+          "templateid": "10332"
+        }
+      ], 
+      "templateid": "10362"
+    }, 
+    {
+      "host": "Zookeeper by HTTP", 
+      "name": "Zookeeper by HTTP", 
+      "parentTemplates": [], 
+      "templateid": "10365"
+    }, 
+    {
+      "host": "Morningstar ProStar MPPT SNMP", 
+      "name": "Morningstar ProStar MPPT SNMP", 
+      "parentTemplates": [], 
+      "templateid": "10366"
+    }, 
+    {
+      "host": "Morningstar ProStar PWM SNMP", 
+      "name": "Morningstar ProStar PWM SNMP", 
+      "parentTemplates": [], 
+      "templateid": "10367"
+    }, 
+    {
+      "host": "Morningstar SunSaver MPPT SNMP", 
+      "name": "Morningstar SunSaver MPPT SNMP", 
+      "parentTemplates": [], 
+      "templateid": "10368"
+    }, 
+    {
+      "host": "Morningstar SureSine SNMP", 
+      "name": "Morningstar SureSine SNMP", 
+      "parentTemplates": [], 
+      "templateid": "10369"
+    }, 
+    {
+      "host": "Morningstar TriStar MPPT 600V SNMP", 
+      "name": "Morningstar TriStar MPPT 600V SNMP", 
+      "parentTemplates": [], 
+      "templateid": "10370"
+    }, 
+    {
+      "host": "Morningstar TriStar MPPT SNMP", 
+      "name": "Morningstar TriStar MPPT SNMP", 
+      "parentTemplates": [], 
+      "templateid": "10371"
+    }, 
+    {
+      "host": "Morningstar TriStar PWM SNMP", 
+      "name": "Morningstar TriStar PWM SNMP", 
+      "parentTemplates": [], 
+      "templateid": "10372"
+    }, 
+    {
+      "host": "GitLab by HTTP", 
+      "name": "GitLab by HTTP", 
+      "parentTemplates": [], 
+      "templateid": "10373"
+    }, 
+    {
+      "host": "Apache ActiveMQ by JMX", 
+      "name": "Apache ActiveMQ by JMX", 
+      "parentTemplates": [], 
+      "templateid": "10374"
+    }, 
+    {
+      "host": "Microsoft Exchange Server 2016 by Zabbix agent", 
+      "name": "Microsoft Exchange Server 2016 by Zabbix agent", 
+      "parentTemplates": [], 
+      "templateid": "10375"
+    }, 
+    {
+      "host": "Microsoft Exchange Server 2016 by Zabbix agent active", 
+      "name": "Microsoft Exchange Server 2016 by Zabbix agent active", 
+      "parentTemplates": [], 
+      "templateid": "10376"
+    }, 
+    {
+      "host": "HashiCorp Vault by HTTP", 
+      "name": "HashiCorp Vault by HTTP", 
+      "parentTemplates": [], 
+      "templateid": "10377"
+    }, 
+    {
+      "host": "NetApp FAS3220 SNMP", 
+      "name": "NetApp FAS3220 SNMP", 
+      "parentTemplates": [
+        {
+          "host": "Generic SNMP", 
+          "name": "Generic SNMP", 
+          "templateid": "10204"
+        }
+      ], 
+      "templateid": "10378"
+    }, 
+    {
+      "host": "Jenkins by HTTP", 
+      "name": "Jenkins by HTTP", 
+      "parentTemplates": [], 
+      "templateid": "10379"
+    }, 
+    {
+      "host": "Ignite by JMX", 
+      "name": "Ignite by JMX", 
+      "parentTemplates": [], 
+      "templateid": "10380"
+    }, 
+    {
+      "host": "Microsoft SharePoint by HTTP", 
+      "name": "Microsoft SharePoint by HTTP", 
+      "parentTemplates": [], 
+      "templateid": "10381"
+    }, 
+    {
+      "host": "MongoDB node by Zabbix Agent 2", 
+      "name": "MongoDB node by Zabbix Agent 2", 
+      "parentTemplates": [], 
+      "templateid": "10382"
+    }, 
+    {
+      "host": "MongoDB cluster by Zabbix Agent 2", 
+      "name": "MongoDB cluster by Zabbix Agent 2", 
+      "parentTemplates": [], 
+      "templateid": "10383"
+    }, 
+    {
+      "host": "SMART by Zabbix agent 2", 
+      "name": "SMART by Zabbix agent 2", 
+      "parentTemplates": [], 
+      "templateid": "10386"
+    }, 
+    {
+      "host": "SMART by Zabbix agent active 2", 
+      "name": "SMART by Zabbix agent active 2", 
+      "parentTemplates": [], 
+      "templateid": "10387"
+    }, 
+    {
+      "host": "Cisco Catalyst 3750V2-24FS SNMP", 
+      "name": "Cisco Catalyst 3750V2-24FS SNMP", 
+      "parentTemplates": [], 
+      "templateid": "10388"
+    }, 
+    {
+      "host": "Cisco Catalyst 3750V2-24PS SNMP", 
+      "name": "Cisco Catalyst 3750V2-24PS SNMP", 
+      "parentTemplates": [], 
+      "templateid": "10389"
+    }, 
+    {
+      "host": "Cisco Catalyst 3750V2-24TS SNMP", 
+      "name": "Cisco Catalyst 3750V2-24TS SNMP", 
+      "parentTemplates": [], 
+      "templateid": "10390"
+    }, 
+    {
+      "host": "Cisco Catalyst 3750V2-48PS SNMP", 
+      "name": "Cisco Catalyst 3750V2-48PS SNMP", 
+      "parentTemplates": [], 
+      "templateid": "10391"
+    }, 
+    {
+      "host": "Cisco Catalyst 3750V2-48TS SNMP", 
+      "name": "Cisco Catalyst 3750V2-48TS SNMP", 
+      "parentTemplates": [], 
+      "templateid": "10392"
+    }, 
+    {
+      "host": "APC UPS SNMP", 
+      "name": "APC UPS SNMP", 
+      "parentTemplates": [], 
+      "templateid": "10393"
+    }, 
+    {
+      "host": "Template Huawei OceanStor Storage 5500 SNMPv2", 
+      "name": "Template Huawei OceanStor Storage 5500 SNMPv2", 
+      "parentTemplates": [], 
+      "templateid": "10394"
+    }, 
+    {
+      "host": "NetApp AFF A700 by HTTP", 
+      "name": "NetApp AFF A700 by HTTP", 
+      "parentTemplates": [], 
+      "templateid": "10395"
+    }, 
+    {
+      "host": "Template Module Generic SNMPv3", 
+      "name": "Template Module Generic SNMPv3", 
+      "parentTemplates": [], 
+      "templateid": "10401"
+    }, 
+    {
+      "host": "Template Server Lenovo XCC SNMPv3", 
+      "name": "Template Server Lenovo XCC SNMPv3", 
+      "parentTemplates": [
+        {
+          "host": "Template Module Generic SNMPv3", 
+          "name": "Template Module Generic SNMPv3", 
+          "templateid": "10401"
+        }
+      ], 
+      "templateid": "10402"
+    }, 
+    {
+      "host": "TEMP_PBC_MID_IBMMQ_CUSTOM", 
+      "name": "TEMP_PBC_MID_IBMMQ_CUSTOM", 
+      "parentTemplates": [], 
+      "templateid": "10413"
+    }, 
+    {
+      "host": "TEMP_PBC_MID_IBMMQ_CUSTOM_LOW", 
+      "name": "TEMP_PBC_MID_IBMMQ_CUSTOM_LOW", 
+      "parentTemplates": [], 
+      "templateid": "10414"
+    }, 
+    {
+      "host": "TEMP_PBC_OS_LINUX_BASE", 
+      "name": "TEMP_PBC_OS_LINUX_BASE", 
+      "parentTemplates": [], 
+      "templateid": "10415"
+    }, 
+    {
+      "host": "TEMP_PBC_SNMP_BASE", 
+      "name": "TEMP_PBC_SNMP_BASE", 
+      "parentTemplates": [
+        {
+          "host": "TEMP_PBC_ICMP_PINGv4_BASE", 
+          "name": "TEMP_PBC_ICMP_PINGv4_BASE", 
+          "templateid": "10186"
+        }
+      ], 
+      "templateid": "10417"
+    }, 
+    {
+      "host": "TEMP_PBC_SEC_PLD_BASE", 
+      "name": "TEMP_PBC_SEC_PLD_BASE", 
+      "parentTemplates": [], 
+      "templateid": "10418"
+    }, 
+    {
+      "host": "Template PBC IPMI Monitor Sensor by Zabbix agent", 
+      "name": "Template PBC IPMI Monitor Sensor by Zabbix agent", 
+      "parentTemplates": [], 
+      "templateid": "10421"
+    }, 
+    {
+      "host": "TEMP_PBC_OS_WINDOWS_BASE", 
+      "name": "TEMP_PBC_OS_WINDOWS_BASE", 
+      "parentTemplates": [], 
+      "templateid": "10423"
+    }, 
+    {
+      "host": "TEMP_PBC_OS_WINDOWS_2003", 
+      "name": "TEMP_PBC_OS_WINDOWS_2003", 
+      "parentTemplates": [], 
+      "templateid": "10424"
+    }, 
+    {
+      "host": "TEMP_PBC_OS_WINDOWS_VM_2003", 
+      "name": "TEMP_PBC_OS_WINDOWS_VM_2003", 
+      "parentTemplates": [], 
+      "templateid": "10425"
+    }, 
+    {
+      "host": "TEMP_PBC_MID_APACHE_CUSTOM", 
+      "name": "TEMP_PBC_MID_APACHE_CUSTOM", 
+      "parentTemplates": [], 
+      "templateid": "10426"
+    }, 
+    {
+      "host": "TEMP_PBC_MID_APP_LOW", 
+      "name": "TEMP_PBC_MID_APP_LOW", 
+      "parentTemplates": [], 
+      "templateid": "10430"
+    }, 
+    {
+      "host": "TEMP_PBC_DB_MYSQL_LOW", 
+      "name": "TEMP_PBC_DB_MYSQL_LOW", 
+      "parentTemplates": [], 
+      "templateid": "10432"
+    }, 
+    {
+      "host": "TEMP_PBC_MID_APACHE_BASE", 
+      "name": "TEMP_PBC_MID_APACHE_BASE", 
+      "parentTemplates": [], 
+      "templateid": "10433"
+    }, 
+    {
+      "host": "Template_PBC_NET_H3C", 
+      "name": "Template_PBC_NET_H3C", 
+      "parentTemplates": [], 
+      "templateid": "10434"
+    }, 
+    {
+      "host": "TEMP_PBC_MID_NTP_BASE", 
+      "name": "TEMP_PBC_MID_NTP_BASE", 
+      "parentTemplates": [], 
+      "templateid": "10436"
+    }, 
+    {
+      "host": "TEMP_PBC_MID_NFS_BASE", 
+      "name": "TEMP_PBC_MID_NFS_BASE", 
+      "parentTemplates": [], 
+      "templateid": "10437"
+    }, 
+    {
+      "host": "TEMP_PBC_DB_DB2_BASE", 
+      "name": "TEMP_PBC_DB_DB2_BASE", 
+      "parentTemplates": [], 
+      "templateid": "10452"
+    }, 
+    {
+      "host": "TEMP_PBC_MID_DNS_BASE", 
+      "name": "TEMP_PBC_MID_DNS_BASE", 
+      "parentTemplates": [], 
+      "templateid": "10453"
+    }, 
+    {
+      "host": "TEMP_PBC_MYSQL_CLUSTER_BASE", 
+      "name": "TEMP_PBC_MYSQL_CLUSTER_BASE", 
+      "parentTemplates": [], 
+      "templateid": "10455"
+    }, 
+    {
+      "host": "TEMP_PBC_DB_MySQL_CLUSTER_INNODB", 
+      "name": "TEMP_PBC_DB_MySQL_CLUSTER_INNODB", 
+      "parentTemplates": [], 
+      "templateid": "10456"
+    }, 
+    {
+      "host": "TEMP_PBC_MID_NGINX_BASE", 
+      "name": "TEMP_PBC_MID_NGINX_BASE", 
+      "parentTemplates": [], 
+      "templateid": "10457"
+    }, 
+    {
+      "host": "TEMP_PBC_PHY_IPMI_BASE", 
+      "name": "TEMP_PBC_PHY_IPMI_BASE", 
+      "parentTemplates": [], 
+      "templateid": "10460"
+    }, 
+    {
+      "host": "TEMP_PBC_FC_Brocade FC SNMP", 
+      "name": "TEMP_PBC_FC_Brocade FC SNMP", 
+      "parentTemplates": [], 
+      "templateid": "10528"
+    }, 
+    {
+      "host": "TEMP_PBC_OS_VMware Guest_DMZ", 
+      "name": "TEMP_PBC_OS_VMware Guest_DMZ", 
+      "parentTemplates": [
+        {
+          "host": "TEMP_PBC_OS_VMware macros_DMZ", 
+          "name": "TEMP_PBC_OS_VMware macros_DMZ", 
+          "templateid": "10538"
+        }
+      ], 
+      "templateid": "10535"
+    }, 
+    {
+      "host": "TEMP_PBC_OS_VMware Hypervisor_DMZ", 
+      "name": "TEMP_PBC_OS_VMware Hypervisor_DMZ", 
+      "parentTemplates": [
+        {
+          "host": "TEMP_PBC_OS_VMware macros_DMZ", 
+          "name": "TEMP_PBC_OS_VMware macros_DMZ", 
+          "templateid": "10538"
+        }
+      ], 
+      "templateid": "10536"
+    }, 
+    {
+      "host": "TEMP_PBC_OS_VMware macros_DMZ", 
+      "name": "TEMP_PBC_OS_VMware macros_DMZ", 
+      "parentTemplates": [], 
+      "templateid": "10538"
+    }, 
+    {
+      "host": "TEMP_PBC_OS_VMware_DMZ", 
+      "name": "TEMP_PBC_OS_VMware_DMZ", 
+      "parentTemplates": [
+        {
+          "host": "TEMP_PBC_ICMP_PINGv4_BASE", 
+          "name": "TEMP_PBC_ICMP_PINGv4_BASE", 
+          "templateid": "10186"
+        }, 
+        {
+          "host": "TEMP_PBC_OS_VMware macros_DMZ", 
+          "name": "TEMP_PBC_OS_VMware macros_DMZ", 
+          "templateid": "10538"
+        }
+      ], 
+      "templateid": "10547"
+    }, 
+    {
+      "host": "TEMP_PBC_OS_VMware_PROD", 
+      "name": "TEMP_PBC_OS_VMware_PROD", 
+      "parentTemplates": [
+        {
+          "host": "TEMP_PBC_ICMP_PINGv4_BASE", 
+          "name": "TEMP_PBC_ICMP_PINGv4_BASE", 
+          "templateid": "10186"
+        }, 
+        {
+          "host": "TEMP_PBC_OS_VMware macros_PROD", 
+          "name": "TEMP_PBC_OS_VMware macros_PROD", 
+          "templateid": "10589"
+        }
+      ], 
+      "templateid": "10550"
+    }, 
+    {
+      "host": "TEMP_PBC_MID_TOMCAT_BASE", 
+      "name": "TEMP_PBC_MID_TOMCAT_BASE", 
+      "parentTemplates": [], 
+      "templateid": "10566"
+    }, 
+    {
+      "host": "TEMP_PBC_MID_HTTPD_LOW", 
+      "name": "TEMP_PBC_MID_HTTPD_LOW", 
+      "parentTemplates": [], 
+      "templateid": "10576"
+    }, 
+    {
+      "host": "TEMP_PBC_OS_VMware macros_PROD", 
+      "name": "TEMP_PBC_OS_VMware macros_PROD", 
+      "parentTemplates": [], 
+      "templateid": "10589"
+    }, 
+    {
+      "host": "TEMP_PBC_PHY_SSH_IBMV7000_BASE", 
+      "name": "TEMP_PBC_PHY_SSH_IBMV7000_BASE", 
+      "parentTemplates": [], 
+      "templateid": "10728"
+    }, 
+    {
+      "host": "TEMP_PBC_HTTP_WEB_BASE", 
+      "name": "TEMP_PBC_HTTP_WEB_BASE", 
+      "parentTemplates": [], 
+      "templateid": "10729"
+    }, 
+    {
+      "host": "TEMP_PBC_PHY_EMC_VNX_BAK", 
+      "name": "TEMP_PBC_PHY_EMC_VNX_BAK", 
+      "parentTemplates": [], 
+      "templateid": "10735"
+    }, 
+    {
+      "host": "TEMP_PBC_MID_FastDFS_LOW", 
+      "name": "TEMP_PBC_MID_FastDFS_LOW", 
+      "parentTemplates": [], 
+      "templateid": "10736"
+    }, 
+    {
+      "host": "TEMP_PBC_MID_NGINX_LOW", 
+      "name": "TEMP_PBC_MID_NGINX_LOW", 
+      "parentTemplates": [], 
+      "templateid": "10737"
+    }, 
+    {
+      "host": "TEMP_PBC_MID_REDIS_LOW", 
+      "name": "TEMP_PBC_MID_REDIS_LOW", 
+      "parentTemplates": [], 
+      "templateid": "10738"
+    }, 
+    {
+      "host": "TEMP_PBC_MID_JAVA_LOW", 
+      "name": "TEMP_PBC_MID_JAVA_LOW", 
+      "parentTemplates": [], 
+      "templateid": "10739"
+    }, 
+    {
+      "host": "TEMP_PBC_PHY_Huawei_OceanStor Storage SNMPv2", 
+      "name": "TEMP_PBC_PHY_Huawei_OceanStor Storage SNMPv2", 
+      "parentTemplates": [
+        {
+          "host": "Generic SNMP", 
+          "name": "Generic SNMP", 
+          "templateid": "10204"
+        }
+      ], 
+      "templateid": "10745"
+    }, 
+    {
+      "host": "Template Module Generic SNMPv2", 
+      "name": "Template Module Generic SNMPv2", 
+      "parentTemplates": [
+        {
+          "host": "TEMP_PBC_ICMP_PINGv4_BASE", 
+          "name": "TEMP_PBC_ICMP_PINGv4_BASE", 
+          "templateid": "10186"
+        }
+      ], 
+      "templateid": "10748"
+    }, 
+    {
+      "host": "TEMP_PBC_PHY_Huawei_PCServer_2288Hv5", 
+      "name": "TEMP_PBC_PHY_Huawei_PCServer_2288Hv5", 
+      "parentTemplates": [], 
+      "templateid": "10749"
+    }, 
+    {
+      "host": "Template Server Inspur BMC All Items 4 Zabbix5.0", 
+      "name": "Template Server Inspur BMC All Items 4 Zabbix5.0", 
+      "parentTemplates": [], 
+      "templateid": "10750"
+    }, 
+    {
+      "host": "TEMP_PBC_PHYI_IBM_IMM-SNMPv2", 
+      "name": "TEMP_PBC_PHYI_IBM_IMM-SNMPv2", 
+      "parentTemplates": [], 
+      "templateid": "10751"
+    }, 
+    {
+      "host": "TEMP_PBC_MID_TLQ_LOW", 
+      "name": "TEMP_PBC_MID_TLQ_LOW", 
+      "parentTemplates": [], 
+      "templateid": "10771"
+    }, 
+    {
+      "host": "TEMP_PBC_MID_DAT_MANAGED_NODE_CUSTOM", 
+      "name": "TEMP_PBC_MID_DAT_MANAGED_NODE_CUSTOM", 
+      "parentTemplates": [], 
+      "templateid": "10776"
+    }, 
+    {
+      "host": "TEMP_PBC_PHY_IBMSVC_BASE", 
+      "name": "TEMP_PBC_PHY_IBMSVC_BASE", 
+      "parentTemplates": [], 
+      "templateid": "10784"
+    }, 
+    {
+      "host": "TEMP_PBC_PHY_SSH", 
+      "name": "TEMP_PBC_PHY_SSH", 
+      "parentTemplates": [], 
+      "templateid": "10786"
+    }, 
+    {
+      "host": "TEMP_PBC_PHY_Huawei_OceanStor 5500v6 Storage SNMPv2", 
+      "name": "TEMP_PBC_PHY_Huawei_OceanStor 5500v6 Storage SNMPv2", 
+      "parentTemplates": [
+        {
+          "host": "Generic SNMP", 
+          "name": "Generic SNMP", 
+          "templateid": "10204"
+        }
+      ], 
+      "templateid": "10792"
+    }, 
+    {
+      "host": "TEMP_PBC_MID_DAT_COMPUT_NODE_CUSTOM", 
+      "name": "TEMP_PBC_MID_DAT_COMPUT_NODE_CUSTOM", 
+      "parentTemplates": [], 
+      "templateid": "10794"
+    }, 
+    {
+      "host": "TEMP_PBC_PHY_EMC_VNX_BASE", 
+      "name": "TEMP_PBC_PHY_EMC_VNX_BASE", 
+      "parentTemplates": [], 
+      "templateid": "10795"
+    }, 
+    {
+      "host": "TEMP_PBC_PHY_EMCUnity_API_BASE", 
+      "name": "TEMP_PBC_PHY_EMCUnity_API_BASE", 
+      "parentTemplates": [], 
+      "templateid": "10875"
+    }, 
+    {
+      "host": "TEMP_PBC_PHY_IPMI_BASEOS", 
+      "name": "TEMP_PBC_PHY_IPMI_BASEOS", 
+      "parentTemplates": [], 
+      "templateid": "10927"
+    }, 
+    {
+      "host": "TEMP_PBC_PHY_DELL_IDRAC_SNMP", 
+      "name": "TEMP_PBC_PHY_DELL_IDRAC_SNMP", 
+      "parentTemplates": [
+        {
+          "host": "Generic SNMP", 
+          "name": "Generic SNMP", 
+          "templateid": "10204"
+        }
+      ], 
+      "templateid": "10929"
+    }, 
+    {
+      "host": "TEMP_PBC_PHYI_Inspur_BMC_All_Items_4_Zabbix5.0", 
+      "name": "TEMP_PBC_PHYI_Inspur_BMC_All_Items_4_Zabbix5.0", 
+      "parentTemplates": [], 
+      "templateid": "10930"
+    }, 
+    {
+      "host": "TEMP_PBC_PHY_INSPUR_TRAP", 
+      "name": "TEMP_PBC_PHY_INSPUR_TRAP", 
+      "parentTemplates": [], 
+      "templateid": "10931"
+    }, 
+    {
+      "host": "TEMP_PBC_PHY_SANGFOR_VDC", 
+      "name": "TEMP_PBC_PHY_SANGFOR_VDC", 
+      "parentTemplates": [], 
+      "templateid": "10937"
+    }, 
+    {
+      "host": "Xsky_SDS_SNMPV2c", 
+      "name": "Xsky SDS SNMP 监控模板", 
+      "parentTemplates": [], 
+      "templateid": "10943"
+    }, 
+    {
+      "host": "Template Storage XSKY XMS by HTTP", 
+      "name": "Template Storage XSKY XMS by HTTP", 
+      "parentTemplates": [], 
+      "templateid": "10944"
+    }, 
+    {
+      "host": "vCenter_SNMP-VMWARE_VCSA_6.7", 
+      "name": "vCenter_SNMP-VMWARE_VCSA_6.7", 
+      "parentTemplates": [], 
+      "templateid": "10947"
+    }, 
+    {
+      "host": "TEMP_PBC_PHY_NTP_BDTIME", 
+      "name": "TEMP_PBC_PHY_NTP_BDTIME", 
+      "parentTemplates": [], 
+      "templateid": "10965"
+    }, 
+    {
+      "host": "TEMP_PBC_PHY_H3C-HDM-G3-SNMPV2", 
+      "name": "TEMP_PBC_PHY_H3C-HDM-G3-SNMPV2", 
+      "parentTemplates": [], 
+      "templateid": "10975"
+    }, 
+    {
+      "host": "TEMP_PBC_EMCDD2500_SNMP_BASE", 
+      "name": "TEMP_PBC_EMCDD2500_SNMP_BASE", 
+      "parentTemplates": [], 
+      "templateid": "10984"
+    }, 
+    {
+      "host": "TEMP_PBC_OS_AVAMAR_SSH_BASE", 
+      "name": "TEMP_PBC_OS_AVAMAR_SSH_BASE", 
+      "parentTemplates": [], 
+      "templateid": "10993"
+    }, 
+    {
+      "host": "Interfaces SNMP for switch", 
+      "name": "Interfaces SNMP for switch", 
+      "parentTemplates": [], 
+      "templateid": "10996"
+    }, 
+    {
+      "host": "TEMP_PBC_OS_LINUX_SNMP_BASE_BAK", 
+      "name": "TEMP_PBC_OS_LINUX_SNMP_BASE_BAK", 
+      "parentTemplates": [], 
+      "templateid": "10997"
+    }, 
+    {
+      "host": "TEMP_PBC_OS_LINUX_LOW", 
+      "name": "TEMP_PBC_OS_LINUX_LOW", 
+      "parentTemplates": [], 
+      "templateid": "11724"
+    }, 
+    {
+      "host": "TEMP_PBC_OS_LINUX_CUSTOM", 
+      "name": "TEMP_PBC_OS_LINUX_CUSTOM", 
+      "parentTemplates": [], 
+      "templateid": "11725"
+    }, 
+    {
+      "host": "TEMP_PBC_OS_VHOST_RSXT", 
+      "name": "TEMP_PBC_OS_VHOST_RSXT", 
+      "parentTemplates": [
+        {
+          "host": "TEMP_PBC_ICMP_PINGv4_BASE", 
+          "name": "TEMP_PBC_ICMP_PINGv4_BASE", 
+          "templateid": "10186"
+        }, 
+        {
+          "host": "TEMP_PBC_OS_VMware macros_PROD", 
+          "name": "TEMP_PBC_OS_VMware macros_PROD", 
+          "templateid": "10589"
+        }
+      ], 
+      "templateid": "12026"
+    }, 
+    {
+      "host": "TEMP_PBC_OS_VHOST_PYXT", 
+      "name": "TEMP_PBC_OS_VHOST_PYXT", 
+      "parentTemplates": [
+        {
+          "host": "TEMP_PBC_ICMP_PINGv4_BASE", 
+          "name": "TEMP_PBC_ICMP_PINGv4_BASE", 
+          "templateid": "10186"
+        }, 
+        {
+          "host": "TEMP_PBC_OS_VMware macros_PROD", 
+          "name": "TEMP_PBC_OS_VMware macros_PROD", 
+          "templateid": "10589"
+        }
+      ], 
+      "templateid": "12035"
+    }, 
+    {
+      "host": "TEMP_PBC_OS_VHOST_WMXT", 
+      "name": "TEMP_PBC_OS_VHOST_WMXT", 
+      "parentTemplates": [
+        {
+          "host": "TEMP_PBC_ICMP_PINGv4_BASE", 
+          "name": "TEMP_PBC_ICMP_PINGv4_BASE", 
+          "templateid": "10186"
+        }, 
+        {
+          "host": "TEMP_PBC_OS_VMware macros_PROD", 
+          "name": "TEMP_PBC_OS_VMware macros_PROD", 
+          "templateid": "10589"
+        }
+      ], 
+      "templateid": "12043"
+    }, 
+    {
+      "host": "TEMP_PBC_OS_VHOST_ZHDZHSP", 
+      "name": "TEMP_PBC_OS_VHOST_ZHDZHSP", 
+      "parentTemplates": [
+        {
+          "host": "TEMP_PBC_ICMP_PINGv4_BASE", 
+          "name": "TEMP_PBC_ICMP_PINGv4_BASE", 
+          "templateid": "10186"
+        }, 
+        {
+          "host": "TEMP_PBC_OS_VMware macros_PROD", 
+          "name": "TEMP_PBC_OS_VMware macros_PROD", 
+          "templateid": "10589"
+        }
+      ], 
+      "templateid": "12047"
+    }, 
+    {
+      "host": "TEMP_PBC_OS_VHOST_GTP-ft", 
+      "name": "TEMP_PBC_OS_VHOST_GTP-ft", 
+      "parentTemplates": [
+        {
+          "host": "TEMP_PBC_ICMP_PINGv4_BASE", 
+          "name": "TEMP_PBC_ICMP_PINGv4_BASE", 
+          "templateid": "10186"
+        }, 
+        {
+          "host": "TEMP_PBC_OS_VMware macros_PROD", 
+          "name": "TEMP_PBC_OS_VMware macros_PROD", 
+          "templateid": "10589"
+        }
+      ], 
+      "templateid": "12053"
+    }, 
+    {
+      "host": "PBC_OA_CHECK_TEMP", 
+      "name": "PBC_OA_CHECK_TEMP", 
+      "parentTemplates": [], 
+      "templateid": "12100"
+    }, 
+    {
+      "host": "TEMP_PBC_XSKY_XMS_HTTP_BAK", 
+      "name": "TEMP_PBC_XSKY_XMS_HTTP_BAK", 
+      "parentTemplates": [], 
+      "templateid": "12104"
+    }, 
+    {
+      "host": "Template_PBC_NET_H3C_louceng", 
+      "name": "Template_PBC_NET_H3C_louceng", 
+      "parentTemplates": [], 
+      "templateid": "12161"
+    }, 
+    {
+      "host": "log-montor", 
+      "name": "log-montor", 
+      "parentTemplates": [], 
+      "templateid": "12173"
+    }, 
+    {
+      "host": "TEMP_PBC_VMWARE_FT_CHECK", 
+      "name": "TEMP_PBC_VMWARE_FT_CHECK", 
+      "parentTemplates": [], 
+      "templateid": "12176"
+    }, 
+    {
+      "host": "TEMP_PBC_PHY_Huawei_Switch_VRP SNMPv2", 
+      "name": "TEMP_PBC_PHY_Huawei_Switch_VRP SNMPv2", 
+      "parentTemplates": [
+        {
+          "host": "EtherLike-MIB SNMP", 
+          "name": "EtherLike-MIB SNMP", 
+          "templateid": "10183"
+        }, 
+        {
+          "host": "Interfaces SNMP", 
+          "name": "Interfaces SNMP", 
+          "templateid": "10190"
+        }, 
+        {
+          "host": "Generic SNMP", 
+          "name": "Generic SNMP", 
+          "templateid": "10204"
+        }
+      ], 
+      "templateid": "12177"
+    }, 
+    {
+      "host": "TEMP_PBC_OS_Ailog_CUSTOM", 
+      "name": "TEMP_PBC_OS_Ailog_CUSTOM", 
+      "parentTemplates": [
+        {
+          "host": "TEMP_PBC_OS_LINUX_BASE", 
+          "name": "TEMP_PBC_OS_LINUX_BASE", 
+          "templateid": "10415"
+        }
+      ], 
+      "templateid": "12191"
+    }, 
+    {
+      "host": "TEMP_PBC_PHY_Huanghe_IDRAC_SNMP", 
+      "name": "TEMP_PBC_PHY_Huanghe_IDRAC_SNMP", 
+      "parentTemplates": [
+        {
+          "host": "Generic SNMP", 
+          "name": "Generic SNMP", 
+          "templateid": "10204"
+        }
+      ], 
+      "templateid": "12209"
+    }, 
+    {
+      "host": "TEMP_PBC_WPS_WDZT_PORT", 
+      "name": "TEMP_PBC_WPS_WDZT_PORT", 
+      "parentTemplates": [], 
+      "templateid": "12222"
+    }, 
+    {
+      "host": "TEMP_PBC_OA_process_port", 
+      "name": "TEMP_PBC_OA_process_port", 
+      "parentTemplates": [], 
+      "templateid": "12223"
+    }, 
+    {
+      "host": "TEMP_PBC_QWJS_search_process_port", 
+      "name": "TEMP_PBC_QWJS_search_process_port", 
+      "parentTemplates": [], 
+      "templateid": "12224"
+    }, 
+    {
+      "host": "TEMP_PBC_M3_process_port", 
+      "name": "TEMP_PBC_M3_process_port", 
+      "parentTemplates": [], 
+      "templateid": "12225"
+    }, 
+    {
+      "host": "TEMP_PBC_DB_DM8_BASE", 
+      "name": "TEMP_PBC_DB_DM8_BASE", 
+      "parentTemplates": [], 
+      "templateid": "12229"
+    }, 
+    {
+      "host": "TEMP_PBC_PHY_Huanghe_SNMP", 
+      "name": "TEMP_PBC_PHY_Huanghe_SNMP", 
+      "parentTemplates": [], 
+      "templateid": "12230"
+    }, 
+    {
+      "host": "Template_PBC_MID_APUSIC_ALB_BASE", 
+      "name": "Template_PBC_MID_APUSIC_ALB_BASE", 
+      "parentTemplates": [], 
+      "templateid": "12231"
+    }, 
+    {
+      "host": "TEMP_PBC_OS_VMware Hypervisor_DMZ111", 
+      "name": "TEMP_PBC_OS_VMware Hypervisor_DMZ111", 
+      "parentTemplates": [], 
+      "templateid": "12235"
+    }, 
+    {
+      "host": "Template_PBC_SEC_CHAITIN_WAF_BASE", 
+      "name": "Template_PBC_SEC_CHAITIN_WAF_BASE", 
+      "parentTemplates": [], 
+      "templateid": "12243"
+    }, 
+    {
+      "host": "TEMP_PBC_OS_LINUX_SNMP_BASE", 
+      "name": "TEMP_PBC_OS_LINUX_SNMP_BASE", 
+      "parentTemplates": [], 
+      "templateid": "12249"
+    }, 
+    {
+      "host": "TEMP_PBC_SEC_IDS_SNMP_BASE", 
+      "name": "TEMP_PBC_SEC_IDS_SNMP_BASE", 
+      "parentTemplates": [], 
+      "templateid": "12252"
+    }, 
+    {
+      "host": "TEMP_PBC_ALB_process_port", 
+      "name": "TEMP_PBC_ALB_process_port", 
+      "parentTemplates": [], 
+      "templateid": "12269"
+    }, 
+    {
+      "host": "TEMP_PBC_XXMH_process_port", 
+      "name": "TEMP_PBC_XXMH_process_port", 
+      "parentTemplates": [], 
+      "templateid": "12270"
+    }, 
+    {
+      "host": "TEMP_PBC_HCFWQ_process_port", 
+      "name": "TEMP_PBC_HCFWQ_process_port", 
+      "parentTemplates": [], 
+      "templateid": "12271"
+    }, 
+    {
+      "host": "TEMP_PBC_DMDB_port", 
+      "name": "TEMP_PBC_DMDB_port", 
+      "parentTemplates": [], 
+      "templateid": "12272"
+    }, 
+    {
+      "host": "TEMP_PBC_WPS_WDZT_process_port", 
+      "name": "TEMP_PBC_WPS_WDZT_process_port", 
+      "parentTemplates": [], 
+      "templateid": "12273"
+    }, 
+    {
+      "host": "Template_PBC_SANGFOR_AD_BASE", 
+      "name": "Template_PBC_SANGFOR_AD_BASE", 
+      "parentTemplates": [], 
+      "templateid": "12276"
+    }, 
+    {
+      "host": "Oracle by ODBC 11G RAC-shuiwu", 
+      "name": "Oracle by ODBC 11G RAC-shuiwu", 
+      "parentTemplates": [], 
+      "templateid": "12289"
+    }, 
+    {
+      "host": "Oracle by ODBC 11G single-shuiwu", 
+      "name": "Oracle by ODBC 11G 节点监控-shuiwu", 
+      "parentTemplates": [], 
+      "templateid": "12290"
+    }, 
+    {
+      "host": "Template_PBC_NET_H3C_RX_TX_POWER", 
+      "name": "Template_PBC_NET_H3C_RX_TX_POWER", 
+      "parentTemplates": [], 
+      "templateid": "12294"
+    }, 
+    {
+      "host": "Template_PBC_NET_H3C_RX_TX_POWER_low_version", 
+      "name": "Template_PBC_NET_H3C_RX_TX_POWER_low_version", 
+      "parentTemplates": [], 
+      "templateid": "12295"
+    }, 
+    {
+      "host": "TEMP_PBC_PHY_Huawei_Switch_RX_TX_POWER", 
+      "name": "TEMP_PBC_PHY_Huawei_Switch_RX_TX_POWER", 
+      "parentTemplates": [], 
+      "templateid": "12296"
+    }, 
+    {
+      "host": "TEMP_PBC_DB_ORACLE_BASE_Agent2", 
+      "name": "TEMP_PBC_DB_ORACLE_BASE_Agent2", 
+      "parentTemplates": [], 
+      "templateid": "12297"
+    }, 
+    {
+      "host": "TEMP_PBC_DB_ORACLE_LOG", 
+      "name": "TEMP_PBC_DB_ORACLE_LOG", 
+      "parentTemplates": [], 
+      "templateid": "12303"
+    }, 
+    {
+      "host": "TEMP_PBC_OS_VM_FIND_ESXI", 
+      "name": "TEMP_PBC_OS_VM_FIND_ESXI", 
+      "parentTemplates": [], 
+      "templateid": "12308"
+    }, 
+    {
+      "host": "TEMP_PBC_DB_DMDB_BASE", 
+      "name": "TEMP_PBC_DB_DMDB_BASE", 
+      "parentTemplates": [], 
+      "templateid": "12309"
+    }, 
+    {
+      "host": "TEMP_PBC_DB_DMDB_DSC_BASE", 
+      "name": "TEMP_PBC_DB_DMDB_DSC_BASE", 
+      "parentTemplates": [], 
+      "templateid": "12310"
+    }, 
+    {
+      "host": "TEMP_PBC_DB_DMDB_STANDBY_BASE", 
+      "name": "TEMP_PBC_DB_DMDB_STANDBY_BASE", 
+      "parentTemplates": [], 
+      "templateid": "12311"
+    }, 
+    {
+      "host": "TEMP_PBC_DB_DMDB_STANDBY_MONITOR_BASE", 
+      "name": "TEMP_PBC_DB_DMDB_STANDBY_MONITOR_BASE", 
+      "parentTemplates": [], 
+      "templateid": "12312"
+    }, 
+    {
+      "host": "DM8-ODBC", 
+      "name": "达梦数据库监控for ODBC", 
+      "parentTemplates": [], 
+      "templateid": "12314"
+    }, 
+    {
+      "host": "TEMP_PBC_SEC_TOPSEC_BASE", 
+      "name": "TEMP_PBC_SEC_TOPSEC_BASE", 
+      "parentTemplates": [], 
+      "templateid": "12316"
+    }, 
+    {
+      "host": "Template_PBC_NET_RUIJIE", 
+      "name": "Template_PBC_NET_RUIJIE", 
+      "parentTemplates": [], 
+      "templateid": "12321"
+    }, 
+    {
+      "host": "TEMP_PBC_BI_report_port", 
+      "name": "TEMP_PBC_BI_report_port", 
+      "parentTemplates": [], 
+      "templateid": "12372"
+    }, 
+    {
+      "host": "TEMP_PBC_CJPT_NGINX_process_port", 
+      "name": "TEMP_PBC_CJPT_NGINX_process_port", 
+      "parentTemplates": [], 
+      "templateid": "12374"
+    }, 
+    {
+      "host": "TEMP_PBC_CJPT_WEB_process_port", 
+      "name": "TEMP_PBC_CJPT_WEB_process_port", 
+      "parentTemplates": [], 
+      "templateid": "12375"
+    }, 
+    {
+      "host": "TEMP_PBC_CJPT_SERVCER-1_process_port", 
+      "name": "TEMP_PBC_CJPT_SERVCER-1_process_port", 
+      "parentTemplates": [], 
+      "templateid": "12376"
+    }, 
+    {
+      "host": "TEMP_PBC_CJPT_SERVCER-2_process_port", 
+      "name": "TEMP_PBC_CJPT_SERVCER-2_process_port", 
+      "parentTemplates": [], 
+      "templateid": "12377"
+    }, 
+    {
+      "host": "TEMP_PBC_CJPT_REDIS_process_port", 
+      "name": "TEMP_PBC_CJPT_REDIS_process_port", 
+      "parentTemplates": [], 
+      "templateid": "12378"
+    }, 
+    {
+      "host": "TEMP_PBC_SJZYGLPT_KD-APP_process_port", 
+      "name": "TEMP_PBC_SJZYGLPT_KD-APP_process_port", 
+      "parentTemplates": [], 
+      "templateid": "12379"
+    }, 
+    {
+      "host": "TEMP_PBC_SJZYGLPT_KD-APP-03_process_port", 
+      "name": "TEMP_PBC_SJZYGLPT_KD-APP-03_process_port", 
+      "parentTemplates": [], 
+      "templateid": "12380"
+    }, 
+    {
+      "host": "TEMP_PBC_SJZYGLPT_KD-APP-04_process_port", 
+      "name": "TEMP_PBC_SJZYGLPT_KD-APP-04_process_port", 
+      "parentTemplates": [], 
+      "templateid": "12381"
+    }, 
+    {
+      "host": "TEMP_PBC_SJZYGLPT_KD-SCH_process_port", 
+      "name": "TEMP_PBC_SJZYGLPT_KD-SCH_process_port", 
+      "parentTemplates": [], 
+      "templateid": "12382"
+    }, 
+    {
+      "host": "TEMP_PBC_SJZYGLPT_DMDB_process_port", 
+      "name": "TEMP_PBC_SJZYGLPT_DMDB_process_port", 
+      "parentTemplates": [], 
+      "templateid": "12383"
+    }, 
+    {
+      "host": "TEMP_PBC_SJZYGLPT_KD-MINIO_process_port", 
+      "name": "TEMP_PBC_SJZYGLPT_KD-MINIO_process_port", 
+      "parentTemplates": [], 
+      "templateid": "12384"
+    }, 
+    {
+      "host": "TEMP_PBC_SJZYGLPT_KD-MINIO-04_process_port", 
+      "name": "TEMP_PBC_SJZYGLPT_KD-MINIO-04_process_port", 
+      "parentTemplates": [], 
+      "templateid": "12385"
+    }, 
+    {
+      "host": "TEMP_PBC_SJZYGLPT_KD-CONF_process_port", 
+      "name": "TEMP_PBC_SJZYGLPT_KD-CONF_process_port", 
+      "parentTemplates": [], 
+      "templateid": "12386"
+    }, 
+    {
+      "host": "TEMP_PBC_SJZYGLPT_KD-LB_process_port", 
+      "name": "TEMP_PBC_SJZYGLPT_KD-LB_process_port", 
+      "parentTemplates": [], 
+      "templateid": "12387"
+    }, 
+    {
+      "host": "TEMP_PBC_SJZYGLPT_KD-ES_process_port", 
+      "name": "TEMP_PBC_SJZYGLPT_KD-ES_process_port", 
+      "parentTemplates": [], 
+      "templateid": "12388"
+    }, 
+    {
+      "host": "TEMP_PBC_SJZYGLPT_KD-JOB_process_port", 
+      "name": "TEMP_PBC_SJZYGLPT_KD-JOB_process_port", 
+      "parentTemplates": [], 
+      "templateid": "12389"
+    }, 
+    {
+      "host": "TEMP_PBC_SJZYGLPT_KD-KDP-01_process_port", 
+      "name": "TEMP_PBC_SJZYGLPT_KD-KDP-01_process_port", 
+      "parentTemplates": [], 
+      "templateid": "12390"
+    }, 
+    {
+      "host": "TEMP_PBC_SJZYGLPT_KD-KDP-02_process_port", 
+      "name": "TEMP_PBC_SJZYGLPT_KD-KDP-02_process_port", 
+      "parentTemplates": [], 
+      "templateid": "12391"
+    }, 
+    {
+      "host": "TEMP_PBC_SJZYGLPT_KD-KDP-03_process_port", 
+      "name": "TEMP_PBC_SJZYGLPT_KD-KDP-03_process_port", 
+      "parentTemplates": [], 
+      "templateid": "12392"
+    }, 
+    {
+      "host": "TEMP_PBC_SJZYGLPT_KD-KDP-04_process_port", 
+      "name": "TEMP_PBC_SJZYGLPT_KD-KDP-04_process_port", 
+      "parentTemplates": [], 
+      "templateid": "12393"
+    }, 
+    {
+      "host": "TEMP_PBC_SJZYGLPT_KD-KDP-05_process_port", 
+      "name": "TEMP_PBC_SJZYGLPT_KD-KDP-05_process_port", 
+      "parentTemplates": [], 
+      "templateid": "12394"
+    }, 
+    {
+      "host": "TEMP_PBC_MID_IBMMQ_LOG", 
+      "name": "TEMP_PBC_MID_IBMMQ_LOG", 
+      "parentTemplates": [], 
+      "templateid": "12395"
+    }, 
+    {
+      "host": "TEMP_PBC_GKJZZF_QM1_port", 
+      "name": "TEMP_PBC_GKJZZF_QM1_port", 
+      "parentTemplates": [], 
+      "templateid": "12396"
+    }, 
+    {
+      "host": "TEMP_PBC_GKJZZF_QM2_port", 
+      "name": "TEMP_PBC_GKJZZF_QM2_port", 
+      "parentTemplates": [], 
+      "templateid": "12397"
+    }, 
+    {
+      "host": "TEMP_PBC_TJSYJYL_port", 
+      "name": "TEMP_PBC_TJSYJYL_port", 
+      "parentTemplates": [], 
+      "templateid": "12408"
+    }, 
+    {
+      "host": "TEMP_PBC_DEMP_port", 
+      "name": "TEMP_PBC_DEMP_port", 
+      "parentTemplates": [], 
+      "templateid": "12412"
+    }, 
+    {
+      "host": "TEMP_PBC_OS_LINUX_SECUNITY", 
+      "name": "TEMP_PBC_OS_LINUX_SECUNITY", 
+      "parentTemplates": [], 
+      "templateid": "12413"
+    }
+  ], 
+  "script_version": "1.0.2-py2", 
+  "notes": [
+    "未导出主机或主机凭证；默认全部可见模板，不按品牌/类型/协议筛选；包含父模板以补齐继承定义；完整性受账号权限限制", 
+    "未读取全局宏、主机宏覆盖或最近监控值", 
+    "默认脱敏不保证删除脚本内部硬编码秘密；分享前人工审查"
+  ], 
+  "root_templateids": [
+    "10001", 
+    "10047", 
+    "10048", 
+    "10050", 
+    "10074", 
+    "10075", 
+    "10076", 
+    "10077", 
+    "10078", 
+    "10079", 
+    "10081", 
+    "10093", 
+    "10094", 
+    "10095", 
+    "10096", 
+    "10097", 
+    "10098", 
+    "10099", 
+    "10100", 
+    "10101", 
+    "10102", 
+    "10103", 
+    "10169", 
+    "10171", 
+    "10172", 
+    "10173", 
+    "10174", 
+    "10175", 
+    "10183", 
+    "10185", 
+    "10186", 
+    "10188", 
+    "10190", 
+    "10192", 
+    "10204", 
+    "10207", 
+    "10208", 
+    "10209", 
+    "10210", 
+    "10211", 
+    "10212", 
+    "10213", 
+    "10215", 
+    "10216", 
+    "10217", 
+    "10218", 
+    "10220", 
+    "10221", 
+    "10222", 
+    "10223", 
+    "10224", 
+    "10226", 
+    "10227", 
+    "10229", 
+    "10230", 
+    "10231", 
+    "10233", 
+    "10234", 
+    "10235", 
+    "10236", 
+    "10237", 
+    "10248", 
+    "10249", 
+    "10250", 
+    "10251", 
+    "10252", 
+    "10253", 
+    "10254", 
+    "10255", 
+    "10256", 
+    "10258", 
+    "10259", 
+    "10260", 
+    "10261", 
+    "10262", 
+    "10264", 
+    "10265", 
+    "10266", 
+    "10267", 
+    "10268", 
+    "10269", 
+    "10270", 
+    "10271", 
+    "10272", 
+    "10273", 
+    "10274", 
+    "10275", 
+    "10276", 
+    "10277", 
+    "10285", 
+    "10286", 
+    "10287", 
+    "10288", 
+    "10289", 
+    "10290", 
+    "10291", 
+    "10292", 
+    "10300", 
+    "10301", 
+    "10302", 
+    "10303", 
+    "10304", 
+    "10305", 
+    "10306", 
+    "10307", 
+    "10308", 
+    "10309", 
+    "10310", 
+    "10314", 
+    "10316", 
+    "10317", 
+    "10318", 
+    "10319", 
+    "10320", 
+    "10321", 
+    "10322", 
+    "10323", 
+    "10324", 
+    "10325", 
+    "10326", 
+    "10327", 
+    "10328", 
+    "10329", 
+    "10330", 
+    "10331", 
+    "10332", 
+    "10335", 
+    "10336", 
+    "10337", 
+    "10338", 
+    "10339", 
+    "10340", 
+    "10341", 
+    "10342", 
+    "10343", 
+    "10344", 
+    "10345", 
+    "10346", 
+    "10347", 
+    "10348", 
+    "10349", 
+    "10350", 
+    "10351", 
+    "10353", 
+    "10355", 
+    "10357", 
+    "10358", 
+    "10359", 
+    "10360", 
+    "10361", 
+    "10362", 
+    "10365", 
+    "10366", 
+    "10367", 
+    "10368", 
+    "10369", 
+    "10370", 
+    "10371", 
+    "10372", 
+    "10373", 
+    "10374", 
+    "10375", 
+    "10376", 
+    "10377", 
+    "10378", 
+    "10379", 
+    "10380", 
+    "10381", 
+    "10382", 
+    "10383", 
+    "10386", 
+    "10387", 
+    "10388", 
+    "10389", 
+    "10390", 
+    "10391", 
+    "10392", 
+    "10393", 
+    "10394", 
+    "10395", 
+    "10401", 
+    "10402", 
+    "10413", 
+    "10414", 
+    "10415", 
+    "10417", 
+    "10418", 
+    "10421", 
+    "10423", 
+    "10424", 
+    "10425", 
+    "10426", 
+    "10430", 
+    "10432", 
+    "10433", 
+    "10434", 
+    "10436", 
+    "10437", 
+    "10452", 
+    "10453", 
+    "10455", 
+    "10456", 
+    "10457", 
+    "10460", 
+    "10528", 
+    "10535", 
+    "10536", 
+    "10538", 
+    "10547", 
+    "10550", 
+    "10566", 
+    "10576", 
+    "10589", 
+    "10728", 
+    "10729", 
+    "10735", 
+    "10736", 
+    "10737", 
+    "10738", 
+    "10739", 
+    "10745", 
+    "10748", 
+    "10749", 
+    "10750", 
+    "10751", 
+    "10771", 
+    "10776", 
+    "10784", 
+    "10786", 
+    "10792", 
+    "10794", 
+    "10795", 
+    "10875", 
+    "10927", 
+    "10929", 
+    "10930", 
+    "10931", 
+    "10937", 
+    "10943", 
+    "10944", 
+    "10947", 
+    "10965", 
+    "10975", 
+    "10984", 
+    "10993", 
+    "10996", 
+    "10997", 
+    "11724", 
+    "11725", 
+    "12026", 
+    "12035", 
+    "12043", 
+    "12047", 
+    "12053", 
+    "12100", 
+    "12104", 
+    "12161", 
+    "12173", 
+    "12176", 
+    "12177", 
+    "12191", 
+    "12209", 
+    "12222", 
+    "12223", 
+    "12224", 
+    "12225", 
+    "12229", 
+    "12230", 
+    "12231", 
+    "12235", 
+    "12243", 
+    "12249", 
+    "12252", 
+    "12269", 
+    "12270", 
+    "12271", 
+    "12272", 
+    "12273", 
+    "12276", 
+    "12289", 
+    "12290", 
+    "12294", 
+    "12295", 
+    "12296", 
+    "12297", 
+    "12303", 
+    "12308", 
+    "12309", 
+    "12310", 
+    "12311", 
+    "12312", 
+    "12314", 
+    "12316", 
+    "12321", 
+    "12372", 
+    "12374", 
+    "12375", 
+    "12376", 
+    "12377", 
+    "12378", 
+    "12379", 
+    "12380", 
+    "12381", 
+    "12382", 
+    "12383", 
+    "12384", 
+    "12385", 
+    "12386", 
+    "12387", 
+    "12388", 
+    "12389", 
+    "12390", 
+    "12391", 
+    "12392", 
+    "12393", 
+    "12394", 
+    "12395", 
+    "12396", 
+    "12397", 
+    "12408", 
+    "12412", 
+    "12413"
+  ], 
+  "sanitized": true, 
+  "api_version": "5.4.5"
+}
