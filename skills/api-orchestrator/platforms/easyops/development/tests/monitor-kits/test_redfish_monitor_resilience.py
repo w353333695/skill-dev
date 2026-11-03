@@ -6,7 +6,7 @@ from pathlib import Path
 from zipfile import ZipFile
 
 
-PACKAGE = Path(__file__).resolve().parents[3] / "hub" / "monitor-kits" / "物理服务器Redfish监控套件_1.0.13.zip"
+PACKAGE = Path(__file__).resolve().parents[3] / "hub" / "monitor-kits" / "物理服务器Redfish监控套件_1.0.14.zip"
 
 
 def run_fixture(fixture):
