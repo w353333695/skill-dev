@@ -223,6 +223,16 @@ items:
     scenario: 深信服 AD 负载均衡器监控指标套件+告警规则模板
     notes: 告警规则模板与套件配套，不单独成商品
     added: "2026-08-29"
+  - id: physical-server-redfish-monitor-kit
+    name: 物理服务器Redfish监控套件
+    category: monitor-kits
+    files: [物理服务器Redfish监控套件_1.0.13.zip]
+    version: "1.0.13"
+    history:
+      - {ver: "1.0.13", date: "2026-11-03", change: "修复局部Redfish指标接口缺失、超时、空Status等情况导致整脚本异常退出；认证失败或根接口不可用仍失败，单指标失败改为WARN并继续，保留可用指标；.py/.orig同步，4类离线回归通过，未激活现网任务"}
+    scenario: 物理服务器BMC Redfish硬件指标监控
+    notes: "基于现网套件65dc3d566c2e9导出包修复；未连接真实设备验证，导入前请备份同名套件并确认任务引用。"
+    added: "2026-11-03"
   - id: physical-server-snmp-monitor-kit
     name: 物理服务器SNMP监控套件
     category: monitor-kits
