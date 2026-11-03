@@ -12,7 +12,7 @@ import zipfile
 class PackageImportTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        default = Path(__file__).resolve().parents[3] / "hub" / "monitor-kits" / "物理服务器SNMP监控套件_0.1.2.zip"
+        default = Path(__file__).resolve().parents[3] / "hub" / "monitor-kits" / "物理服务器SNMP监控套件_0.1.3.zip"
         cls.archive = zipfile.ZipFile(os.environ.get("MONITOR_PACKAGE", str(default)))
         cls.root = "物理服务器SNMP监控/"
 
@@ -24,7 +24,7 @@ class PackageImportTests(unittest.TestCase):
         plugin = self.archive.read(self.root + "plugin.yaml").decode("utf-8")
         name = re.search(r"(?m)^name: (.+)$", plugin).group(1)
         self.assertEqual(self.root, name + "/")
-        self.assertIn('version: "%s"' % os.environ.get('MONITOR_PACKAGE_VERSION', '0.1.2'), plugin)
+        self.assertIn('version: "%s"' % os.environ.get('MONITOR_PACKAGE_VERSION', '0.1.3'), plugin)
         self.assertIn("samplerType: metric_sampler", plugin)
         self.assertIn("scriptType: python", plugin)
 

@@ -48,6 +48,8 @@ package_structure:
         │   └── package.conf.yaml
         └── bin/                    # 二进制（exporter 类型必填）
 
+  metric_agent_type_consistency: "simple-script/metric_sampler 套件的 plugin.yaml.agentType 必须为 easyops；origin_metric.json 与 alias_metric.json 中每个指标的 agentType 也必须为 easyops。metricbeat 仅适用于 metricbeat 类型套件，混用会导致指标导入或运行态路由不一致，可能出现激活无报错但无实际采集。发布回归必须校验三处一致。"
+
   files_by_type:
     simple-script: [plugin.yaml, src/<script>.py, src/<script>.orig, origin_metric.json, alias_metric.json, metric_set.json, readme]
     metricbeat: [plugin.yaml, config.template.yaml, origin_metric.json, alias_metric.json, metric_set.json]
