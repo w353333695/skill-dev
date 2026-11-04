@@ -7,7 +7,7 @@ from pathlib import Path
 from zipfile import ZipFile
 
 
-PACKAGE = Path(__file__).resolve().parents[3] / "hub" / "monitor-kits" / "物理服务器Redfish监控套件_1.0.15.zip"
+PACKAGE = Path(__file__).resolve().parents[3] / "hub" / "monitor-kits" / "物理服务器Redfish监控套件_1.0.16.zip"
 
 
 def run_fixture(fixture):
@@ -66,3 +66,24 @@ def test_published_script_injects_environment_parameters():
     assert namespace["password"] == "secret"
     assert namespace["requestsTime"] == 7
     assert "EASYOPS_COLLECTOR_host" not in original
+
+
+def test_top_level_failure_is_visible_on_stdout_and_exits_zero():
+    with ZipFile(str(PACKAGE)) as archive:
+        script = archive.read("src/物理服务器Redfish监控套件.py").decode("utf-8")
+    program = """
+namespace = {'__name__': 'fixture'}
+exec(compile(%r, 'redfish.py', 'exec'), namespace)
+namespace['collect'] = lambda: (_ for _ in ()).throw(Exception('auth fail'))
+try:
+    namespace['sys'].exit(namespace['main']())
+except Exception:
+    namespace['sys'].stdout.write('COLLECT_ERROR:\\n')
+    namespace['traceback'].print_exc(file=namespace['sys'].stdout)
+    namespace['sys'].stdout.flush()
+""" % script
+    result = subprocess.run([sys.executable, "-c", program], capture_output=True, text=True)
+    assert result.returncode == 0
+    assert result.stdout.startswith("COLLECT_ERROR:\n")
+    assert "auth fail" in result.stdout
+    assert result.stderr == ""

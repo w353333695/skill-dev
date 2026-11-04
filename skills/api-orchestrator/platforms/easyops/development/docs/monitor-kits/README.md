@@ -18,3 +18,30 @@
 当前 Hub 中的物理服务器 Redfish 包已含 `alertRule/【物理服务器】通用告警.json`；现网 Redfish 套件详情的 `alertRules` 仍为空。现网 BCS（instanceId=`65f6851a511ad`，packageVersion=`1.1.1`）详情的 `alertRules` 和 `metricThresholdRules` 也为空；对 `ALERT_RULE_TEMPLATE` 的查询未得到可用实例结果。因此本次没有完成“导入后生成 ALERT_RULE_TEMPLATE”的实测确认。
 
 本次已将 Hub 中已有的 BCS、BWS、SVC、光纤交换机、深信服 AD 负载均衡器、路由器监控套件的配套 `.xlsx` 规则转换为包内 `alertRule/*.json`。转换保留资源模型、优先级、生效时间、事件过滤器、复合条件及全部指标阈值；每个包只新增对应规则文件，不改变采集脚本和指标定义。
+
+## 服务器 SNMP 品牌与解析
+
+见 `物理服务器SNMP_Zabbix品牌映射.md`：品牌来源、协议边界、温度/容量/风扇单位、实机验收边界及证据文件。
+
+
+## metric_sampler 失败输出与退出码
+
+监控前端依赖采集脚本的 stdout 展示错误，不能用非零退出码代替错误正文。simple-script + `metric_sampler` 统一使用以下入口：
+
+```python
+def main():
+    result = collect()
+    print(json.dumps(result, ensure_ascii=False))
+    return 0
+
+if __name__ == '__main__':
+    try:
+        sys.exit(main())
+    except Exception:
+        sys.stdout.write('COLLECT_ERROR:\n')
+        traceback.print_exc(file=sys.stdout)
+        sys.stdout.flush()
+        sys.exit(0)
+```
+
+局部指标或可选资源失败只记录 WARN 并继续；只有无法进入采集的异常才进入顶层 `COLLECT_ERROR`。正常采集输出必须仍是纯 JSON 数组；不要把 traceback 写到 stderr 后直接 `exit(1)`，否则前端可能看不到错误。

@@ -86,8 +86,8 @@ output_protocols:
       - "必须是 JSON 数组 [{...},...]，不是单对象 {...}"
       - "每条记录必须含 dims 和 vals"
       - "vals 值必须数值型（绘图/告警需要）"
-      - "错误信息输出 stderr（print >> sys.stderr, ...），不污染 stdout"
-      - "异常时输出空数组 [] 确保 stdout 始终合法 JSON"
+      - "正常采集 stdout 输出 JSON 数组；不要把调试或错误文本混入正常 JSON"
+      - "顶层异常必须输出 COLLECT_ERROR: 与 traceback 到 stdout，并最终 exit 0，确保前端能看到错误正文；不要直接非零 exit()"
     source: "simple-script-guide.md:146-181,401-421"
 
   # -------------------------------------------------------------------------
@@ -303,3 +303,11 @@ cmdb_process_sampler_diagnostics:
   no_records: "采集完成但无任何CMDB记录时抛出CollectionError，提示检查collect.skip和SNMP请求日志。"
   null_values: "CMDB 空结构字段可能以字符串 null 注入；端口等可选数值先按 null-like 视为未设置并应用明确默认值（SNMP port=161），真正非数字值仍必须失败。"
   nonblocking_varbinds: "SNMP walk 中单个 varbind 可能省略类型（如 = 0）或返回空字符串（如 = \"\"）；解析器应记录 oid/payload warning、跳过或按可判定基础类型解析并继续整表，最终统一汇总 warnings。只有命令失败、完全无可用varbind、配置/鉴权错误或最终无CMDB记录才阻断。"
+
+# 监控 metric_sampler 前端可观测失败协议（2026-11-04）
+metric_sampler_frontend_error_protocol:
+  rule: "脚本中不要直接以非零退出表示采集失败；前端依赖 stdout 展示错误正文。顶层异常输出 COLLECT_ERROR: 和完整 traceback 到 stdout，flush 后 exit 0。"
+  success: "main() 输出 json.dumps(result, ensure_ascii=False) 后 return 0。"
+  failure: "if __name__ == '__main__': try: sys.exit(main()) except Exception: sys.stdout.write('COLLECT_ERROR\n'); traceback.print_exc(file=sys.stdout); sys.stdout.flush(); sys.exit(0)"
+  scope: "simple-script + metric_sampler 监控套件；CMDB process_sampler 另遵循 GATHERING DATA 协议。"
+  warning: "单指标/可选资源失败只记录 WARN 并继续，不伪造健康值；只有无法进入采集的异常才进入顶层 COLLECT_ERROR。"
