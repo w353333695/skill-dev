@@ -99,9 +99,22 @@ class ArgumentParser(argparse.ArgumentParser):
         if message:
             write_text(file or sys.stderr, message)
 
-VERSION = "1.1.0-py2"
+VERSION = "1.2.0-py2"
 LOGGER = logging.getLogger("zabbix_export")
 SENSITIVE = re.compile(r"password|passwd|passphrase|secret|token|community|authorization|api[_ .-]?key|auth[_ .-]?(key|pass)|priv[_ .-]?(key|pass)|psk", re.I)
+
+# 私有化环境直接修改本段变量后运行，不再通过命令行传入连接参数。
+ZABBIX_URL = "https://zabbix.example/zabbix"
+ZABBIX_USER = "Admin"
+ZABBIX_PASSWORD = "zabbix"
+ZABBIX_TOKEN = ""
+OUTPUT_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "exports")
+TIMEOUT = 120
+INSECURE = False
+INCLUDE_SENSITIVE = True
+TEMPLATE_IDS = []
+TEMPLATE_NAMES = []
+EXPORT_ALL = True
 
 
 class ExportError(RuntimeError):
@@ -245,51 +258,28 @@ def write_json(path, value):
 
 
 def parser():
-    argument_parser = ArgumentParser(description="只读导出Zabbix 5.4全部可见模板和递归父模板，覆盖服务器、存储、网络及其他设备，不按品牌或采集协议筛选，不连接被监控设备、不修改模板或任务。Python 2.7.9+（也兼容Python 3），无第三方依赖。", epilog="示例：\n  python %(prog)s --url https://zabbix.example/zabbix --list\n  python %(prog)s --url https://zabbix.example/zabbix\n  python %(prog)s --url https://zabbix.example/zabbix --name 'Dell iDRAC SNMP' --name 'Template Server Lenovo XCC SNMPv3'\n  python %(prog)s --url https://zabbix.example/zabbix --template-id 10749 --template-id 10929\n  python %(prog)s --url https://zabbix.example/zabbix --all\n\n认证：ZABBIX_TOKEN，或ZABBIX_USER+ZABBIX_PASSWORD环境变量；无密码时交互隐藏输入。\n默认导出全部可见模板，不按品牌、设备类型或SNMP协议过滤；--name/--template-id仅用于缩小范围。完整性受账号权限限制。\n导出保留原生结构；默认脱敏后不能当完整凭证备份。继承内容需父模板共同导出。\n日志仅记录方法及请求ID，不记录请求体/凭证/原始响应；导出文件仍需人工审查脚本内硬编码秘密。\nCtrl-C退出130；成功0；配置/API/导出失败1。", formatter_class=argparse.RawDescriptionHelpFormatter)
+    argument_parser = ArgumentParser(description="从Zabbix 5.4只读导出模板、告警触发器、触发器原型和监控项阈值。请先修改脚本顶部配置变量；不接受连接、输出路径等命令行参数。Python 2.7.9+（也兼容Python 3）。", epilog="运行：python %(prog)s\n帮助：python %(prog)s --help\n配置项：ZABBIX_URL、ZABBIX_USER、ZABBIX_PASSWORD、OUTPUT_DIR、TEMPLATE_IDS、TEMPLATE_NAMES。", formatter_class=argparse.RawDescriptionHelpFormatter)
     argument_parser.add_argument("--version", action="version", version=VERSION)
-    argument_parser.add_argument("--url", default=os.environ.get("ZABBIX_URL"), help="站点或完整API地址；默认ZABBIX_URL，自动补api_jsonrpc.php")
-    argument_parser.add_argument("--user", default=os.environ.get("ZABBIX_USER"), help="用户名；默认ZABBIX_USER；密码勿放命令行")
-    selection = argument_parser.add_mutually_exclusive_group()
-    selection.add_argument("--all", action="store_true", help="显式导出全部可见模板；不指定选择器时也默认全量")
-    selection.add_argument("--list", action="store_true", help="仅列出全部可见模板ID/名称，不导出文件")
-    argument_parser.add_argument("--name", action="append", default=[], help="精确模板标识或显示名，可重复；未指定选择器时默认导出全部可见模板")
-    argument_parser.add_argument("--template-id", action="append", default=[], help="模板ID，可重复；未指定选择器时默认导出全部可见模板")
-    argument_parser.add_argument("--output-dir", default="./zabbix-template-exports", help="输出根目录；默认./zabbix-template-exports，创建唯一子目录，不覆盖旧文件")
-    argument_parser.add_argument("--timeout", type=int, default=120, help="单次API超时秒；默认120，无自动重试")
-    argument_parser.add_argument("--insecure", action="store_true", help="显式跳过HTTPS证书校验；默认验证证书，仅可信自签环境使用")
-    argument_parser.add_argument("--include-sensitive", action="store_true", help="保留API返回的凭证/宏值；默认脱敏，不建议开启或分享；API自身隐藏值仍无法恢复")
     return argument_parser
 
 
 def main(argv=None):
-    arguments = parser().parse_args(argv)
-    arguments.name = [cli_text(value) for value in arguments.name]
-    arguments.template_id = [text(value) for value in arguments.template_id]
+    parser().parse_args(argv)
     logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s", stream=UTF8Stream(sys.stderr))
     client = None
     try:
-        if not arguments.url or arguments.timeout <= 0:
-            raise ExportError("必须提供--url/ZABBIX_URL，timeout须大于0")
-        if (arguments.all or arguments.list) and (arguments.name or arguments.template_id):
-            raise ExportError("--all/--list不能与--name/--template-id混用")
-        client = Client(cli_text(arguments.url), arguments.timeout, arguments.insecure)
-        token = os.environ.get("ZABBIX_TOKEN")
+        if not ZABBIX_URL or not ZABBIX_USER or not ZABBIX_PASSWORD or TIMEOUT <= 0:
+            raise ExportError("请先填写脚本顶部的ZABBIX_URL、ZABBIX_USER、ZABBIX_PASSWORD，TIMEOUT须大于0")
+        client = Client(cli_text(ZABBIX_URL), TIMEOUT, INSECURE)
+        token = ZABBIX_TOKEN
         password = None
         if token:
             client.auth = text(token)
             client.secrets.append(text(token))
             LOGGER.info("[main] Using ZABBIX_TOKEN; password prompt is not needed")
         else:
-            if not arguments.user:
-                raise ExportError("请提供--user/ZABBIX_USER和--url/ZABBIX_URL，或使用ZABBIX_TOKEN")
-            password = os.environ.get("ZABBIX_PASSWORD")
-            if password:
-                LOGGER.info("[main] Using ZABBIX_PASSWORD; password prompt is not needed")
-            else:
-                prompt = "Zabbix password (hidden): "
-                if sys.version_info[0] == 2:
-                    prompt = prompt.encode("ascii")
-                password = getpass.getpass(prompt)
+            password = ZABBIX_PASSWORD
+            LOGGER.info("[main] Using configured ZABBIX_PASSWORD")
             password = cli_text(password)
             client.secrets.append(password)
         LOGGER.info("[main] API endpoint=%s", client.url)
@@ -298,15 +288,11 @@ def main(argv=None):
             raise ExportError("本脚本针对5.4.x，实际API版本为%s，停止以免错误兼容" % api_version)
         LOGGER.info("API版本=%s", api_version)
         if not token:
-            client.login(cli_text(arguments.user), password)
+            client.login(cli_text(ZABBIX_USER), password)
         templates = client.call("template.get", {"output": ["templateid", "host", "name"], "selectParentTemplates": ["templateid", "host", "name"], "sortfield": "host"})
         if not isinstance(templates, list):
             raise ExportError("template.get未返回数组")
-        if arguments.list:
-            for row in templates:
-                write_text(sys.stdout, "%s\t%s\t%s\n" % (row["templateid"], row["host"], row["name"]))
-            return 0
-        roots, selected = choose_templates(templates, arguments.template_id, arguments.name, arguments.all)
+        roots, selected = choose_templates(templates, TEMPLATE_IDS, TEMPLATE_NAMES, EXPORT_ALL)
         LOGGER.info("匹配根模板=%s，含父模板=%s", len(roots), len(selected))
         raw = client.call("configuration.export", {"options": {"templates": [row["templateid"] for row in selected]}, "format": "json", "prettyprint": True})
         exported = json.loads(raw)
@@ -324,10 +310,10 @@ def main(argv=None):
             "trigger_prototypes": client.call("triggerprototype.get", alert_params),
             "items": client.call("item.get", {"hostids": template_ids, "output": "extend", "selectPreprocessing": "extend", "selectTags": "extend", "selectValueMap": "extend", "sortfield": "name"}),
         }
-        if not arguments.include_sensitive:
+        if not INCLUDE_SENSITIVE:
             exported = sanitize(exported)
             alerts = sanitize(alerts)
-        root = os.path.abspath(os.path.expanduser(cli_text(arguments.output_dir)))
+        root = os.path.abspath(os.path.expanduser(cli_text(OUTPUT_DIR)))
         if not os.path.isdir(root):
             try:
                 os.makedirs(root, 0o700)
@@ -338,7 +324,7 @@ def main(argv=None):
         os.mkdir(output, 0o700)
         write_json(os.path.join(output, "templates.json"), exported)
         write_json(os.path.join(output, "alert-rules.json"), alerts)
-        write_json(os.path.join(output, "template-index.json"), {"api_version": api_version, "script_version": VERSION, "root_templateids": sorted(roots, key=int), "templates": selected, "alert_counts": dict((key, len(value)) for key, value in alerts.items()), "sanitized": not arguments.include_sensitive, "notes": ["alert-rules.json包含触发器、触发器原型、监控项及预处理，可用于整理EasyOps告警模板和阈值", "未导出主机或主机凭证；完整性受账号权限限制"]})
+        write_json(os.path.join(output, "template-index.json"), {"api_version": api_version, "script_version": VERSION, "root_templateids": sorted(roots, key=int), "templates": selected, "alert_counts": dict((key, len(value)) for key, value in alerts.items()), "sanitized": not INCLUDE_SENSITIVE, "notes": ["alert-rules.json包含触发器、触发器原型、监控项及预处理，可用于整理EasyOps告警模板和阈值", "未导出主机或主机凭证；完整性受账号权限限制"]})
         LOGGER.info("导出完成，模板=%s，触发器=%s，触发器原型=%s，监控项=%s", len(selected), len(alerts["triggers"]), len(alerts["trigger_prototypes"]), len(alerts["items"]))
         write_text(sys.stdout, text(output) + "\n")
         return 0
