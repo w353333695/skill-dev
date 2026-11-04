@@ -5,7 +5,6 @@ from __future__ import print_function, unicode_literals
 
 import argparse
 import datetime
-import getpass
 import io
 import json
 import logging
