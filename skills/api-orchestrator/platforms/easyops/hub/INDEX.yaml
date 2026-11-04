@@ -613,9 +613,10 @@ items:
   - id: os-snmp-monitoring-kit
     name: 操作系统SNMP监控套件
     category: monitor-kits
-    files: [操作系统SNMP监控套件_0.1.0.zip]
-    version: "0.1.0"
+    files: [操作系统SNMP监控套件_0.1.1.zip]
+    version: "0.1.1"
     history:
+      - {ver: "0.1.1", date: "2026-11-05", change: "改为直接绑定现有HOST@ONEMODEL，移除自建模型文件；采集和告警逻辑不变"}
       - {ver: "0.1.0", date: "2026-11-04", change: "新增Linux/Windows带内SNMP监控，采集标准HOST-RESOURCES-MIB、IF-MIB、UCD-SNMP-MIB并附告警规则与系统SNMP开启说明；不含BMC硬件监控"}
     scenario: Linux/Windows操作系统带内SNMP监控套件
     notes: "操作系统IP直接开启SNMP Agent；不要填BMC管理口IP"

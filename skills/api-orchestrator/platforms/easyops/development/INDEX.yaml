@@ -264,8 +264,9 @@ items:
     name: 操作系统SNMP监控套件源码
     category: monitor-kits
     files: [monitor-kits/os-snmp-monitoring]
-    version: "0.1.0"
+    version: "0.1.1"
     history:
+      - {ver: "0.1.1", date: "2026-11-05", change: "改为直接绑定现有HOST@ONEMODEL，不再随包导入自建操作系统模型"}
       - {ver: "0.1.0", date: "2026-11-04", change: "新增Linux/Windows带内SNMP监控，基于HOST-RESOURCES-MIB、IF-MIB、UCD-SNMP-MIB；与物理服务器BMC套件分离"}
     scenario: Linux/Windows操作系统带内SNMP监控采集器、指标、告警和配置说明
     notes: "不采集iDRAC/iLO/XCC/iBMC及风扇、电源、温度等BMC硬件指标"

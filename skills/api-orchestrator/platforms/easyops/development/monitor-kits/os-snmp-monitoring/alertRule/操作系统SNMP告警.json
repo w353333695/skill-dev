@@ -14,7 +14,7 @@
         {"metricName":"os.fs.pused","mode":"static","type":"bigger_than","threshold":80,"alertCount":3,"recoverCount":5,"detectWindow":3,"comparators":[{"level":"warning","threshold":80,"displayThreshold":80,"type":"bigger_than","tolerance":0},{"level":"critical","threshold":90,"displayThreshold":90,"type":"bigger_than","tolerance":0}]},
         {"metricName":"os.if.oper.status","mode":"static","type":"equal","threshold":2,"alertCount":3,"recoverCount":5,"detectWindow":3,"comparators":[{"level":"warning","threshold":2,"displayThreshold":2,"type":"equal","tolerance":0}]}
       ],
-      "objectId":"OS_SNMP@ONEMODEL",
+      "objectId":"HOST@ONEMODEL",
       "priority":"warning"
     }
   ]

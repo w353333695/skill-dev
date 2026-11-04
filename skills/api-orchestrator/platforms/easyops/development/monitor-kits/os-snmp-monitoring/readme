@@ -57,7 +57,7 @@ Restart-Service SNMP
 
 ## EasyOps 参数
 
-将操作系统 IP（不是 BMC IP）写入 `OS_SNMP@ONEMODEL` 实例，`snmp_conf` 映射如下：
+将操作系统 IP（不是 BMC IP）写入 `HOST@ONEMODEL` 实例，`snmp_conf` 映射如下：
 
 - `snmpPort`：默认 `161`
 - `snmpVersion`：`1`、`2c` 或 `3`

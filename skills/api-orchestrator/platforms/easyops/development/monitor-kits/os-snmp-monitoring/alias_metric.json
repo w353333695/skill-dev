@@ -22,7 +22,7 @@
       "基础信息"
     ],
     "name": "os.snmp.available",
-    "objectId": "OS_SNMP@ONEMODEL",
+    "objectId": "HOST@ONEMODEL",
     "originalMetrics": [
       "os.snmp.available"
     ],
@@ -52,7 +52,7 @@
       "基础信息"
     ],
     "name": "os.info.sys_descr",
-    "objectId": "OS_SNMP@ONEMODEL",
+    "objectId": "HOST@ONEMODEL",
     "originalMetrics": [
       "os.info.sys_descr"
     ],
@@ -82,7 +82,7 @@
       "基础信息"
     ],
     "name": "os.uptime.seconds",
-    "objectId": "OS_SNMP@ONEMODEL",
+    "objectId": "HOST@ONEMODEL",
     "originalMetrics": [
       "os.uptime.seconds"
     ],
@@ -112,7 +112,7 @@
       "基础信息"
     ],
     "name": "os.snmp.error",
-    "objectId": "OS_SNMP@ONEMODEL",
+    "objectId": "HOST@ONEMODEL",
     "originalMetrics": [
       "os.snmp.error"
     ],
@@ -142,7 +142,7 @@
       "CPU与负载"
     ],
     "name": "os.cpu.util",
-    "objectId": "OS_SNMP@ONEMODEL",
+    "objectId": "HOST@ONEMODEL",
     "originalMetrics": [
       "os.cpu.util"
     ],
@@ -172,7 +172,7 @@
       "CPU与负载"
     ],
     "name": "os.cpu.count",
-    "objectId": "OS_SNMP@ONEMODEL",
+    "objectId": "HOST@ONEMODEL",
     "originalMetrics": [
       "os.cpu.count"
     ],
@@ -202,7 +202,7 @@
       "CPU与负载"
     ],
     "name": "os.load.1",
-    "objectId": "OS_SNMP@ONEMODEL",
+    "objectId": "HOST@ONEMODEL",
     "originalMetrics": [
       "os.load.1"
     ],
@@ -232,7 +232,7 @@
       "CPU与负载"
     ],
     "name": "os.load.5",
-    "objectId": "OS_SNMP@ONEMODEL",
+    "objectId": "HOST@ONEMODEL",
     "originalMetrics": [
       "os.load.5"
     ],
@@ -262,7 +262,7 @@
       "CPU与负载"
     ],
     "name": "os.load.15",
-    "objectId": "OS_SNMP@ONEMODEL",
+    "objectId": "HOST@ONEMODEL",
     "originalMetrics": [
       "os.load.15"
     ],
@@ -292,7 +292,7 @@
       "内存与Swap"
     ],
     "name": "os.mem.total.real",
-    "objectId": "OS_SNMP@ONEMODEL",
+    "objectId": "HOST@ONEMODEL",
     "originalMetrics": [
       "os.mem.total.real"
     ],
@@ -322,7 +322,7 @@
       "内存与Swap"
     ],
     "name": "os.mem.avail.real",
-    "objectId": "OS_SNMP@ONEMODEL",
+    "objectId": "HOST@ONEMODEL",
     "originalMetrics": [
       "os.mem.avail.real"
     ],
@@ -352,7 +352,7 @@
       "内存与Swap"
     ],
     "name": "os.mem.buffer",
-    "objectId": "OS_SNMP@ONEMODEL",
+    "objectId": "HOST@ONEMODEL",
     "originalMetrics": [
       "os.mem.buffer"
     ],
@@ -382,7 +382,7 @@
       "内存与Swap"
     ],
     "name": "os.mem.cached",
-    "objectId": "OS_SNMP@ONEMODEL",
+    "objectId": "HOST@ONEMODEL",
     "originalMetrics": [
       "os.mem.cached"
     ],
@@ -412,7 +412,7 @@
       "内存与Swap"
     ],
     "name": "os.mem.total.swap",
-    "objectId": "OS_SNMP@ONEMODEL",
+    "objectId": "HOST@ONEMODEL",
     "originalMetrics": [
       "os.mem.total.swap"
     ],
@@ -442,7 +442,7 @@
       "内存与Swap"
     ],
     "name": "os.mem.avail.swap",
-    "objectId": "OS_SNMP@ONEMODEL",
+    "objectId": "HOST@ONEMODEL",
     "originalMetrics": [
       "os.mem.avail.swap"
     ],
@@ -472,7 +472,7 @@
       "基础信息"
     ],
     "name": "os.processes",
-    "objectId": "OS_SNMP@ONEMODEL",
+    "objectId": "HOST@ONEMODEL",
     "originalMetrics": [
       "os.processes"
     ],
@@ -520,7 +520,7 @@
       "文件系统"
     ],
     "name": "os.fs.total.bytes",
-    "objectId": "OS_SNMP@ONEMODEL",
+    "objectId": "HOST@ONEMODEL",
     "originalMetrics": [
       "os.fs.total.bytes"
     ],
@@ -568,7 +568,7 @@
       "文件系统"
     ],
     "name": "os.fs.used.bytes",
-    "objectId": "OS_SNMP@ONEMODEL",
+    "objectId": "HOST@ONEMODEL",
     "originalMetrics": [
       "os.fs.used.bytes"
     ],
@@ -616,7 +616,7 @@
       "文件系统"
     ],
     "name": "os.fs.pused",
-    "objectId": "OS_SNMP@ONEMODEL",
+    "objectId": "HOST@ONEMODEL",
     "originalMetrics": [
       "os.fs.pused"
     ],
@@ -664,7 +664,7 @@
       "网络接口"
     ],
     "name": "os.if.speed.bps",
-    "objectId": "OS_SNMP@ONEMODEL",
+    "objectId": "HOST@ONEMODEL",
     "originalMetrics": [
       "os.if.speed.bps"
     ],
@@ -712,7 +712,7 @@
       "网络接口"
     ],
     "name": "os.if.oper.status",
-    "objectId": "OS_SNMP@ONEMODEL",
+    "objectId": "HOST@ONEMODEL",
     "originalMetrics": [
       "os.if.oper.status"
     ],
@@ -760,7 +760,7 @@
       "网络接口"
     ],
     "name": "os.if.in.octets",
-    "objectId": "OS_SNMP@ONEMODEL",
+    "objectId": "HOST@ONEMODEL",
     "originalMetrics": [
       "os.if.in.octets"
     ],
@@ -808,7 +808,7 @@
       "网络接口"
     ],
     "name": "os.if.out.octets",
-    "objectId": "OS_SNMP@ONEMODEL",
+    "objectId": "HOST@ONEMODEL",
     "originalMetrics": [
       "os.if.out.octets"
     ],
@@ -856,7 +856,7 @@
       "网络接口"
     ],
     "name": "os.if.in.errors",
-    "objectId": "OS_SNMP@ONEMODEL",
+    "objectId": "HOST@ONEMODEL",
     "originalMetrics": [
       "os.if.in.errors"
     ],
@@ -904,7 +904,7 @@
       "网络接口"
     ],
     "name": "os.if.out.errors",
-    "objectId": "OS_SNMP@ONEMODEL",
+    "objectId": "HOST@ONEMODEL",
     "originalMetrics": [
       "os.if.out.errors"
     ],
@@ -934,7 +934,7 @@
       "内存与Swap"
     ],
     "name": "os.mem.pused",
-    "objectId": "OS_SNMP@ONEMODEL",
+    "objectId": "HOST@ONEMODEL",
     "originalMetrics": [
       "os.mem.pused"
     ],
@@ -964,7 +964,7 @@
       "内存与Swap"
     ],
     "name": "os.swap.pused",
-    "objectId": "OS_SNMP@ONEMODEL",
+    "objectId": "HOST@ONEMODEL",
     "originalMetrics": [
       "os.swap.pused"
     ],
