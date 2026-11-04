@@ -41,9 +41,9 @@ platform_conventions:
       正式采集仍须逐命令限时；前置检查不能保证之后不中途断连或所有业务字段都有权限。
       纯本地脚本检查本地依赖/权限/必要输入，不额外访问网络；无法适用时明确说明原因，禁止静默省略。
     failure_output: |
-      stdout 保持当前输出协议，stderr 仅输出一次可定位且脱敏的失败摘要（函数标记、失败阶段/类别），不打印认证命令或凭证。
-      except 错误日志保留 traceback.format_exc()（同样脱敏），不得把密钥、连接串或带敏感参数的 URL 写入日志。
-      metric_sampler 可返回 []，不得把无法采集伪装成健康、0值或成功；CMDB采集保持 GATHERING DATA 协议且不覆盖旧数据。
+      metric_sampler 正常 stdout 保持纯 JSON 数组；顶层异常必须向 stdout 输出 COLLECT_ERROR: 与脱敏 traceback，flush 后 exit 0，不得直接非零 exit()，避免前端丢失错误正文。
+      单指标或可选资源失败仅输出 WARN 并继续，不伪造健康值；不得打印认证命令、凭证或带敏感参数的 URL。
+      CMDB采集保持 GATHERING DATA 协议且不覆盖旧数据。
       巡检保持 INSTANCE ID 与 start/end 标记协议；按实际支持的失败/不可评估机制表达，不新增未定义字段或制造通过结论。
       返回码遵循平台现有协议并在交付说明中写清；不得因失败退出破坏收尾/日志落盘。
     verification: |

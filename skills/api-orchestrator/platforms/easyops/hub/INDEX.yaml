@@ -216,9 +216,9 @@ items:
     name: 光纤交换机监控套件
     category: monitor-kits
     files: [光纤交换机监控套件_v1.0.15.zip, 光纤交换机监控_告警规则模板.xlsx]
-    version: "1.0.15"
+    version: "1.0.16"
     history:
-      - {ver: "1.0.15", date: "2026-08-29", change: 初版入库}
+      - {ver: "1.0.16", date: "2026-08-29", change: 初版入库}
       - {ver: "1.0.15", date: "2026-11-04", change: "将配套告警规则模板同步打包到 alertRule/*.json"}
     scenario: 光纤交换机(Brocade/华为OEM) SNMP 指标监控套件+告警规则模板
     notes: 告警规则模板与套件配套，不单独成商品
@@ -239,10 +239,10 @@ items:
   - id: physical-server-redfish-monitor-kit
     name: 物理服务器Redfish监控套件
     category: monitor-kits
-    files: [物理服务器Redfish监控套件_1.0.15.zip]
+    files: [物理服务器Redfish监控套件_1.0.16.zip]
     version: "1.0.15"
     history:
-      - {ver: "1.0.13", date: "2026-11-03", change: "修复局部Redfish指标接口缺失、超时、空Status等情况导致整脚本异常退出；认证失败或根接口不可用仍失败，单指标失败改为WARN并继续，保留可用指标；修正ZIP目录0755/文件0664权限，避免导入permission denied；发布py注入4项EASYOPS_COLLECTOR参数，orig保留未注入源文件；离线回归通过，未激活现网任务"}
+      - {ver: "1.0.13", date: "2026-11-03", change: "修复局部Redfish指标接口缺失、超时、空Status等情况导致整脚本异常退出；认证失败或根接口不可用仍失败，单指标失败改为WARN并继续，保留可用指标；修正ZIP目录0755/文件0664权限，避免导入permission denied；发布py注入4项EASYOPS_COLLECTOR参数，orig保留未注入源文件；顶层异常stdout输出COLLECT_ERROR并exit0，前端可见；离线回归通过，未激活现网任务"}
       - {ver: "1.0.15", date: "2026-11-04", change: "确认 alertRule 自动导入语义，并将现有监控套件告警规则同步到包内；统一 ZIP 文件权限为 0664"}
     scenario: 物理服务器BMC Redfish硬件指标监控
     notes: "基于现网套件65dc3d566c2e9导出包修复；未连接真实设备验证，导入前请备份同名套件并确认任务引用。"
@@ -250,9 +250,11 @@ items:
   - id: physical-server-snmp-monitor-kit
     name: 物理服务器SNMP监控套件
     category: monitor-kits
-    files: [物理服务器SNMP监控套件_0.1.9.zip, 物理服务器SNMP监控_告警规则模板_0.1.9.xlsx]
-    version: "0.1.9"
+    files: [物理服务器SNMP监控套件_0.1.11.zip, 物理服务器SNMP监控_告警规则模板_0.1.9.xlsx]
+    version: "0.1.11"
     history:
+      - {ver: "0.1.11", date: "2026-11-04", change: "基于用户Zabbix导出扩展HP iLO、Supermicro Aten、黄河iDRAC映射，补齐IBM/Lenovo内存；修复品牌配置闭环；风扇百分比独立指标，清理未验证私有候选，保留13份模板证据；25项离线回归通过，尚未实机验收；沿用0.1.9告警表"}
+      - {ver: "0.1.10", date: "2026-11-04", change: "补齐IBM IMM PROFILES配置，修复IBM识别后KeyError: ibm；补充IMM温度/风扇/电源私有MIB候选，CPU利用率仍不误用私有状态表"}
       - {ver: "0.1.9", date: "2026-11-04", change: "修正CPU利用率适用范围：仅在HOST-RESOURCES-MIB LLD发现有效hrProcessorLoad时按Zabbix avg()输出；移除把厂商BMC CPU状态/信息表误当利用率的错误兜底；BMC不支持时WARN并继续"}
       - {ver: "0.1.8", date: "2026-11-04", change: "对齐Zabbix 5.4.5数据处理：HOST-RESOURCES-MIB CPU多核平均；按hrStorageType区分RAM/固定磁盘计算利用率；Dell/Huawei温度乘0.1；ENTITY-SENSOR-MIB按sensorScale换算；单项异常WARN不中断"}
       - {ver: "0.1.7", date: "2026-11-04", change: "基于Zabbix 5.4.5服务器模板触发器整理告警规则模板；覆盖CPU/内存/温度/磁盘/风扇/电源/健康/网口/光口"}
