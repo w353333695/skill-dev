@@ -260,3 +260,13 @@ items:
     scenario: 查询指定 CMDB 模型（父模型自动展开子模型）及实例是否配置监控、所属监控任务、实例级监控状态和实际报错；工具包已归档，可直接导入
     notes: "AutoOps toolId=0d0a4e02b4c60aaab64b1c8510d37423；v1.1.19/vId=d7a89eccf278848fe0b545f889c16fe5；sandboxRun=true。所有请求仿照sdk/easyops_client.py internal，IP/org优先读agent conf.yaml，无前端网关。任务列表12000，实例明细12000 GET /api/v1/list-resource-monitor-job-instances，query={configId,statusFilter:all,name:'',page,pageSize}，data.instances按instanceId关联；旧8125/api/v1/list-job-instances对当前任务返回空，不能用它代替前端任务明细。状态8125 POST /v1/job_status/get，body={configId,list:[{instanceId,uuid}],sampler:metric_sampler}；instanceId是目标资产主键，uuid是任务明细executionHosts中的执行主机UUID，不是目标资产_uuid、任务UUID、pluginId或CMDB instanceId。无执行主机只标记未知并写诊断，不发送空UUID，避免后端空MGET；多执行主机去重后分批查询，混合结果汇总部分成功。父模型仅发现实例，普通模型分组查任务；按(_object_id,instanceId)全局去重。任务filter只判断覆盖，不代替监控status；CSV collectionParams保留脱敏的任务参数表达式，zabbix_memo读取目标实例同名可选属性，缺失/null为空；查询开启ignore_missing_field_error。2026-11-02 FIREWALL/HOST全量：1952行且链接唯一，已监控1952；防火墙26失败，真实lastErr为SNMP目标null:161；HOST 1成功/1925未知，110.24成功且lastErr空；无mget错误，远端CSV回读通过，zabbix_memo列存在且本批1952行均为空，与CMDB查询一致；11项离线回归覆盖非空中文、引号及缺属性场景。执行needNotify=\"true\"；验收 https://192.168.110.24/next/tool/task/202611_task18e426760ca1c64fbe10；CSV=/tmp/cmdb_monitor_status_20261102_142740.csv；原生包script与线上及本地一致。"
     added: "2026-10-30"
+  - id: os-snmp-monitoring-kit
+    name: 操作系统SNMP监控套件源码
+    category: monitor-kits
+    files: [monitor-kits/os-snmp-monitoring]
+    version: "0.1.0"
+    history:
+      - {ver: "0.1.0", date: "2026-11-04", change: "新增Linux/Windows带内SNMP监控，基于HOST-RESOURCES-MIB、IF-MIB、UCD-SNMP-MIB；与物理服务器BMC套件分离"}
+    scenario: Linux/Windows操作系统带内SNMP监控采集器、指标、告警和配置说明
+    notes: "不采集iDRAC/iLO/XCC/iBMC及风扇、电源、温度等BMC硬件指标"
+    added: "2026-11-04"

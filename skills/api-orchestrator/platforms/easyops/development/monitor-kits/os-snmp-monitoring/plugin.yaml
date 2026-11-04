@@ -1,0 +1,40 @@
+type: simple-script
+name: 操作系统SNMP监控
+version: "0.1.0"
+command:
+    collect:
+        interpreter: ""
+        scriptPath:
+            - src
+            - os_snmp_monitor.py
+        type: python
+        user: ""
+params:
+    - ip
+    - port
+    - version
+    - community
+    - username
+    - auth_key
+    - auth_protocol
+    - priv_key
+    - priv_protocol
+    - osType
+paramDefine:
+    - {name: ip, valueType: string, defaultValue: $.ip, display: true, displayName: "操作系统IP", description: "Linux/Windows操作系统IP，不是BMC管理口IP", use: collectParams, optional: false, isFromSecret: false, isEncrypt: false, extraArgs: null}
+    - {name: port, valueType: string, defaultValue: "161", display: true, displayName: "SNMP端口", description: "默认161/UDP", use: collectParams, optional: true, isFromSecret: false, isEncrypt: false, extraArgs: null}
+    - {name: version, valueType: string, defaultValue: "2c", display: true, displayName: "SNMP版本", description: "1/2c/3", use: collectParams, optional: false, isFromSecret: false, isEncrypt: false, extraArgs: null}
+    - {name: community, valueType: password, defaultValue: "", display: true, displayName: "SNMP团体名", description: "v1/v2c只读团体名，建议使用密钥引用", use: collectParams, optional: true, isFromSecret: true, isEncrypt: true, extraArgs: null}
+    - {name: username, valueType: string, defaultValue: "", display: true, displayName: "SNMPv3用户名", description: "SNMPv3用户名", use: collectParams, optional: true, isFromSecret: false, isEncrypt: false, extraArgs: null}
+    - {name: auth_key, valueType: password, defaultValue: "", display: true, displayName: "SNMPv3认证密钥", description: "MD5/SHA认证密钥", use: collectParams, optional: true, isFromSecret: true, isEncrypt: true, extraArgs: null}
+    - {name: auth_protocol, valueType: string, defaultValue: "", display: true, displayName: "SNMPv3认证协议", description: "MD5或SHA", use: collectParams, optional: true, isFromSecret: false, isEncrypt: false, extraArgs: null}
+    - {name: priv_key, valueType: password, defaultValue: "", display: true, displayName: "SNMPv3加密密钥", description: "DES/AES加密密钥", use: collectParams, optional: true, isFromSecret: true, isEncrypt: true, extraArgs: null}
+    - {name: priv_protocol, valueType: string, defaultValue: "", display: true, displayName: "SNMPv3加密协议", description: "DES或AES", use: collectParams, optional: true, isFromSecret: false, isEncrypt: false, extraArgs: null}
+    - {name: osType, valueType: string, defaultValue: "unknown", display: true, displayName: "操作系统类型", description: "linux或windows，用于维度和展示", use: collectParams, optional: true, isFromSecret: false, isEncrypt: false, extraArgs: null}
+agentType: easyops
+category: 操作系统.带内监控
+scriptType: python
+interpreter: ""
+memo: "通过操作系统IP上的标准SNMP Agent采集Linux和Windows带内指标，不包含BMC硬件管理口指标"
+icon: null
+relateObjectId: OS_SNMP@ONEMODEL

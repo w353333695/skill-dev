@@ -1,0 +1,80 @@
+操作系统SNMP监控套件（带内）
+
+本套件面向 Linux、Windows 操作系统自身的 IP 地址，通过操作系统 SNMP Agent 采集 CPU、内存、Swap、文件系统、进程、系统运行时间和网卡指标。操作系统带内监控与物理服务器/BMC 管理口监控完全分离：不采集 iDRAC、iLO、XCC、iBMC、风扇、电源、温度或物理磁盘传感器。
+
+协议范围：标准 SNMPv1/v2c/v3；优先使用 HOST-RESOURCES-MIB、IF-MIB，Linux 额外使用 UCD-SNMP-MIB。执行节点需要安装 Net-SNMP 的 snmpget/snmpwalk。
+
+## Linux 开启 SNMP
+
+Debian/Ubuntu：
+
+```bash
+sudo apt-get update
+sudo apt-get install -y snmpd snmp
+sudo systemctl enable --now snmpd
+```
+
+编辑 `/etc/snmp/snmpd.conf`，只允许 EasyOps 执行节点访问：
+
+```conf
+agentAddress udp:161
+rocommunity CHANGE_ME_COMMUNITY 192.0.2.10/32
+sysLocation CHANGE_ME_LOCATION
+sysContact CHANGE_ME_CONTACT
+```
+
+重启并验证：
+
+```bash
+sudo systemctl restart snmpd
+snmpwalk -v2c -c CHANGE_ME_COMMUNITY 127.0.0.1 1.3.6.1.2.1.1
+```
+
+RHEL/CentOS 使用 `dnf install net-snmp net-snmp-utils`，配置仍为 `/etc/snmp/snmpd.conf`。防火墙只放行执行节点到 UDP/161。
+
+## Windows 开启 SNMP
+
+Windows Server 管理员 PowerShell：
+
+```powershell
+Install-WindowsFeature -Name SNMP-Service,SNMP-WMI-Provider -IncludeManagementTools
+Set-Service SNMP -StartupType Automatic
+Start-Service SNMP
+```
+
+Windows 客户端按版本支持情况执行：
+
+```powershell
+Add-WindowsCapability -Online -Name "SNMP.Client~~~~0.0.1.0"
+```
+
+打开 `services.msc` → `SNMP Service` → `属性` → `Security`：添加只读团体名，并选择只接受来自 EasyOps 执行节点的 SNMP 数据包。然后在 Windows 防火墙仅允许执行节点访问 UDP/161：
+
+```powershell
+New-NetFirewallRule -DisplayName "EasyOps OS SNMP UDP 161" -Direction Inbound -Protocol UDP -LocalPort 161 -RemoteAddress 192.0.2.10 -Action Allow
+Restart-Service SNMP
+```
+
+## EasyOps 参数
+
+将操作系统 IP（不是 BMC IP）写入 `OS_SNMP@ONEMODEL` 实例，`snmp_conf` 映射如下：
+
+- `snmpPort`：默认 `161`
+- `snmpVersion`：`1`、`2c` 或 `3`
+- `community`：v1/v2c 只读团体名
+- `securityName`：v3 用户名
+- `authKey`、`authProtocol`：v3 认证密钥和 `MD5`/`SHA`
+- `privKey`、`privProtocol`：v3 加密密钥和 `DES`/`AES`
+
+生产环境优先 SNMPv3 `authPriv`；团体名和密钥必须通过密钥引用，不要写入公开文档或日志。
+
+## 指标与告警
+
+- 基础：SNMP 可用性、系统描述、运行时间、进程数。
+- CPU：处理器数量、CPU 使用率、Linux 1/5/15 分钟负载。
+- 内存：物理内存总量、可用、Buffer、Cache、Swap。
+- 文件系统：总容量、已用容量、使用率；按 HOST-RESOURCES-MIB 发现。
+- 网络：接口速率、运行状态、入/出流量和错误计数。
+- 默认告警：SNMP 不可用、CPU 80%/95%、内存 80%/90%、文件系统 80%/90%、接口状态异常。
+
+Windows SNMP 通常不提供 Linux UCD-SNMP-MIB 的 load average；缺失指标会跳过，不伪造为零。单项 OID 不支持不影响其他指标采集；`sysDescr` 和系统 OID 均无法读取时判定 SNMP 不可用。

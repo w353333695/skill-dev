@@ -1,0 +1,974 @@
+[
+  {
+    "dataType": "double",
+    "description": "os.snmp.available",
+    "dims": [
+      {
+        "dimDisplayName": "ip",
+        "dimName": "ip",
+        "isArray": false,
+        "originDimName": "ip"
+      },
+      {
+        "dimDisplayName": "osType",
+        "dimName": "osType",
+        "isArray": false,
+        "originDimName": "osType"
+      }
+    ],
+    "displayName": "os.snmp.available",
+    "expression": "",
+    "metricSet": [
+      "基础信息"
+    ],
+    "name": "os.snmp.available",
+    "objectId": "OS_SNMP@ONEMODEL",
+    "originalMetrics": [
+      "os.snmp.available"
+    ],
+    "type": "normal",
+    "unit": ""
+  },
+  {
+    "dataType": "string",
+    "description": "os.info.sys_descr",
+    "dims": [
+      {
+        "dimDisplayName": "ip",
+        "dimName": "ip",
+        "isArray": false,
+        "originDimName": "ip"
+      },
+      {
+        "dimDisplayName": "osType",
+        "dimName": "osType",
+        "isArray": false,
+        "originDimName": "osType"
+      }
+    ],
+    "displayName": "os.info.sys_descr",
+    "expression": "",
+    "metricSet": [
+      "基础信息"
+    ],
+    "name": "os.info.sys_descr",
+    "objectId": "OS_SNMP@ONEMODEL",
+    "originalMetrics": [
+      "os.info.sys_descr"
+    ],
+    "type": "normal",
+    "unit": ""
+  },
+  {
+    "dataType": "double",
+    "description": "os.uptime.seconds",
+    "dims": [
+      {
+        "dimDisplayName": "ip",
+        "dimName": "ip",
+        "isArray": false,
+        "originDimName": "ip"
+      },
+      {
+        "dimDisplayName": "osType",
+        "dimName": "osType",
+        "isArray": false,
+        "originDimName": "osType"
+      }
+    ],
+    "displayName": "os.uptime.seconds",
+    "expression": "",
+    "metricSet": [
+      "基础信息"
+    ],
+    "name": "os.uptime.seconds",
+    "objectId": "OS_SNMP@ONEMODEL",
+    "originalMetrics": [
+      "os.uptime.seconds"
+    ],
+    "type": "normal",
+    "unit": ""
+  },
+  {
+    "dataType": "string",
+    "description": "os.snmp.error",
+    "dims": [
+      {
+        "dimDisplayName": "ip",
+        "dimName": "ip",
+        "isArray": false,
+        "originDimName": "ip"
+      },
+      {
+        "dimDisplayName": "osType",
+        "dimName": "osType",
+        "isArray": false,
+        "originDimName": "osType"
+      }
+    ],
+    "displayName": "os.snmp.error",
+    "expression": "",
+    "metricSet": [
+      "基础信息"
+    ],
+    "name": "os.snmp.error",
+    "objectId": "OS_SNMP@ONEMODEL",
+    "originalMetrics": [
+      "os.snmp.error"
+    ],
+    "type": "normal",
+    "unit": ""
+  },
+  {
+    "dataType": "double",
+    "description": "os.cpu.util",
+    "dims": [
+      {
+        "dimDisplayName": "ip",
+        "dimName": "ip",
+        "isArray": false,
+        "originDimName": "ip"
+      },
+      {
+        "dimDisplayName": "osType",
+        "dimName": "osType",
+        "isArray": false,
+        "originDimName": "osType"
+      }
+    ],
+    "displayName": "os.cpu.util",
+    "expression": "",
+    "metricSet": [
+      "CPU与负载"
+    ],
+    "name": "os.cpu.util",
+    "objectId": "OS_SNMP@ONEMODEL",
+    "originalMetrics": [
+      "os.cpu.util"
+    ],
+    "type": "normal",
+    "unit": ""
+  },
+  {
+    "dataType": "double",
+    "description": "os.cpu.count",
+    "dims": [
+      {
+        "dimDisplayName": "ip",
+        "dimName": "ip",
+        "isArray": false,
+        "originDimName": "ip"
+      },
+      {
+        "dimDisplayName": "osType",
+        "dimName": "osType",
+        "isArray": false,
+        "originDimName": "osType"
+      }
+    ],
+    "displayName": "os.cpu.count",
+    "expression": "",
+    "metricSet": [
+      "CPU与负载"
+    ],
+    "name": "os.cpu.count",
+    "objectId": "OS_SNMP@ONEMODEL",
+    "originalMetrics": [
+      "os.cpu.count"
+    ],
+    "type": "normal",
+    "unit": ""
+  },
+  {
+    "dataType": "double",
+    "description": "os.load.1",
+    "dims": [
+      {
+        "dimDisplayName": "ip",
+        "dimName": "ip",
+        "isArray": false,
+        "originDimName": "ip"
+      },
+      {
+        "dimDisplayName": "osType",
+        "dimName": "osType",
+        "isArray": false,
+        "originDimName": "osType"
+      }
+    ],
+    "displayName": "os.load.1",
+    "expression": "",
+    "metricSet": [
+      "CPU与负载"
+    ],
+    "name": "os.load.1",
+    "objectId": "OS_SNMP@ONEMODEL",
+    "originalMetrics": [
+      "os.load.1"
+    ],
+    "type": "normal",
+    "unit": ""
+  },
+  {
+    "dataType": "double",
+    "description": "os.load.5",
+    "dims": [
+      {
+        "dimDisplayName": "ip",
+        "dimName": "ip",
+        "isArray": false,
+        "originDimName": "ip"
+      },
+      {
+        "dimDisplayName": "osType",
+        "dimName": "osType",
+        "isArray": false,
+        "originDimName": "osType"
+      }
+    ],
+    "displayName": "os.load.5",
+    "expression": "",
+    "metricSet": [
+      "CPU与负载"
+    ],
+    "name": "os.load.5",
+    "objectId": "OS_SNMP@ONEMODEL",
+    "originalMetrics": [
+      "os.load.5"
+    ],
+    "type": "normal",
+    "unit": ""
+  },
+  {
+    "dataType": "double",
+    "description": "os.load.15",
+    "dims": [
+      {
+        "dimDisplayName": "ip",
+        "dimName": "ip",
+        "isArray": false,
+        "originDimName": "ip"
+      },
+      {
+        "dimDisplayName": "osType",
+        "dimName": "osType",
+        "isArray": false,
+        "originDimName": "osType"
+      }
+    ],
+    "displayName": "os.load.15",
+    "expression": "",
+    "metricSet": [
+      "CPU与负载"
+    ],
+    "name": "os.load.15",
+    "objectId": "OS_SNMP@ONEMODEL",
+    "originalMetrics": [
+      "os.load.15"
+    ],
+    "type": "normal",
+    "unit": ""
+  },
+  {
+    "dataType": "double",
+    "description": "os.mem.total.real",
+    "dims": [
+      {
+        "dimDisplayName": "ip",
+        "dimName": "ip",
+        "isArray": false,
+        "originDimName": "ip"
+      },
+      {
+        "dimDisplayName": "osType",
+        "dimName": "osType",
+        "isArray": false,
+        "originDimName": "osType"
+      }
+    ],
+    "displayName": "os.mem.total.real",
+    "expression": "",
+    "metricSet": [
+      "内存与Swap"
+    ],
+    "name": "os.mem.total.real",
+    "objectId": "OS_SNMP@ONEMODEL",
+    "originalMetrics": [
+      "os.mem.total.real"
+    ],
+    "type": "normal",
+    "unit": ""
+  },
+  {
+    "dataType": "double",
+    "description": "os.mem.avail.real",
+    "dims": [
+      {
+        "dimDisplayName": "ip",
+        "dimName": "ip",
+        "isArray": false,
+        "originDimName": "ip"
+      },
+      {
+        "dimDisplayName": "osType",
+        "dimName": "osType",
+        "isArray": false,
+        "originDimName": "osType"
+      }
+    ],
+    "displayName": "os.mem.avail.real",
+    "expression": "",
+    "metricSet": [
+      "内存与Swap"
+    ],
+    "name": "os.mem.avail.real",
+    "objectId": "OS_SNMP@ONEMODEL",
+    "originalMetrics": [
+      "os.mem.avail.real"
+    ],
+    "type": "normal",
+    "unit": ""
+  },
+  {
+    "dataType": "double",
+    "description": "os.mem.buffer",
+    "dims": [
+      {
+        "dimDisplayName": "ip",
+        "dimName": "ip",
+        "isArray": false,
+        "originDimName": "ip"
+      },
+      {
+        "dimDisplayName": "osType",
+        "dimName": "osType",
+        "isArray": false,
+        "originDimName": "osType"
+      }
+    ],
+    "displayName": "os.mem.buffer",
+    "expression": "",
+    "metricSet": [
+      "内存与Swap"
+    ],
+    "name": "os.mem.buffer",
+    "objectId": "OS_SNMP@ONEMODEL",
+    "originalMetrics": [
+      "os.mem.buffer"
+    ],
+    "type": "normal",
+    "unit": ""
+  },
+  {
+    "dataType": "double",
+    "description": "os.mem.cached",
+    "dims": [
+      {
+        "dimDisplayName": "ip",
+        "dimName": "ip",
+        "isArray": false,
+        "originDimName": "ip"
+      },
+      {
+        "dimDisplayName": "osType",
+        "dimName": "osType",
+        "isArray": false,
+        "originDimName": "osType"
+      }
+    ],
+    "displayName": "os.mem.cached",
+    "expression": "",
+    "metricSet": [
+      "内存与Swap"
+    ],
+    "name": "os.mem.cached",
+    "objectId": "OS_SNMP@ONEMODEL",
+    "originalMetrics": [
+      "os.mem.cached"
+    ],
+    "type": "normal",
+    "unit": ""
+  },
+  {
+    "dataType": "double",
+    "description": "os.mem.total.swap",
+    "dims": [
+      {
+        "dimDisplayName": "ip",
+        "dimName": "ip",
+        "isArray": false,
+        "originDimName": "ip"
+      },
+      {
+        "dimDisplayName": "osType",
+        "dimName": "osType",
+        "isArray": false,
+        "originDimName": "osType"
+      }
+    ],
+    "displayName": "os.mem.total.swap",
+    "expression": "",
+    "metricSet": [
+      "内存与Swap"
+    ],
+    "name": "os.mem.total.swap",
+    "objectId": "OS_SNMP@ONEMODEL",
+    "originalMetrics": [
+      "os.mem.total.swap"
+    ],
+    "type": "normal",
+    "unit": ""
+  },
+  {
+    "dataType": "double",
+    "description": "os.mem.avail.swap",
+    "dims": [
+      {
+        "dimDisplayName": "ip",
+        "dimName": "ip",
+        "isArray": false,
+        "originDimName": "ip"
+      },
+      {
+        "dimDisplayName": "osType",
+        "dimName": "osType",
+        "isArray": false,
+        "originDimName": "osType"
+      }
+    ],
+    "displayName": "os.mem.avail.swap",
+    "expression": "",
+    "metricSet": [
+      "内存与Swap"
+    ],
+    "name": "os.mem.avail.swap",
+    "objectId": "OS_SNMP@ONEMODEL",
+    "originalMetrics": [
+      "os.mem.avail.swap"
+    ],
+    "type": "normal",
+    "unit": ""
+  },
+  {
+    "dataType": "double",
+    "description": "os.processes",
+    "dims": [
+      {
+        "dimDisplayName": "ip",
+        "dimName": "ip",
+        "isArray": false,
+        "originDimName": "ip"
+      },
+      {
+        "dimDisplayName": "osType",
+        "dimName": "osType",
+        "isArray": false,
+        "originDimName": "osType"
+      }
+    ],
+    "displayName": "os.processes",
+    "expression": "",
+    "metricSet": [
+      "基础信息"
+    ],
+    "name": "os.processes",
+    "objectId": "OS_SNMP@ONEMODEL",
+    "originalMetrics": [
+      "os.processes"
+    ],
+    "type": "normal",
+    "unit": ""
+  },
+  {
+    "dataType": "double",
+    "description": "os.fs.total.bytes",
+    "dims": [
+      {
+        "dimDisplayName": "ip",
+        "dimName": "ip",
+        "isArray": false,
+        "originDimName": "ip"
+      },
+      {
+        "dimDisplayName": "osType",
+        "dimName": "osType",
+        "isArray": false,
+        "originDimName": "osType"
+      },
+      {
+        "dimDisplayName": "resourceType",
+        "dimName": "resourceType",
+        "isArray": false,
+        "originDimName": "resourceType"
+      },
+      {
+        "dimDisplayName": "resourceIndex",
+        "dimName": "resourceIndex",
+        "isArray": false,
+        "originDimName": "resourceIndex"
+      },
+      {
+        "dimDisplayName": "resourceName",
+        "dimName": "resourceName",
+        "isArray": false,
+        "originDimName": "resourceName"
+      }
+    ],
+    "displayName": "os.fs.total.bytes",
+    "expression": "",
+    "metricSet": [
+      "文件系统"
+    ],
+    "name": "os.fs.total.bytes",
+    "objectId": "OS_SNMP@ONEMODEL",
+    "originalMetrics": [
+      "os.fs.total.bytes"
+    ],
+    "type": "normal",
+    "unit": ""
+  },
+  {
+    "dataType": "double",
+    "description": "os.fs.used.bytes",
+    "dims": [
+      {
+        "dimDisplayName": "ip",
+        "dimName": "ip",
+        "isArray": false,
+        "originDimName": "ip"
+      },
+      {
+        "dimDisplayName": "osType",
+        "dimName": "osType",
+        "isArray": false,
+        "originDimName": "osType"
+      },
+      {
+        "dimDisplayName": "resourceType",
+        "dimName": "resourceType",
+        "isArray": false,
+        "originDimName": "resourceType"
+      },
+      {
+        "dimDisplayName": "resourceIndex",
+        "dimName": "resourceIndex",
+        "isArray": false,
+        "originDimName": "resourceIndex"
+      },
+      {
+        "dimDisplayName": "resourceName",
+        "dimName": "resourceName",
+        "isArray": false,
+        "originDimName": "resourceName"
+      }
+    ],
+    "displayName": "os.fs.used.bytes",
+    "expression": "",
+    "metricSet": [
+      "文件系统"
+    ],
+    "name": "os.fs.used.bytes",
+    "objectId": "OS_SNMP@ONEMODEL",
+    "originalMetrics": [
+      "os.fs.used.bytes"
+    ],
+    "type": "normal",
+    "unit": ""
+  },
+  {
+    "dataType": "double",
+    "description": "os.fs.pused",
+    "dims": [
+      {
+        "dimDisplayName": "ip",
+        "dimName": "ip",
+        "isArray": false,
+        "originDimName": "ip"
+      },
+      {
+        "dimDisplayName": "osType",
+        "dimName": "osType",
+        "isArray": false,
+        "originDimName": "osType"
+      },
+      {
+        "dimDisplayName": "resourceType",
+        "dimName": "resourceType",
+        "isArray": false,
+        "originDimName": "resourceType"
+      },
+      {
+        "dimDisplayName": "resourceIndex",
+        "dimName": "resourceIndex",
+        "isArray": false,
+        "originDimName": "resourceIndex"
+      },
+      {
+        "dimDisplayName": "resourceName",
+        "dimName": "resourceName",
+        "isArray": false,
+        "originDimName": "resourceName"
+      }
+    ],
+    "displayName": "os.fs.pused",
+    "expression": "",
+    "metricSet": [
+      "文件系统"
+    ],
+    "name": "os.fs.pused",
+    "objectId": "OS_SNMP@ONEMODEL",
+    "originalMetrics": [
+      "os.fs.pused"
+    ],
+    "type": "normal",
+    "unit": ""
+  },
+  {
+    "dataType": "double",
+    "description": "os.if.speed.bps",
+    "dims": [
+      {
+        "dimDisplayName": "ip",
+        "dimName": "ip",
+        "isArray": false,
+        "originDimName": "ip"
+      },
+      {
+        "dimDisplayName": "osType",
+        "dimName": "osType",
+        "isArray": false,
+        "originDimName": "osType"
+      },
+      {
+        "dimDisplayName": "resourceType",
+        "dimName": "resourceType",
+        "isArray": false,
+        "originDimName": "resourceType"
+      },
+      {
+        "dimDisplayName": "resourceIndex",
+        "dimName": "resourceIndex",
+        "isArray": false,
+        "originDimName": "resourceIndex"
+      },
+      {
+        "dimDisplayName": "resourceName",
+        "dimName": "resourceName",
+        "isArray": false,
+        "originDimName": "resourceName"
+      }
+    ],
+    "displayName": "os.if.speed.bps",
+    "expression": "",
+    "metricSet": [
+      "网络接口"
+    ],
+    "name": "os.if.speed.bps",
+    "objectId": "OS_SNMP@ONEMODEL",
+    "originalMetrics": [
+      "os.if.speed.bps"
+    ],
+    "type": "normal",
+    "unit": ""
+  },
+  {
+    "dataType": "double",
+    "description": "os.if.oper.status",
+    "dims": [
+      {
+        "dimDisplayName": "ip",
+        "dimName": "ip",
+        "isArray": false,
+        "originDimName": "ip"
+      },
+      {
+        "dimDisplayName": "osType",
+        "dimName": "osType",
+        "isArray": false,
+        "originDimName": "osType"
+      },
+      {
+        "dimDisplayName": "resourceType",
+        "dimName": "resourceType",
+        "isArray": false,
+        "originDimName": "resourceType"
+      },
+      {
+        "dimDisplayName": "resourceIndex",
+        "dimName": "resourceIndex",
+        "isArray": false,
+        "originDimName": "resourceIndex"
+      },
+      {
+        "dimDisplayName": "resourceName",
+        "dimName": "resourceName",
+        "isArray": false,
+        "originDimName": "resourceName"
+      }
+    ],
+    "displayName": "os.if.oper.status",
+    "expression": "",
+    "metricSet": [
+      "网络接口"
+    ],
+    "name": "os.if.oper.status",
+    "objectId": "OS_SNMP@ONEMODEL",
+    "originalMetrics": [
+      "os.if.oper.status"
+    ],
+    "type": "normal",
+    "unit": ""
+  },
+  {
+    "dataType": "double",
+    "description": "os.if.in.octets",
+    "dims": [
+      {
+        "dimDisplayName": "ip",
+        "dimName": "ip",
+        "isArray": false,
+        "originDimName": "ip"
+      },
+      {
+        "dimDisplayName": "osType",
+        "dimName": "osType",
+        "isArray": false,
+        "originDimName": "osType"
+      },
+      {
+        "dimDisplayName": "resourceType",
+        "dimName": "resourceType",
+        "isArray": false,
+        "originDimName": "resourceType"
+      },
+      {
+        "dimDisplayName": "resourceIndex",
+        "dimName": "resourceIndex",
+        "isArray": false,
+        "originDimName": "resourceIndex"
+      },
+      {
+        "dimDisplayName": "resourceName",
+        "dimName": "resourceName",
+        "isArray": false,
+        "originDimName": "resourceName"
+      }
+    ],
+    "displayName": "os.if.in.octets",
+    "expression": "",
+    "metricSet": [
+      "网络接口"
+    ],
+    "name": "os.if.in.octets",
+    "objectId": "OS_SNMP@ONEMODEL",
+    "originalMetrics": [
+      "os.if.in.octets"
+    ],
+    "type": "normal",
+    "unit": ""
+  },
+  {
+    "dataType": "double",
+    "description": "os.if.out.octets",
+    "dims": [
+      {
+        "dimDisplayName": "ip",
+        "dimName": "ip",
+        "isArray": false,
+        "originDimName": "ip"
+      },
+      {
+        "dimDisplayName": "osType",
+        "dimName": "osType",
+        "isArray": false,
+        "originDimName": "osType"
+      },
+      {
+        "dimDisplayName": "resourceType",
+        "dimName": "resourceType",
+        "isArray": false,
+        "originDimName": "resourceType"
+      },
+      {
+        "dimDisplayName": "resourceIndex",
+        "dimName": "resourceIndex",
+        "isArray": false,
+        "originDimName": "resourceIndex"
+      },
+      {
+        "dimDisplayName": "resourceName",
+        "dimName": "resourceName",
+        "isArray": false,
+        "originDimName": "resourceName"
+      }
+    ],
+    "displayName": "os.if.out.octets",
+    "expression": "",
+    "metricSet": [
+      "网络接口"
+    ],
+    "name": "os.if.out.octets",
+    "objectId": "OS_SNMP@ONEMODEL",
+    "originalMetrics": [
+      "os.if.out.octets"
+    ],
+    "type": "normal",
+    "unit": ""
+  },
+  {
+    "dataType": "double",
+    "description": "os.if.in.errors",
+    "dims": [
+      {
+        "dimDisplayName": "ip",
+        "dimName": "ip",
+        "isArray": false,
+        "originDimName": "ip"
+      },
+      {
+        "dimDisplayName": "osType",
+        "dimName": "osType",
+        "isArray": false,
+        "originDimName": "osType"
+      },
+      {
+        "dimDisplayName": "resourceType",
+        "dimName": "resourceType",
+        "isArray": false,
+        "originDimName": "resourceType"
+      },
+      {
+        "dimDisplayName": "resourceIndex",
+        "dimName": "resourceIndex",
+        "isArray": false,
+        "originDimName": "resourceIndex"
+      },
+      {
+        "dimDisplayName": "resourceName",
+        "dimName": "resourceName",
+        "isArray": false,
+        "originDimName": "resourceName"
+      }
+    ],
+    "displayName": "os.if.in.errors",
+    "expression": "",
+    "metricSet": [
+      "网络接口"
+    ],
+    "name": "os.if.in.errors",
+    "objectId": "OS_SNMP@ONEMODEL",
+    "originalMetrics": [
+      "os.if.in.errors"
+    ],
+    "type": "normal",
+    "unit": ""
+  },
+  {
+    "dataType": "double",
+    "description": "os.if.out.errors",
+    "dims": [
+      {
+        "dimDisplayName": "ip",
+        "dimName": "ip",
+        "isArray": false,
+        "originDimName": "ip"
+      },
+      {
+        "dimDisplayName": "osType",
+        "dimName": "osType",
+        "isArray": false,
+        "originDimName": "osType"
+      },
+      {
+        "dimDisplayName": "resourceType",
+        "dimName": "resourceType",
+        "isArray": false,
+        "originDimName": "resourceType"
+      },
+      {
+        "dimDisplayName": "resourceIndex",
+        "dimName": "resourceIndex",
+        "isArray": false,
+        "originDimName": "resourceIndex"
+      },
+      {
+        "dimDisplayName": "resourceName",
+        "dimName": "resourceName",
+        "isArray": false,
+        "originDimName": "resourceName"
+      }
+    ],
+    "displayName": "os.if.out.errors",
+    "expression": "",
+    "metricSet": [
+      "网络接口"
+    ],
+    "name": "os.if.out.errors",
+    "objectId": "OS_SNMP@ONEMODEL",
+    "originalMetrics": [
+      "os.if.out.errors"
+    ],
+    "type": "normal",
+    "unit": ""
+  },
+  {
+    "dataType": "double",
+    "description": "物理内存使用率",
+    "dims": [
+      {
+        "dimDisplayName": "ip",
+        "dimName": "ip",
+        "isArray": false,
+        "originDimName": "ip"
+      },
+      {
+        "dimDisplayName": "osType",
+        "dimName": "osType",
+        "isArray": false,
+        "originDimName": "osType"
+      }
+    ],
+    "displayName": "物理内存使用率",
+    "expression": "",
+    "metricSet": [
+      "内存与Swap"
+    ],
+    "name": "os.mem.pused",
+    "objectId": "OS_SNMP@ONEMODEL",
+    "originalMetrics": [
+      "os.mem.pused"
+    ],
+    "type": "normal",
+    "unit": "%"
+  },
+  {
+    "dataType": "double",
+    "description": "Swap使用率",
+    "dims": [
+      {
+        "dimDisplayName": "ip",
+        "dimName": "ip",
+        "isArray": false,
+        "originDimName": "ip"
+      },
+      {
+        "dimDisplayName": "osType",
+        "dimName": "osType",
+        "isArray": false,
+        "originDimName": "osType"
+      }
+    ],
+    "displayName": "Swap使用率",
+    "expression": "",
+    "metricSet": [
+      "内存与Swap"
+    ],
+    "name": "os.swap.pused",
+    "objectId": "OS_SNMP@ONEMODEL",
+    "originalMetrics": [
+      "os.swap.pused"
+    ],
+    "type": "normal",
+    "unit": "%"
+  }
+]

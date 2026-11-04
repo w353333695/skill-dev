@@ -1,0 +1,704 @@
+[
+  {
+    "agentType": "easyops",
+    "dataType": "double",
+    "instanceId": "",
+    "key": "os.snmp.available",
+    "labels": [
+      "ip",
+      "osType"
+    ],
+    "metricType": "gauge",
+    "tagDefine": [
+      {
+        "name": "ip",
+        "readOnly": false
+      },
+      {
+        "name": "osType",
+        "readOnly": false
+      }
+    ]
+  },
+  {
+    "agentType": "easyops",
+    "dataType": "string",
+    "instanceId": "",
+    "key": "os.info.sys_descr",
+    "labels": [
+      "ip",
+      "osType"
+    ],
+    "metricType": "gauge",
+    "tagDefine": [
+      {
+        "name": "ip",
+        "readOnly": false
+      },
+      {
+        "name": "osType",
+        "readOnly": false
+      }
+    ]
+  },
+  {
+    "agentType": "easyops",
+    "dataType": "double",
+    "instanceId": "",
+    "key": "os.uptime.seconds",
+    "labels": [
+      "ip",
+      "osType"
+    ],
+    "metricType": "gauge",
+    "tagDefine": [
+      {
+        "name": "ip",
+        "readOnly": false
+      },
+      {
+        "name": "osType",
+        "readOnly": false
+      }
+    ]
+  },
+  {
+    "agentType": "easyops",
+    "dataType": "string",
+    "instanceId": "",
+    "key": "os.snmp.error",
+    "labels": [
+      "ip",
+      "osType"
+    ],
+    "metricType": "gauge",
+    "tagDefine": [
+      {
+        "name": "ip",
+        "readOnly": false
+      },
+      {
+        "name": "osType",
+        "readOnly": false
+      }
+    ]
+  },
+  {
+    "agentType": "easyops",
+    "dataType": "double",
+    "instanceId": "",
+    "key": "os.cpu.util",
+    "labels": [
+      "ip",
+      "osType"
+    ],
+    "metricType": "gauge",
+    "tagDefine": [
+      {
+        "name": "ip",
+        "readOnly": false
+      },
+      {
+        "name": "osType",
+        "readOnly": false
+      }
+    ]
+  },
+  {
+    "agentType": "easyops",
+    "dataType": "double",
+    "instanceId": "",
+    "key": "os.cpu.count",
+    "labels": [
+      "ip",
+      "osType"
+    ],
+    "metricType": "gauge",
+    "tagDefine": [
+      {
+        "name": "ip",
+        "readOnly": false
+      },
+      {
+        "name": "osType",
+        "readOnly": false
+      }
+    ]
+  },
+  {
+    "agentType": "easyops",
+    "dataType": "double",
+    "instanceId": "",
+    "key": "os.load.1",
+    "labels": [
+      "ip",
+      "osType"
+    ],
+    "metricType": "gauge",
+    "tagDefine": [
+      {
+        "name": "ip",
+        "readOnly": false
+      },
+      {
+        "name": "osType",
+        "readOnly": false
+      }
+    ]
+  },
+  {
+    "agentType": "easyops",
+    "dataType": "double",
+    "instanceId": "",
+    "key": "os.load.5",
+    "labels": [
+      "ip",
+      "osType"
+    ],
+    "metricType": "gauge",
+    "tagDefine": [
+      {
+        "name": "ip",
+        "readOnly": false
+      },
+      {
+        "name": "osType",
+        "readOnly": false
+      }
+    ]
+  },
+  {
+    "agentType": "easyops",
+    "dataType": "double",
+    "instanceId": "",
+    "key": "os.load.15",
+    "labels": [
+      "ip",
+      "osType"
+    ],
+    "metricType": "gauge",
+    "tagDefine": [
+      {
+        "name": "ip",
+        "readOnly": false
+      },
+      {
+        "name": "osType",
+        "readOnly": false
+      }
+    ]
+  },
+  {
+    "agentType": "easyops",
+    "dataType": "double",
+    "instanceId": "",
+    "key": "os.mem.total.real",
+    "labels": [
+      "ip",
+      "osType"
+    ],
+    "metricType": "gauge",
+    "tagDefine": [
+      {
+        "name": "ip",
+        "readOnly": false
+      },
+      {
+        "name": "osType",
+        "readOnly": false
+      }
+    ]
+  },
+  {
+    "agentType": "easyops",
+    "dataType": "double",
+    "instanceId": "",
+    "key": "os.mem.avail.real",
+    "labels": [
+      "ip",
+      "osType"
+    ],
+    "metricType": "gauge",
+    "tagDefine": [
+      {
+        "name": "ip",
+        "readOnly": false
+      },
+      {
+        "name": "osType",
+        "readOnly": false
+      }
+    ]
+  },
+  {
+    "agentType": "easyops",
+    "dataType": "double",
+    "instanceId": "",
+    "key": "os.mem.buffer",
+    "labels": [
+      "ip",
+      "osType"
+    ],
+    "metricType": "gauge",
+    "tagDefine": [
+      {
+        "name": "ip",
+        "readOnly": false
+      },
+      {
+        "name": "osType",
+        "readOnly": false
+      }
+    ]
+  },
+  {
+    "agentType": "easyops",
+    "dataType": "double",
+    "instanceId": "",
+    "key": "os.mem.cached",
+    "labels": [
+      "ip",
+      "osType"
+    ],
+    "metricType": "gauge",
+    "tagDefine": [
+      {
+        "name": "ip",
+        "readOnly": false
+      },
+      {
+        "name": "osType",
+        "readOnly": false
+      }
+    ]
+  },
+  {
+    "agentType": "easyops",
+    "dataType": "double",
+    "instanceId": "",
+    "key": "os.mem.total.swap",
+    "labels": [
+      "ip",
+      "osType"
+    ],
+    "metricType": "gauge",
+    "tagDefine": [
+      {
+        "name": "ip",
+        "readOnly": false
+      },
+      {
+        "name": "osType",
+        "readOnly": false
+      }
+    ]
+  },
+  {
+    "agentType": "easyops",
+    "dataType": "double",
+    "instanceId": "",
+    "key": "os.mem.avail.swap",
+    "labels": [
+      "ip",
+      "osType"
+    ],
+    "metricType": "gauge",
+    "tagDefine": [
+      {
+        "name": "ip",
+        "readOnly": false
+      },
+      {
+        "name": "osType",
+        "readOnly": false
+      }
+    ]
+  },
+  {
+    "agentType": "easyops",
+    "dataType": "double",
+    "instanceId": "",
+    "key": "os.processes",
+    "labels": [
+      "ip",
+      "osType"
+    ],
+    "metricType": "gauge",
+    "tagDefine": [
+      {
+        "name": "ip",
+        "readOnly": false
+      },
+      {
+        "name": "osType",
+        "readOnly": false
+      }
+    ]
+  },
+  {
+    "agentType": "easyops",
+    "dataType": "double",
+    "instanceId": "",
+    "key": "os.fs.total.bytes",
+    "labels": [
+      "ip",
+      "osType",
+      "resourceType",
+      "resourceIndex",
+      "resourceName"
+    ],
+    "metricType": "gauge",
+    "tagDefine": [
+      {
+        "name": "ip",
+        "readOnly": false
+      },
+      {
+        "name": "osType",
+        "readOnly": false
+      },
+      {
+        "name": "resourceType",
+        "readOnly": false
+      },
+      {
+        "name": "resourceIndex",
+        "readOnly": false
+      },
+      {
+        "name": "resourceName",
+        "readOnly": false
+      }
+    ]
+  },
+  {
+    "agentType": "easyops",
+    "dataType": "double",
+    "instanceId": "",
+    "key": "os.fs.used.bytes",
+    "labels": [
+      "ip",
+      "osType",
+      "resourceType",
+      "resourceIndex",
+      "resourceName"
+    ],
+    "metricType": "gauge",
+    "tagDefine": [
+      {
+        "name": "ip",
+        "readOnly": false
+      },
+      {
+        "name": "osType",
+        "readOnly": false
+      },
+      {
+        "name": "resourceType",
+        "readOnly": false
+      },
+      {
+        "name": "resourceIndex",
+        "readOnly": false
+      },
+      {
+        "name": "resourceName",
+        "readOnly": false
+      }
+    ]
+  },
+  {
+    "agentType": "easyops",
+    "dataType": "double",
+    "instanceId": "",
+    "key": "os.fs.pused",
+    "labels": [
+      "ip",
+      "osType",
+      "resourceType",
+      "resourceIndex",
+      "resourceName"
+    ],
+    "metricType": "gauge",
+    "tagDefine": [
+      {
+        "name": "ip",
+        "readOnly": false
+      },
+      {
+        "name": "osType",
+        "readOnly": false
+      },
+      {
+        "name": "resourceType",
+        "readOnly": false
+      },
+      {
+        "name": "resourceIndex",
+        "readOnly": false
+      },
+      {
+        "name": "resourceName",
+        "readOnly": false
+      }
+    ]
+  },
+  {
+    "agentType": "easyops",
+    "dataType": "double",
+    "instanceId": "",
+    "key": "os.if.speed.bps",
+    "labels": [
+      "ip",
+      "osType",
+      "resourceType",
+      "resourceIndex",
+      "resourceName"
+    ],
+    "metricType": "gauge",
+    "tagDefine": [
+      {
+        "name": "ip",
+        "readOnly": false
+      },
+      {
+        "name": "osType",
+        "readOnly": false
+      },
+      {
+        "name": "resourceType",
+        "readOnly": false
+      },
+      {
+        "name": "resourceIndex",
+        "readOnly": false
+      },
+      {
+        "name": "resourceName",
+        "readOnly": false
+      }
+    ]
+  },
+  {
+    "agentType": "easyops",
+    "dataType": "double",
+    "instanceId": "",
+    "key": "os.if.oper.status",
+    "labels": [
+      "ip",
+      "osType",
+      "resourceType",
+      "resourceIndex",
+      "resourceName"
+    ],
+    "metricType": "gauge",
+    "tagDefine": [
+      {
+        "name": "ip",
+        "readOnly": false
+      },
+      {
+        "name": "osType",
+        "readOnly": false
+      },
+      {
+        "name": "resourceType",
+        "readOnly": false
+      },
+      {
+        "name": "resourceIndex",
+        "readOnly": false
+      },
+      {
+        "name": "resourceName",
+        "readOnly": false
+      }
+    ]
+  },
+  {
+    "agentType": "easyops",
+    "dataType": "double",
+    "instanceId": "",
+    "key": "os.if.in.octets",
+    "labels": [
+      "ip",
+      "osType",
+      "resourceType",
+      "resourceIndex",
+      "resourceName"
+    ],
+    "metricType": "gauge",
+    "tagDefine": [
+      {
+        "name": "ip",
+        "readOnly": false
+      },
+      {
+        "name": "osType",
+        "readOnly": false
+      },
+      {
+        "name": "resourceType",
+        "readOnly": false
+      },
+      {
+        "name": "resourceIndex",
+        "readOnly": false
+      },
+      {
+        "name": "resourceName",
+        "readOnly": false
+      }
+    ]
+  },
+  {
+    "agentType": "easyops",
+    "dataType": "double",
+    "instanceId": "",
+    "key": "os.if.out.octets",
+    "labels": [
+      "ip",
+      "osType",
+      "resourceType",
+      "resourceIndex",
+      "resourceName"
+    ],
+    "metricType": "gauge",
+    "tagDefine": [
+      {
+        "name": "ip",
+        "readOnly": false
+      },
+      {
+        "name": "osType",
+        "readOnly": false
+      },
+      {
+        "name": "resourceType",
+        "readOnly": false
+      },
+      {
+        "name": "resourceIndex",
+        "readOnly": false
+      },
+      {
+        "name": "resourceName",
+        "readOnly": false
+      }
+    ]
+  },
+  {
+    "agentType": "easyops",
+    "dataType": "double",
+    "instanceId": "",
+    "key": "os.if.in.errors",
+    "labels": [
+      "ip",
+      "osType",
+      "resourceType",
+      "resourceIndex",
+      "resourceName"
+    ],
+    "metricType": "gauge",
+    "tagDefine": [
+      {
+        "name": "ip",
+        "readOnly": false
+      },
+      {
+        "name": "osType",
+        "readOnly": false
+      },
+      {
+        "name": "resourceType",
+        "readOnly": false
+      },
+      {
+        "name": "resourceIndex",
+        "readOnly": false
+      },
+      {
+        "name": "resourceName",
+        "readOnly": false
+      }
+    ]
+  },
+  {
+    "agentType": "easyops",
+    "dataType": "double",
+    "instanceId": "",
+    "key": "os.if.out.errors",
+    "labels": [
+      "ip",
+      "osType",
+      "resourceType",
+      "resourceIndex",
+      "resourceName"
+    ],
+    "metricType": "gauge",
+    "tagDefine": [
+      {
+        "name": "ip",
+        "readOnly": false
+      },
+      {
+        "name": "osType",
+        "readOnly": false
+      },
+      {
+        "name": "resourceType",
+        "readOnly": false
+      },
+      {
+        "name": "resourceIndex",
+        "readOnly": false
+      },
+      {
+        "name": "resourceName",
+        "readOnly": false
+      }
+    ]
+  },
+  {
+    "agentType": "easyops",
+    "dataType": "double",
+    "instanceId": "",
+    "key": "os.mem.pused",
+    "labels": [
+      "ip",
+      "osType"
+    ],
+    "metricType": "gauge",
+    "tagDefine": [
+      {
+        "name": "ip",
+        "readOnly": false
+      },
+      {
+        "name": "osType",
+        "readOnly": false
+      }
+    ]
+  },
+  {
+    "agentType": "easyops",
+    "dataType": "double",
+    "instanceId": "",
+    "key": "os.swap.pused",
+    "labels": [
+      "ip",
+      "osType"
+    ],
+    "metricType": "gauge",
+    "tagDefine": [
+      {
+        "name": "ip",
+        "readOnly": false
+      },
+      {
+        "name": "osType",
+        "readOnly": false
+      }
+    ]
+  }
+]
