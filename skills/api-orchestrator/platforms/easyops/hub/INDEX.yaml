@@ -250,9 +250,10 @@ items:
   - id: physical-server-snmp-monitor-kit
     name: 物理服务器SNMP监控套件
     category: monitor-kits
-    files: [物理服务器SNMP监控套件_0.1.7.zip, 物理服务器SNMP监控_告警规则模板_0.1.7.xlsx]
-    version: "0.1.7"
+    files: [物理服务器SNMP监控套件_0.1.8.zip, 物理服务器SNMP监控_告警规则模板_0.1.8.xlsx]
+    version: "0.1.8"
     history:
+      - {ver: "0.1.8", date: "2026-11-04", change: "对齐Zabbix 5.4.5数据处理：HOST-RESOURCES-MIB CPU多核平均；按hrStorageType区分RAM/固定磁盘计算利用率；Dell/Huawei温度乘0.1；ENTITY-SENSOR-MIB按sensorScale换算；单项异常WARN不中断"}
       - {ver: "0.1.7", date: "2026-11-04", change: "基于Zabbix 5.4.5服务器模板触发器整理告警规则模板；覆盖CPU/内存/温度/磁盘/风扇/电源/健康/网口/光口"}
       - {ver: "0.1.0", date: "2026-11-02", change: "初版：华为/浪潮/联想/百信/戴尔/H3C品牌识别；标准MIB与厂商私有MIB候选；CPU/内存/磁盘/电源/风扇/温度/网口/光口统一指标；MIB证据随包保留"}
       - {ver: "0.1.1", date: "2026-11-02", change: "修复ZIP缺显式目录及权限、目录名与plugin.yaml不一致；补metric_sampler/python元数据；3项导入结构回归。110.24原包permission denied已复现，修复包进入制品存储后因logic.object_store_service名字服务NotFound失败，未导入成功"}
