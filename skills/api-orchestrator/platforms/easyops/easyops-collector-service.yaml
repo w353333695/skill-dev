@@ -39,10 +39,53 @@ service:
         user: ${EASYOPS_USER}
 
 # -----------------------------------------------------------------------------
+# 前端资源监控任务编排（collector_service_v2.job）
+# 真实前端调用：POST /api/v1/create-resource-monitor-job
+# 源码证据：next-apps-hyper-insign-v2/apps/infra-monitor/src/Pages/Setting/CollectionStrategy/Create/route.yaml
+# 说明：该接口不是 legacy collector_job 的薄封装；它负责把 pluginId、metricSetIds、
+# collectorJob（含 effective/collect time、目标过滤、参数映射）编排成前端可见任务。
+# -----------------------------------------------------------------------------
+resources:
+  resource_monitor_job:
+    description: |
+      前端可见的资源监控任务创建入口。必须通过网关/正式 v2 contract 调用，
+      不要用 legacy POST /api/v1/collector_job 代替，否则可能缺少 collectTime、
+      enableAgentJob 等字段，任务不会出现在前端列表。
+    path: ""
+    operations:
+      create:
+        method: POST
+        path: /api/v1/create-resource-monitor-job
+        body:
+          type: object
+          required: [pluginId, metricSetIds, collectorJob]
+          properties:
+            pluginId: { type: string, description: "已导入套件 instanceId" }
+            metricSetIds: { type: array, items: { type: string }, description: "指标集 instanceId 列表；可为空但会导致无指标采集" }
+            collectorJob:
+              type: object
+              required: [objectId, jobName, jobFilter, collectorParams, interval, timeout, enabled]
+              properties:
+                objectId: { type: string }
+                jobName: { type: string }
+                jobFilter: { type: object, description: "目标模型与 instances 查询；不要仅传字符串" }
+                collectorParams: { type: array, items: { type: object } }
+                collectParams: { type: array, items: { type: object } }
+                instanceMapping: { type: array, items: { type: object } }
+                hostIds: { type: array, items: { type: string } }
+                collectTime: { type: object, description: "兼容旧字段，含 startTime/endTime" }
+                effectiveTime: { type: object, description: "新任务时间策略，static/calendar 结构" }
+                interval: { type: integer }
+                timeout: { type: integer }
+                enabled: { type: boolean }
+                centralizedEnable: { type: boolean }
+                collectAgent: { type: string }
+        response: { type: object, additional_properties: true }
+
+# -----------------------------------------------------------------------------
 # 资源：collector_job —— 采集任务 CRUD（collector_service:8125）
 # 权威源码：resources/源代码/collector_service/collector_job/route.go
 # -----------------------------------------------------------------------------
-resources:
 
 # -----------------------------------------------------------------------------
   collector_job:
