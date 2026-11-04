@@ -99,7 +99,7 @@ class ArgumentParser(argparse.ArgumentParser):
         if message:
             write_text(file or sys.stderr, message)
 
-VERSION = "1.0.3-py2"
+VERSION = "1.1.0-py2"
 LOGGER = logging.getLogger("zabbix_export")
 SENSITIVE = re.compile(r"password|passwd|passphrase|secret|token|community|authorization|api[_ .-]?key|auth[_ .-]?(key|pass)|priv[_ .-]?(key|pass)|psk", re.I)
 
@@ -286,7 +286,10 @@ def main(argv=None):
             if password:
                 LOGGER.info("[main] Using ZABBIX_PASSWORD; password prompt is not needed")
             else:
-                password = getpass.getpass("Zabbix password (hidden): ")
+                prompt = "Zabbix password (hidden): "
+                if sys.version_info[0] == 2:
+                    prompt = prompt.encode("ascii")
+                password = getpass.getpass(prompt)
             password = cli_text(password)
             client.secrets.append(password)
         LOGGER.info("[main] API endpoint=%s", client.url)
@@ -314,8 +317,16 @@ def main(argv=None):
             raise ExportError("导出模板集合不匹配；缺失=%s，额外=%s" % (sorted(expected-actual), sorted(actual-expected)))
         if text(document.get("version")) != "5.4":
             raise ExportError("导出文档版本不是5.4")
+        template_ids = [row["templateid"] for row in selected]
+        alert_params = {"hostids": template_ids, "output": "extend", "selectHosts": ["hostid", "host", "name"], "selectItems": "extend", "selectFunctions": "extend", "selectDependencies": "extend", "selectTags": "extend", "expand": True}
+        alerts = {
+            "triggers": client.call("trigger.get", alert_params),
+            "trigger_prototypes": client.call("triggerprototype.get", alert_params),
+            "items": client.call("item.get", {"hostids": template_ids, "output": "extend", "selectPreprocessing": "extend", "selectTags": "extend", "selectValueMap": "extend", "sortfield": "name"}),
+        }
         if not arguments.include_sensitive:
             exported = sanitize(exported)
+            alerts = sanitize(alerts)
         root = os.path.abspath(os.path.expanduser(cli_text(arguments.output_dir)))
         if not os.path.isdir(root):
             try:
@@ -326,8 +337,9 @@ def main(argv=None):
         output = os.path.join(root, "zabbix54_" + datetime.datetime.now().strftime("%Y%m%d_%H%M%S_%f"))
         os.mkdir(output, 0o700)
         write_json(os.path.join(output, "templates.json"), exported)
-        write_json(os.path.join(output, "template-index.json"), {"api_version": api_version, "script_version": VERSION, "root_templateids": sorted(roots, key=int), "templates": selected, "sanitized": not arguments.include_sensitive, "notes": ["未导出主机或主机凭证；默认全部可见模板，不按品牌/类型/协议筛选；包含父模板以补齐继承定义；完整性受账号权限限制", "未读取全局宏、主机宏覆盖或最近监控值", "默认脱敏不保证删除脚本内部硬编码秘密；分享前人工审查"]})
-        LOGGER.info("导出完成，模板=%s；请人工审查后分享templates.json和template-index.json", len(selected))
+        write_json(os.path.join(output, "alert-rules.json"), alerts)
+        write_json(os.path.join(output, "template-index.json"), {"api_version": api_version, "script_version": VERSION, "root_templateids": sorted(roots, key=int), "templates": selected, "alert_counts": dict((key, len(value)) for key, value in alerts.items()), "sanitized": not arguments.include_sensitive, "notes": ["alert-rules.json包含触发器、触发器原型、监控项及预处理，可用于整理EasyOps告警模板和阈值", "未导出主机或主机凭证；完整性受账号权限限制"]})
+        LOGGER.info("导出完成，模板=%s，触发器=%s，触发器原型=%s，监控项=%s", len(selected), len(alerts["triggers"]), len(alerts["trigger_prototypes"]), len(alerts["items"]))
         write_text(sys.stdout, text(output) + "\n")
         return 0
     except Exception:
