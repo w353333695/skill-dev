@@ -218,7 +218,7 @@ items:
     files: [光纤交换机监控套件_v1.0.15.zip, 光纤交换机监控_告警规则模板.xlsx]
     version: "1.0.15"
     history:
-      - {ver: "1.0.14", date: "2026-08-29", change: 初版入库}
+      - {ver: "1.0.15", date: "2026-08-29", change: 初版入库}
       - {ver: "1.0.15", date: "2026-11-04", change: "将配套告警规则模板同步打包到 alertRule/*.json"}
     scenario: 光纤交换机(Brocade/华为OEM) SNMP 指标监控套件+告警规则模板
     notes: 告警规则模板与套件配套，不单独成商品
@@ -242,7 +242,7 @@ items:
     files: [物理服务器Redfish监控套件_1.0.15.zip]
     version: "1.0.15"
     history:
-      - {ver: "1.0.13", date: "2026-11-03", change: "修复局部Redfish指标接口缺失、超时、空Status等情况导致整脚本异常退出；认证失败或根接口不可用仍失败，单指标失败改为WARN并继续，保留可用指标；修正ZIP目录0755/文件0644权限，避免导入permission denied；.py/.orig同步，离线回归通过，未激活现网任务"}
+      - {ver: "1.0.13", date: "2026-11-03", change: "修复局部Redfish指标接口缺失、超时、空Status等情况导致整脚本异常退出；认证失败或根接口不可用仍失败，单指标失败改为WARN并继续，保留可用指标；修正ZIP目录0755/文件0664权限，避免导入permission denied；发布py注入4项EASYOPS_COLLECTOR参数，orig保留未注入源文件；离线回归通过，未激活现网任务"}
       - {ver: "1.0.15", date: "2026-11-04", change: "确认 alertRule 自动导入语义，并将现有监控套件告警规则同步到包内；统一 ZIP 文件权限为 0664"}
     scenario: 物理服务器BMC Redfish硬件指标监控
     notes: "基于现网套件65dc3d566c2e9导出包修复；未连接真实设备验证，导入前请备份同名套件并确认任务引用。"
@@ -250,16 +250,17 @@ items:
   - id: physical-server-snmp-monitor-kit
     name: 物理服务器SNMP监控套件
     category: monitor-kits
-    files: [物理服务器SNMP监控套件_0.1.5.zip]
-    version: "0.1.5"
+    files: [物理服务器SNMP监控套件_0.1.7.zip, 物理服务器SNMP监控_告警规则模板_0.1.7.xlsx]
+    version: "0.1.7"
     history:
+      - {ver: "0.1.7", date: "2026-11-04", change: "基于Zabbix 5.4.5服务器模板触发器整理告警规则模板；覆盖CPU/内存/温度/磁盘/风扇/电源/健康/网口/光口"}
       - {ver: "0.1.0", date: "2026-11-02", change: "初版：华为/浪潮/联想/百信/戴尔/H3C品牌识别；标准MIB与厂商私有MIB候选；CPU/内存/磁盘/电源/风扇/温度/网口/光口统一指标；MIB证据随包保留"}
       - {ver: "0.1.1", date: "2026-11-02", change: "修复ZIP缺显式目录及权限、目录名与plugin.yaml不一致；补metric_sampler/python元数据；3项导入结构回归。110.24原包permission denied已复现，修复包进入制品存储后因logic.object_store_service名字服务NotFound失败，未导入成功"}
       - {ver: "0.1.2", date: "2026-11-02", change: "补齐src/物理服务器SNMP监控.orig，分离原始正文与九项环境变量注入；去除future导入以支持平台前置注入；6项回归含改名重生成。110.24旧包同样orig缺失已复现，新包通过重生成后被object_store_service未注册阻塞，尚未安装成功"}
       - {ver: "0.1.3", date: "2026-11-03", change: "修复origin_metric.json指标agentType误写metricbeat，统一为easyops，与simple-script/metric_sampler套件运行类型一致"}
       - {ver: "0.1.4", date: "2026-11-03", change: "修复激活时别名displayName与Redfish冲突：统一物理机SNMP-前缀，保持内部name/key；修复metric_sampler输出CMDB标记及11项维度不匹配；9项回归含真实main模拟JSON与全指标维度校验。目标环境激活及真机未验证"}
       - {ver: "0.1.5", date: "2026-11-03", change: "$.参数关闭加密和密钥引用；端口optional及null等空值归一默认161；log_level默认ERROR可切DEBUG；缺失OID和指标WARN、部分采集继续；DEBUG完整脱敏命令/响应/解析/输出及请求耗时；17项回归通过，目标环境未验证"}
-    scenario: 物理服务器BMC SNMP硬件与接口监控
+    scenario: 物理服务器BMC SNMP硬件与接口监控及告警规则
     notes: "0.1.5增加日志参数和完整脱敏DEBUG；动态参数鉴权标志为false，但升级可能继承旧标志，必须回读套件及已有任务。Python dict/list品牌配置，MIB资料随包保留；MIB映射及真机指标未验收。0.1.2修复脚本型改名导入的.orig缺失，保留显式0755目录/0664文件及metric_sampler/python元数据；.orig无生成注入段和future，.py含九项参数取参；回归覆盖改名再注入编译与参数取值。110.24已对比验证旧包orig缺失/新包通过重生成，但后续制品存储logic.object_store_service ENS NotFound(-100005)，此为0.1.2历史阻塞；后续用户0.1.3抓包证实导入后激活因别名显示名冲突失败。0.1.4未远端激活。环境存在同名物理服务器SNMP监控套件(metricbeat,instanceId=65dc3d56b1079)，未覆盖或修改；新包内部名称为物理服务器SNMP监控，可导入新套件，勿直接覆盖不同agentType的旧套件。"
     added: "2026-11-02"
   - id: router-monitor-kit
