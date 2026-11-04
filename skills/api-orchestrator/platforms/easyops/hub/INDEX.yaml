@@ -1,11 +1,11 @@
 # EasyOps hub 平台商店索引 —— 查重载体 + 变更日志（机制见 skill references/hub.md）
 # 类目语义: cmdb-kits=CMDB采集套件包 inspection-kits=巡检套件包(tar.gz)
-#   monitor-kits=监控套件包+配套告警规则模板(xlsx) scripts=历史脚本成品包（仅压缩包）
+#   monitor-kits=监控套件包+配套告警规则模板(xlsx) scripts=已验证脚本成品（源码目录或压缩包）
 #   tools=autoops 工具成品 sso-adapter-providers=sso provider 成品
 #   itsm-service=ITSM 服务/流程交付包 custom-msg-sender=自定义消息发送器 other=未归类交付物
 # 收录门槛: 仅成品交付物；命名规范（2026-09-17 起）{类别}_{名称}_{版本}.{扩展名}，中文人类可读，
 #   如「ITSM服务_主机申请_1.3.4.zip」；旧命名 <名称>_v<版本>.<ext> 存量不动，新版回流按新命名+删旧版文件
-# 存放规则: 仅收录成品包及可导入模板；源码、tests、开发文档位于 ../development/，不得混入 hub。
+# 存放规则: 仅收录成品包及可导入模板；未完成源码、tests、临时文件位于 ../development/；已验证可复用脚本源码可归档到 hub/scripts/。
 items:
   - id: easyops-development-script-bundle
     name: EasyOps开发脚本合集
@@ -13,9 +13,9 @@ items:
     files: [脚本_EasyOps开发脚本合集_1.0.0.zip]
     version: "1.0.0"
     history:
-      - {ver: "1.0.0", date: "2026-11-04", change: "将 development/scripts 中可复用脚本按目录打包归档；排除 tests、缓存和平台特定 wheel"}
+      - {ver: "1.0.0", date: "2026-11-04", change: "将 development/scripts 中可复用脚本按目录归档并打包；排除 tests、缓存和平台特定 wheel"}
     scenario: EasyOps 平台 CMDB、ITSM、平台运维、基线检查、监控辅助和迁移脚本复用
-    notes: "源码继续在 development/scripts 维护；Hub 仅保留可分发脚本包，不包含 tests、缓存或构建材料"
+    notes: "Hub 同时保留已验证源码目录和可分发压缩包；development 仅保留测试与未完成迭代材料，不包含 tests、缓存或构建材料"
     added: "2026-11-04"
   # ---- cmdb-kits（5 商品）----
   - id: svc-cmdb-kit

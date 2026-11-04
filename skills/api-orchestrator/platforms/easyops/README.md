@@ -40,6 +40,9 @@
 | **easyops-{cmdb,autoops,itsm,sys-setting}.yaml** | 各系统 api-cli 清单：命令树 + body schema | 「实际调用」|
 | **sdk/** | 编排侧 Python SDK（api-cli 缺口补丁）：`easyops_client.py`（自包含 py2/3，双模式 openapi AK/SK 签名 + 内网直连，补 multipart/binary 缺口）。【编排侧 tool_package 导入导出/openapi 用；非 agent 工具脚本依赖，属 platform_conventions 例外】| 「编排侧 tool_package 导入导出」「外网 AK/SK 调用」|
 | formats/ | 跨部署复用的格式包：collector-kit（采集器插件 schema）+ sso-provider（sso-adapter 标准 provider 实物范本 oauth2/cas，交付新 provider 直接仿写） | 「格式范本」「sso provider 实物」|
+| development/docs/common/ | 所有套件类型共享的开发、调试、打包、导入和版本维护知识；先读这里再读类型专属文档 | 「公共套件开发知识」「permission denied」「导入失败」 |
+| development/docs/cmdb-kits/ | 仅 CMDB 采集套件的模型、采集任务、资源发现和验收知识 | 「CMDB 采集套件」 |
+| development/docs/monitor-kits/ | 仅监控套件的指标、指标集、监控任务和激活验收知识 | 「监控套件」 |
 | **hub/INDEX.yaml** | 平台商店商品索引（存量成品：套件包/脚本/模板，含版本演进 history） | 「有没有现成的 XX 套件/脚本」（开发前查重） |
 
 ## 快速调用
@@ -158,6 +161,7 @@ scripts/run.sh --spec platforms/demo/easyops-cmdb.yaml object_instance search PH
 ## 套件开发能力（formats/collector-kit/）
 
 跨部署复用的套件包格式知识（在 `formats/collector-kit/`）：plugin-yaml-schema / sampler-types / param-mechanism / package-format。
+公共套件导入与打包排障：`development/docs/common/套件开发_导入权限与打包规范.md`；公共知识索引：`development/docs/common/README.md`。
 e2e 流程：`flows/develop-and-import-kit.yaml` / `upgrade-plugin.yaml` / `delete-plugin.yaml`。
 
 ## CMDB 采集套件前端验收
