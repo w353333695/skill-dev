@@ -252,9 +252,10 @@ items:
   - id: physical-server-snmp-monitor-kit
     name: 物理服务器SNMP监控套件
     category: monitor-kits
-    files: [物理服务器SNMP监控套件_0.1.12.zip, 物理服务器SNMP监控_告警规则模板_0.1.12.xlsx]
-    version: "0.1.12"
+    files: [物理服务器SNMP监控套件_0.1.13.zip, 物理服务器SNMP监控_告警规则模板_0.1.13.xlsx]
+    version: "0.1.13"
     history:
+      - {ver: "0.1.13", date: "2026-11-05", change: "按Zabbix 5.4.5明确阈值生成alertRule/物理服务器SNMP告警.json和Excel：CPU 90%，内存/固定磁盘80/90%，通用温度50/60℃；CPU/Ambient位置阈值留存来源证据，状态枚举不跨品牌硬编码"}
       - {ver: "0.1.12", date: "2026-11-05", change: "按监控套件错误打印规范增加COLLECT_ERROR stdout顶层异常出口，输出完整traceback并返回0，确保前端可见；局部指标仍WARN不中断；回归验证通过"}
       - {ver: "0.1.11", date: "2026-11-04", change: "基于用户Zabbix导出扩展HP iLO、Supermicro Aten、黄河iDRAC映射，补齐IBM/Lenovo内存；修复品牌配置闭环；风扇百分比独立指标，清理未验证私有候选，保留13份模板证据；25项离线回归通过，尚未实机验收；沿用0.1.9告警表"}
       - {ver: "0.1.10", date: "2026-11-04", change: "补齐IBM IMM PROFILES配置，修复IBM识别后KeyError: ibm；补充IMM温度/风扇/电源私有MIB候选，CPU利用率仍不误用私有状态表"}
