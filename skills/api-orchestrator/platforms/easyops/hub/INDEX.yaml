@@ -617,9 +617,10 @@ items:
   - id: os-snmp-monitoring-kit
     name: 操作系统SNMP监控套件
     category: monitor-kits
-    files: [操作系统SNMP监控套件_0.1.9.zip, 操作系统SNMP监控_告警规则模板_0.1.9.xlsx]
-    version: "0.1.9"
+    files: [操作系统SNMP监控套件_0.1.10.zip, 操作系统SNMP监控_告警规则模板_0.1.10.xlsx]
+    version: "0.1.10"
     history:
+      - {ver: "0.1.10", date: "2026-11-05", change: "按OLAP指标存储规范将多级点号指标ID统一改为下划线，并同步脚本、指标定义、告警JSON/XLSX；补充知识约束"}
       - {ver: "0.1.9", date: "2026-11-05", change: "补充Python2运行时与Unicode兼容说明；noSuchName可选OID不再写入os.snmp.error；重新打包"}
       - {ver: "0.1.8", date: "2026-11-05", change: "按Python2采集规范移除future导入并固定EasyOps解释器；snmpwalk改用host:port；兼容Unicode输出并忽略可选OID的noSuchName错误"}
       - {ver: "0.1.7", date: "2026-11-05", change: "按CMDB动态参数安全规范将HOST.snmp_conf凭证字段设为valueType=cmdb且禁止密钥引用与加密；重新打包套件和独立告警模板"}

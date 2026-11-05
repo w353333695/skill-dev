@@ -1,7 +1,7 @@
 [
   {
     "dataType": "double",
-    "description": "os.snmp.available",
+    "description": "os_snmp_available",
     "dims": [
       {
         "dimDisplayName": "ip",
@@ -16,22 +16,22 @@
         "originDimName": "osType"
       }
     ],
-    "displayName": "os.snmp.available",
+    "displayName": "os_snmp_available",
     "expression": "",
     "metricSet": [
       "基础信息"
     ],
-    "name": "os.snmp.available",
+    "name": "os_snmp_available",
     "objectId": "HOST",
     "originalMetrics": [
-      "os.snmp.available"
+      "os_snmp_available"
     ],
     "type": "normal",
     "unit": ""
   },
   {
     "dataType": "string",
-    "description": "os.info.sys_descr",
+    "description": "os_info_sys_descr",
     "dims": [
       {
         "dimDisplayName": "ip",
@@ -46,22 +46,22 @@
         "originDimName": "osType"
       }
     ],
-    "displayName": "os.info.sys_descr",
+    "displayName": "os_info_sys_descr",
     "expression": "",
     "metricSet": [
       "基础信息"
     ],
-    "name": "os.info.sys_descr",
+    "name": "os_info_sys_descr",
     "objectId": "HOST",
     "originalMetrics": [
-      "os.info.sys_descr"
+      "os_info_sys_descr"
     ],
     "type": "normal",
     "unit": ""
   },
   {
     "dataType": "double",
-    "description": "os.uptime.seconds",
+    "description": "os_uptime_seconds",
     "dims": [
       {
         "dimDisplayName": "ip",
@@ -76,22 +76,22 @@
         "originDimName": "osType"
       }
     ],
-    "displayName": "os.uptime.seconds",
+    "displayName": "os_uptime_seconds",
     "expression": "",
     "metricSet": [
       "基础信息"
     ],
-    "name": "os.uptime.seconds",
+    "name": "os_uptime_seconds",
     "objectId": "HOST",
     "originalMetrics": [
-      "os.uptime.seconds"
+      "os_uptime_seconds"
     ],
     "type": "normal",
     "unit": ""
   },
   {
     "dataType": "string",
-    "description": "os.snmp.error",
+    "description": "os_snmp_error",
     "dims": [
       {
         "dimDisplayName": "ip",
@@ -106,22 +106,22 @@
         "originDimName": "osType"
       }
     ],
-    "displayName": "os.snmp.error",
+    "displayName": "os_snmp_error",
     "expression": "",
     "metricSet": [
       "基础信息"
     ],
-    "name": "os.snmp.error",
+    "name": "os_snmp_error",
     "objectId": "HOST",
     "originalMetrics": [
-      "os.snmp.error"
+      "os_snmp_error"
     ],
     "type": "normal",
     "unit": ""
   },
   {
     "dataType": "double",
-    "description": "os.cpu.util",
+    "description": "os_cpu_util",
     "dims": [
       {
         "dimDisplayName": "ip",
@@ -136,22 +136,22 @@
         "originDimName": "osType"
       }
     ],
-    "displayName": "os.cpu.util",
+    "displayName": "os_cpu_util",
     "expression": "",
     "metricSet": [
       "CPU与负载"
     ],
-    "name": "os.cpu.util",
+    "name": "os_cpu_util",
     "objectId": "HOST",
     "originalMetrics": [
-      "os.cpu.util"
+      "os_cpu_util"
     ],
     "type": "normal",
     "unit": ""
   },
   {
     "dataType": "double",
-    "description": "os.cpu.count",
+    "description": "os_cpu_count",
     "dims": [
       {
         "dimDisplayName": "ip",
@@ -166,22 +166,22 @@
         "originDimName": "osType"
       }
     ],
-    "displayName": "os.cpu.count",
+    "displayName": "os_cpu_count",
     "expression": "",
     "metricSet": [
       "CPU与负载"
     ],
-    "name": "os.cpu.count",
+    "name": "os_cpu_count",
     "objectId": "HOST",
     "originalMetrics": [
-      "os.cpu.count"
+      "os_cpu_count"
     ],
     "type": "normal",
     "unit": ""
   },
   {
     "dataType": "double",
-    "description": "os.load.1",
+    "description": "os_load_1",
     "dims": [
       {
         "dimDisplayName": "ip",
@@ -196,22 +196,22 @@
         "originDimName": "osType"
       }
     ],
-    "displayName": "os.load.1",
+    "displayName": "os_load_1",
     "expression": "",
     "metricSet": [
       "CPU与负载"
     ],
-    "name": "os.load.1",
+    "name": "os_load_1",
     "objectId": "HOST",
     "originalMetrics": [
-      "os.load.1"
+      "os_load_1"
     ],
     "type": "normal",
     "unit": ""
   },
   {
     "dataType": "double",
-    "description": "os.load.5",
+    "description": "os_load_5",
     "dims": [
       {
         "dimDisplayName": "ip",
@@ -226,22 +226,22 @@
         "originDimName": "osType"
       }
     ],
-    "displayName": "os.load.5",
+    "displayName": "os_load_5",
     "expression": "",
     "metricSet": [
       "CPU与负载"
     ],
-    "name": "os.load.5",
+    "name": "os_load_5",
     "objectId": "HOST",
     "originalMetrics": [
-      "os.load.5"
+      "os_load_5"
     ],
     "type": "normal",
     "unit": ""
   },
   {
     "dataType": "double",
-    "description": "os.load.15",
+    "description": "os_load_15",
     "dims": [
       {
         "dimDisplayName": "ip",
@@ -256,22 +256,22 @@
         "originDimName": "osType"
       }
     ],
-    "displayName": "os.load.15",
+    "displayName": "os_load_15",
     "expression": "",
     "metricSet": [
       "CPU与负载"
     ],
-    "name": "os.load.15",
+    "name": "os_load_15",
     "objectId": "HOST",
     "originalMetrics": [
-      "os.load.15"
+      "os_load_15"
     ],
     "type": "normal",
     "unit": ""
   },
   {
     "dataType": "double",
-    "description": "os.mem.total.real",
+    "description": "os_mem_total_real",
     "dims": [
       {
         "dimDisplayName": "ip",
@@ -286,22 +286,22 @@
         "originDimName": "osType"
       }
     ],
-    "displayName": "os.mem.total.real",
+    "displayName": "os_mem_total_real",
     "expression": "",
     "metricSet": [
       "内存与Swap"
     ],
-    "name": "os.mem.total.real",
+    "name": "os_mem_total_real",
     "objectId": "HOST",
     "originalMetrics": [
-      "os.mem.total.real"
+      "os_mem_total_real"
     ],
     "type": "normal",
     "unit": ""
   },
   {
     "dataType": "double",
-    "description": "os.mem.avail.real",
+    "description": "os_mem_avail_real",
     "dims": [
       {
         "dimDisplayName": "ip",
@@ -316,22 +316,22 @@
         "originDimName": "osType"
       }
     ],
-    "displayName": "os.mem.avail.real",
+    "displayName": "os_mem_avail_real",
     "expression": "",
     "metricSet": [
       "内存与Swap"
     ],
-    "name": "os.mem.avail.real",
+    "name": "os_mem_avail_real",
     "objectId": "HOST",
     "originalMetrics": [
-      "os.mem.avail.real"
+      "os_mem_avail_real"
     ],
     "type": "normal",
     "unit": ""
   },
   {
     "dataType": "double",
-    "description": "os.mem.buffer",
+    "description": "os_mem_buffer",
     "dims": [
       {
         "dimDisplayName": "ip",
@@ -346,22 +346,22 @@
         "originDimName": "osType"
       }
     ],
-    "displayName": "os.mem.buffer",
+    "displayName": "os_mem_buffer",
     "expression": "",
     "metricSet": [
       "内存与Swap"
     ],
-    "name": "os.mem.buffer",
+    "name": "os_mem_buffer",
     "objectId": "HOST",
     "originalMetrics": [
-      "os.mem.buffer"
+      "os_mem_buffer"
     ],
     "type": "normal",
     "unit": ""
   },
   {
     "dataType": "double",
-    "description": "os.mem.cached",
+    "description": "os_mem_cached",
     "dims": [
       {
         "dimDisplayName": "ip",
@@ -376,22 +376,22 @@
         "originDimName": "osType"
       }
     ],
-    "displayName": "os.mem.cached",
+    "displayName": "os_mem_cached",
     "expression": "",
     "metricSet": [
       "内存与Swap"
     ],
-    "name": "os.mem.cached",
+    "name": "os_mem_cached",
     "objectId": "HOST",
     "originalMetrics": [
-      "os.mem.cached"
+      "os_mem_cached"
     ],
     "type": "normal",
     "unit": ""
   },
   {
     "dataType": "double",
-    "description": "os.mem.total.swap",
+    "description": "os_mem_total_swap",
     "dims": [
       {
         "dimDisplayName": "ip",
@@ -406,22 +406,22 @@
         "originDimName": "osType"
       }
     ],
-    "displayName": "os.mem.total.swap",
+    "displayName": "os_mem_total_swap",
     "expression": "",
     "metricSet": [
       "内存与Swap"
     ],
-    "name": "os.mem.total.swap",
+    "name": "os_mem_total_swap",
     "objectId": "HOST",
     "originalMetrics": [
-      "os.mem.total.swap"
+      "os_mem_total_swap"
     ],
     "type": "normal",
     "unit": ""
   },
   {
     "dataType": "double",
-    "description": "os.mem.avail.swap",
+    "description": "os_mem_avail_swap",
     "dims": [
       {
         "dimDisplayName": "ip",
@@ -436,22 +436,22 @@
         "originDimName": "osType"
       }
     ],
-    "displayName": "os.mem.avail.swap",
+    "displayName": "os_mem_avail_swap",
     "expression": "",
     "metricSet": [
       "内存与Swap"
     ],
-    "name": "os.mem.avail.swap",
+    "name": "os_mem_avail_swap",
     "objectId": "HOST",
     "originalMetrics": [
-      "os.mem.avail.swap"
+      "os_mem_avail_swap"
     ],
     "type": "normal",
     "unit": ""
   },
   {
     "dataType": "double",
-    "description": "os.processes",
+    "description": "os_processes",
     "dims": [
       {
         "dimDisplayName": "ip",
@@ -466,22 +466,22 @@
         "originDimName": "osType"
       }
     ],
-    "displayName": "os.processes",
+    "displayName": "os_processes",
     "expression": "",
     "metricSet": [
       "基础信息"
     ],
-    "name": "os.processes",
+    "name": "os_processes",
     "objectId": "HOST",
     "originalMetrics": [
-      "os.processes"
+      "os_processes"
     ],
     "type": "normal",
     "unit": ""
   },
   {
     "dataType": "double",
-    "description": "os.fs.total.bytes",
+    "description": "os_fs_total_bytes",
     "dims": [
       {
         "dimDisplayName": "ip",
@@ -514,22 +514,22 @@
         "originDimName": "resourceName"
       }
     ],
-    "displayName": "os.fs.total.bytes",
+    "displayName": "os_fs_total_bytes",
     "expression": "",
     "metricSet": [
       "文件系统"
     ],
-    "name": "os.fs.total.bytes",
+    "name": "os_fs_total_bytes",
     "objectId": "HOST",
     "originalMetrics": [
-      "os.fs.total.bytes"
+      "os_fs_total_bytes"
     ],
     "type": "normal",
     "unit": ""
   },
   {
     "dataType": "double",
-    "description": "os.fs.used.bytes",
+    "description": "os_fs_used_bytes",
     "dims": [
       {
         "dimDisplayName": "ip",
@@ -562,22 +562,22 @@
         "originDimName": "resourceName"
       }
     ],
-    "displayName": "os.fs.used.bytes",
+    "displayName": "os_fs_used_bytes",
     "expression": "",
     "metricSet": [
       "文件系统"
     ],
-    "name": "os.fs.used.bytes",
+    "name": "os_fs_used_bytes",
     "objectId": "HOST",
     "originalMetrics": [
-      "os.fs.used.bytes"
+      "os_fs_used_bytes"
     ],
     "type": "normal",
     "unit": ""
   },
   {
     "dataType": "double",
-    "description": "os.fs.pused",
+    "description": "os_fs_pused",
     "dims": [
       {
         "dimDisplayName": "ip",
@@ -610,22 +610,22 @@
         "originDimName": "resourceName"
       }
     ],
-    "displayName": "os.fs.pused",
+    "displayName": "os_fs_pused",
     "expression": "",
     "metricSet": [
       "文件系统"
     ],
-    "name": "os.fs.pused",
+    "name": "os_fs_pused",
     "objectId": "HOST",
     "originalMetrics": [
-      "os.fs.pused"
+      "os_fs_pused"
     ],
     "type": "normal",
     "unit": ""
   },
   {
     "dataType": "double",
-    "description": "os.if.speed.bps",
+    "description": "os_if_speed_bps",
     "dims": [
       {
         "dimDisplayName": "ip",
@@ -658,22 +658,22 @@
         "originDimName": "resourceName"
       }
     ],
-    "displayName": "os.if.speed.bps",
+    "displayName": "os_if_speed_bps",
     "expression": "",
     "metricSet": [
       "网络接口"
     ],
-    "name": "os.if.speed.bps",
+    "name": "os_if_speed_bps",
     "objectId": "HOST",
     "originalMetrics": [
-      "os.if.speed.bps"
+      "os_if_speed_bps"
     ],
     "type": "normal",
     "unit": ""
   },
   {
     "dataType": "double",
-    "description": "os.if.oper.status",
+    "description": "os_if_oper_status",
     "dims": [
       {
         "dimDisplayName": "ip",
@@ -706,22 +706,22 @@
         "originDimName": "resourceName"
       }
     ],
-    "displayName": "os.if.oper.status",
+    "displayName": "os_if_oper_status",
     "expression": "",
     "metricSet": [
       "网络接口"
     ],
-    "name": "os.if.oper.status",
+    "name": "os_if_oper_status",
     "objectId": "HOST",
     "originalMetrics": [
-      "os.if.oper.status"
+      "os_if_oper_status"
     ],
     "type": "normal",
     "unit": ""
   },
   {
     "dataType": "double",
-    "description": "os.if.in.octets",
+    "description": "os_if_in_octets",
     "dims": [
       {
         "dimDisplayName": "ip",
@@ -754,22 +754,22 @@
         "originDimName": "resourceName"
       }
     ],
-    "displayName": "os.if.in.octets",
+    "displayName": "os_if_in_octets",
     "expression": "",
     "metricSet": [
       "网络接口"
     ],
-    "name": "os.if.in.octets",
+    "name": "os_if_in_octets",
     "objectId": "HOST",
     "originalMetrics": [
-      "os.if.in.octets"
+      "os_if_in_octets"
     ],
     "type": "normal",
     "unit": ""
   },
   {
     "dataType": "double",
-    "description": "os.if.out.octets",
+    "description": "os_if_out_octets",
     "dims": [
       {
         "dimDisplayName": "ip",
@@ -802,22 +802,22 @@
         "originDimName": "resourceName"
       }
     ],
-    "displayName": "os.if.out.octets",
+    "displayName": "os_if_out_octets",
     "expression": "",
     "metricSet": [
       "网络接口"
     ],
-    "name": "os.if.out.octets",
+    "name": "os_if_out_octets",
     "objectId": "HOST",
     "originalMetrics": [
-      "os.if.out.octets"
+      "os_if_out_octets"
     ],
     "type": "normal",
     "unit": ""
   },
   {
     "dataType": "double",
-    "description": "os.if.in.errors",
+    "description": "os_if_in_errors",
     "dims": [
       {
         "dimDisplayName": "ip",
@@ -850,22 +850,22 @@
         "originDimName": "resourceName"
       }
     ],
-    "displayName": "os.if.in.errors",
+    "displayName": "os_if_in_errors",
     "expression": "",
     "metricSet": [
       "网络接口"
     ],
-    "name": "os.if.in.errors",
+    "name": "os_if_in_errors",
     "objectId": "HOST",
     "originalMetrics": [
-      "os.if.in.errors"
+      "os_if_in_errors"
     ],
     "type": "normal",
     "unit": ""
   },
   {
     "dataType": "double",
-    "description": "os.if.out.errors",
+    "description": "os_if_out_errors",
     "dims": [
       {
         "dimDisplayName": "ip",
@@ -898,15 +898,15 @@
         "originDimName": "resourceName"
       }
     ],
-    "displayName": "os.if.out.errors",
+    "displayName": "os_if_out_errors",
     "expression": "",
     "metricSet": [
       "网络接口"
     ],
-    "name": "os.if.out.errors",
+    "name": "os_if_out_errors",
     "objectId": "HOST",
     "originalMetrics": [
-      "os.if.out.errors"
+      "os_if_out_errors"
     ],
     "type": "normal",
     "unit": ""
@@ -933,10 +933,10 @@
     "metricSet": [
       "内存与Swap"
     ],
-    "name": "os.mem.pused",
+    "name": "os_mem_pused",
     "objectId": "HOST",
     "originalMetrics": [
-      "os.mem.pused"
+      "os_mem_pused"
     ],
     "type": "normal",
     "unit": "%"
@@ -963,10 +963,10 @@
     "metricSet": [
       "内存与Swap"
     ],
-    "name": "os.swap.pused",
+    "name": "os_swap_pused",
     "objectId": "HOST",
     "originalMetrics": [
-      "os.swap.pused"
+      "os_swap_pused"
     ],
     "type": "normal",
     "unit": "%"

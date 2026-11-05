@@ -33,7 +33,7 @@
       "instanceId": "os-snmp-alert-strategy",
       "multiConditions": [
         {
-          "metricName": "os.snmp.available",
+          "metricName": "os_snmp_available",
           "mode": "static",
           "type": "diff",
           "threshold": [
@@ -84,7 +84,7 @@
           ]
         },
         {
-          "metricName": "os.cpu.util",
+          "metricName": "os_cpu_util",
           "mode": "static",
           "type": "bigger_than",
           "threshold": 80,
@@ -109,7 +109,7 @@
           ]
         },
         {
-          "metricName": "os.mem.pused",
+          "metricName": "os_mem_pused",
           "mode": "static",
           "type": "bigger_than",
           "threshold": 80,
@@ -134,7 +134,7 @@
           ]
         },
         {
-          "metricName": "os.fs.pused",
+          "metricName": "os_fs_pused",
           "mode": "static",
           "type": "bigger_than",
           "threshold": 80,
@@ -159,7 +159,7 @@
           ]
         },
         {
-          "metricName": "os.if.oper.status",
+          "metricName": "os_if_oper_status",
           "mode": "static",
           "type": "diff",
           "threshold": [

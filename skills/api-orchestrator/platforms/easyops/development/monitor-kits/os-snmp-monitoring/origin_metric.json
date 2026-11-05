@@ -3,7 +3,7 @@
     "agentType": "easyops",
     "dataType": "double",
     "instanceId": "",
-    "key": "os.snmp.available",
+    "key": "os_snmp_available",
     "labels": [
       "ip",
       "osType"
@@ -24,7 +24,7 @@
     "agentType": "easyops",
     "dataType": "string",
     "instanceId": "",
-    "key": "os.info.sys_descr",
+    "key": "os_info_sys_descr",
     "labels": [
       "ip",
       "osType"
@@ -45,7 +45,7 @@
     "agentType": "easyops",
     "dataType": "double",
     "instanceId": "",
-    "key": "os.uptime.seconds",
+    "key": "os_uptime_seconds",
     "labels": [
       "ip",
       "osType"
@@ -66,7 +66,7 @@
     "agentType": "easyops",
     "dataType": "string",
     "instanceId": "",
-    "key": "os.snmp.error",
+    "key": "os_snmp_error",
     "labels": [
       "ip",
       "osType"
@@ -87,7 +87,7 @@
     "agentType": "easyops",
     "dataType": "double",
     "instanceId": "",
-    "key": "os.cpu.util",
+    "key": "os_cpu_util",
     "labels": [
       "ip",
       "osType"
@@ -108,7 +108,7 @@
     "agentType": "easyops",
     "dataType": "double",
     "instanceId": "",
-    "key": "os.cpu.count",
+    "key": "os_cpu_count",
     "labels": [
       "ip",
       "osType"
@@ -129,7 +129,7 @@
     "agentType": "easyops",
     "dataType": "double",
     "instanceId": "",
-    "key": "os.load.1",
+    "key": "os_load_1",
     "labels": [
       "ip",
       "osType"
@@ -150,7 +150,7 @@
     "agentType": "easyops",
     "dataType": "double",
     "instanceId": "",
-    "key": "os.load.5",
+    "key": "os_load_5",
     "labels": [
       "ip",
       "osType"
@@ -171,7 +171,7 @@
     "agentType": "easyops",
     "dataType": "double",
     "instanceId": "",
-    "key": "os.load.15",
+    "key": "os_load_15",
     "labels": [
       "ip",
       "osType"
@@ -192,7 +192,7 @@
     "agentType": "easyops",
     "dataType": "double",
     "instanceId": "",
-    "key": "os.mem.total.real",
+    "key": "os_mem_total_real",
     "labels": [
       "ip",
       "osType"
@@ -213,7 +213,7 @@
     "agentType": "easyops",
     "dataType": "double",
     "instanceId": "",
-    "key": "os.mem.avail.real",
+    "key": "os_mem_avail_real",
     "labels": [
       "ip",
       "osType"
@@ -234,7 +234,7 @@
     "agentType": "easyops",
     "dataType": "double",
     "instanceId": "",
-    "key": "os.mem.buffer",
+    "key": "os_mem_buffer",
     "labels": [
       "ip",
       "osType"
@@ -255,7 +255,7 @@
     "agentType": "easyops",
     "dataType": "double",
     "instanceId": "",
-    "key": "os.mem.cached",
+    "key": "os_mem_cached",
     "labels": [
       "ip",
       "osType"
@@ -276,7 +276,7 @@
     "agentType": "easyops",
     "dataType": "double",
     "instanceId": "",
-    "key": "os.mem.total.swap",
+    "key": "os_mem_total_swap",
     "labels": [
       "ip",
       "osType"
@@ -297,7 +297,7 @@
     "agentType": "easyops",
     "dataType": "double",
     "instanceId": "",
-    "key": "os.mem.avail.swap",
+    "key": "os_mem_avail_swap",
     "labels": [
       "ip",
       "osType"
@@ -318,7 +318,7 @@
     "agentType": "easyops",
     "dataType": "double",
     "instanceId": "",
-    "key": "os.processes",
+    "key": "os_processes",
     "labels": [
       "ip",
       "osType"
@@ -339,7 +339,7 @@
     "agentType": "easyops",
     "dataType": "double",
     "instanceId": "",
-    "key": "os.fs.total.bytes",
+    "key": "os_fs_total_bytes",
     "labels": [
       "ip",
       "osType",
@@ -375,7 +375,7 @@
     "agentType": "easyops",
     "dataType": "double",
     "instanceId": "",
-    "key": "os.fs.used.bytes",
+    "key": "os_fs_used_bytes",
     "labels": [
       "ip",
       "osType",
@@ -411,7 +411,7 @@
     "agentType": "easyops",
     "dataType": "double",
     "instanceId": "",
-    "key": "os.fs.pused",
+    "key": "os_fs_pused",
     "labels": [
       "ip",
       "osType",
@@ -447,7 +447,7 @@
     "agentType": "easyops",
     "dataType": "double",
     "instanceId": "",
-    "key": "os.if.speed.bps",
+    "key": "os_if_speed_bps",
     "labels": [
       "ip",
       "osType",
@@ -483,7 +483,7 @@
     "agentType": "easyops",
     "dataType": "double",
     "instanceId": "",
-    "key": "os.if.oper.status",
+    "key": "os_if_oper_status",
     "labels": [
       "ip",
       "osType",
@@ -519,7 +519,7 @@
     "agentType": "easyops",
     "dataType": "double",
     "instanceId": "",
-    "key": "os.if.in.octets",
+    "key": "os_if_in_octets",
     "labels": [
       "ip",
       "osType",
@@ -555,7 +555,7 @@
     "agentType": "easyops",
     "dataType": "double",
     "instanceId": "",
-    "key": "os.if.out.octets",
+    "key": "os_if_out_octets",
     "labels": [
       "ip",
       "osType",
@@ -591,7 +591,7 @@
     "agentType": "easyops",
     "dataType": "double",
     "instanceId": "",
-    "key": "os.if.in.errors",
+    "key": "os_if_in_errors",
     "labels": [
       "ip",
       "osType",
@@ -627,7 +627,7 @@
     "agentType": "easyops",
     "dataType": "double",
     "instanceId": "",
-    "key": "os.if.out.errors",
+    "key": "os_if_out_errors",
     "labels": [
       "ip",
       "osType",
@@ -663,7 +663,7 @@
     "agentType": "easyops",
     "dataType": "double",
     "instanceId": "",
-    "key": "os.mem.pused",
+    "key": "os_mem_pused",
     "labels": [
       "ip",
       "osType"
@@ -684,7 +684,7 @@
     "agentType": "easyops",
     "dataType": "double",
     "instanceId": "",
-    "key": "os.swap.pused",
+    "key": "os_swap_pused",
     "labels": [
       "ip",
       "osType"

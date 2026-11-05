@@ -120,6 +120,11 @@ kit_dashboard:
     含 <% %> 表达式的配置时，% 必须转义成 <%% QUERY.xxx %%>——但产物 JSON 落盘前必须还原为
     <% QUERY.xxx %>！<%% %%> 双百分号残留在 args/properties 里，表达式引擎不识别（QUERY.instanceId
     解析为空 → 查询报错）。生成器统一用 .format() 或落盘前全局 replace('<%%','<%').replace('%%>','%>')。
+  metric_storage_id_safety: |
+    🔴【指标存储 ID 禁止多级点号】监控套件 origin_metric.key、alias_metric.name/originalMetrics、采集脚本输出 vals 的指标 ID 应使用字母、数字和下划线（例如 os_cpu_util、os_fs_pused），不要保存为 os.cpu.util 或 os.fs.pused。OLAP 查询字段按下划线字段解析，带点的 ID 会被当作路径表达式，导致监控查询接口报字段错误。告警 JSON/XLSX 的 metricName 必须与脚本输出和 origin_metric.key 完全一致。
+    点号仅可作为展示描述或文档语义，不得作为指标存储 ID；已有点号指标迁移时必须同步修改 origin_metric、alias_metric、脚本 vals、告警规则和仪表盘引用。
+    source: "2026-11-05 OS SNMP 监控套件 OLAP 查询报错复盘；dashboard-kit OLAP 字段下划线化约束"
+
   olap_field_pitfall: |
     🔴【OLAP 指标字段名坑×2】（2026-10-19 路由器盘 300303 两轮实测）：
     ① 字段名取套件包 origin_metric.json 的 key 的【下划线化形态】——key 含点号（snmp.netware.cpu_utilization）

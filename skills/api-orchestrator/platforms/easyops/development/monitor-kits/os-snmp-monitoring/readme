@@ -69,6 +69,10 @@ Restart-Service SNMP
 
 生产环境优先 SNMPv3 `authPriv`。本套件的 SNMP 凭证来自 HOST 的 `snmp_conf` CMDB 属性，因此参数定义使用 `valueType=cmdb`，并且 `isFromSecret=false`、`isEncrypt=false`；敏感性由 CMDB 字段权限控制，不通过任务密钥覆盖。不要把凭证写入公开文档或日志。
 
+## 指标 ID 约束
+
+本套件的指标存储 ID 统一使用下划线格式（例如 `os_cpu_util`、`os_fs_pused`），不使用 `os.cpu.util`、`os.fs.pused` 这类多级点号形式。指标 ID 必须在采集脚本输出、`origin_metric.json`、`alias_metric.json`、告警 JSON 和告警模板 XLSX 中保持完全一致；点号仅用于说明文字，不用于指标存储。这样可避免 OLAP 查询把点号解析为字段路径。
+
 ## 指标与告警
 
 - 基础：SNMP 可用性、系统描述、运行时间、进程数。

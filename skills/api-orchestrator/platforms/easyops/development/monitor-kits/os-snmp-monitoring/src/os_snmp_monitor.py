@@ -204,30 +204,30 @@ def main():
     else:
         load_probe, _ = scalar(BASE["load_5"])
         tags["osType"] = "linux" if load_probe is not None else "unknown"
-    vals["os.snmp.available"] = 1
-    vals["os.info.sys_descr"] = descr
-    vals["os.uptime.seconds"] = numeric(uptime)
+    vals["os_snmp_available"] = 1
+    vals["os_info_sys_descr"] = descr
+    vals["os_uptime_seconds"] = numeric(uptime)
     for name, oid in BASE.items():
         if name in ("sys_descr", "sys_uptime", "hr_system_uptime"):
             continue
         value, error = scalar(oid)
         if value is not None:
-            vals["os.%s" % name.replace("_", ".")] = numeric(value)
+            vals["os_%s" % name] = numeric(value)
         elif error:
             append_error(errors, error)
-    total_real = vals.get("os.mem.total.real", 0)
-    avail_real = vals.get("os.mem.avail.real", 0)
-    total_swap = vals.get("os.mem.total.swap", 0)
-    avail_swap = vals.get("os.mem.avail.swap", 0)
+    total_real = vals.get("os_mem_total_real", 0)
+    avail_real = vals.get("os_mem_avail_real", 0)
+    total_swap = vals.get("os_mem_total_swap", 0)
+    avail_swap = vals.get("os_mem_avail_swap", 0)
     if total_real > 0:
-        vals["os.mem.pused"] = (total_real - avail_real) * 100.0 / total_real
+        vals["os_mem_pused"] = (total_real - avail_real) * 100.0 / total_real
     if total_swap > 0:
-        vals["os.swap.pused"] = (total_swap - avail_swap) * 100.0 / total_swap
+        vals["os_swap_pused"] = (total_swap - avail_swap) * 100.0 / total_swap
     processor_lines, _ = run_snmp(BASE["hr_processor_load"], walk=True)
     processor_loads = [numeric(parse_value(line)) for line in processor_lines if " = " in line]
     if processor_loads:
-        vals["os.cpu.util"] = sum(processor_loads) / len(processor_loads)
-        vals["os.cpu.count"] = len(processor_loads)
+        vals["os_cpu_util"] = sum(processor_loads) / len(processor_loads)
+        vals["os_cpu_count"] = len(processor_loads)
     records = [{"dims": tags, "vals": vals, "timestamp": now}]
     storage = {key: parse_table(run_snmp(oid, walk=True)[0]) for key, oid in TABLES.items() if key.startswith("storage_")}
     for index, size in storage["storage_size"].items():
@@ -237,13 +237,13 @@ def main():
             continue
         resource_name = to_text(storage["storage_name"].get(index, index))
         resource = dict(tags, resourceType="filesystem", resourceIndex=index, resourceName=resource_name)
-        records.append({"dims": resource, "vals": {"os.fs.total.bytes": size * unit, "os.fs.used.bytes": used * unit, "os.fs.pused": used * 100.0 / size}, "timestamp": now})
+        records.append({"dims": resource, "vals": {"os_fs_total_bytes": size * unit, "os_fs_used_bytes": used * unit, "os_fs_pused": used * 100.0 / size}, "timestamp": now})
     interfaces = {key: parse_table(run_snmp(oid, walk=True)[0]) for key, oid in TABLES.items() if key.startswith("if_")}
     for index, name in interfaces["if_descr"].items():
         resource = dict(tags, resourceType="interface", resourceIndex=index, resourceName=to_text(name))
-        records.append({"dims": resource, "vals": {"os.if.speed.bps": numeric(interfaces["if_speed"].get(index)), "os.if.oper.status": numeric(interfaces["if_oper"].get(index)), "os.if.in.octets": numeric(interfaces["if_in_octets"].get(index)), "os.if.out.octets": numeric(interfaces["if_out_octets"].get(index)), "os.if.in.errors": numeric(interfaces["if_in_errors"].get(index)), "os.if.out.errors": numeric(interfaces["if_out_errors"].get(index))}, "timestamp": now})
+        records.append({"dims": resource, "vals": {"os_if_speed_bps": numeric(interfaces["if_speed"].get(index)), "os_if_oper_status": numeric(interfaces["if_oper"].get(index)), "os_if_in_octets": numeric(interfaces["if_in_octets"].get(index)), "os_if_out_octets": numeric(interfaces["if_out_octets"].get(index)), "os_if_in_errors": numeric(interfaces["if_in_errors"].get(index)), "os_if_out_errors": numeric(interfaces["if_out_errors"].get(index))}, "timestamp": now})
     if errors:
-        records[0]["vals"]["os.snmp.error"] = u"; ".join(to_text(item) for item in errors[:3])
+        records[0]["vals"]["os_snmp_error"] = u"; ".join(to_text(item) for item in errors[:3])
     write_stdout(json.dumps(records, ensure_ascii=False))
     write_stdout("\n")
     return 0
