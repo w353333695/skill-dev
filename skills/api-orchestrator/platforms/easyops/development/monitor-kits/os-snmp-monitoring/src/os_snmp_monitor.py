@@ -8,6 +8,7 @@ import re
 import subprocess
 import sys
 import time
+import traceback
 
 BASE = {
     "sys_descr": "1.3.6.1.2.1.1.1.0",
@@ -74,8 +75,8 @@ def run_snmp(oid, walk=False):
         if proc.returncode != 0:
             return [], stderr.decode("utf-8", "replace").strip() or output
         return output.splitlines(), ""
-    except Exception as error:
-        return [], "[run_snmp] %s" % error
+    except Exception:
+        return [], "[run_snmp]\n%s" % traceback.format_exc()
 
 
 def parse_value(text):
@@ -135,8 +136,11 @@ def main():
         uptime, error = scalar(BASE["sys_uptime"])
     if error:
         errors.append(error)
-    vals["os.snmp.available"] = 1 if descr is not None else 0
-    vals["os.info.sys_descr"] = descr or ""
+    if descr is None:
+        detail = error or "snmpget sysDescr returned no value"
+        raise RuntimeError("[collect] SNMP基础连通性失败（sysDescr不可读）：%s" % detail)
+    vals["os.snmp.available"] = 1
+    vals["os.info.sys_descr"] = descr
     vals["os.uptime.seconds"] = numeric(uptime)
     for name, oid in BASE.items():
         if name in ("sys_descr", "sys_uptime", "hr_system_uptime"):
@@ -181,6 +185,8 @@ def main():
 if __name__ == "__main__":
     try:
         sys.exit(main())
-    except Exception as error:
-        print(json.dumps([{"dims": {"ip": env("ip")}, "vals": {"os.snmp.available": 0, "os.snmp.error": "[main] %s" % error}}], ensure_ascii=False))
+    except Exception:
+        sys.stdout.write("COLLECT_ERROR:\n")
+        traceback.print_exc(file=sys.stdout)
+        sys.stdout.flush()
         sys.exit(0)

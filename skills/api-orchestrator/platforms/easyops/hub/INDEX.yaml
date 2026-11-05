@@ -614,9 +614,10 @@ items:
   - id: os-snmp-monitoring-kit
     name: 操作系统SNMP监控套件
     category: monitor-kits
-    files: [操作系统SNMP监控套件_0.1.2.zip]
-    version: "0.1.2"
+    files: [操作系统SNMP监控套件_0.1.3.zip]
+    version: "0.1.3"
     history:
+      - {ver: "0.1.3", date: "2026-11-05", change: "按metric_sampler约定将顶层采集异常输出到stdout的COLLECT_ERROR及完整traceback，基础SNMP失败前端可见；局部OID失败继续采集"}
       - {ver: "0.1.2", date: "2026-11-05", change: "按实测模型详情改为绑定HOST（无@ONEMODEL后缀），移除snmp_conf假设；SNMP凭证改为任务参数"}
       - {ver: "0.1.1", date: "2026-11-05", change: "改为直接绑定现有HOST@ONEMODEL，移除自建模型文件；采集和告警逻辑不变"}
       - {ver: "0.1.0", date: "2026-11-04", change: "新增Linux/Windows带内SNMP监控，采集标准HOST-RESOURCES-MIB、IF-MIB、UCD-SNMP-MIB并附告警规则与系统SNMP开启说明；不含BMC硬件监控"}

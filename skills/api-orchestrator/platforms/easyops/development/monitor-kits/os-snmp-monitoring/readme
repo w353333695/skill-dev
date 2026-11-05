@@ -82,3 +82,11 @@ Windows SNMP 通常不提供 Linux UCD-SNMP-MIB 的 load average；缺失指标�
 
 
 模型核对记录：2026-11-05 在当前 EasyOps 环境通过 `object_model.list --q HOST` 和 `object_model.detail HOST` 确认，目标模型 ID 为 `HOST`，不是 `HOST@ONEMODEL`；模型包含 `ip`、`osSystem`、`osVersion`，未发现 `snmp_conf`。
+
+## 错误输出
+
+本套件遵循 EasyOps `metric_sampler` 前端错误展示约定：
+
+- 基础 SNMP 连通性失败（`sysDescr` 无法读取）时，stdout 输出 `COLLECT_ERROR:` 和完整 traceback，进程退出码保持 `0`，前端可直接展示错误正文。
+- 单个可选 OID 不支持时继续采集其他指标，并在基础记录的 `os.snmp.error` 中保留错误摘要。
+- traceback 输出到 stdout，不写 stderr；正常采集时 stdout 仍是纯 JSON 数组。
