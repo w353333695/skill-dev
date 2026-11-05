@@ -45,30 +45,3 @@ if __name__ == '__main__':
 ```
 
 局部指标或可选资源失败只记录 WARN 并继续；只有无法进入采集的异常才进入顶层 `COLLECT_ERROR`。正常采集输出必须仍是纯 JSON 数组；不要把 traceback 写到 stderr 后直接 `exit(1)`，否则前端可能看不到错误。
-
-## DM 监控套件账密错误核对（2026-11-05）
-
-现网套件：`DM监控套件`，instanceId=`65dc3d3488b19`，版本 `1.1.4`，脚本为导出包中的 `src/dm_db_monitor.py`。
-
-实测错误输出：
-
-```text
-dmdb_tablespace_total_size: json unmarshal data failed : invalid character 'C' looking for begining of value;
-data:[CODE:-2501]用户名或密码错误
-```
-
-原因链路：
-
-1. 脚本从 `EASYOPS_COLLECTOR_username/password/ip/port` 读取参数。
-2. `DMDB_Connection.__init__` 直接调用 `dmPython.connect(...)`；账密错误会抛出异常，异常内容包含 `[CODE:-2501]用户名或密码错误`。
-3. 顶层 `except Exception as e` 只执行 `print(e)`，没有输出 JSON、`COLLECT_ERROR:` 或 traceback，也没有显式 `sys.exit(0)`。
-4. `metric_sampler` 仍按正常指标 JSON 解析 stdout，于是把 `data:[CODE:-2501]...` 当 JSON 解析，产生 `json unmarshal data failed`。前缀 `dmdb_tablespace_total_size` 是指标解析阶段附加的上下文，不是脚本主动打印的指标错误。
-
-与本目录统一规范的差异：
-
-- **不一致**：规范要求顶层异常写入 stdout 的 `COLLECT_ERROR:` + traceback，并以 `exit(0)` 结束；DM 套件实际只 `print(e)`。
-- **不一致**：规范要求正常 stdout 为纯 JSON 数组；DM 账密异常时 stdout 是纯文本。
-- **不一致**：脚本仍保留 `exit()`（缺少依赖文件时），且未显式保证异常路径退出码为 0。
-- **一致点**：错误正文确实走 stdout，因此前端能看到错误；但当前展示是二次 JSON 解析错误，原始账密错误只作为 `data:` 内容保留。
-
-因此不能把 DM 套件当前表现描述为已遵循 `COLLECT_ERROR` 协议；它属于“旧脚本 stdout 透传 + sampler JSON 解析失败”的兼容行为。后续若修 DM 套件，应把顶层入口改成统一异常协议，并将连接失败归为不可采集条件，保留 `[CODE:-2501]用户名或密码错误` 的 traceback/错误正文。

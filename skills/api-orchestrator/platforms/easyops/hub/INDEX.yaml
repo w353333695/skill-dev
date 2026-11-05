@@ -239,11 +239,12 @@ items:
   - id: physical-server-redfish-monitor-kit
     name: 物理服务器Redfish监控套件
     category: monitor-kits
-    files: [物理服务器Redfish监控套件_1.0.16.zip]
-    version: "1.0.15"
+    files: [物理服务器Redfish监控套件_1.0.17.zip]
+    version: "1.0.17"
     history:
       - {ver: "1.0.13", date: "2026-11-03", change: "修复局部Redfish指标接口缺失、超时、空Status等情况导致整脚本异常退出；认证失败或根接口不可用仍失败，单指标失败改为WARN并继续，保留可用指标；修正ZIP目录0755/文件0664权限，避免导入permission denied；发布py注入4项EASYOPS_COLLECTOR参数，orig保留未注入源文件；顶层异常stdout输出COLLECT_ERROR并exit0，前端可见；离线回归通过，未激活现网任务"}
       - {ver: "1.0.15", date: "2026-11-04", change: "确认 alertRule 自动导入语义，并将现有监控套件告警规则同步到包内；统一 ZIP 文件权限为 0664"}
+      - {ver: "1.0.17", date: "2026-11-05", change: "修复环境变量注入覆盖Python编码声明：保留shebang第一行、UTF-8声明第二行，注入段移到文件头之后；新增原始字节文件头回归，未做Python2实机或现网验证"}
     scenario: 物理服务器BMC Redfish硬件指标监控
     notes: "基于现网套件65dc3d566c2e9导出包修复；未连接真实设备验证，导入前请备份同名套件并确认任务引用。"
     added: "2026-11-03"

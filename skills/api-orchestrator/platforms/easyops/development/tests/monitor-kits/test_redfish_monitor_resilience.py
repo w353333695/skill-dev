@@ -7,7 +7,7 @@ from pathlib import Path
 from zipfile import ZipFile
 
 
-PACKAGE = Path(__file__).resolve().parents[3] / "hub" / "monitor-kits" / "物理服务器Redfish监控套件_1.0.16.zip"
+PACKAGE = Path(__file__).resolve().parents[3] / "hub" / "monitor-kits" / "物理服务器Redfish监控套件_1.0.17.zip"
 
 
 def run_fixture(fixture):
@@ -87,3 +87,15 @@ except Exception:
     assert result.stdout.startswith("COLLECT_ERROR:\n")
     assert "auth fail" in result.stdout
     assert result.stderr == ""
+
+
+def test_python_headers_precede_environment_injection():
+    with ZipFile(str(PACKAGE)) as archive:
+        for suffix in ("py", "orig"):
+            source = archive.read("src/物理服务器Redfish监控套件." + suffix)
+            lines = source.splitlines()
+            assert lines[0].startswith(b"#!/")
+            assert b"coding: UTF-8" in lines[1]
+            compile(source, "redfish." + suffix, "exec")
+        script = archive.read("src/物理服务器Redfish监控套件.py")
+        assert script.index(b"coding: UTF-8") < script.index(b"EASYOPS_COLLECTOR_host")
