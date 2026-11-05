@@ -617,9 +617,11 @@ items:
   - id: os-snmp-monitoring-kit
     name: 操作系统SNMP监控套件
     category: monitor-kits
-    files: [操作系统SNMP监控套件_0.1.7.zip, 操作系统SNMP监控_告警规则模板_0.1.7.xlsx]
-    version: "0.1.7"
+    files: [操作系统SNMP监控套件_0.1.9.zip, 操作系统SNMP监控_告警规则模板_0.1.9.xlsx]
+    version: "0.1.9"
     history:
+      - {ver: "0.1.9", date: "2026-11-05", change: "补充Python2运行时与Unicode兼容说明；noSuchName可选OID不再写入os.snmp.error；重新打包"}
+      - {ver: "0.1.8", date: "2026-11-05", change: "按Python2采集规范移除future导入并固定EasyOps解释器；snmpwalk改用host:port；兼容Unicode输出并忽略可选OID的noSuchName错误"}
       - {ver: "0.1.7", date: "2026-11-05", change: "按CMDB动态参数安全规范将HOST.snmp_conf凭证字段设为valueType=cmdb且禁止密钥引用与加密；重新打包套件和独立告警模板"}
       - {ver: "0.1.6", date: "2026-11-05", change: "HOST新增网络设备同源snmp_conf结构体；采集参数从$.snmp_conf动态注入；OS类型改由SNMP探测识别，不依赖osSystem；新增独立告警规则模板XLSX"}
       - {ver: "0.1.5", date: "2026-11-05", change: "补充src/os_snmp_monitor.orig原始源码，修正环境变量注入交付结构并排除__pycache__；同步更新导入规范"}

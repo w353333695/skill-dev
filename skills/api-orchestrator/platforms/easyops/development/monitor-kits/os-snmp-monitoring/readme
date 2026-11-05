@@ -83,10 +83,17 @@ Windows SNMP 通常不提供 Linux UCD-SNMP-MIB 的 load average；缺失指标�
 
 模型核对记录：2026-11-05 在当前 EasyOps 环境通过 `object_model.list --q HOST` 和 `object_model.detail HOST` 确认，目标模型 ID 为 `HOST`；已向 HOST 增加与网络设备一致的 `snmp_conf` 结构体，采集任务从 `$.snmp_conf.*` 动态取值。
 
+## 运行时兼容说明
+
+- 采集脚本使用 EasyOps agent 默认解释器 `/usr/local/easyops/python/bin/python`（Python 2.7），不依赖 `env python`，也不使用 `from __future__ import print_function`。
+- Net-SNMP 命令目标统一组装为 `host:port`，不向 `snmpwalk`/`snmpget` 传递不兼容的 `-p` 参数；IPv6 目标会组装为 `[host]:port`。
+- SNMP 输出按 UTF-8 容错解码，文件系统名称等资源维度按 Unicode 安全输出，避免非 ASCII 名称触发 `UnicodeDecodeError`/`UnicodeEncodeError`。
+- 某些 Windows 或定制 SNMP Agent 不实现 `HOST-RESOURCES-MIB::hrProcessorLoad`，返回 `noSuchName`/`There is no such variable` 时仅跳过该可选指标，不作为 `os.snmp.error` 连通性错误。
+
 ## 错误输出
 
 本套件遵循 EasyOps `metric_sampler` 前端错误展示约定：
 
 - 基础 SNMP 连通性失败（`sysDescr` 无法读取）时，stdout 输出 `COLLECT_ERROR:` 和完整 traceback，进程退出码保持 `0`，前端可直接展示错误正文。
-- 单个可选 OID 不支持时继续采集其他指标，并在基础记录的 `os.snmp.error` 中保留错误摘要。
+- 单个可选 OID 不支持时继续采集其他指标；只有真实执行错误才写入基础记录的 `os.snmp.error`，`noSuchName`/变量不存在按能力缺失处理。
 - traceback 输出到 stdout，不写 stderr；正常采集时 stdout 仍是纯 JSON 数组。

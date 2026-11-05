@@ -1,7 +1,6 @@
-#!/usr/bin/env python
+#!/usr/local/easyops/python/bin/python
 # -*- coding: utf-8 -*-
 """EasyOps 带内操作系统 SNMP 监控采集器。"""
-from __future__ import print_function
 import json
 import os
 import re
@@ -9,6 +8,56 @@ import subprocess
 import sys
 import time
 import traceback
+
+try:
+    text_type = unicode
+except NameError:
+    text_type = str
+
+
+def to_text(value):
+    if value is None:
+        return u""
+    if isinstance(value, text_type):
+        return value
+    if isinstance(value, bytes):
+        return value.decode("utf-8", "replace")
+    return text_type(value)
+
+
+def to_bytes(value):
+    value = to_text(value)
+    return value.encode("utf-8", "replace") if isinstance(value, text_type) else value
+
+
+def write_stdout(value):
+    value = to_text(value)
+    if sys.version_info[0] < 3:
+        sys.stdout.write(to_bytes(value))
+    else:
+        sys.stdout.write(value)
+
+
+def format_target(host, port):
+    host = to_text(host).strip()
+    port = to_text(port).strip()
+    if not port:
+        return host
+    if ":" in host and not host.startswith("["):
+        return "[%s]:%s" % (host, port)
+    return "%s:%s" % (host, port)
+
+
+def is_missing_oid_error(error):
+    text = to_text(error).lower()
+    return ("nosuchname" in text or "no such variable" in text or
+            "nosuchobject" in text or "nosuchinstance" in text)
+
+
+def append_error(errors, error):
+    if error and not is_missing_oid_error(error):
+        errors.append(to_text(error))
+
 
 BASE = {
     "sys_descr": "1.3.6.1.2.1.1.1.0",
@@ -58,12 +107,13 @@ def env_any(*names):
 def command_args():
     version = (env_any("snmpVersion", "version") or "2c").lower()
     port = env_any("snmpPort", "port") or "161"
-    target = env("ip", "127.0.0.1")
+    target = format_target(env("ip", "127.0.0.1"), port)
     if version in ("1", "2c", "2"):
-        return ["-v", "2c" if version == "2" else version, "-c", env("community", "public"), "-p", str(port), target]
+        args = ["-v", "2c" if version == "2" else version, "-c", env("community", "public"), target]
+        return [to_bytes(arg) for arg in args]
     security_level = env_any("securityLevel") or "noAuthNoPriv"
     username = env_any("securityName", "username")
-    args = ["-v", "3", "-u", username, "-p", str(port), "-l", security_level]
+    args = ["-v", "3", "-u", username, "-l", security_level]
     auth_protocol = env_any("authProtocol", "auth_protocol").upper()
     priv_protocol = env_any("privProtocol", "priv_protocol").upper()
     if security_level in ("authNoPriv", "authPriv"):
@@ -74,7 +124,7 @@ def command_args():
     if context_name:
         args.extend(["-n", context_name])
     args.append(target)
-    return args
+    return [to_bytes(arg) for arg in args]
 
 
 def run_snmp(oid, walk=False):
@@ -82,15 +132,16 @@ def run_snmp(oid, walk=False):
     try:
         proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         stdout, stderr = proc.communicate()
-        output = stdout.decode("utf-8", "replace").strip()
+        output = to_text(stdout).strip()
         if proc.returncode != 0:
-            return [], stderr.decode("utf-8", "replace").strip() or output
+            return [], to_text(stderr).strip() or output
         return output.splitlines(), ""
     except Exception:
-        return [], "[run_snmp]\n%s" % traceback.format_exc()
+        return [], u"[run_snmp]\n%s" % to_text(traceback.format_exc())
 
 
 def parse_value(text):
+    text = to_text(text)
     value = text.split(" = ", 1)[-1].strip()
     if value.startswith("STRING:"):
         return value[7:].strip().strip('"')
@@ -131,7 +182,7 @@ def numeric(value, default=0.0):
 
 def main():
     if "--help" in sys.argv or "-h" in sys.argv:
-        print("采集带内 Linux/Windows 操作系统 SNMP 指标；凭证通过 EASYOPS_COLLECTOR_* 参数传入。")
+        write_stdout(u"采集带内 Linux/Windows 操作系统 SNMP 指标；凭证通过 EASYOPS_COLLECTOR_* 参数传入。\n")
         return 0
     now = int(time.time() * 1000)
     ip = env("ip", "127.0.0.1")
@@ -139,17 +190,15 @@ def main():
     vals = {}
     errors = []
     descr, error = scalar(BASE["sys_descr"])
-    if error:
-        errors.append(error)
+    append_error(errors, error)
     uptime, error = scalar(BASE["hr_system_uptime"])
     if uptime is None:
         uptime, error = scalar(BASE["sys_uptime"])
-    if error:
-        errors.append(error)
+    append_error(errors, error)
     if descr is None:
-        detail = error or "snmpget sysDescr returned no value"
-        raise RuntimeError("[collect] SNMP基础连通性失败（sysDescr不可读）：%s" % detail)
-    descr_text = str(descr)
+        detail = to_text(error) or u"snmpget sysDescr returned no value"
+        raise RuntimeError(to_bytes(u"[collect] SNMP基础连通性失败（sysDescr不可读）：%s" % detail))
+    descr_text = to_text(descr)
     if re.search(r"windows|microsoft", descr_text, re.I):
         tags["osType"] = "windows"
     else:
@@ -165,7 +214,7 @@ def main():
         if value is not None:
             vals["os.%s" % name.replace("_", ".")] = numeric(value)
         elif error:
-            errors.append(error)
+            append_error(errors, error)
     total_real = vals.get("os.mem.total.real", 0)
     avail_real = vals.get("os.mem.avail.real", 0)
     total_swap = vals.get("os.mem.total.swap", 0)
@@ -186,15 +235,17 @@ def main():
         used = numeric(storage["storage_used"].get(index), 0)
         if size <= 0:
             continue
-        resource = dict(tags, resourceType="filesystem", resourceIndex=index, resourceName=str(storage["storage_name"].get(index, index)))
+        resource_name = to_text(storage["storage_name"].get(index, index))
+        resource = dict(tags, resourceType="filesystem", resourceIndex=index, resourceName=resource_name)
         records.append({"dims": resource, "vals": {"os.fs.total.bytes": size * unit, "os.fs.used.bytes": used * unit, "os.fs.pused": used * 100.0 / size}, "timestamp": now})
     interfaces = {key: parse_table(run_snmp(oid, walk=True)[0]) for key, oid in TABLES.items() if key.startswith("if_")}
     for index, name in interfaces["if_descr"].items():
-        resource = dict(tags, resourceType="interface", resourceIndex=index, resourceName=str(name))
+        resource = dict(tags, resourceType="interface", resourceIndex=index, resourceName=to_text(name))
         records.append({"dims": resource, "vals": {"os.if.speed.bps": numeric(interfaces["if_speed"].get(index)), "os.if.oper.status": numeric(interfaces["if_oper"].get(index)), "os.if.in.octets": numeric(interfaces["if_in_octets"].get(index)), "os.if.out.octets": numeric(interfaces["if_out_octets"].get(index)), "os.if.in.errors": numeric(interfaces["if_in_errors"].get(index)), "os.if.out.errors": numeric(interfaces["if_out_errors"].get(index))}, "timestamp": now})
     if errors:
-        records[0]["vals"]["os.snmp.error"] = "; ".join(errors[:3])
-    print(json.dumps(records, ensure_ascii=False))
+        records[0]["vals"]["os.snmp.error"] = u"; ".join(to_text(item) for item in errors[:3])
+    write_stdout(json.dumps(records, ensure_ascii=False))
+    write_stdout("\n")
     return 0
 
 
@@ -202,7 +253,7 @@ if __name__ == "__main__":
     try:
         sys.exit(main())
     except Exception:
-        sys.stdout.write("COLLECT_ERROR:\n")
-        traceback.print_exc(file=sys.stdout)
+        write_stdout(u"COLLECT_ERROR:\n")
+        write_stdout(traceback.format_exc())
         sys.stdout.flush()
         sys.exit(0)
