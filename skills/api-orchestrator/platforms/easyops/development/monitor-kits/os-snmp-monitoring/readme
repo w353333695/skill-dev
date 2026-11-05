@@ -57,15 +57,15 @@ Restart-Service SNMP
 
 ## EasyOps 参数
 
-直接复用现有 `HOST` 模型实例。当前模型实测字段包括 `ip`、`osSystem`、`osVersion`；其中 `ip` 用作采集目标，`osSystem` 用作操作系统类型维度。当前 `HOST` 模型没有 `snmp_conf` 字段，因此 SNMP 版本、团体名及 SNMPv3 凭证全部作为监控任务采集参数配置。
+直接复用现有 `HOST` 模型实例。当前模型实测字段包括 `ip`、`osSystem`、`osVersion` 和新增的 `snmp_conf`；`ip` 与 `snmp_conf` 用作采集配置。采集器不依赖 `osSystem` 判断平台，使用 `sysDescr` 和标准 OID 探测结果自动识别 Windows/Linux。
 
 - `ip`：取现有 HOST 实例的 `ip` 属性
-- `osType`：默认取现有 HOST 实例的 `osSystem` 属性
-- `port`：默认 `161`
-- `version`：`1`、`2c` 或 `3`
-- `community`：v1/v2c 只读团体名
-- `username`、`auth_key`、`auth_protocol`：SNMPv3 用户和认证参数
-- `priv_key`、`priv_protocol`：SNMPv3 加密参数
+- `snmpPort`：取 `HOST.snmp_conf.snmpPort`，默认 `161`
+- `snmpVersion`：取 `HOST.snmp_conf.snmpVersion`，支持 `1`、`2c`、`3`
+- `community`：取 `HOST.snmp_conf.community`
+- `securityLevel`、`securityName`：取 `HOST.snmp_conf` 对应字段
+- `authProtocol`、`authKey`：取 `HOST.snmp_conf` 对应字段
+- `privProtocol`、`privKey`、`contextName`：取 `HOST.snmp_conf` 对应字段
 
 生产环境优先 SNMPv3 `authPriv`；团体名和密钥必须通过密钥引用，不要写入公开文档或日志。
 
@@ -81,7 +81,7 @@ Restart-Service SNMP
 Windows SNMP 通常不提供 Linux UCD-SNMP-MIB 的 load average；缺失指标会跳过，不伪造为零。单项 OID 不支持不影响其他指标采集；`sysDescr` 和系统 OID 均无法读取时判定 SNMP 不可用。
 
 
-模型核对记录：2026-11-05 在当前 EasyOps 环境通过 `object_model.list --q HOST` 和 `object_model.detail HOST` 确认，目标模型 ID 为 `HOST`，不是 `HOST@ONEMODEL`；模型包含 `ip`、`osSystem`、`osVersion`，未发现 `snmp_conf`。
+模型核对记录：2026-11-05 在当前 EasyOps 环境通过 `object_model.list --q HOST` 和 `object_model.detail HOST` 确认，目标模型 ID 为 `HOST`；已向 HOST 增加与网络设备一致的 `snmp_conf` 结构体，采集任务从 `$.snmp_conf.*` 动态取值。
 
 ## 错误输出
 

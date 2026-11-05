@@ -47,21 +47,32 @@ def env(name, default=""):
     return os.environ.get("EASYOPS_COLLECTOR_" + name, default)
 
 
+def env_any(*names):
+    for name in names:
+        value = env(name, "")
+        if value not in (None, "", "null", "None"):
+            return value
+    return ""
+
+
 def command_args():
-    version = env("version", "2c").lower()
-    port = env("port", "161") or "161"
+    version = (env_any("snmpVersion", "version") or "2c").lower()
+    port = env_any("snmpPort", "port") or "161"
     target = env("ip", "127.0.0.1")
     if version in ("1", "2c", "2"):
         return ["-v", "2c" if version == "2" else version, "-c", env("community", "public"), "-p", str(port), target]
-    args = ["-v", "3", "-u", env("username"), "-p", str(port)]
-    auth_protocol = env("auth_protocol", "").upper()
-    priv_protocol = env("priv_protocol", "").upper()
-    if auth_protocol:
-        args.extend(["-l", "authPriv" if priv_protocol else "authNoPriv", "-a", auth_protocol, "-A", env("auth_key")])
-    else:
-        args.extend(["-l", "noAuthNoPriv"])
-    if priv_protocol:
-        args.extend(["-x", priv_protocol, "-X", env("priv_key")])
+    security_level = env_any("securityLevel") or "noAuthNoPriv"
+    username = env_any("securityName", "username")
+    args = ["-v", "3", "-u", username, "-p", str(port), "-l", security_level]
+    auth_protocol = env_any("authProtocol", "auth_protocol").upper()
+    priv_protocol = env_any("privProtocol", "priv_protocol").upper()
+    if security_level in ("authNoPriv", "authPriv"):
+        args.extend(["-a", auth_protocol, "-A", env_any("authKey", "auth_key")])
+    if security_level == "authPriv":
+        args.extend(["-x", priv_protocol, "-X", env_any("privKey", "priv_key")])
+    context_name = env_any("contextName")
+    if context_name:
+        args.extend(["-n", context_name])
     args.append(target)
     return args
 
@@ -124,8 +135,7 @@ def main():
         return 0
     now = int(time.time() * 1000)
     ip = env("ip", "127.0.0.1")
-    os_type = env("osType", "unknown").lower()
-    tags = {"ip": ip, "osType": os_type}
+    tags = {"ip": ip, "osType": "unknown"}
     vals = {}
     errors = []
     descr, error = scalar(BASE["sys_descr"])
@@ -139,6 +149,12 @@ def main():
     if descr is None:
         detail = error or "snmpget sysDescr returned no value"
         raise RuntimeError("[collect] SNMP基础连通性失败（sysDescr不可读）：%s" % detail)
+    descr_text = str(descr)
+    if re.search(r"windows|microsoft", descr_text, re.I):
+        tags["osType"] = "windows"
+    else:
+        load_probe, _ = scalar(BASE["load_5"])
+        tags["osType"] = "linux" if load_probe is not None else "unknown"
     vals["os.snmp.available"] = 1
     vals["os.info.sys_descr"] = descr
     vals["os.uptime.seconds"] = numeric(uptime)
