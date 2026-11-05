@@ -264,8 +264,9 @@ items:
     name: 操作系统SNMP监控套件源码
     category: monitor-kits
     files: [monitor-kits/os-snmp-monitoring]
-    version: "0.1.3"
+    version: "0.1.4"
     history:
+      - {ver: "0.1.4", date: "2026-11-05", change: "补齐告警模板根对象/策略对象非空name、规则命名格式和HOST实例策略；按告警知识修正状态类diff及阈值类恢复语义"}
       - {ver: "0.1.3", date: "2026-11-05", change: "按metric_sampler约定将顶层采集异常输出到stdout的COLLECT_ERROR及完整traceback，基础SNMP失败前端可见；局部OID失败继续采集"}
       - {ver: "0.1.2", date: "2026-11-05", change: "按实测模型详情改为绑定HOST（无@ONEMODEL后缀），移除snmp_conf假设；SNMP凭证改为任务参数"}
       - {ver: "0.1.1", date: "2026-11-05", change: "改为直接绑定现有HOST@ONEMODEL，不再随包导入自建操作系统模型"}

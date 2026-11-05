@@ -4,18 +4,234 @@
       "alertInterval": 60,
       "conditionType": "metricThreshold",
       "conditionsOperator": "or",
-      "effectiveTime": {"type":"static","static":{"dayStartTime":"00:00:00","dayEndTime":"23:59:59","dayOfWeek":[1,2,3,4,5,6,0]}},
-      "eventFilterQuery": {"type":"filter","filter":{"conditionGroup":[{"conditionList":[]}] }},
-      "instanceId":"os-snmp-alert-strategy",
-      "multiConditions":[
-        {"metricName":"os.snmp.available","mode":"static","type":"unequal","threshold":1,"alertCount":3,"recoverCount":5,"detectWindow":3,"comparators":[{"level":"warning","threshold":1,"displayThreshold":1,"type":"unequal","tolerance":0}]},
-        {"metricName":"os.cpu.util","mode":"static","type":"bigger_than","threshold":80,"alertCount":3,"recoverCount":5,"detectWindow":3,"comparators":[{"level":"warning","threshold":80,"displayThreshold":80,"type":"bigger_than","tolerance":0},{"level":"critical","threshold":95,"displayThreshold":95,"type":"bigger_than","tolerance":0}]},
-        {"metricName":"os.mem.pused","mode":"static","type":"bigger_than","threshold":80,"alertCount":3,"recoverCount":5,"detectWindow":3,"comparators":[{"level":"warning","threshold":80,"displayThreshold":80,"type":"bigger_than","tolerance":0},{"level":"critical","threshold":90,"displayThreshold":90,"type":"bigger_than","tolerance":0}]},
-        {"metricName":"os.fs.pused","mode":"static","type":"bigger_than","threshold":80,"alertCount":3,"recoverCount":5,"detectWindow":3,"comparators":[{"level":"warning","threshold":80,"displayThreshold":80,"type":"bigger_than","tolerance":0},{"level":"critical","threshold":90,"displayThreshold":90,"type":"bigger_than","tolerance":0}]},
-        {"metricName":"os.if.oper.status","mode":"static","type":"equal","threshold":2,"alertCount":3,"recoverCount":5,"detectWindow":3,"comparators":[{"level":"warning","threshold":2,"displayThreshold":2,"type":"equal","tolerance":0}]}
+      "effectiveTime": {
+        "type": "static",
+        "static": {
+          "dayStartTime": "00:00:00",
+          "dayEndTime": "23:59:59",
+          "dayOfWeek": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            0
+          ]
+        }
+      },
+      "eventFilterQuery": {
+        "type": "filter",
+        "filter": {
+          "conditionGroup": [
+            {
+              "conditionList": []
+            }
+          ]
+        }
+      },
+      "instanceId": "os-snmp-alert-strategy",
+      "multiConditions": [
+        {
+          "metricName": "os.snmp.available",
+          "mode": "static",
+          "type": "diff",
+          "threshold": [
+            null,
+            null
+          ],
+          "alertCount": 1,
+          "recoverCount": 0,
+          "detectWindow": 1,
+          "comparators": [
+            {
+              "level": "warning",
+              "threshold": [
+                null,
+                null
+              ],
+              "displayThreshold": [
+                null,
+                null
+              ],
+              "displayUnit": "",
+              "params": [
+                {
+                  "key": "offset",
+                  "value": 0
+                },
+                {
+                  "key": "window",
+                  "value": 8
+                }
+              ],
+              "tolerance": 0
+            }
+          ],
+          "displayThreshold": [
+            null,
+            null
+          ],
+          "params": [
+            {
+              "key": "offset",
+              "value": 0
+            },
+            {
+              "key": "window",
+              "value": 8
+            }
+          ]
+        },
+        {
+          "metricName": "os.cpu.util",
+          "mode": "static",
+          "type": "bigger_than",
+          "threshold": 80,
+          "alertCount": 3,
+          "recoverCount": 1,
+          "detectWindow": 3,
+          "comparators": [
+            {
+              "level": "warning",
+              "threshold": 80,
+              "displayThreshold": 80,
+              "type": "bigger_than",
+              "tolerance": 0
+            },
+            {
+              "level": "critical",
+              "threshold": 95,
+              "displayThreshold": 95,
+              "type": "bigger_than",
+              "tolerance": 0
+            }
+          ]
+        },
+        {
+          "metricName": "os.mem.pused",
+          "mode": "static",
+          "type": "bigger_than",
+          "threshold": 80,
+          "alertCount": 3,
+          "recoverCount": 1,
+          "detectWindow": 3,
+          "comparators": [
+            {
+              "level": "warning",
+              "threshold": 80,
+              "displayThreshold": 80,
+              "type": "bigger_than",
+              "tolerance": 0
+            },
+            {
+              "level": "critical",
+              "threshold": 90,
+              "displayThreshold": 90,
+              "type": "bigger_than",
+              "tolerance": 0
+            }
+          ]
+        },
+        {
+          "metricName": "os.fs.pused",
+          "mode": "static",
+          "type": "bigger_than",
+          "threshold": 80,
+          "alertCount": 3,
+          "recoverCount": 1,
+          "detectWindow": 3,
+          "comparators": [
+            {
+              "level": "warning",
+              "threshold": 80,
+              "displayThreshold": 80,
+              "type": "bigger_than",
+              "tolerance": 0
+            },
+            {
+              "level": "critical",
+              "threshold": 90,
+              "displayThreshold": 90,
+              "type": "bigger_than",
+              "tolerance": 0
+            }
+          ]
+        },
+        {
+          "metricName": "os.if.oper.status",
+          "mode": "static",
+          "type": "diff",
+          "threshold": [
+            null,
+            null
+          ],
+          "alertCount": 1,
+          "recoverCount": 0,
+          "detectWindow": 1,
+          "comparators": [
+            {
+              "level": "warning",
+              "threshold": [
+                null,
+                null
+              ],
+              "displayThreshold": [
+                null,
+                null
+              ],
+              "displayUnit": "",
+              "params": [
+                {
+                  "key": "offset",
+                  "value": 0
+                },
+                {
+                  "key": "window",
+                  "value": 8
+                }
+              ],
+              "tolerance": 0
+            }
+          ],
+          "displayThreshold": [
+            null,
+            null
+          ],
+          "params": [
+            {
+              "key": "offset",
+              "value": 0
+            },
+            {
+              "key": "window",
+              "value": 8
+            }
+          ]
+        }
       ],
-      "objectId":"HOST",
-      "priority":"warning"
+      "objectId": "HOST",
+      "priority": "warning",
+      "name": "{hostname}操作系统SNMP通用告警规则",
+      "upgradeCondition": {
+        "enable": false
+      }
+    }
+  ],
+  "name": "操作系统带内SNMP初始化告警模板",
+  "objectId": "HOST",
+  "priority": 50,
+  "_rule_name_format": "{hostname}操作系统SNMP告警规则",
+  "_source_template": "操作系统SNMP监控套件_告警规则模板.xlsx",
+  "cmdbInstanceStrategy": [
+    {
+      "instanceId": "instances-strategy-os-snmp",
+      "instances": {
+        "objectId": "HOST",
+        "type": "all"
+      },
+      "name": "{hostname}操作系统SNMP目标资源",
+      "objectId": "HOST"
     }
   ]
 }

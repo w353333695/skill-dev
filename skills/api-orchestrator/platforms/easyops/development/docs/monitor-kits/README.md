@@ -50,3 +50,13 @@ if __name__ == '__main__':
 ### 本次错误暴露实现（2026-11-05）
 
 监控套件脚本必须在 `__main__` 顶层捕获无法进入采集的异常：先使用带函数标记和 `traceback.format_exc()` 的 ERROR 日志记录，再向 stdout 输出固定前缀 `COLLECT_ERROR:`、完整 traceback，并以退出码 0 结束。这样 `metric_sampler` 前端可以直接展示实际异常正文；不能只写 stderr 或只依赖非零退出码。正常成功路径 stdout 仍只能输出 JSON 数组，局部 OID/可选组件失败使用 WARNING 并继续。
+
+## 操作系统 SNMP 告警规则构建依据
+
+操作系统 SNMP 套件的 `alertRule/操作系统SNMP告警.json` 按现有 EasyOps 监控套件告警契约构建，不是自定义简化格式：
+
+- 根对象必须有非空 `name`、`objectId`、`priority`、`_rule_name_format`，并包含 `alertConditionStrategy` 与 `cmdbInstanceStrategy`。
+- `alertConditionStrategy[]` 每条策略必须有非空 `name`、`instanceId`、`objectId`、`conditionType`、`multiConditions` 和 `upgradeCondition`。
+- 阈值类资源使用 `bigger_than` 等阈值条件，`alertCount=3`、`detectWindow=3`、`recoverCount=1`。
+- 状态类资源（SNMP 可用性、接口运行状态）使用 `diff`，`alertCount=1`、`detectWindow=1`、`recoverCount=0`；不能用持续 `equal/unequal` 判断状态，否则会造成稳态误报或恢复误报。
+- 结构依据：`formats/alert-kit/alert-rule-template.yaml`、现有 Hub 套件 `BCS监控套件/alertRule/BCS监控.json`，以及其中的 `name`、`_rule_name_format`、`cmdbInstanceStrategy` 和 `multiConditions` 实例。
