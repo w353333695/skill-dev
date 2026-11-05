@@ -67,7 +67,7 @@ Restart-Service SNMP
 - `authProtocol`、`authKey`：取 `HOST.snmp_conf` 对应字段
 - `privProtocol`、`privKey`、`contextName`：取 `HOST.snmp_conf` 对应字段
 
-生产环境优先 SNMPv3 `authPriv`；团体名和密钥必须通过密钥引用，不要写入公开文档或日志。
+生产环境优先 SNMPv3 `authPriv`。本套件的 SNMP 凭证来自 HOST 的 `snmp_conf` CMDB 属性，因此参数定义使用 `valueType=cmdb`，并且 `isFromSecret=false`、`isEncrypt=false`；敏感性由 CMDB 字段权限控制，不通过任务密钥覆盖。不要把凭证写入公开文档或日志。
 
 ## 指标与告警
 
