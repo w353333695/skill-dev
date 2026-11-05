@@ -239,9 +239,10 @@ items:
   - id: physical-server-redfish-monitor-kit
     name: 物理服务器Redfish监控套件
     category: monitor-kits
-    files: [物理服务器Redfish监控套件_1.0.17.zip]
-    version: "1.0.17"
+    files: [物理服务器Redfish监控套件_1.0.18.zip]
+    version: "1.0.18"
     history:
+      - {ver: "1.0.18", date: "2026-11-05", change: "认证失败输出具体原因：区分HTTP 401/403、Redfish服务端错误、响应非JSON和网络异常；汇总缓存Token、Session Token、Basic认证失败原因；不输出密码或Token"}
       - {ver: "1.0.13", date: "2026-11-03", change: "修复局部Redfish指标接口缺失、超时、空Status等情况导致整脚本异常退出；认证失败或根接口不可用仍失败，单指标失败改为WARN并继续，保留可用指标；修正ZIP目录0755/文件0664权限，避免导入permission denied；发布py注入4项EASYOPS_COLLECTOR参数，orig保留未注入源文件；顶层异常stdout输出COLLECT_ERROR并exit0，前端可见；离线回归通过，未激活现网任务"}
       - {ver: "1.0.15", date: "2026-11-04", change: "确认 alertRule 自动导入语义，并将现有监控套件告警规则同步到包内；统一 ZIP 文件权限为 0664"}
       - {ver: "1.0.17", date: "2026-11-05", change: "修复环境变量注入覆盖Python编码声明：保留shebang第一行、UTF-8声明第二行，注入段移到文件头之后；新增原始字节文件头回归，未做Python2实机或现网验证"}
@@ -615,9 +616,10 @@ items:
   - id: os-snmp-monitoring-kit
     name: 操作系统SNMP监控套件
     category: monitor-kits
-    files: [操作系统SNMP监控套件_0.1.4.zip]
-    version: "0.1.4"
+    files: [操作系统SNMP监控套件_0.1.5.zip]
+    version: "0.1.5"
     history:
+      - {ver: "0.1.5", date: "2026-11-05", change: "补充src/os_snmp_monitor.orig原始源码，修正环境变量注入交付结构并排除__pycache__；同步更新导入规范"}
       - {ver: "0.1.4", date: "2026-11-05", change: "补齐告警模板根对象/策略对象非空name、规则命名格式和HOST实例策略；按告警知识修正状态类diff及阈值类恢复语义"}
       - {ver: "0.1.3", date: "2026-11-05", change: "按metric_sampler约定将顶层采集异常输出到stdout的COLLECT_ERROR及完整traceback，基础SNMP失败前端可见；局部OID失败继续采集"}
       - {ver: "0.1.2", date: "2026-11-05", change: "按实测模型详情改为绑定HOST（无@ONEMODEL后缀），移除snmp_conf假设；SNMP凭证改为任务参数"}
