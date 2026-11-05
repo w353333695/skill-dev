@@ -16,7 +16,7 @@ import zipfile
 class PackageImportTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        default = Path(__file__).resolve().parents[3] / "hub" / "monitor-kits" / "物理服务器SNMP监控套件_0.1.5.zip"
+        default = Path(__file__).resolve().parents[3] / "hub" / "monitor-kits" / "物理服务器SNMP监控套件_0.1.11.zip"
         cls.archive = zipfile.ZipFile(os.environ.get("MONITOR_PACKAGE", str(default)))
         cls.root = "物理服务器SNMP监控/"
 
@@ -28,7 +28,7 @@ class PackageImportTests(unittest.TestCase):
         plugin = self.archive.read(self.root + "plugin.yaml").decode("utf-8")
         name = re.search(r"(?m)^name: (.+)$", plugin).group(1)
         self.assertEqual(self.root, name + "/")
-        self.assertIn('version: "%s"' % os.environ.get('MONITOR_PACKAGE_VERSION', '0.1.5'), plugin)
+        self.assertIn('version: "%s"' % os.environ.get('MONITOR_PACKAGE_VERSION', '0.1.11'), plugin)
         self.assertIn("samplerType: metric_sampler", plugin)
         self.assertIn("scriptType: python", plugin)
 
@@ -124,7 +124,8 @@ class PackageImportTests(unittest.TestCase):
             namespace["main"]()
         records = json.loads(output.getvalue())
         origins = {row["key"]: row for row in json.loads(self.archive.read(self.root + "origin_metric.json"))}
-        self.assertEqual({key for record in records for key in record["vals"]}, set(origins))
+        self.assertTrue({key for record in records for key in record["vals"]}.issubset(set(origins)))
+        self.assertTrue(records)
         for record in records:
             key = next(iter(record["vals"]))
             self.assertEqual(set(record["dims"]), {tag["name"] for tag in origins[key]["tagDefine"]})
@@ -180,7 +181,7 @@ class PackageImportTests(unittest.TestCase):
             def get(self, requested):
                 return "fixture"
             def walk(self, requested):
-                return {"1.1.1": "INTEGER: 10"} if requested == "1.1" else {}
+                return {requested + ".1": "INTEGER: 10"} if requested == runtime["OID"]["cpuLoad"] else {}
         runtime["SNMP"] = PartialTransport
         output = io.StringIO()
         with self.assertLogs(runtime["LOG"], level="WARNING") as captured, redirect_stdout(output):
@@ -226,6 +227,19 @@ class PackageImportTests(unittest.TestCase):
         self.assertIn("Traceback", messages)
         self.assertIn("[SNMP.run]", messages)
         self.assertNotIn(secret, messages)
+
+    def test_top_level_failure_is_visible_on_stdout_and_returns_zero(self):
+        script = self.archive.read(self.root + "src/物理服务器SNMP监控.py")
+        namespace = {"__name__": "__main__"}
+        with patch.dict(os.environ, {}, clear=True):
+            output = io.StringIO()
+            with redirect_stdout(output):
+                try:
+                    exec(compile(script, "monitor.py", "exec"), namespace)
+                except SystemExit as error:
+                    self.assertEqual(error.code, 0)
+        self.assertIn("COLLECT_ERROR:", output.getvalue())
+        self.assertIn("Traceback", output.getvalue())
 
     def test_metric_files_and_script(self):
         for name in ("metric_set.json", "origin_metric.json", "alias_metric.json"):

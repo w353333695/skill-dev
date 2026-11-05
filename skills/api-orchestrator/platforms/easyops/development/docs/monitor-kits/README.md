@@ -45,3 +45,8 @@ if __name__ == '__main__':
 ```
 
 局部指标或可选资源失败只记录 WARN 并继续；只有无法进入采集的异常才进入顶层 `COLLECT_ERROR`。正常采集输出必须仍是纯 JSON 数组；不要把 traceback 写到 stderr 后直接 `exit(1)`，否则前端可能看不到错误。
+
+
+### 本次错误暴露实现（2026-11-05）
+
+监控套件脚本必须在 `__main__` 顶层捕获无法进入采集的异常：先使用带函数标记和 `traceback.format_exc()` 的 ERROR 日志记录，再向 stdout 输出固定前缀 `COLLECT_ERROR:`、完整 traceback，并以退出码 0 结束。这样 `metric_sampler` 前端可以直接展示实际异常正文；不能只写 stderr 或只依赖非零退出码。正常成功路径 stdout 仍只能输出 JSON 数组，局部 OID/可选组件失败使用 WARNING 并继续。
