@@ -1,7 +1,7 @@
 [
   {
     "dataType": "double",
-    "description": "os_snmp_available",
+    "description": "操作系统SNMP探测可用性，1表示可用",
     "dims": [
       {
         "dimDisplayName": "ip",
@@ -16,7 +16,7 @@
         "originDimName": "osType"
       }
     ],
-    "displayName": "os_snmp_available",
+    "displayName": "操作系统SNMP-可用性",
     "expression": "",
     "metricSet": [
       "基础信息"
@@ -31,7 +31,7 @@
   },
   {
     "dataType": "string",
-    "description": "os_info_sys_descr",
+    "description": "SNMP sysDescr 返回的操作系统描述信息",
     "dims": [
       {
         "dimDisplayName": "ip",
@@ -46,7 +46,7 @@
         "originDimName": "osType"
       }
     ],
-    "displayName": "os_info_sys_descr",
+    "displayName": "操作系统SNMP-系统描述",
     "expression": "",
     "metricSet": [
       "基础信息"
@@ -61,7 +61,7 @@
   },
   {
     "dataType": "double",
-    "description": "os_uptime_seconds",
+    "description": "操作系统连续运行时间，单位：秒",
     "dims": [
       {
         "dimDisplayName": "ip",
@@ -76,7 +76,7 @@
         "originDimName": "osType"
       }
     ],
-    "displayName": "os_uptime_seconds",
+    "displayName": "操作系统SNMP-运行时间",
     "expression": "",
     "metricSet": [
       "基础信息"
@@ -91,7 +91,7 @@
   },
   {
     "dataType": "string",
-    "description": "os_snmp_error",
+    "description": "SNMP采集过程中的真实错误摘要；可选OID不存在不计入此指标",
     "dims": [
       {
         "dimDisplayName": "ip",
@@ -106,7 +106,7 @@
         "originDimName": "osType"
       }
     ],
-    "displayName": "os_snmp_error",
+    "displayName": "操作系统SNMP-采集错误",
     "expression": "",
     "metricSet": [
       "基础信息"
@@ -121,7 +121,7 @@
   },
   {
     "dataType": "double",
-    "description": "os_cpu_util",
+    "description": "操作系统CPU平均使用率，单位：百分比",
     "dims": [
       {
         "dimDisplayName": "ip",
@@ -136,7 +136,7 @@
         "originDimName": "osType"
       }
     ],
-    "displayName": "os_cpu_util",
+    "displayName": "操作系统SNMP-CPU使用率",
     "expression": "",
     "metricSet": [
       "CPU与负载"
@@ -151,7 +151,7 @@
   },
   {
     "dataType": "double",
-    "description": "os_cpu_count",
+    "description": "操作系统可见处理器数量",
     "dims": [
       {
         "dimDisplayName": "ip",
@@ -166,7 +166,7 @@
         "originDimName": "osType"
       }
     ],
-    "displayName": "os_cpu_count",
+    "displayName": "操作系统SNMP-CPU数量",
     "expression": "",
     "metricSet": [
       "CPU与负载"
@@ -181,7 +181,7 @@
   },
   {
     "dataType": "double",
-    "description": "os_load_1",
+    "description": "Linux操作系统1分钟平均负载",
     "dims": [
       {
         "dimDisplayName": "ip",
@@ -196,7 +196,7 @@
         "originDimName": "osType"
       }
     ],
-    "displayName": "os_load_1",
+    "displayName": "操作系统SNMP-1分钟负载",
     "expression": "",
     "metricSet": [
       "CPU与负载"
@@ -211,7 +211,7 @@
   },
   {
     "dataType": "double",
-    "description": "os_load_5",
+    "description": "Linux操作系统5分钟平均负载",
     "dims": [
       {
         "dimDisplayName": "ip",
@@ -226,7 +226,7 @@
         "originDimName": "osType"
       }
     ],
-    "displayName": "os_load_5",
+    "displayName": "操作系统SNMP-5分钟负载",
     "expression": "",
     "metricSet": [
       "CPU与负载"
@@ -241,7 +241,7 @@
   },
   {
     "dataType": "double",
-    "description": "os_load_15",
+    "description": "Linux操作系统15分钟平均负载",
     "dims": [
       {
         "dimDisplayName": "ip",
@@ -256,7 +256,7 @@
         "originDimName": "osType"
       }
     ],
-    "displayName": "os_load_15",
+    "displayName": "操作系统SNMP-15分钟负载",
     "expression": "",
     "metricSet": [
       "CPU与负载"
@@ -271,7 +271,7 @@
   },
   {
     "dataType": "double",
-    "description": "os_mem_total_real",
+    "description": "物理内存总量，单位：KB",
     "dims": [
       {
         "dimDisplayName": "ip",
@@ -286,7 +286,7 @@
         "originDimName": "osType"
       }
     ],
-    "displayName": "os_mem_total_real",
+    "displayName": "操作系统SNMP-物理内存总量",
     "expression": "",
     "metricSet": [
       "内存与Swap"
@@ -301,7 +301,7 @@
   },
   {
     "dataType": "double",
-    "description": "os_mem_avail_real",
+    "description": "可用物理内存，单位：KB",
     "dims": [
       {
         "dimDisplayName": "ip",
@@ -316,7 +316,7 @@
         "originDimName": "osType"
       }
     ],
-    "displayName": "os_mem_avail_real",
+    "displayName": "操作系统SNMP-可用物理内存",
     "expression": "",
     "metricSet": [
       "内存与Swap"
@@ -331,7 +331,7 @@
   },
   {
     "dataType": "double",
-    "description": "os_mem_buffer",
+    "description": "物理内存缓冲区，单位：KB",
     "dims": [
       {
         "dimDisplayName": "ip",
@@ -346,7 +346,7 @@
         "originDimName": "osType"
       }
     ],
-    "displayName": "os_mem_buffer",
+    "displayName": "操作系统SNMP-内存缓冲区",
     "expression": "",
     "metricSet": [
       "内存与Swap"
@@ -361,7 +361,7 @@
   },
   {
     "dataType": "double",
-    "description": "os_mem_cached",
+    "description": "物理内存缓存，单位：KB",
     "dims": [
       {
         "dimDisplayName": "ip",
@@ -376,7 +376,7 @@
         "originDimName": "osType"
       }
     ],
-    "displayName": "os_mem_cached",
+    "displayName": "操作系统SNMP-内存缓存",
     "expression": "",
     "metricSet": [
       "内存与Swap"
@@ -391,7 +391,7 @@
   },
   {
     "dataType": "double",
-    "description": "os_mem_total_swap",
+    "description": "Swap总量，单位：KB",
     "dims": [
       {
         "dimDisplayName": "ip",
@@ -406,7 +406,7 @@
         "originDimName": "osType"
       }
     ],
-    "displayName": "os_mem_total_swap",
+    "displayName": "操作系统SNMP-Swap总量",
     "expression": "",
     "metricSet": [
       "内存与Swap"
@@ -421,7 +421,7 @@
   },
   {
     "dataType": "double",
-    "description": "os_mem_avail_swap",
+    "description": "可用Swap，单位：KB",
     "dims": [
       {
         "dimDisplayName": "ip",
@@ -436,7 +436,7 @@
         "originDimName": "osType"
       }
     ],
-    "displayName": "os_mem_avail_swap",
+    "displayName": "操作系统SNMP-可用Swap",
     "expression": "",
     "metricSet": [
       "内存与Swap"
@@ -451,7 +451,7 @@
   },
   {
     "dataType": "double",
-    "description": "os_processes",
+    "description": "操作系统当前进程数量",
     "dims": [
       {
         "dimDisplayName": "ip",
@@ -466,7 +466,7 @@
         "originDimName": "osType"
       }
     ],
-    "displayName": "os_processes",
+    "displayName": "操作系统SNMP-进程数",
     "expression": "",
     "metricSet": [
       "基础信息"
@@ -481,7 +481,7 @@
   },
   {
     "dataType": "double",
-    "description": "os_fs_total_bytes",
+    "description": "文件系统总容量，单位：字节",
     "dims": [
       {
         "dimDisplayName": "ip",
@@ -514,7 +514,7 @@
         "originDimName": "resourceName"
       }
     ],
-    "displayName": "os_fs_total_bytes",
+    "displayName": "操作系统SNMP-文件系统总容量",
     "expression": "",
     "metricSet": [
       "文件系统"
@@ -529,7 +529,7 @@
   },
   {
     "dataType": "double",
-    "description": "os_fs_used_bytes",
+    "description": "文件系统已用容量，单位：字节",
     "dims": [
       {
         "dimDisplayName": "ip",
@@ -562,7 +562,7 @@
         "originDimName": "resourceName"
       }
     ],
-    "displayName": "os_fs_used_bytes",
+    "displayName": "操作系统SNMP-文件系统已用容量",
     "expression": "",
     "metricSet": [
       "文件系统"
@@ -577,7 +577,7 @@
   },
   {
     "dataType": "double",
-    "description": "os_fs_pused",
+    "description": "文件系统容量使用率，单位：百分比",
     "dims": [
       {
         "dimDisplayName": "ip",
@@ -610,7 +610,7 @@
         "originDimName": "resourceName"
       }
     ],
-    "displayName": "os_fs_pused",
+    "displayName": "操作系统SNMP-文件系统使用率",
     "expression": "",
     "metricSet": [
       "文件系统"
@@ -625,7 +625,7 @@
   },
   {
     "dataType": "double",
-    "description": "os_if_speed_bps",
+    "description": "网络接口链路速率，单位：bit/s",
     "dims": [
       {
         "dimDisplayName": "ip",
@@ -658,7 +658,7 @@
         "originDimName": "resourceName"
       }
     ],
-    "displayName": "os_if_speed_bps",
+    "displayName": "操作系统SNMP-网卡速率",
     "expression": "",
     "metricSet": [
       "网络接口"
@@ -673,7 +673,7 @@
   },
   {
     "dataType": "double",
-    "description": "os_if_oper_status",
+    "description": "网络接口运行状态，1表示up",
     "dims": [
       {
         "dimDisplayName": "ip",
@@ -706,7 +706,7 @@
         "originDimName": "resourceName"
       }
     ],
-    "displayName": "os_if_oper_status",
+    "displayName": "操作系统SNMP-网卡运行状态",
     "expression": "",
     "metricSet": [
       "网络接口"
@@ -721,7 +721,7 @@
   },
   {
     "dataType": "double",
-    "description": "os_if_in_octets",
+    "description": "网络接口接收字节计数",
     "dims": [
       {
         "dimDisplayName": "ip",
@@ -754,7 +754,7 @@
         "originDimName": "resourceName"
       }
     ],
-    "displayName": "os_if_in_octets",
+    "displayName": "操作系统SNMP-网卡入流量",
     "expression": "",
     "metricSet": [
       "网络接口"
@@ -769,7 +769,7 @@
   },
   {
     "dataType": "double",
-    "description": "os_if_out_octets",
+    "description": "网络接口发送字节计数",
     "dims": [
       {
         "dimDisplayName": "ip",
@@ -802,7 +802,7 @@
         "originDimName": "resourceName"
       }
     ],
-    "displayName": "os_if_out_octets",
+    "displayName": "操作系统SNMP-网卡出流量",
     "expression": "",
     "metricSet": [
       "网络接口"
@@ -817,7 +817,7 @@
   },
   {
     "dataType": "double",
-    "description": "os_if_in_errors",
+    "description": "网络接口接收错误计数",
     "dims": [
       {
         "dimDisplayName": "ip",
@@ -850,7 +850,7 @@
         "originDimName": "resourceName"
       }
     ],
-    "displayName": "os_if_in_errors",
+    "displayName": "操作系统SNMP-网卡入方向错误数",
     "expression": "",
     "metricSet": [
       "网络接口"
@@ -865,7 +865,7 @@
   },
   {
     "dataType": "double",
-    "description": "os_if_out_errors",
+    "description": "网络接口发送错误计数",
     "dims": [
       {
         "dimDisplayName": "ip",
@@ -898,7 +898,7 @@
         "originDimName": "resourceName"
       }
     ],
-    "displayName": "os_if_out_errors",
+    "displayName": "操作系统SNMP-网卡出方向错误数",
     "expression": "",
     "metricSet": [
       "网络接口"
@@ -913,7 +913,7 @@
   },
   {
     "dataType": "double",
-    "description": "物理内存使用率",
+    "description": "物理内存使用率，单位：百分比",
     "dims": [
       {
         "dimDisplayName": "ip",
@@ -928,7 +928,7 @@
         "originDimName": "osType"
       }
     ],
-    "displayName": "物理内存使用率",
+    "displayName": "操作系统SNMP-物理内存使用率",
     "expression": "",
     "metricSet": [
       "内存与Swap"
@@ -943,7 +943,7 @@
   },
   {
     "dataType": "double",
-    "description": "Swap使用率",
+    "description": "Swap使用率，单位：百分比",
     "dims": [
       {
         "dimDisplayName": "ip",
@@ -958,7 +958,7 @@
         "originDimName": "osType"
       }
     ],
-    "displayName": "Swap使用率",
+    "displayName": "操作系统SNMP-Swap使用率",
     "expression": "",
     "metricSet": [
       "内存与Swap"

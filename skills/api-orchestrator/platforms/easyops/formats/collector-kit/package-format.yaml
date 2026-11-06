@@ -49,6 +49,7 @@ package_structure:
         └── bin/                    # 二进制（exporter 类型必填）
 
   metric_agent_type_consistency: "simple-script/metric_sampler 套件的 plugin.yaml.agentType 必须为 easyops；origin_metric.json 的 agentType 必须为 easyops；alias_metric.json 若显式包含 agentType 也须一致，原生别名文件通常不含此字段，不要为一致性强行添加。metricbeat 仅适用于 metricbeat 类型套件，混用会导致指标导入或运行态路由不一致，可能出现激活无报错但无实际采集。发布回归必须校验三处一致。"
+  alias_localization: "alias_metric.json 的 name/originalMetrics 保持稳定的英文下划线指标 ID；displayName 和 description 使用中文业务名称与说明。displayName 使用稳定的套件/协议前缀（如操作系统SNMP-），避免与其他套件别名冲突；不要把内部指标 ID 直接作为用户可见别名。"
 
   activation_preflight:
     scope: "开发、首次导入、升级、重新激活都必须检查；只校验 ZIP 或上传接口成功不算激活验收。"
