@@ -1,0 +1,395 @@
+[
+  {
+    "agentType": "easyops",
+    "dataType": "double",
+    "instanceId": "",
+    "key": "storage_snmp_available",
+    "labels": [
+      "ip",
+      "vendor"
+    ],
+    "metricType": "gauge",
+    "tagDefine": [
+      {
+        "name": "ip",
+        "readOnly": false
+      },
+      {
+        "name": "vendor",
+        "readOnly": false
+      }
+    ]
+  },
+  {
+    "agentType": "easyops",
+    "dataType": "string",
+    "instanceId": "",
+    "key": "storage_info_sys_descr",
+    "labels": [
+      "ip",
+      "vendor"
+    ],
+    "metricType": "gauge",
+    "tagDefine": [
+      {
+        "name": "ip",
+        "readOnly": false
+      },
+      {
+        "name": "vendor",
+        "readOnly": false
+      }
+    ]
+  },
+  {
+    "agentType": "easyops",
+    "dataType": "string",
+    "instanceId": "",
+    "key": "storage_info_sys_objectid",
+    "labels": [
+      "ip",
+      "vendor"
+    ],
+    "metricType": "gauge",
+    "tagDefine": [
+      {
+        "name": "ip",
+        "readOnly": false
+      },
+      {
+        "name": "vendor",
+        "readOnly": false
+      }
+    ]
+  },
+  {
+    "agentType": "easyops",
+    "dataType": "string",
+    "instanceId": "",
+    "key": "storage_info_version",
+    "labels": [
+      "ip",
+      "vendor",
+      "resourceType",
+      "resourceIndex",
+      "resourceName"
+    ],
+    "metricType": "gauge",
+    "tagDefine": [
+      {
+        "name": "ip",
+        "readOnly": false
+      },
+      {
+        "name": "vendor",
+        "readOnly": false
+      },
+      {
+        "name": "resourceType",
+        "readOnly": false
+      },
+      {
+        "name": "resourceIndex",
+        "readOnly": false
+      },
+      {
+        "name": "resourceName",
+        "readOnly": false
+      }
+    ]
+  },
+  {
+    "agentType": "easyops",
+    "dataType": "double",
+    "instanceId": "",
+    "key": "storage_uptime_ticks",
+    "labels": [
+      "ip",
+      "vendor"
+    ],
+    "metricType": "gauge",
+    "tagDefine": [
+      {
+        "name": "ip",
+        "readOnly": false
+      },
+      {
+        "name": "vendor",
+        "readOnly": false
+      }
+    ]
+  },
+  {
+    "agentType": "easyops",
+    "dataType": "string",
+    "instanceId": "",
+    "key": "storage_snmp_error",
+    "labels": [
+      "ip",
+      "vendor"
+    ],
+    "metricType": "gauge",
+    "tagDefine": [
+      {
+        "name": "ip",
+        "readOnly": false
+      },
+      {
+        "name": "vendor",
+        "readOnly": false
+      }
+    ]
+  },
+  {
+    "agentType": "easyops",
+    "dataType": "double",
+    "instanceId": "",
+    "key": "storage_capacity_bytes",
+    "labels": [
+      "ip",
+      "vendor",
+      "resourceType",
+      "resourceIndex",
+      "resourceName"
+    ],
+    "metricType": "gauge",
+    "tagDefine": [
+      {
+        "name": "ip",
+        "readOnly": false
+      },
+      {
+        "name": "vendor",
+        "readOnly": false
+      },
+      {
+        "name": "resourceType",
+        "readOnly": false
+      },
+      {
+        "name": "resourceIndex",
+        "readOnly": false
+      },
+      {
+        "name": "resourceName",
+        "readOnly": false
+      }
+    ]
+  },
+  {
+    "agentType": "easyops",
+    "dataType": "double",
+    "instanceId": "",
+    "key": "storage_used_bytes",
+    "labels": [
+      "ip",
+      "vendor",
+      "resourceType",
+      "resourceIndex",
+      "resourceName"
+    ],
+    "metricType": "gauge",
+    "tagDefine": [
+      {
+        "name": "ip",
+        "readOnly": false
+      },
+      {
+        "name": "vendor",
+        "readOnly": false
+      },
+      {
+        "name": "resourceType",
+        "readOnly": false
+      },
+      {
+        "name": "resourceIndex",
+        "readOnly": false
+      },
+      {
+        "name": "resourceName",
+        "readOnly": false
+      }
+    ]
+  },
+  {
+    "agentType": "easyops",
+    "dataType": "double",
+    "instanceId": "",
+    "key": "storage_used_percent",
+    "labels": [
+      "ip",
+      "vendor",
+      "resourceType",
+      "resourceIndex",
+      "resourceName"
+    ],
+    "metricType": "gauge",
+    "tagDefine": [
+      {
+        "name": "ip",
+        "readOnly": false
+      },
+      {
+        "name": "vendor",
+        "readOnly": false
+      },
+      {
+        "name": "resourceType",
+        "readOnly": false
+      },
+      {
+        "name": "resourceIndex",
+        "readOnly": false
+      },
+      {
+        "name": "resourceName",
+        "readOnly": false
+      }
+    ]
+  },
+  {
+    "agentType": "easyops",
+    "dataType": "double",
+    "instanceId": "",
+    "key": "storage_status",
+    "labels": [
+      "ip",
+      "vendor",
+      "resourceType",
+      "resourceIndex",
+      "resourceName"
+    ],
+    "metricType": "gauge",
+    "tagDefine": [
+      {
+        "name": "ip",
+        "readOnly": false
+      },
+      {
+        "name": "vendor",
+        "readOnly": false
+      },
+      {
+        "name": "resourceType",
+        "readOnly": false
+      },
+      {
+        "name": "resourceIndex",
+        "readOnly": false
+      },
+      {
+        "name": "resourceName",
+        "readOnly": false
+      }
+    ]
+  },
+  {
+    "agentType": "easyops",
+    "dataType": "double",
+    "instanceId": "",
+    "key": "storage_failed_disk_count",
+    "labels": [
+      "ip",
+      "vendor",
+      "resourceType",
+      "resourceIndex",
+      "resourceName"
+    ],
+    "metricType": "gauge",
+    "tagDefine": [
+      {
+        "name": "ip",
+        "readOnly": false
+      },
+      {
+        "name": "vendor",
+        "readOnly": false
+      },
+      {
+        "name": "resourceType",
+        "readOnly": false
+      },
+      {
+        "name": "resourceIndex",
+        "readOnly": false
+      },
+      {
+        "name": "resourceName",
+        "readOnly": false
+      }
+    ]
+  },
+  {
+    "agentType": "easyops",
+    "dataType": "double",
+    "instanceId": "",
+    "key": "storage_resource_present",
+    "labels": [
+      "ip",
+      "vendor",
+      "resourceType",
+      "resourceIndex",
+      "resourceName"
+    ],
+    "metricType": "gauge",
+    "tagDefine": [
+      {
+        "name": "ip",
+        "readOnly": false
+      },
+      {
+        "name": "vendor",
+        "readOnly": false
+      },
+      {
+        "name": "resourceType",
+        "readOnly": false
+      },
+      {
+        "name": "resourceIndex",
+        "readOnly": false
+      },
+      {
+        "name": "resourceName",
+        "readOnly": false
+      }
+    ]
+  },
+  {
+    "agentType": "easyops",
+    "dataType": "string",
+    "instanceId": "",
+    "key": "storage_resource_value",
+    "labels": [
+      "ip",
+      "vendor",
+      "resourceType",
+      "resourceIndex",
+      "resourceName"
+    ],
+    "metricType": "gauge",
+    "tagDefine": [
+      {
+        "name": "ip",
+        "readOnly": false
+      },
+      {
+        "name": "vendor",
+        "readOnly": false
+      },
+      {
+        "name": "resourceType",
+        "readOnly": false
+      },
+      {
+        "name": "resourceIndex",
+        "readOnly": false
+      },
+      {
+        "name": "resourceName",
+        "readOnly": false
+      }
+    ]
+  }
+]

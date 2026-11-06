@@ -1,0 +1,14 @@
+{
+  "name": "存储设备SNMP告警",
+  "objectId": "HOST",
+  "priority": 3,
+  "_rule_name_format": "存储设备SNMP-{#vendor}-{#resourceName}",
+  "alertConditionStrategy": [
+    {"name":"SNMP不可用","instanceId":"storage_snmp_available","objectId":"HOST","conditionType":"diff","multiConditions":[{"field":"storage_snmp_available","operator":"equal","value":0}],"upgradeCondition":{"alertCount":1,"detectWindow":1,"recoverCount":1}},
+    {"name":"容量使用率高","instanceId":"storage_used_percent","objectId":"HOST","conditionType":"bigger_than","multiConditions":[{"field":"storage_used_percent","operator":"bigger_than","value":80}],"upgradeCondition":{"alertCount":3,"detectWindow":3,"recoverCount":1}},
+    {"name":"容量使用率严重","instanceId":"storage_used_percent","objectId":"HOST","conditionType":"bigger_than","multiConditions":[{"field":"storage_used_percent","operator":"bigger_than","value":90}],"upgradeCondition":{"alertCount":3,"detectWindow":3,"recoverCount":1}},
+    {"name":"阵列状态异常","instanceId":"storage_status","objectId":"HOST","conditionType":"diff","multiConditions":[{"field":"storage_status","operator":"unequal","value":1}],"upgradeCondition":{"alertCount":1,"detectWindow":1,"recoverCount":1}},
+    {"name":"故障磁盘","instanceId":"storage_failed_disk_count","objectId":"HOST","conditionType":"bigger_than","multiConditions":[{"field":"storage_failed_disk_count","operator":"bigger_than","value":0}],"upgradeCondition":{"alertCount":1,"detectWindow":1,"recoverCount":1}}
+  ],
+  "cmdbInstanceStrategy": {"objectId":"HOST","resourceType":"HOST","instanceId":"ip"}
+}

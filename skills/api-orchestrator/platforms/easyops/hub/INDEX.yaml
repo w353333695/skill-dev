@@ -634,3 +634,13 @@ items:
     scenario: Linux/Windows操作系统带内SNMP监控套件
     notes: "操作系统IP直接开启SNMP Agent；不要填BMC管理口IP"
     added: "2026-11-04"
+  - id: storage-snmp-monitor-kit
+    name: 存储设备SNMP监控套件
+    category: monitor-kits
+    files: [存储设备SNMP监控套件_0.1.0.zip]
+    version: "0.1.0"
+    history:
+      - {ver: "0.1.0", date: "2026-11-06", change: "基于 Zabbix 5.4 存储模板调研新增通用存储 SNMP 套件；支持 HOST-RESOURCES-MIB、Huawei OceanStor、NetApp FAS/AFF、XSKY SDS、EMC Data Domain、Dell iDRAC 识别与容量监控，未知品牌标准 MIB 兜底"}
+    scenario: 多品牌存储阵列/NAS/SDS 的 SNMP 容量、健康与资源发现监控
+    notes: "HTTP/API/SSH 专用模板不伪装为 SNMP；私有 OID 不可用时继续输出标准 MIB 指标"
+    added: "2026-11-06"

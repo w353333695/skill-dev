@@ -1,0 +1,42 @@
+type: simple-script
+name: 存储设备SNMP监控
+version: "0.1.0"
+command:
+    collect:
+        interpreter: ""
+        scriptPath:
+            - src
+            - storage_snmp_monitor.py
+        type: python
+        user: ""
+params:
+    - ip
+    - snmpPort
+    - snmpVersion
+    - community
+    - securityLevel
+    - securityName
+    - authProtocol
+    - authKey
+    - privProtocol
+    - privKey
+    - contextName
+paramDefine:
+    - {name: ip, valueType: string, defaultValue: $.ip, display: true, displayName: "存储设备IP", description: "存储阵列或管理口IP", use: collectParams, optional: false, isFromSecret: false, isEncrypt: false, extraArgs: null}
+    - {name: snmpPort, valueType: int, defaultValue: $.snmp_conf.snmpPort, display: true, displayName: "SNMP端口", description: "默认161", use: collectParams, optional: true, isFromSecret: false, isEncrypt: false, extraArgs: null}
+    - {name: snmpVersion, valueType: string, defaultValue: $.snmp_conf.snmpVersion, display: true, displayName: "SNMP版本", description: "支持1/2c/3", use: collectParams, optional: false, isFromSecret: false, isEncrypt: false, extraArgs: null}
+    - {name: community, valueType: cmdb, defaultValue: $.snmp_conf.community, display: true, displayName: "SNMP团体名", description: "v1/v2c只读团体名", use: collectParams, optional: true, isFromSecret: false, isEncrypt: false, extraArgs: null}
+    - {name: securityLevel, valueType: string, defaultValue: $.snmp_conf.securityLevel, display: true, displayName: "SNMPv3安全级别", description: "noAuthNoPriv/authNoPriv/authPriv", use: collectParams, optional: true, isFromSecret: false, isEncrypt: false, extraArgs: null}
+    - {name: securityName, valueType: string, defaultValue: $.snmp_conf.securityName, display: true, displayName: "SNMPv3安全名", description: "SNMPv3用户名", use: collectParams, optional: true, isFromSecret: false, isEncrypt: false, extraArgs: null}
+    - {name: authProtocol, valueType: string, defaultValue: $.snmp_conf.authProtocol, display: true, displayName: "SNMPv3认证协议", description: "MD5/SHA", use: collectParams, optional: true, isFromSecret: false, isEncrypt: false, extraArgs: null}
+    - {name: authKey, valueType: cmdb, defaultValue: $.snmp_conf.authKey, display: true, displayName: "SNMPv3认证密钥", description: "凭证走CMDB，不写日志", use: collectParams, optional: true, isFromSecret: false, isEncrypt: false, extraArgs: null}
+    - {name: privProtocol, valueType: string, defaultValue: $.snmp_conf.privProtocol, display: true, displayName: "SNMPv3加密协议", description: "DES/AES", use: collectParams, optional: true, isFromSecret: false, isEncrypt: false, extraArgs: null}
+    - {name: privKey, valueType: cmdb, defaultValue: $.snmp_conf.privKey, display: true, displayName: "SNMPv3加密密钥", description: "凭证走CMDB，不写日志", use: collectParams, optional: true, isFromSecret: false, isEncrypt: false, extraArgs: null}
+    - {name: contextName, valueType: string, defaultValue: $.snmp_conf.contextName, display: true, displayName: "SNMPv3上下文", description: "可选上下文名称", use: collectParams, optional: true, isFromSecret: false, isEncrypt: false, extraArgs: null}
+agentType: easyops
+category: 存储.带外监控
+scriptType: python
+interpreter: ""
+memo: "通过标准SNMP与厂商私有MIB监控存储阵列；标准HOST-RESOURCES-MIB作为通用兜底"
+icon: null
+relateObjectId: HOST

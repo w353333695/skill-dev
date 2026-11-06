@@ -1,0 +1,80 @@
+[
+  {
+    "objectId": "HOST",
+    "metricId": "storage_snmp_available",
+    "displayName": "存储SNMP-snmp available",
+    "description": "存储设备SNMP统一指标：storage_snmp_available"
+  },
+  {
+    "objectId": "HOST",
+    "metricId": "storage_info_sys_descr",
+    "displayName": "存储SNMP-info sys descr",
+    "description": "存储设备SNMP统一指标：storage_info_sys_descr"
+  },
+  {
+    "objectId": "HOST",
+    "metricId": "storage_info_sys_objectid",
+    "displayName": "存储SNMP-info sys objectid",
+    "description": "存储设备SNMP统一指标：storage_info_sys_objectid"
+  },
+  {
+    "objectId": "HOST",
+    "metricId": "storage_info_version",
+    "displayName": "存储SNMP-info version",
+    "description": "存储设备SNMP统一指标：storage_info_version"
+  },
+  {
+    "objectId": "HOST",
+    "metricId": "storage_uptime_ticks",
+    "displayName": "存储SNMP-uptime ticks",
+    "description": "存储设备SNMP统一指标：storage_uptime_ticks"
+  },
+  {
+    "objectId": "HOST",
+    "metricId": "storage_snmp_error",
+    "displayName": "存储SNMP-snmp error",
+    "description": "存储设备SNMP统一指标：storage_snmp_error"
+  },
+  {
+    "objectId": "HOST",
+    "metricId": "storage_capacity_bytes",
+    "displayName": "存储SNMP-capacity bytes",
+    "description": "存储设备SNMP统一指标：storage_capacity_bytes"
+  },
+  {
+    "objectId": "HOST",
+    "metricId": "storage_used_bytes",
+    "displayName": "存储SNMP-used bytes",
+    "description": "存储设备SNMP统一指标：storage_used_bytes"
+  },
+  {
+    "objectId": "HOST",
+    "metricId": "storage_used_percent",
+    "displayName": "存储SNMP-used percent",
+    "description": "存储设备SNMP统一指标：storage_used_percent"
+  },
+  {
+    "objectId": "HOST",
+    "metricId": "storage_status",
+    "displayName": "存储SNMP-status",
+    "description": "存储设备SNMP统一指标：storage_status"
+  },
+  {
+    "objectId": "HOST",
+    "metricId": "storage_failed_disk_count",
+    "displayName": "存储SNMP-failed disk count",
+    "description": "存储设备SNMP统一指标：storage_failed_disk_count"
+  },
+  {
+    "objectId": "HOST",
+    "metricId": "storage_resource_present",
+    "displayName": "存储SNMP-resource present",
+    "description": "存储设备SNMP统一指标：storage_resource_present"
+  },
+  {
+    "objectId": "HOST",
+    "metricId": "storage_resource_value",
+    "displayName": "存储SNMP-resource value",
+    "description": "存储设备SNMP统一指标：storage_resource_value"
+  }
+]
