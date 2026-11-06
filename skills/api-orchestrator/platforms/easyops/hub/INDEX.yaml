@@ -637,9 +637,10 @@ items:
   - id: storage-snmp-monitor-kit
     name: 存储设备SNMP监控套件
     category: monitor-kits
-    files: [存储设备SNMP监控套件_0.1.0.zip]
-    version: "0.1.0"
+    files: [存储设备SNMP监控套件_0.1.1.zip, 存储设备SNMP监控_告警规则模板_0.1.1.xlsx]
+    version: "0.1.1"
     history:
+      - {ver: "0.1.1", date: "2026-11-06", change: "补充与套件同源的 Excel 告警规则模板，覆盖 SNMP 不可用、容量 80%/90%、阵列状态和故障磁盘告警"}
       - {ver: "0.1.0", date: "2026-11-06", change: "基于 Zabbix 5.4 存储模板调研新增通用存储 SNMP 套件；支持 HOST-RESOURCES-MIB、Huawei OceanStor、NetApp FAS/AFF、XSKY SDS、EMC Data Domain、Dell iDRAC 识别与容量监控，未知品牌标准 MIB 兜底"}
     scenario: 多品牌存储阵列/NAS/SDS 的 SNMP 容量、健康与资源发现监控
     notes: "HTTP/API/SSH 专用模板不伪装为 SNMP；私有 OID 不可用时继续输出标准 MIB 指标"
