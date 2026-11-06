@@ -60,3 +60,37 @@ if __name__ == '__main__':
 - 阈值类资源使用 `bigger_than` 等阈值条件，`alertCount=3`、`detectWindow=3`、`recoverCount=1`。
 - 状态类资源（SNMP 可用性、接口运行状态）使用 `diff`，`alertCount=1`、`detectWindow=1`、`recoverCount=0`；不能用持续 `equal/unequal` 判断状态，否则会造成稳态误报或恢复误报。
 - 结构依据：`formats/alert-kit/alert-rule-template.yaml`、现有 Hub 套件 `BCS监控套件/alertRule/BCS监控.json`，以及其中的 `name`、`_rule_name_format`、`cmdbInstanceStrategy` 和 `multiConditions` 实例。
+
+## 监控套件发布前契约校验（强制）
+
+监控套件不能只做 JSON 语法校验；EasyOps 的 `importOther` 会按后端结构反序列化附属文件，数组/对象类型错误会在导入阶段才暴露。每次打包前必须执行：
+
+```bash
+python3 skills/api-orchestrator/platforms/easyops/development/scripts/validate_monitor_kit.py <套件目录>
+python3 skills/api-orchestrator/platforms/easyops/development/scripts/validate_monitor_kit.py <套件.zip>
+```
+
+校验器必须阻断以下问题：
+
+- `alertRule/*.json` 根对象缺少 `name`、`objectId`、`priority`、`_rule_name_format`、`alertConditionStrategy` 或 `cmdbInstanceStrategy`。
+- `alertConditionStrategy`、`multiConditions`、`cmdbInstanceStrategy` 误写为对象；这三个位置按平台契约分别要求数组。
+- `cmdbInstanceStrategy[]` 缺少 `instanceId`、`objectId` 或 `instances.objectId/type`。
+- 告警 `metricName` 不存在于 `origin_metric.json`，导致规则导入后无法绑定指标。
+- `resource_discovery_define.json` 顶层不是数组，或条目缺少 `objectId`、`category`、`type`。
+- ZIP 顶层目录超过一个、缺少 `plugin.yaml`、版本号为空。
+
+### 当前环境导入验收
+
+离线校验通过后，必须使用新版本 ZIP 调用 `POST /api/v1/plugin/import`；不得把 HTTP 200 单独当作完整验收。至少记录：
+
+1. 响应 `code=0`、`data.instanceId`、`agentType`。
+2. `GET /api/v1/plugin/detail/{instanceId}` 返回 `status=available`、套件名称和版本正确。
+3. 查询 `_COLLECTOR_EASYOPS_PLUGIN` 的 `pluginResConfig`，确认资源发现配置实际写入。
+4. 在事件中心/告警规则页面或对应 CMDB 模型查询，确认 `alertRule/*.json` 是否真正落库；详情接口中的 `alertRules=[]` 不能直接证明“未导入”，也不能直接证明“已落库”。
+5. 失败时保留后端原始错误，并修复后递增版本号重新导入；禁止覆盖同版本号包继续重试。
+
+### 契约真源与变更规则
+
+- 优先复制当前环境已经成功导入的监控套件结构，再替换指标和阈值，不从字段名猜测数组/对象类型。
+- 平台后端契约、`formats/collector-kit/package-format.yaml` 和已验证套件是结构真源；README 只能解释用法，不能替代结构校验。
+- JSON 告警与 XLSX 告警模板必须共享同一 `objectId`、指标名和阈值；任一方修改后重新执行校验并递增版本。

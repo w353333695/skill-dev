@@ -358,3 +358,21 @@ version_management:
   zip_naming: "{套件名}_v{版本号}.zip（如 Tomcat监控套件_v1.0.4.zip）"
   custom_kit: "定制内置套件改名后，version 从 1.0.0 起独立版本线，不继承原内置版本号"
   source: "upload.md:113,267-283（过时 pack_plugin.py 版本逻辑；命名规范一致）"
+
+# -----------------------------------------------------------------------------
+# monitor_kit_preflight（2026-11-06）
+# -----------------------------------------------------------------------------
+monitor_kit_preflight:
+  command: "python3 development/scripts/validate_monitor_kit.py <kit-dir-or-zip>"
+  required_before_pack: true
+  checks:
+    - "plugin.yaml 存在且 name/version 非空"
+    - "alertRule/*.json 的 cmdbInstanceStrategy 必须为数组；每项包含 instanceId/objectId/instances.objectId/instances.type"
+    - "alertRule/*.json 的 alertConditionStrategy、multiConditions 必须为数组，metricName 必须存在于 origin_metric.json"
+    - "resource_discovery_define.json 顶层必须为数组；每项包含 objectId/category/type"
+    - "ZIP 仅一个顶层套件目录，目录与 plugin.yaml name 一致，排除缓存文件"
+  import_acceptance:
+    - "POST /api/v1/plugin/import 返回 code=0、data.instanceId"
+    - "GET /api/v1/plugin/detail/{instanceId} 返回 status=available 且版本正确"
+    - "通过 CMDB/API 验证附属资源落库；不能以 detail.alertRules 为空单独判定导入失败或成功"
+  version_rule: "契约修复或附属资源变更必须递增 patch 版本，不得用同版本号重复导入"

@@ -281,3 +281,12 @@ items:
     scenario: Linux/Windows操作系统带内SNMP监控采集器、指标、告警和配置说明
     notes: "不采集iDRAC/iLO/XCC/iBMC及风扇、电源、温度等BMC硬件指标"
     added: "2026-11-04"
+  - id: monitor-kit-preflight-validator
+    name: 监控套件契约校验器
+    category: scripts
+    files: [scripts/validate_monitor_kit.py]
+    history:
+      - {date: "2026-11-06", change: "新增监控套件目录/ZIP preflight：校验告警策略数组契约、资源发现数组契约、指标引用、ZIP 顶层目录和版本"}
+    scenario: EasyOps 监控套件打包前离线契约校验，拦截 importOther 的数组/对象结构错误
+    notes: "仅依赖 Python 标准库；当前环境导入仍需按 monitor-kits README 做真实 API 和附属资源验收"
+    added: "2026-11-06"
