@@ -1,80 +1,536 @@
 [
   {
-    "objectId": "HOST",
-    "metricId": "storage_snmp_available",
+    "dataType": "double",
+    "description": "存储设备SNMP统一指标：storage_snmp_available",
+    "dims": [
+      {
+        "dimDisplayName": "ip",
+        "dimName": "ip",
+        "isArray": false,
+        "originDimName": "ip"
+      },
+      {
+        "dimDisplayName": "vendor",
+        "dimName": "vendor",
+        "isArray": false,
+        "originDimName": "vendor"
+      }
+    ],
     "displayName": "存储SNMP-snmp available",
-    "description": "存储设备SNMP统一指标：storage_snmp_available"
+    "expression": "",
+    "metricSet": [
+      "基础信息"
+    ],
+    "name": "storage_snmp_available",
+    "objectId": "HOST",
+    "originalMetrics": [
+      "storage_snmp_available"
+    ],
+    "type": "normal",
+    "unit": ""
   },
   {
-    "objectId": "HOST",
-    "metricId": "storage_info_sys_descr",
+    "dataType": "string",
+    "description": "存储设备SNMP统一指标：storage_info_sys_descr",
+    "dims": [
+      {
+        "dimDisplayName": "ip",
+        "dimName": "ip",
+        "isArray": false,
+        "originDimName": "ip"
+      },
+      {
+        "dimDisplayName": "vendor",
+        "dimName": "vendor",
+        "isArray": false,
+        "originDimName": "vendor"
+      }
+    ],
     "displayName": "存储SNMP-info sys descr",
-    "description": "存储设备SNMP统一指标：storage_info_sys_descr"
+    "expression": "",
+    "metricSet": [
+      "基础信息"
+    ],
+    "name": "storage_info_sys_descr",
+    "objectId": "HOST",
+    "originalMetrics": [
+      "storage_info_sys_descr"
+    ],
+    "type": "normal",
+    "unit": ""
   },
   {
-    "objectId": "HOST",
-    "metricId": "storage_info_sys_objectid",
+    "dataType": "string",
+    "description": "存储设备SNMP统一指标：storage_info_sys_objectid",
+    "dims": [
+      {
+        "dimDisplayName": "ip",
+        "dimName": "ip",
+        "isArray": false,
+        "originDimName": "ip"
+      },
+      {
+        "dimDisplayName": "vendor",
+        "dimName": "vendor",
+        "isArray": false,
+        "originDimName": "vendor"
+      }
+    ],
     "displayName": "存储SNMP-info sys objectid",
-    "description": "存储设备SNMP统一指标：storage_info_sys_objectid"
+    "expression": "",
+    "metricSet": [
+      "基础信息"
+    ],
+    "name": "storage_info_sys_objectid",
+    "objectId": "HOST",
+    "originalMetrics": [
+      "storage_info_sys_objectid"
+    ],
+    "type": "normal",
+    "unit": ""
   },
   {
-    "objectId": "HOST",
-    "metricId": "storage_info_version",
+    "dataType": "string",
+    "description": "存储设备SNMP统一指标：storage_info_version",
+    "dims": [
+      {
+        "dimDisplayName": "ip",
+        "dimName": "ip",
+        "isArray": false,
+        "originDimName": "ip"
+      },
+      {
+        "dimDisplayName": "vendor",
+        "dimName": "vendor",
+        "isArray": false,
+        "originDimName": "vendor"
+      },
+      {
+        "dimDisplayName": "resourceType",
+        "dimName": "resourceType",
+        "isArray": false,
+        "originDimName": "resourceType"
+      },
+      {
+        "dimDisplayName": "resourceIndex",
+        "dimName": "resourceIndex",
+        "isArray": false,
+        "originDimName": "resourceIndex"
+      },
+      {
+        "dimDisplayName": "resourceName",
+        "dimName": "resourceName",
+        "isArray": false,
+        "originDimName": "resourceName"
+      }
+    ],
     "displayName": "存储SNMP-info version",
-    "description": "存储设备SNMP统一指标：storage_info_version"
+    "expression": "",
+    "metricSet": [
+      "阵列健康"
+    ],
+    "name": "storage_info_version",
+    "objectId": "HOST",
+    "originalMetrics": [
+      "storage_info_version"
+    ],
+    "type": "normal",
+    "unit": ""
   },
   {
-    "objectId": "HOST",
-    "metricId": "storage_uptime_ticks",
+    "dataType": "double",
+    "description": "存储设备SNMP统一指标：storage_uptime_ticks",
+    "dims": [
+      {
+        "dimDisplayName": "ip",
+        "dimName": "ip",
+        "isArray": false,
+        "originDimName": "ip"
+      },
+      {
+        "dimDisplayName": "vendor",
+        "dimName": "vendor",
+        "isArray": false,
+        "originDimName": "vendor"
+      }
+    ],
     "displayName": "存储SNMP-uptime ticks",
-    "description": "存储设备SNMP统一指标：storage_uptime_ticks"
+    "expression": "",
+    "metricSet": [
+      "基础信息"
+    ],
+    "name": "storage_uptime_ticks",
+    "objectId": "HOST",
+    "originalMetrics": [
+      "storage_uptime_ticks"
+    ],
+    "type": "normal",
+    "unit": ""
   },
   {
-    "objectId": "HOST",
-    "metricId": "storage_snmp_error",
+    "dataType": "string",
+    "description": "存储设备SNMP统一指标：storage_snmp_error",
+    "dims": [
+      {
+        "dimDisplayName": "ip",
+        "dimName": "ip",
+        "isArray": false,
+        "originDimName": "ip"
+      },
+      {
+        "dimDisplayName": "vendor",
+        "dimName": "vendor",
+        "isArray": false,
+        "originDimName": "vendor"
+      }
+    ],
     "displayName": "存储SNMP-snmp error",
-    "description": "存储设备SNMP统一指标：storage_snmp_error"
+    "expression": "",
+    "metricSet": [
+      "基础信息"
+    ],
+    "name": "storage_snmp_error",
+    "objectId": "HOST",
+    "originalMetrics": [
+      "storage_snmp_error"
+    ],
+    "type": "normal",
+    "unit": ""
   },
   {
-    "objectId": "HOST",
-    "metricId": "storage_capacity_bytes",
+    "dataType": "double",
+    "description": "存储设备SNMP统一指标：storage_capacity_bytes",
+    "dims": [
+      {
+        "dimDisplayName": "ip",
+        "dimName": "ip",
+        "isArray": false,
+        "originDimName": "ip"
+      },
+      {
+        "dimDisplayName": "vendor",
+        "dimName": "vendor",
+        "isArray": false,
+        "originDimName": "vendor"
+      },
+      {
+        "dimDisplayName": "resourceType",
+        "dimName": "resourceType",
+        "isArray": false,
+        "originDimName": "resourceType"
+      },
+      {
+        "dimDisplayName": "resourceIndex",
+        "dimName": "resourceIndex",
+        "isArray": false,
+        "originDimName": "resourceIndex"
+      },
+      {
+        "dimDisplayName": "resourceName",
+        "dimName": "resourceName",
+        "isArray": false,
+        "originDimName": "resourceName"
+      }
+    ],
     "displayName": "存储SNMP-capacity bytes",
-    "description": "存储设备SNMP统一指标：storage_capacity_bytes"
+    "expression": "",
+    "metricSet": [
+      "容量与文件系统"
+    ],
+    "name": "storage_capacity_bytes",
+    "objectId": "HOST",
+    "originalMetrics": [
+      "storage_capacity_bytes"
+    ],
+    "type": "normal",
+    "unit": ""
   },
   {
-    "objectId": "HOST",
-    "metricId": "storage_used_bytes",
+    "dataType": "double",
+    "description": "存储设备SNMP统一指标：storage_used_bytes",
+    "dims": [
+      {
+        "dimDisplayName": "ip",
+        "dimName": "ip",
+        "isArray": false,
+        "originDimName": "ip"
+      },
+      {
+        "dimDisplayName": "vendor",
+        "dimName": "vendor",
+        "isArray": false,
+        "originDimName": "vendor"
+      },
+      {
+        "dimDisplayName": "resourceType",
+        "dimName": "resourceType",
+        "isArray": false,
+        "originDimName": "resourceType"
+      },
+      {
+        "dimDisplayName": "resourceIndex",
+        "dimName": "resourceIndex",
+        "isArray": false,
+        "originDimName": "resourceIndex"
+      },
+      {
+        "dimDisplayName": "resourceName",
+        "dimName": "resourceName",
+        "isArray": false,
+        "originDimName": "resourceName"
+      }
+    ],
     "displayName": "存储SNMP-used bytes",
-    "description": "存储设备SNMP统一指标：storage_used_bytes"
+    "expression": "",
+    "metricSet": [
+      "容量与文件系统"
+    ],
+    "name": "storage_used_bytes",
+    "objectId": "HOST",
+    "originalMetrics": [
+      "storage_used_bytes"
+    ],
+    "type": "normal",
+    "unit": ""
   },
   {
-    "objectId": "HOST",
-    "metricId": "storage_used_percent",
+    "dataType": "double",
+    "description": "存储设备SNMP统一指标：storage_used_percent",
+    "dims": [
+      {
+        "dimDisplayName": "ip",
+        "dimName": "ip",
+        "isArray": false,
+        "originDimName": "ip"
+      },
+      {
+        "dimDisplayName": "vendor",
+        "dimName": "vendor",
+        "isArray": false,
+        "originDimName": "vendor"
+      },
+      {
+        "dimDisplayName": "resourceType",
+        "dimName": "resourceType",
+        "isArray": false,
+        "originDimName": "resourceType"
+      },
+      {
+        "dimDisplayName": "resourceIndex",
+        "dimName": "resourceIndex",
+        "isArray": false,
+        "originDimName": "resourceIndex"
+      },
+      {
+        "dimDisplayName": "resourceName",
+        "dimName": "resourceName",
+        "isArray": false,
+        "originDimName": "resourceName"
+      }
+    ],
     "displayName": "存储SNMP-used percent",
-    "description": "存储设备SNMP统一指标：storage_used_percent"
+    "expression": "",
+    "metricSet": [
+      "容量与文件系统"
+    ],
+    "name": "storage_used_percent",
+    "objectId": "HOST",
+    "originalMetrics": [
+      "storage_used_percent"
+    ],
+    "type": "normal",
+    "unit": ""
   },
   {
-    "objectId": "HOST",
-    "metricId": "storage_status",
+    "dataType": "double",
+    "description": "存储设备SNMP统一指标：storage_status",
+    "dims": [
+      {
+        "dimDisplayName": "ip",
+        "dimName": "ip",
+        "isArray": false,
+        "originDimName": "ip"
+      },
+      {
+        "dimDisplayName": "vendor",
+        "dimName": "vendor",
+        "isArray": false,
+        "originDimName": "vendor"
+      },
+      {
+        "dimDisplayName": "resourceType",
+        "dimName": "resourceType",
+        "isArray": false,
+        "originDimName": "resourceType"
+      },
+      {
+        "dimDisplayName": "resourceIndex",
+        "dimName": "resourceIndex",
+        "isArray": false,
+        "originDimName": "resourceIndex"
+      },
+      {
+        "dimDisplayName": "resourceName",
+        "dimName": "resourceName",
+        "isArray": false,
+        "originDimName": "resourceName"
+      }
+    ],
     "displayName": "存储SNMP-status",
-    "description": "存储设备SNMP统一指标：storage_status"
+    "expression": "",
+    "metricSet": [
+      "阵列健康"
+    ],
+    "name": "storage_status",
+    "objectId": "HOST",
+    "originalMetrics": [
+      "storage_status"
+    ],
+    "type": "normal",
+    "unit": ""
   },
   {
-    "objectId": "HOST",
-    "metricId": "storage_failed_disk_count",
+    "dataType": "double",
+    "description": "存储设备SNMP统一指标：storage_failed_disk_count",
+    "dims": [
+      {
+        "dimDisplayName": "ip",
+        "dimName": "ip",
+        "isArray": false,
+        "originDimName": "ip"
+      },
+      {
+        "dimDisplayName": "vendor",
+        "dimName": "vendor",
+        "isArray": false,
+        "originDimName": "vendor"
+      },
+      {
+        "dimDisplayName": "resourceType",
+        "dimName": "resourceType",
+        "isArray": false,
+        "originDimName": "resourceType"
+      },
+      {
+        "dimDisplayName": "resourceIndex",
+        "dimName": "resourceIndex",
+        "isArray": false,
+        "originDimName": "resourceIndex"
+      },
+      {
+        "dimDisplayName": "resourceName",
+        "dimName": "resourceName",
+        "isArray": false,
+        "originDimName": "resourceName"
+      }
+    ],
     "displayName": "存储SNMP-failed disk count",
-    "description": "存储设备SNMP统一指标：storage_failed_disk_count"
+    "expression": "",
+    "metricSet": [
+      "阵列健康"
+    ],
+    "name": "storage_failed_disk_count",
+    "objectId": "HOST",
+    "originalMetrics": [
+      "storage_failed_disk_count"
+    ],
+    "type": "normal",
+    "unit": ""
   },
   {
-    "objectId": "HOST",
-    "metricId": "storage_resource_present",
+    "dataType": "double",
+    "description": "存储设备SNMP统一指标：storage_resource_present",
+    "dims": [
+      {
+        "dimDisplayName": "ip",
+        "dimName": "ip",
+        "isArray": false,
+        "originDimName": "ip"
+      },
+      {
+        "dimDisplayName": "vendor",
+        "dimName": "vendor",
+        "isArray": false,
+        "originDimName": "vendor"
+      },
+      {
+        "dimDisplayName": "resourceType",
+        "dimName": "resourceType",
+        "isArray": false,
+        "originDimName": "resourceType"
+      },
+      {
+        "dimDisplayName": "resourceIndex",
+        "dimName": "resourceIndex",
+        "isArray": false,
+        "originDimName": "resourceIndex"
+      },
+      {
+        "dimDisplayName": "resourceName",
+        "dimName": "resourceName",
+        "isArray": false,
+        "originDimName": "resourceName"
+      }
+    ],
     "displayName": "存储SNMP-resource present",
-    "description": "存储设备SNMP统一指标：storage_resource_present"
+    "expression": "",
+    "metricSet": [
+      "组件发现"
+    ],
+    "name": "storage_resource_present",
+    "objectId": "HOST",
+    "originalMetrics": [
+      "storage_resource_present"
+    ],
+    "type": "normal",
+    "unit": ""
   },
   {
-    "objectId": "HOST",
-    "metricId": "storage_resource_value",
+    "dataType": "string",
+    "description": "存储设备SNMP统一指标：storage_resource_value",
+    "dims": [
+      {
+        "dimDisplayName": "ip",
+        "dimName": "ip",
+        "isArray": false,
+        "originDimName": "ip"
+      },
+      {
+        "dimDisplayName": "vendor",
+        "dimName": "vendor",
+        "isArray": false,
+        "originDimName": "vendor"
+      },
+      {
+        "dimDisplayName": "resourceType",
+        "dimName": "resourceType",
+        "isArray": false,
+        "originDimName": "resourceType"
+      },
+      {
+        "dimDisplayName": "resourceIndex",
+        "dimName": "resourceIndex",
+        "isArray": false,
+        "originDimName": "resourceIndex"
+      },
+      {
+        "dimDisplayName": "resourceName",
+        "dimName": "resourceName",
+        "isArray": false,
+        "originDimName": "resourceName"
+      }
+    ],
     "displayName": "存储SNMP-resource value",
-    "description": "存储设备SNMP统一指标：storage_resource_value"
+    "expression": "",
+    "metricSet": [
+      "组件发现"
+    ],
+    "name": "storage_resource_value",
+    "objectId": "HOST",
+    "originalMetrics": [
+      "storage_resource_value"
+    ],
+    "type": "normal",
+    "unit": ""
   }
 ]

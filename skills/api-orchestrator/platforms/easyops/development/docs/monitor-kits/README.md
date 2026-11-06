@@ -94,3 +94,14 @@ python3 skills/api-orchestrator/platforms/easyops/development/scripts/validate_m
 - 优先复制当前环境已经成功导入的监控套件结构，再替换指标和阈值，不从字段名猜测数组/对象类型。
 - 平台后端契约、`formats/collector-kit/package-format.yaml` 和已验证套件是结构真源；README 只能解释用法，不能替代结构校验。
 - JSON 告警与 XLSX 告警模板必须共享同一 `objectId`、指标名和阈值；任一方修改后重新执行校验并递增版本。
+
+### 激活时报 `search originMetric` / `page_size validate failed`
+
+该错误不能直接归因于 SNMP 采集脚本。优先按以下顺序排查：
+
+1. 查询 `/api/v1/plugin/metrics/list/{instanceId}`，确认原始指标数量大于 0。
+2. 通过 legacy 指标接口 `POST /api/v2/collector-metric-names`（`page=1,pageSize>=1,pluginId=...`）确认别名指标已生成；不能只看 `plugin.detail`，其 `aliasMetrics`/`metricSets` 可能为空或不返回附属资源。
+3. 检查 `alias_metric.json` 是否使用完整字段：`name`、`objectId`、`dataType`、`type`、`dims`、`metricSet`、`originalMetrics`、`unit`、`expression`；不能使用自定义的 `metricId` 代替 `name/originalMetrics`。
+4. 确认 `metricSet` 中的名称都存在于 `metric_set.json`，`originalMetrics` 都存在于 `origin_metric.json`。
+5. 若套件已用错误版本导入，不能只重试激活；必须递增版本并用 `import_update` 重新导入附属指标，再重新查询指标元数据。
+6. 若原始指标和别名指标都正常而仍报 `page_size`，再核对激活接口的请求分页参数；`page_size=0`、缺失分页字段或调用了错误端口/旧 contract 都属于平台调用问题，不应修改 OID 或采集脚本掩盖。

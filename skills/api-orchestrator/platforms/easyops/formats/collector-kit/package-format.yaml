@@ -376,3 +376,9 @@ monitor_kit_preflight:
     - "GET /api/v1/plugin/detail/{instanceId} 返回 status=available 且版本正确"
     - "通过 CMDB/API 验证附属资源落库；不能以 detail.alertRules 为空单独判定导入失败或成功"
   version_rule: "契约修复或附属资源变更必须递增 patch 版本，不得用同版本号重复导入"
+  alias_metric_contract:
+    required_fields: [name, objectId, dataType, type, dims, metricSet, originalMetrics, unit, expression]
+    array_fields: [dims, metricSet, originalMetrics]
+    linkage: "alias_metric.originalMetrics 必须全部存在于 origin_metric.key；alias_metric.metricSet 中的每个名称必须存在于 metric_set.name"
+    activation_diagnosis: "激活前先查 /api/v1/plugin/metrics/list/{instanceId} 与 legacy /api/v2/collector-metric-names；不能只看 plugin.detail 的 aliasMetrics/metricSets"
+    forbidden_shortcut: "禁止以 metricId/displayName/description 自定义字段替代平台 alias_metric 契约；JSON 合法不等于附属指标可导入"

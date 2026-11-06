@@ -638,9 +638,11 @@ items:
   - id: storage-snmp-monitor-kit
     name: 存储设备SNMP监控套件
     category: monitor-kits
-    files: [存储设备SNMP监控套件_0.1.3.zip, 存储设备SNMP监控_告警规则模板_0.1.1.xlsx]
-    version: "0.1.3"
+    files: [存储设备SNMP监控套件_0.1.5.zip, 存储设备SNMP监控_告警规则模板_0.1.1.xlsx]
+    version: "0.1.5"
     history:
+      - {ver: "0.1.5", date: "2026-11-06", change: "用 import_update 重新导入修复后的原始指标、别名指标和指标集，解决激活阶段 originMetric 分页校验错误"}
+      - {ver: "0.1.4", date: "2026-11-06", change: "修复 alias_metric.json 字段契约，补齐 name/originalMetrics/dims/metricSet/type，使激活阶段可正确检索指标"}
       - {ver: "0.1.3", date: "2026-11-06", change: "修复 resource_discovery_define.json 顶层类型：由对象改为平台要求的数组，并进行当前环境再次导入验证"}
       - {ver: "0.1.2", date: "2026-11-06", change: "修复 alertRule 的 cmdbInstanceStrategy 类型：由对象改为平台要求的数组，按已验证套件契约补齐告警条件字段并准备当前环境导入验证"}
       - {ver: "0.1.1", date: "2026-11-06", change: "补充与套件同源的 Excel 告警规则模板，覆盖 SNMP 不可用、容量 80%/90%、阵列状态和故障磁盘告警"}
