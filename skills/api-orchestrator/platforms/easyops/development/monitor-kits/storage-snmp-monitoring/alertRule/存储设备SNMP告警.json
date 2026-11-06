@@ -1,14 +1,205 @@
 {
-  "name": "存储设备SNMP告警",
-  "objectId": "HOST",
-  "priority": 3,
-  "_rule_name_format": "存储设备SNMP-{#vendor}-{#resourceName}",
   "alertConditionStrategy": [
-    {"name":"SNMP不可用","instanceId":"storage_snmp_available","objectId":"HOST","conditionType":"diff","multiConditions":[{"field":"storage_snmp_available","operator":"equal","value":0}],"upgradeCondition":{"alertCount":1,"detectWindow":1,"recoverCount":1}},
-    {"name":"容量使用率高","instanceId":"storage_used_percent","objectId":"HOST","conditionType":"bigger_than","multiConditions":[{"field":"storage_used_percent","operator":"bigger_than","value":80}],"upgradeCondition":{"alertCount":3,"detectWindow":3,"recoverCount":1}},
-    {"name":"容量使用率严重","instanceId":"storage_used_percent","objectId":"HOST","conditionType":"bigger_than","multiConditions":[{"field":"storage_used_percent","operator":"bigger_than","value":90}],"upgradeCondition":{"alertCount":3,"detectWindow":3,"recoverCount":1}},
-    {"name":"阵列状态异常","instanceId":"storage_status","objectId":"HOST","conditionType":"diff","multiConditions":[{"field":"storage_status","operator":"unequal","value":1}],"upgradeCondition":{"alertCount":1,"detectWindow":1,"recoverCount":1}},
-    {"name":"故障磁盘","instanceId":"storage_failed_disk_count","objectId":"HOST","conditionType":"bigger_than","multiConditions":[{"field":"storage_failed_disk_count","operator":"bigger_than","value":0}],"upgradeCondition":{"alertCount":1,"detectWindow":1,"recoverCount":1}}
+    {
+      "alertInterval": 60,
+      "conditionType": "metricThreshold",
+      "conditionsOperator": "or",
+      "effectiveTime": {
+        "type": "static",
+        "static": {
+          "dayStartTime": "00:00:00",
+          "dayEndTime": "23:59:59",
+          "dayOfWeek": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            0
+          ]
+        }
+      },
+      "eventFilterQuery": {
+        "type": "filter",
+        "filter": {
+          "conditionGroup": [
+            {
+              "conditionList": []
+            }
+          ]
+        }
+      },
+      "instanceId": "storage-snmp-alert-strategy",
+      "multiConditions": [
+        {
+          "metricName": "storage_snmp_available",
+          "mode": "static",
+          "type": "diff",
+          "threshold": [
+            null,
+            null
+          ],
+          "alertCount": 1,
+          "recoverCount": 0,
+          "detectWindow": 1,
+          "comparators": [
+            {
+              "level": "warning",
+              "threshold": [
+                null,
+                null
+              ],
+              "displayThreshold": [
+                null,
+                null
+              ],
+              "displayUnit": "",
+              "params": [
+                {
+                  "key": "offset",
+                  "value": 0
+                },
+                {
+                  "key": "window",
+                  "value": 8
+                }
+              ],
+              "tolerance": 0
+            }
+          ],
+          "displayThreshold": [
+            null,
+            null
+          ],
+          "params": [
+            {
+              "key": "offset",
+              "value": 0
+            },
+            {
+              "key": "window",
+              "value": 8
+            }
+          ]
+        },
+        {
+          "metricName": "storage_used_percent",
+          "mode": "static",
+          "type": "bigger_than",
+          "threshold": 80,
+          "alertCount": 3,
+          "recoverCount": 1,
+          "detectWindow": 3,
+          "comparators": [
+            {
+              "level": "warning",
+              "threshold": 80,
+              "displayThreshold": 80,
+              "type": "bigger_than",
+              "tolerance": 0
+            },
+            {
+              "level": "critical",
+              "threshold": 90,
+              "displayThreshold": 90,
+              "type": "bigger_than",
+              "tolerance": 0
+            }
+          ]
+        },
+        {
+          "metricName": "storage_status",
+          "mode": "static",
+          "type": "diff",
+          "threshold": [
+            null,
+            null
+          ],
+          "alertCount": 1,
+          "recoverCount": 0,
+          "detectWindow": 1,
+          "comparators": [
+            {
+              "level": "warning",
+              "threshold": [
+                null,
+                null
+              ],
+              "displayThreshold": [
+                null,
+                null
+              ],
+              "displayUnit": "",
+              "params": [
+                {
+                  "key": "offset",
+                  "value": 0
+                },
+                {
+                  "key": "window",
+                  "value": 8
+                }
+              ],
+              "tolerance": 0
+            }
+          ],
+          "displayThreshold": [
+            null,
+            null
+          ],
+          "params": [
+            {
+              "key": "offset",
+              "value": 0
+            },
+            {
+              "key": "window",
+              "value": 8
+            }
+          ]
+        },
+        {
+          "metricName": "storage_failed_disk_count",
+          "mode": "static",
+          "type": "bigger_than",
+          "threshold": 0,
+          "alertCount": 1,
+          "recoverCount": 0,
+          "detectWindow": 1,
+          "comparators": [
+            {
+              "level": "critical",
+              "threshold": 0,
+              "displayThreshold": 0,
+              "type": "bigger_than",
+              "tolerance": 0
+            }
+          ]
+        }
+      ],
+      "objectId": "HOST",
+      "priority": "warning",
+      "name": "{objectName}存储设备SNMP通用告警规则",
+      "upgradeCondition": {
+        "enable": false
+      }
+    }
   ],
-  "cmdbInstanceStrategy": {"objectId":"HOST","resourceType":"HOST","instanceId":"ip"}
+  "name": "存储设备SNMP初始化告警模板",
+  "objectId": "HOST",
+  "priority": 50,
+  "_rule_name_format": "{objectName}存储设备SNMP告警规则",
+  "_source_template": "存储设备SNMP监控_告警规则模板.xlsx",
+  "cmdbInstanceStrategy": [
+    {
+      "instanceId": "instances-strategy-storage-snmp",
+      "instances": {
+        "objectId": "HOST",
+        "type": "all"
+      },
+      "name": "{objectName}存储设备SNMP目标资源",
+      "objectId": "HOST"
+    }
+  ]
 }
