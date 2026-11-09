@@ -1,6 +1,16 @@
 # 开发源码索引（由原 Hub 脚本条目迁移；不是成品商店索引）
 # category/files 相对本 development 目录；成品包查 ../hub/INDEX.yaml。
 items:
+  - id: fc-switch-monitor-source
+    name: 光纤交换机监控源码与离线回归
+    category: monitor-kits
+    files: [fc-switch-monitoring/plugin.yaml, fc-switch-monitoring/src/光纤交换机监控.py, fc-switch-monitoring/src/光纤交换机监控.orig]
+    history:
+      - {date: "2026-11-09", change: "交付1.0.17；21项运行时测试、3项包验收测试通过；配置环境导入并导出核验"}
+    scenario: 光纤交换机监控参数、SNMP认证和异常处理维护
+    notes: "成品在Hub；验收见docs/monitor-kits/光纤交换机监控修复验收_2026-11-09.md；离线测试不代表设备恢复。"
+    added: "2026-11-09"
+
   - id: generic-switch-monitor-source
     name: 通用交换机监控源码与回归
     category: monitor-kits

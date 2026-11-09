@@ -1,0 +1,230 @@
+{
+  "alertConditionStrategy": [
+    {
+      "alertInterval": 60,
+      "conditionType": "metricThreshold",
+      "conditionsOperator": "or",
+      "effectiveTime": {
+        "static": {
+          "dayEndTime": "23:59:59",
+          "dayOfWeek": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            0
+          ],
+          "dayStartTime": "00:00:00"
+        },
+        "type": "static"
+      },
+      "eventFilterQuery": {
+        "filter": {
+          "conditionGroup": [
+            {
+              "conditionList": []
+            }
+          ]
+        },
+        "type": "filter"
+      },
+      "instanceId": "alertConditions-strategy-71446b1fc1dd",
+      "multiConditions": [
+        {
+          "alertCount": 3,
+          "alertDims": null,
+          "comparators": [
+            {
+              "level": "info",
+              "threshold": 60,
+              "displayThreshold": 60,
+              "tolerance": 0,
+              "type": "bigger_than"
+            },
+            {
+              "level": "warning",
+              "threshold": 70,
+              "displayThreshold": 70,
+              "tolerance": 0,
+              "type": "bigger_than"
+            },
+            {
+              "level": "critical",
+              "threshold": 90,
+              "displayThreshold": 90,
+              "tolerance": 0,
+              "type": "bigger_than"
+            }
+          ],
+          "detectWindow": 3,
+          "metricName": "m_cpu_usage",
+          "mode": "static",
+          "recoverCount": 0,
+          "type": "bigger_than"
+        },
+        {
+          "alertCount": 3,
+          "alertDims": null,
+          "comparators": [
+            {
+              "level": "info",
+              "threshold": 70,
+              "displayThreshold": 70,
+              "tolerance": 0,
+              "type": "bigger_than"
+            },
+            {
+              "level": "warning",
+              "threshold": 80,
+              "displayThreshold": 80,
+              "tolerance": 0,
+              "type": "bigger_than"
+            },
+            {
+              "level": "critical",
+              "threshold": 90,
+              "displayThreshold": 90,
+              "tolerance": 0,
+              "type": "bigger_than"
+            }
+          ],
+          "detectWindow": 3,
+          "metricName": "m_mem_usage",
+          "mode": "static",
+          "recoverCount": 0,
+          "type": "bigger_than"
+        },
+        {
+          "alertCount": 3,
+          "alertDims": null,
+          "comparators": [
+            {
+              "level": "critical",
+              "threshold": 1,
+              "displayThreshold": 1,
+              "tolerance": 0,
+              "type": "unequal"
+            }
+          ],
+          "detectWindow": 3,
+          "metricName": "m_oper_status",
+          "mode": "static",
+          "recoverCount": 0,
+          "type": "unequal"
+        },
+        {
+          "alertCount": 3,
+          "alertDims": null,
+          "comparators": [
+            {
+              "level": "critical",
+              "threshold": 1,
+              "displayThreshold": 1,
+              "tolerance": 0,
+              "type": "unequal"
+            }
+          ],
+          "detectWindow": 3,
+          "metricName": "m_port_oper_status",
+          "mode": "static",
+          "recoverCount": 0,
+          "type": "unequal"
+        },
+        {
+          "alertCount": 3,
+          "alertDims": null,
+          "comparators": [
+            {
+              "level": "critical",
+              "threshold": 2,
+              "displayThreshold": 2,
+              "tolerance": 0,
+              "type": "unequal"
+            }
+          ],
+          "detectWindow": 3,
+          "metricName": "m_sensor_status",
+          "mode": "static",
+          "recoverCount": 0,
+          "type": "unequal"
+        },
+        {
+          "alertCount": 3,
+          "alertDims": null,
+          "comparators": [
+            {
+              "level": "warning",
+              "threshold": 70,
+              "displayThreshold": 70,
+              "tolerance": 0,
+              "type": "bigger_than"
+            },
+            {
+              "level": "critical",
+              "threshold": 80,
+              "displayThreshold": 80,
+              "tolerance": 0,
+              "type": "bigger_than"
+            }
+          ],
+          "detectWindow": 3,
+          "metricName": "m_sfp_temperature",
+          "mode": "static",
+          "recoverCount": 0,
+          "type": "bigger_than"
+        },
+        {
+          "alertCount": 3,
+          "alertDims": null,
+          "comparators": [
+            {
+              "level": "warning",
+              "threshold": -100,
+              "displayThreshold": -10,
+              "tolerance": 0,
+              "type": "smaller_than"
+            },
+            {
+              "level": "critical",
+              "threshold": -150,
+              "displayThreshold": -15,
+              "tolerance": 0,
+              "type": "smaller_than"
+            }
+          ],
+          "detectWindow": 3,
+          "metricName": "m_sfp_rx_power",
+          "mode": "static",
+          "recoverCount": 0,
+          "type": "smaller_than"
+        }
+      ],
+      "name": "光纤交换机通用告警规则",
+      "objectId": "FIBERCHANNEL_SWITCH@ONEMODEL",
+      "upgradeCondition": {
+        "enable": false
+      }
+    }
+  ],
+  "alertGroupStrategy": null,
+  "alertMetricFillStrategy": null,
+  "alertNotifyStrategy": null,
+  "cmdbInstanceStrategy": [
+    {
+      "instanceId": "instances-strategy-71446b1fc1dd",
+      "instances": {
+        "objectId": "FIBERCHANNEL_SWITCH@ONEMODEL",
+        "type": "all"
+      },
+      "name": "{appSystemName}{serviceSetName}目标资源",
+      "objectId": "FIBERCHANNEL_SWITCH@ONEMODEL"
+    }
+  ],
+  "name": "光纤交换机初始化模板",
+  "objectId": "FIBERCHANNEL_SWITCH@ONEMODEL",
+  "priority": 50,
+  "_source_template": "光纤交换机监控_告警规则模板.xlsx",
+  "_rule_name_format": "{objectName}{appSystemName}{serviceSetName}通用告警规则"
+}

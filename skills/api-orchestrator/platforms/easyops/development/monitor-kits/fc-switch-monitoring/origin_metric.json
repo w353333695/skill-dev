@@ -1,0 +1,299 @@
+[
+    {
+        "agentType": "easyops",
+        "dataType": "double",
+        "instanceId": "",
+        "key": "m_cpu_usage",
+        "labels": [],
+        "metricType": "gauge",
+        "tagDefine": [{"name": "ip", "readOnly": false}]
+    },
+    {
+        "agentType": "easyops",
+        "dataType": "double",
+        "instanceId": "",
+        "key": "m_mem_usage",
+        "labels": [],
+        "metricType": "gauge",
+        "tagDefine": [{"name": "ip", "readOnly": false}]
+    },
+    {
+        "agentType": "easyops",
+        "dataType": "double",
+        "instanceId": "",
+        "key": "m_sys_uptime",
+        "labels": [],
+        "metricType": "gauge",
+        "tagDefine": [{"name": "ip", "readOnly": false}]
+    },
+    {
+        "agentType": "easyops",
+        "dataType": "double",
+        "instanceId": "",
+        "key": "m_oper_status",
+        "labels": [],
+        "metricType": "gauge",
+        "tagDefine": [{"name": "ip", "readOnly": false}]
+    },
+    {
+        "agentType": "easyops",
+        "dataType": "double",
+        "instanceId": "",
+        "key": "m_domain_id",
+        "labels": [],
+        "metricType": "gauge",
+        "tagDefine": [{"name": "ip", "readOnly": false}]
+    },
+    {
+        "agentType": "easyops",
+        "dataType": "double",
+        "instanceId": "",
+        "key": "m_port_oper_status",
+        "labels": [],
+        "metricType": "gauge",
+        "tagDefine": [{"name": "ip", "readOnly": false}, {"name": "port_name", "readOnly": false}]
+    },
+    {
+        "agentType": "easyops",
+        "dataType": "double",
+        "instanceId": "",
+        "key": "m_port_phy_state",
+        "labels": [],
+        "metricType": "gauge",
+        "tagDefine": [{"name": "ip", "readOnly": false}, {"name": "port_name", "readOnly": false}]
+    },
+    {
+        "agentType": "easyops",
+        "dataType": "double",
+        "instanceId": "",
+        "key": "m_port_link_state",
+        "labels": [],
+        "metricType": "gauge",
+        "tagDefine": [{"name": "ip", "readOnly": false}, {"name": "port_name", "readOnly": false}]
+    },
+    {
+        "agentType": "easyops",
+        "dataType": "double",
+        "instanceId": "",
+        "key": "m_port_speed",
+        "labels": [],
+        "metricType": "gauge",
+        "tagDefine": [{"name": "ip", "readOnly": false}, {"name": "port_name", "readOnly": false}]
+    },
+    {
+        "agentType": "easyops",
+        "dataType": "double",
+        "instanceId": "",
+        "key": "m_port_login_count",
+        "labels": [],
+        "metricType": "gauge",
+        "tagDefine": [{"name": "ip", "readOnly": false}, {"name": "port_name", "readOnly": false}]
+    },
+    {
+        "agentType": "easyops",
+        "dataType": "double",
+        "instanceId": "",
+        "key": "m_port_tx_words",
+        "labels": [],
+        "metricType": "counter",
+        "tagDefine": [{"name": "ip", "readOnly": false}, {"name": "port_name", "readOnly": false}]
+    },
+    {
+        "agentType": "easyops",
+        "dataType": "double",
+        "instanceId": "",
+        "key": "m_port_rx_words",
+        "labels": [],
+        "metricType": "counter",
+        "tagDefine": [{"name": "ip", "readOnly": false}, {"name": "port_name", "readOnly": false}]
+    },
+    {
+        "agentType": "easyops",
+        "dataType": "double",
+        "instanceId": "",
+        "key": "m_port_tx_frames",
+        "labels": [],
+        "metricType": "counter",
+        "tagDefine": [{"name": "ip", "readOnly": false}, {"name": "port_name", "readOnly": false}]
+    },
+    {
+        "agentType": "easyops",
+        "dataType": "double",
+        "instanceId": "",
+        "key": "m_port_rx_frames",
+        "labels": [],
+        "metricType": "counter",
+        "tagDefine": [{"name": "ip", "readOnly": false}, {"name": "port_name", "readOnly": false}]
+    },
+    {
+        "agentType": "easyops",
+        "dataType": "double",
+        "instanceId": "",
+        "key": "m_port_c3_discards",
+        "labels": [],
+        "metricType": "counter",
+        "tagDefine": [{"name": "ip", "readOnly": false}, {"name": "port_name", "readOnly": false}]
+    },
+    {
+        "agentType": "easyops",
+        "dataType": "double",
+        "instanceId": "",
+        "key": "m_port_no_tx_credits",
+        "labels": [],
+        "metricType": "counter",
+        "tagDefine": [{"name": "ip", "readOnly": false}, {"name": "port_name", "readOnly": false}]
+    },
+    {
+        "agentType": "easyops",
+        "dataType": "double",
+        "instanceId": "",
+        "key": "m_port_crc_errors",
+        "labels": [],
+        "metricType": "counter",
+        "tagDefine": [{"name": "ip", "readOnly": false}, {"name": "port_name", "readOnly": false}]
+    },
+    {
+        "agentType": "easyops",
+        "dataType": "double",
+        "instanceId": "",
+        "key": "m_port_enc_in_errors",
+        "labels": [],
+        "metricType": "counter",
+        "tagDefine": [{"name": "ip", "readOnly": false}, {"name": "port_name", "readOnly": false}]
+    },
+    {
+        "agentType": "easyops",
+        "dataType": "double",
+        "instanceId": "",
+        "key": "m_port_enc_out_errors",
+        "labels": [],
+        "metricType": "counter",
+        "tagDefine": [{"name": "ip", "readOnly": false}, {"name": "port_name", "readOnly": false}]
+    },
+    {
+        "agentType": "easyops",
+        "dataType": "double",
+        "instanceId": "",
+        "key": "m_port_trunc_frames",
+        "labels": [],
+        "metricType": "counter",
+        "tagDefine": [{"name": "ip", "readOnly": false}, {"name": "port_name", "readOnly": false}]
+    },
+    {
+        "agentType": "easyops",
+        "dataType": "double",
+        "instanceId": "",
+        "key": "m_port_too_long_frames",
+        "labels": [],
+        "metricType": "counter",
+        "tagDefine": [{"name": "ip", "readOnly": false}, {"name": "port_name", "readOnly": false}]
+    },
+    {
+        "agentType": "easyops",
+        "dataType": "double",
+        "instanceId": "",
+        "key": "m_port_bad_eof",
+        "labels": [],
+        "metricType": "counter",
+        "tagDefine": [{"name": "ip", "readOnly": false}, {"name": "port_name", "readOnly": false}]
+    },
+    {
+        "agentType": "easyops",
+        "dataType": "double",
+        "instanceId": "",
+        "key": "m_port_link_failures",
+        "labels": [],
+        "metricType": "counter",
+        "tagDefine": [{"name": "ip", "readOnly": false}, {"name": "port_name", "readOnly": false}]
+    },
+    {
+        "agentType": "easyops",
+        "dataType": "double",
+        "instanceId": "",
+        "key": "m_port_sync_losses",
+        "labels": [],
+        "metricType": "counter",
+        "tagDefine": [{"name": "ip", "readOnly": false}, {"name": "port_name", "readOnly": false}]
+    },
+    {
+        "agentType": "easyops",
+        "dataType": "double",
+        "instanceId": "",
+        "key": "m_port_sig_losses",
+        "labels": [],
+        "metricType": "counter",
+        "tagDefine": [{"name": "ip", "readOnly": false}, {"name": "port_name", "readOnly": false}]
+    },
+    {
+        "agentType": "easyops",
+        "dataType": "double",
+        "instanceId": "",
+        "key": "m_port_credit_loss",
+        "labels": [],
+        "metricType": "counter",
+        "tagDefine": [{"name": "ip", "readOnly": false}, {"name": "port_name", "readOnly": false}]
+    },
+    {
+        "agentType": "easyops",
+        "dataType": "double",
+        "instanceId": "",
+        "key": "m_port_fec_uncorrected",
+        "labels": [],
+        "metricType": "counter",
+        "tagDefine": [{"name": "ip", "readOnly": false}, {"name": "port_name", "readOnly": false}]
+    },
+    {
+        "agentType": "easyops",
+        "dataType": "double",
+        "instanceId": "",
+        "key": "m_sensor_value",
+        "labels": [],
+        "metricType": "gauge",
+        "tagDefine": [{"name": "ip", "readOnly": false}, {"name": "sensor_name", "readOnly": false}]
+    },
+    {
+        "agentType": "easyops",
+        "dataType": "double",
+        "instanceId": "",
+        "key": "m_sensor_status",
+        "labels": [],
+        "metricType": "gauge",
+        "tagDefine": [{"name": "ip", "readOnly": false}, {"name": "sensor_name", "readOnly": false}]
+    },
+    {
+        "agentType": "easyops",
+        "dataType": "double",
+        "instanceId": "",
+        "key": "m_sfp_temperature",
+        "labels": [],
+        "metricType": "gauge",
+        "tagDefine": [{"name": "ip", "readOnly": false}, {"name": "port_name", "readOnly": false}]
+    },
+    {
+        "agentType": "easyops",
+        "dataType": "double",
+        "instanceId": "",
+        "key": "m_sfp_voltage",
+        "labels": [],
+        "metricType": "gauge",
+        "tagDefine": [{"name": "ip", "readOnly": false}, {"name": "port_name", "readOnly": false}]
+    },
+    {
+        "agentType": "easyops",
+        "dataType": "double",
+        "instanceId": "",
+        "key": "m_sfp_tx_power",
+        "labels": [],
+        "metricType": "gauge",
+        "tagDefine": [{"name": "ip", "readOnly": false}, {"name": "port_name", "readOnly": false}]
+    },
+    {
+        "agentType": "easyops",
+        "dataType": "double",
+        "instanceId": "",
+        "key": "m_sfp_rx_power",
+        "labels": [],
+        "metricType": "gauge",
+        "tagDefine": [{"name": "ip", "readOnly": false}, {"name": "port_name", "readOnly": false}]
+    }
+]

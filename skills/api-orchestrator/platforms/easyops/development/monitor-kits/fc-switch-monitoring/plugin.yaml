@@ -1,0 +1,176 @@
+type: simple-script
+name: 光纤交换机监控
+version: 1.0.17
+command:
+  collect:
+    interpreter: ''
+    scriptPath:
+    - src
+    - 光纤交换机监控.py
+    type: python
+    user: ''
+params:
+- ip
+- port
+- version
+- community
+- username
+- auth_key
+- auth_protocol
+- priv_key
+- priv_protocol
+- security_level
+- context_name
+- logLevel
+paramDefine:
+- name: ip
+  valueType: cmdb
+  defaultValue: $.ip
+  display: true
+  displayName: 设备IP
+  description: 光纤交换机管理IP
+  use: collectParams
+  optional: false
+  isFromSecret: false
+  isEncrypt: false
+  extraArgs: null
+- name: port
+  valueType: int
+  defaultValue: $.snmpPort
+  display: true
+  displayName: SNMP端口
+  description: 从$.snmpPort读取，空/null时默认161；非空非法端口报错
+  use: collectParams
+  optional: true
+  isFromSecret: false
+  isEncrypt: false
+  extraArgs: null
+- name: version
+  valueType: cmdb
+  defaultValue: $.auth.snmpVersion
+  display: true
+  displayName: SNMP版本
+  description: SNMP协议版本1/2c/3；缺省2c
+  use: collectParams
+  optional: true
+  isFromSecret: false
+  isEncrypt: false
+  extraArgs: null
+- name: community
+  valueType: cmdb
+  defaultValue: $.auth.community
+  display: true
+  displayName: SNMP团体名
+  description: SNMP v1/v2c团体名
+  use: collectParams
+  optional: true
+  isFromSecret: false
+  isEncrypt: false
+  extraArgs: null
+- name: username
+  valueType: cmdb
+  defaultValue: $.auth.securityName
+  display: true
+  displayName: SNMPv3用户名
+  description: SNMPv3安全名
+  use: collectParams
+  optional: true
+  isFromSecret: false
+  isEncrypt: false
+  extraArgs: null
+- name: auth_key
+  valueType: cmdb
+  defaultValue: $.auth.authKey
+  display: true
+  displayName: 认证密钥
+  description: SNMPv3认证密码
+  use: collectParams
+  optional: true
+  isFromSecret: false
+  isEncrypt: false
+  extraArgs: null
+- name: auth_protocol
+  valueType: cmdb
+  defaultValue: $.auth.authProtocol
+  display: true
+  displayName: 认证协议
+  description: SNMPv3认证协议(MD5/SHA)
+  use: collectParams
+  optional: true
+  isFromSecret: false
+  isEncrypt: false
+  extraArgs: null
+- name: priv_key
+  valueType: cmdb
+  defaultValue: $.auth.privKey
+  display: true
+  displayName: 加密密钥
+  description: SNMPv3加密密码
+  use: collectParams
+  optional: true
+  isFromSecret: false
+  isEncrypt: false
+  extraArgs: null
+- name: priv_protocol
+  valueType: cmdb
+  defaultValue: $.auth.privProtocol
+  display: true
+  displayName: 加密协议
+  description: SNMPv3加密协议(DES/AES)
+  use: collectParams
+  optional: true
+  isFromSecret: false
+  isEncrypt: false
+  extraArgs: null
+- name: security_level
+  valueType: cmdb
+  defaultValue: $.auth.securityLevel
+  display: true
+  displayName: 安全级别
+  description: SNMPv3安全级别，未配置时按密钥推导
+  use: collectParams
+  optional: true
+  isFromSecret: false
+  isEncrypt: false
+  extraArgs: null
+- name: context_name
+  valueType: cmdb
+  defaultValue: $.auth.contextName
+  display: true
+  displayName: 上下文名
+  description: SNMPv3上下文，取auth.contextName
+  use: collectParams
+  optional: true
+  isFromSecret: false
+  isEncrypt: false
+  extraArgs: null
+- name: logLevel
+  valueType: string
+  defaultValue: ERROR
+  display: true
+  displayName: 日志级别
+  description: 默认ERROR，DEBUG输出脱敏诊断；凭证不写日志
+  use: collectParams
+  optional: true
+  isFromSecret: false
+  isEncrypt: false
+  extraArgs: null
+agentType: easyops
+category: 基础设施.网络资源
+scriptType: python
+interpreter: ''
+memo: 光纤交换机SNMP监控；空端口默认161，前置认证检查，指标安全转换与阶段隔离
+icon: null
+relateObjectId: FIBERCHANNEL_SWITCH@ONEMODEL
+installPath: 光纤交换机监控
+samplerType: metric_sampler
+jobFilter: null
+protected: false
+noPackage: false
+collectType: []
+collectAgent: ''
+group: []
+rating: 0
+metricbeatName: ''
+processors: []
+extInfo: null

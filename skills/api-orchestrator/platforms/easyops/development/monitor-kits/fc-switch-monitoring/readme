@@ -1,0 +1,33 @@
+- 采集对象为 FIBERCHANNEL_SWITCH@ONEMODEL（光纤交换机）模型实例
+- 支持品牌自动探测：Brocade/博科、Cisco MDS、华为SNS（含OEM），其他品牌回退 FCMGMT-MIB
+- 必填字段：ip（管理IP）
+- SNMP认证参数从CMDB实例的auth结构体自动获取（snmpVersion/community/securityName/authKey/authProtocol/privKey/privProtocol）
+- 采集任务中监控对象建议通过条件动态筛选，是否监控: 是
+- 采集6个指标集：设备基础指标、FC端口状态、FC端口流量、FC端口错误、传感器指标、SFP光模块
+
+## v1.0.8 修复记录
+- 修复 SNMP walk 索引后缀提取未处理 OID 前导点导致的错位问题：此前绝大多数端口/传感器/SFP指标因索引无法匹配端口名而丢失，仅 m_port_enc_in_errors 偶然存活，现已全部恢复。
+- 修复 sysUpTime（Timeticks 类型）解析：原 `Timeticks: (nnn) ...` 字符串直接 float 报错并中断采集，现正确提取括号内厘秒值并转换为秒。
+- 修复 SFP port_name 映射：此前将 SFP 索引中的 WWN 残串作为端口名，现取索引末段端口号正确映射。
+- 修复端口运行状态映射 online(1) 被误判为 0 的笔误。
+- 过滤 "No Such Instance"/"End of MIB" 等无效 SNMP 响应，避免污染结果。
+- 说明：部分指标（如 m_port_tx_words/m_port_rx_words/m_port_speed）依赖设备实际提供的 OID，若设备对该 OID 返回 No Such Instance 则无数据（属设备本身不提供，非采集异常）。
+
+## 1.0.17 修复与使用
+
+- 套件名称、ZIP唯一顶层目录均为“光纤交换机监控”，清除旧包重复嵌套的同名目录；版本统一为1.0.17，`.py/.orig` 保持相同源码。
+- 管理地址仍取 `$.ip`，缺失、null或未解析的地址立即报告错误；`port` 仍取 `$.snmpPort`，缺省/空/null默认161，1~65535之外及非空非法值不静默替换。
+- SNMP版本缺省2c；v1/v2c必须有团体名，v3必须有安全名，authPriv必须有认证和隐私密钥。所有CMDB动态参数均不叠加任务密钥解析/加密标志，凭证由CMDB字段权限控制，不复制或改写实例凭证。
+- 新增可选参数 `security_level=$.auth.securityLevel`、`context_name=$.auth.contextName`；未设置安全级别时按已有密钥推导，保持旧任务兼容。
+- 一次sysDescr SNMP只读前置认证检查，原生超时3秒、零重试并用3秒进程期限兜底；失败立即跳过本轮业务采集。正式每条snmpget/snmpwalk默认10秒、零重试，带独立进程期限并回收超时进程。不使用shell拼接，也不依赖外部timeout程序。
+- 非数值NA、空值、NaN/Infinity等仅跳过对应指标，不伪造0；有效的0值保留。CPU、端口状态、流量、错误、传感器、SFP按阶段隔离，单个阶段异常不丢失其他阶段已获取的记录。
+- 顶层失败时stdout输出 `COLLECT_ERROR:`、函数标记和脱敏traceback，退出0供EasyOps展示错误正文；正常stdout仅为JSON数组。没有任何有效指标时不输出伪成功。命令行参数错误退出2，Ctrl+C可停止。
+- 日志默认ERROR，设置 `EASYOPS_COLLECTOR_logLevel=DEBUG` 或 `EASYOPS_LOG_LEVEL=DEBUG` 可看脱敏的OID响应、品牌选择和阶段记录数。不要在群聊发送凭证或未脱敏日志。
+- 保持33个原始指标、33个别名、6个指标集与原有告警定义。Brocade等分支未实现的Cisco专属5项指标不补零，不新增未经证实的OID。
+- 依赖EasyOps默认Python 2.7及Net-SNMP的snmpget/snmpwalk；脚本兼容Python 3。`python 光纤交换机监控.py --help` / `--version` 可直接查看说明，不会采集。
+
+### 导入与验收
+
+在“监控套件”导入本ZIP；已有同名监控套件使用升级/更新，保留其instanceId，不删除旧套件或重建任务。名称相近的“光纤交换机信息采集”是CMDB配置采集，不能用本监控包覆盖。
+
+本次仅授权同步套件定义，不自动激活、创建或启动采集任务。导入后应核对模型 `FIBERCHANNEL_SWITCH@ONEMODEL`、版本、33项指标/6个指标集、参数映射和认证字段权限，再在实际设备采集环境验收。CSV来源环境与当前配置环境不同，导入成功不等于CSV设备已恢复。

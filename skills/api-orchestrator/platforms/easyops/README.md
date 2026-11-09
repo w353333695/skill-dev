@@ -276,4 +276,4 @@ object_model.list(查证objectId) → collector_metric.list(查证指标名) →
 
 ## 交换机监控更新（2026-11-09）
 
-通用交换机监控 1.1.9：保留 `$.ip`，空/null SNMP 端口默认 161；已同步配置环境并回流 Hub。光纤交换机 Hub 包的进程退出、可选指标缺项及包结构问题仅完成离线诊断。证据、适用环境和未验收边界见 `development/docs/monitor-kits/交换机与光纤交换机监控_2026-11-09.md`，成品见 `hub/INDEX.yaml`。
+通用交换机监控 1.1.9：保留 `$.ip`，空/null SNMP 端口默认 161；已同步配置环境并回流 Hub。光纤交换机监控 1.0.17 已修复并同步配置环境与 Hub，24项离线回归通过；未激活或启动采集任务，不能据此认定CSV设备恢复。光交修复验收见 `development/docs/monitor-kits/光纤交换机监控修复验收_2026-11-09.md`。证据、适用环境和未验收边界见 `development/docs/monitor-kits/交换机与光纤交换机监控_2026-11-09.md`，成品见 `hub/INDEX.yaml`。

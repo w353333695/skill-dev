@@ -226,13 +226,14 @@ items:
   - id: fc-switch-monitor-kit
     name: 光纤交换机监控套件
     category: monitor-kits
-    files: [光纤交换机监控套件_v1.0.15.zip, 光纤交换机监控_告警规则模板.xlsx]
-    version: "1.0.16"
+    files: [监控套件_光纤交换机监控_1.0.17.zip, 光纤交换机监控_告警规则模板.xlsx]
+    version: "1.0.17"
     history:
       - {ver: "1.0.16", date: "2026-08-29", change: 初版入库}
       - {ver: "1.0.15", date: "2026-11-04", change: "将配套告警规则模板同步打包到 alertRule/*.json"}
+      - {ver: "1.0.17", date: "2026-11-09", change: "修复null端口、认证、子进程超时和NA转换；规范单根目录；24项离线回归通过，导入配置环境并回读"}
     scenario: 光纤交换机(Brocade/华为OEM) SNMP 指标监控套件+告警规则模板
-    notes: 告警规则模板与套件配套，不单独成商品
+    notes: "配置环境192.168.110.24套件65fd29bf3b835，available；未激活、未建任务、未真机采集；33原始/33别名/6指标集定义已回读。详见development/docs/monitor-kits/光纤交换机监控修复验收_2026-11-09.md"
     added: "2026-08-29"
   - id: sangfor-ad-monitor-kit
     name: 深信服AD负载均衡器监控套件
