@@ -63,6 +63,14 @@ def validate_dir(root, require_name_match=False):
         raise ValidationError("plugin.yaml 缺少 version")
     if require_name_match and root.name != name.group(1).strip():
         raise ValidationError("ZIP/目录名 %s 与 plugin.yaml.name %s 不一致" % (root.name, name.group(1).strip()))
+    source_files = list((root / "src").glob("*.py")) if (root / "src").exists() else []
+    for source in source_files:
+        orig = source.with_suffix(".orig")
+        if not orig.exists() or orig.stat().st_size == 0:
+            raise ValidationError("缺少与 %s 对应的 src/%s.orig" % (source.name, source.stem))
+    for forbidden in root.rglob("*"):
+        if forbidden.is_file() and ("__pycache__" in forbidden.parts or forbidden.suffix == ".pyc"):
+            raise ValidationError("ZIP/目录禁止包含缓存文件: %s" % forbidden.relative_to(root))
     origin = load_json(root / "origin_metric.json", "origin_metric.json")
     metric_keys = {row.get("key") for row in origin if isinstance(row, dict) and row.get("key")}
     alias_path = root / "alias_metric.json"
