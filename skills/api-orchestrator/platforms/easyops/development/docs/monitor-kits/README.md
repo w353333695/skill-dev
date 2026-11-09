@@ -115,3 +115,7 @@ python3 skills/api-orchestrator/platforms/easyops/development/scripts/validate_m
 - 导入前读取目标模型，逐项核对 `$.ip`、`$.snmp_conf.*`。缺失属性只能在明确授权后新增，不迁移任何真实凭证。模型更新须保留保护标记、继承、已有属性、视图及权限；视图中的 `attr_authorizers` 可能为 null，合并前按空对象处理。
 - 当前环境已为存储模型新增 `snmp_conf` struct，含 snmpVersion/snmpPort/community/securityLevel/securityName/authProtocol/authKey/privProtocol/privKey/contextName；读取权限为 easyops 及平台管理员，字段权限不等于加密。
 - 新实例 `65fcf03206da9`，名称“存储设备SNMP监控-存储模型”，版本 `0.1.6`，回读关联模型为存储模型、状态 available。这只证明导入和定义回读，不证明激活、告警落库或真机采集成功。
+
+## 通用交换机与光纤交换机排查（2026-11-09）
+
+见 `交换机与光纤交换机监控_2026-11-09.md`：通用交换机 1.1.9 已在配置环境升级并回读；地址保持 `$.ip`、空/null 端口默认 161。光交仅完成 CSV、Hub 包审计与离线故障复现，尚未修改或发布光交套件，不能把 `exit status 1` 直接归因到某个 OID。

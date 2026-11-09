@@ -7,6 +7,17 @@
 #   如「ITSM服务_主机申请_1.3.4.zip」；旧命名 <名称>_v<版本>.<ext> 存量不动，新版回流按新命名+删旧版文件
 # 存放规则: 仅收录成品包及可导入模板；未完成源码、tests、临时文件位于 ../development/；已验证可复用脚本源码可归档到 hub/scripts/。
 items:
+  - id: generic-switch-monitor-kit
+    name: 通用交换机监控
+    category: monitor-kits
+    files: [监控套件_通用交换机监控_1.1.9.zip]
+    version: "1.1.9"
+    history:
+      - {ver: "1.1.9", date: "2026-11-09", change: "从环境1.1.8导出升级；地址保持$.ip；空/null端口在Go模板降级161；保持指标、品牌分支、处理器和仪表盘"}
+    scenario: 通用交换机 SNMP metricbeat 指标采集；动态端口空值兼容
+    notes: "环境192.168.110.24/org1888，instanceId=65dc3d5759319；已升级并回读为1.1.9/enabled，重新导出核验模板和指标定义；57项离线模板场景通过。不代表CSV来源11.66.19.194真机采集已恢复，未批量改任务或设备数据。"
+    added: "2026-11-09"
+
   - id: easyops-development-script-bundle
     name: EasyOps开发脚本合集
     category: scripts

@@ -1,0 +1,301 @@
+type: metricbeat
+name: 通用交换机监控
+version: 1.1.9
+command:
+    collect: null
+params:
+    - snmpIp
+    - snmpPort
+    - community
+    - version
+    - username
+    - password
+    - auth_protocol
+    - priv_protocol
+    - priv_password
+    - context_name
+    - security_level
+    - brand
+    - interface_names
+paramDefine:
+    - name: snmpIp
+      valueType: string
+      defaultValue: $.ip
+      display: true
+      displayName: ""
+      description: ""
+      use: collectorParams
+      optional: true
+      isFromSecret: false
+      isEncrypt: false
+      extraArgs: null
+    - name: snmpPort
+      valueType: string
+      defaultValue: $.snmpPort
+      display: true
+      displayName: ""
+      description: ""
+      use: collectorParams
+      optional: true
+      isFromSecret: false
+      isEncrypt: false
+      extraArgs: null
+    - name: community
+      valueType: string
+      defaultValue: $.auth.community
+      display: true
+      displayName: ""
+      description: ""
+      use: collectorParams
+      optional: true
+      isFromSecret: false
+      isEncrypt: false
+      extraArgs: null
+    - name: version
+      valueType: string
+      defaultValue: $.auth.snmpVersion
+      display: true
+      displayName: ""
+      description: ""
+      use: collectorParams
+      optional: true
+      isFromSecret: false
+      isEncrypt: false
+      extraArgs: null
+    - name: username
+      valueType: string
+      defaultValue: $.auth.securityName
+      display: true
+      displayName: ""
+      description: ""
+      use: collectorParams
+      optional: true
+      isFromSecret: false
+      isEncrypt: false
+      extraArgs: null
+    - name: password
+      valueType: string
+      defaultValue: $.auth.authKey
+      display: true
+      displayName: ""
+      description: ""
+      use: collectorParams
+      optional: true
+      isFromSecret: false
+      isEncrypt: false
+      extraArgs: null
+    - name: auth_protocol
+      valueType: string
+      defaultValue: $.auth.authProtocol
+      display: true
+      displayName: ""
+      description: ""
+      use: collectorParams
+      optional: true
+      isFromSecret: false
+      isEncrypt: false
+      extraArgs: null
+    - name: priv_protocol
+      valueType: string
+      defaultValue: $.auth.privProtocol
+      display: true
+      displayName: ""
+      description: ""
+      use: collectorParams
+      optional: true
+      isFromSecret: false
+      isEncrypt: false
+      extraArgs: null
+    - name: priv_password
+      valueType: string
+      defaultValue: $.auth.privKey
+      display: true
+      displayName: ""
+      description: ""
+      use: collectorParams
+      optional: true
+      isFromSecret: false
+      isEncrypt: false
+      extraArgs: null
+    - name: context_name
+      valueType: string
+      defaultValue: $.auth.context_name
+      display: true
+      displayName: ""
+      description: ""
+      use: collectorParams
+      optional: true
+      isFromSecret: false
+      isEncrypt: false
+      extraArgs: null
+    - name: security_level
+      valueType: string
+      defaultValue: $.auth.securityLevel
+      display: true
+      displayName: ""
+      description: ""
+      use: collectorParams
+      optional: true
+      isFromSecret: false
+      isEncrypt: false
+      extraArgs: null
+    - name: brand
+      valueType: string
+      defaultValue: $.brand
+      display: true
+      displayName: 品牌名
+      description: ""
+      use: collectorParams
+      optional: false
+      isFromSecret: false
+      isEncrypt: false
+      extraArgs: null
+    - name: interface_names
+      valueType: string
+      defaultValue: $.netdports[?(@.isMonitor == 是)].ifName.join()
+      display: true
+      displayName: 端口名称列表
+      description: ""
+      use: collectorParams
+      optional: false
+      isFromSecret: false
+      isEncrypt: false
+      extraArgs: null
+agentType: metricbeat
+category: 网络设备
+scriptType: ""
+interpreter: ""
+memo: ""
+icon: null
+relateObjectId: SWITCH@ONEMODEL
+installPath: 交换机微应用监控套件
+samplerType: metric_sampler
+jobFilter: null
+protected: false
+noPackage: true
+collectType: []
+collectAgent: ""
+group: []
+rating: 0
+metricbeatName: redis
+processors:
+    - name: format_uptime
+      action:
+        func: calculate
+        param:
+            expression: '[snmp.netware.uptime] / 100'
+            targetField: snmp.netware.uptime
+      output: {}
+      parents: []
+    - name: format_fan_index
+      action:
+        func: format
+        param:
+            format: FAN:%v
+            metricName: snmp.netware.fan_name
+            target: snmp.netware.fan_name
+      output: {}
+      parents: []
+    - name: format_power_index
+      action:
+        func: format
+        param:
+            format: POWER:%v
+            metricName: snmp.netware.power_name
+            target: snmp.netware.power_name
+      output: {}
+      parents: []
+    - name: format_cpu_name
+      action:
+        func: format
+        param:
+            format: '%v'
+            metricName: snmp.netware.device_name
+            target: snmp.netware.cpu_name
+      output: {}
+      parents: []
+    - name: format_memory_name
+      action:
+        func: format
+        param:
+            format: '%v'
+            metricName: snmp.netware.device_name
+            target: snmp.netware.memory_name
+      output: {}
+      parents: []
+    - name: format_temperature_name
+      action:
+        func: format
+        param:
+            format: '%v'
+            metricName: snmp.netware.device_name
+            target: snmp.netware.temperature_name
+      output: {}
+      parents: []
+    - name: cal_memory_pct
+      action:
+        func: calculate
+        param:
+            expression: '[snmp.netware.memory_used] / ([snmp.netware.memory_used]+[snmp.netware.memory_free]) * 100'
+            targetField: snmp.netware.memory_utilization
+      output: {}
+      parents: []
+    - name: cal_device_ifhcinoctets_per_sec
+      action:
+        func: rate
+        param:
+            dims:
+                - snmp.netware.device_ifname
+            metricName: snmp.netware.device_ifhcinoctets
+            targetField: snmp.netware.device_ifhcinoctets_per
+      output: {}
+      parents: []
+    - name: cal_device_ifhcoutoctets_per_sec
+      action:
+        func: rate
+        param:
+            dims:
+                - snmp.netware.device_ifname
+            metricName: snmp.netware.device_ifhcoutoctets
+            targetField: snmp.netware.device_ifhcoutoctets_per
+      output: {}
+      parents: []
+    - name: cal_device_ifinerrors_per_sec
+      action:
+        func: rate
+        param:
+            dims:
+                - snmp.netware.device_ifname
+            metricName: snmp.netware.device_ifinerrors
+            targetField: snmp.netware.device_ifinerrors_per
+      output: {}
+      parents: []
+    - name: cal_device_ifouterrors_per_sec
+      action:
+        func: rate
+        param:
+            dims:
+                - snmp.netware.device_ifname
+            metricName: snmp.netware.device_ifouterrors
+            targetField: snmp.netware.device_ifouterrors_per
+      output: {}
+      parents: []
+    - name: cal_device_if_in_utilization
+      action:
+        func: calculate
+        param:
+            expression: ([snmp.netware.device_ifhcinoctets_per] * 8) / ([snmp.netware.device_ifspeed] * 1000000) * 100
+            targetField: snmp.netware.device_if_in_utilization
+      output: {}
+      parents: []
+    - name: cal_device_if_out_utilization
+      action:
+        func: calculate
+        param:
+            expression: ([snmp.netware.device_ifhcoutoctets_per] * 8) / ([snmp.netware.device_ifspeed] * 1000000) * 100
+            targetField: snmp.netware.device_if_out_utilization
+      output: {}
+      parents: []
+extInfo:
+    - brand: New  Technologies Co., Ltd
+      series: ""

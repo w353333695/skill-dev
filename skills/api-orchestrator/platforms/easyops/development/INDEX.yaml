@@ -1,6 +1,16 @@
 # 开发源码索引（由原 Hub 脚本条目迁移；不是成品商店索引）
 # category/files 相对本 development 目录；成品包查 ../hub/INDEX.yaml。
 items:
+  - id: generic-switch-monitor-source
+    name: 通用交换机监控源码与回归
+    category: monitor-kits
+    files: [generic-switch-monitoring/plugin.yaml, generic-switch-monitoring/config.template.yaml]
+    history:
+      - {date: "2026-11-09", change: "从环境1.1.8导出为可复现构建源，修复$.ip和null端口，交付1.1.9；增加57项Go模板渲染场景与2项光交故障复现"}
+    scenario: 通用交换机监控维护与光纤交换机监控离线诊断
+    notes: "详见 docs/monitor-kits/交换机与光纤交换机监控_2026-11-09.md；测试位于 tests/monitor-kits/，成品在Hub。"
+    added: "2026-11-09"
+
   - id: baseline-checker
     name: 配置基线管理
     category: scripts
