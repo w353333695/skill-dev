@@ -1,6 +1,6 @@
 type: simple-script
-name: 存储设备SNMP监控
-version: "0.1.5"
+name: 存储设备SNMP监控-存储模型
+version: "0.1.6"
 command:
     collect:
         interpreter: ""
@@ -39,4 +39,4 @@ scriptType: python
 interpreter: ""
 memo: "通过标准SNMP与厂商私有MIB监控存储阵列；标准HOST-RESOURCES-MIB作为通用兜底"
 icon: null
-relateObjectId: HOST
+relateObjectId: STORAGE@ONEMODEL

@@ -1,7 +1,7 @@
 [
   {
-    "objectId": "HOST",
+    "objectId": "STORAGE@ONEMODEL",
     "category": "存储.存储设备",
-    "type": "HOST"
+    "type": "STORAGE@ONEMODEL"
   }
 ]

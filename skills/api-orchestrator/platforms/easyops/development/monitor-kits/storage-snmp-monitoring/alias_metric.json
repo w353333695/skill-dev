@@ -22,7 +22,7 @@
       "基础信息"
     ],
     "name": "storage_snmp_available",
-    "objectId": "HOST",
+    "objectId": "STORAGE@ONEMODEL",
     "originalMetrics": [
       "storage_snmp_available"
     ],
@@ -52,7 +52,7 @@
       "基础信息"
     ],
     "name": "storage_info_sys_descr",
-    "objectId": "HOST",
+    "objectId": "STORAGE@ONEMODEL",
     "originalMetrics": [
       "storage_info_sys_descr"
     ],
@@ -82,7 +82,7 @@
       "基础信息"
     ],
     "name": "storage_info_sys_objectid",
-    "objectId": "HOST",
+    "objectId": "STORAGE@ONEMODEL",
     "originalMetrics": [
       "storage_info_sys_objectid"
     ],
@@ -130,7 +130,7 @@
       "阵列健康"
     ],
     "name": "storage_info_version",
-    "objectId": "HOST",
+    "objectId": "STORAGE@ONEMODEL",
     "originalMetrics": [
       "storage_info_version"
     ],
@@ -160,7 +160,7 @@
       "基础信息"
     ],
     "name": "storage_uptime_ticks",
-    "objectId": "HOST",
+    "objectId": "STORAGE@ONEMODEL",
     "originalMetrics": [
       "storage_uptime_ticks"
     ],
@@ -190,7 +190,7 @@
       "基础信息"
     ],
     "name": "storage_snmp_error",
-    "objectId": "HOST",
+    "objectId": "STORAGE@ONEMODEL",
     "originalMetrics": [
       "storage_snmp_error"
     ],
@@ -238,7 +238,7 @@
       "容量与文件系统"
     ],
     "name": "storage_capacity_bytes",
-    "objectId": "HOST",
+    "objectId": "STORAGE@ONEMODEL",
     "originalMetrics": [
       "storage_capacity_bytes"
     ],
@@ -286,7 +286,7 @@
       "容量与文件系统"
     ],
     "name": "storage_used_bytes",
-    "objectId": "HOST",
+    "objectId": "STORAGE@ONEMODEL",
     "originalMetrics": [
       "storage_used_bytes"
     ],
@@ -334,7 +334,7 @@
       "容量与文件系统"
     ],
     "name": "storage_used_percent",
-    "objectId": "HOST",
+    "objectId": "STORAGE@ONEMODEL",
     "originalMetrics": [
       "storage_used_percent"
     ],
@@ -382,7 +382,7 @@
       "阵列健康"
     ],
     "name": "storage_status",
-    "objectId": "HOST",
+    "objectId": "STORAGE@ONEMODEL",
     "originalMetrics": [
       "storage_status"
     ],
@@ -430,7 +430,7 @@
       "阵列健康"
     ],
     "name": "storage_failed_disk_count",
-    "objectId": "HOST",
+    "objectId": "STORAGE@ONEMODEL",
     "originalMetrics": [
       "storage_failed_disk_count"
     ],
@@ -478,7 +478,7 @@
       "组件发现"
     ],
     "name": "storage_resource_present",
-    "objectId": "HOST",
+    "objectId": "STORAGE@ONEMODEL",
     "originalMetrics": [
       "storage_resource_present"
     ],
@@ -526,7 +526,7 @@
       "组件发现"
     ],
     "name": "storage_resource_value",
-    "objectId": "HOST",
+    "objectId": "STORAGE@ONEMODEL",
     "originalMetrics": [
       "storage_resource_value"
     ],

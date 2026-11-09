@@ -638,9 +638,10 @@ items:
   - id: storage-snmp-monitor-kit
     name: 存储设备SNMP监控套件
     category: monitor-kits
-    files: [存储设备SNMP监控套件_0.1.5.zip, 存储设备SNMP监控_告警规则模板_0.1.1.xlsx]
-    version: "0.1.5"
+    files: [存储设备SNMP监控套件_0.1.6.zip, 存储设备SNMP监控_告警规则模板_0.1.6.xlsx]
+    version: "0.1.6"
     history:
+      - {ver: "0.1.6", date: "2026-11-09", change: "绑定STORAGE@ONEMODEL；当前环境新增snmp_conf并保留模型原配置；指标、告警和Excel同步切换；因平台不支持原地修改关联模型，另名导入为存储设备SNMP监控-存储模型，instanceId=65fcf03206da9；导入和模型回读通过，激活与真机采集待验收"}
       - {ver: "0.1.5", date: "2026-11-06", change: "用 import_update 重新导入修复后的原始指标、别名指标和指标集，解决激活阶段 originMetric 分页校验错误"}
       - {ver: "0.1.4", date: "2026-11-06", change: "修复 alias_metric.json 字段契约，补齐 name/originalMetrics/dims/metricSet/type，使激活阶段可正确检索指标"}
       - {ver: "0.1.3", date: "2026-11-06", change: "修复 resource_discovery_define.json 顶层类型：由对象改为平台要求的数组，并进行当前环境再次导入验证"}

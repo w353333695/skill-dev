@@ -105,3 +105,13 @@ python3 skills/api-orchestrator/platforms/easyops/development/scripts/validate_m
 4. 确认 `metricSet` 中的名称都存在于 `metric_set.json`，`originalMetrics` 都存在于 `origin_metric.json`。
 5. 若套件已用错误版本导入，不能只重试激活；必须递增版本并用 `import_update` 重新导入附属指标，再重新查询指标元数据。
 6. 若原始指标和别名指标都正常而仍报 `page_size`，再核对激活接口的请求分页参数；`page_size=0`、缺失分页字段或调用了错误端口/旧 contract 都属于平台调用问题，不应修改 OID 或采集脚本掩盖。
+
+## 关联模型迁移与动态参数核对
+
+2026-11-09，当前 demo 环境存储套件实测：`import_update` 将 `relateObjectId` 从 `HOST` 改为 `STORAGE@ONEMODEL` 返回 `100010`，内部原因为“不支持修改适用监控资源，请修改后重新上传”。不能把换模型当成普通升级，也不能用 `upsert` 绕过校验；应新名称导入，保留旧套件和旧任务，由使用者迁移采集目标。
+
+- 存储设备使用 `STORAGE@ONEMODEL`；`HOST-RESOURCES-MIB` 是协议名称，不决定 CMDB 模型归属。
+- `plugin.yaml.relateObjectId`、别名指标、告警规则（含嵌套策略）、Excel 和资源发现的模型引用必须一致；资源发现 `type` 按目标环境契约核对。
+- 导入前读取目标模型，逐项核对 `$.ip`、`$.snmp_conf.*`。缺失属性只能在明确授权后新增，不迁移任何真实凭证。模型更新须保留保护标记、继承、已有属性、视图及权限；视图中的 `attr_authorizers` 可能为 null，合并前按空对象处理。
+- 当前环境已为存储模型新增 `snmp_conf` struct，含 snmpVersion/snmpPort/community/securityLevel/securityName/authProtocol/authKey/privProtocol/privKey/contextName；读取权限为 easyops 及平台管理员，字段权限不等于加密。
+- 新实例 `65fcf03206da9`，名称“存储设备SNMP监控-存储模型”，版本 `0.1.6`，回读关联模型为存储模型、状态 available。这只证明导入和定义回读，不证明激活、告警落库或真机采集成功。
