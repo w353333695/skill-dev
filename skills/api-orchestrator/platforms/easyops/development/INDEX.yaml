@@ -1,6 +1,16 @@
 # 开发源码索引（由原 Hub 脚本条目迁移；不是成品商店索引）
 # category/files 相对本 development 目录；成品包查 ../hub/INDEX.yaml。
 items:
+  - id: ping-monitor-source
+    name: 主机Ping监控源码与离线回归
+    category: monitor-kits
+    files: [monitor-kits/ping-monitoring/plugin.yaml, monitor-kits/ping-monitoring/src/ping_monitor.py, monitor-kits/ping-monitoring/src/ping_monitor.orig]
+    history:
+      - {date: "2026-11-10", change: "初版开发；5项离线回归通过，包含无网络模拟、参数校验和成品包结构校验"}
+    scenario: HOST模型ICMP Ping监控套件开发
+    notes: "成品在../hub/monitor-kits/监控套件_主机Ping监控_0.1.0.zip；未导入配置环境、未执行真实设备Ping。"
+    added: "2026-11-10"
+
   - id: fc-switch-monitor-source
     name: 光纤交换机监控源码与离线回归
     category: monitor-kits

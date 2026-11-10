@@ -7,6 +7,16 @@
 #   如「ITSM服务_主机申请_1.3.4.zip」；旧命名 <名称>_v<版本>.<ext> 存量不动，新版回流按新命名+删旧版文件
 # 存放规则: 仅收录成品包及可导入模板；未完成源码、tests、临时文件位于 ../development/；已验证可复用脚本源码可归档到 hub/scripts/。
 items:
+  - id: ping-monitor-kit
+    name: 主机Ping监控
+    category: monitor-kits
+    files: [监控套件_主机Ping监控_0.1.0.zip]
+    version: "0.1.0"
+    history:
+      - {ver: "0.1.0", date: "2026-11-10", change: "初版：基于HOST.ip的ICMP可达性、丢包率和往返时延监控，含默认告警规则"}
+    scenario: 主机ICMP Ping可达性监控
+    notes: "执行节点需要ping命令；ICMP可达不等同于TCP端口或业务协议可用性。未同步配置环境。"
+    added: "2026-11-10"
   - id: generic-switch-monitor-kit
     name: 通用交换机监控
     category: monitor-kits

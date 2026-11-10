@@ -1,0 +1,27 @@
+type: simple-script
+name: 主机Ping监控
+version: "0.1.0"
+command:
+    collect:
+        interpreter: ""
+        scriptPath:
+            - src
+            - ping_monitor.py
+        type: python
+        user: ""
+params:
+    - ip
+    - count
+    - timeout
+paramDefine:
+    - {name: ip, valueType: string, defaultValue: $.ip, display: true, displayName: "目标IP", description: "取HOST模型的ip属性", use: collectParams, optional: false, isFromSecret: false, isEncrypt: false, extraArgs: null}
+    - {name: count, valueType: int, defaultValue: "3", display: true, displayName: "Ping次数", description: "每次采集发送的ICMP请求数，默认3", use: collectParams, optional: true, isFromSecret: false, isEncrypt: false, extraArgs: null}
+    - {name: timeout, valueType: int, defaultValue: "2", display: true, displayName: "单次超时秒数", description: "单个ICMP请求超时时间，默认2秒", use: collectParams, optional: true, isFromSecret: false, isEncrypt: false, extraArgs: null}
+agentType: easyops
+category: 基础设施.网络资源
+scriptType: python
+interpreter: ""
+samplerType: metric_sampler
+memo: "通过执行节点ICMP Ping采集主机可达性、丢包率和往返时延；不等同于TCP端口或业务协议可用性。"
+icon: null
+relateObjectId: HOST
