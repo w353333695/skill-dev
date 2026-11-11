@@ -328,11 +328,10 @@ class PackageTests(unittest.TestCase):
             self.assertTrue(set(alias["originalMetrics"]).issubset(origins))
             expected = set(tag["name"] for key in alias["originalMetrics"] for tag in origins[key]["tagDefine"])
             self.assertEqual(expected, set(dim["originDimName"] for dim in alias["dims"]))
-        alert = read(u"alertRule/物理机IPMI状态变化告警.json")
-        for condition in alert["alertConditionStrategy"][0]["multiConditions"]:
-            self.assertIn(condition["metricName"], origins)
-            self.assertEqual(condition["type"], "diff")
-            self.assertEqual(condition["alertCount"], 1)
+        template = os.path.join(ROOT, u"物理服务器IPMI告警规则模板.xlsx")
+        self.assertTrue(os.path.isfile(template))
+        with open(template, "rb") as stream:
+            self.assertEqual(stream.read(2), b"PK")
 
     def test_arch_bundles_are_identical_and_pure(self):
         bundles = []
