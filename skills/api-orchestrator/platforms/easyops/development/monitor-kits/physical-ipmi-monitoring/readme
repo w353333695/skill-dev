@@ -14,6 +14,8 @@ username/password：必填，建议专用只读账号。密码/密钥使用平�
 kg：可选，BMC要求的KG密钥（文本原值，不自行转hex），默认空。
 port：UDP端口，默认623，范围1..65535。
 timeout：本轮总超时秒数，默认60，范围5..300，退出前另有最多2秒注销时间。
+login_timeout：认证预检查独立短超时，默认5秒，范围1..30；一次登录尝试，pyghmi协议重传受此时限约束。
+预检查使用同一BMC/端口/认证，不使用Ping替代；失败跳过全量SDR采集，不重复登录或轮询至成功。
 privilege：默认2(USER)，可选3(OPERATOR)，不请求ADMIN。设备拒绝时先确认账号权限，勿随意提升权限。
 支持Linux x86_64/amd64及aarch64/arm64、CPython 2.7或Python 3；Linux需有标准库ctypes支持。
 采集周期建议至少120秒，超时设为小于采集周期；大型SDR仓库需调高timeout。
@@ -22,7 +24,7 @@ privilege：默认2(USER)，可选3(OPERATOR)，不请求ADMIN。设备拒绝时
 vendor/x86_64/dependencies.zip和vendor/arm64/dependencies.zip分别提供完整第三方运行子集，
 均为纯Python，内容相同，按架构选择；不需要pip、编译器、ipmitool或架构相关.so，不改系统Python。
 依赖：pyghmi 1.5.61（Apache-2.0，只取Session/SDR及其依赖模块）、pyaes 1.6.1（MIT）、six 1.17.0（MIT）。
-pyghmi不是未经修改的官方发行包：仅将两处AES-CBC调用替换为pyaes，禁止IPMI1.5降级。
+pyghmi不是未经修改的官方发行包：仅将两处AES-CBC调用替换为pyaes，禁止IPMI1.5降级，移除上游会话模块的远控示例入口，修正pause吞掉超时及诊断print污染stdout的问题。
 补丁在third-party/pyghmi-pureaes.patch；上游来源/原包SHA256在dependencies.lock.json。
 各依赖原始许可证保留在每个依赖ZIP的LICENSES目录，原始模块的版权声明保持不变。
 不包含Redfish、OEM扩展和pyghmi命令行管理工具，也不需要cryptography、cffi、dateutil。
@@ -37,6 +39,7 @@ python src/ipmi_monitor.py --check-config
 --doctor校验本地导入及NIST AES-CBC向量；--check-config校验环境参数但不输出参数。
 实际采集：由EasyOps任务无参数运行脚本。采集正常输出JSON数组；入口错误输出COLLECT_ERROR及脱敏traceback，退出0供前端展示。
 BMC登录失败输出available=0、错误数和脱敏摘要；局部传感器失败继续输出已有读数。
+日志默认ERROR，EASYOPS_LOG_LEVEL或LOG_LEVEL可设DEBUG，输出只读命令原始响应及最终结果；始终脱敏凭证，不记录握手密钥。
 
 五、指标语义
 统一前缀physical_ipmi_，中文别名统一“物理机IPMI-”避免与其他协议重名。

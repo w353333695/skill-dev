@@ -7,13 +7,16 @@ import json
 import logging
 import os
 import signal
-import stat
 import subprocess
 import sys
 import time
 import types
 import unittest
 import zipfile
+try:
+    from StringIO import StringIO
+except ImportError:
+    from io import StringIO
 
 ROOT = os.environ["IPMI_KIT_ROOT"]
 SCRIPT = os.path.join(ROOT, "src", "ipmi_monitor.py")
@@ -58,6 +61,7 @@ class FakeReader(object):
     def __init__(self, settings):
         FakeReader.instance = self
         self.closed = False
+        self.sdr_called = False
 
     def login(self):
         if self.fail_login:
@@ -67,6 +71,7 @@ class FakeReader(object):
         return 1
 
     def sensors(self):
+        self.sdr_called = True
         return ["1.0", "2.0", "3.0"]
 
     def sensor(self, identifier):
@@ -108,6 +113,7 @@ class CollectorTests(unittest.TestCase):
         values = rows[0]["vals"]
         self.assertEqual(values["physical_ipmi_available"], 0)
         self.assertNotIn("physical_ipmi_power_on", values)
+        self.assertFalse(FakeReader.instance.sdr_called)
         for secret in (SETTINGS["password"], SETTINGS["kg"]):
             self.assertNotIn(secret, json.dumps(rows))
             self.assertNotIn(secret, self.log.getvalue())
@@ -211,6 +217,40 @@ class CollectorTests(unittest.TestCase):
             monitor.load_dependencies()
             self.assertIn("arm64", sys.path[0])
 
+    def test_main_output_is_only_json(self):
+        environment = dict(("EASYOPS_COLLECTOR_" + key, str(value)) for key, value in SETTINGS.items())
+        output = StringIO()
+        rows = monitor.collect(SETTINGS, FakeReader)
+        with changed(os, "environ", environment):
+            with changed(monitor, "collect", lambda settings: rows):
+                with changed(sys, "stdout", output):
+                    self.assertEqual(monitor.main([]), 0)
+        self.assertEqual(json.loads(output.getvalue()), rows)
+
+    def test_escaped_secret_is_redacted(self):
+        secret = u"fixture\n\t\\secret"
+        settings = dict(SETTINGS, password=secret)
+        for value in (secret, json.dumps(secret), repr(secret)):
+            cleaned = monitor.scrub(value, settings)
+            self.assertNotIn(secret, cleaned)
+            self.assertNotIn("fixture", cleaned)
+
+    def test_hash_mismatch_is_rejected(self):
+        class BadDigest(object):
+            def hexdigest(self):
+                return "0" * 64
+        with changed(monitor.hashlib, "sha256", lambda content: BadDigest()):
+            self.assertRaises(RuntimeError, monitor.load_dependencies)
+
+    def test_optional_none_defaults(self):
+        environment = dict(("EASYOPS_COLLECTOR_" + key, str(value)) for key, value in SETTINGS.items())
+        for key in ("port", "timeout", "login_timeout", "privilege"):
+            environment["EASYOPS_COLLECTOR_" + key] = None
+        with changed(os, "environ", environment):
+            settings = monitor.config()
+        self.assertEqual((settings["port"], settings["timeout"], settings["login_timeout"], settings["privilege"]),
+                         (623, 60, 5, 2))
+
     def test_dimensions_match_definitions(self):
         with io.open(os.path.join(ROOT, "origin_metric.json"), encoding="utf-8") as stream:
             origins = dict((row["key"], row) for row in json.load(stream))
@@ -220,6 +260,16 @@ class CollectorTests(unittest.TestCase):
 
 
 class ProtocolTests(unittest.TestCase):
+    def test_pause_propagates_timeout(self):
+        class FakePause(object):
+            @classmethod
+            def wait_for_rsp(cls, timeout):
+                raise monitor.CollectTimeout("fixture interrupted wait")
+        method = session.Session.pause
+        implementation = getattr(method, "__func__", None) or method.im_func
+        with changed(session, "_monotonic_time", lambda: 0):
+            self.assertRaises(monitor.CollectTimeout, implementation, FakePause, 1)
+
     def test_nist_aes_cbc(self):
         self.assertTrue(pureaes.self_test())
 
@@ -264,6 +314,26 @@ class ProtocolTests(unittest.TestCase):
 
 
 class PackageTests(unittest.TestCase):
+    def test_metric_alias_and_alert_graph(self):
+        def read(name):
+            with io.open(os.path.join(monitor.text(ROOT), monitor.text(name)), encoding="utf-8") as stream:
+                return json.load(stream)
+        origins = dict((row["key"], row) for row in read("origin_metric.json"))
+        groups = set(row["name"] for row in read("metric_set.json"))
+        aliases = read("alias_metric.json")
+        self.assertEqual(len(aliases), len(set(row["displayName"] for row in aliases)))
+        for alias in aliases:
+            self.assertTrue(alias["displayName"].startswith(u"物理机IPMI-"))
+            self.assertTrue(set(alias["metricSet"]).issubset(groups))
+            self.assertTrue(set(alias["originalMetrics"]).issubset(origins))
+            expected = set(tag["name"] for key in alias["originalMetrics"] for tag in origins[key]["tagDefine"])
+            self.assertEqual(expected, set(dim["originDimName"] for dim in alias["dims"]))
+        alert = read(u"alertRule/物理机IPMI状态变化告警.json")
+        for condition in alert["alertConditionStrategy"][0]["multiConditions"]:
+            self.assertIn(condition["metricName"], origins)
+            self.assertEqual(condition["type"], "diff")
+            self.assertEqual(condition["alertCount"], 1)
+
     def test_arch_bundles_are_identical_and_pure(self):
         bundles = []
         for architecture in ("x86_64", "arm64"):

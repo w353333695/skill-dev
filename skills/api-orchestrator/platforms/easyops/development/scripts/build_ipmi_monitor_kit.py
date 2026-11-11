@@ -16,7 +16,7 @@ VERSION = "0.1.0"
 NAME = "物理服务器IPMI监控"
 BASE = Path(__file__).resolve().parents[1]
 SOURCE = BASE / "monitor-kits" / "physical-ipmi-monitoring"
-PARAMS = ("ip", "bmc_ip", "username", "password", "kg", "port", "timeout", "privilege")
+PARAMS = ("ip", "bmc_ip", "username", "password", "kg", "port", "timeout", "login_timeout", "privilege")
 PACKAGES = (("pyghmi", "1.5.61"), ("pyaes", "1.6.1"), ("six", "1.17.0"))
 PYGHMI_MODULES = ("__init__.py", "constants.py", "exceptions.py", "ipmi/__init__.py",
                   "ipmi/sdr.py", "ipmi/private/__init__.py", "ipmi/private/session.py",
@@ -28,8 +28,8 @@ def dump(path, data):
     path.write_text(json.dumps(data, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 
 
-def zip_tree(root, output, prefix=""):
-    with zipfile.ZipFile(output, "w", compression=zipfile.ZIP_DEFLATED) as archive:
+def zip_tree(root, output, prefix="", compression=zipfile.ZIP_DEFLATED):
+    with zipfile.ZipFile(output, "w", compression=compression) as archive:
         directories = [root] + sorted(path for path in root.rglob("*") if path.is_dir())
         files = sorted(path for path in root.rglob("*") if path.is_file())
         for path in directories + files:
@@ -40,7 +40,7 @@ def zip_tree(root, output, prefix=""):
             directory = path.is_dir()
             info = zipfile.ZipInfo(name + "/" if directory else name)
             info.create_system = 3
-            info.compress_type = zipfile.ZIP_DEFLATED
+            info.compress_type = compression
             info.external_attr = ((stat.S_IFDIR | 0o755) if directory else (stat.S_IFREG | 0o664)) << 16
             if directory:
                 info.external_attr |= 0x10
@@ -89,6 +89,24 @@ def patch_session(text):
                         '''        if self.ipmiversion == 1.5:
             self.onlogon({'error': 'IPMI 2.0 required; downgrade disabled'})
             return''')
+    marker = '\n\nif __name__ == "__main__":\n'
+    if text.count(marker) != 1:
+        raise ValueError("[patch_session] 无法定位上游示例入口")
+    text = text.split(marker, 1)[0] + "\n"
+    text = replace_once(text, """    @classmethod
+    def pause(cls, timeout):
+        try:
+            starttime = _monotonic_time()
+            while _monotonic_time() - starttime < timeout:
+                cls.wait_for_rsp(timeout - (_monotonic_time() - starttime))
+        except Exception as e:
+            print(repr(e))""", """    @classmethod
+    def pause(cls, timeout):
+        starttime = _monotonic_time()
+        while _monotonic_time() - starttime < timeout:
+            cls.wait_for_rsp(timeout - (_monotonic_time() - starttime))""")
+    text = replace_once(text, "            print('Password for {0} is somehow malformed'.format(self.bmc))",
+                        "            self.onlogon({'error': 'IPMI password encoding error'})")
     return text
 
 
@@ -151,14 +169,15 @@ def metadata(root):
               ("kg", "KG密钥", "", "可选；按BMC配置填写，通过加密参数注入"),
               ("port", "IPMI UDP端口", "623", "默认623，范围1..65535"),
               ("timeout", "整轮超时秒数", "60", "默认60，范围5..300；另有最多2秒注销"),
+              ("login_timeout", "认证预检查超时秒数", "5", "默认5，范围1..30；一次认证尝试，协议重传受此总时限约束"),
               ("privilege", "会话权限", "2", "默认2 USER；若平台拒绝可改3 OPERATOR，禁止ADMIN")]
     lines = ['type: simple-script', 'name: ' + NAME, 'version: "' + VERSION + '"',
              'command:', '    collect:', '        interpreter: ""', '        scriptPath: [src, ipmi_monitor.py]',
              '        type: python', '        user: ""', 'params: ' + json.dumps(list(PARAMS)), 'paramDefine:']
     for key, label, default, description in fields:
-        item = {"name": key, "valueType": "int" if key in ("port", "timeout", "privilege") else "string",
+        item = {"name": key, "valueType": "int" if key in ("port", "timeout", "login_timeout", "privilege") else "string",
                 "defaultValue": default, "display": True, "displayName": label, "description": description,
-                "use": "collectParams", "optional": key in ("kg", "port", "timeout", "privilege"),
+                "use": "collectParams", "optional": key in ("kg", "port", "timeout", "login_timeout", "privilege"),
                 "isFromSecret": False, "isEncrypt": key in ("password", "kg"), "extraArgs": None}
         lines.append("    - " + json.dumps(item, ensure_ascii=False))
     lines.extend(['agentType: easyops', 'category: 基础设施.物理资源', 'scriptType: python',
@@ -237,7 +256,7 @@ def build(cache, output):
     shutil.copyfile(SOURCE / "readme", root / "readme")
     dependencies(cache, output, root)
     archive = output / ("监控套件_物理服务器IPMI监控_" + VERSION + ".zip")
-    zip_tree(root, archive, NAME)
+    zip_tree(root, archive, NAME, compression=zipfile.ZIP_STORED)
     print(archive)
 
 

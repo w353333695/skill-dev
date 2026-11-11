@@ -35,7 +35,11 @@ def scrub(value, settings):
     result = text(value)
     secrets = [settings.get(key, "") for key in ("password", "kg", "username")]
     for secret in sorted((item for item in secrets if item), key=len, reverse=True):
-        result = result.replace(text(secret), "<redacted>")
+        value = text(secret)
+        variants = (value, value.encode("unicode_escape").decode("ascii"),
+                    json.dumps(value, ensure_ascii=True)[1:-1])
+        for variant in variants:
+            result = result.replace(variant, "<redacted>")
     return result
 
 
@@ -65,6 +69,7 @@ def config():
             raise ValueError("[config] %s 必须为 IP 地址，不接受主机名" % key)
     for key, default, lower, upper in (("port", 623, 1, 65535),
                                         ("timeout", 60, 5, 300),
+                                        ("login_timeout", 5, 1, 30),
                                         ("privilege", 2, 2, 3)):
         try:
             settings[key] = int(env(key, str(default)))
@@ -122,7 +127,10 @@ class IPMIReader(object):
     def raw_command(self, netfn, command, **kwargs):
         if (netfn, command) not in self.READ_COMMANDS:
             raise ValueError("[raw_command] 禁止非白名单命令")
-        return self.session.raw_command(netfn=netfn, command=command, **kwargs)
+        response = self.session.raw_command(netfn=netfn, command=command, **kwargs)
+        logging.debug("[raw_command] netfn=%s command=%s request=%s response=%s",
+                      netfn, command, scrub(repr(kwargs), self.settings), scrub(repr(response), self.settings))
+        return response
 
     def xraw_command(self, netfn, command, **kwargs):
         response = self.raw_command(netfn, command, **kwargs)
@@ -202,10 +210,15 @@ def collect(settings, reader_factory=IPMIReader):
     reader = reader_factory(settings)
     started = time.time()
     old_handler = signal.signal(signal.SIGALRM, expired)
-    signal.alarm(settings["timeout"])
+    signal.alarm(min(settings["timeout"], settings.get("login_timeout", 5)))
     try:
         reader.login()
         summary["physical_ipmi_available"] = 1
+        remaining = settings["timeout"] - (time.time() - started)
+        if remaining <= 0:
+            raise CollectTimeout("[collect] 认证后已无剩余采集时间")
+        signal.setitimer(signal.ITIMER_REAL, remaining)
+        logging.debug("[collect] 认证预检查通过，开始只读SDR采集")
         try:
             summary["physical_ipmi_power_on"] = reader.power()
         except CollectTimeout:
@@ -240,7 +253,9 @@ def collect(settings, reader_factory=IPMIReader):
             signal.alarm(0)
             signal.signal(signal.SIGALRM, old_handler)
     summary["physical_ipmi_duration_seconds"] = max(0, time.time() - started)
-    return [record(settings, summary)] + rows
+    result = [record(settings, summary)] + rows
+    logging.debug("[collect] output=%s", scrub(json.dumps(result, ensure_ascii=True), settings))
+    return result
 
 
 def parser():
@@ -249,7 +264,7 @@ def parser():
         epilog="示例：python src/ipmi_monitor.py --doctor；参数检查：--check-config；采集：不带参数。\n"
                "所有参数通过 EASYOPS_COLLECTOR_* 注入，密码不要放命令行。\n"
                "ip=物理机CMDB IP，bmc_ip=BMC IP，username/password=凭证；port=623，timeout=60秒，"
-               "privilege=2(USER，可选3 OPERATOR)，kg=可选密钥。\n"
+               "login_timeout=5秒，privilege=2(USER，可选3 OPERATOR)，kg=可选密钥。\n"
                "正常输出JSON数组；入口错误输出COLLECT_ERROR及脱敏traceback，退出0供前端展示。\n"
                "--doctor/--check-config失败退出2；--help/--version不访问设备。总超时后另有最多2秒注销。",
         formatter_class=argparse.RawDescriptionHelpFormatter)
@@ -263,7 +278,9 @@ def parser():
 def main(argv=None):
     args = parser().parse_args(argv)
     settings = dict((key, env(key, secret=True)) for key in ("username", "password", "kg"))
-    logging.basicConfig(level=logging.WARNING, format="%(levelname)s %(message)s")
+    level_name = os.environ.get("EASYOPS_LOG_LEVEL") or os.environ.get("LOG_LEVEL") or "ERROR"
+    levels = {"DEBUG": logging.DEBUG, "INFO": logging.INFO, "WARNING": logging.WARNING, "ERROR": logging.ERROR}
+    logging.basicConfig(level=levels.get(level_name.upper(), logging.ERROR), format="%(levelname)s %(message)s")
     try:
         if args.doctor:
             load_dependencies()
