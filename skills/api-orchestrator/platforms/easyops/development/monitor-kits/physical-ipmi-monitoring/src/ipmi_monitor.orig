@@ -1,0 +1,282 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+"""物理服务器 IPMI 2.0 只读监控，兼容 Python 2.7。"""
+import argparse
+import json
+import logging
+import math
+import os
+import platform
+import signal
+import socket
+import sys
+import time
+import traceback
+
+VERSION = "0.1.0"
+try:
+    text_type = unicode
+except NameError:
+    text_type = str
+
+
+class CollectTimeout(Exception):
+    pass
+
+
+def text(value):
+    if isinstance(value, bytes) and not isinstance(value, text_type):
+        return value.decode("utf-8", "replace")
+    return text_type(value)
+
+
+def scrub(value, settings):
+    result = text(value)
+    secrets = [settings.get(key, "") for key in ("password", "kg", "username")]
+    for secret in sorted((item for item in secrets if item), key=len, reverse=True):
+        result = result.replace(text(secret), "<redacted>")
+    return result
+
+
+def env(name, default="", secret=False):
+    value = os.environ.get("EASYOPS_COLLECTOR_" + name)
+    if value is None or value == "":
+        return default
+    return value if secret else value.strip()
+
+
+def config():
+    settings = dict((key, env(key, secret=key in ("password", "kg")))
+                    for key in ("ip", "bmc_ip", "username", "password", "kg"))
+    for key in ("ip", "bmc_ip", "username", "password"):
+        if not settings[key] or settings[key].startswith("$."):
+            raise ValueError("[config] 缺少有效参数: " + key)
+    for key in ("ip", "bmc_ip"):
+        valid = False
+        for family in (socket.AF_INET, socket.AF_INET6):
+            try:
+                socket.inet_pton(family, settings[key])
+                valid = True
+                break
+            except (socket.error, ValueError):
+                continue
+        if not valid:
+            raise ValueError("[config] %s 必须为 IP 地址，不接受主机名" % key)
+    for key, default, lower, upper in (("port", 623, 1, 65535),
+                                        ("timeout", 60, 5, 300),
+                                        ("privilege", 2, 2, 3)):
+        try:
+            settings[key] = int(env(key, str(default)))
+        except ValueError:
+            raise ValueError("[config] %s 必须为整数" % key)
+        if not lower <= settings[key] <= upper:
+            raise ValueError("[config] %s 不在允许范围" % key)
+    return settings
+
+
+def load_dependencies():
+    if platform.system() != "Linux":
+        raise RuntimeError("[load_dependencies] 仅支持 Linux")
+    machine = platform.machine().lower()
+    aliases = {"x86_64": "x86_64", "amd64": "x86_64", "aarch64": "arm64", "arm64": "arm64"}
+    if machine not in aliases:
+        raise RuntimeError("[load_dependencies] 仅支持 x86_64/ARM64")
+    base = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    vendor = os.path.join(base, "vendor")
+    with open(os.path.join(vendor, aliases[machine], "manifest.json"), "r") as stream:
+        manifest = json.load(stream)
+    if manifest.get("architecture") != aliases[machine] or manifest.get("native_extensions"):
+        raise RuntimeError("[load_dependencies] 离线依赖清单错误")
+    sys.dont_write_bytecode = True
+    sys.path.insert(0, os.path.join(vendor, aliases[machine], "dependencies.zip"))
+    from pyghmi.ipmi.private import session
+    from pyghmi.ipmi import sdr
+    return session, sdr
+
+
+class IPMIReader(object):
+    READ_COMMANDS = frozenset(((6, 1), (10, 0x20), (10, 0x22), (10, 0x23),
+                               (4, 0x2d), (4, 0x23), (0, 1)))
+
+    def __init__(self, settings):
+        self.settings = settings
+        self.session = None
+        self.repository = None
+        self.session_module, self.sdr_module = load_dependencies()
+
+    def login(self):
+        self.session = self.session_module.Session(
+            bmc=self.settings["bmc_ip"], userid=self.settings["username"],
+            password=self.settings["password"], port=self.settings["port"],
+            kg=self.settings["kg"] or None, privlevel=self.settings["privilege"],
+            keepalive=False)
+        if self.session.ipmiversion != 2.0:
+            raise RuntimeError("[login] 必须使用 IPMI 2.0")
+
+    def raw_command(self, netfn, command, **kwargs):
+        if (netfn, command) not in self.READ_COMMANDS:
+            raise ValueError("[raw_command] 禁止非白名单命令")
+        return self.session.raw_command(netfn=netfn, command=command, **kwargs)
+
+    def xraw_command(self, netfn, command, **kwargs):
+        response = self.raw_command(netfn, command, **kwargs)
+        if response.get("code") or response.get("error"):
+            raise RuntimeError("[xraw_command] IPMI 读取失败: %s" % response.get("error", response.get("code")))
+        return response
+
+    def get_event_constants(self):
+        from pyghmi.ipmi.private import constants
+        return constants
+
+    def power(self):
+        data = self.xraw_command(0, 1)["data"]
+        if not data:
+            raise ValueError("[power] 空机箱状态响应")
+        return int(data[0]) & 1
+
+    def sensors(self):
+        self.repository = self.sdr_module.SDR(self)
+        return list(self.repository.get_sensor_numbers())
+
+    def sensor(self, identifier):
+        entry = self.repository.sensors[identifier]
+        response = self.xraw_command(4, 0x2d, rslun=entry.sensor_lun,
+                                     data=(entry.sensor_number,))
+        return entry.decode_sensor_reading(self, response["data"])
+
+    def close(self):
+        if self.session is not None:
+            self.session.logout()
+
+
+def record(settings, values, sensor=None, identifier=None):
+    dims = {"ip": settings["ip"], "bmc_ip": settings["bmc_ip"]}
+    if sensor is not None:
+        dims.update({"sensor_id": text(identifier), "sensor_name": text(sensor.name),
+                     "sensor_type": text(sensor.type)})
+    return {"dims": dims, "vals": values, "timestamp": int(time.time() * 1000)}
+
+
+def sensor_values(sensor):
+    if sensor.unavailable:
+        return {"physical_ipmi_sensor_available": 0}
+    values = {"physical_ipmi_sensor_available": 1}
+    if sensor.health is not None:
+        health = int(sensor.health)
+        if health < 0 or health & ~7:
+            raise ValueError("[sensor_values] 无效健康位掩码")
+        values["physical_ipmi_sensor_health"] = health
+    numeric = sensor.value
+    if numeric is not None:
+        numeric = float(numeric)
+        if not math.isnan(numeric) and not math.isinf(numeric):
+            unit = text(sensor.units).strip()
+            units = {u"\u00b0C": "temperature_celsius", "C": "temperature_celsius",
+                     u"\u00b0F": "temperature_fahrenheit", "F": "temperature_fahrenheit",
+                     "RPM": "fan_rpm", "V": "voltage_volts", "W": "power_watts",
+                     "A": "current_amperes", "%": "sensor_percent"}
+            if unit in units:
+                values["physical_ipmi_" + units[unit]] = numeric
+    return values
+
+
+def expired(signum, frame):
+    raise CollectTimeout("[collect] 超出本轮总超时")
+
+
+def log_error(marker, settings, level=logging.ERROR):
+    logging.log(level, "[%s] %s", marker, scrub(traceback.format_exc(), settings))
+
+
+def collect(settings, reader_factory=IPMIReader):
+    rows = []
+    summary = {"physical_ipmi_available": 0, "physical_ipmi_sensor_count": 0,
+               "physical_ipmi_error_count": 0, "physical_ipmi_collect_complete": 0,
+               "physical_ipmi_error": ""}
+    reader = reader_factory(settings)
+    started = time.time()
+    old_handler = signal.signal(signal.SIGALRM, expired)
+    signal.alarm(settings["timeout"])
+    try:
+        reader.login()
+        summary["physical_ipmi_available"] = 1
+        try:
+            summary["physical_ipmi_power_on"] = reader.power()
+        except CollectTimeout:
+            raise
+        except Exception:
+            summary["physical_ipmi_error_count"] += 1
+            log_error("power", settings, logging.WARNING)
+        identifiers = reader.sensors()
+        summary["physical_ipmi_sensor_count"] = len(identifiers)
+        for identifier in identifiers:
+            try:
+                sensor = reader.sensor(identifier)
+                rows.append(record(settings, sensor_values(sensor), sensor, identifier))
+            except CollectTimeout:
+                raise
+            except Exception:
+                summary["physical_ipmi_error_count"] += 1
+                log_error("sensor", settings, logging.WARNING)
+        summary["physical_ipmi_collect_complete"] = int(summary["physical_ipmi_error_count"] == 0)
+    except Exception:
+        summary["physical_ipmi_error_count"] += 1
+        summary["physical_ipmi_error"] = scrub(traceback.format_exc().splitlines()[-1], settings)[:512]
+        log_error("collect", settings)
+    finally:
+        signal.alarm(0)
+        try:
+            signal.alarm(2)
+            reader.close()
+        except Exception:
+            log_error("close", settings, logging.WARNING)
+        finally:
+            signal.alarm(0)
+            signal.signal(signal.SIGALRM, old_handler)
+    summary["physical_ipmi_duration_seconds"] = max(0, time.time() - started)
+    return [record(settings, summary)] + rows
+
+
+def parser():
+    result = argparse.ArgumentParser(
+        description="物理服务器 IPMI 2.0 只读监控；支持 Linux x86_64/ARM64，Python 2.7/3。",
+        epilog="示例：python src/ipmi_monitor.py --doctor；参数检查：--check-config；采集：不带参数。\n"
+               "所有参数通过 EASYOPS_COLLECTOR_* 注入，密码不要放命令行。\n"
+               "ip=物理机CMDB IP，bmc_ip=BMC IP，username/password=凭证；port=623，timeout=60秒，"
+               "privilege=2(USER，可选3 OPERATOR)，kg=可选密钥。\n"
+               "正常输出JSON数组；入口错误输出COLLECT_ERROR及脱敏traceback，退出0供前端展示。\n"
+               "--doctor/--check-config失败退出2；--help/--version不访问设备。总超时后另有最多2秒注销。",
+        formatter_class=argparse.RawDescriptionHelpFormatter)
+    result.add_argument("--version", action="version", version=VERSION)
+    group = result.add_mutually_exclusive_group()
+    group.add_argument("--doctor", action="store_true", help="仅检查本地依赖和 AES 标准向量，不联网，默认关闭")
+    group.add_argument("--check-config", action="store_true", help="仅校验环境参数，不联网、不输出凭证，默认关闭")
+    return result
+
+
+def main(argv=None):
+    args = parser().parse_args(argv)
+    settings = dict((key, env(key, secret=True)) for key in ("username", "password", "kg"))
+    logging.basicConfig(level=logging.WARNING, format="%(levelname)s %(message)s")
+    try:
+        if args.doctor:
+            load_dependencies()
+            from pyghmi.ipmi.private.pureaes import self_test
+            self_test()
+            sys.stdout.write("依赖检查通过：纯 Python IPMI/AES，未连接设备\n")
+            return 0
+        settings = config()
+        if args.check_config:
+            sys.stdout.write("参数校验通过，未连接设备\n")
+            return 0
+        sys.stdout.write(json.dumps(collect(settings), ensure_ascii=True, allow_nan=False) + "\n")
+        return 0
+    except Exception:
+        failure = scrub(traceback.format_exc(), settings)
+        logging.error("[main] %s", failure)
+        sys.stdout.write("COLLECT_ERROR: [main]\n" + failure + "\n")
+        return 2 if args.doctor or args.check_config else 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

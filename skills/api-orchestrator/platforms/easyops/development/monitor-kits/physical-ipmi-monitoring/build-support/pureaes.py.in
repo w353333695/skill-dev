@@ -1,0 +1,30 @@
+# -*- coding: utf-8 -*-
+"""仅替换 pyghmi 的 AES-CBC 后端；IPMI 层负责填充，不添加 PKCS7。"""
+import binascii
+import pyaes
+
+
+def transform(key, iv, data, decrypting=False):
+    if len(key) != 16 or len(iv) != 16 or len(data) % 16:
+        raise ValueError("[pureaes] AES-128-CBC 要求16字节密钥/IV及完整数据块")
+    cipher = pyaes.AESModeOfOperationCBC(key, iv=iv)
+    operation = cipher.decrypt if decrypting else cipher.encrypt
+    return b"".join(operation(data[offset:offset + 16]) for offset in range(0, len(data), 16))
+
+
+def encrypt(key, iv, data):
+    return transform(key, iv, data)
+
+
+def decrypt(key, iv, data):
+    return transform(key, iv, data, True)
+
+
+def self_test():
+    key = binascii.unhexlify(b"2b7e151628aed2a6abf7158809cf4f3c")
+    iv = binascii.unhexlify(b"000102030405060708090a0b0c0d0e0f")
+    plain = binascii.unhexlify(b"6bc1bee22e409f96e93d7e117393172aae2d8a571e03ac9c9eb76fac45af8e51")
+    encrypted = binascii.unhexlify(b"7649abac8119b246cee98e9b12e9197d5086cb9b507219ee95db113a917678b2")
+    if encrypt(key, iv, plain) != encrypted or decrypt(key, iv, encrypted) != plain:
+        raise RuntimeError("[self_test] NIST SP800-38A F.2 AES-CBC 标准向量不匹配")
+    return True

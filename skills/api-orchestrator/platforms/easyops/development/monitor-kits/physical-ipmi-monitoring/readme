@@ -1,0 +1,62 @@
+物理服务器IPMI监控 0.1.0
+
+一、导入与使用
+在 EasyOps 监控套件页面导入本 ZIP。模型要求目标环境已有 PHYSICAL_SERVER@ONEMODEL，
+本包不附模型覆盖文件，避免变更已有资产模型。本次仅离线开发，不导入、不激活、不创建任务。
+导入后先检查套件详情、指标集、告警附属资源；再经授权配置执行Agent及单台测试任务。
+包内src/ipmi_monitor.py为执行脚本，同名.orig用于平台重新生成。不得只复制脚本而丢弃vendor。
+改名导入时还须检查平台生成的.py编码声明仍在第二行；本包不能修复服务端的前置注入缺陷。
+
+二、参数（全部通过 EASYOPS_COLLECTOR_<参数名> 注入）
+ip：必填，CMDB物理机IP，默认映射$.ip，用于实例关联。
+bmc_ip：必填，BMC管理IPv4/IPv6，必须明确配置；不自动将业务IP作为BMC目标。
+username/password：必填，建议专用只读账号。密码/密钥使用平台加密参数或凭证设施，不落配置文件、命令行、日志。
+kg：可选，BMC要求的KG密钥（文本原值，不自行转hex），默认空。
+port：UDP端口，默认623，范围1..65535。
+timeout：本轮总超时秒数，默认60，范围5..300，退出前另有最多2秒注销时间。
+privilege：默认2(USER)，可选3(OPERATOR)，不请求ADMIN。设备拒绝时先确认账号权限，勿随意提升权限。
+支持Linux x86_64/amd64及aarch64/arm64、CPython 2.7或Python 3；Linux需有标准库ctypes支持。
+采集周期建议至少120秒，超时设为小于采集周期；大型SDR仓库需调高timeout。
+
+三、离线依赖
+vendor/x86_64/dependencies.zip和vendor/arm64/dependencies.zip分别提供完整第三方运行子集，
+均为纯Python，内容相同，按架构选择；不需要pip、编译器、ipmitool或架构相关.so，不改系统Python。
+依赖：pyghmi 1.5.61（Apache-2.0，只取Session/SDR及其依赖模块）、pyaes 1.6.1（MIT）、six 1.17.0（MIT）。
+pyghmi不是未经修改的官方发行包：仅将两处AES-CBC调用替换为pyaes，禁止IPMI1.5降级。
+补丁在third-party/pyghmi-pureaes.patch；上游来源/原包SHA256在dependencies.lock.json。
+各依赖原始许可证保留在每个依赖ZIP的LICENSES目录，原始模块的版权声明保持不变。
+不包含Redfish、OEM扩展和pyghmi命令行管理工具，也不需要cryptography、cffi、dateutil。
+本包只读业务命令白名单含Get Device ID、Get/Reserve SDR、Get Sensor Reading/Factors、Get Chassis Status。
+会话协商、SDR预留、注销为协议必要操作，不会开关机、清SEL或修改BMC配置。
+
+四、检查命令（不连接设备）
+python src/ipmi_monitor.py -h
+python src/ipmi_monitor.py --version
+python src/ipmi_monitor.py --doctor
+python src/ipmi_monitor.py --check-config
+--doctor校验本地导入及NIST AES-CBC向量；--check-config校验环境参数但不输出参数。
+实际采集：由EasyOps任务无参数运行脚本。采集正常输出JSON数组；入口错误输出COLLECT_ERROR及脱敏traceback，退出0供前端展示。
+BMC登录失败输出available=0、错误数和脱敏摘要；局部传感器失败继续输出已有读数。
+
+五、指标语义
+统一前缀physical_ipmi_，中文别名统一“物理机IPMI-”避免与其他协议重名。
+基础：available=IPMI会话已建立(0/1)，power_on=机箱电源位(0/1)，sensor_count=SDR可读传感器数，
+error_count=采集异常数，collect_complete=遍历流程完成且无读取异常(0/1)，duration_seconds=耗时，error=脱敏错误摘要。
+collect_complete不是“所有硬件健康”；传感器读数不可用时可正常返回sensor_available=0。
+传感器维度：ip、bmc_ip、sensor_id、sensor_name、sensor_type；sensor_id来自SDR身份，不用名称作为唯一键。
+sensor_health保留pyghmi健康位掩码：0正常、1Warning、2Critical、4Failed，可按位组合；不包含未知和不可用读数的虚假正常值。
+仅按真实SDR单位输出：摄氏/华氏温度、RPM、电压V、功率W、电流A、百分比；不从名称猜单位，不将风扇百分比当RPM。
+不含OEM私有硬盘/RAID字段；内存、CPU、电源等只有设备提供通用SDR时才有对应健康状态，不声称全品牌覆盖。
+不可用/未知指标不填0，不支持的复合单位不强行换算。若BMC未提供某种SDR，该类指标无数据属于能力边界。
+
+六、告警
+alertRule/物理机IPMI状态变化告警.json与CSV模板一致：会话可用、采集完整性、传感器可用性/健康、机箱电源使用diff状态变化。
+状态变化可能包含故障及恢复，不等于持续故障告警；首次采样已故障不保证触发，不以此替代缺失数据/心跳检测。
+不预置跨型号通用温度/风扇/电压阈值，避免误报；需结合传感器类型及厂商额定范围配置数值阈值。
+没有收到采集数据时，请单独配置平台的无数据策略；告警模板本身不覆盖Agent退出或网络中断造成的无样本。
+
+七、验证范围与风险
+离线验证覆盖Python2.7/Python3、AES-CBC标准向量、模拟SDR/传感器、错误/超时/脱敏及ZIP元数据。
+ARM64为纯Python可移植依赖交付，未进行ARM64实体机器运行；真实BMC连通、厂商兼容性、性能和平台导入激活均待现场验收。
+Python2.7和本协议依赖已老旧；纯PythonAES不是恒定时间实现，性能不及原生加密库，不宣称通过安全认证。
+只在受控管理网、已授权BMC使用；不要将IPMI暴露公网。需要更强的安全保证应升级运行时并选用受维护的原生加密后端。
