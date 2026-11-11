@@ -12,7 +12,7 @@ import stat
 import tarfile
 import zipfile
 
-VERSION = "0.1.1"
+VERSION = "0.1.2"
 NAME = "物理服务器IPMI监控"
 BASE = Path(__file__).resolve().parents[1]
 SOURCE = BASE / "monitor-kits" / "physical-ipmi-monitoring"
@@ -175,7 +175,7 @@ def metadata(root):
              'command:', '    collect:', '        interpreter: ""', '        scriptPath: [src, ipmi_monitor.py]',
              '        type: python', '        user: ""', 'params: ' + json.dumps(list(PARAMS)), 'paramDefine:']
     for key, label, default, description in fields:
-        item = {"name": key, "valueType": ("int" if key in ("port", "timeout", "login_timeout", "privilege") else ("password" if key in ("password", "kg") else "string")),
+        item = {"name": key, "valueType": "string",
                 "defaultValue": default, "display": True, "displayName": label, "description": description,
                 "use": "collectParams", "optional": key in ("kg", "port", "timeout", "login_timeout", "privilege"),
                 "isFromSecret": False, "isEncrypt": False, "extraArgs": None}
