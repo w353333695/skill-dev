@@ -98,8 +98,9 @@ def dependencies(cache, build, root):
     licenses = common / "LICENSES"
     licenses.mkdir(exist_ok=True)
     lock = []
+    pinned = json.loads((SOURCE / "build-support/dependencies.lock.json").read_text())
     for name, version in PACKAGES:
-        metadata = json.loads((cache / (name + ".json")).read_text())
+        metadata = next(item for item in pinned if item["name"] == name and item["version"] == version)
         source = cache / metadata["filename"]
         digest = hashlib.sha256(source.read_bytes()).hexdigest()
         if digest != metadata["digests"]["sha256"]:
@@ -243,7 +244,7 @@ def build(cache, output):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__, epilog="示例：python3 build_ipmi_monitor_kit.py --cache <源码缓存> --output <新构建目录>；不联网，不操作平台。失败退出非0。")
     parser.add_argument("--version", action="version", version=VERSION)
-    parser.add_argument("--cache", type=Path, required=True, help="包含源码tar.gz及对应PyPI JSON元数据的目录；无默认值")
+    parser.add_argument("--cache", type=Path, required=True, help="包含锁定版本源码tar.gz的目录；无默认值")
     parser.add_argument("--output", type=Path, required=True, help="全新构建目录；禁止复用旧套件子目录，无默认值")
     args = parser.parse_args()
     build(args.cache, args.output)

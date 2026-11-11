@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 """物理服务器 IPMI 2.0 只读监控，兼容 Python 2.7。"""
 import argparse
+import hashlib
 import json
 import logging
 import math
@@ -87,8 +88,13 @@ def load_dependencies():
         manifest = json.load(stream)
     if manifest.get("architecture") != aliases[machine] or manifest.get("native_extensions"):
         raise RuntimeError("[load_dependencies] 离线依赖清单错误")
+    bundle = os.path.join(vendor, aliases[machine], "dependencies.zip")
+    with open(bundle, "rb") as stream:
+        digest = hashlib.sha256(stream.read()).hexdigest()
+    if digest != manifest.get("sha256"):
+        raise RuntimeError("[load_dependencies] 离线依赖SHA256校验失败")
     sys.dont_write_bytecode = True
-    sys.path.insert(0, os.path.join(vendor, aliases[machine], "dependencies.zip"))
+    sys.path.insert(0, bundle)
     from pyghmi.ipmi.private import session
     from pyghmi.ipmi import sdr
     return session, sdr
@@ -171,8 +177,8 @@ def sensor_values(sensor):
         numeric = float(numeric)
         if not math.isnan(numeric) and not math.isinf(numeric):
             unit = text(sensor.units).strip()
-            units = {u"\u00b0C": "temperature_celsius", "C": "temperature_celsius",
-                     u"\u00b0F": "temperature_fahrenheit", "F": "temperature_fahrenheit",
+            units = {u"\u00b0C": "temperature_celsius",
+                     u"\u00b0F": "temperature_fahrenheit",
                      "RPM": "fan_rpm", "V": "voltage_volts", "W": "power_watts",
                      "A": "current_amperes", "%": "sensor_percent"}
             if unit in units:
@@ -274,7 +280,8 @@ def main(argv=None):
     except Exception:
         failure = scrub(traceback.format_exc(), settings)
         logging.error("[main] %s", failure)
-        sys.stdout.write("COLLECT_ERROR: [main]\n" + failure + "\n")
+        output = "COLLECT_ERROR: [main]\n" + failure + "\n"
+        sys.stdout.write(output.encode("utf-8") if sys.version_info[0] == 2 else output)
         return 2 if args.doctor or args.check_config else 0
 
 

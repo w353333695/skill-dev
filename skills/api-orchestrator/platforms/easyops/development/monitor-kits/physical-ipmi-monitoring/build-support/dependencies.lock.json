@@ -1,0 +1,35 @@
+[
+  {
+    "name": "pyghmi",
+    "version": "1.5.61",
+    "filename": "pyghmi-1.5.61.tar.gz",
+    "url": "https://files.pythonhosted.org/packages/72/84/e550e91c2fa6e98868d78b39c2b459e3cc24fb2e815ea1fdd11db2442e1f/pyghmi-1.5.61.tar.gz",
+    "digests": {
+      "blake2b_256": "7284e550e91c2fa6e98868d78b39c2b459e3cc24fb2e815ea1fdd11db2442e1f",
+      "md5": "a6dac2655a8b2f38798474d0715e1725",
+      "sha256": "69305a1fe0f9acc5929952401bfbfa79813c114988291a8bd6b78a7e574c0f77"
+    }
+  },
+  {
+    "name": "pyaes",
+    "version": "1.6.1",
+    "filename": "pyaes-1.6.1.tar.gz",
+    "url": "https://files.pythonhosted.org/packages/44/66/2c17bae31c906613795711fc78045c285048168919ace2220daa372c7d72/pyaes-1.6.1.tar.gz",
+    "digests": {
+      "blake2b_256": "44662c17bae31c906613795711fc78045c285048168919ace2220daa372c7d72",
+      "md5": "20fd5c6e29dcfdd08098e85a859a54ec",
+      "sha256": "02c1b1405c38d3c370b085fb952dd8bea3fadcee6411ad99f312cc129c536d8f"
+    }
+  },
+  {
+    "name": "six",
+    "version": "1.17.0",
+    "filename": "six-1.17.0.tar.gz",
+    "url": "https://files.pythonhosted.org/packages/94/e7/b2c673351809dca68a0e064b6af791aa332cf192da575fd474ed7d6f16a2/six-1.17.0.tar.gz",
+    "digests": {
+      "blake2b_256": "94e7b2c673351809dca68a0e064b6af791aa332cf192da575fd474ed7d6f16a2",
+      "md5": "a0387fe15662c71057b4fb2b7aa9056a",
+      "sha256": "ff70335d468e7eb6ec65b95b99d3a2836546063f63acc5171de367e834932a81"
+    }
+  }
+]
