@@ -2,7 +2,6 @@
 # -*- coding: utf-8 -*-
 """离线构建物理服务器 IPMI 套件；依赖源码须事先下载并验证官方 SHA256。"""
 import argparse
-import copy
 import difflib
 import hashlib
 import json
@@ -217,30 +216,7 @@ def metadata(root):
     dump(root / "origin_metric.json", origins)
     dump(root / "alias_metric.json", aliases)
     dump(root / "metric_set.json", [{"name": "物理机IPMI-基础"}, {"name": "物理机IPMI-传感器"}])
-    template = json.loads((BASE / "monitor-kits/os-snmp-monitoring/alertRule/操作系统SNMP告警.json").read_text())
-    strategy = template["alertConditionStrategy"][0]
-    condition = copy.deepcopy(strategy["multiConditions"][0])
-    strategy["multiConditions"] = []
-    for suffix in ("available", "sensor_available", "sensor_health", "collect_complete", "power_on"):
-        item = copy.deepcopy(condition)
-        item["metricName"] = "physical_ipmi_" + suffix
-        strategy["multiConditions"].append(item)
-    for item in (template, strategy):
-        item["objectId"] = "PHYSICAL_SERVER@ONEMODEL"
-        item["name"] = "物理机IPMI-状态变化告警"
-    strategy["instanceId"] = "physical-ipmi-state-alert"
-    template["_rule_name_format"] = "{ip}物理机IPMI-状态变化"
-    template["_source_template"] = "IPMI状态变化；不是持续故障阈值告警"
-    target = template["cmdbInstanceStrategy"][0]
-    target.update({"instanceId": "physical-ipmi-targets", "objectId": "PHYSICAL_SERVER@ONEMODEL",
-                   "name": "物理机IPMI-目标资源"})
-    target["instances"]["objectId"] = "PHYSICAL_SERVER@ONEMODEL"
-    dump(root / "alertRule/物理机IPMI状态变化告警.json", template)
-    rows = ["指标,规则,触发窗口,恢复,说明"]
-    for suffix in ("available", "sensor_available", "sensor_health", "collect_complete", "power_on"):
-        rows.append("physical_ipmi_%s,diff,1次/1窗口,0,状态变化通知；不等同持续故障判断" % suffix)
-    (root / "物理机IPMI告警规则模板.csv").write_text("\ufeff" + "\n".join(rows) + "\n", encoding="utf-8")
-
+    shutil.copyfile(SOURCE / "物理服务器IPMI告警规则模板.xlsx", root / "物理服务器IPMI告警规则模板.xlsx")
 
 def build(cache, output):
     root = output / NAME
