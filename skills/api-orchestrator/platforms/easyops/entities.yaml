@@ -432,12 +432,12 @@ transitions:
 
   # —— 跨 service 接力（collector_plugin_service → collector_service）——
   - name: cross_service_plugin_to_kit
-    desc: "套件定义（8151）→ 激活（12000）跨 service 接力"
+    desc: "套件定义（8151）→ 激活（frontend网关）跨 service 接力"
     steps:
       - from: plugin_package.import   # collector_plugin_service:8151
         pick: data.instanceId
-        to: [kit.activate]            # collector_service:12000
-        how: "import 返回 instanceId → kit.activate body.instanceId。⚠️跨端口跨 spec，CLI 用 --spec 切换（easyops-collector-plugin.yaml → easyops-collector-service.yaml），且 kit.activate 需带 giraffe-contract-name header"
+        to: [kit.activate]            # collector_service frontend网关
+        how: "import 返回 instanceId → kit.activate body.instanceId。⚠️跨端口跨 spec，CLI 用 --spec 切换（easyops-collector-plugin.yaml → easyops-collector-service.yaml），且kit.activate需显式--endpoint frontend，保持完整合约路径"
   # ---- 巡检域 transitions（inspection e2e 接力）----
   - name: insp_develop_import_e2e
     desc: "巡检套件 e2e：开发套件包(tar.gz)→导入→验证→建任务→执行→查结果"

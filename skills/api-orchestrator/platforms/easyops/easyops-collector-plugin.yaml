@@ -35,7 +35,7 @@
 #   故 export/import/import_update 的 description 标注「api-cli 仅预览，真调走 SDK」。
 #
 # ⚠️ 激活能力【不在本服务】：collector_plugin_service 无 enable/disable/activate 端点。
-#   激活在 collector_service:8125 的 POST /api/v1/collector/kit/activate（见 easyops-collector-service.yaml）。
+#   激活走 collector_service 的frontend网关kit.activate --endpoint frontend（见 easyops-collector-service.yaml）。
 #   本服务只管套件定义的 CRUD + 导入导出；激活=把定义变成运行中的采集任务，跨服务。
 #
 # 知识按 SKILL.md 设计分文件存放（本目录是外接 collector_plugin_service 唯一真相来源）：
@@ -78,7 +78,7 @@ resources:
     description: |
       EasyOps 采集套件（easyops_plugin）。一个套件 = 类型(simple-script/metricbeat/exporter) + 关联CMDB模型 + 采集参数(paramDefine) + 指标定义。
       3 种类型各有独立 create/update 端点（字段集不同）。无单 type 字段做联合判别（由端点隐式区分）。
-      ⚠️无启用/禁用/激活端点——激活在 collector_service:8125（见 easyops-collector-service.yaml plugin.activate）。
+      ⚠️无启用/禁用/激活端点——激活走collector_service前端网关（见easyops-collector-service.yaml kit.activate --endpoint frontend）。
       删除前置：套件不能被采集任务引用（_COLLECTOR_JOB），否则拒删。字段结构见 objects.yaml#collector_plugin。
     path: ""
 

@@ -50,4 +50,4 @@ steps:
 note: "升级走 import_update（PUT），不是 import（POST）。import_update 的 instanceId 在 path，version 在 form 必填。"
 side_effects: "见 objects.yaml#collector_plugin.side_effects plugin_package.import_update（agentType不可变/版本唯一/参数加密位继承/无回滚）"
 rollback: "无显式回滚。需还原时以步骤2备份包内容重新发布一个未使用的新版本号；不能复用旧version，不能自动删除共享指标。"
-acceptance: "plugin.detail <instanceId> 确认 packageVersion 已更新；前端 kit_detail URL"
+acceptance: "plugin.detail确认packageVersion；监控套件按activate-and-test-monitor-kit.yaml继续frontend启用、回读v2任务、同步与立即采集，分别验收执行及指标入库。"

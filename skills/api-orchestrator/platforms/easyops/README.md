@@ -146,12 +146,12 @@ scripts/run.sh --spec platforms/demo/easyops-cmdb.yaml object_instance search PH
 ## 两个系统
 
 - **collector_plugin_service:8151** —— 采集套件管理（CRUD/导入导出/指标导入）。spec: `easyops-collector-plugin.yaml`
-- **collector_service:8125** —— 采集任务 CRUD、任务状态与指标元数据。当前源码/现网未提供 `collector/kit/activate` 或 `collector/kit/info/list`。spec: `easyops-collector-service.yaml`
+- **collector_service:8125** —— 采集任务 CRUD、任务状态与指标元数据。启用、v2任务、立即同步与采集走HTTPS前端网关，见`systems.yaml`的`collector_service.runtime.gateway_monitor_lifecycle`。spec: `easyops-collector-service.yaml`
 
 ## 关键认知（collector 域）
 
-1. **任务入口** —— 套件导入/升级走 `collector_plugin_service`；采集任务通过 `collector_service.collector_job` CRUD 创建、更新和启停，状态通过 `job_status/get` 查询。
-2. **激活机制** —— activate 触发 AssignJobs（CMDB事件驱动+600s兜底）。检查code、totalStatus和resources逐项结果，fail/wait不能判为完成。
+1. **任务入口** —— 套件导入/升级走 `collector_plugin_service`；前端资源监控任务通过 `resource_monitor_job.create --endpoint frontend` 创建，先查重；legacy CRUD不能替代v2任务编排。
+2. **激活机制** —— 启用走前端网关；资源计数不证明运行任务存在，任务创建、同步和实际采集分别验证。检查code、totalStatus和resources逐项结果，fail/wait不能判为完成。
 3. **multipart 走 SDK** —— plugin_package.export/import/import_update 是 multipart/binary，api-cli 仅 --print-curl，真调走 curl -F / Python SDK。
 4. **list 计数坑** —— plugin.list 的 total 在 data.total（body内），非 stderr _meta.total。
 5. **采集脚本 py2.7** —— print 语句/requests/subprocess 无 timeout（详见 formats/collector-kit/sampler-types.yaml）。
@@ -180,7 +180,7 @@ e2e 流程：`flows/develop-and-import-kit.yaml` / `upgrade-plugin.yaml` / `dele
 ## e2e 真调状态（2026-08-13）
 
 - ✅ collector_plugin_service:8151 完整验证（import/export/import_update/delete/metricbeat_list）—— 真调结论已回流各 runtime/api_behavior 字段
-- ⚠️历史 kit 资料已废弃：现网 `:12000` 携带 `ListCollectorKitInfo@1.0.5` 返回 `contract not found`，不要调用不存在的 kit 路由。
+- ⚠️后端直连失败不证明网关能力不存在；使用完整合约路径与`--endpoint frontend`。
 - e2e 测试套件A『主机端口可达性监控套件』instanceId=658e73a176ad1 已导入保留（供后续 activate 验证）
 - 待解 gap：采集脚本在现网 agent 上的实际执行链路（需 agent 侧日志）；API 契约以源码注册路由为准。
 
@@ -277,3 +277,8 @@ object_model.list(查证objectId) → collector_metric.list(查证指标名) →
 ## 交换机监控更新（2026-11-09）
 
 通用交换机监控 1.1.9：保留 `$.ip`，空/null SNMP 端口默认 161；已同步配置环境并回流 Hub。光纤交换机监控 1.0.17 已修复并同步配置环境与 Hub，24项离线回归通过；未激活或启动采集任务，不能据此认定CSV设备恢复。光交修复验收见 `development/docs/monitor-kits/光纤交换机监控修复验收_2026-11-09.md`。证据、适用环境和未验收边界见 `development/docs/monitor-kits/交换机与光纤交换机监控_2026-11-09.md`，成品见 `hub/INDEX.yaml`。
+
+### 网关同步与立即采集（2026-11-11）
+
+用户已确认Ping任务立即同步与采集成功；接口已录入`easyops-collector-service.yaml`，流程见`flows/activate-and-test-monitor-kit.yaml`。
+证据边界与请求示例见[监控套件网关启用与立即采集](development/docs/monitor-kits/监控套件网关启用与立即采集_2026-11-11.md)。不保存抓包Cookie，不把用户验收扩写为已获取五项时序值。

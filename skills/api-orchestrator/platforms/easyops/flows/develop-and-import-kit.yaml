@@ -113,9 +113,10 @@ steps:
     desc: "验证套件已导入（确认 name/agentType/samplerType/relateObjectId/status）"
     expect: "status=available（自定义）/enabled（内置）；字段与设计一致"
   - n: 10
-    args: ["<PLUGIN_ID>", "--header giraffe-contract-name:<contract@版本>"]
-    desc: "(可选) 激活套件→生成采集任务。⚠️kit.activate 在 collector_service:12000，需 giraffe-contract-name header（contract 版本待探测，见 systems.yaml runtime.contract_version_gap）"
-    expect: "检查code、totalStatus及resources逐项状态；fail/wait不可判为完整成功。激活异步，需轮询collector_job及实例status/lastErr验证实际执行"
+    op: kit.activate
+    args: ["--endpoint frontend"]
+    desc: "(可选) frontend网关kit.activate启用；使用完整合约路径，不用legacy后端。resources计数不能证明运行任务存在，继续按activate-and-test-monitor-kit.yaml验收。"
+    expect: "检查code、totalStatus及resources逐项状态；fail/wait不可判为完整成功。按activate-and-test-monitor-kit.yaml查v2任务、同步、立即采集并逐层验收"
 
 note: |
   api-cli 对 plugin_package.import/export/import_update 仅 --print-curl 预览（multipart/binary 不支持），

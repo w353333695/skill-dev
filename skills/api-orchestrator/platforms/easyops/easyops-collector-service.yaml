@@ -1,18 +1,9 @@
 # =============================================================================
 # EasyOps 采集服务契约—— api-cli 集中清单
 # -----------------------------------------------------------------------------
-# 真调环境（172.30.0.90）与源码核对结果：collector_service:8125 注册
-# collector_job CRUD、job_status/get、collector_metric；源码未注册
-# /api/v1/collector/kit/activate 或 /api/v1/collector/kit/info/list。
-# 原有 kit 资料已移除，避免编排调用现网不存在的接口。
-#
-# 接入面：
-#   • backend —— :12000（HTTP，giraffe-contract-name header 路由）。
-#
-# 鉴权：与 collector_plugin_service 同 EasyOps 平台。org+user header；cookie 非必需。
-#
-# collector_job/job_status 使用 legacy 端点，实测无需 giraffe-contract-name；
-# backend(:12000) 仅保留作兼容配置，不宣称存在 kit 路由。
+# 2026-11-11补录：启用、v2任务、同步及立即采集走HTTPS前端网关。
+# 后端404/contract not found不能证明前端能力不存在；legacy CRUD仍保留。
+# 接入与证据：systems.yaml#collector_service.runtime.gateway_monitor_lifecycle。
 # =============================================================================
 spec: api-cli/v1
 service:
@@ -21,7 +12,7 @@ service:
   default_endpoint: backend
   endpoints:
     backend:
-      base_url: ${EASYOPS_COLLECTOR_SERVICE_BACKEND_URL}   # 值在 env.d/collector.env，指 http://172.30.0.90:12000（实测 kit 端点在 12000 非 8125）
+      base_url: ${EASYOPS_COLLECTOR_SERVICE_BACKEND_URL}   # 值在 env.d/collector.env，指 http://172.30.0.90:12000（兼容后端，网关操作须显式frontend）
       host: admin.easyops.local                              # IP 直连，Host 由 endpoint.Host 注入
       path_prefix: ""
       auth: none                                              # 直连 auth=none，org/user 由 headers 注入
@@ -29,6 +20,10 @@ service:
         org: ${EASYOPS_ORG}
         user: ${EASYOPS_USER}
         # giraffe-contract-name 不在此设——它因 operation 而异（activate≠list），真调 per-op 用 --header 传
+    frontend:
+      base_url: ${EASYOPS_COLLECTOR_FRONTEND_URL}
+      path_prefix: /next/api/gateway
+      auth: easyops-cookie
     backend_legacy:
       base_url: ${EASYOPS_COLLECTOR_SERVICE_LEGACY_URL}     # :8125 旧版进程（metric/collector_job 端点所在）。实测（2026-08-14）：collector_metric list/get 直 200 免 contract header
       host: admin.easyops.local
@@ -46,6 +41,45 @@ service:
 # collectorJob（含 effective/collect time、目标过滤、参数映射）编排成前端可见任务。
 # -----------------------------------------------------------------------------
 resources:
+  kit:
+    description: "套件启用；显式选择frontend，不从legacy源码或后端直连错误推断网关能力。"
+    path: ""
+    operations:
+      activate:
+        description: "必须--endpoint frontend；检查totalStatus及resources；资源计数不等于运行任务已创建。"
+        method: POST
+        path: /easyops.api.collector_service.job.ActivateCollectorKit@1.0.19/api/v1/collector/kit/activate
+        body:
+          type: object
+          required: [instanceId, relateObjectId, notRequireJob, needUpdateJob]
+          properties:
+            instanceId: { type: string, description: "套件ID，不是运行任务ID" }
+            relateObjectId: { type: string, description: "套件关联的真实模型ID" }
+            notRequireJob: { type: boolean, description: "本次验证为true；须另查运行任务是否存在" }
+            needUpdateJob: { type: boolean, description: "本次验证为true；先检查已有任务影响" }
+        response: { type: object, additional_properties: true }
+  metric_collection:
+    description: "立即执行采集，reportMetric=true会上报指标。"
+    path: ""
+    operations:
+      collect_sync:
+        description: "必须--endpoint frontend；uuid取该任务executionHosts.uuid；用户2026-11-11确认采集成功。"
+        method: POST
+        path: /logic.collector_service/api/v1/collect-metric-sync
+        body:
+          type: object
+          required: [withJobId, samplerJobConfig, uuid, reportMetric, sampler]
+          properties:
+            withJobId: { type: boolean }
+            samplerJobConfig:
+              type: object
+              required: [configId]
+              properties:
+                configId: { type: string, description: "运行采集任务ID" }
+            uuid: { type: string, description: "执行主机Agent UUID，不猜测或混用目标实例ID" }
+            reportMetric: { type: boolean }
+            sampler: { type: string, enum: [metric_sampler] }
+        response: { type: object, additional_properties: true }
   resource_monitor_job:
     description: |
       前端可见的资源监控任务创建入口。必须通过网关/正式 v2 contract 调用，
@@ -55,7 +89,8 @@ resources:
     operations:
       create:
         method: POST
-        path: /api/v1/create-resource-monitor-job
+        description: "必须--endpoint frontend；先查重；返回data.id为configId，重试前查询避免重复创建。"
+        path: /easyops.api.collector_service_v2.job.CreateResourceMonitorJob@1.0.23/api/v1/create-resource-monitor-job
         body:
           type: object
           required: [pluginId, metricSetIds, collectorJob]
@@ -80,6 +115,14 @@ resources:
                 enabled: { type: boolean }
                 centralizedEnable: { type: boolean }
                 collectAgent: { type: string }
+        response: { type: object, additional_properties: true }
+
+      sync_now:
+        description: "必须--endpoint frontend；GET有同步配置副作用，不等于执行或指标入库成功。"
+        method: GET
+        path: /easyops.api.collector_service_v2.job.SyncConfigNow@1.0.1/api/v1/sync-config-now/{configId}
+        params:
+          configId: { in: path, type: string, required: true, description: "运行采集任务ID" }
         response: { type: object, additional_properties: true }
 
 # -----------------------------------------------------------------------------

@@ -753,7 +753,7 @@ systems:
       ② plugin_package 导出/导入/升级（3）：zip 流 / multipart；
       ③ log_plugin 日志套件 CRUD（4）：processSteps 链；
       ④ metric_management 指标导入（6）：4 adapter（prometheus/zabbix/easyagent/metricbeat）。
-      当前源码未注册 collector/kit/activate 或 collector/kit/info/list；任务应走 collector_job CRUD（源码 route.go）与 job_status/get。
+      启用及v2运行任务走collector_service的frontend网关；legacy源码不能证明网关能力不存在。
       核心范式：套件=类型+关联CMDB模型+采集参数(paramDefine)+指标定义；3 类型由端点隐式区分（无单 type 字段）。
 
     spec: easyops-collector-plugin.yaml          # api-cli 清单，相对本目录
@@ -818,7 +818,7 @@ systems:
       create_returns_instanceid: "3 个 create 端点响应 data:{instanceId}（13hex），用于后续 detail/delete 或创建 collector_job"
       delete_precondition: "删除前置：套件不能被 _COLLECTOR_JOB 引用（SearchTotal.Data!=0 报『此套件关联有采集任务不允许删除』）；删除级联清空 MetricObjectId 下所有 collectorPlugin.instanceId==id 的指标实例"
       update_agenttype_immutable: "import_update 升级时 agentType 不可变（报『更新套件时不允许变更套件类型』）；version 必须唯一（重复报『已存在同名版本』）"
-      no_enable_endpoint: "本服务无 enable/disable/activate 端点；任务生命周期由 collector_job.status 管理。"
+      no_enable_endpoint: "本8151服务不负责启用；启用走collector_service frontend网关，不以legacy任务状态接口替代。"
       multipart_uses_sdk: "plugin_package.export/import/import_update 是 multipart/binary 流，api-cli 无法真调（params.in 无 formData）。真调走 Python SDK（sdk/easyops_client.py 扩展）或 curl -F。详见 formats/collector-kit/package-format.yaml"
       py2_runtime: "采集脚本默认 Python2.7（agent 运行时），py2 规范见 formats/collector-kit/sampler-types.yaml python2_rules（print语句/requests/subprocess无timeout）"
       sampler_type_decides_output: "samplerType 决定脚本输出协议：metric_sampler→直接[{dims,vals}]JSON（监控）；process_sampler→BEGIN/END GATHERING DATA标记包裹（CMDB采集）。详见 formats/collector-kit/sampler-types.yaml"
@@ -841,7 +841,7 @@ systems:
     description: |
       EasyOps 采集服务（collector_service）——当前真实调用面为 collector_job CRUD、job_status/get 与 collector_metric。
       :8125 注册上述路由；:12000 携带 ListCollectorKitInfo@1.0.5 返回 contract not found，
-      当前不提供 /api/v1/collector/kit/activate 或 /api/v1/collector/kit/info/list。
+      上述直连结果不代表前端网关能力不存在；启用、v2任务、同步及立即采集见runtime.gateway_monitor_lifecycle。
       命令树见 easyops-collector-service.yaml。
 
     spec: easyops-collector-service.yaml
@@ -851,13 +851,17 @@ systems:
       backend:
         base_url: ${EASYOPS_COLLECTOR_SERVICE_BACKEND_URL}   # 指 http://172.30.0.90:12000
         host: admin.easyops.local
+      frontend:
+        base_url: ${EASYOPS_COLLECTOR_FRONTEND_URL}
+        path_prefix: /next/api/gateway
       backend_legacy:
         base_url: ${EASYOPS_COLLECTOR_SERVICE_LEGACY_URL}     # :8125 真实 collector_job/job_status/metric 端点
         host: admin.easyops.local
 
-    auth: collector-cookie
+    auth: easyops-cookie
 
     env:
+      EASYOPS_COLLECTOR_FRONTEND_URL: ""  # 网关操作必须HTTPS入口
       EASYOPS_COLLECTOR_SERVICE_BACKEND_URL: ""  # :12000 完整 URL；端口见 runtime.ports.collector_service_kit
       EASYOPS_COLLECTOR_SERVICE_LEGACY_URL: ""   # :8125 完整 URL（collector_metric/collector_job 端点所在，e2e 实测 2026-08-14）
 
@@ -865,6 +869,13 @@ systems:
       collector_job:
         create: "创建采集任务（POST /api/v1/collector_job）；必须提供 job.objectId/jobName/filter/timeout/enabled/interval/agentType/collectorParams、metrics、pluginIds"
         crud: "采集任务 GET/PUT/DELETE 与 PUT /status（均在 legacy 端点 :8125）"
+      kit:
+        activate: "套件启用；必须选择frontend，检查totalStatus与resources"
+      resource_monitor_job:
+        create: "v2任务创建，先查重；返回data.id"
+        sync_now: "立即同步；GET有副作用，必须选择frontend"
+      metric_collection:
+        collect_sync: "立即采集与指标上报，必须选择frontend"
       collector_metric:
         list: "指标元数据检索（v2 分页：metricNames 精确/objectId 过滤/metricName 模糊）——dashboard 指标查证权威源（2026-08-14 接入，metric/route.go:21）"
       job_status:
@@ -884,10 +895,24 @@ systems:
       topology: |
         :8125 legacy collector_service 注册 collector_job CRUD、job_status/get、collector_metric；
         :12000 携带 ListCollectorKitInfo@1.0.5 返回 contract not found，当前不能作为 kit API 使用。
-        源码未注册 /api/v1/collector/kit/activate 或 /api/v1/collector/kit/info/list。
+        该legacy源码范围不能外推网关能力；2026-11-11前端启用成功证据见gateway_monitor_lifecycle。
 
       collector_job_association: "_COLLECTOR_JOB.plugins 字段存 pluginInstanceId 列表；AssignJobs 取 Plugins[0].InstanceId 作 kitId（assign_job.go:34）"
-      sync_to_bypass_timer: "任务创建或更新后如需立即同步，可调 collector_service:8125 POST /api/v1/sync-job-config（config/route.go:11）；不要调用不存在的 kit.activate"
+      sync_to_bypass_timer: "前端v2运行任务按configId调用resource_monitor_job.sync_now --endpoint frontend；legacy源码另有sync-job-config，不混用任务体系。"
+      gateway_monitor_lifecycle:
+        verified_at: "2026-11-11"
+        environment: "192.168.110.24 / org1888"
+        transport: "HTTPS /next/api/gateway；保持完整合约名、@版本和logic.collector_service路由。其他环境需核对。"
+        auth: "frontend使用部署根easyops-cookie；凭证不入文档/日志，未经确认不保存用户粘贴Cookie。"
+        cli: "当前进程EASYOPS_COLLECTOR_FRONTEND_URL设HTTPS；显式--endpoint frontend，不改部署env。"
+        identities: "启用instanceId=套件ID；同步configId=运行任务ID；立即采集uuid取该任务executionHosts.uuid，不能用目标实例ID猜测。"
+        activation: "已验证notRequireJob=true、needUpdateJob=true；resources.collectorJob计数不证明已创建运行任务，须查询v2任务并在不存在时创建。"
+        route_boundary: "后端8125的404或12000的contract not found不证明网关未部署，不能据此要求恢复服务。"
+        evidence: "前序助手记录启用totalStatus=success、创建返回data.id、同步code=0；用户提供两个抓包并确认已执行且采集成功，未提供原始响应和五项时序值。"
+        acceptance: "导入、启用、任务创建、配置同步、采集执行、指标入库分别验收；status=ok或lastErr空不能单独证明五项指标存在。"
+        invalid_version: "先核对任务与执行主机并同步配置，再复测；不能直接判为软件版本过低，不反复发版或批量启停。"
+        diagnosis: "维度和__future__注入兼容仅为此前识别的风险点；未建立与无时序的因果关系，不记为确定根因。"
+
 
     acceptance_urls:
       kit_list: "${EASYOPS_COLLECTOR_FRONTEND_URL}/next/collect-platform/kit-repo/list?page=1&q={keyword}"   # 用户前端实测(2026-08-13)

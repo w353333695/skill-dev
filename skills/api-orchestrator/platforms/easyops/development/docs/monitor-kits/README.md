@@ -127,3 +127,8 @@ python3 skills/api-orchestrator/platforms/easyops/development/scripts/validate_m
 ## 华为存储实测样本校准
 
 见 `华为存储SNMP校准_2026-11-11.md`：身份树与数据树分离、ASN.1类型保留、完整SNMPINDEX、容量MiB到字节换算、硬件字段和用户walk回放。新版套件0.1.7已走导入并重新导出验证；未宣称激活/真机验收。
+
+## 网关启用、同步与立即采集（2026-11-11）
+
+- [请求示例、用户验收与排障结论纠正](监控套件网关启用与立即采集_2026-11-11.md)
+- 接口权威：`../../../easyops-collector-service.yaml`；流程：`../../../flows/activate-and-test-monitor-kit.yaml`。

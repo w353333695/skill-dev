@@ -1,0 +1,44 @@
+name: activate-and-test-monitor-kit
+intent: 监控套件启用、运行任务查重与创建、配置同步及立即采集验收
+trigger: ["启用监控套件", "立即同步配置", "立即采集", "监控任务invalidVersion"]
+guard: 规划挡（写；确认目标与影响范围后执行）
+reference: "systems.yaml#collector_service.runtime.gateway_monitor_lifecycle"
+prerequisites:
+  env: [EASYOPS_COLLECTOR_FRONTEND_URL]
+  auth: "部署根easyops-cookie；Cookie不入资料和日志"
+  endpoint: "frontend，HTTPS；保持完整合约名和@版本"
+steps:
+  - n: 1
+    desc: "读套件、关联模型及v2现有任务，限定授权目标并查重；动态IP用$.ip、paramType=cmdb、isFromSecret/isEncrypt均false"
+    expect: "区分套件instanceId、任务configId和执行主机UUID"
+  - n: 2
+    op: kit.activate
+    args: ["--endpoint frontend"]
+    desc: "使用套件真实relateObjectId；已验证notRequireJob=true、needUpdateJob=true，先确认更新已有任务影响"
+    expect: "检查code、totalStatus、resources逐项结果；collectorJob计数不能代替运行任务查询"
+  - n: 3
+    op: resource_monitor_job.create
+    args: ["--endpoint frontend"]
+    desc: "仅在v2确认任务不存在时创建；已有则复用。指标集、pluginId来自真实套件；过滤仅含授权目标。重试前查重。"
+    expect: "保存data.id为configId；回读enabled、interval、参数与目标"
+  - n: 4
+    desc: "从该任务ListJobInstances明细获取executionHosts.uuid，不用套件ID、目标实例ID或其他主机UUID猜测"
+    expect: "任务及执行主机对应一致且具备采集条件"
+  - n: 5
+    op: resource_monitor_job.sync_now
+    args: ["<configId>", "--endpoint frontend"]
+    desc: "GET有同步配置副作用；必须经授权；同步不等于执行"
+    expect: "检查业务结果并回读状态"
+  - n: 6
+    op: metric_collection.collect_sync
+    args: ["--endpoint frontend"]
+    desc: "body包含withJobId=true、samplerJobConfig.configId、执行主机uuid、reportMetric=true、sampler=metric_sampler；实际执行并上报指标"
+    expect: "保留脱敏业务响应和真实错误，HTTP200/code0/statusok不能替代逐项时序验收"
+  - n: 7
+    desc: "检查实际输出与时序；Ping逐项检查五项指标。用户确认成功时记为用户验收，不虚构值。"
+    expect: "分别记录导入、启用、任务、同步、执行、入库的证据来源"
+error_handling:
+  invalidVersion: "先核对configId/执行主机并同步复测；不是已证实软件过低，不反复发版或批量启停"
+  backend_404: "后端404或contract not found不证明前端能力不存在；检查入口及完整路由"
+side_effects: "启用可能更新资源/已有任务；创建新增任务；GET同步有副作用；reportMetric=true写入指标。"
+acceptance: "2026-11-11用户确认同步及立即采集成功；未提供原始返回和五项时序值。"
