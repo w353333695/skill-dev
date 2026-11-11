@@ -41,7 +41,7 @@
             null
           ],
           "alertCount": 1,
-          "recoverCount": 0,
+          "recoverCount": 1,
           "detectWindow": 1,
           "comparators": [
             {
@@ -117,7 +117,7 @@
             null
           ],
           "alertCount": 1,
-          "recoverCount": 0,
+          "recoverCount": 1,
           "detectWindow": 1,
           "comparators": [
             {
@@ -165,7 +165,7 @@
           "type": "bigger_than",
           "threshold": 0,
           "alertCount": 1,
-          "recoverCount": 0,
+          "recoverCount": 1,
           "detectWindow": 1,
           "comparators": [
             {
@@ -190,16 +190,9 @@
   "objectId": "STORAGE@ONEMODEL",
   "priority": 50,
   "_rule_name_format": "{objectName}存储设备SNMP告警规则",
-  "_source_template": "存储设备SNMP监控_告警规则模板.xlsx",
-  "cmdbInstanceStrategy": [
-    {
-      "instanceId": "instances-strategy-storage-snmp",
-      "instances": {
-        "objectId": "STORAGE@ONEMODEL",
-        "type": "all"
-      },
-      "name": "{objectName}存储设备SNMP目标资源",
-      "objectId": "STORAGE@ONEMODEL"
-    }
-  ]
+  "_source_template": "存储设备SNMP监控_告警规则模板_0.1.9.xlsx",
+  "cmdbInstanceStrategy": [],
+  "alertGroupStrategy": [],
+  "alertMetricFillStrategy": [],
+  "alertNotifyStrategy": []
 }

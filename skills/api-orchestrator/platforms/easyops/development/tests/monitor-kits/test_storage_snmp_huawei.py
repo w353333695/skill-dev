@@ -72,6 +72,7 @@ class HuaweiTests(unittest.TestCase):
         self.assertEqual(records[0]['vals']['storage_info_sys_objectid'], '1.3.6.1.4.1.2011.2.91')
         self.assertNotIn('storage_uptime_ticks', records[0]['vals'])
         arrays = [row for row in records if row['dims'].get('resourceType') == 'array']
+        self.assertEqual(arrays[0]['vals']['storage_failed_disk_count'], 0)
         values = {key: value for row in arrays for key, value in row['vals'].items()}
         self.assertEqual(values['storage_capacity_bytes'], 114261655 * 1048576)
         self.assertEqual(values['storage_used_bytes'], 56338073 * 1048576)
@@ -89,6 +90,17 @@ class HuaweiTests(unittest.TestCase):
         self.assertEqual(sorted(row['vals']['storage_controller_memory_percent'] for row in controllers), [51, 52])
         import json
         definitions = {row['key']: row for row in json.loads((SOURCE.parents[1] / 'origin_metric.json').read_text())}
+        disk_status_oid = '1.3.6.1.4.1.34774.4.1.23.5.1.1.2'
+        def with_failed_disk(oid, walk=False):
+            lines, error = response(oid, walk)
+            if oid == disk_status_oid and lines:
+                lines = list(lines)
+                lines[0] = lines[0].replace('Gauge32: 1', 'Gauge32: 2')
+            return lines, error
+        with patch.object(module, 'run', with_failed_disk):
+            failed_records = module.collect()
+        failed_array = next(row for row in failed_records if row['dims'].get('resourceType') == 'array')
+        self.assertEqual(failed_array['vals']['storage_failed_disk_count'], 1)
         for row in records:
             for key in row['vals']:
                 self.assertIn(key, definitions)

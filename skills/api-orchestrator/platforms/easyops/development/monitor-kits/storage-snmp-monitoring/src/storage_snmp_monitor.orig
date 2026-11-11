@@ -206,6 +206,7 @@ def collect_huawei_resources(records, tags, errors):
             values[field] = parse_table(lines, oid)
             if error and not re.search(r"no\s*such", error, re.I):
                 errors.append(error)
+        failed_disk_count = 0
         for index, name in values["name"].items():
             metrics = {"storage_resource_present": 1, "storage_resource_value": text(name)}
             for field, rows in values.items():
@@ -218,8 +219,15 @@ def collect_huawei_resources(records, tags, errors):
             used = metrics.get("storage_used_bytes")
             if total is not None and used is not None and total > 0:
                 metrics["storage_used_percent"] = used * 100.0 / total
+            if kind == "disk" and metrics.get("storage_status") not in (None, 1):
+                failed_disk_count += 1
             if metrics:
                 add_record(records, tags, metrics, kind, index, name)
+        if kind == "disk":
+            for record in records:
+                if record["dims"].get("resourceType") == "array":
+                    record["vals"]["storage_failed_disk_count"] = failed_disk_count
+                    break
 
 
 def collect():

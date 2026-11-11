@@ -23,8 +23,8 @@ def load_json(path, label):
 def validate_alert(data, label, metric_keys):
     required = ("name", "objectId", "priority", "_rule_name_format", "alertConditionStrategy", "cmdbInstanceStrategy")
     for key in required:
-        if not data.get(key):
-            raise ValidationError("%s 缺少非空字段 %s" % (label, key))
+        if key not in data:
+            raise ValidationError("%s 缺少字段 %s" % (label, key))
     if not isinstance(data["alertConditionStrategy"], list):
         raise ValidationError("%s.alertConditionStrategy 必须是数组" % label)
     if not isinstance(data["cmdbInstanceStrategy"], list):

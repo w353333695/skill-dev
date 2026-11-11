@@ -1,6 +1,6 @@
 type: simple-script
 name: 存储设备SNMP监控-存储模型
-version: "0.1.7"
+version: "0.1.10"
 command:
     collect:
         interpreter: ""
@@ -34,6 +34,7 @@ paramDefine:
     - {name: privKey, valueType: cmdb, defaultValue: $.snmp_conf.privKey, display: true, displayName: "SNMPv3加密密钥", description: "凭证走CMDB，不写日志", use: collectParams, optional: true, isFromSecret: false, isEncrypt: false, extraArgs: null}
     - {name: contextName, valueType: string, defaultValue: $.snmp_conf.contextName, display: true, displayName: "SNMPv3上下文", description: "可选上下文名称", use: collectParams, optional: true, isFromSecret: false, isEncrypt: false, extraArgs: null}
 agentType: easyops
+samplerType: metric_sampler
 category: 存储.带外监控
 scriptType: python
 interpreter: ""

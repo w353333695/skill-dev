@@ -660,9 +660,12 @@ items:
   - id: storage-snmp-monitor-kit
     name: 存储设备SNMP监控套件
     category: monitor-kits
-    files: [存储设备SNMP监控套件_0.1.7.zip, 存储设备SNMP监控_告警规则模板_0.1.6.xlsx]
-    version: "0.1.7"
+    files: [存储设备SNMP监控套件_0.1.10.zip, 存储设备SNMP监控_告警规则模板_0.1.10.xlsx]
+    version: "0.1.10"
     history:
+      - {ver: "0.1.10", date: "2026-11-11", change: "补齐metric_sampler声明以对齐已验证自动告警导入链路；继续保留修正后的故障盘计数和模板一致性"}
+      - {ver: "0.1.9", date: "2026-11-11", change: "按已验证Ping自动导入契约补齐空策略数组并简化目标策略；Excel仍保留全量目标策略供管理端导入"}
+      - {ver: "0.1.8", date: "2026-11-11", change: "修复华为故障磁盘计数输出；告警JSON与Excel恢复次数对齐；Excel通知策略名称修正并升级为0.1.8"}
       - {ver: "0.1.0", date: "2026-11-06", change: "基于 Zabbix 5.4 存储模板调研新增通用存储 SNMP 套件；支持 HOST-RESOURCES-MIB、Huawei OceanStor、NetApp FAS/AFF、XSKY SDS、EMC Data Domain、Dell iDRAC 识别与容量监控，未知品牌标准 MIB 兜底"}
       - {ver: "0.1.1", date: "2026-11-06", change: "补充与套件同源的 Excel 告警规则模板，覆盖 SNMP 不可用、容量 80%/90%、阵列状态和故障磁盘告警"}
       - {ver: "0.1.2", date: "2026-11-06", change: "修复 alertRule 的 cmdbInstanceStrategy 类型：由对象改为平台要求的数组，按已验证套件契约补齐告警条件字段并准备当前环境导入验证"}
