@@ -7,6 +7,16 @@
 #   如「ITSM服务_主机申请_1.3.4.zip」；旧命名 <名称>_v<版本>.<ext> 存量不动，新版回流按新命名+删旧版文件
 # 存放规则: 仅收录成品包及可导入模板；未完成源码、tests、临时文件位于 ../development/；已验证可复用脚本源码可归档到 hub/scripts/。
 items:
+  - id: physical-server-ipmi-monitor-kit
+    name: 物理服务器IPMI监控
+    category: monitor-kits
+    files: [监控套件_物理服务器IPMI监控_0.1.1.zip]
+    version: "0.1.1"
+    history:
+      - {ver: "0.1.1", date: "2026-11-11", change: "账密、BMC地址和KG改为CMDB实例属性动态参数，所有isEncrypt/isFromSecret关闭，password/kg使用password类型；创建任务时可替换$.路径"}
+    scenario: 物理服务器BMC的IPMI2.0带外传感器和硬件状态监控
+    notes: "默认路径$.bmc_ip、$.ipmi_username、$.ipmi_password、$.ipmi_kg，需部署方在PHYSICAL_SERVER模型/任务中配置或替换；未导入远端。"
+    added: "2026-11-11"
   - id: ping-monitor-kit
     name: 主机Ping监控
     category: monitor-kits

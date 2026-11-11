@@ -12,7 +12,7 @@ import stat
 import tarfile
 import zipfile
 
-VERSION = "0.1.0"
+VERSION = "0.1.1"
 NAME = "物理服务器IPMI监控"
 BASE = Path(__file__).resolve().parents[1]
 SOURCE = BASE / "monitor-kits" / "physical-ipmi-monitoring"
@@ -163,10 +163,10 @@ def dependencies(cache, build, root):
 
 def metadata(root):
     fields = [("ip", "CMDB物理机IP", "$.ip", "用于关联物理机，不用作BMC目标"),
-              ("bmc_ip", "BMC管理IP", "", "必填；明确填写BMC管理IP，不自动使用业务IP"),
-              ("username", "IPMI用户名", "", "建议专用只读用户"),
-              ("password", "IPMI密码", "", "通过平台加密参数注入；不放命令行/文档"),
-              ("kg", "KG密钥", "", "可选；按BMC配置填写，通过加密参数注入"),
+              ("bmc_ip", "BMC管理IP", "$.bmc_ip", "从PHYSICAL_SERVER实例属性读取；创建任务时可改为实际CMDB属性路径"),
+              ("username", "IPMI用户名", "$.ipmi_username", "从PHYSICAL_SERVER实例属性读取；创建任务时可改为实际CMDB属性路径"),
+              ("password", "IPMI密码", "$.ipmi_password", "从PHYSICAL_SERVER实例属性读取；不走平台加密参数"),
+              ("kg", "KG密钥", "$.ipmi_kg", "从PHYSICAL_SERVER实例属性读取；可选，不走平台加密参数"),
               ("port", "IPMI UDP端口", "623", "默认623，范围1..65535"),
               ("timeout", "整轮超时秒数", "60", "默认60，范围5..300；另有最多2秒注销"),
               ("login_timeout", "认证预检查超时秒数", "5", "默认5，范围1..30；一次认证尝试，协议重传受此总时限约束"),
@@ -175,10 +175,10 @@ def metadata(root):
              'command:', '    collect:', '        interpreter: ""', '        scriptPath: [src, ipmi_monitor.py]',
              '        type: python', '        user: ""', 'params: ' + json.dumps(list(PARAMS)), 'paramDefine:']
     for key, label, default, description in fields:
-        item = {"name": key, "valueType": "int" if key in ("port", "timeout", "login_timeout", "privilege") else "string",
+        item = {"name": key, "valueType": ("int" if key in ("port", "timeout", "login_timeout", "privilege") else ("password" if key in ("password", "kg") else "string")),
                 "defaultValue": default, "display": True, "displayName": label, "description": description,
                 "use": "collectParams", "optional": key in ("kg", "port", "timeout", "login_timeout", "privilege"),
-                "isFromSecret": False, "isEncrypt": key in ("password", "kg"), "extraArgs": None}
+                "isFromSecret": False, "isEncrypt": False, "extraArgs": None}
         lines.append("    - " + json.dumps(item, ensure_ascii=False))
     lines.extend(['agentType: easyops', 'category: 基础设施.物理资源', 'scriptType: python',
                   'interpreter: ""', 'samplerType: metric_sampler', 'relateObjectId: PHYSICAL_SERVER@ONEMODEL',

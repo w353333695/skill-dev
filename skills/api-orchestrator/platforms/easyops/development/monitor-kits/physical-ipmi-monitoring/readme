@@ -1,4 +1,4 @@
-物理服务器IPMI监控 0.1.0
+物理服务器IPMI监控 0.1.1
 
 一、导入与使用
 在 EasyOps 监控套件页面导入本 ZIP。模型要求目标环境已有 PHYSICAL_SERVER@ONEMODEL，
@@ -9,9 +9,11 @@
 
 二、参数（全部通过 EASYOPS_COLLECTOR_<参数名> 注入）
 ip：必填，CMDB物理机IP，默认映射$.ip，用于实例关联。
-bmc_ip：必填，BMC管理IPv4/IPv6，必须明确配置；不自动将业务IP作为BMC目标。
-username/password：必填，建议专用只读账号。密码/密钥使用平台加密参数或凭证设施，不落配置文件、命令行、日志。
-kg：可选，BMC要求的KG密钥（文本原值，不自行转hex），默认空。
+bmc_ip：必填，默认从CMDB动态属性 $.bmc_ip 读取；创建任务时可替换为实际属性路径。
+username：必填，默认从CMDB动态属性 $.ipmi_username 读取；建议专用只读账号。
+password：必填，默认从CMDB动态属性 $.ipmi_password 读取；动态参数不加密、不走密钥管理。
+kg：可选，默认从CMDB动态属性 $.ipmi_kg 读取；动态参数不加密，BMC不要求时留空。
+以上 $. 路径均为任务级可调整参数，需先在 PHYSICAL_SERVER 实例上创建对应属性。
 port：UDP端口，默认623，范围1..65535。
 timeout：本轮总超时秒数，默认60，范围5..300，退出前另有最多2秒注销时间。
 login_timeout：认证预检查独立短超时，默认5秒，范围1..30；一次登录尝试，pyghmi协议重传受此时限约束。
