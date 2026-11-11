@@ -532,5 +532,101 @@
     ],
     "type": "normal",
     "unit": ""
+  },
+  {
+    "dataType": "double",
+    "description": "存储SNMP-华为控制器CPU使用率",
+    "dims": [
+      {
+        "dimDisplayName": "ip",
+        "dimName": "ip",
+        "isArray": false,
+        "originDimName": "ip"
+      },
+      {
+        "dimDisplayName": "vendor",
+        "dimName": "vendor",
+        "isArray": false,
+        "originDimName": "vendor"
+      },
+      {
+        "dimDisplayName": "resourceType",
+        "dimName": "resourceType",
+        "isArray": false,
+        "originDimName": "resourceType"
+      },
+      {
+        "dimDisplayName": "resourceIndex",
+        "dimName": "resourceIndex",
+        "isArray": false,
+        "originDimName": "resourceIndex"
+      },
+      {
+        "dimDisplayName": "resourceName",
+        "dimName": "resourceName",
+        "isArray": false,
+        "originDimName": "resourceName"
+      }
+    ],
+    "displayName": "存储SNMP-华为控制器CPU使用率",
+    "expression": "",
+    "metricSet": [
+      "容量与文件系统"
+    ],
+    "name": "storage_controller_cpu_percent",
+    "objectId": "STORAGE@ONEMODEL",
+    "originalMetrics": [
+      "storage_controller_cpu_percent"
+    ],
+    "type": "normal",
+    "unit": "%"
+  },
+  {
+    "dataType": "double",
+    "description": "存储SNMP-华为控制器内存使用率",
+    "dims": [
+      {
+        "dimDisplayName": "ip",
+        "dimName": "ip",
+        "isArray": false,
+        "originDimName": "ip"
+      },
+      {
+        "dimDisplayName": "vendor",
+        "dimName": "vendor",
+        "isArray": false,
+        "originDimName": "vendor"
+      },
+      {
+        "dimDisplayName": "resourceType",
+        "dimName": "resourceType",
+        "isArray": false,
+        "originDimName": "resourceType"
+      },
+      {
+        "dimDisplayName": "resourceIndex",
+        "dimName": "resourceIndex",
+        "isArray": false,
+        "originDimName": "resourceIndex"
+      },
+      {
+        "dimDisplayName": "resourceName",
+        "dimName": "resourceName",
+        "isArray": false,
+        "originDimName": "resourceName"
+      }
+    ],
+    "displayName": "存储SNMP-华为控制器内存使用率",
+    "expression": "",
+    "metricSet": [
+      "容量与文件系统"
+    ],
+    "name": "storage_controller_memory_percent",
+    "objectId": "STORAGE@ONEMODEL",
+    "originalMetrics": [
+      "storage_controller_memory_percent"
+    ],
+    "type": "normal",
+    "unit": "%"
   }
 ]

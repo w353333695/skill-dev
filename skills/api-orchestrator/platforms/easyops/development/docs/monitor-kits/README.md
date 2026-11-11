@@ -123,3 +123,7 @@ python3 skills/api-orchestrator/platforms/easyops/development/scripts/validate_m
 
 新增 `主机Ping监控` 0.1.0：关联 `HOST` 模型，地址取 `$.ip`，执行节点通过系统 `ping` 命令采集可达状态、丢包率和最小/平均/最大往返时延，默认3次、单次超时2秒。套件只代表ICMP可达性，不替代TCP端口或业务协议探测；成品包见 Hub 索引，尚未导入配置环境或执行真实设备Ping。
 
+
+## 华为存储实测样本校准
+
+见 `华为存储SNMP校准_2026-11-11.md`：身份树与数据树分离、ASN.1类型保留、完整SNMPINDEX、容量MiB到字节换算、硬件字段和用户walk回放。新版套件0.1.7已走导入并重新导出验证；未宣称激活/真机验收。

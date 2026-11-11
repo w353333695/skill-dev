@@ -1,6 +1,6 @@
 type: simple-script
 name: 存储设备SNMP监控-存储模型
-version: "0.1.6"
+version: "0.1.7"
 command:
     collect:
         interpreter: ""

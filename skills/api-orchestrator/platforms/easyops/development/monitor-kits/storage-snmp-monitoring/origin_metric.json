@@ -391,5 +391,77 @@
         "readOnly": false
       }
     ]
+  },
+  {
+    "agentType": "easyops",
+    "dataType": "double",
+    "instanceId": "",
+    "key": "storage_controller_cpu_percent",
+    "labels": [
+      "ip",
+      "vendor",
+      "resourceType",
+      "resourceIndex",
+      "resourceName"
+    ],
+    "metricType": "gauge",
+    "tagDefine": [
+      {
+        "name": "ip",
+        "readOnly": false
+      },
+      {
+        "name": "vendor",
+        "readOnly": false
+      },
+      {
+        "name": "resourceType",
+        "readOnly": false
+      },
+      {
+        "name": "resourceIndex",
+        "readOnly": false
+      },
+      {
+        "name": "resourceName",
+        "readOnly": false
+      }
+    ]
+  },
+  {
+    "agentType": "easyops",
+    "dataType": "double",
+    "instanceId": "",
+    "key": "storage_controller_memory_percent",
+    "labels": [
+      "ip",
+      "vendor",
+      "resourceType",
+      "resourceIndex",
+      "resourceName"
+    ],
+    "metricType": "gauge",
+    "tagDefine": [
+      {
+        "name": "ip",
+        "readOnly": false
+      },
+      {
+        "name": "vendor",
+        "readOnly": false
+      },
+      {
+        "name": "resourceType",
+        "readOnly": false
+      },
+      {
+        "name": "resourceIndex",
+        "readOnly": false
+      },
+      {
+        "name": "resourceName",
+        "readOnly": false
+      }
+    ]
   }
 ]

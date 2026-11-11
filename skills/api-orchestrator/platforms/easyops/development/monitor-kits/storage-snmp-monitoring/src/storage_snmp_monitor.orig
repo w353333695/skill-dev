@@ -29,7 +29,8 @@ TABLES = {
 }
 PROFILES = {
     "huawei_oceanstor": {
-        "roots": ["1.3.6.1.4.1.34774"],
+        "roots": ["1.3.6.1.4.1.2011.2.91", "1.3.6.1.4.1.34774"],
+        "capacity_multiplier": 1048576,
         "capacity_total": "1.3.6.1.4.1.34774.4.1.1.5.0",
         "capacity_used": "1.3.6.1.4.1.34774.4.1.1.4.0",
         "device_status": "1.3.6.1.4.1.34774.4.1.1.3.0",
@@ -38,7 +39,7 @@ PROFILES = {
             "disk": "1.3.6.1.4.1.34774.4.1.23.5.1.1.1",
             "controller": "1.3.6.1.4.1.34774.4.1.23.5.2.1.1",
             "pool": "1.3.6.1.4.1.34774.4.1.23.4.2.1.2",
-            "lun": "1.3.6.1.4.1.34774.4.1.19.9.4.1.2",
+            "lun": "1.3.6.1.4.1.34774.4.1.23.4.8.1.2",
         },
     },
     "netapp": {
@@ -110,25 +111,44 @@ def run(oid, walk=False):
         return [], "[run_snmp]\n%s" % traceback.format_exc()
 
 
+def normalize_oid(value):
+    return text(value).strip().replace("SNMPv2-SMI::enterprises.", "1.3.6.1.4.1.").replace("enterprises.", "1.3.6.1.4.1.").lstrip(".")
+
+
 def parse_value(line):
     value = text(line).split(" = ", 1)[-1].strip()
-    value = re.sub(r"^(STRING|INTEGER|Counter32|Counter64|Gauge32|Unsigned32|OID|Timeticks|Hex-STRING|Opaque):\s*", "", value, flags=re.I)
+    if re.search(r"no\s*such|no more variables|endofmibview|^NULL$", value, re.I):
+        return None
+    typed = re.match(r"^(STRING|INTEGER|Counter32|Counter64|Gauge32|Unsigned32|OID|Timeticks|Hex-STRING|Opaque):\s*(.*)$", value, re.I)
+    if typed:
+        kind, value = typed.group(1).lower(), typed.group(2)
+        if kind == "oid":
+            return normalize_oid(value)
+        if kind in ("string", "hex-string"):
+            return value[1:-1] if value.startswith('"') and value.endswith('"') else value
+        if kind == "timeticks":
+            ticks = re.search(r"\((\d+)\)", value)
+            return int(ticks.group(1)) if ticks else None
     if value.startswith('"') and value.endswith('"'):
         return value[1:-1]
-    match = re.search(r"[-+]?\d+(?:\.\d+)?", value)
-    if match:
-        number = float(match.group(0))
-        return int(number) if number.is_integer() else number
-    return value
+    if re.match(r"^[-+]?\d+$", value):
+        return int(value)
+    if re.match(r"^[-+]?\d+(?:\.\d+)?$", value):
+        return float(value)
+    enum = re.match(r"^[^()]+\(([-+]?\d+)\)$", value)
+    return int(enum.group(1)) if enum else value
 
 
-def parse_table(lines):
+def parse_table(lines, root):
     values = {}
+    prefix = normalize_oid(root) + "."
     for line in lines:
-        match = re.match(r"^\.(\d+(?:\.\d+)*)\s*=", text(line))
-        if match:
-            index = match.group(1).split(".")[-1]
-            values[index] = parse_value(line)
+        if " = " not in text(line):
+            continue
+        oid = normalize_oid(text(line).split(" = ", 1)[0])
+        value = parse_value(line)
+        if oid.startswith(prefix) and value is not None:
+            values[oid[len(prefix):]] = value
     return values
 
 
@@ -147,7 +167,7 @@ def number(value):
 def vendor_for(object_id, descr):
     haystack = (text(object_id) + " " + text(descr)).lower()
     for name, profile in PROFILES.items():
-        if any(text(root) in text(object_id) for root in profile.get("roots", [])):
+        if any(normalize_oid(object_id) == root or normalize_oid(object_id).startswith(root + ".") for root in profile.get("roots", [])):
             return name
     checks = (("huawei", "huawei_oceanstor"), ("oceanstor", "huawei_oceanstor"), ("netapp", "netapp"), ("xsky", "xsky"), ("data domain", "emc_dd2500"), ("idrac", "dell_idrac"), ("dell", "dell_idrac"))
     for marker, name in checks:
@@ -163,6 +183,45 @@ def add_record(records, tags, values, resource_type="", resource_index="", resou
     records.append({"dims": dims, "vals": values, "timestamp": int(time.time() * 1000)})
 
 
+def collect_huawei_resources(records, tags, errors):
+    definitions = {
+        "disk": ("23.5.1.1", 1, 2),
+        "controller": ("23.5.2.1", 1, 2),
+        "pool": ("23.4.2.1", 2, 5),
+        "power": ("23.5.3.1", 1, 3),
+        "fan": ("23.5.4.1", 2, 3),
+        "battery": ("23.5.5.1", 2, 3),
+        "enclosure": ("23.5.6.1", 2, 4),
+    }
+    for kind, (table, name_column, status_column) in definitions.items():
+        columns = {"name": name_column, "storage_status": status_column}
+        if kind == "controller":
+            columns.update({"storage_controller_cpu_percent": 8, "storage_controller_memory_percent": 9})
+        if kind == "pool":
+            columns.update({"storage_capacity_bytes": 7, "storage_used_bytes": 8})
+        values = {}
+        for field, column in columns.items():
+            oid = "1.3.6.1.4.1.34774.4.1.%s.%s" % (table, column)
+            lines, error = run(oid, walk=True)
+            values[field] = parse_table(lines, oid)
+            if error and not re.search(r"no\s*such", error, re.I):
+                errors.append(error)
+        for index, name in values["name"].items():
+            metrics = {"storage_resource_present": 1, "storage_resource_value": text(name)}
+            for field, rows in values.items():
+                if field == "name":
+                    continue
+                value = number(rows.get(index))
+                if value is not None:
+                    metrics[field] = value * 1048576 if field.endswith("_bytes") else value
+            total = metrics.get("storage_capacity_bytes")
+            used = metrics.get("storage_used_bytes")
+            if total is not None and used is not None and total > 0:
+                metrics["storage_used_percent"] = used * 100.0 / total
+            if metrics:
+                add_record(records, tags, metrics, kind, index, name)
+
+
 def collect():
     errors = []
     descr, error = scalar(BASE["sys_descr"])
@@ -174,7 +233,7 @@ def collect():
     records = []
     base_values = {"storage_snmp_available": 1, "storage_info_sys_descr": text(descr), "storage_info_sys_objectid": text(object_id)}
     uptime, uptime_error = scalar(BASE["sys_uptime"])
-    if uptime is not None:
+    if number(uptime) is not None:
         base_values["storage_uptime_ticks"] = number(uptime)
     if uptime_error:
         errors.append(uptime_error)
@@ -183,7 +242,7 @@ def collect():
     storage = {}
     for name, oid in TABLES.items():
         lines, table_error = run(oid, walk=True)
-        storage[name] = parse_table(lines)
+        storage[name] = parse_table(lines, oid)
         if table_error and "nosuch" not in table_error.lower() and "no such" not in table_error.lower():
             errors.append(table_error)
     indexes = sorted(set(storage["storage_size"]) | set(storage["storage_used"]))
@@ -198,6 +257,7 @@ def collect():
         add_record(records, tags, {"storage_capacity_bytes": size * unit, "storage_used_bytes": used * unit, "storage_used_percent": used * 100.0 / size}, kind, index, name)
 
     profile = PROFILES.get(vendor, {})
+    array_values = {}
     for metric, oid_key in (("storage_capacity_bytes", "capacity_total"), ("storage_used_bytes", "capacity_used"), ("storage_status", "device_status"), ("storage_info_version", "version"), ("storage_failed_disk_count", "failed_disks")):
         oid = profile.get(oid_key)
         if not oid:
@@ -205,15 +265,28 @@ def collect():
         value, metric_error = scalar(oid)
         if value is not None:
             parsed = number(value) if metric not in ("storage_info_version",) else text(value)
-            add_record(records, tags, {metric: parsed}, "array", "0", vendor)
+            if parsed is not None:
+                if metric in ("storage_capacity_bytes", "storage_used_bytes"):
+                    parsed *= profile.get("capacity_multiplier", 1)
+                array_values[metric] = parsed
         elif metric_error and "nosuch" not in metric_error.lower() and "no such" not in metric_error.lower():
             errors.append(metric_error)
+    total = array_values.get("storage_capacity_bytes")
+    used = array_values.get("storage_used_bytes")
+    if total is not None and used is not None and total > 0:
+        array_values["storage_used_percent"] = used * 100.0 / total
+    if array_values:
+        add_record(records, tags, array_values, "array", "0", vendor)
     for resource_type, oid in profile.get("discoveries", {}).items():
+        if vendor == "huawei_oceanstor" and resource_type in ("disk", "controller", "pool"):
+            continue
         lines, discovery_error = run(oid, walk=True)
         if discovery_error and "nosuch" not in discovery_error.lower() and "no such" not in discovery_error.lower():
             errors.append(discovery_error)
-        for index, value in parse_table(lines).items():
+        for index, value in parse_table(lines, oid).items():
             add_record(records, tags, {"storage_resource_present": 1, "storage_resource_value": text(value)}, resource_type, index, value)
+    if vendor == "huawei_oceanstor":
+        collect_huawei_resources(records, tags, errors)
     if errors:
         records[0]["vals"]["storage_snmp_error"] = "; ".join(text(item) for item in errors[:3])
     return records
