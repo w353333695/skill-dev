@@ -1,0 +1,150 @@
+import hashlib
+import hmac
+import json
+import os
+import shutil
+import stat
+import subprocess
+import sys
+import time
+import unittest
+import uuid
+import zipfile
+from pathlib import Path
+from unittest import mock
+
+KIT = Path(__file__).resolve().parents[2] / "monitor-kits/host-deploy-instance-monitoring"
+SOURCE = KIT / "src/host_deploy_instance_monitor.py"
+PACKAGE = Path(__file__).resolve().parents[3] / "hub/monitor-kits/监控套件_主机部署实例监控_0.1.1.zip"
+WORKTREE_ROOT = Path(__file__).resolve().parents[7]
+
+
+def module():
+    namespace = {"__name__": "host_deploy_instance_monitor_test"}
+    exec(compile(SOURCE.read_bytes(), str(SOURCE), "exec"), namespace)
+    return namespace
+
+
+class HostDeployInstanceMonitorTests(unittest.TestCase):
+    def test_config(self):
+        m = module()
+        env = {
+            "EASYOPS_COLLECTOR_instanceId": "65eb86f148251",
+            "EASYOPS_COLLECTOR_hostUuid": "f907bc31-c391-4518-be14-fe50d827bfd8",
+            "EASYOPS_COLLECTOR_hostIp": "192.168.110.24",
+            "EASYOPS_COLLECTOR_cacheTtlDays": "7",
+            "EASYOPS_COLLECTOR_sampleInterval": "0.2",
+            "EASYOPS_COLLECTOR_requestTimeout": "10",
+        }
+        with mock.patch.dict(os.environ, env, clear=True):
+            settings = m["config"]()
+        self.assertEqual(settings["hostInstanceId"], "65eb86f148251")
+        self.assertEqual(settings["cacheTtlSeconds"], 604800)
+        with mock.patch.dict(os.environ, {"EASYOPS_COLLECTOR_instanceId": "$.instanceId"}, clear=True):
+            with self.assertRaises(ValueError):
+                m["config"]()
+
+    def test_process_match_prefers_process_list(self):
+        m = module()
+        process = {
+            "pid": 123, "comm": "redis-server", "state": "R", "utime": 10.0,
+            "stime": 5.0, "threads": 4, "startTimeTicks": 100.0,
+            "cmdline": "./bin/redis-server ./conf/redis.conf",
+            "cwd": "/data/easyops/redis/data",
+        }
+        target = {
+            "instanceId": "65df0395e33cd", "installPath": "/usr/local/easyops/redis",
+            "ports": ["6379"],
+            "processList": [{"pname": "redis-server", "cmdline": "./bin/redis-server", "cwd": "/data/easyops/redis"}],
+        }
+        self.assertEqual(m["match_target_processes"](target, [process]), [process])
+
+    def test_keyword_group_requires_all_keywords(self):
+        m = module()
+        process = {"pid": 1, "cmdline": "/usr/local/easyops/java -Dapp=api", "cwd": "/"}
+        self.assertTrue(m["match_keyword_group"](process, {"cmdline": ["/usr/local/easyops/java", "-Dapp=api"]}))
+        self.assertFalse(m["match_keyword_group"](process, {"cmdline": ["/usr/local/easyops/java", "-Dapp=web"]}))
+
+    def test_collect_target_metrics(self):
+        m = module()
+        process = {
+            "pid": 123, "comm": "redis-server", "state": "R", "utime": 10.0,
+            "stime": 5.0, "threads": 4, "startTimeTicks": 100.0,
+            "cmdline": "./bin/redis-server ./conf/redis.conf",
+            "cwd": "/data/easyops/redis/data",
+        }
+        refreshed = dict(process)
+        refreshed.update({"utime": 16.0, "stime": 5.0})
+        settings = {
+            "hostInstanceId": "host1", "sampleInterval": 0.0,
+        }
+        target = {
+            "instanceId": "deploy1", "installPath": "/usr/local/easyops/redis",
+            "ports": ["6379"],
+            "processList": [{"pname": "redis-server", "cmdline": "./bin/redis-server"}],
+        }
+        clocks = iter([101.0, 102.0])
+        with mock.patch.object(m["time"], "sleep"), mock.patch.object(m["time"], "time", side_effect=lambda: next(clocks)), \
+             mock.patch.dict(m, {"parse_proc_stat": mock.Mock(return_value=refreshed), "process_socket_inodes": mock.Mock(return_value=({"inode1"}, True)), "process_memory_bytes": mock.Mock(return_value=1000.0), "process_fd_usage": mock.Mock(return_value=(100, 1024))}):
+            result = m["collect_target"](target, [process], {6379: {"inode1"}}, 1000.0, 100.0, 2000.0, settings, 2000.0, 10.0, 1.0, 1)
+        self.assertEqual(result["dims"]["deployInstanceId"], "deploy1")
+        self.assertEqual(result["vals"]["deploy_instance_process_alive"], 1.0)
+        self.assertEqual(result["vals"]["deploy_instance_port_listen"], 1.0)
+        self.assertEqual(result["vals"]["deploy_instance_process_start_timestamp"], 1001.0)
+        self.assertEqual(result["vals"]["deploy_instance_process_uptime_seconds"], 999.0)
+        self.assertEqual(result["vals"]["deploy_instance_process_cpu_percent"], 6.0)
+        self.assertEqual(result["vals"]["deploy_instance_process_memory_percent"], 50.0)
+        self.assertAlmostEqual(result["vals"]["deploy_instance_process_fd_usage_percent"], 9.765625)
+        self.assertEqual(set(result["vals"]), set(m["METRIC_KEYS"]))
+
+    def test_cache_valid_and_stale_fallback(self):
+        m = module()
+        cache_root = WORKTREE_ROOT / ".local" / ("test-cache-" + uuid.uuid4().hex)
+        cache_root.mkdir(parents=True)
+        try:
+            settings = {
+                "hostInstanceId": "host1", "hostUuid": "uuid", "hostIp": "ip",
+                "cacheDir": str(cache_root), "cacheTtlSeconds": 60,
+            }
+            data = {"version": 1, "refreshedAt": time.time() - 10, "targets": []}
+            m["write_json_atomic"](m["cache_path"](settings), data)
+            cache, success = m["ensure_cache"](settings, time.time())
+            self.assertEqual(success, 1.0)
+            self.assertEqual(cache["targets"], [])
+            data["refreshedAt"] = time.time() - 100000
+            m["write_json_atomic"](m["cache_path"](settings), data)
+            cache, success = m["ensure_cache"](settings, time.time())
+            self.assertEqual(success, 0.0)
+            self.assertEqual(cache["targets"], [])
+            self.assertEqual(os.stat(m["cache_path"](settings)).st_mode & 0o777, 0o600)
+        finally:
+            shutil.rmtree(cache_root)
+
+    def test_openapi_signature(self):
+        m = module()
+        body = '{"query":{"isMonitor":"是"}}'.encode('utf-8')
+        with mock.patch.object(m["time"], "time", return_value=1700000000):
+            query = m["sign_openapi"]("POST", m["OPENAPI_PATH"], "application/json", body, "ak", "sk")
+        expected = hmac.new(b"sk", ("POST\n%s\n\napplication/json\n%s\n1700000000\nak" % (m["OPENAPI_PATH"], hashlib.md5(body).hexdigest())).encode("utf-8"), hashlib.sha1).hexdigest()
+        self.assertEqual(query, {"accesskey": "ak", "signature": expected, "expires": "1700000000"})
+
+    def test_help_and_version(self):
+        result = subprocess.run([sys.executable, str(SOURCE), "--version"], capture_output=True, text=True, env={**os.environ, "PYTHONDONTWRITEBYTECODE": "1"})
+        self.assertEqual(result.returncode, 0)
+        self.assertEqual(result.stdout.strip(), "0.1.1")
+
+    def test_definitions_and_package(self):
+        origins = json.loads((KIT / "origin_metric.json").read_text(encoding="utf-8"))
+        aliases = json.loads((KIT / "alias_metric.json").read_text(encoding="utf-8"))
+        self.assertEqual(len(origins), 22)
+        self.assertEqual({row["key"] for row in origins}, {row["name"] for row in aliases})
+        if not PACKAGE.exists():
+            self.skipTest("package not built yet")
+        with zipfile.ZipFile(PACKAGE) as package:
+            self.assertEqual(package.namelist()[0], "主机部署实例监控/")
+            for item in package.infolist():
+                self.assertEqual(stat.S_IMODE(item.external_attr >> 16), 0o755 if item.is_dir() else 0o664)
+
+
+if __name__ == "__main__":
+    unittest.main()
