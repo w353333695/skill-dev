@@ -10,12 +10,14 @@ import time
 import unittest
 import uuid
 import zipfile
+
+import yaml
 from pathlib import Path
 from unittest import mock
 
 KIT = Path(__file__).resolve().parents[2] / "monitor-kits/host-deploy-instance-monitoring"
 SOURCE = KIT / "src/host_deploy_instance_monitor.py"
-PACKAGE = Path(__file__).resolve().parents[3] / "hub/monitor-kits/监控套件_主机部署实例监控_0.1.2.zip"
+PACKAGE = Path(__file__).resolve().parents[3] / "hub/monitor-kits/监控套件_主机部署实例监控_0.1.3.zip"
 WORKTREE_ROOT = Path(__file__).resolve().parents[7]
 
 
@@ -131,7 +133,17 @@ class HostDeployInstanceMonitorTests(unittest.TestCase):
     def test_help_and_version(self):
         result = subprocess.run([sys.executable, str(SOURCE), "--version"], capture_output=True, text=True, env={**os.environ, "PYTHONDONTWRITEBYTECODE": "1"})
         self.assertEqual(result.returncode, 0)
-        self.assertEqual(result.stdout.strip(), "0.1.2")
+        self.assertEqual(result.stdout.strip(), "0.1.3")
+
+    def test_credential_parameters_are_manual_encrypted_not_secret_refs(self):
+        plugin = yaml.safe_load((KIT / "plugin.yaml").read_text(encoding="utf-8"))
+        params = {row["name"]: row for row in plugin["paramDefine"]}
+        for name in ("openapiAk", "openapiSk"):
+            self.assertEqual(params[name]["valueType"], "password")
+            self.assertFalse(params[name]["isFromSecret"])
+            self.assertTrue(params[name]["isEncrypt"])
+        self.assertNotIn("openapiAccessKey", params)
+        self.assertNotIn("openapiSecretKey", params)
 
     def test_definitions_and_package(self):
         origins = json.loads((KIT / "origin_metric.json").read_text(encoding="utf-8"))
@@ -145,6 +157,12 @@ class HostDeployInstanceMonitorTests(unittest.TestCase):
             self.skipTest("package not built yet")
         with zipfile.ZipFile(PACKAGE) as package:
             self.assertEqual(package.namelist()[0], "主机部署实例监控/")
+            packaged_plugin = yaml.safe_load(package.read("主机部署实例监控/plugin.yaml").decode("utf-8"))
+            packaged_params = {row["name"]: row for row in packaged_plugin["paramDefine"]}
+            for name in ("openapiAk", "openapiSk"):
+                self.assertEqual(packaged_params[name]["valueType"], "password")
+                self.assertFalse(packaged_params[name]["isFromSecret"])
+                self.assertTrue(packaged_params[name]["isEncrypt"])
             packaged_metric_sets = json.loads(package.read("主机部署实例监控/metric_set.json").decode("utf-8"))
             self.assertEqual(packaged_metric_sets, metric_sets)
             for item in package.infolist():

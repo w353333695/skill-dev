@@ -21,14 +21,15 @@ items:
   - id: host-deploy-instance-monitor-kit
     name: 主机部署实例监控
     category: monitor-kits
-    files: [监控套件_主机部署实例监控_0.1.2.zip, 主机部署实例监控_告警规则模板_0.1.2.xlsx]
-    version: "0.1.2"
+    files: [监控套件_主机部署实例监控_0.1.3.zip, 主机部署实例监控_告警规则模板_0.1.3.xlsx]
+    version: "0.1.3"
     history:
       - {ver: "0.1.1", date: "2026-11-12", change: "修正成品包仅保留XLSX告警模板，避免同时导入JSON与XLSX生成重复告警定义；OpenAPI凭证参数使用password类型"}
       - {ver: "0.1.2", date: "2026-11-12", change: "修正metric_set.json为对象数组并补齐通用校验，避免指标集未生成导致前端创建任务无法加载"}
+      - {ver: "0.1.3", date: "2026-11-12", change: "AK/SK参数更名为openapiAk/openapiSk并改为password加密手填模式，关闭Secret引用继承导致的传参问题"}
       - {ver: "0.1.0", date: "2026-11-12", change: "初版：HOST本地缓存/OpenAPI刷新isMonitor=是的部署实例，采集进程、端口、CPU、内存和句柄指标"}
     scenario: 主机关联部署实例的本机进程、端口和资源监控
-    notes: "需配置OpenAPI网关地址与AK/SK并放行实例search；0.1.2已导入并回读enabled，指标集4个/别名指标22个；OpenAPI真实调用和目标主机采集待验收。"
+    notes: "需配置OpenAPI网关地址与AK/SK并放行实例search；0.1.3已导入并回读enabled，指标集4个/别名指标22个，AK/SK为password且isFromSecret=false；OpenAPI真实调用和目标主机采集待验收。"
     added: "2026-11-12"
   - id: ping-monitor-kit
     name: 主机Ping监控

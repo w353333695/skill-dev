@@ -71,6 +71,25 @@ def validate_dir(root, require_name_match=False):
     for forbidden in root.rglob("*"):
         if forbidden.is_file() and ("__pycache__" in forbidden.parts or forbidden.suffix == ".pyc"):
             raise ValidationError("ZIP/目录禁止包含缓存文件: %s" % forbidden.relative_to(root))
+    param_lines = [line.strip() for line in text.splitlines() if line.strip().startswith("- {name:")]
+    param_names = set()
+    for line in param_lines:
+        name_match = re.search(r"\{name:\s*([^,}]+)", line)
+        if name_match:
+            param_names.add(name_match.group(1).strip())
+    for line in param_lines:
+        name_match = re.search(r"\{name:\s*([^,}]+)", line)
+        param_name = name_match.group(1).strip() if name_match else "<unknown>"
+        default_match = re.search(r"defaultValue:\s*([^,}]+)", line)
+        default = default_match.group(1).strip().strip("'\"") if default_match else ""
+        from_secret = bool(re.search(r"isFromSecret:\s*true", line))
+        encrypt = bool(re.search(r"isEncrypt:\s*true", line))
+        if default.startswith("$.") and (from_secret or encrypt):
+            raise ValidationError("paramDefine.%s 使用$.动态取值时 isFromSecret/isEncrypt 必须为false" % param_name)
+        if "valueType: password" in line and not default and "optional: false" in line and from_secret and "secretName" not in param_names:
+            raise ValidationError("paramDefine.%s 是必填手填password，不能启用isFromSecret；应配置isEncrypt=true且isFromSecret=false" % param_name)
+        if "valueType: password" in line and not from_secret and not encrypt:
+            raise ValidationError("paramDefine.%s 是password时必须启用isEncrypt" % param_name)
     origin = load_json(root / "origin_metric.json", "origin_metric.json")
     metric_keys = {row.get("key") for row in origin if isinstance(row, dict) and row.get("key")}
     metric_sets = load_json(root / "metric_set.json", "metric_set.json")

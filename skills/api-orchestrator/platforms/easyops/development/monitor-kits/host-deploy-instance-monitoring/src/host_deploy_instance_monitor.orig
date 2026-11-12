@@ -22,7 +22,7 @@ else:
     from urllib import urlencode
     from urllib2 import Request, urlopen
 
-VERSION = "0.1.2"
+VERSION = "0.1.3"
 OBJECT_ID = "ARTIFACT_INST@ONEMODEL"
 OPENAPI_PATH = "/cmdbservice/v3/object/ARTIFACT_INST@ONEMODEL/instance/_search"
 OPENAPI_HOST = "openapi.easyops-only.com"
@@ -82,8 +82,8 @@ def config():
         "cacheDir": env("cacheDir", "/tmp/easyops/deploy-instance-monitor"),
         "cacheTtlSeconds": cache_ttl_days * 86400,
         "gateway": env("openapiGateway") or os.environ.get("EASYOPS_OPENAPI_GATEWAY_URL", ""),
-        "accessKey": env("openapiAccessKey") or os.environ.get("EASYOPS_OPENAPI_AK", ""),
-        "secretKey": env("openapiSecretKey") or os.environ.get("EASYOPS_OPENAPI_SK", ""),
+        "accessKey": env("openapiAk") or os.environ.get("EASYOPS_OPENAPI_AK", ""),
+        "secretKey": env("openapiSk") or os.environ.get("EASYOPS_OPENAPI_SK", ""),
         "sampleInterval": sample_interval,
         "requestTimeout": request_timeout,
     }
@@ -536,7 +536,7 @@ def collect(settings):
 def main(argv=None):
     parser = argparse.ArgumentParser(
         description="主机部署实例本机监控：按主机instanceId读取7天缓存，OpenAPI刷新isMonitor=是的ARTIFACT_INST目标，采集进程、端口、CPU、内存和句柄指标。",
-        epilog="参数均由 EASYOPS_COLLECTOR_* 环境变量注入：instanceId/hostUuid/hostIp/cacheDir/cacheTtlDays/openapiGateway/openapiAccessKey/openapiSecretKey/sampleInterval/requestTimeout。正常输出JSON数组；顶层异常输出COLLECT_ERROR并保持退出码0。示例：EASYOPS_COLLECTOR_instanceId=65eb86f148251 EASYOPS_COLLECTOR_hostUuid=f907... EASYOPS_COLLECTOR_hostIp=192.168.110.24 EASYOPS_COLLECTOR_openapiGateway=http://192.168.110.24 EASYOPS_OPENAPI_AK=... EASYOPS_OPENAPI_SK=... python host_deploy_instance_monitor.py")
+        epilog="参数均由 EASYOPS_COLLECTOR_* 环境变量注入：instanceId/hostUuid/hostIp/cacheDir/cacheTtlDays/openapiGateway/openapiAk/openapiSk/sampleInterval/requestTimeout。正常输出JSON数组；顶层异常输出COLLECT_ERROR并保持退出码0。示例：EASYOPS_COLLECTOR_instanceId=65eb86f148251 EASYOPS_COLLECTOR_hostUuid=f907... EASYOPS_COLLECTOR_hostIp=192.168.110.24 EASYOPS_COLLECTOR_openapiGateway=http://192.168.110.24 EASYOPS_OPENAPI_AK=... EASYOPS_OPENAPI_SK=... python host_deploy_instance_monitor.py")
     parser.add_argument("--version", action="version", version=VERSION)
     parser.parse_args(argv)
     try:
