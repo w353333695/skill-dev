@@ -64,3 +64,5 @@ apps/fintech-sync/
 
 # knodo 本地状态与运行产物
 .knodo/
+.mettings/
+.pytest_cache/
