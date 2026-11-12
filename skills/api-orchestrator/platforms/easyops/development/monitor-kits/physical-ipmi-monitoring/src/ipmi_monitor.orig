@@ -14,7 +14,7 @@ import sys
 import time
 import traceback
 
-VERSION = "0.1.1"
+VERSION = "0.1.4"
 try:
     text_type = unicode
 except NameError:

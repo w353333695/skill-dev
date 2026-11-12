@@ -11,7 +11,7 @@ import stat
 import tarfile
 import zipfile
 
-VERSION = "0.1.2"
+VERSION = "0.1.4"
 NAME = "物理服务器IPMI监控"
 BASE = Path(__file__).resolve().parents[1]
 SOURCE = BASE / "monitor-kits" / "physical-ipmi-monitoring"
