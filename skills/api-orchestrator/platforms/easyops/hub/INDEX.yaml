@@ -28,7 +28,7 @@ items:
       - {ver: "0.1.2", date: "2026-11-12", change: "修正metric_set.json为对象数组并补齐通用校验，避免指标集未生成导致前端创建任务无法加载"}
       - {ver: "0.1.0", date: "2026-11-12", change: "初版：HOST本地缓存/OpenAPI刷新isMonitor=是的部署实例，采集进程、端口、CPU、内存和句柄指标"}
     scenario: 主机关联部署实例的本机进程、端口和资源监控
-    notes: "需配置OpenAPI网关地址与AK/SK并放行实例search；已导入并回读available；OpenAPI真实调用和目标主机采集待验收。"
+    notes: "需配置OpenAPI网关地址与AK/SK并放行实例search；0.1.2已导入并回读enabled，指标集4个/别名指标22个；OpenAPI真实调用和目标主机采集待验收。"
     added: "2026-11-12"
   - id: ping-monitor-kit
     name: 主机Ping监控
