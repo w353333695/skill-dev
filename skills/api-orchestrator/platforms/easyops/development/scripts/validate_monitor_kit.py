@@ -73,6 +73,14 @@ def validate_dir(root, require_name_match=False):
             raise ValidationError("ZIP/目录禁止包含缓存文件: %s" % forbidden.relative_to(root))
     origin = load_json(root / "origin_metric.json", "origin_metric.json")
     metric_keys = {row.get("key") for row in origin if isinstance(row, dict) and row.get("key")}
+    metric_sets = load_json(root / "metric_set.json", "metric_set.json")
+    if not isinstance(metric_sets, list) or not metric_sets:
+        raise ValidationError("metric_set.json 必须是非空数组")
+    metric_set_names = set()
+    for index, metric_set in enumerate(metric_sets):
+        if not isinstance(metric_set, dict) or not metric_set.get("name"):
+            raise ValidationError("metric_set.json[%d] 必须是包含非空 name 的对象，不能是字符串" % index)
+        metric_set_names.add(metric_set["name"])
     alias_path = root / "alias_metric.json"
     aliases = load_json(alias_path, "alias_metric.json")
     if not isinstance(aliases, list) or not aliases:
@@ -85,6 +93,9 @@ def validate_dir(root, require_name_match=False):
                 raise ValidationError("alias_metric.json[%d] 缺少 %s" % (index, key))
         if not isinstance(alias["dims"], list) or not isinstance(alias["metricSet"], list) or not isinstance(alias["originalMetrics"], list):
             raise ValidationError("alias_metric.json[%d] 的 dims/metricSet/originalMetrics 必须是数组" % index)
+        unknown_metric_sets = set(alias["metricSet"]) - metric_set_names
+        if unknown_metric_sets:
+            raise ValidationError("alias_metric.json[%d] 引用了未定义指标集 %s" % (index, sorted(unknown_metric_sets)))
         unknown = set(alias["originalMetrics"]) - metric_keys
         if unknown:
             raise ValidationError("alias_metric.json[%d] 引用了未定义原始指标 %s" % (index, sorted(unknown)))
@@ -103,7 +114,7 @@ def validate_dir(root, require_name_match=False):
             for key in ("objectId", "category", "type"):
                 if not row.get(key):
                     raise ValidationError("resource_discovery_define.json[%d] 缺少 %s" % (index, key))
-    return "目录校验通过: %s (version=%s, metrics=%d)" % (name.group(1).strip(), version.group(1), len(metric_keys))
+    return "目录校验通过: %s (version=%s, metrics=%d, metricSets=%d)" % (name.group(1).strip(), version.group(1), len(metric_keys), len(metric_set_names))
 
 
 def validate_zip(path):
@@ -130,7 +141,7 @@ def validate_zip(path):
 
 
 def main():
-    parser = argparse.ArgumentParser(description="校验 EasyOps 监控套件目录或 ZIP 的结构、告警和资源发现契约")
+    parser = argparse.ArgumentParser(description="校验 EasyOps 监控套件目录或 ZIP 的结构、指标集、告警和资源发现契约")
     parser.add_argument("package", help="套件目录或 ZIP 文件")
     args = parser.parse_args()
     path = Path(args.package)

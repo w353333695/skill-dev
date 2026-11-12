@@ -15,7 +15,7 @@ from unittest import mock
 
 KIT = Path(__file__).resolve().parents[2] / "monitor-kits/host-deploy-instance-monitoring"
 SOURCE = KIT / "src/host_deploy_instance_monitor.py"
-PACKAGE = Path(__file__).resolve().parents[3] / "hub/monitor-kits/监控套件_主机部署实例监控_0.1.1.zip"
+PACKAGE = Path(__file__).resolve().parents[3] / "hub/monitor-kits/监控套件_主机部署实例监控_0.1.2.zip"
 WORKTREE_ROOT = Path(__file__).resolve().parents[7]
 
 
@@ -131,17 +131,22 @@ class HostDeployInstanceMonitorTests(unittest.TestCase):
     def test_help_and_version(self):
         result = subprocess.run([sys.executable, str(SOURCE), "--version"], capture_output=True, text=True, env={**os.environ, "PYTHONDONTWRITEBYTECODE": "1"})
         self.assertEqual(result.returncode, 0)
-        self.assertEqual(result.stdout.strip(), "0.1.1")
+        self.assertEqual(result.stdout.strip(), "0.1.2")
 
     def test_definitions_and_package(self):
         origins = json.loads((KIT / "origin_metric.json").read_text(encoding="utf-8"))
         aliases = json.loads((KIT / "alias_metric.json").read_text(encoding="utf-8"))
+        metric_sets = json.loads((KIT / "metric_set.json").read_text(encoding="utf-8"))
         self.assertEqual(len(origins), 22)
         self.assertEqual({row["key"] for row in origins}, {row["name"] for row in aliases})
+        self.assertTrue(all(isinstance(row, dict) and row.get("name") for row in metric_sets))
+        self.assertEqual({row["name"] for row in metric_sets}, {name for row in aliases for name in row["metricSet"]})
         if not PACKAGE.exists():
             self.skipTest("package not built yet")
         with zipfile.ZipFile(PACKAGE) as package:
             self.assertEqual(package.namelist()[0], "主机部署实例监控/")
+            packaged_metric_sets = json.loads(package.read("主机部署实例监控/metric_set.json").decode("utf-8"))
+            self.assertEqual(packaged_metric_sets, metric_sets)
             for item in package.infolist():
                 self.assertEqual(stat.S_IMODE(item.external_attr >> 16), 0o755 if item.is_dir() else 0o664)
 
