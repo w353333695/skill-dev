@@ -42,11 +42,11 @@ service:
 # -----------------------------------------------------------------------------
 resources:
   kit:
-    description: "套件启用；显式选择frontend，不从legacy源码或后端直连错误推断网关能力。"
+    description: "套件启用与监控资源刷新；显式选择frontend，不从legacy源码或后端直连错误推断网关能力。"
     path: ""
     operations:
       activate:
-        description: "必须--endpoint frontend；检查totalStatus及resources；资源计数不等于运行任务已创建。"
+        description: "必须--endpoint frontend；检查totalStatus及resources；资源计数不等于运行任务已创建。指标/维度/指标集变更后可激活刷新目录。"
         method: POST
         path: /easyops.api.collector_service.job.ActivateCollectorKit@1.0.19/api/v1/collector/kit/activate
         body:
@@ -56,7 +56,7 @@ resources:
             instanceId: { type: string, description: "套件ID，不是运行任务ID" }
             relateObjectId: { type: string, description: "套件关联的真实模型ID" }
             notRequireJob: { type: boolean, description: "本次验证为true；须另查运行任务是否存在" }
-            needUpdateJob: { type: boolean, description: "本次验证为true；先检查已有任务影响" }
+            needUpdateJob: { type: boolean, description: "仅刷新指标定义可用false；true会更新任务，先检查影响" }
         response: { type: object, additional_properties: true }
   metric_collection:
     description: "立即执行采集，reportMetric=true会上报指标。"
@@ -80,6 +80,58 @@ resources:
             reportMetric: { type: boolean }
             sampler: { type: string, enum: [metric_sampler] }
         response: { type: object, additional_properties: true }
+  debug_collector_job:
+    description: |
+      前端“创建采集任务”页的套件调试入口。该接口会生成临时 debug-job 配置、
+      向指定执行主机推送 sampler 并真实执行采集；不是 dry-run，不创建正式任务。
+      HTTP 200 或业务 code=0 不代表脚本成功，必须逐项检查 list[].resultList[].error，
+      并确认 result[].data 本身可被 JSON 反序列化。
+    path: ""
+    operations:
+      run:
+        description: "必须--endpoint frontend；仅对已授权插件、模型实例和执行主机调用。easyops类型插件会推送sampler。"
+        method: POST
+        path: /logic.collector_service/api/v1/debug-collector-job
+        body:
+          type: object
+          required: [pluginId, job]
+          properties:
+            pluginId: { type: string, description: "监控套件ID；服务按它读取插件与别名指标" }
+            job:
+              type: object
+              required: [metricSetIds, objectId, instanceIds, collectAgent, collectCount, timeout]
+              properties:
+                metricSetIds: { type: array, items: { type: string }, description: "参与调试的指标集ID；为空时不注入别名指标" }
+                collectorParams: { type: array, items: { type: object, additional_properties: true }, description: "转换进collector config的采集参数；前端抓包常出现与params重复" }
+                instanceMapping: { type: array, items: { type: object, additional_properties: true }, description: "实例级参数映射" }
+                params: { type: array, items: { type: object, additional_properties: true }, description: "任务参数；paramType=cmdb时value可引用CMDB字段，const为常量；isEncrypt=true时平台负责注入前解密" }
+                objectId: { type: string, description: "目标模型ID，如HOST" }
+                instanceIds: { type: array, items: { type: string }, description: "固定目标实例过滤，服务端转换为instanceId $in" }
+                collectAgent: { type: string, description: "执行主机Agent UUID或可解析值；easyops插件用于推送sampler" }
+                collectCount: { type: integer, description: "执行次数；0按1次处理，超过服务端上限会被截断" }
+                timeout: { type: integer, description: "单次采集超时秒数" }
+        response:
+          type: object
+          description: "data按执行主机分组；params为实际合并后的任务参数、实例参数与instance mapping，可能包含敏感值，日志必须脱敏"
+          properties:
+            code: { type: integer }
+            data:
+              type: object
+              properties:
+                list:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      uuid: { type: string, description: "执行主机UUID" }
+                      resultList:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            data: { type: string, description: "采集脚本stdout原文；成功时应为合法JSON" }
+                            error: { type: string, description: "执行错误；非空即失败，即使外层HTTP为200" }
+                params: { type: array, items: { type: object, additional_properties: true } }
   resource_monitor_job:
     description: |
       前端可见的资源监控任务创建入口。必须通过网关/正式 v2 contract 调用，

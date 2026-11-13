@@ -1,0 +1,18 @@
+主机部署实例监控套件
+
+关联模型：HOST。任务默认读取 `$.instanceId`、`$._uuid` 和 `$.ip`，在执行主机本地匹配部署实例进程与端口。
+
+目标发现流程：
+
+1. 优先读取 `<cacheDir>/<hostInstanceId>.json`。
+2. 缓存不存在、损坏或超过 `cacheTtlDays`（默认7天）时，调用 OpenAPI `POST /cmdbservice/v3/object/ARTIFACT_INST@ONEMODEL/instance/_search`。
+3. OpenAPI 查询 `isMonitor=是`，并按 `host.instanceId`、部署实例 `uuid` 或 `ip` 匹配当前主机；结果原子写回缓存。
+4. 若缓存过期但 OpenAPI 失败，允许继续使用旧缓存并输出 `host_deploy_cache_refresh_success=0`；无缓存可用时采集报错。
+
+目标匹配依据：优先使用 `processMatchGroups.cmdline`；无匹配关键字组时使用 `processList` 的 `pname/cwd/cmdline`，并参考 `installPath`。端口检查读取 `/proc/net/tcp*` 与进程 socket inode；无法读取进程 fd 时退化为检查主机端口监听。
+
+指标包含：进程存活、进程/线程/僵尸进程数量、启动时间与运行时长、期望与实际监听端口、端口缺失数与监听比例、进程内存、CPU、句柄数与句柄使用率、目标配置有效性、采集成功率和缓存状态。进程相关指标带`cmdline`维度并按命令行分组输出；端口相关指标带`port`维度，每个期望端口单独输出监听状态。
+
+OpenAPI AK/SK 通过任务参数 `openapiAk`、`openapiSk`（string 类型、Secret 可选、加密传递）或 `EASYOPS_OPENAPI_AK`、`EASYOPS_OPENAPI_SK` 环境变量注入；网关地址可通过任务参数或 `EASYOPS_OPENAPI_GATEWAY_URL` 注入。脚本不记录密钥。OpenAPI 主体需要有 `ARTIFACT_INST@ONEMODEL` 读权限，网关需放行 search URI。
+
+注意：本套件只做本机进程/端口/内核计数采集，不校验业务协议返回，也不能替代健康检查接口或应用日志诊断。

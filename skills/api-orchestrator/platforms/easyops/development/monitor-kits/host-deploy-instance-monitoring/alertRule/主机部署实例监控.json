@@ -1,0 +1,235 @@
+{
+  "name": "主机部署实例默认告警模板",
+  "objectId": "HOST",
+  "priority": 50,
+  "_rule_name_format": "{hostname}部署实例监控告警",
+  "_source_template": "主机部署实例监控_告警规则模板.xlsx",
+  "alertConditionStrategy": [
+    {
+      "name": "{hostname}部署实例进程端口与资源告警",
+      "instanceId": "host-deploy-instance-alert-strategy",
+      "objectId": "HOST",
+      "conditionType": "metricThreshold",
+      "conditionsOperator": "or",
+      "alertInterval": 60,
+      "multiConditions": [
+        {
+          "metricName": "deploy_instance_process_alive",
+          "mode": "static",
+          "type": "equal",
+          "threshold": 0,
+          "alertCount": 3,
+          "recoverCount": 1,
+          "detectWindow": 3,
+          "comparators": [
+            {
+              "level": "warning",
+              "threshold": 0,
+              "displayThreshold": 0,
+              "tolerance": 0,
+              "type": "equal"
+            },
+            {
+              "level": "critical",
+              "threshold": 0,
+              "displayThreshold": 0,
+              "tolerance": 0,
+              "type": "equal"
+            }
+          ]
+        },
+        {
+          "metricName": "deploy_instance_port_listen",
+          "mode": "static",
+          "type": "equal",
+          "threshold": 0,
+          "alertCount": 3,
+          "recoverCount": 1,
+          "detectWindow": 3,
+          "comparators": [
+            {
+              "level": "warning",
+              "threshold": 0,
+              "displayThreshold": 0,
+              "tolerance": 0,
+              "type": "equal"
+            }
+          ]
+        },
+        {
+          "metricName": "deploy_instance_config_valid",
+          "mode": "static",
+          "type": "equal",
+          "threshold": 0,
+          "alertCount": 1,
+          "recoverCount": 1,
+          "detectWindow": 1,
+          "comparators": [
+            {
+              "level": "warning",
+              "threshold": 0,
+              "displayThreshold": 0,
+              "tolerance": 0,
+              "type": "equal"
+            }
+          ]
+        },
+        {
+          "metricName": "deploy_instance_collect_success",
+          "mode": "static",
+          "type": "equal",
+          "threshold": 0,
+          "alertCount": 1,
+          "recoverCount": 1,
+          "detectWindow": 1,
+          "comparators": [
+            {
+              "level": "critical",
+              "threshold": 0,
+              "displayThreshold": 0,
+              "tolerance": 0,
+              "type": "equal"
+            }
+          ]
+        },
+        {
+          "metricName": "deploy_instance_zombie_process_count",
+          "mode": "static",
+          "type": "bigger_than",
+          "threshold": 0,
+          "alertCount": 3,
+          "recoverCount": 1,
+          "detectWindow": 3,
+          "comparators": [
+            {
+              "level": "warning",
+              "threshold": 0,
+              "displayThreshold": 0,
+              "tolerance": 0,
+              "type": "bigger_than"
+            }
+          ]
+        },
+        {
+          "metricName": "deploy_instance_process_cpu_percent",
+          "mode": "static",
+          "type": "bigger_than",
+          "threshold": 80,
+          "alertCount": 3,
+          "recoverCount": 1,
+          "detectWindow": 3,
+          "comparators": [
+            {
+              "level": "warning",
+              "threshold": 80,
+              "displayThreshold": 80,
+              "tolerance": 0,
+              "type": "bigger_than"
+            },
+            {
+              "level": "critical",
+              "threshold": 95,
+              "displayThreshold": 95,
+              "tolerance": 0,
+              "type": "bigger_than"
+            }
+          ]
+        },
+        {
+          "metricName": "deploy_instance_process_memory_percent",
+          "mode": "static",
+          "type": "bigger_than",
+          "threshold": 80,
+          "alertCount": 3,
+          "recoverCount": 1,
+          "detectWindow": 3,
+          "comparators": [
+            {
+              "level": "warning",
+              "threshold": 80,
+              "displayThreshold": 80,
+              "tolerance": 0,
+              "type": "bigger_than"
+            },
+            {
+              "level": "critical",
+              "threshold": 90,
+              "displayThreshold": 90,
+              "tolerance": 0,
+              "type": "bigger_than"
+            }
+          ]
+        },
+        {
+          "metricName": "deploy_instance_process_fd_usage_percent",
+          "mode": "static",
+          "type": "bigger_than",
+          "threshold": 80,
+          "alertCount": 3,
+          "recoverCount": 1,
+          "detectWindow": 3,
+          "comparators": [
+            {
+              "level": "warning",
+              "threshold": 80,
+              "displayThreshold": 80,
+              "tolerance": 0,
+              "type": "bigger_than"
+            },
+            {
+              "level": "critical",
+              "threshold": 90,
+              "displayThreshold": 90,
+              "tolerance": 0,
+              "type": "bigger_than"
+            }
+          ]
+        }
+      ],
+      "effectiveTime": {
+        "type": "static",
+        "static": {
+          "dayStartTime": "00:00:00",
+          "dayEndTime": "23:59:59",
+          "dayOfWeek": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            0
+          ]
+        }
+      },
+      "eventFilterQuery": {
+        "type": "filter",
+        "filter": {
+          "conditionGroup": [
+            {
+              "conditionList": []
+            }
+          ]
+        }
+      },
+      "priority": "warning",
+      "upgradeCondition": {
+        "enable": false
+      }
+    }
+  ],
+  "alertGroupStrategy": [],
+  "alertMetricFillStrategy": [],
+  "alertNotifyStrategy": [],
+  "cmdbInstanceStrategy": [
+    {
+      "instanceId": "host-deploy-instance-targets",
+      "instances": {
+        "objectId": "HOST",
+        "type": "all"
+      },
+      "name": "{hostname}部署实例监控目标",
+      "objectId": "HOST"
+    }
+  ]
+}

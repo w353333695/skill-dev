@@ -68,15 +68,53 @@ def validate_dir(root, require_name_match=False):
         orig = source.with_suffix(".orig")
         if not orig.exists() or orig.stat().st_size == 0:
             raise ValidationError("缺少与 %s 对应的 src/%s.orig" % (source.name, source.stem))
+        source_text = source.read_text(encoding="utf-8")
+        orig_text = orig.read_text(encoding="utf-8")
+        if "ensure_ascii=False" in source_text or "ensure_ascii=False" in orig_text:
+            raise ValidationError("%s 使用 ensure_ascii=False；Python 2.7遇到非ASCII字节串会UnicodeDecodeError，请使用默认ASCII escape" % source.name)
+        if source_text != orig_text:
+            raise ValidationError("%s 与对应 .orig 内容不一致" % source.name)
     for forbidden in root.rglob("*"):
         if forbidden.is_file() and ("__pycache__" in forbidden.parts or forbidden.suffix == ".pyc"):
             raise ValidationError("ZIP/目录禁止包含缓存文件: %s" % forbidden.relative_to(root))
+    param_lines = [line.strip() for line in text.splitlines() if line.strip().startswith("- {name:")]
+    param_names = set()
+    for line in param_lines:
+        name_match = re.search(r"\{name:\s*([^,}]+)", line)
+        if name_match:
+            param_names.add(name_match.group(1).strip())
+    for line in param_lines:
+        name_match = re.search(r"\{name:\s*([^,}]+)", line)
+        param_name = name_match.group(1).strip() if name_match else "<unknown>"
+        default_match = re.search(r"defaultValue:\s*([^,}]+)", line)
+        default = default_match.group(1).strip().strip("'\"") if default_match else ""
+        from_secret = bool(re.search(r"isFromSecret:\s*true", line))
+        encrypt = bool(re.search(r"isEncrypt:\s*true", line))
+        if default.startswith("$.") and (from_secret or encrypt):
+            raise ValidationError("paramDefine.%s 使用$.动态取值时 isFromSecret/isEncrypt 必须为false" % param_name)
+        if "valueType: password" in line and not default and "optional: false" in line and from_secret and "secretName" not in param_names:
+            raise ValidationError("paramDefine.%s 是必填手填password，不能启用isFromSecret；应配置isEncrypt=true且isFromSecret=false" % param_name)
+        if "valueType: password" in line and not from_secret and not encrypt:
+            raise ValidationError("paramDefine.%s 是password时必须启用isEncrypt" % param_name)
     origin = load_json(root / "origin_metric.json", "origin_metric.json")
     metric_keys = {row.get("key") for row in origin if isinstance(row, dict) and row.get("key")}
+    metric_sets = load_json(root / "metric_set.json", "metric_set.json")
+    if not isinstance(metric_sets, list) or not metric_sets:
+        raise ValidationError("metric_set.json 必须是非空数组")
+    metric_set_names = set()
+    for index, metric_set in enumerate(metric_sets):
+        if not isinstance(metric_set, dict) or not metric_set.get("name"):
+            raise ValidationError("metric_set.json[%d] 必须是包含非空 name 的对象，不能是字符串" % index)
+        metric_set_names.add(metric_set["name"])
     alias_path = root / "alias_metric.json"
     aliases = load_json(alias_path, "alias_metric.json")
     if not isinstance(aliases, list) or not aliases:
         raise ValidationError("alias_metric.json 必须是非空数组")
+    origin_dimensions = {
+        row.get("key"): set(row.get("labels") or [])
+        for row in origin
+        if isinstance(row, dict) and row.get("key")
+    }
     for index, alias in enumerate(aliases):
         if not isinstance(alias, dict):
             raise ValidationError("alias_metric.json[%d] 必须是对象" % index)
@@ -85,9 +123,17 @@ def validate_dir(root, require_name_match=False):
                 raise ValidationError("alias_metric.json[%d] 缺少 %s" % (index, key))
         if not isinstance(alias["dims"], list) or not isinstance(alias["metricSet"], list) or not isinstance(alias["originalMetrics"], list):
             raise ValidationError("alias_metric.json[%d] 的 dims/metricSet/originalMetrics 必须是数组" % index)
+        unknown_metric_sets = set(alias["metricSet"]) - metric_set_names
+        if unknown_metric_sets:
+            raise ValidationError("alias_metric.json[%d] 引用了未定义指标集 %s" % (index, sorted(unknown_metric_sets)))
         unknown = set(alias["originalMetrics"]) - metric_keys
         if unknown:
             raise ValidationError("alias_metric.json[%d] 引用了未定义原始指标 %s" % (index, sorted(unknown)))
+        alias_dimensions = {row.get("dimName") for row in alias["dims"] if isinstance(row, dict)}
+        if len(alias["originalMetrics"]) == 1:
+            expected_dimensions = origin_dimensions.get(alias["originalMetrics"][0], set())
+            if alias_dimensions != expected_dimensions:
+                raise ValidationError("alias_metric.json[%d] 维度 %s 与原始指标标签 %s 不一致" % (index, sorted(alias_dimensions), sorted(expected_dimensions)))
     alert_dir = root / "alertRule"
     if alert_dir.exists():
         for path in alert_dir.glob("*.json"):
@@ -103,7 +149,7 @@ def validate_dir(root, require_name_match=False):
             for key in ("objectId", "category", "type"):
                 if not row.get(key):
                     raise ValidationError("resource_discovery_define.json[%d] 缺少 %s" % (index, key))
-    return "目录校验通过: %s (version=%s, metrics=%d)" % (name.group(1).strip(), version.group(1), len(metric_keys))
+    return "目录校验通过: %s (version=%s, metrics=%d, metricSets=%d)" % (name.group(1).strip(), version.group(1), len(metric_keys), len(metric_set_names))
 
 
 def validate_zip(path):
@@ -130,7 +176,7 @@ def validate_zip(path):
 
 
 def main():
-    parser = argparse.ArgumentParser(description="校验 EasyOps 监控套件目录或 ZIP 的结构、告警和资源发现契约")
+    parser = argparse.ArgumentParser(description="校验 EasyOps 监控套件目录或 ZIP 的结构、指标集、告警和资源发现契约")
     parser.add_argument("package", help="套件目录或 ZIP 文件")
     args = parser.parse_args()
     path = Path(args.package)

@@ -11,6 +11,16 @@ items:
     notes: "配置环境instanceId=65fd44441db01；完整walk回放通过不等于真机采集或激活验收"
     added: "2026-11-11"
 
+  - id: host-deploy-instance-monitor-source
+    name: 主机部署实例监控源码与离线回归
+    category: monitor-kits
+    files: [monitor-kits/host-deploy-instance-monitoring, tests/monitor-kits/test_host_deploy_instance_monitor.py, docs/monitor-kits/主机部署实例监控_数据结构与离线交付_2026-11-12.md]
+    history:
+      - {date: "2026-11-12", change: "0.1.1；成品包仅保留XLSX告警模板，避免重复告警定义；8项离线回归与导入回读通过"}
+      - {date: "2026-11-12", change: "0.1.0初版开发；新增isMonitor字段并标记3个测试实例"}
+    scenario: HOST模型关联ARTIFACT_INST@ONEMODEL部署实例的本机监控套件开发
+    notes: "成品在../hub/monitor-kits/监控套件_主机部署实例监控_0.1.1.zip；套件已导入为66010484e0751并回读available；OpenAPI真实调用和真机采集待验收。"
+    added: "2026-11-12"
   - id: ping-monitor-source
     name: 主机Ping监控源码与离线回归
     category: monitor-kits

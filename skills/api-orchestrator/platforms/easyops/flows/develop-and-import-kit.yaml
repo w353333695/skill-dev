@@ -113,6 +113,13 @@ steps:
     desc: "验证套件已导入（确认 name/agentType/samplerType/relateObjectId/status）"
     expect: "status=available（自定义）/enabled（内置）；字段与设计一致"
   - n: 10
+    op: object_instance.search
+    desc: "导入后回读套件的指标集实例与指标映射，防止前端创建任务无法加载指标集"
+    dataflow: |
+      POST /v3/object/_COLLECTOR_EASYOPS_PLUGIN/instance/_search
+      {query:{instanceId:<PLUGIN_ID>}, fields:[relateMetricSets.instanceId, relateMetricSets.name, relateMetricSets.metrics.name, aliasMetrics.name]}
+    expect: "relateMetricSets 非空；每个 alias_metric.metricSet 名称都有实例ID，metrics 映射数与设计一致。为空时禁止交付前端验收，必须先修复附属指标集落库"
+  - n: 11
     op: kit.activate
     args: ["--endpoint frontend"]
     desc: "(可选) frontend网关kit.activate启用；使用完整合约路径，不用legacy后端。resources计数不能证明运行任务存在，继续按activate-and-test-monitor-kit.yaml验收。"

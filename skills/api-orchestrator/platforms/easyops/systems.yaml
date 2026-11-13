@@ -876,6 +876,8 @@ systems:
         sync_now: "立即同步；GET有副作用，必须选择frontend"
       metric_collection:
         collect_sync: "立即采集与指标上报，必须选择frontend"
+      debug_collector_job:
+        run: "创建任务前真实调试插件；必须选择frontend，指定套件ID、目标实例和执行主机；检查resultList[].error且data必须是合法JSON"
       collector_metric:
         list: "指标元数据检索（v2 分页：metricNames 精确/objectId 过滤/metricName 模糊）——dashboard 指标查证权威源（2026-08-14 接入，metric/route.go:21）"
       job_status:
@@ -907,6 +909,8 @@ systems:
         cli: "当前进程EASYOPS_COLLECTOR_FRONTEND_URL设HTTPS；显式--endpoint frontend，不改部署env。"
         identities: "启用instanceId=套件ID；同步configId=运行任务ID；立即采集uuid取该任务executionHosts.uuid，不能用目标实例ID猜测。"
         activation: "已验证notRequireJob=true、needUpdateJob=true；resources.collectorJob计数不证明已创建运行任务，须查询v2任务并在不存在时创建。"
+        metric_refresh: "已验证激活可刷新指标/维度定义：指标资源变更后用notRequireJob=true、needUpdateJob=false执行kit.activate，再回读_COLLECTOR_ALIAS_METRIC.dims、relateMetricSets和指标集映射；不要优先直接改CMDB。"
+        internal_activation: "110.24已验证Cookie过期时可用内部POST /api/v1/collector/kit/activate；headers带Host/org/user和giraffe-contract-name=easyops.api.collector_service.job.ActivateCollectorKit（无@版本），2026-11-13返回code=0/totalStatus=success。该合约名不得泛化到其他环境。"
         route_boundary: "后端8125的404或12000的contract not found不证明网关未部署，不能据此要求恢复服务。"
         evidence: "前序助手记录启用totalStatus=success、创建返回data.id、同步code=0；用户提供两个抓包并确认已执行且采集成功，未提供原始响应和五项时序值。"
         acceptance: "导入、启用、任务创建、配置同步、采集执行、指标入库分别验收；status=ok或lastErr空不能单独证明五项指标存在。"
