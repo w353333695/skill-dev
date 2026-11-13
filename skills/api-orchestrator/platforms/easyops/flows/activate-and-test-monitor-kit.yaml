@@ -14,8 +14,8 @@ steps:
   - n: 2
     op: kit.activate
     args: ["--endpoint frontend"]
-    desc: "使用套件真实relateObjectId；已验证notRequireJob=true、needUpdateJob=true，先确认更新已有任务影响"
-    expect: "检查code、totalStatus、resources逐项结果；collectorJob计数不能代替运行任务查询"
+    desc: "使用套件真实relateObjectId；套件升级后先执行激活刷新指标/维度/指标集资源，已验证notRequireJob=true、needUpdateJob=false可避免更新已有任务"
+    expect: "检查code、totalStatus、resources逐项结果，并回读别名维度、relateMetricSets与指标集映射；needUpdateJob=true前必须确认任务影响"
   - n: 3
     op: debug_collector_job.run
     args: ["--endpoint frontend"]
@@ -45,5 +45,5 @@ steps:
 error_handling:
   invalidVersion: "先核对configId/执行主机并同步复测；不是已证实软件过低，不反复发版或批量启停"
   backend_404: "后端404或contract not found不证明前端能力不存在；检查入口及完整路由"
-side_effects: "启用可能更新资源/已有任务；创建新增任务；GET同步有副作用；reportMetric=true写入指标。"
+side_effects: "启用会刷新监控资源；needUpdateJob=true才更新已有任务；创建新增任务；GET同步有副作用；reportMetric=true写入指标。"
 acceptance: "2026-11-11用户确认同步及立即采集成功；未提供原始返回和五项时序值。"

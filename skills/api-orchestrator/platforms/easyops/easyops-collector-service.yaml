@@ -42,11 +42,11 @@ service:
 # -----------------------------------------------------------------------------
 resources:
   kit:
-    description: "套件启用；显式选择frontend，不从legacy源码或后端直连错误推断网关能力。"
+    description: "套件启用与监控资源刷新；显式选择frontend，不从legacy源码或后端直连错误推断网关能力。"
     path: ""
     operations:
       activate:
-        description: "必须--endpoint frontend；检查totalStatus及resources；资源计数不等于运行任务已创建。"
+        description: "必须--endpoint frontend；检查totalStatus及resources；资源计数不等于运行任务已创建。指标/维度/指标集变更后可激活刷新目录。"
         method: POST
         path: /easyops.api.collector_service.job.ActivateCollectorKit@1.0.19/api/v1/collector/kit/activate
         body:
@@ -56,7 +56,7 @@ resources:
             instanceId: { type: string, description: "套件ID，不是运行任务ID" }
             relateObjectId: { type: string, description: "套件关联的真实模型ID" }
             notRequireJob: { type: boolean, description: "本次验证为true；须另查运行任务是否存在" }
-            needUpdateJob: { type: boolean, description: "本次验证为true；先检查已有任务影响" }
+            needUpdateJob: { type: boolean, description: "仅刷新指标定义可用false；true会更新任务，先检查影响" }
         response: { type: object, additional_properties: true }
   metric_collection:
     description: "立即执行采集，reportMetric=true会上报指标。"
