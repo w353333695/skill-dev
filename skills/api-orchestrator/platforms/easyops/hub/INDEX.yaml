@@ -21,8 +21,8 @@ items:
   - id: host-deploy-instance-monitor-kit
     name: 主机部署实例监控
     category: monitor-kits
-    files: [监控套件_主机部署实例监控_0.1.6.zip, 主机部署实例监控_告警规则模板_0.1.6.xlsx]
-    version: "0.1.6"
+    files: [监控套件_主机部署实例监控_0.1.7.zip, 主机部署实例监控_告警规则模板_0.1.7.xlsx]
+    version: "0.1.7"
     history:
       - {ver: "0.1.1", date: "2026-11-12", change: "修正成品包仅保留XLSX告警模板，避免同时导入JSON与XLSX生成重复告警定义；OpenAPI凭证参数使用password类型"}
       - {ver: "0.1.2", date: "2026-11-12", change: "修正metric_set.json为对象数组并补齐通用校验，避免指标集未生成导致前端创建任务无法加载"}
@@ -31,8 +31,9 @@ items:
       - {ver: "0.1.4", date: "2026-11-13", change: "移除json.dumps的ensure_ascii=False，兼容Python 2.7中文字节串并将该规则加入通用校验"}
       - {ver: "0.1.5", date: "2026-11-13", change: "进程指标增加cmdline维度并按命令行分组；端口指标增加port维度并逐端口输出监听状态"}
       - {ver: "0.1.6", date: "2026-11-13", change: "OpenAPI AK/SK切换为string+collectorParams+Secret可选+加密，验证平台参数传递链路"}
+      - {ver: "0.1.7", date: "2026-11-13", change: "OpenAPI AK/SK改为普通字符串参数；主机instanceId/uuid/ip动态参数不再前端展示"}
     scenario: 主机关联部署实例的本机进程、端口和资源监控
-    notes: "需配置OpenAPI网关地址与AK/SK并放行实例search；0.1.6已导入并激活，AK/SK为string+collectorParams+isFromSecret=true+isEncrypt=true，22个别名指标维度错误0、4个指标集(3/11/5/3)回读正确；Secret/collectorParams注入链路待debug或真实采集复验。"
+    notes: "需配置OpenAPI网关地址与AK/SK并放行实例search；0.1.7 AK/SK为普通string+collectParams+非Secret+不加密，主机instanceId/uuid/ip保持动态注入且前端隐藏；22个别名指标维度、4个指标集(3/11/5/3)需升级后回读。"
     added: "2026-11-12"
   - id: ping-monitor-kit
     name: 主机Ping监控
