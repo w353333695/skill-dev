@@ -17,7 +17,7 @@ from unittest import mock
 
 KIT = Path(__file__).resolve().parents[2] / "monitor-kits/host-deploy-instance-monitoring"
 SOURCE = KIT / "src/host_deploy_instance_monitor.py"
-PACKAGE = Path(__file__).resolve().parents[3] / "hub/monitor-kits/监控套件_主机部署实例监控_0.1.6.zip"
+PACKAGE = Path(__file__).resolve().parents[3] / "hub/monitor-kits/监控套件_主机部署实例监控_0.1.7.zip"
 WORKTREE_ROOT = Path(__file__).resolve().parents[7]
 
 
@@ -162,7 +162,7 @@ class HostDeployInstanceMonitorTests(unittest.TestCase):
     def test_help_and_version(self):
         result = subprocess.run([sys.executable, str(SOURCE), "--version"], capture_output=True, text=True, env={**os.environ, "PYTHONDONTWRITEBYTECODE": "1"})
         self.assertEqual(result.returncode, 0)
-        self.assertEqual(result.stdout.strip(), "0.1.6")
+        self.assertEqual(result.stdout.strip(), "0.1.7")
 
     def test_python2_json_output_uses_ascii_escape(self):
         source = SOURCE.read_text(encoding="utf-8")
@@ -171,16 +171,19 @@ class HostDeployInstanceMonitorTests(unittest.TestCase):
         self.assertNotIn("ensure_ascii=False", orig)
         self.assertEqual(source, orig)
 
-    def test_credential_parameters_use_collector_secret_mode(self):
+    def test_parameter_display_and_plain_credential_mode(self):
         plugin = yaml.safe_load((KIT / "plugin.yaml").read_text(encoding="utf-8"))
         params = {row["name"]: row for row in plugin["paramDefine"]}
-        for name in ("openapiAk", "openapiSk"):
+        for name in ("instanceId", "hostUuid", "hostIp"):
+            self.assertFalse(params[name]["display"])
+        for name in ("openapiAkText", "openapiSkText"):
+            self.assertTrue(params[name]["display"])
             self.assertEqual(params[name]["valueType"], "string")
-            self.assertEqual(params[name]["use"], "collectorParams")
-            self.assertTrue(params[name]["isFromSecret"])
-            self.assertTrue(params[name]["isEncrypt"])
-        self.assertNotIn("openapiAccessKey", params)
-        self.assertNotIn("openapiSecretKey", params)
+            self.assertEqual(params[name]["use"], "collectParams")
+            self.assertFalse(params[name]["isFromSecret"])
+            self.assertFalse(params[name]["isEncrypt"])
+        for name in ("openapiAk", "openapiSk", "openapiAccessKey", "openapiSecretKey"):
+            self.assertNotIn(name, params)
 
     def test_definitions_and_package(self):
         origins = json.loads((KIT / "origin_metric.json").read_text(encoding="utf-8"))
@@ -204,11 +207,14 @@ class HostDeployInstanceMonitorTests(unittest.TestCase):
             self.assertEqual(package.namelist()[0], "主机部署实例监控/")
             packaged_plugin = yaml.safe_load(package.read("主机部署实例监控/plugin.yaml").decode("utf-8"))
             packaged_params = {row["name"]: row for row in packaged_plugin["paramDefine"]}
-            for name in ("openapiAk", "openapiSk"):
+            for name in ("instanceId", "hostUuid", "hostIp"):
+                self.assertFalse(packaged_params[name]["display"])
+            for name in ("openapiAkText", "openapiSkText"):
+                self.assertTrue(packaged_params[name]["display"])
                 self.assertEqual(packaged_params[name]["valueType"], "string")
-                self.assertEqual(packaged_params[name]["use"], "collectorParams")
-                self.assertTrue(packaged_params[name]["isFromSecret"])
-                self.assertTrue(packaged_params[name]["isEncrypt"])
+                self.assertEqual(packaged_params[name]["use"], "collectParams")
+                self.assertFalse(packaged_params[name]["isFromSecret"])
+                self.assertFalse(packaged_params[name]["isEncrypt"])
             packaged_metric_sets = json.loads(package.read("主机部署实例监控/metric_set.json").decode("utf-8"))
             self.assertEqual(packaged_metric_sets, metric_sets)
             packaged_origins = json.loads(package.read("主机部署实例监控/origin_metric.json").decode("utf-8"))
