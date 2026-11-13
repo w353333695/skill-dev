@@ -33,7 +33,7 @@ items:
       - {ver: "0.1.6", date: "2026-11-13", change: "OpenAPI AK/SK切换为string+collectorParams+Secret可选+加密，验证平台参数传递链路"}
       - {ver: "0.1.7", date: "2026-11-13", change: "OpenAPI AK/SK更名为openapiAkText/openapiSkText普通字符串参数；主机instanceId/uuid/ip动态参数不再前端展示"}
     scenario: 主机关联部署实例的本机进程、端口和资源监控
-    notes: "需配置OpenAPI网关地址与AK/SK并放行实例search；0.1.7 openapiAkText/openapiSkText为普通string+collectParams+非Secret+不加密，主机instanceId/uuid/ip保持动态注入且前端隐藏；22个别名指标维度、4个指标集(3/11/5/3)需升级后回读。"
+    notes: "需配置OpenAPI网关地址与AK/SK并放行实例search；0.1.7已导入并激活，openapiAkText/openapiSkText为普通string+collectParams+非Secret+不加密，旧openapiAk/openapiSk不存在，主机instanceId/uuid/ip保持动态注入且前端隐藏；22项指标与4个指标集(3/11/5/3)回读无回归。"
     added: "2026-11-12"
   - id: ping-monitor-kit
     name: 主机Ping监控
