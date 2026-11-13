@@ -16,8 +16,8 @@ params:
     - cacheDir
     - cacheTtlDays
     - openapiGateway
-    - openapiAk
-    - openapiSk
+    - openapiAkText
+    - openapiSkText
     - sampleInterval
     - requestTimeout
 paramDefine:
@@ -27,8 +27,8 @@ paramDefine:
     - {name: cacheDir, valueType: string, defaultValue: /tmp/easyops/deploy-instance-monitor, display: true, displayName: "缓存目录", description: "执行主机本地缓存目录，默认 /tmp/easyops/deploy-instance-monitor", use: collectParams, optional: true, isFromSecret: false, isEncrypt: false, extraArgs: null}
     - {name: cacheTtlDays, valueType: int, defaultValue: "7", display: true, displayName: "缓存有效期(天)", description: "缓存超过该天数后重新调用OpenAPI search，默认7天，范围1-90", use: collectParams, optional: true, isFromSecret: false, isEncrypt: false, extraArgs: null}
     - {name: openapiGateway, valueType: string, defaultValue: "", display: true, displayName: "OpenAPI网关地址", description: "内网网关地址，如 http://192.168.110.24；也可用EASYOPS_OPENAPI_GATEWAY_URL", use: collectParams, optional: false, isFromSecret: false, isEncrypt: false, extraArgs: null}
-    - {name: openapiAk, valueType: string, defaultValue: "", display: true, displayName: "OpenAPI AK", description: "普通字符串任务参数或EASYOPS_OPENAPI_AK；不启用Secret引用和加密，不写日志", use: collectParams, optional: false, isFromSecret: false, isEncrypt: false, extraArgs: null}
-    - {name: openapiSk, valueType: string, defaultValue: "", display: true, displayName: "OpenAPI SK", description: "普通字符串任务参数或EASYOPS_OPENAPI_SK；不启用Secret引用和加密，不写日志", use: collectParams, optional: false, isFromSecret: false, isEncrypt: false, extraArgs: null}
+    - {name: openapiAkText, valueType: string, defaultValue: "", display: true, displayName: "OpenAPI AK", description: "普通字符串任务参数或EASYOPS_OPENAPI_AK；不启用Secret引用和加密，不写日志", use: collectParams, optional: false, isFromSecret: false, isEncrypt: false, extraArgs: null}
+    - {name: openapiSkText, valueType: string, defaultValue: "", display: true, displayName: "OpenAPI SK", description: "普通字符串任务参数或EASYOPS_OPENAPI_SK；不启用Secret引用和加密，不写日志", use: collectParams, optional: false, isFromSecret: false, isEncrypt: false, extraArgs: null}
     - {name: sampleInterval, valueType: string, defaultValue: "0.2", display: true, displayName: "CPU采样间隔(秒)", description: "两次/proc进程CPU计数间隔，默认0.2秒，范围0.05-2", use: collectParams, optional: true, isFromSecret: false, isEncrypt: false, extraArgs: null}
     - {name: requestTimeout, valueType: int, defaultValue: "10", display: true, displayName: "OpenAPI超时(秒)", description: "OpenAPI请求超时，默认10秒，范围3-30", use: collectParams, optional: true, isFromSecret: false, isEncrypt: false, extraArgs: null}
 agentType: easyops

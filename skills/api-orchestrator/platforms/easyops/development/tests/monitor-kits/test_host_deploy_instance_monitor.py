@@ -176,14 +176,14 @@ class HostDeployInstanceMonitorTests(unittest.TestCase):
         params = {row["name"]: row for row in plugin["paramDefine"]}
         for name in ("instanceId", "hostUuid", "hostIp"):
             self.assertFalse(params[name]["display"])
-        for name in ("openapiAk", "openapiSk"):
+        for name in ("openapiAkText", "openapiSkText"):
             self.assertTrue(params[name]["display"])
             self.assertEqual(params[name]["valueType"], "string")
             self.assertEqual(params[name]["use"], "collectParams")
             self.assertFalse(params[name]["isFromSecret"])
             self.assertFalse(params[name]["isEncrypt"])
-        self.assertNotIn("openapiAccessKey", params)
-        self.assertNotIn("openapiSecretKey", params)
+        for name in ("openapiAk", "openapiSk", "openapiAccessKey", "openapiSecretKey"):
+            self.assertNotIn(name, params)
 
     def test_definitions_and_package(self):
         origins = json.loads((KIT / "origin_metric.json").read_text(encoding="utf-8"))
@@ -209,7 +209,7 @@ class HostDeployInstanceMonitorTests(unittest.TestCase):
             packaged_params = {row["name"]: row for row in packaged_plugin["paramDefine"]}
             for name in ("instanceId", "hostUuid", "hostIp"):
                 self.assertFalse(packaged_params[name]["display"])
-            for name in ("openapiAk", "openapiSk"):
+            for name in ("openapiAkText", "openapiSkText"):
                 self.assertTrue(packaged_params[name]["display"])
                 self.assertEqual(packaged_params[name]["valueType"], "string")
                 self.assertEqual(packaged_params[name]["use"], "collectParams")

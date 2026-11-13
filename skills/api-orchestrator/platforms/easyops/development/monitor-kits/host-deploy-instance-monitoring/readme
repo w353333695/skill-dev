@@ -13,6 +13,6 @@
 
 指标包含：进程存活、进程/线程/僵尸进程数量、启动时间与运行时长、期望与实际监听端口、端口缺失数与监听比例、进程内存、CPU、句柄数与句柄使用率、目标配置有效性、采集成功率和缓存状态。进程相关指标带`cmdline`维度并按命令行分组输出；端口相关指标带`port`维度，每个期望端口单独输出监听状态。
 
-OpenAPI AK/SK 通过普通字符串任务参数 `openapiAk`、`openapiSk` 或 `EASYOPS_OPENAPI_AK`、`EASYOPS_OPENAPI_SK` 环境变量注入；网关地址可通过任务参数或 `EASYOPS_OPENAPI_GATEWAY_URL` 注入。脚本不记录密钥。OpenAPI 主体需要有 `ARTIFACT_INST@ONEMODEL` 读权限，网关需放行 search URI。
+OpenAPI AK/SK 通过普通字符串任务参数 `openapiAkText`、`openapiSkText` 或 `EASYOPS_OPENAPI_AK`、`EASYOPS_OPENAPI_SK` 环境变量注入；网关地址可通过任务参数或 `EASYOPS_OPENAPI_GATEWAY_URL` 注入。脚本不记录密钥。OpenAPI 主体需要有 `ARTIFACT_INST@ONEMODEL` 读权限，网关需放行 search URI。
 
 注意：本套件只做本机进程/端口/内核计数采集，不校验业务协议返回，也不能替代健康检查接口或应用日志诊断。
