@@ -110,6 +110,11 @@ def validate_dir(root, require_name_match=False):
     aliases = load_json(alias_path, "alias_metric.json")
     if not isinstance(aliases, list) or not aliases:
         raise ValidationError("alias_metric.json 必须是非空数组")
+    origin_dimensions = {
+        row.get("key"): set(row.get("labels") or [])
+        for row in origin
+        if isinstance(row, dict) and row.get("key")
+    }
     for index, alias in enumerate(aliases):
         if not isinstance(alias, dict):
             raise ValidationError("alias_metric.json[%d] 必须是对象" % index)
@@ -124,6 +129,11 @@ def validate_dir(root, require_name_match=False):
         unknown = set(alias["originalMetrics"]) - metric_keys
         if unknown:
             raise ValidationError("alias_metric.json[%d] 引用了未定义原始指标 %s" % (index, sorted(unknown)))
+        alias_dimensions = {row.get("dimName") for row in alias["dims"] if isinstance(row, dict)}
+        if len(alias["originalMetrics"]) == 1:
+            expected_dimensions = origin_dimensions.get(alias["originalMetrics"][0], set())
+            if alias_dimensions != expected_dimensions:
+                raise ValidationError("alias_metric.json[%d] 维度 %s 与原始指标标签 %s 不一致" % (index, sorted(alias_dimensions), sorted(expected_dimensions)))
     alert_dir = root / "alertRule"
     if alert_dir.exists():
         for path in alert_dir.glob("*.json"):

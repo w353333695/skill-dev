@@ -17,7 +17,7 @@ from unittest import mock
 
 KIT = Path(__file__).resolve().parents[2] / "monitor-kits/host-deploy-instance-monitoring"
 SOURCE = KIT / "src/host_deploy_instance_monitor.py"
-PACKAGE = Path(__file__).resolve().parents[3] / "hub/monitor-kits/监控套件_主机部署实例监控_0.1.4.zip"
+PACKAGE = Path(__file__).resolve().parents[3] / "hub/monitor-kits/监控套件_主机部署实例监控_0.1.5.zip"
 WORKTREE_ROOT = Path(__file__).resolve().parents[7]
 
 
@@ -89,15 +89,44 @@ class HostDeployInstanceMonitorTests(unittest.TestCase):
         with mock.patch.object(m["time"], "sleep"), mock.patch.object(m["time"], "time", side_effect=lambda: next(clocks)), \
              mock.patch.dict(m, {"parse_proc_stat": mock.Mock(return_value=refreshed), "process_socket_inodes": mock.Mock(return_value=({"inode1"}, True)), "process_memory_bytes": mock.Mock(return_value=1000.0), "process_fd_usage": mock.Mock(return_value=(100, 1024))}):
             result = m["collect_target"](target, [process], {6379: {"inode1"}}, 1000.0, 100.0, 2000.0, settings, 2000.0, 10.0, 1.0, 1)
-        self.assertEqual(result["dims"]["deployInstanceId"], "deploy1")
-        self.assertEqual(result["vals"]["deploy_instance_process_alive"], 1.0)
-        self.assertEqual(result["vals"]["deploy_instance_port_listen"], 1.0)
-        self.assertEqual(result["vals"]["deploy_instance_process_start_timestamp"], 1001.0)
-        self.assertEqual(result["vals"]["deploy_instance_process_uptime_seconds"], 999.0)
-        self.assertEqual(result["vals"]["deploy_instance_process_cpu_percent"], 6.0)
-        self.assertEqual(result["vals"]["deploy_instance_process_memory_percent"], 50.0)
-        self.assertAlmostEqual(result["vals"]["deploy_instance_process_fd_usage_percent"], 9.765625)
-        self.assertEqual(set(result["vals"]), set(m["METRIC_KEYS"]))
+        self.assertEqual(len(result), 3)
+        process_row, port_row, target_row = result
+        self.assertEqual(process_row["dims"]["deployInstanceId"], "deploy1")
+        self.assertEqual(process_row["dims"]["cmdline"], "./bin/redis-server ./conf/redis.conf")
+        self.assertEqual(process_row["vals"]["deploy_instance_process_alive"], 1.0)
+        self.assertEqual(process_row["vals"]["deploy_instance_process_start_timestamp"], 1001.0)
+        self.assertEqual(process_row["vals"]["deploy_instance_process_uptime_seconds"], 999.0)
+        self.assertEqual(process_row["vals"]["deploy_instance_process_cpu_percent"], 6.0)
+        self.assertEqual(process_row["vals"]["deploy_instance_process_memory_percent"], 50.0)
+        self.assertAlmostEqual(process_row["vals"]["deploy_instance_process_fd_usage_percent"], 9.765625)
+        self.assertEqual(set(process_row["vals"]), set(m["PROCESS_METRIC_KEYS"]))
+        self.assertEqual(port_row["dims"]["port"], "6379")
+        self.assertEqual(port_row["vals"]["deploy_instance_port_listen"], 1.0)
+        self.assertEqual(port_row["vals"]["deploy_instance_listening_port_count"], 1.0)
+        self.assertEqual(port_row["vals"]["deploy_instance_port_missing_count"], 0.0)
+        self.assertEqual(set(port_row["vals"]), set(m["PORT_METRIC_KEYS"]))
+        self.assertNotIn("cmdline", target_row["dims"])
+        self.assertNotIn("port", target_row["dims"])
+        self.assertEqual(set(target_row["vals"]), set(m["TARGET_METRIC_KEYS"]))
+
+    def test_collect_target_splits_process_and_port_dimensions(self):
+        m = module()
+        first = {"pid": 123, "comm": "redis-server", "state": "R", "utime": 10.0, "stime": 5.0, "threads": 4, "startTimeTicks": 100.0, "cmdline": "redis-server", "cwd": "/redis"}
+        second = {"pid": 456, "comm": "redis-sentinel", "state": "R", "utime": 4.0, "stime": 2.0, "threads": 2, "startTimeTicks": 120.0, "cmdline": "redis-sentinel", "cwd": "/redis"}
+        refreshed_first = dict(first, utime=12.0, stime=5.0)
+        refreshed_second = dict(second, utime=5.0, stime=2.0)
+        target = {"instanceId": "deploy1", "installPath": "/redis", "ports": [6379, 26379]}
+        clocks = iter([101.0, 102.0])
+        with mock.patch.object(m["time"], "sleep"), mock.patch.object(m["time"], "time", side_effect=lambda: next(clocks)), \
+             mock.patch.dict(m, {"parse_proc_stat": mock.Mock(side_effect=[refreshed_first, refreshed_second]), "process_socket_inodes": mock.Mock(return_value=({"inode1"}, True)), "process_memory_bytes": mock.Mock(side_effect=[1000.0, 3000.0]), "process_fd_usage": mock.Mock(side_effect=[(100, 1024), (200, 2048)])}):
+            rows = m["collect_target"](target, [first, second], {6379: {"inode1"}}, 1000.0, 100.0, 4000.0, {"hostInstanceId": "host1", "sampleInterval": 0.0}, 2000.0, 10.0, 1.0, 1)
+        self.assertEqual(len(rows), 5)
+        self.assertEqual([row["dims"].get("cmdline") for row in rows[:2]], ["redis-server", "redis-sentinel"])
+        self.assertEqual(rows[2]["dims"]["port"], "6379")
+        self.assertEqual(rows[2]["vals"]["deploy_instance_port_listen"], 1.0)
+        self.assertEqual(rows[3]["dims"]["port"], "26379")
+        self.assertEqual(rows[3]["vals"]["deploy_instance_port_listen"], 0.0)
+        self.assertEqual(rows[3]["vals"]["deploy_instance_port_missing_count"], 1.0)
 
     def test_cache_valid_and_stale_fallback(self):
         m = module()
@@ -133,7 +162,7 @@ class HostDeployInstanceMonitorTests(unittest.TestCase):
     def test_help_and_version(self):
         result = subprocess.run([sys.executable, str(SOURCE), "--version"], capture_output=True, text=True, env={**os.environ, "PYTHONDONTWRITEBYTECODE": "1"})
         self.assertEqual(result.returncode, 0)
-        self.assertEqual(result.stdout.strip(), "0.1.4")
+        self.assertEqual(result.stdout.strip(), "0.1.5")
 
     def test_python2_json_output_uses_ascii_escape(self):
         source = SOURCE.read_text(encoding="utf-8")
@@ -156,8 +185,16 @@ class HostDeployInstanceMonitorTests(unittest.TestCase):
         origins = json.loads((KIT / "origin_metric.json").read_text(encoding="utf-8"))
         aliases = json.loads((KIT / "alias_metric.json").read_text(encoding="utf-8"))
         metric_sets = json.loads((KIT / "metric_set.json").read_text(encoding="utf-8"))
+        origin_dimensions = {row["key"]: set(row["labels"]) for row in origins}
         self.assertEqual(len(origins), 22)
         self.assertEqual({row["key"] for row in origins}, {row["name"] for row in aliases})
+        for alias in aliases:
+            self.assertEqual({row["dimName"] for row in alias["dims"]}, origin_dimensions[alias["originalMetrics"][0]])
+        for key, dimensions in origin_dimensions.items():
+            if key.startswith("deploy_instance_process"):
+                self.assertIn("cmdline", dimensions)
+            if key.startswith("deploy_instance_port") or key in ("deploy_instance_expected_port_count", "deploy_instance_listening_port_count"):
+                self.assertIn("port", dimensions)
         self.assertTrue(all(isinstance(row, dict) and row.get("name") for row in metric_sets))
         self.assertEqual({row["name"] for row in metric_sets}, {name for row in aliases for name in row["metricSet"]})
         if not PACKAGE.exists():
@@ -172,6 +209,8 @@ class HostDeployInstanceMonitorTests(unittest.TestCase):
                 self.assertTrue(packaged_params[name]["isEncrypt"])
             packaged_metric_sets = json.loads(package.read("主机部署实例监控/metric_set.json").decode("utf-8"))
             self.assertEqual(packaged_metric_sets, metric_sets)
+            packaged_origins = json.loads(package.read("主机部署实例监控/origin_metric.json").decode("utf-8"))
+            self.assertEqual(packaged_origins, origins)
             for item in package.infolist():
                 self.assertEqual(stat.S_IMODE(item.external_attr >> 16), 0o755 if item.is_dir() else 0o664)
 

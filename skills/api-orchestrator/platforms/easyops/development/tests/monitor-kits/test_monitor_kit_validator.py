@@ -61,6 +61,22 @@ class MonitorKitValidatorTests(unittest.TestCase):
                 module.validate_dir(root)
             self.assertIn("ensure_ascii=False", str(context.exception))
 
+    def test_alias_dimensions_must_match_origin_labels(self):
+        module = validator()
+        with tempfile.TemporaryDirectory(dir=WORKTREE_ROOT / ".local") as temporary:
+            root = Path(temporary) / "kit"
+            root.mkdir()
+            (root / "plugin.yaml").write_text("name: test-kit\nversion: 1.0.0\n", encoding="utf-8")
+            (root / "origin_metric.json").write_text(json.dumps([{"key": "metric", "labels": ["host", "port"]}]), encoding="utf-8")
+            (root / "metric_set.json").write_text(json.dumps([{"name": "基础指标"}]), encoding="utf-8")
+            (root / "alias_metric.json").write_text(json.dumps([{
+                "name": "metric", "objectId": "HOST", "dataType": "double", "type": "gauge",
+                "dims": [{"dimName": "host"}], "metricSet": ["基础指标"], "originalMetrics": ["metric"],
+            }]), encoding="utf-8")
+            with self.assertRaises(module.ValidationError) as context:
+                module.validate_dir(root)
+            self.assertIn("维度", str(context.exception))
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -22,23 +22,28 @@ else:
     from urllib import urlencode
     from urllib2 import Request, urlopen
 
-VERSION = "0.1.4"
+VERSION = "0.1.5"
 OBJECT_ID = "ARTIFACT_INST@ONEMODEL"
 OPENAPI_PATH = "/cmdbservice/v3/object/ARTIFACT_INST@ONEMODEL/instance/_search"
 OPENAPI_HOST = "openapi.easyops-only.com"
-METRIC_KEYS = [
+PROCESS_METRIC_KEYS = [
     "deploy_instance_process_alive", "deploy_instance_process_count",
     "deploy_instance_matching_process_count", "deploy_instance_zombie_process_count",
     "deploy_instance_thread_count", "deploy_instance_process_start_timestamp",
     "deploy_instance_process_uptime_seconds", "deploy_instance_process_memory_bytes",
     "deploy_instance_process_memory_percent", "deploy_instance_process_cpu_percent",
     "deploy_instance_process_fd_count", "deploy_instance_process_fd_usage_percent",
+]
+PORT_METRIC_KEYS = [
     "deploy_instance_expected_port_count", "deploy_instance_listening_port_count",
     "deploy_instance_port_missing_count", "deploy_instance_port_listen",
     "deploy_instance_port_listen_ratio_pct", "deploy_instance_config_valid",
+]
+TARGET_METRIC_KEYS = [
     "deploy_instance_collect_success", "host_deploy_instance_target_count",
     "host_deploy_cache_age_seconds", "host_deploy_cache_refresh_success",
 ]
+METRIC_KEYS = PROCESS_METRIC_KEYS + PORT_METRIC_KEYS + TARGET_METRIC_KEYS
 
 
 def text(value):
@@ -461,7 +466,10 @@ def collect_target(target, processes, sockets, boot_ts, ticks, mem_total, settin
             listening.append(port)
         elif not fd_readable and global_inodes:
             listening.append(port)
-    before = sum(item["utime"] + item["stime"] for item in matched)
+    before_by_cmdline = {}
+    for item in matched:
+        cmdline = text(item.get("cmdline"))
+        before_by_cmdline[cmdline] = before_by_cmdline.get(cmdline, 0.0) + item["utime"] + item["stime"]
     sample_started = time.time()
     time.sleep(settings["sampleInterval"])
     refreshed = {}
@@ -474,47 +482,69 @@ def collect_target(target, processes, sockets, boot_ts, ticks, mem_total, settin
             parsed["cmdline"], parsed["cwd"] = item["cmdline"], item["cwd"]
             refreshed[item["pid"]] = parsed
     elapsed = max(time.time() - sample_started, 0.001)
-    after = sum(item["utime"] + item["stime"] for item in refreshed.values())
-    cpu_percent = max((after - before) / (elapsed * ticks) * 100.0, 0.0) if refreshed else -1.0
-    memory_bytes = sum(max(process_memory_bytes(item["pid"]), 0.0) for item in refreshed.values())
-    thread_count = sum(item["threads"] for item in refreshed.values())
-    zombie_count = sum(1 for item in refreshed.values() if item["state"] == "Z")
-    starts = [boot_ts + item["startTimeTicks"] / ticks for item in refreshed.values()] if boot_ts >= 0 else []
-    fd_count = fd_limit = readable_fd_count = 0
+    cmdlines = []
+    for item in matched:
+        cmdline = text(item.get("cmdline"))
+        if cmdline not in cmdlines:
+            cmdlines.append(cmdline)
+    after_by_cmdline = {}
     for item in refreshed.values():
-        used, limit = process_fd_usage(item["pid"])
-        if used >= 0:
-            fd_count += used
-            readable_fd_count += 1
-        if limit > 0:
-            fd_limit += limit
-    fd_usage = fd_count * 100.0 / fd_limit if fd_limit > 0 else -1.0
+        cmdline = text(item.get("cmdline"))
+        after_by_cmdline[cmdline] = after_by_cmdline.get(cmdline, 0.0) + item["utime"] + item["stime"]
     config_valid = bool(text(target.get("installPath")) or (isinstance(target.get("processMatchGroups"), list) and target.get("processMatchGroups")))
-    values = {
-        "deploy_instance_process_alive": 1.0 if matched else 0.0,
-        "deploy_instance_process_count": float(len(matched)),
-        "deploy_instance_matching_process_count": float(len(matched)),
-        "deploy_instance_zombie_process_count": float(zombie_count),
-        "deploy_instance_thread_count": float(thread_count),
-        "deploy_instance_process_start_timestamp": min(starts) if starts else -1.0,
-        "deploy_instance_process_uptime_seconds": max(now - min(starts), 0.0) if starts else -1.0,
-        "deploy_instance_process_memory_bytes": memory_bytes if matched else 0.0,
-        "deploy_instance_process_memory_percent": memory_bytes * 100.0 / mem_total if matched and mem_total > 0 else -1.0,
-        "deploy_instance_process_cpu_percent": cpu_percent,
-        "deploy_instance_process_fd_count": float(fd_count) if readable_fd_count else -1.0,
-        "deploy_instance_process_fd_usage_percent": fd_usage,
-        "deploy_instance_expected_port_count": float(len(expected_ports)),
-        "deploy_instance_listening_port_count": float(len(listening)),
-        "deploy_instance_port_missing_count": float(len([port for port in expected_ports if port not in listening])),
-        "deploy_instance_port_listen": 1.0 if not expected_ports or len(listening) == len(expected_ports) else 0.0,
-        "deploy_instance_port_listen_ratio_pct": len(listening) * 100.0 / len(expected_ports) if expected_ports else 100.0,
-        "deploy_instance_config_valid": 1.0 if config_valid else 0.0,
+    base_dims = {"hostInstanceId": settings["hostInstanceId"], "deployInstanceId": text(target.get("instanceId")), "installPath": text(target.get("installPath"))}
+    rows = []
+    for cmdline in cmdlines or [""]:
+        group = [item for item in refreshed.values() if text(item.get("cmdline")) == cmdline]
+        memory_bytes = sum(max(process_memory_bytes(item["pid"]), 0.0) for item in group)
+        thread_count = sum(item["threads"] for item in group)
+        zombie_count = sum(1 for item in group if item["state"] == "Z")
+        starts = [boot_ts + item["startTimeTicks"] / ticks for item in group] if boot_ts >= 0 else []
+        fd_count = fd_limit = 0
+        readable_fd_count = 0
+        for item in group:
+            used, limit = process_fd_usage(item["pid"])
+            if used >= 0:
+                fd_count += used
+                readable_fd_count += 1
+            if limit > 0:
+                fd_limit += limit
+        fd_usage = fd_count * 100.0 / fd_limit if fd_limit > 0 else -1.0
+        before = before_by_cmdline.get(cmdline, 0.0)
+        after = after_by_cmdline.get(cmdline, 0.0)
+        process_values = {
+            "deploy_instance_process_alive": 1.0 if group else 0.0,
+            "deploy_instance_process_count": float(len(group)),
+            "deploy_instance_matching_process_count": float(len(group)),
+            "deploy_instance_zombie_process_count": float(zombie_count),
+            "deploy_instance_thread_count": float(thread_count),
+            "deploy_instance_process_start_timestamp": min(starts) if starts else -1.0,
+            "deploy_instance_process_uptime_seconds": max(now - min(starts), 0.0) if starts else -1.0,
+            "deploy_instance_process_memory_bytes": memory_bytes if group else 0.0,
+            "deploy_instance_process_memory_percent": memory_bytes * 100.0 / mem_total if group and mem_total > 0 else -1.0,
+            "deploy_instance_process_cpu_percent": max((after - before) / (elapsed * ticks) * 100.0, 0.0) if group else -1.0,
+            "deploy_instance_process_fd_count": float(fd_count) if readable_fd_count else -1.0,
+            "deploy_instance_process_fd_usage_percent": fd_usage,
+        }
+        rows.append({"dims": dict(base_dims, cmdline=cmdline), "vals": process_values})
+    for port in expected_ports or [""]:
+        is_listening = port in listening
+        port_values = {
+            "deploy_instance_expected_port_count": 1.0 if expected_ports else 0.0,
+            "deploy_instance_listening_port_count": 1.0 if is_listening else 0.0,
+            "deploy_instance_port_missing_count": 0.0 if not expected_ports or is_listening else 1.0,
+            "deploy_instance_port_listen": 1.0 if not expected_ports or is_listening else 0.0,
+            "deploy_instance_port_listen_ratio_pct": 100.0 if not expected_ports or is_listening else 0.0,
+            "deploy_instance_config_valid": 1.0 if config_valid else 0.0,
+        }
+        rows.append({"dims": dict(base_dims, port=text(port)), "vals": port_values})
+    rows.append({"dims": dict(base_dims), "vals": {
         "deploy_instance_collect_success": 1.0,
         "host_deploy_instance_target_count": float(target_count),
         "host_deploy_cache_age_seconds": cache_age,
         "host_deploy_cache_refresh_success": refresh_success,
-    }
-    return {"dims": {"hostInstanceId": settings["hostInstanceId"], "deployInstanceId": text(target.get("instanceId")), "installPath": text(target.get("installPath"))}, "vals": values}
+    }})
+    return rows
 
 
 def collect(settings):
@@ -527,7 +557,7 @@ def collect(settings):
     output = []
     for target in targets:
         try:
-            output.append(collect_target(target, processes, sockets, boot_ts, ticks, mem_total, settings, now, cache_age, refresh_success, len(targets)))
+            output.extend(collect_target(target, processes, sockets, boot_ts, ticks, mem_total, settings, now, cache_age, refresh_success, len(targets)))
         except Exception:
             output.append({"dims": {"hostInstanceId": settings["hostInstanceId"], "deployInstanceId": text(target.get("instanceId")), "installPath": text(target.get("installPath"))}, "vals": {"deploy_instance_config_valid": 0.0, "deploy_instance_collect_success": 0.0, "host_deploy_instance_target_count": float(len(targets)), "host_deploy_cache_age_seconds": cache_age, "host_deploy_cache_refresh_success": refresh_success}})
     return output

@@ -21,16 +21,17 @@ items:
   - id: host-deploy-instance-monitor-kit
     name: 主机部署实例监控
     category: monitor-kits
-    files: [监控套件_主机部署实例监控_0.1.4.zip, 主机部署实例监控_告警规则模板_0.1.4.xlsx]
-    version: "0.1.4"
+    files: [监控套件_主机部署实例监控_0.1.5.zip, 主机部署实例监控_告警规则模板_0.1.5.xlsx]
+    version: "0.1.5"
     history:
       - {ver: "0.1.1", date: "2026-11-12", change: "修正成品包仅保留XLSX告警模板，避免同时导入JSON与XLSX生成重复告警定义；OpenAPI凭证参数使用password类型"}
       - {ver: "0.1.2", date: "2026-11-12", change: "修正metric_set.json为对象数组并补齐通用校验，避免指标集未生成导致前端创建任务无法加载"}
       - {ver: "0.1.3", date: "2026-11-12", change: "AK/SK参数更名为openapiAk/openapiSk并改为password加密手填模式，关闭Secret引用继承导致的传参问题"}
       - {ver: "0.1.0", date: "2026-11-12", change: "初版：HOST本地缓存/OpenAPI刷新isMonitor=是的部署实例，采集进程、端口、CPU、内存和句柄指标"}
       - {ver: "0.1.4", date: "2026-11-13", change: "移除json.dumps的ensure_ascii=False，兼容Python 2.7中文字节串并将该规则加入通用校验"}
+      - {ver: "0.1.5", date: "2026-11-13", change: "进程指标增加cmdline维度并按命令行分组；端口指标增加port维度并逐端口输出监听状态"}
     scenario: 主机关联部署实例的本机进程、端口和资源监控
-    notes: "需配置OpenAPI网关地址与AK/SK并放行实例search；0.1.4已导入并回读enabled，22个原始指标和4个指标集(3/11/5/3)无回归，AK/SK为password且isFromSecret=false；携带授权凭证的端到端采集待用户复验。"
+    notes: "需配置OpenAPI网关地址与AK/SK并放行实例search；0.1.5进程指标带cmdline维度、端口指标带port维度，22个原始指标和4个指标集(3/11/5/3)无回归，AK/SK为password且isFromSecret=false；携带授权凭证的端到端采集待用户复验。"
     added: "2026-11-12"
   - id: ping-monitor-kit
     name: 主机Ping监控
