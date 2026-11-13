@@ -17,24 +17,29 @@ steps:
     desc: "使用套件真实relateObjectId；已验证notRequireJob=true、needUpdateJob=true，先确认更新已有任务影响"
     expect: "检查code、totalStatus、resources逐项结果；collectorJob计数不能代替运行任务查询"
   - n: 3
+    op: debug_collector_job.run
+    args: ["--endpoint frontend"]
+    desc: "可选创建任务前预检：复用前端指标集与参数构造，对单个授权实例和执行主机真实执行；不创建正式任务"
+    expect: "业务code=0且每个resultList[].error为空，data可JSON decode并覆盖预期指标；不能只看HTTP 200"
+  - n: 4
     op: resource_monitor_job.create
     args: ["--endpoint frontend"]
     desc: "仅在v2确认任务不存在时创建；已有则复用。指标集、pluginId来自真实套件；过滤仅含授权目标。重试前查重。"
     expect: "保存data.id为configId；回读enabled、interval、参数与目标"
-  - n: 4
+  - n: 5
     desc: "从该任务ListJobInstances明细获取executionHosts.uuid，不用套件ID、目标实例ID或其他主机UUID猜测"
     expect: "任务及执行主机对应一致且具备采集条件"
-  - n: 5
+  - n: 6
     op: resource_monitor_job.sync_now
     args: ["<configId>", "--endpoint frontend"]
     desc: "GET有同步配置副作用；必须经授权；同步不等于执行"
     expect: "检查业务结果并回读状态"
-  - n: 6
+  - n: 7
     op: metric_collection.collect_sync
     args: ["--endpoint frontend"]
     desc: "body包含withJobId=true、samplerJobConfig.configId、执行主机uuid、reportMetric=true、sampler=metric_sampler；实际执行并上报指标"
     expect: "保留脱敏业务响应和真实错误，HTTP200/code0/statusok不能替代逐项时序验收"
-  - n: 7
+  - n: 8
     desc: "检查实际输出与时序；Ping逐项检查五项指标。用户确认成功时记为用户验收，不虚构值。"
     expect: "分别记录导入、启用、任务、同步、执行、入库的证据来源"
 error_handling:

@@ -22,7 +22,7 @@
 ```python
 def main():
     result = collect()
-    print(json.dumps(result, ensure_ascii=False))
+    print(json.dumps(result))
     return 0
 
 if __name__ == '__main__':
@@ -36,6 +36,8 @@ if __name__ == '__main__':
 ```
 
 局部指标或可选资源失败只记录 WARN 并继续；只有无法进入采集的异常才进入顶层 `COLLECT_ERROR`。正常采集输出必须仍是纯 JSON 数组；不要把 traceback 写到 stderr 后直接 `exit(1)`，否则前端可能看不到错误。
+
+EasyOps 旧执行环境可能使用 Python 2.7。脚本源码或采集数据包含中文时，`ensure_ascii=False` 会让 Python 2 的 JSON encoder 先按 ASCII 解码字节串并抛出 `UnicodeDecodeError`。监控脚本统一使用默认 `ensure_ascii=True`：输出为 `\\uXXXX`，JSON 语义不变，且 Python 2/3 均稳定。打包校验器必须阻断 Python 采集脚本中的 `ensure_ascii=False`。
 
 
 ### 本次错误暴露实现（2026-11-05）
@@ -56,6 +58,7 @@ python3 skills/api-orchestrator/platforms/easyops/development/scripts/validate_m
 - 告警 `metricName` 不存在于 `origin_metric.json`，导致规则导入后无法绑定指标。
 - `resource_discovery_define.json` 顶层不是数组，或条目缺少 `objectId`、`category`、`type`。
 - ZIP 顶层目录超过一个、缺少 `plugin.yaml`、版本号为空。
+- Python 采集脚本包含 `ensure_ascii=False`，在 Python 2.7 环境遇到中文字节串时触发 `UnicodeDecodeError`。
 
 ### 当前环境导入验收
 

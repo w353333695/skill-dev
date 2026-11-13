@@ -22,7 +22,7 @@ else:
     from urllib import urlencode
     from urllib2 import Request, urlopen
 
-VERSION = "0.1.3"
+VERSION = "0.1.4"
 OBJECT_ID = "ARTIFACT_INST@ONEMODEL"
 OPENAPI_PATH = "/cmdbservice/v3/object/ARTIFACT_INST@ONEMODEL/instance/_search"
 OPENAPI_HOST = "openapi.easyops-only.com"
@@ -104,7 +104,7 @@ def write_json_atomic(path, data):
         raise OSError(errno.ENOENT, "cache directory does not exist", directory)
     temporary = "%s.%d.tmp" % (path, os.getpid())
     with open(temporary, "wb") as handle:
-        handle.write(json.dumps(data, ensure_ascii=False, separators=(",", ":")).encode("utf-8"))
+        handle.write(json.dumps(data, separators=(",", ":")).encode("utf-8"))
         handle.flush()
         os.fsync(handle.fileno())
     os.chmod(temporary, 0o600)
@@ -169,7 +169,7 @@ def search_targets(settings):
             "fields": fields, "page": page, "page_size": 1000,
             "ignore_missing_field_error": True,
             "query": {"isMonitor": "是", "$or": conditions},
-        }, ensure_ascii=False).encode("utf-8")
+        }).encode("utf-8")
         query = sign_openapi("POST", OPENAPI_PATH, "application/json", body, settings["accessKey"], settings["secretKey"])
         result = http_json(
             settings["gateway"].rstrip("/") + OPENAPI_PATH, query, body,
@@ -541,7 +541,7 @@ def main(argv=None):
     parser.parse_args(argv)
     try:
         settings = config()
-        print(json.dumps(collect(settings), ensure_ascii=False, allow_nan=False))
+        print(json.dumps(collect(settings), allow_nan=False))
     except Exception:
         print("COLLECT_ERROR: [main] " + traceback.format_exc())
     return 0

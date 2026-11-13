@@ -17,7 +17,7 @@ from unittest import mock
 
 KIT = Path(__file__).resolve().parents[2] / "monitor-kits/host-deploy-instance-monitoring"
 SOURCE = KIT / "src/host_deploy_instance_monitor.py"
-PACKAGE = Path(__file__).resolve().parents[3] / "hub/monitor-kits/监控套件_主机部署实例监控_0.1.3.zip"
+PACKAGE = Path(__file__).resolve().parents[3] / "hub/monitor-kits/监控套件_主机部署实例监控_0.1.4.zip"
 WORKTREE_ROOT = Path(__file__).resolve().parents[7]
 
 
@@ -133,7 +133,14 @@ class HostDeployInstanceMonitorTests(unittest.TestCase):
     def test_help_and_version(self):
         result = subprocess.run([sys.executable, str(SOURCE), "--version"], capture_output=True, text=True, env={**os.environ, "PYTHONDONTWRITEBYTECODE": "1"})
         self.assertEqual(result.returncode, 0)
-        self.assertEqual(result.stdout.strip(), "0.1.3")
+        self.assertEqual(result.stdout.strip(), "0.1.4")
+
+    def test_python2_json_output_uses_ascii_escape(self):
+        source = SOURCE.read_text(encoding="utf-8")
+        orig = SOURCE.with_suffix(".orig").read_text(encoding="utf-8")
+        self.assertNotIn("ensure_ascii=False", source)
+        self.assertNotIn("ensure_ascii=False", orig)
+        self.assertEqual(source, orig)
 
     def test_credential_parameters_are_manual_encrypted_not_secret_refs(self):
         plugin = yaml.safe_load((KIT / "plugin.yaml").read_text(encoding="utf-8"))

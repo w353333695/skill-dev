@@ -47,6 +47,20 @@ class MonitorKitValidatorTests(unittest.TestCase):
                 module.validate_dir(root)
             self.assertIn("metric_set.json[0] 必须是包含非空 name 的对象", str(context.exception))
 
+    def test_python_source_cannot_use_non_ascii_json_output(self):
+        module = validator()
+        with tempfile.TemporaryDirectory(dir=WORKTREE_ROOT / ".local") as temporary:
+            root = Path(temporary) / "kit"
+            root.mkdir()
+            (root / "plugin.yaml").write_text("name: test-kit\nversion: 1.0.0\n", encoding="utf-8")
+            source = root / "src/collector.py"
+            source.parent.mkdir()
+            source.write_text("print(json.dumps(data, ensure_ascii=False))\n", encoding="utf-8")
+            source.with_suffix(".orig").write_text("print(json.dumps(data, ensure_ascii=False))\n", encoding="utf-8")
+            with self.assertRaises(module.ValidationError) as context:
+                module.validate_dir(root)
+            self.assertIn("ensure_ascii=False", str(context.exception))
+
 
 if __name__ == "__main__":
     unittest.main()

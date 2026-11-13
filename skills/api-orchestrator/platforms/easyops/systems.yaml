@@ -876,6 +876,8 @@ systems:
         sync_now: "立即同步；GET有副作用，必须选择frontend"
       metric_collection:
         collect_sync: "立即采集与指标上报，必须选择frontend"
+      debug_collector_job:
+        run: "创建任务前真实调试插件；必须选择frontend，指定套件ID、目标实例和执行主机；检查resultList[].error且data必须是合法JSON"
       collector_metric:
         list: "指标元数据检索（v2 分页：metricNames 精确/objectId 过滤/metricName 模糊）——dashboard 指标查证权威源（2026-08-14 接入，metric/route.go:21）"
       job_status:

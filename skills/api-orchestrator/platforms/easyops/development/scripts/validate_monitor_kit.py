@@ -68,6 +68,12 @@ def validate_dir(root, require_name_match=False):
         orig = source.with_suffix(".orig")
         if not orig.exists() or orig.stat().st_size == 0:
             raise ValidationError("缺少与 %s 对应的 src/%s.orig" % (source.name, source.stem))
+        source_text = source.read_text(encoding="utf-8")
+        orig_text = orig.read_text(encoding="utf-8")
+        if "ensure_ascii=False" in source_text or "ensure_ascii=False" in orig_text:
+            raise ValidationError("%s 使用 ensure_ascii=False；Python 2.7遇到非ASCII字节串会UnicodeDecodeError，请使用默认ASCII escape" % source.name)
+        if source_text != orig_text:
+            raise ValidationError("%s 与对应 .orig 内容不一致" % source.name)
     for forbidden in root.rglob("*"):
         if forbidden.is_file() and ("__pycache__" in forbidden.parts or forbidden.suffix == ".pyc"):
             raise ValidationError("ZIP/目录禁止包含缓存文件: %s" % forbidden.relative_to(root))
