@@ -30,7 +30,7 @@ items:
       - {ver: "0.1.0", date: "2026-11-12", change: "初版：HOST本地缓存/OpenAPI刷新isMonitor=是的部署实例，采集进程、端口、CPU、内存和句柄指标"}
       - {ver: "0.1.4", date: "2026-11-13", change: "移除json.dumps的ensure_ascii=False，兼容Python 2.7中文字节串并将该规则加入通用校验"}
     scenario: 主机关联部署实例的本机进程、端口和资源监控
-    notes: "需配置OpenAPI网关地址与AK/SK并放行实例search；0.1.3已导入并回读enabled，指标集4个/别名指标22个，AK/SK为password且isFromSecret=false；OpenAPI真实调用和目标主机采集待验收。"
+    notes: "需配置OpenAPI网关地址与AK/SK并放行实例search；0.1.4已导入并回读enabled，22个原始指标和4个指标集(3/11/5/3)无回归，AK/SK为password且isFromSecret=false；携带授权凭证的端到端采集待用户复验。"
     added: "2026-11-12"
   - id: ping-monitor-kit
     name: 主机Ping监控

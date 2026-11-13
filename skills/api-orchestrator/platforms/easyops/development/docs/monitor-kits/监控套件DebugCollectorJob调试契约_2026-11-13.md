@@ -21,6 +21,8 @@
 | `job.collectorParams` | 采集参数列表，会转换为collector config的`collectorParams`；前端抓包常与`params`重复，重复本身不是脚本必需。 |
 | `job.instanceMapping` | 实例级映射，转换到collector config的同名字段。 |
 
+前端抓包还可能出现 `job.collectParams`。从当前 `DebugJob` 执行源码看，实际转换和执行只消费 `job.params`、`job.collectorParams` 与 `job.instanceMapping`；调试排查时不要把 `collectParams` 误认为本接口的必需执行参数。若复用前端抓包，应以响应 `data.params` 核对最终合并结果。
+
 ## 响应验收
 
 1. 外层HTTP 200只是传输成功；必须检查业务响应`code=0`。
