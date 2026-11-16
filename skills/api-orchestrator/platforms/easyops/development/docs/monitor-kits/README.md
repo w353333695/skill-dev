@@ -39,6 +39,10 @@ if __name__ == '__main__':
 
 EasyOps 旧执行环境可能使用 Python 2.7。脚本源码或采集数据包含中文时，`ensure_ascii=False` 会让 Python 2 的 JSON encoder 先按 ASCII 解码字节串并抛出 `UnicodeDecodeError`。监控脚本统一使用默认 `ensure_ascii=True`：输出为 `\\uXXXX`，JSON 语义不变，且 Python 2/3 均稳定。打包校验器必须阻断 Python 采集脚本中的 `ensure_ascii=False`。
 
+Python 2 的 `/proc`、OpenAPI 或命令输出解码后可能得到 `unicode`。通用文本归一函数不能对它直接执行 `str(value)`：Python 2 会按 ASCII 编码并在中文字符处抛出 `UnicodeEncodeError`。应显式保留 `unicode` 值，仅字节串按 UTF-8 解码；JSON 输出继续使用默认 ASCII escape。
+
+`debug-collector-job` 可能把脚本 stderr 合并进 `resultList[].data`。DEBUG/局部 ERROR 结构化日志不能写 stdout 或 stderr，否则会与最终 JSON 数组拼成多段文本并触发 `json unmarshal data failed`。诊断应写入缓存目录侧车文件（如 `<cacheDir>/<hostInstanceId>.debug.log`），并做大小轮转；stdout 仅保留指标 JSON 数组，顶层致命异常仍按 `COLLECT_ERROR:` 协议输出。
+
 
 ### 本次错误暴露实现（2026-11-05）
 
