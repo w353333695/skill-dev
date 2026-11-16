@@ -11,7 +11,9 @@
 
 目标匹配依据：优先使用 `processMatchGroups.cmdline`；无匹配关键字组时使用 `processList` 的 `pname/cwd/cmdline`，并参考 `installPath`。端口检查读取 `/proc/net/tcp*` 与进程 socket inode；无法读取进程 fd 时退化为检查主机端口监听。
 
-指标包含：进程存活、进程/线程/僵尸进程数量、启动时间与运行时长、期望与实际监听端口、端口缺失数与监听比例、进程内存、CPU、句柄数与句柄使用率、目标配置有效性、采集成功率和缓存状态。进程相关指标带`cmdline`维度并按命令行分组输出；端口相关指标带`port`维度，每个期望端口单独输出监听状态。
+操作系统兼容：Linux按上述 `/proc` 与 inode 方式采集。Windows通过 PowerShell `Get-CimInstance Win32_Process/Win32_OperatingSystem` 获取进程、CPU时间、线程、内存、句柄、启动时间和系统内存，通过 `netstat -ano -p tcp` 按PID关联监听端口；路径匹配兼容反斜杠和大小写。Windows无僵尸进程语义，`zombie_process_count`输出0；句柄上限不可直接获取，`fd_count`为进程句柄数、`fd_usage_percent`输出-1。Windows下旧任务携带Linux默认缓存目录时会自动映射到 `%SystemRoot%\\Temp\\easyops\\deploy-instance-monitor`。
+
+指标包含：进程存活、进程/线程/僵尸进程数量、启动时间与运行时长、期望与实际监听端口、端口缺失数与监听比例、进程内存、CPU、句柄数与句柄使用率、目标配置有效性、采集成功率和缓存状态。进程相关指标带`cmdline`维度并按命令行分组输出；端口相关指标带`port`维度，每个期望端口单独输出监听状态。Linux与Windows均输出同一套22项指标定义，便于告警和看板复用。
 
 OpenAPI AK/SK 通过普通字符串任务参数 `openapiAkText`、`openapiSkText` 或 `EASYOPS_OPENAPI_AK`、`EASYOPS_OPENAPI_SK` 环境变量注入；网关地址可通过任务参数或 `EASYOPS_OPENAPI_GATEWAY_URL` 注入。脚本不记录密钥。OpenAPI 主体需要有 `ARTIFACT_INST@ONEMODEL` 读权限，网关需放行 search URI。
 

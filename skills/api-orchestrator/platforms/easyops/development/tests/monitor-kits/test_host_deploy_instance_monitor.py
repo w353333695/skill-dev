@@ -19,7 +19,7 @@ from unittest import mock
 
 KIT = Path(__file__).resolve().parents[2] / "monitor-kits/host-deploy-instance-monitoring"
 SOURCE = KIT / "src/host_deploy_instance_monitor.py"
-PACKAGE = Path(__file__).resolve().parents[3] / "hub/monitor-kits/监控套件_主机部署实例监控_0.1.9.zip"
+PACKAGE = Path(__file__).resolve().parents[3] / "hub/monitor-kits/监控套件_主机部署实例监控_0.1.10.zip"
 WORKTREE_ROOT = Path(__file__).resolve().parents[7]
 
 
@@ -70,6 +70,67 @@ class HostDeployInstanceMonitorTests(unittest.TestCase):
         process = {"pid": 1, "cmdline": "/usr/local/easyops/java -Dapp=api", "cwd": "/"}
         self.assertTrue(m["match_keyword_group"](process, {"cmdline": ["/usr/local/easyops/java", "-Dapp=api"]}))
         self.assertFalse(m["match_keyword_group"](process, {"cmdline": ["/usr/local/easyops/java", "-Dapp=web"]}))
+
+    def test_windows_process_and_netstat_parsers(self):
+        m = module()
+        self.assertEqual(m["parse_windows_datetime"]("20261116103000.123456+480"), 1794796200.123456)
+        self.assertEqual(m["parse_windows_datetime"]("20261116103000.123456-480"), 1794853800.123456)
+        process = m["parse_windows_process_row"]({
+            "ProcessId": 123, "Name": "app.exe",
+            "CommandLine": r"C:\Program Files\App\app.exe --port 8080",
+            "ExecutablePath": r"C:\Program Files\App\app.exe",
+            "CreationDate": "20261116103000.123456+480",
+            "UserModeTime": 10000000, "KernelModeTime": 5000000,
+            "ThreadCount": 4, "WorkingSetSize": 1024, "HandleCount": 32,
+        })
+        self.assertEqual(process["utime"], 1.0)
+        self.assertEqual(process["stime"], 0.5)
+        self.assertEqual(process["start_timestamp"], 1794796200.123456)
+        self.assertEqual(process["fd_count"], 32)
+        netstat = (
+            "  Proto  Local Address          Foreign Address        State           PID\r\n"
+            "  TCP    0.0.0.0:8080           0.0.0.0:0              LISTENING       123\r\n"
+            "  TCP    [::]:8080              [::]:0                 LISTENING       123\r\n"
+        )
+        self.assertEqual(m["parse_windows_netstat"](netstat), {8080: {"123"}})
+
+    def test_windows_target_collect_and_path_matching(self):
+        m = module()
+        process = {
+            "pid": 123, "comm": "app.exe", "state": "", "utime": 1.0,
+            "stime": 0.5, "threads": 4, "start_timestamp": 1794796200.0,
+            "cmdline": r"c:\program files\app\app.exe --port 8080", "cwd": "",
+            "memory_bytes": 1024.0, "fd_count": 32,
+        }
+        refreshed = dict(process, utime=1.2, stime=0.5)
+        settings = {"hostInstanceId": "host1", "sampleInterval": 0.0, "logLevel": "ERROR", "windows": True}
+        target = {
+            "instanceId": "deploy1", "installPath": r"C:\Program Files\App",
+            "ports": [8080],
+            "processList": [{"pname": "APP.EXE", "cmdline": r"c:\program files\app\app.exe"}],
+        }
+        clocks = iter([101.0, 102.0])
+        with mock.patch.object(m["time"], "sleep"), mock.patch.object(m["time"], "time", side_effect=lambda: next(clocks)), \
+             mock.patch.dict(m, {
+                 "IS_WINDOWS": True,
+                 "refresh_process_record": mock.Mock(return_value=refreshed),
+                 "process_socket_inodes": mock.Mock(return_value=({"123"}, True)),
+                 "process_memory_bytes": mock.Mock(return_value=1024.0),
+                 "process_fd_usage": mock.Mock(return_value=(32, -1)),
+                 "windows_process_snapshot": mock.Mock(),
+             }):
+            with redirect_stderr(io.StringIO()):
+                result = m["collect_target"](target, [process], {8080: {"123"}}, -1.0, 100.0, 2048.0, settings, 1794791500.0, 10.0, 1.0, 1)
+        process_row, port_row, target_row = result
+        self.assertEqual(process_row["vals"]["deploy_instance_process_alive"], 1.0)
+        self.assertEqual(process_row["vals"]["deploy_instance_process_start_timestamp"], 1794796200.0)
+        self.assertEqual(process_row["vals"]["deploy_instance_process_memory_percent"], 50.0)
+        self.assertAlmostEqual(process_row["vals"]["deploy_instance_process_cpu_percent"], 20.0)
+        self.assertEqual(process_row["vals"]["deploy_instance_process_fd_count"], 32.0)
+        self.assertEqual(process_row["vals"]["deploy_instance_process_fd_usage_percent"], -1.0)
+        self.assertEqual(port_row["dims"]["port"], "8080")
+        self.assertEqual(port_row["vals"]["deploy_instance_port_listen"], 1.0)
+        self.assertEqual(set().union(*(row["vals"] for row in result)), set(m["METRIC_KEYS"]))
 
     def test_collect_target_metrics(self):
         m = module()
@@ -210,7 +271,7 @@ class HostDeployInstanceMonitorTests(unittest.TestCase):
     def test_help_and_version(self):
         result = subprocess.run([sys.executable, str(SOURCE), "--version"], capture_output=True, text=True, env={**os.environ, "PYTHONDONTWRITEBYTECODE": "1"})
         self.assertEqual(result.returncode, 0)
-        self.assertEqual(result.stdout.strip(), "0.1.9")
+        self.assertEqual(result.stdout.strip(), "0.1.10")
 
     def test_python2_json_output_uses_ascii_escape(self):
         source = SOURCE.read_text(encoding="utf-8")

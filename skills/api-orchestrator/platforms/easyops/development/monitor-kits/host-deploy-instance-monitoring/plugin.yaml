@@ -1,6 +1,6 @@
 type: simple-script
 name: 主机部署实例监控
-version: "0.1.9"
+version: "0.1.10"
 command:
     collect:
         interpreter: ""
@@ -25,7 +25,7 @@ paramDefine:
     - {name: instanceId, valueType: string, defaultValue: $.instanceId, display: false, displayName: "主机实例ID", description: "取HOST模型instanceId，用于缓存文件隔离；必填", use: collectParams, optional: false, isFromSecret: false, isEncrypt: false, extraArgs: null}
     - {name: hostUuid, valueType: string, defaultValue: $._uuid, display: false, displayName: "主机UUID", description: "取HOST._uuid，OpenAPI优先用它匹配部署实例uuid；缺失时使用主机IP", use: collectParams, optional: true, isFromSecret: false, isEncrypt: false, extraArgs: null}
     - {name: hostIp, valueType: string, defaultValue: $.ip, display: false, displayName: "主机IP", description: "取HOST.ip，hostUuid缺失时匹配部署实例ip", use: collectParams, optional: true, isFromSecret: false, isEncrypt: false, extraArgs: null}
-    - {name: cacheDir, valueType: string, defaultValue: /tmp/easyops/deploy-instance-monitor, display: true, displayName: "缓存目录", description: "执行主机本地缓存目录，默认 /tmp/easyops/deploy-instance-monitor", use: collectParams, optional: true, isFromSecret: false, isEncrypt: false, extraArgs: null}
+    - {name: cacheDir, valueType: string, defaultValue: /tmp/easyops/deploy-instance-monitor, display: true, displayName: "缓存目录", description: "执行主机本地缓存目录；Linux默认/tmp/easyops/deploy-instance-monitor，Windows自动映射到SystemRoot\\Temp\\easyops\\deploy-instance-monitor", use: collectParams, optional: true, isFromSecret: false, isEncrypt: false, extraArgs: null}
     - {name: cacheTtlDays, valueType: int, defaultValue: "7", display: true, displayName: "缓存有效期(天)", description: "缓存超过该天数后重新调用OpenAPI search，默认7天，范围1-90", use: collectParams, optional: true, isFromSecret: false, isEncrypt: false, extraArgs: null}
     - {name: openapiGateway, valueType: string, defaultValue: "", display: true, displayName: "OpenAPI网关地址", description: "内网网关地址，如 http://192.168.110.24；也可用EASYOPS_OPENAPI_GATEWAY_URL", use: collectParams, optional: false, isFromSecret: false, isEncrypt: false, extraArgs: null}
     - {name: openapiAkText, valueType: string, defaultValue: "", display: true, displayName: "OpenAPI AK", description: "普通字符串任务参数或EASYOPS_OPENAPI_AK；不启用Secret引用和加密，不写日志", use: collectParams, optional: false, isFromSecret: false, isEncrypt: false, extraArgs: null}
