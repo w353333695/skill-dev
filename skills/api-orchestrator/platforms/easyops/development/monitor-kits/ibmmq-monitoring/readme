@@ -1,0 +1,42 @@
+IBM MQ监控套件
+
+版本：0.1.0；关联模型：HOST；执行位置：Linux HOST执行节点本机。
+
+## 采集链路
+
+1. 通过任务参数或 `MQ_INSTALLATION_PATH`、`/opt/mqm/bin`、`/opt/ibm/mq/bin`、`/usr/mqm/bin`、`PATH` 定位 `dspmq` 与 `runmqsc`。
+2. 执行 `dspmq -o status` 发现队列管理器，`qmgrName` 留空时采集全部队列管理器。
+3. 对每个队列管理器执行 `runmqsc <qmgrName>`，批量下发队列、队列状态、通道状态和监听器状态查询。
+4. 默认排除 `SYSTEM.` 前缀队列，可用 `queueFilter` 正则二次筛选；可选读取 `/proc` 采集进程CPU、内存、线程和句柄。
+5. stdout输出纯JSON数组；无法进入采集时输出 `COLLECT_ERROR:` 与完整traceback，退出码保持0。
+
+## 参数
+
+- `instanceId`：取 `$.instanceId`，用于主机维度。
+- `qmgrName`：留空自动发现；指定后仅采集该队列管理器。
+- `mqBinPath`：IBM MQ `bin` 目录；留空自动探测。
+- `queueFilter`：队列名正则，默认 `.*`。
+- `includeSystemQueues`：默认 `false`，排除系统队列。
+- `processMonitor`：默认 `true`，采集进程资源。
+- `sampleInterval`：CPU采样间隔，默认0.2秒。
+- `commandTimeout`：MQ命令超时，默认10秒。
+
+## 指标
+
+共30项：采集状态、队列管理器、队列汇总/明细、监听器、通道和进程资源。关键指标包括 `ibmmq_qmgr_status`、`ibmmq_queue_current_depth`、`ibmmq_queue_usage_percent`、`ibmmq_queue_oldest_message_age_seconds`、`ibmmq_listener_status`、`ibmmq_channel_status`、`ibmmq_channel_retrying_count` 和进程CPU/内存/线程/句柄。
+
+## 权限与限制
+
+- 执行用户必须能运行 `dspmq`/`runmqsc` 并读取队列管理器状态；推荐由部署了IBM MQ的 `mqm` 用户或等权账号执行。
+- 脚本不支持Windows执行节点；Windows发现线索见模型与自动发现说明。
+- 告警模板为 `IBM_MQ监控_告警规则模板_0.1.0.xlsx`，需通过事件中心Excel入口导入。队列绝对深度阈值1000/5000为初始值，生产使用前必须按队列SLA调整。
+- 本套件未连接远端队列管理器，也不校验客户端Put/Get业务链路；跨节点链路探测需单独建设拨测。
+
+## 离线验证
+
+```bash
+python3 development/scripts/build_ibmmq_monitor_kit.py
+python3 development/scripts/validate_monitor_kit.py development/monitor-kits/ibmmq-monitoring
+python3 development/scripts/validate_monitor_kit.py ../hub/monitor-kits/监控套件_IBM_MQ监控_0.1.0.zip
+cd development && python3 -m unittest discover -s tests/monitor-kits -p 'test_ibmmq_monitor.py'
+```

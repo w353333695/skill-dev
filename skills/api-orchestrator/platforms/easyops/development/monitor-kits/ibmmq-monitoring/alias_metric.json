@@ -1,0 +1,1220 @@
+[
+  {
+    "agentType": "easyops",
+    "dataType": "double",
+    "description": "采集成功；1成功，0失败",
+    "dims": [
+      {
+        "dimDisplayName": "hostInstanceId",
+        "dimName": "hostInstanceId",
+        "isArray": false,
+        "originDimName": "hostInstanceId"
+      },
+      {
+        "dimDisplayName": "qmgrName",
+        "dimName": "qmgrName",
+        "isArray": false,
+        "originDimName": "qmgrName"
+      },
+      {
+        "dimDisplayName": "installPath",
+        "dimName": "installPath",
+        "isArray": false,
+        "originDimName": "installPath"
+      }
+    ],
+    "displayName": "ibmmq_collect_success",
+    "expression": "",
+    "metricSet": [
+      "采集状态"
+    ],
+    "name": "ibmmq_collect_success",
+    "objectId": "HOST",
+    "originalMetrics": [
+      "ibmmq_collect_success"
+    ],
+    "type": "normal",
+    "unit": ""
+  },
+  {
+    "agentType": "easyops",
+    "dataType": "double",
+    "description": "dspmq队列管理器发现成功；1成功，0失败",
+    "dims": [
+      {
+        "dimDisplayName": "hostInstanceId",
+        "dimName": "hostInstanceId",
+        "isArray": false,
+        "originDimName": "hostInstanceId"
+      },
+      {
+        "dimDisplayName": "qmgrName",
+        "dimName": "qmgrName",
+        "isArray": false,
+        "originDimName": "qmgrName"
+      },
+      {
+        "dimDisplayName": "installPath",
+        "dimName": "installPath",
+        "isArray": false,
+        "originDimName": "installPath"
+      }
+    ],
+    "displayName": "ibmmq_discovery_success",
+    "expression": "",
+    "metricSet": [
+      "采集状态"
+    ],
+    "name": "ibmmq_discovery_success",
+    "objectId": "HOST",
+    "originalMetrics": [
+      "ibmmq_discovery_success"
+    ],
+    "type": "normal",
+    "unit": ""
+  },
+  {
+    "agentType": "easyops",
+    "dataType": "double",
+    "description": "本机发现的IBM MQ队列管理器数量",
+    "dims": [
+      {
+        "dimDisplayName": "hostInstanceId",
+        "dimName": "hostInstanceId",
+        "isArray": false,
+        "originDimName": "hostInstanceId"
+      }
+    ],
+    "displayName": "ibmmq_qmgr_count",
+    "expression": "",
+    "metricSet": [
+      "队列管理器"
+    ],
+    "name": "ibmmq_qmgr_count",
+    "objectId": "HOST",
+    "originalMetrics": [
+      "ibmmq_qmgr_count"
+    ],
+    "type": "normal",
+    "unit": "个"
+  },
+  {
+    "agentType": "easyops",
+    "dataType": "double",
+    "description": "队列管理器状态；1 Running，其余0",
+    "dims": [
+      {
+        "dimDisplayName": "hostInstanceId",
+        "dimName": "hostInstanceId",
+        "isArray": false,
+        "originDimName": "hostInstanceId"
+      },
+      {
+        "dimDisplayName": "qmgrName",
+        "dimName": "qmgrName",
+        "isArray": false,
+        "originDimName": "qmgrName"
+      },
+      {
+        "dimDisplayName": "installPath",
+        "dimName": "installPath",
+        "isArray": false,
+        "originDimName": "installPath"
+      }
+    ],
+    "displayName": "ibmmq_qmgr_status",
+    "expression": "",
+    "metricSet": [
+      "队列管理器"
+    ],
+    "name": "ibmmq_qmgr_status",
+    "objectId": "HOST",
+    "originalMetrics": [
+      "ibmmq_qmgr_status"
+    ],
+    "type": "normal",
+    "unit": ""
+  },
+  {
+    "agentType": "easyops",
+    "dataType": "double",
+    "description": "runmqsc整体执行成功；1成功，0失败",
+    "dims": [
+      {
+        "dimDisplayName": "hostInstanceId",
+        "dimName": "hostInstanceId",
+        "isArray": false,
+        "originDimName": "hostInstanceId"
+      },
+      {
+        "dimDisplayName": "qmgrName",
+        "dimName": "qmgrName",
+        "isArray": false,
+        "originDimName": "qmgrName"
+      },
+      {
+        "dimDisplayName": "installPath",
+        "dimName": "installPath",
+        "isArray": false,
+        "originDimName": "installPath"
+      }
+    ],
+    "displayName": "ibmmq_sc_command_success",
+    "expression": "",
+    "metricSet": [
+      "采集状态"
+    ],
+    "name": "ibmmq_sc_command_success",
+    "objectId": "HOST",
+    "originalMetrics": [
+      "ibmmq_sc_command_success"
+    ],
+    "type": "normal",
+    "unit": ""
+  },
+  {
+    "agentType": "easyops",
+    "dataType": "double",
+    "description": "纳入监控的本地队列数量",
+    "dims": [
+      {
+        "dimDisplayName": "hostInstanceId",
+        "dimName": "hostInstanceId",
+        "isArray": false,
+        "originDimName": "hostInstanceId"
+      },
+      {
+        "dimDisplayName": "qmgrName",
+        "dimName": "qmgrName",
+        "isArray": false,
+        "originDimName": "qmgrName"
+      },
+      {
+        "dimDisplayName": "installPath",
+        "dimName": "installPath",
+        "isArray": false,
+        "originDimName": "installPath"
+      }
+    ],
+    "displayName": "ibmmq_queue_total",
+    "expression": "",
+    "metricSet": [
+      "队列"
+    ],
+    "name": "ibmmq_queue_total",
+    "objectId": "HOST",
+    "originalMetrics": [
+      "ibmmq_queue_total"
+    ],
+    "type": "normal",
+    "unit": "个"
+  },
+  {
+    "agentType": "easyops",
+    "dataType": "double",
+    "description": "纳入监控队列当前深度合计",
+    "dims": [
+      {
+        "dimDisplayName": "hostInstanceId",
+        "dimName": "hostInstanceId",
+        "isArray": false,
+        "originDimName": "hostInstanceId"
+      },
+      {
+        "dimDisplayName": "qmgrName",
+        "dimName": "qmgrName",
+        "isArray": false,
+        "originDimName": "qmgrName"
+      },
+      {
+        "dimDisplayName": "installPath",
+        "dimName": "installPath",
+        "isArray": false,
+        "originDimName": "installPath"
+      }
+    ],
+    "displayName": "ibmmq_queue_depth_total",
+    "expression": "",
+    "metricSet": [
+      "队列"
+    ],
+    "name": "ibmmq_queue_depth_total",
+    "objectId": "HOST",
+    "originalMetrics": [
+      "ibmmq_queue_depth_total"
+    ],
+    "type": "normal",
+    "unit": "条"
+  },
+  {
+    "agentType": "easyops",
+    "dataType": "double",
+    "description": "纳入监控队列最大配置深度",
+    "dims": [
+      {
+        "dimDisplayName": "hostInstanceId",
+        "dimName": "hostInstanceId",
+        "isArray": false,
+        "originDimName": "hostInstanceId"
+      },
+      {
+        "dimDisplayName": "qmgrName",
+        "dimName": "qmgrName",
+        "isArray": false,
+        "originDimName": "qmgrName"
+      },
+      {
+        "dimDisplayName": "installPath",
+        "dimName": "installPath",
+        "isArray": false,
+        "originDimName": "installPath"
+      }
+    ],
+    "displayName": "ibmmq_queue_max_depth",
+    "expression": "",
+    "metricSet": [
+      "队列"
+    ],
+    "name": "ibmmq_queue_max_depth",
+    "objectId": "HOST",
+    "originalMetrics": [
+      "ibmmq_queue_max_depth"
+    ],
+    "type": "normal",
+    "unit": "条"
+  },
+  {
+    "agentType": "easyops",
+    "dataType": "double",
+    "description": "队列深度占用率最大值",
+    "dims": [
+      {
+        "dimDisplayName": "hostInstanceId",
+        "dimName": "hostInstanceId",
+        "isArray": false,
+        "originDimName": "hostInstanceId"
+      },
+      {
+        "dimDisplayName": "qmgrName",
+        "dimName": "qmgrName",
+        "isArray": false,
+        "originDimName": "qmgrName"
+      },
+      {
+        "dimDisplayName": "installPath",
+        "dimName": "installPath",
+        "isArray": false,
+        "originDimName": "installPath"
+      }
+    ],
+    "displayName": "ibmmq_queue_max_usage_percent",
+    "expression": "",
+    "metricSet": [
+      "队列"
+    ],
+    "name": "ibmmq_queue_max_usage_percent",
+    "objectId": "HOST",
+    "originalMetrics": [
+      "ibmmq_queue_max_usage_percent"
+    ],
+    "type": "normal",
+    "unit": "%"
+  },
+  {
+    "agentType": "easyops",
+    "dataType": "double",
+    "description": "队列当前消息深度",
+    "dims": [
+      {
+        "dimDisplayName": "hostInstanceId",
+        "dimName": "hostInstanceId",
+        "isArray": false,
+        "originDimName": "hostInstanceId"
+      },
+      {
+        "dimDisplayName": "qmgrName",
+        "dimName": "qmgrName",
+        "isArray": false,
+        "originDimName": "qmgrName"
+      },
+      {
+        "dimDisplayName": "installPath",
+        "dimName": "installPath",
+        "isArray": false,
+        "originDimName": "installPath"
+      },
+      {
+        "dimDisplayName": "queueName",
+        "dimName": "queueName",
+        "isArray": false,
+        "originDimName": "queueName"
+      }
+    ],
+    "displayName": "ibmmq_queue_current_depth",
+    "expression": "",
+    "metricSet": [
+      "队列明细"
+    ],
+    "name": "ibmmq_queue_current_depth",
+    "objectId": "HOST",
+    "originalMetrics": [
+      "ibmmq_queue_current_depth"
+    ],
+    "type": "normal",
+    "unit": "条"
+  },
+  {
+    "agentType": "easyops",
+    "dataType": "double",
+    "description": "队列配置最大深度",
+    "dims": [
+      {
+        "dimDisplayName": "hostInstanceId",
+        "dimName": "hostInstanceId",
+        "isArray": false,
+        "originDimName": "hostInstanceId"
+      },
+      {
+        "dimDisplayName": "qmgrName",
+        "dimName": "qmgrName",
+        "isArray": false,
+        "originDimName": "qmgrName"
+      },
+      {
+        "dimDisplayName": "installPath",
+        "dimName": "installPath",
+        "isArray": false,
+        "originDimName": "installPath"
+      },
+      {
+        "dimDisplayName": "queueName",
+        "dimName": "queueName",
+        "isArray": false,
+        "originDimName": "queueName"
+      }
+    ],
+    "displayName": "ibmmq_queue_max_depth_config",
+    "expression": "",
+    "metricSet": [
+      "队列明细"
+    ],
+    "name": "ibmmq_queue_max_depth_config",
+    "objectId": "HOST",
+    "originalMetrics": [
+      "ibmmq_queue_max_depth_config"
+    ],
+    "type": "normal",
+    "unit": "条"
+  },
+  {
+    "agentType": "easyops",
+    "dataType": "double",
+    "description": "队列当前深度占最大深度比例",
+    "dims": [
+      {
+        "dimDisplayName": "hostInstanceId",
+        "dimName": "hostInstanceId",
+        "isArray": false,
+        "originDimName": "hostInstanceId"
+      },
+      {
+        "dimDisplayName": "qmgrName",
+        "dimName": "qmgrName",
+        "isArray": false,
+        "originDimName": "qmgrName"
+      },
+      {
+        "dimDisplayName": "installPath",
+        "dimName": "installPath",
+        "isArray": false,
+        "originDimName": "installPath"
+      },
+      {
+        "dimDisplayName": "queueName",
+        "dimName": "queueName",
+        "isArray": false,
+        "originDimName": "queueName"
+      }
+    ],
+    "displayName": "ibmmq_queue_usage_percent",
+    "expression": "",
+    "metricSet": [
+      "队列明细"
+    ],
+    "name": "ibmmq_queue_usage_percent",
+    "objectId": "HOST",
+    "originalMetrics": [
+      "ibmmq_queue_usage_percent"
+    ],
+    "type": "normal",
+    "unit": "%"
+  },
+  {
+    "agentType": "easyops",
+    "dataType": "double",
+    "description": "队列最老消息年龄",
+    "dims": [
+      {
+        "dimDisplayName": "hostInstanceId",
+        "dimName": "hostInstanceId",
+        "isArray": false,
+        "originDimName": "hostInstanceId"
+      },
+      {
+        "dimDisplayName": "qmgrName",
+        "dimName": "qmgrName",
+        "isArray": false,
+        "originDimName": "qmgrName"
+      },
+      {
+        "dimDisplayName": "installPath",
+        "dimName": "installPath",
+        "isArray": false,
+        "originDimName": "installPath"
+      },
+      {
+        "dimDisplayName": "queueName",
+        "dimName": "queueName",
+        "isArray": false,
+        "originDimName": "queueName"
+      }
+    ],
+    "displayName": "ibmmq_queue_oldest_message_age_seconds",
+    "expression": "",
+    "metricSet": [
+      "队列明细"
+    ],
+    "name": "ibmmq_queue_oldest_message_age_seconds",
+    "objectId": "HOST",
+    "originalMetrics": [
+      "ibmmq_queue_oldest_message_age_seconds"
+    ],
+    "type": "normal",
+    "unit": "s"
+  },
+  {
+    "agentType": "easyops",
+    "dataType": "double",
+    "description": "队列输入句柄数",
+    "dims": [
+      {
+        "dimDisplayName": "hostInstanceId",
+        "dimName": "hostInstanceId",
+        "isArray": false,
+        "originDimName": "hostInstanceId"
+      },
+      {
+        "dimDisplayName": "qmgrName",
+        "dimName": "qmgrName",
+        "isArray": false,
+        "originDimName": "qmgrName"
+      },
+      {
+        "dimDisplayName": "installPath",
+        "dimName": "installPath",
+        "isArray": false,
+        "originDimName": "installPath"
+      },
+      {
+        "dimDisplayName": "queueName",
+        "dimName": "queueName",
+        "isArray": false,
+        "originDimName": "queueName"
+      }
+    ],
+    "displayName": "ibmmq_queue_input_handles",
+    "expression": "",
+    "metricSet": [
+      "队列明细"
+    ],
+    "name": "ibmmq_queue_input_handles",
+    "objectId": "HOST",
+    "originalMetrics": [
+      "ibmmq_queue_input_handles"
+    ],
+    "type": "normal",
+    "unit": "个"
+  },
+  {
+    "agentType": "easyops",
+    "dataType": "double",
+    "description": "队列输出句柄数",
+    "dims": [
+      {
+        "dimDisplayName": "hostInstanceId",
+        "dimName": "hostInstanceId",
+        "isArray": false,
+        "originDimName": "hostInstanceId"
+      },
+      {
+        "dimDisplayName": "qmgrName",
+        "dimName": "qmgrName",
+        "isArray": false,
+        "originDimName": "qmgrName"
+      },
+      {
+        "dimDisplayName": "installPath",
+        "dimName": "installPath",
+        "isArray": false,
+        "originDimName": "installPath"
+      },
+      {
+        "dimDisplayName": "queueName",
+        "dimName": "queueName",
+        "isArray": false,
+        "originDimName": "queueName"
+      }
+    ],
+    "displayName": "ibmmq_queue_output_handles",
+    "expression": "",
+    "metricSet": [
+      "队列明细"
+    ],
+    "name": "ibmmq_queue_output_handles",
+    "objectId": "HOST",
+    "originalMetrics": [
+      "ibmmq_queue_output_handles"
+    ],
+    "type": "normal",
+    "unit": "个"
+  },
+  {
+    "agentType": "easyops",
+    "dataType": "double",
+    "description": "监听器数量",
+    "dims": [
+      {
+        "dimDisplayName": "hostInstanceId",
+        "dimName": "hostInstanceId",
+        "isArray": false,
+        "originDimName": "hostInstanceId"
+      },
+      {
+        "dimDisplayName": "qmgrName",
+        "dimName": "qmgrName",
+        "isArray": false,
+        "originDimName": "qmgrName"
+      },
+      {
+        "dimDisplayName": "installPath",
+        "dimName": "installPath",
+        "isArray": false,
+        "originDimName": "installPath"
+      }
+    ],
+    "displayName": "ibmmq_listener_total",
+    "expression": "",
+    "metricSet": [
+      "监听器"
+    ],
+    "name": "ibmmq_listener_total",
+    "objectId": "HOST",
+    "originalMetrics": [
+      "ibmmq_listener_total"
+    ],
+    "type": "normal",
+    "unit": "个"
+  },
+  {
+    "agentType": "easyops",
+    "dataType": "double",
+    "description": "Running状态监听器数量",
+    "dims": [
+      {
+        "dimDisplayName": "hostInstanceId",
+        "dimName": "hostInstanceId",
+        "isArray": false,
+        "originDimName": "hostInstanceId"
+      },
+      {
+        "dimDisplayName": "qmgrName",
+        "dimName": "qmgrName",
+        "isArray": false,
+        "originDimName": "qmgrName"
+      },
+      {
+        "dimDisplayName": "installPath",
+        "dimName": "installPath",
+        "isArray": false,
+        "originDimName": "installPath"
+      }
+    ],
+    "displayName": "ibmmq_listener_running_count",
+    "expression": "",
+    "metricSet": [
+      "监听器"
+    ],
+    "name": "ibmmq_listener_running_count",
+    "objectId": "HOST",
+    "originalMetrics": [
+      "ibmmq_listener_running_count"
+    ],
+    "type": "normal",
+    "unit": "个"
+  },
+  {
+    "agentType": "easyops",
+    "dataType": "double",
+    "description": "监听器状态；1 Running，0.5 Starting，0.25 Standby，0异常",
+    "dims": [
+      {
+        "dimDisplayName": "hostInstanceId",
+        "dimName": "hostInstanceId",
+        "isArray": false,
+        "originDimName": "hostInstanceId"
+      },
+      {
+        "dimDisplayName": "qmgrName",
+        "dimName": "qmgrName",
+        "isArray": false,
+        "originDimName": "qmgrName"
+      },
+      {
+        "dimDisplayName": "installPath",
+        "dimName": "installPath",
+        "isArray": false,
+        "originDimName": "installPath"
+      },
+      {
+        "dimDisplayName": "listenerName",
+        "dimName": "listenerName",
+        "isArray": false,
+        "originDimName": "listenerName"
+      },
+      {
+        "dimDisplayName": "port",
+        "dimName": "port",
+        "isArray": false,
+        "originDimName": "port"
+      }
+    ],
+    "displayName": "ibmmq_listener_status",
+    "expression": "",
+    "metricSet": [
+      "监听器明细"
+    ],
+    "name": "ibmmq_listener_status",
+    "objectId": "HOST",
+    "originalMetrics": [
+      "ibmmq_listener_status"
+    ],
+    "type": "normal",
+    "unit": ""
+  },
+  {
+    "agentType": "easyops",
+    "dataType": "double",
+    "description": "通道状态记录数量",
+    "dims": [
+      {
+        "dimDisplayName": "hostInstanceId",
+        "dimName": "hostInstanceId",
+        "isArray": false,
+        "originDimName": "hostInstanceId"
+      },
+      {
+        "dimDisplayName": "qmgrName",
+        "dimName": "qmgrName",
+        "isArray": false,
+        "originDimName": "qmgrName"
+      },
+      {
+        "dimDisplayName": "installPath",
+        "dimName": "installPath",
+        "isArray": false,
+        "originDimName": "installPath"
+      }
+    ],
+    "displayName": "ibmmq_channel_total",
+    "expression": "",
+    "metricSet": [
+      "通道"
+    ],
+    "name": "ibmmq_channel_total",
+    "objectId": "HOST",
+    "originalMetrics": [
+      "ibmmq_channel_total"
+    ],
+    "type": "normal",
+    "unit": "个"
+  },
+  {
+    "agentType": "easyops",
+    "dataType": "double",
+    "description": "Running状态通道数量",
+    "dims": [
+      {
+        "dimDisplayName": "hostInstanceId",
+        "dimName": "hostInstanceId",
+        "isArray": false,
+        "originDimName": "hostInstanceId"
+      },
+      {
+        "dimDisplayName": "qmgrName",
+        "dimName": "qmgrName",
+        "isArray": false,
+        "originDimName": "qmgrName"
+      },
+      {
+        "dimDisplayName": "installPath",
+        "dimName": "installPath",
+        "isArray": false,
+        "originDimName": "installPath"
+      }
+    ],
+    "displayName": "ibmmq_channel_running_count",
+    "expression": "",
+    "metricSet": [
+      "通道"
+    ],
+    "name": "ibmmq_channel_running_count",
+    "objectId": "HOST",
+    "originalMetrics": [
+      "ibmmq_channel_running_count"
+    ],
+    "type": "normal",
+    "unit": "个"
+  },
+  {
+    "agentType": "easyops",
+    "dataType": "double",
+    "description": "Retrying状态通道数量",
+    "dims": [
+      {
+        "dimDisplayName": "hostInstanceId",
+        "dimName": "hostInstanceId",
+        "isArray": false,
+        "originDimName": "hostInstanceId"
+      },
+      {
+        "dimDisplayName": "qmgrName",
+        "dimName": "qmgrName",
+        "isArray": false,
+        "originDimName": "qmgrName"
+      },
+      {
+        "dimDisplayName": "installPath",
+        "dimName": "installPath",
+        "isArray": false,
+        "originDimName": "installPath"
+      }
+    ],
+    "displayName": "ibmmq_channel_retrying_count",
+    "expression": "",
+    "metricSet": [
+      "通道"
+    ],
+    "name": "ibmmq_channel_retrying_count",
+    "objectId": "HOST",
+    "originalMetrics": [
+      "ibmmq_channel_retrying_count"
+    ],
+    "type": "normal",
+    "unit": "个"
+  },
+  {
+    "agentType": "easyops",
+    "dataType": "double",
+    "description": "通道状态；1 Running，0.5 Starting，0.25 Paused，0异常",
+    "dims": [
+      {
+        "dimDisplayName": "hostInstanceId",
+        "dimName": "hostInstanceId",
+        "isArray": false,
+        "originDimName": "hostInstanceId"
+      },
+      {
+        "dimDisplayName": "qmgrName",
+        "dimName": "qmgrName",
+        "isArray": false,
+        "originDimName": "qmgrName"
+      },
+      {
+        "dimDisplayName": "installPath",
+        "dimName": "installPath",
+        "isArray": false,
+        "originDimName": "installPath"
+      },
+      {
+        "dimDisplayName": "channelName",
+        "dimName": "channelName",
+        "isArray": false,
+        "originDimName": "channelName"
+      },
+      {
+        "dimDisplayName": "channelType",
+        "dimName": "channelType",
+        "isArray": false,
+        "originDimName": "channelType"
+      }
+    ],
+    "displayName": "ibmmq_channel_status",
+    "expression": "",
+    "metricSet": [
+      "通道明细"
+    ],
+    "name": "ibmmq_channel_status",
+    "objectId": "HOST",
+    "originalMetrics": [
+      "ibmmq_channel_status"
+    ],
+    "type": "normal",
+    "unit": ""
+  },
+  {
+    "agentType": "easyops",
+    "dataType": "double",
+    "description": "通道发送或接收消息计数",
+    "dims": [
+      {
+        "dimDisplayName": "hostInstanceId",
+        "dimName": "hostInstanceId",
+        "isArray": false,
+        "originDimName": "hostInstanceId"
+      },
+      {
+        "dimDisplayName": "qmgrName",
+        "dimName": "qmgrName",
+        "isArray": false,
+        "originDimName": "qmgrName"
+      },
+      {
+        "dimDisplayName": "installPath",
+        "dimName": "installPath",
+        "isArray": false,
+        "originDimName": "installPath"
+      },
+      {
+        "dimDisplayName": "channelName",
+        "dimName": "channelName",
+        "isArray": false,
+        "originDimName": "channelName"
+      },
+      {
+        "dimDisplayName": "channelType",
+        "dimName": "channelType",
+        "isArray": false,
+        "originDimName": "channelType"
+      }
+    ],
+    "displayName": "ibmmq_channel_messages",
+    "expression": "",
+    "metricSet": [
+      "通道明细"
+    ],
+    "name": "ibmmq_channel_messages",
+    "objectId": "HOST",
+    "originalMetrics": [
+      "ibmmq_channel_messages"
+    ],
+    "type": "normal",
+    "unit": "条"
+  },
+  {
+    "agentType": "easyops",
+    "dataType": "double",
+    "description": "通道发送或接收字节数",
+    "dims": [
+      {
+        "dimDisplayName": "hostInstanceId",
+        "dimName": "hostInstanceId",
+        "isArray": false,
+        "originDimName": "hostInstanceId"
+      },
+      {
+        "dimDisplayName": "qmgrName",
+        "dimName": "qmgrName",
+        "isArray": false,
+        "originDimName": "qmgrName"
+      },
+      {
+        "dimDisplayName": "installPath",
+        "dimName": "installPath",
+        "isArray": false,
+        "originDimName": "installPath"
+      },
+      {
+        "dimDisplayName": "channelName",
+        "dimName": "channelName",
+        "isArray": false,
+        "originDimName": "channelName"
+      },
+      {
+        "dimDisplayName": "channelType",
+        "dimName": "channelType",
+        "isArray": false,
+        "originDimName": "channelType"
+      }
+    ],
+    "displayName": "ibmmq_channel_bytes",
+    "expression": "",
+    "metricSet": [
+      "通道明细"
+    ],
+    "name": "ibmmq_channel_bytes",
+    "objectId": "HOST",
+    "originalMetrics": [
+      "ibmmq_channel_bytes"
+    ],
+    "type": "normal",
+    "unit": "B"
+  },
+  {
+    "agentType": "easyops",
+    "dataType": "double",
+    "description": "匹配到的进程命令行是否存活；1存活",
+    "dims": [
+      {
+        "dimDisplayName": "hostInstanceId",
+        "dimName": "hostInstanceId",
+        "isArray": false,
+        "originDimName": "hostInstanceId"
+      },
+      {
+        "dimDisplayName": "qmgrName",
+        "dimName": "qmgrName",
+        "isArray": false,
+        "originDimName": "qmgrName"
+      },
+      {
+        "dimDisplayName": "installPath",
+        "dimName": "installPath",
+        "isArray": false,
+        "originDimName": "installPath"
+      },
+      {
+        "dimDisplayName": "cmdline",
+        "dimName": "cmdline",
+        "isArray": false,
+        "originDimName": "cmdline"
+      }
+    ],
+    "displayName": "ibmmq_process_alive",
+    "expression": "",
+    "metricSet": [
+      "进程资源"
+    ],
+    "name": "ibmmq_process_alive",
+    "objectId": "HOST",
+    "originalMetrics": [
+      "ibmmq_process_alive"
+    ],
+    "type": "normal",
+    "unit": ""
+  },
+  {
+    "agentType": "easyops",
+    "dataType": "double",
+    "description": "同命令行IBM MQ进程数量",
+    "dims": [
+      {
+        "dimDisplayName": "hostInstanceId",
+        "dimName": "hostInstanceId",
+        "isArray": false,
+        "originDimName": "hostInstanceId"
+      },
+      {
+        "dimDisplayName": "qmgrName",
+        "dimName": "qmgrName",
+        "isArray": false,
+        "originDimName": "qmgrName"
+      },
+      {
+        "dimDisplayName": "installPath",
+        "dimName": "installPath",
+        "isArray": false,
+        "originDimName": "installPath"
+      },
+      {
+        "dimDisplayName": "cmdline",
+        "dimName": "cmdline",
+        "isArray": false,
+        "originDimName": "cmdline"
+      }
+    ],
+    "displayName": "ibmmq_process_count",
+    "expression": "",
+    "metricSet": [
+      "进程资源"
+    ],
+    "name": "ibmmq_process_count",
+    "objectId": "HOST",
+    "originalMetrics": [
+      "ibmmq_process_count"
+    ],
+    "type": "normal",
+    "unit": "个"
+  },
+  {
+    "agentType": "easyops",
+    "dataType": "double",
+    "description": "进程CPU使用率",
+    "dims": [
+      {
+        "dimDisplayName": "hostInstanceId",
+        "dimName": "hostInstanceId",
+        "isArray": false,
+        "originDimName": "hostInstanceId"
+      },
+      {
+        "dimDisplayName": "qmgrName",
+        "dimName": "qmgrName",
+        "isArray": false,
+        "originDimName": "qmgrName"
+      },
+      {
+        "dimDisplayName": "installPath",
+        "dimName": "installPath",
+        "isArray": false,
+        "originDimName": "installPath"
+      },
+      {
+        "dimDisplayName": "cmdline",
+        "dimName": "cmdline",
+        "isArray": false,
+        "originDimName": "cmdline"
+      }
+    ],
+    "displayName": "ibmmq_process_cpu_percent",
+    "expression": "",
+    "metricSet": [
+      "进程资源"
+    ],
+    "name": "ibmmq_process_cpu_percent",
+    "objectId": "HOST",
+    "originalMetrics": [
+      "ibmmq_process_cpu_percent"
+    ],
+    "type": "normal",
+    "unit": "%"
+  },
+  {
+    "agentType": "easyops",
+    "dataType": "double",
+    "description": "进程RSS内存",
+    "dims": [
+      {
+        "dimDisplayName": "hostInstanceId",
+        "dimName": "hostInstanceId",
+        "isArray": false,
+        "originDimName": "hostInstanceId"
+      },
+      {
+        "dimDisplayName": "qmgrName",
+        "dimName": "qmgrName",
+        "isArray": false,
+        "originDimName": "qmgrName"
+      },
+      {
+        "dimDisplayName": "installPath",
+        "dimName": "installPath",
+        "isArray": false,
+        "originDimName": "installPath"
+      },
+      {
+        "dimDisplayName": "cmdline",
+        "dimName": "cmdline",
+        "isArray": false,
+        "originDimName": "cmdline"
+      }
+    ],
+    "displayName": "ibmmq_process_memory_bytes",
+    "expression": "",
+    "metricSet": [
+      "进程资源"
+    ],
+    "name": "ibmmq_process_memory_bytes",
+    "objectId": "HOST",
+    "originalMetrics": [
+      "ibmmq_process_memory_bytes"
+    ],
+    "type": "normal",
+    "unit": "B"
+  },
+  {
+    "agentType": "easyops",
+    "dataType": "double",
+    "description": "进程线程数",
+    "dims": [
+      {
+        "dimDisplayName": "hostInstanceId",
+        "dimName": "hostInstanceId",
+        "isArray": false,
+        "originDimName": "hostInstanceId"
+      },
+      {
+        "dimDisplayName": "qmgrName",
+        "dimName": "qmgrName",
+        "isArray": false,
+        "originDimName": "qmgrName"
+      },
+      {
+        "dimDisplayName": "installPath",
+        "dimName": "installPath",
+        "isArray": false,
+        "originDimName": "installPath"
+      },
+      {
+        "dimDisplayName": "cmdline",
+        "dimName": "cmdline",
+        "isArray": false,
+        "originDimName": "cmdline"
+      }
+    ],
+    "displayName": "ibmmq_process_thread_count",
+    "expression": "",
+    "metricSet": [
+      "进程资源"
+    ],
+    "name": "ibmmq_process_thread_count",
+    "objectId": "HOST",
+    "originalMetrics": [
+      "ibmmq_process_thread_count"
+    ],
+    "type": "normal",
+    "unit": "个"
+  },
+  {
+    "agentType": "easyops",
+    "dataType": "double",
+    "description": "进程打开句柄数",
+    "dims": [
+      {
+        "dimDisplayName": "hostInstanceId",
+        "dimName": "hostInstanceId",
+        "isArray": false,
+        "originDimName": "hostInstanceId"
+      },
+      {
+        "dimDisplayName": "qmgrName",
+        "dimName": "qmgrName",
+        "isArray": false,
+        "originDimName": "qmgrName"
+      },
+      {
+        "dimDisplayName": "installPath",
+        "dimName": "installPath",
+        "isArray": false,
+        "originDimName": "installPath"
+      },
+      {
+        "dimDisplayName": "cmdline",
+        "dimName": "cmdline",
+        "isArray": false,
+        "originDimName": "cmdline"
+      }
+    ],
+    "displayName": "ibmmq_process_fd_count",
+    "expression": "",
+    "metricSet": [
+      "进程资源"
+    ],
+    "name": "ibmmq_process_fd_count",
+    "objectId": "HOST",
+    "originalMetrics": [
+      "ibmmq_process_fd_count"
+    ],
+    "type": "normal",
+    "unit": "个"
+  }
+]

@@ -1,0 +1,37 @@
+type: simple-script
+name: IBM MQ监控
+version: "0.1.0"
+command:
+    collect:
+        interpreter: ""
+        scriptPath:
+            - src
+            - ibmmq_monitor.py
+        type: python
+        user: ""
+params:
+    - instanceId
+    - qmgrName
+    - mqBinPath
+    - queueFilter
+    - includeSystemQueues
+    - processMonitor
+    - sampleInterval
+    - commandTimeout
+paramDefine:
+    - {name: instanceId, valueType: string, defaultValue: "$.instanceId", display: false, displayName: "主机实例ID", description: "取HOST.instanceId", use: collectParams, optional: false, isFromSecret: false, isEncrypt: false, extraArgs: null}
+    - {name: qmgrName, valueType: string, defaultValue: "", display: true, displayName: "队列管理器", description: "留空自动发现本机全部队列管理器；填定后只采集该队列管理器", use: collectParams, optional: true, isFromSecret: false, isEncrypt: false, extraArgs: null}
+    - {name: mqBinPath, valueType: string, defaultValue: "", display: true, displayName: "IBM MQ bin目录", description: "例如/opt/mqm/bin；留空自动探测MQ_INSTALLATION_PATH和常见安装目录", use: collectParams, optional: true, isFromSecret: false, isEncrypt: false, extraArgs: null}
+    - {name: queueFilter, valueType: string, defaultValue: ".*", display: true, displayName: "队列过滤正则", description: "默认监控全部非SYSTEM.前缀队列", use: collectParams, optional: true, isFromSecret: false, isEncrypt: false, extraArgs: null}
+    - {name: includeSystemQueues, valueType: string, defaultValue: "false", display: true, displayName: "包含系统队列", description: "默认排除SYSTEM.前缀队列", use: collectParams, optional: true, isFromSecret: false, isEncrypt: false, extraArgs: null}
+    - {name: processMonitor, valueType: string, defaultValue: "true", display: true, displayName: "启用进程资源采集", description: "默认启用，按cmdline分组输出进程资源", use: collectParams, optional: true, isFromSecret: false, isEncrypt: false, extraArgs: null}
+    - {name: sampleInterval, valueType: float, defaultValue: "0.2", display: true, displayName: "CPU采样间隔(秒)", description: "两次/proc CPU计数间隔，默认0.2，范围0.05-2", use: collectParams, optional: true, isFromSecret: false, isEncrypt: false, extraArgs: null}
+    - {name: commandTimeout, valueType: int, defaultValue: "10", display: true, displayName: "MQ命令超时(秒)", description: "dspmq/runmqsc超时时间，默认10，范围1-60", use: collectParams, optional: true, isFromSecret: false, isEncrypt: false, extraArgs: null}
+agentType: easyops
+category: 中间件.消息队列
+scriptType: python
+interpreter: ""
+samplerType: metric_sampler
+memo: "在Linux执行节点本地调用dspmq/runmqsc，采集IBM MQ队列管理器、监听器、通道、队列深度和进程资源指标。"
+icon: null
+relateObjectId: HOST
