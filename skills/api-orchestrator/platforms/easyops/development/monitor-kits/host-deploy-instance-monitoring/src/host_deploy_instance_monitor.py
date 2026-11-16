@@ -1,8 +1,6 @@
 #!/usr/local/easyops/python/bin/python
 # -*- coding: utf-8 -*-
 """HOST 本地部署实例进程与端口监控脚本，参数由 EASYOPS_COLLECTOR_* 注入。"""
-from __future__ import division, print_function
-
 import argparse
 import errno
 import hashlib
@@ -22,7 +20,7 @@ else:
     from urllib import urlencode
     from urllib2 import Request, urlopen
 
-VERSION = "0.1.7"
+VERSION = "0.1.8"
 OBJECT_ID = "ARTIFACT_INST@ONEMODEL"
 OPENAPI_PATH = "/cmdbservice/v3/object/ARTIFACT_INST@ONEMODEL/instance/_search"
 OPENAPI_HOST = "openapi.easyops-only.com"
@@ -499,7 +497,7 @@ def collect_target(target, processes, sockets, boot_ts, ticks, mem_total, settin
         memory_bytes = sum(max(process_memory_bytes(item["pid"]), 0.0) for item in group)
         thread_count = sum(item["threads"] for item in group)
         zombie_count = sum(1 for item in group if item["state"] == "Z")
-        starts = [boot_ts + item["startTimeTicks"] / ticks for item in group] if boot_ts >= 0 else []
+        starts = [boot_ts + float(item["startTimeTicks"]) / ticks for item in group] if boot_ts >= 0 else []
         fd_count = fd_limit = 0
         readable_fd_count = 0
         for item in group:
@@ -522,7 +520,7 @@ def collect_target(target, processes, sockets, boot_ts, ticks, mem_total, settin
             "deploy_instance_process_uptime_seconds": max(now - min(starts), 0.0) if starts else -1.0,
             "deploy_instance_process_memory_bytes": memory_bytes if group else 0.0,
             "deploy_instance_process_memory_percent": memory_bytes * 100.0 / mem_total if group and mem_total > 0 else -1.0,
-            "deploy_instance_process_cpu_percent": max((after - before) / (elapsed * ticks) * 100.0, 0.0) if group else -1.0,
+            "deploy_instance_process_cpu_percent": max(float(after - before) / (elapsed * ticks) * 100.0, 0.0) if group else -1.0,
             "deploy_instance_process_fd_count": float(fd_count) if readable_fd_count else -1.0,
             "deploy_instance_process_fd_usage_percent": fd_usage,
         }
@@ -571,9 +569,9 @@ def main(argv=None):
     parser.parse_args(argv)
     try:
         settings = config()
-        print(json.dumps(collect(settings), allow_nan=False))
+        sys.stdout.write("%s\n" % json.dumps(collect(settings), allow_nan=False))
     except Exception:
-        print("COLLECT_ERROR: [main] " + traceback.format_exc())
+        sys.stdout.write("COLLECT_ERROR: [main] %s\n" % traceback.format_exc())
     return 0
 
 

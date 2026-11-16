@@ -17,7 +17,7 @@ from unittest import mock
 
 KIT = Path(__file__).resolve().parents[2] / "monitor-kits/host-deploy-instance-monitoring"
 SOURCE = KIT / "src/host_deploy_instance_monitor.py"
-PACKAGE = Path(__file__).resolve().parents[3] / "hub/monitor-kits/监控套件_主机部署实例监控_0.1.7.zip"
+PACKAGE = Path(__file__).resolve().parents[3] / "hub/monitor-kits/监控套件_主机部署实例监控_0.1.8.zip"
 WORKTREE_ROOT = Path(__file__).resolve().parents[7]
 
 
@@ -162,7 +162,7 @@ class HostDeployInstanceMonitorTests(unittest.TestCase):
     def test_help_and_version(self):
         result = subprocess.run([sys.executable, str(SOURCE), "--version"], capture_output=True, text=True, env={**os.environ, "PYTHONDONTWRITEBYTECODE": "1"})
         self.assertEqual(result.returncode, 0)
-        self.assertEqual(result.stdout.strip(), "0.1.7")
+        self.assertEqual(result.stdout.strip(), "0.1.8")
 
     def test_python2_json_output_uses_ascii_escape(self):
         source = SOURCE.read_text(encoding="utf-8")
@@ -170,6 +170,15 @@ class HostDeployInstanceMonitorTests(unittest.TestCase):
         self.assertNotIn("ensure_ascii=False", source)
         self.assertNotIn("ensure_ascii=False", orig)
         self.assertEqual(source, orig)
+
+    def test_python_source_allows_parameter_injection_before_imports(self):
+        source = SOURCE.read_text(encoding="utf-8")
+        orig = SOURCE.with_suffix(".orig").read_text(encoding="utf-8")
+        self.assertNotIn("from __future__", source)
+        self.assertNotIn("from __future__", orig)
+        lines = source.splitlines(keepends=True)
+        injected = "".join(lines[:2] + ["import os\n"] + lines[2:])
+        compile(injected, "platform-injected-host-deploy-instance-monitor.py", "exec")
 
     def test_parameter_display_and_plain_credential_mode(self):
         plugin = yaml.safe_load((KIT / "plugin.yaml").read_text(encoding="utf-8"))

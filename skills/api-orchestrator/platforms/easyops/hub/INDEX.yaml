@@ -21,8 +21,8 @@ items:
   - id: host-deploy-instance-monitor-kit
     name: 主机部署实例监控
     category: monitor-kits
-    files: [监控套件_主机部署实例监控_0.1.7.zip, 主机部署实例监控_告警规则模板_0.1.7.xlsx]
-    version: "0.1.7"
+    files: [监控套件_主机部署实例监控_0.1.8.zip, 主机部署实例监控_告警规则模板_0.1.8.xlsx]
+    version: "0.1.8"
     history:
       - {ver: "0.1.1", date: "2026-11-12", change: "修正成品包仅保留XLSX告警模板，避免同时导入JSON与XLSX生成重复告警定义；OpenAPI凭证参数使用password类型"}
       - {ver: "0.1.2", date: "2026-11-12", change: "修正metric_set.json为对象数组并补齐通用校验，避免指标集未生成导致前端创建任务无法加载"}
@@ -32,8 +32,9 @@ items:
       - {ver: "0.1.5", date: "2026-11-13", change: "进程指标增加cmdline维度并按命令行分组；端口指标增加port维度并逐端口输出监听状态"}
       - {ver: "0.1.6", date: "2026-11-13", change: "OpenAPI AK/SK切换为string+collectorParams+Secret可选+加密，验证平台参数传递链路"}
       - {ver: "0.1.7", date: "2026-11-13", change: "OpenAPI AK/SK更名为openapiAkText/openapiSkText普通字符串参数；主机instanceId/uuid/ip动态参数不再前端展示"}
+      - {ver: "0.1.8", date: "2026-11-16", change: "移除from __future__导入并显式兼容Python 2除法与输出；将禁用规则加入监控套件开发流程和通用校验器"}
     scenario: 主机关联部署实例的本机进程、端口和资源监控
-    notes: "需配置OpenAPI网关地址与AK/SK并放行实例search；0.1.7已导入并激活，openapiAkText/openapiSkText为普通string+collectParams+非Secret+不加密，旧openapiAk/openapiSk不存在，主机instanceId/uuid/ip保持动态注入且前端隐藏；22项指标与4个指标集(3/11/5/3)回读无回归。"
+    notes: "需配置OpenAPI网关地址与AK/SK并放行实例search；openapiAkText/openapiSkText为普通string+collectParams+非Secret+不加密，主机instanceId/uuid/ip保持动态注入且前端隐藏；22项指标与4个指标集(3/11/5/3)。"
     added: "2026-11-12"
   - id: ping-monitor-kit
     name: 主机Ping监控

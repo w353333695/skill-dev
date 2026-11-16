@@ -72,6 +72,8 @@ def validate_dir(root, require_name_match=False):
         orig_text = orig.read_text(encoding="utf-8")
         if "ensure_ascii=False" in source_text or "ensure_ascii=False" in orig_text:
             raise ValidationError("%s 使用 ensure_ascii=False；Python 2.7遇到非ASCII字节串会UnicodeDecodeError，请使用默认ASCII escape" % source.name)
+        if re.search(r"(?m)^\s*from\s+__future__\s+import\b", source_text) or re.search(r"(?m)^\s*from\s+__future__\s+import\b", orig_text):
+            raise ValidationError("%s 或对应 .orig 使用 from __future__ import；平台注入参数后 future 导入可能不在文件开头，请在 Python 2 语法下显式实现除法/输出" % source.name)
         if source_text != orig_text:
             raise ValidationError("%s 与对应 .orig 内容不一致" % source.name)
     for forbidden in root.rglob("*"):

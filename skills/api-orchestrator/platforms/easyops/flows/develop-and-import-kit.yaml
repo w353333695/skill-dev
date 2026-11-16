@@ -16,6 +16,7 @@ key_rule: |
      samplerType 决定输出协议——metric_sampler 直接[{dims,vals}] / process_sampler 用 BEGIN/END GATHERING DATA 标记）
   ③ 参数设计（$.attr 动态取参见 param-mechanism.yaml：$.开头配 paramType=cmdb，取值对象=采集目标实例）
   打包（见 package-format.yaml）：ZIP_STORED + UTF-8 flag，zip顶层目录名=plugin.yaml name（必须一致）。
+  agent 端 Python 脚本禁止 `from __future__ import ...`：平台会在文件头注入参数代码，future 导入不再位于文件开头时 Python 2.7 会报语法错误；除法和 print 必须按 Python 2 语法显式兼容。
 
 parameter_and_log_preflight:
   reference: "formats/collector-kit/param-mechanism.yaml#cmdb_dynamic_parameter_safety"
@@ -90,11 +91,11 @@ steps:
           isEncrypt:true（+valueType:password）——禁止当普通 string 明文存储。
           明文存的密码会在 detail 回显/任务参数/日志中泄漏。
   - n: 5
-    desc: "本地模拟环境变量跑脚本，验证输出格式（metric 检查 [{dims,vals}]；process 检查 GATHERING DATA 标记）"
-    expect: "stdout 输出合法 JSON；dims/vals 齐全；vals 数值型（metric）"
+    desc: "本地模拟环境变量跑脚本并校验Python源码，验证输出格式（metric 检查 [{dims,vals}]；process 检查 GATHERING DATA 标记）"
+    expect: "stdout 输出合法 JSON；dims/vals 齐全；vals 数值型（metric）；py/orig均无from __future__ import，且参数注入到文件头后仍可编译"
   - n: 6
-    desc: "用 pack_kit.py 打 zip（ZIP_STORED + UTF-8 flag，排除 .version/.git/__pycache__）"
-    expect: "zip 顶层目录名 = plugin.yaml name；UTF-8 flag 全覆盖"
+    desc: "运行 validate_monitor_kit.py 后再打 zip（ZIP_STORED + UTF-8 flag，排除 .version/.git/__pycache__）"
+    expect: "zip 顶层目录名 = plugin.yaml name；UTF-8 flag 全覆盖；校验器阻止from __future__导入、ensure_ascii=False、缓存文件和指标/维度契约错误"
   - n: 7
     desc: "查 cmdb _COLLECTOR_EASYOPS_PLUGIN by name 确定走新建/覆盖/拒绝"
     dataflow: "POST /v3/object/_COLLECTOR_EASYOPS_PLUGIN/instance/_search {query:{name:<套件名>},fields:[instanceId,name,protected,status]}"
