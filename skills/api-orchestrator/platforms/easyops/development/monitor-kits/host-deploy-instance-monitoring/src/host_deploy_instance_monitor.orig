@@ -22,7 +22,7 @@ else:
     from urllib import urlencode
     from urllib2 import Request, urlopen
 
-VERSION = "0.1.11"
+VERSION = "0.1.12"
 IS_WINDOWS = os.name == "nt"
 OBJECT_ID = "ARTIFACT_INST@ONEMODEL"
 OPENAPI_PATH = "/cmdbservice/v3/object/ARTIFACT_INST@ONEMODEL/instance/_search"
@@ -52,6 +52,32 @@ def value_digest(value):
     return hashlib.sha1(text(value).encode("utf-8")).hexdigest()[:12]
 
 
+DEBUG_LOG_MAX_BYTES = 5 * 1024 * 1024
+
+
+def write_debug_log(path, payload):
+    directory = os.path.dirname(path)
+    if directory:
+        try:
+            os.makedirs(directory, 0o700)
+        except OSError as exc:
+            if exc.errno != errno.EEXIST:
+                raise
+    try:
+        if os.path.exists(path) and os.path.getsize(path) >= DEBUG_LOG_MAX_BYTES:
+            rotated = "%s.1" % path
+            try:
+                if os.path.exists(rotated):
+                    os.remove(rotated)
+                os.rename(path, rotated)
+            except OSError:
+                pass
+        with open(path, "ab") as handle:
+            handle.write(("%s\n" % payload).encode("utf-8"))
+    except (IOError, OSError):
+        pass
+
+
 def log_event(settings, level, stage, **fields):
     configured_level = text(settings.get("logLevel", "ERROR")).upper()
     if level == "DEBUG" and configured_level != "DEBUG":
@@ -60,7 +86,10 @@ def log_event(settings, level, stage, **fields):
         return
     payload = {"level": level, "stage": stage}
     payload.update(fields)
-    sys.stderr.write("%s\n" % json.dumps(payload, separators=(",", ":"), allow_nan=False))
+    log_path = settings.get("debugLogPath")
+    if not log_path:
+        return
+    write_debug_log(log_path, json.dumps(payload, separators=(",", ":"), allow_nan=False))
 
 
 def text(value):
@@ -68,6 +97,8 @@ def text(value):
         return ""
     if isinstance(value, bytes):
         return value.decode("utf-8", "replace")
+    if sys.version_info[0] == 2 and isinstance(value, unicode):
+        return value
     return str(value)
 
 
@@ -105,6 +136,10 @@ def config():
         "hostUuid": env("hostUuid"),
         "hostIp": env("hostIp"),
         "cacheDir": normalized_cache_dir(env("cacheDir", default_cache_dir())),
+        "debugLogPath": os.path.join(
+            normalized_cache_dir(env("cacheDir", default_cache_dir())),
+            host_instance_id + ".debug.log"
+        ),
         "cacheTtlSeconds": cache_ttl_days * 86400,
         "gateway": "",
         "gatewaySource": "missing",
@@ -868,7 +903,7 @@ def collect(settings):
 def main(argv=None):
     parser = argparse.ArgumentParser(
         description="主机部署实例本机监控：按主机instanceId读取7天缓存，OpenAPI刷新isMonitor=是的ARTIFACT_INST目标，采集进程、端口、CPU、内存和句柄指标。",
-        epilog="参数均由 EASYOPS_COLLECTOR_* 环境变量注入：instanceId/hostUuid/hostIp/cacheDir/cacheTtlDays/openapiGateway(兜底)/openapiAkText/openapiSkText/sampleInterval/requestTimeout/logLevel。logLevel=DEBUG时诊断JSON写stderr且不包含AK/SK，stdout保持纯JSON数组；默认ERROR只输出异常。顶层异常输出COLLECT_ERROR并保持退出码0。示例：EASYOPS_COLLECTOR_instanceId=65eb86f148251 EASYOPS_COLLECTOR_hostUuid=f907... EASYOPS_COLLECTOR_hostIp=192.168.110.24 EASYOPS_COLLECTOR_openapiGateway=http://192.168.110.24 EASYOPS_OPENAPI_AK=... EASYOPS_OPENAPI_SK=... EASYOPS_COLLECTOR_logLevel=DEBUG python host_deploy_instance_monitor.py")
+        epilog="参数均由 EASYOPS_COLLECTOR_* 环境变量注入：instanceId/hostUuid/hostIp/cacheDir/cacheTtlDays/openapiGateway(兜底)/openapiAkText/openapiSkText/sampleInterval/requestTimeout/logLevel。logLevel=DEBUG时诊断JSON写入缓存目录<hostInstanceId>.debug.log且不包含AK/SK，stdout/stderr均不混入诊断；默认ERROR只输出异常。顶层异常输出COLLECT_ERROR并保持退出码0。示例：EASYOPS_COLLECTOR_instanceId=65eb86f148251 EASYOPS_COLLECTOR_hostUuid=f907... EASYOPS_COLLECTOR_hostIp=192.168.110.24 EASYOPS_COLLECTOR_openapiGateway=http://192.168.110.24 EASYOPS_OPENAPI_AK=... EASYOPS_OPENAPI_SK=... EASYOPS_COLLECTOR_logLevel=DEBUG python host_deploy_instance_monitor.py")
     parser.add_argument("--version", action="version", version=VERSION)
     parser.parse_args(argv)
     try:

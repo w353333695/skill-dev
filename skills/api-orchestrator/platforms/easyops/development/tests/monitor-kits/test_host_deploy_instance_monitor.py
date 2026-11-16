@@ -11,7 +11,7 @@ import time
 import unittest
 import uuid
 import zipfile
-from contextlib import redirect_stderr
+from contextlib import redirect_stderr, redirect_stdout
 
 import yaml
 from pathlib import Path
@@ -19,7 +19,7 @@ from unittest import mock
 
 KIT = Path(__file__).resolve().parents[2] / "monitor-kits/host-deploy-instance-monitoring"
 SOURCE = KIT / "src/host_deploy_instance_monitor.py"
-PACKAGE = Path(__file__).resolve().parents[3] / "hub/monitor-kits/监控套件_主机部署实例监控_0.1.11.zip"
+PACKAGE = Path(__file__).resolve().parents[3] / "hub/monitor-kits/监控套件_主机部署实例监控_0.1.12.zip"
 WORKTREE_ROOT = Path(__file__).resolve().parents[7]
 
 
@@ -52,6 +52,42 @@ class HostDeployInstanceMonitorTests(unittest.TestCase):
         with mock.patch.dict(os.environ, {"EASYOPS_COLLECTOR_instanceId": "$.instanceId"}, clear=True):
             with self.assertRaises(ValueError):
                 m["config"]()
+
+    def test_log_event_keeps_standard_streams_clean(self):
+        m = module()
+        log_root = WORKTREE_ROOT / ".local" / ("test-debug-log-" + uuid.uuid4().hex)
+        log_path = log_root / "host.debug.log"
+        settings = {"logLevel": "DEBUG", "debugLogPath": str(log_path)}
+        stdout, stderr = io.StringIO(), io.StringIO()
+        with redirect_stdout(stdout), redirect_stderr(stderr):
+            m["log_event"](settings, "DEBUG", "config.ready", value="中文")
+        self.assertEqual(stdout.getvalue(), "")
+        self.assertEqual(stderr.getvalue(), "")
+        rows = [json.loads(line) for line in log_path.read_text(encoding="utf-8").splitlines()]
+        self.assertEqual(rows, [{"level": "DEBUG", "stage": "config.ready", "value": "中文"}])
+
+    def test_debug_log_rotation(self):
+        m = module()
+        log_root = WORKTREE_ROOT / ".local" / ("test-debug-log-" + uuid.uuid4().hex)
+        log_path = log_root / "host.debug.log"
+        try:
+            with mock.patch.dict(m, {"DEBUG_LOG_MAX_BYTES": 0}):
+                m["write_debug_log"](str(log_path), "first")
+                m["write_debug_log"](str(log_path), "second")
+            self.assertEqual((log_path.with_suffix(".log.1")).read_text(encoding="utf-8"), "first\n")
+            self.assertEqual(log_path.read_text(encoding="utf-8"), "second\n")
+        finally:
+            shutil.rmtree(log_root)
+
+    def test_python2_unicode_text_is_not_ascii_encoded(self):
+        m = module()
+        value = "中文命令行"
+        with mock.patch.dict(m, {
+            "sys": mock.Mock(version_info=(2, 7, 18, "final", 0)),
+            "unicode": str,
+        }):
+            self.assertEqual(m["text"](value), value)
+            self.assertEqual(m["normalize_windows_path"](value), value)
 
     def test_openapi_gateway_from_agent_config(self):
         m = module()
@@ -157,8 +193,10 @@ class HostDeployInstanceMonitorTests(unittest.TestCase):
         }
         refreshed = dict(process)
         refreshed.update({"utime": 16.0, "stime": 5.0})
+        log_root = WORKTREE_ROOT / ".local" / ("test-debug-log-" + uuid.uuid4().hex)
         settings = {
             "hostInstanceId": "host1", "sampleInterval": 0.0, "logLevel": "DEBUG",
+            "debugLogPath": str(log_root / "host1.debug.log"),
         }
         target = {
             "instanceId": "deploy1", "installPath": "/usr/local/easyops/redis",
@@ -168,9 +206,7 @@ class HostDeployInstanceMonitorTests(unittest.TestCase):
         clocks = iter([101.0, 102.0])
         with mock.patch.object(m["time"], "sleep"), mock.patch.object(m["time"], "time", side_effect=lambda: next(clocks)), \
             mock.patch.dict(m, {"read_file": mock.Mock(return_value=b"123 (redis-server) R"), "parse_proc_stat": mock.Mock(return_value=refreshed), "process_socket_inodes": mock.Mock(return_value=({"inode1"}, True)), "process_memory_bytes": mock.Mock(return_value=1000.0), "process_fd_usage": mock.Mock(return_value=(100, 1024))}):
-            stderr = io.StringIO()
-            with redirect_stderr(stderr):
-                result = m["collect_target"](target, [process], {6379: {"inode1"}}, 1000.0, 100.0, 2000.0, settings, 2000.0, 10.0, 1.0, 1)
+            result = m["collect_target"](target, [process], {6379: {"inode1"}}, 1000.0, 100.0, 2000.0, settings, 2000.0, 10.0, 1.0, 1)
         self.assertEqual(len(result), 3)
         process_row, port_row, target_row = result
         self.assertEqual(process_row["dims"]["deployInstanceId"], "deploy1")
@@ -191,12 +227,14 @@ class HostDeployInstanceMonitorTests(unittest.TestCase):
         self.assertNotIn("cmdline", target_row["dims"])
         self.assertNotIn("port", target_row["dims"])
         self.assertEqual(set(target_row["vals"]), set(m["TARGET_METRIC_KEYS"]))
-        log_rows = [json.loads(line) for line in stderr.getvalue().splitlines()]
+        log_path = Path(settings["debugLogPath"])
+        log_content = log_path.read_text(encoding="utf-8")
+        log_rows = [json.loads(line) for line in log_content.splitlines()]
         self.assertEqual({row["stage"] for row in log_rows}, {"target.start", "port.match", "process.metrics", "port.metrics", "target.metrics"})
         self.assertTrue(all(row["level"] == "DEBUG" for row in log_rows))
-        self.assertNotIn("./bin/redis-server", stderr.getvalue())
-        self.assertNotIn("accessKey", stderr.getvalue())
-        self.assertNotIn("secretKey", stderr.getvalue())
+        self.assertNotIn("./bin/redis-server", log_content)
+        self.assertNotIn("accessKey", log_content)
+        self.assertNotIn("secretKey", log_content)
 
     def test_collect_target_fallback_logs_traceback_and_five_metrics(self):
         m = module()
@@ -204,6 +242,7 @@ class HostDeployInstanceMonitorTests(unittest.TestCase):
             "hostInstanceId": "host1", "hostUuid": "uuid", "hostIp": "ip",
             "gateway": "http://gateway", "accessKey": "ak", "secretKey": "sk",
             "sampleInterval": 0.0, "cacheTtlSeconds": 604800.0, "logLevel": "DEBUG",
+            "debugLogPath": str(WORKTREE_ROOT / ".local" / ("test-debug-log-" + uuid.uuid4().hex) / "host1.debug.log"),
         }
         target = {"instanceId": "deploy1", "installPath": "/redis"}
         with mock.patch.dict(m, {
@@ -215,16 +254,14 @@ class HostDeployInstanceMonitorTests(unittest.TestCase):
             "memory_total_bytes": mock.Mock(return_value=2000.0),
             "collect_target": mock.Mock(side_effect=RuntimeError("target boom")),
         }):
-            stderr = io.StringIO()
-            with redirect_stderr(stderr):
-                result = m["collect"](settings)
+            result = m["collect"](settings)
         self.assertEqual(len(result), 1)
         self.assertEqual(set(result[0]["vals"]), {
             "deploy_instance_config_valid", "deploy_instance_collect_success",
             "host_deploy_instance_target_count", "host_deploy_cache_age_seconds",
             "host_deploy_cache_refresh_success",
         })
-        log_rows = [json.loads(line) for line in stderr.getvalue().splitlines()]
+        log_rows = [json.loads(line) for line in Path(settings["debugLogPath"]).read_text(encoding="utf-8").splitlines()]
         failed = next(row for row in log_rows if row["stage"] == "target.collect_failed")
         self.assertEqual(failed["level"], "ERROR")
         self.assertEqual(failed["fallbackMetricCount"], 5)
@@ -286,7 +323,7 @@ class HostDeployInstanceMonitorTests(unittest.TestCase):
     def test_help_and_version(self):
         result = subprocess.run([sys.executable, str(SOURCE), "--version"], capture_output=True, text=True, env={**os.environ, "PYTHONDONTWRITEBYTECODE": "1"})
         self.assertEqual(result.returncode, 0)
-        self.assertEqual(result.stdout.strip(), "0.1.11")
+        self.assertEqual(result.stdout.strip(), "0.1.12")
 
     def test_python2_json_output_uses_ascii_escape(self):
         source = SOURCE.read_text(encoding="utf-8")
