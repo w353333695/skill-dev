@@ -21,16 +21,17 @@ items:
   - id: ibmmq-monitor-kit
     name: IBM MQ监控
     category: monitor-kits
-    files: [监控套件_IBM_MQ监控_0.4.1.zip, IBM_MQ监控_告警规则模板_0.4.1.xlsx]
-    version: "0.4.1"
+    files: [监控套件_IBM_MQ监控_0.4.2.zip, IBM_MQ监控_告警规则模板_0.4.2.xlsx]
+    version: "0.4.2"
     history:
+      - {ver: "0.4.2", date: "2026-11-16", change: "移除qmgrName/mqBinPath任务参数；采集时自动探测MQ命令目录并用dspmq枚举全部本地队列管理器，多队列管理器均输出监控数据"}
       - {ver: "0.4.1", date: "2026-11-16", change: "移除采集脚本from __future__ import依赖，显式保持占用率浮点除法并改用stdout输出；重新打包，功能不变"}
       - {ver: "0.4.0", date: "2026-11-16", change: "按Zabbix导出模板优化45指标/11指标集：DEADQ精确识别死信队列并强制纳入，XMITQ识别传输队列，采集GET/PUT与通道收发字节数；队列占用率80%/90%、DLQ连续2点Critical、队列管理器/监听器单点异常；同时支持Linux/Windows，尚未线上导入"}
       - {ver: "0.3.0", date: "2026-11-16", change: "同时支持Linux/Windows执行节点：Windows命令扩展名与安装目录探测、PowerShell CIM进程指标、WMIC降级；已完成双平台离线回归，尚未线上导入"}
       - {ver: "0.2.0", date: "2026-11-16", change: "按现网受保护IBMMQ@ONEMODEL实例模型导入，复用ARTIFACT_INST继承关系；插件6605ad8dec33d已激活并完成30指标/9指标集落库核验"}
       - {ver: "0.1.0", date: "2026-11-16", change: "初版：Linux本机dspmq/runmqsc采集队列管理器、监听器、通道、队列深度和进程资源，并配套XLSX告警模板"}
     scenario: Linux/Windows主机本地IBM MQ队列管理器监控
-    notes: "绑定现网IBMMQ@ONEMODEL实例；需通过部署实例/主机关联在目标主机执行，且用户具备dspmq/runmqsc权限。0.2.0已导入并激活；0.4.1为Zabbix阈值对齐、双平台支持且无future import版本，尚未线上导入，未创建正式采集任务，未真实IBM MQ实例执行采集。"
+    notes: "绑定现网IBMMQ@ONEMODEL实例；需通过部署实例/主机关联在目标主机执行，且用户具备dspmq/runmqsc权限。0.2.0已导入并激活；0.4.2为自动发现队列管理器、自动探测命令目录、Zabbix阈值对齐且双平台支持版本，尚未线上导入，未创建正式采集任务，未真实IBM MQ实例执行采集。"
     added: "2026-11-16"
   - id: host-deploy-instance-monitor-kit
     name: 主机部署实例监控

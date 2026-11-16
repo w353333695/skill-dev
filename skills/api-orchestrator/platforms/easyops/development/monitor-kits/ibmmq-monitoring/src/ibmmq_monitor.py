@@ -15,7 +15,7 @@ import threading
 import time
 import traceback
 
-VERSION = "0.4.1"
+VERSION = "0.4.2"
 QMGR_COMMAND = "DISPLAY QMGR DEADQ"
 STATUS_COMMAND = "DISPLAY QSTATUS(*) CURDEPTH MSGAGE IPPROCS OPPROCS"
 QUEUE_COMMAND = "DISPLAY QLOCAL(*) CURDEPTH MAXDEPTH USAGE GET PUT"
@@ -43,18 +43,14 @@ def config():
         raise ValueError("[config] sampleInterval必须在0.05到2之间")
     settings = {
         "ibmmqInstanceId": env("instanceId"),
-        "qmgrName": env("qmgrName"),
         "hostIp": env("hostIp"),
         "installPath": env("installPath"),
-        "mqBinPath": env("mqBinPath"),
         "queueFilter": env("queueFilter", ".*"),
         "includeSystemQueues": env("includeSystemQueues", "false").lower() in ("1", "true", "yes"),
         "processMonitor": env("processMonitor", "true").lower() in ("1", "true", "yes"),
         "timeout": timeout,
         "interval": interval,
     }
-    if not settings["qmgrName"] or settings["qmgrName"].startswith("$."):
-        raise ValueError("[config] IBMMQ实例缺少qmgrName，无法定位队列管理器")
     return settings
 
 
@@ -124,7 +120,6 @@ def execute(args, settings, input_text=None):
 
 
 def find_mq_bin(settings):
-    configured = settings["mqBinPath"]
     install_path = settings.get("installPath", "")
     command = "dspmq.exe" if is_windows() else "dspmq"
 
@@ -139,10 +134,6 @@ def find_mq_bin(settings):
         return bool(path) and os.path.isfile(os.path.join(path, command))
 
     candidates = []
-    if configured and not configured.startswith("$."):
-        configured_bin = candidate_bin(configured)
-        if configured_bin:
-            candidates.append(configured_bin)
     installation_path = os.environ.get("MQ_INSTALLATION_PATH")
     if installation_path:
         candidates.append(os.path.join(installation_path, "bin"))
@@ -193,8 +184,6 @@ def numeric(value, default=0.0):
 
 def discover_qmgrs(mq_bin, settings):
     args = [mq_command(mq_bin, "dspmq"), "-o", "status"]
-    if settings["qmgrName"]:
-        args.extend(["-m", settings["qmgrName"]])
     returncode, output = execute(args, settings)
     qmgrs = []
     for line in output.splitlines():
@@ -594,19 +583,19 @@ def collect_qmgr(qmgr, mq_bin, settings):
 def collect(settings):
     mq_bin = find_mq_bin(settings)
     if not mq_bin:
-        raise RuntimeError("[collect] 未找到可执行dspmq，请设置mqBinPath并确认执行用户有IBM MQ命令权限")
+        raise RuntimeError("[collect] 未找到可执行dspmq；请确认installPath、MQ_INSTALLATION_PATH、PATH或常见IBM MQ安装目录可用")
     qmgrs, returncode = discover_qmgrs(mq_bin, settings)
     output = []
     for qmgr in qmgrs:
         output.extend(collect_qmgr(qmgr, mq_bin, settings))
-    target_found = len(qmgrs) == 1
+    target_found = len(qmgrs) > 0
     output.append(dict(dims={"ibmmqInstanceId": settings["ibmmqInstanceId"]}, vals={
         "ibmmq_qmgr_count": float(len(qmgrs)),
         "ibmmq_collect_success": float(target_found),
     }))
     if not qmgrs:
         base = {
-            "ibmmqInstanceId": settings["ibmmqInstanceId"], "qmgrName": settings["qmgrName"],
+            "ibmmqInstanceId": settings["ibmmqInstanceId"], "qmgrName": "",
             "hostIp": settings.get("hostIp", ""), "installPath": settings.get("installPath", ""),
         }
         output.append(dict(dims=base, vals={
@@ -626,9 +615,9 @@ def main(argv=None):
         ),
         epilog=(
             "示例：\n"
-            "  EASYOPS_COLLECTOR_instanceId=i1 EASYOPS_COLLECTOR_qmgrName=QM1 %(prog)s\n"
-            "  EASYOPS_COLLECTOR_mqBinPath=/opt/mqm/bin EASYOPS_COLLECTOR_qmgrName=QM1 %(prog)s\n"
-            "  EASYOPS_COLLECTOR_mqBinPath='C:\\Program Files\\IBM\\MQ\\bin' EASYOPS_COLLECTOR_qmgrName=QM1 %(prog)s\n\n"
+            "  EASYOPS_COLLECTOR_instanceId=i1 EASYOPS_COLLECTOR_installPath=/opt/mqm %(prog)s\n"
+            "  EASYOPS_COLLECTOR_installPath=/opt/mqm %(prog)s\n"
+            "  EASYOPS_COLLECTOR_installPath='C:\\Program Files\\IBM\\MQ' %(prog)s\n\n"
             "Linux默认探测/opt/mqm/bin、/opt/ibm/mq/bin、/usr/mqm/bin；Windows默认探测Program Files下IBM MQ bin目录。"
         ),
     )

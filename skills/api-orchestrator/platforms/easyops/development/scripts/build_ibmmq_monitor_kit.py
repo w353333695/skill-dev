@@ -14,11 +14,11 @@ ROOT = Path(__file__).resolve().parents[1]
 KIT = ROOT / "monitor-kits/ibmmq-monitoring"
 HUB = ROOT.parent / "hub/monitor-kits"
 NAME = "IBM MQ监控"
-VERSION = "0.4.1"
+VERSION = "0.4.2"
 SUPPORTED_PLATFORMS = ("Linux", "Windows")
 OBJECT_ID = "IBMMQ@ONEMODEL"
-XLSX_NAME = "IBM_MQ监控_告警规则模板_0.4.1.xlsx"
-ZIP_NAME = "监控套件_IBM_MQ监控_0.4.1.zip"
+XLSX_NAME = "IBM_MQ监控_告警规则模板_0.4.2.xlsx"
+ZIP_NAME = "监控套件_IBM_MQ监控_0.4.2.zip"
 BASE_DIMS = ("ibmmqInstanceId", "qmgrName", "hostIp", "installPath")
 QUEUE_DIMS = BASE_DIMS + ("queueName",)
 CHANNEL_DIMS = BASE_DIMS + ("channelName", "channelType")
@@ -75,10 +75,8 @@ METRICS = (
 )
 PARAMETERS = (
     ("instanceId", "string", "$.instanceId", "IBM MQ实例ID", "取IBMMQ.instanceId，用于实例维度", False, False),
-    ("qmgrName", "string", "$.name", "队列管理器", "取IBMMQ实例名称；实例名应配置为队列管理器名", False, False),
     ("hostIp", "string", "$.ip", "部署主机IP", "取ARTIFACT_INST继承ip，用于维度与部署定位", False, False),
     ("installPath", "string", "$.installPath", "安装路径", "取ARTIFACT_INST继承installPath，用于定位bin目录", False, False),
-    ("mqBinPath", "string", "", "IBM MQ bin目录", "手动填写或留空；Linux/Windows均按installPath和常见安装目录探测", True, True),
     ("queueFilter", "string", ".*", "队列过滤正则", "默认监控全部非SYSTEM.前缀队列", True, True),
     ("includeSystemQueues", "string", "false", "包含系统队列", "默认排除SYSTEM.前缀队列", True, True),
     ("processMonitor", "string", "true", "启用进程资源采集", "默认启用，按cmdline分组输出进程资源", True, True),
@@ -181,7 +179,7 @@ def plugin_yaml():
     lines.extend([
         "agentType: easyops", "category: 消息队列", "scriptType: python",
         "interpreter: \"\"", "samplerType: metric_sampler",
-        "memo: \"同时支持Linux/Windows执行节点；按IBM MQ队列管理器实例调用dspmq/runmqsc，采集队列管理器、监听器、通道、本地/传输/死信队列和进程资源指标。\"",
+        "memo: \"同时支持Linux/Windows执行节点；自动探测MQ命令目录并用dspmq枚举本地队列管理器，采集队列管理器、监听器、通道、本地/传输/死信队列和进程资源指标。\"",
         "icon: null", "relateObjectId: IBMMQ@ONEMODEL",
     ])
     return "\n".join(lines) + "\n"

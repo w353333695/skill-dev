@@ -1,6 +1,6 @@
 type: simple-script
 name: IBM MQ监控
-version: "0.4.1"
+version: "0.4.2"
 command:
     collect:
         interpreter: ""
@@ -11,10 +11,8 @@ command:
         user: ""
 params:
     - instanceId
-    - qmgrName
     - hostIp
     - installPath
-    - mqBinPath
     - queueFilter
     - includeSystemQueues
     - processMonitor
@@ -22,10 +20,8 @@ params:
     - commandTimeout
 paramDefine:
     - {name: instanceId, valueType: string, defaultValue: "$.instanceId", display: false, displayName: "IBM MQ实例ID", description: "取IBMMQ.instanceId，用于实例维度", use: collectParams, optional: false, isFromSecret: false, isEncrypt: false, extraArgs: null}
-    - {name: qmgrName, valueType: string, defaultValue: "$.name", display: false, displayName: "队列管理器", description: "取IBMMQ实例名称；实例名应配置为队列管理器名", use: collectParams, optional: false, isFromSecret: false, isEncrypt: false, extraArgs: null}
     - {name: hostIp, valueType: string, defaultValue: "$.ip", display: false, displayName: "部署主机IP", description: "取ARTIFACT_INST继承ip，用于维度与部署定位", use: collectParams, optional: false, isFromSecret: false, isEncrypt: false, extraArgs: null}
     - {name: installPath, valueType: string, defaultValue: "$.installPath", display: false, displayName: "安装路径", description: "取ARTIFACT_INST继承installPath，用于定位bin目录", use: collectParams, optional: false, isFromSecret: false, isEncrypt: false, extraArgs: null}
-    - {name: mqBinPath, valueType: string, defaultValue: "", display: true, displayName: "IBM MQ bin目录", description: "手动填写或留空；Linux/Windows均按installPath和常见安装目录探测", use: collectParams, optional: true, isFromSecret: false, isEncrypt: false, extraArgs: null}
     - {name: queueFilter, valueType: string, defaultValue: ".*", display: true, displayName: "队列过滤正则", description: "默认监控全部非SYSTEM.前缀队列", use: collectParams, optional: true, isFromSecret: false, isEncrypt: false, extraArgs: null}
     - {name: includeSystemQueues, valueType: string, defaultValue: "false", display: true, displayName: "包含系统队列", description: "默认排除SYSTEM.前缀队列", use: collectParams, optional: true, isFromSecret: false, isEncrypt: false, extraArgs: null}
     - {name: processMonitor, valueType: string, defaultValue: "true", display: true, displayName: "启用进程资源采集", description: "默认启用，按cmdline分组输出进程资源", use: collectParams, optional: true, isFromSecret: false, isEncrypt: false, extraArgs: null}
@@ -36,6 +32,6 @@ category: 消息队列
 scriptType: python
 interpreter: ""
 samplerType: metric_sampler
-memo: "同时支持Linux/Windows执行节点；按IBM MQ队列管理器实例调用dspmq/runmqsc，采集队列管理器、监听器、通道、本地/传输/死信队列和进程资源指标。"
+memo: "同时支持Linux/Windows执行节点；自动探测MQ命令目录并用dspmq枚举本地队列管理器，采集队列管理器、监听器、通道、本地/传输/死信队列和进程资源指标。"
 icon: null
 relateObjectId: IBMMQ@ONEMODEL

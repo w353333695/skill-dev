@@ -119,7 +119,7 @@ python3 skills/api-orchestrator/platforms/easyops/development/scripts/validate_m
 
 ## IBM MQ监控（2026-11-16）
 
-新增 `IBM MQ监控` 0.4.1：绑定现网内置中间件实例模型 `IBMMQ@ONEMODEL`（继承 `ARTIFACT_INST@ONEMODEL`），同时支持Linux和Windows执行节点，按 `ip+name` 实例调用 `dspmq/runmqsc`，采集队列管理器、监听器、通道、本地/传输/死信队列、GET/PUT、通道收发字节数和进程资源；模型与进程/cmdline 自动发现规律见 `IBM_MQ监控模型与自动发现_2026-11-16.md`。已按Zabbix导出模板对齐队列占用率80%/90%、死信队列深度连续2点Critical、队列管理器/监听器单点异常等阈值；GET/PUT异常按Zabbix禁用触发器处理为仅采集展示。0.2.0曾导入插件`6605ad8dec33d`并激活成功，回读`enabled`、9个指标集、30个别名指标与维度映射、1条资源发现配置均正确。0.4.1完成双平台离线模拟回归，采集脚本不依赖`from __future__ import`，尚未导入线上，未创建正式采集任务，也未连接真实 IBM MQ 实例执行采集。
+新增 `IBM MQ监控` 0.4.2：绑定现网内置中间件实例模型 `IBMMQ@ONEMODEL`（继承 `ARTIFACT_INST@ONEMODEL`），同时支持Linux和Windows执行节点，自动探测MQ命令目录并用 `dspmq` 枚举本地全部队列管理器，再调用 `runmqsc` 采集队列管理器、监听器、通道、本地/传输/死信队列、GET/PUT、通道收发字节数和进程资源；不再暴露 `qmgrName/mqBinPath` 任务参数，模型与进程/cmdline 自动发现规律见 `IBM_MQ监控模型与自动发现_2026-11-16.md`。已按Zabbix导出模板对齐队列占用率80%/90%、死信队列深度连续2点Critical、队列管理器/监听器单点异常等阈值；GET/PUT异常按Zabbix禁用触发器处理为仅采集展示。0.2.0曾导入插件`6605ad8dec33d`并激活成功，回读`enabled`、9个指标集、30个别名指标与维度映射、1条资源发现配置均正确。0.4.2完成双平台离线模拟回归，采集脚本不依赖`from __future__ import`，尚未导入线上，未创建正式采集任务，也未连接真实 IBM MQ 实例执行采集。
 
 ## 主机部署实例监控（2026-11-12）
 
