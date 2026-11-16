@@ -14,7 +14,7 @@
 | `job.objectId` | 目标模型ID，例如 `HOST`。 |
 | `job.instanceIds` | 固定目标实例过滤；服务端生成 `instanceId: {"$in": [...]}`。 |
 | `job.metricSetIds` | 参与调试的指标集ID；服务据此查询别名指标。 |
-| `job.collectAgent` | 执行主机Agent UUID或可解析值；easyops插件用它推送 sampler。 |
+| `job.collectAgent` | 执行主机Agent UUID或可解析值；easyops插件用它推送 sampler。传`$.ip`或常量IP时，服务端会按`HOST.ip`反查`HOST._uuid`得到执行Agent；省略时会生成空UUID，不能作为“默认选主机”。 |
 | `job.timeout` | 临时采集超时秒数。 |
 | `job.collectCount` | 执行次数；`0`按1次，超过服务端配置上限会被截断，多次执行之间按服务端配置等待。 |
 | `job.params` | 任务参数列表，会转换为临时collector config的`params`。`paramType=cmdb`时可引用实例字段，`const`为常量。 |
@@ -35,6 +35,8 @@
 
 - `json unmarshal data failed: invalid character 'C' looking for beginning of value`：脚本stdout以`COLLECT_ERROR:`开头，服务端把错误正文当JSON解析失败。应查看后续traceback定位真实异常，不能只改网关参数。
 - Python 2.7 `UnicodeDecodeError: 'ascii' codec can't decode byte ...`：脚本在`json.dumps(..., ensure_ascii=False)`中序列化含中文的字节串。Python 2会先按ASCII解码并失败。修复方式是移除`ensure_ascii=False`，使用默认ASCII escape；JSON中文显示为`\\uXXXX`但语义不变。
+- `empty jobs`：说明服务端没有为任何目标实例生成执行job。常见原因是`job.instanceIds`在目标模型中不存在、过滤路径为空，或执行器解析不到Agent；应先回读目标实例和`collectAgent`，不要先怀疑脚本stdout。
+- 省略`collectAgent`可能返回`target:@<org> not found,get info error`，因为临时job的执行UUID为空。`$.ip`和精确主机IP在目标`HOST`实例存在且`_uuid`有效时等价。
 
 ## 安全边界
 
