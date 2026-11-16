@@ -15,8 +15,8 @@ import yaml
 BASE = Path(__file__).resolve().parents[2]
 KIT = BASE / "monitor-kits/ibmmq-monitoring"
 SOURCE = KIT / "src/ibmmq_monitor.orig"
-PACKAGE = BASE.parent / "hub/monitor-kits/监控套件_IBM_MQ监控_0.2.0.zip"
-XLSX = KIT / "IBM_MQ监控_告警规则模板_0.2.0.xlsx"
+PACKAGE = BASE.parent / "hub/monitor-kits/监控套件_IBM_MQ监控_0.3.0.zip"
+XLSX = KIT / "IBM_MQ监控_告警规则模板_0.3.0.xlsx"
 
 
 def module():
@@ -41,10 +41,46 @@ class IBMMQMonitorTest(unittest.TestCase):
     def test_version(self):
         result = subprocess.run([sys.executable, str(SOURCE), "--version"], capture_output=True, text=True)
         self.assertEqual(result.returncode, 0)
-        self.assertIn("0.2.0", result.stdout)
+        self.assertIn("0.3.0", result.stdout)
 
     def test_orig_and_runtime_are_identical(self):
         self.assertEqual(SOURCE.read_bytes(), (KIT / "src/ibmmq_monitor.py").read_bytes())
+
+
+    def test_windows_commands_and_process_metrics(self):
+        with mock.patch.object(self.m, "is_windows", return_value=True):
+            self.assertEqual(self.m.mq_command(r"C:\IBM\MQ\bin", "dspmq"), r"C:\IBM\MQ\bin\dspmq.exe")
+            with mock.patch.object(self.m, "execute", return_value=(0, "COMMAND ACCEPTED")) as command_execute:
+                self.m.run_mqsc(r"C:\IBM\MQ\bin", "QM1", self.settings)
+            mqsc_input = command_execute.call_args[0][2]
+            self.assertTrue(mqsc_input.endswith("\r\n"))
+            self.assertTrue(command_execute.call_args[0][0][0].endswith("runmqsc.exe"))
+            process_json = json.dumps([{
+                "ProcessId": 101,
+                "ExecutablePath": r"C:\Program Files\IBM\MQ\bin\runmqlsr.exe",
+                "CommandLine": r"C:\Program Files\IBM\MQ\bin\runmqlsr.exe -m QM1 -t TCP -p 1414",
+            }])
+            perf_json = json.dumps([{
+                "IDProcess": 101, "PercentProcessorTime": "3.5", "ThreadCount": "4",
+                "HandleCount": "50", "WorkingSetPrivate": "1048576",
+            }])
+            def powershell(command, settings):
+                return 0, process_json if "Win32_Process |" in command else perf_json
+            with mock.patch.object(self.m, "run_powershell", side_effect=powershell):
+                grouped = self.m.collect_processes("QM1", self.settings)
+            self.assertEqual(len(grouped), 1)
+            row = next(iter(grouped.values()))
+            self.assertEqual(row["alive"], 1.0)
+            self.assertEqual(row["count"], 1.0)
+            self.assertEqual(row["cpu"], 3.5)
+            self.assertEqual(row["memory"], 1048576.0)
+            self.assertEqual(row["threads"], 4.0)
+            self.assertEqual(row["fds"], 50.0)
+
+    def test_config_requires_qmgr(self):
+        with mock.patch.dict(os.environ, {"EASYOPS_COLLECTOR_qmgrName": "$.name"}):
+            with self.assertRaises(ValueError):
+                self.m.config()
 
     def test_parse_mqsc(self):
         output = "\n".join([
@@ -110,6 +146,7 @@ class IBMMQMonitorTest(unittest.TestCase):
         metric_sets = json.loads((KIT / "metric_set.json").read_text())
         self.assertEqual(plugin["name"], "IBM MQ监控")
         self.assertEqual(plugin["relateObjectId"], "IBMMQ@ONEMODEL")
+        self.assertIn("Linux/Windows", plugin["memo"])
         self.assertEqual(len(origins), 30)
         self.assertEqual({row["key"] for row in origins}, {row["name"] for row in aliases})
         self.assertTrue(all(isinstance(row, dict) and row.get("name") for row in metric_sets))
@@ -139,7 +176,7 @@ class IBMMQMonitorTest(unittest.TestCase):
                 mode = stat.S_IMODE(item.external_attr >> 16)
                 self.assertEqual(mode, 0o755 if item.is_dir() else 0o664)
             self.assertIn("IBM MQ监控/src/ibmmq_monitor.orig", package.namelist())
-            self.assertIn("IBM MQ监控/IBM_MQ监控_告警规则模板_0.2.0.xlsx", package.namelist())
+            self.assertIn("IBM MQ监控/IBM_MQ监控_告警规则模板_0.3.0.xlsx", package.namelist())
             self.assertIn("IBM MQ监控/resource_discovery_define.json", package.namelist())
             self.assertNotIn("IBM MQ监控/IBMMQ@ONEMODEL.json", package.namelist())
 

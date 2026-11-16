@@ -14,10 +14,11 @@ ROOT = Path(__file__).resolve().parents[1]
 KIT = ROOT / "monitor-kits/ibmmq-monitoring"
 HUB = ROOT.parent / "hub/monitor-kits"
 NAME = "IBM MQ监控"
-VERSION = "0.2.0"
+VERSION = "0.3.0"
+SUPPORTED_PLATFORMS = ("Linux", "Windows")
 OBJECT_ID = "IBMMQ@ONEMODEL"
-XLSX_NAME = "IBM_MQ监控_告警规则模板_0.2.0.xlsx"
-ZIP_NAME = "监控套件_IBM_MQ监控_0.2.0.zip"
+XLSX_NAME = "IBM_MQ监控_告警规则模板_0.3.0.xlsx"
+ZIP_NAME = "监控套件_IBM_MQ监控_0.3.0.zip"
 BASE_DIMS = ("ibmmqInstanceId", "qmgrName", "hostIp", "installPath")
 QUEUE_DIMS = BASE_DIMS + ("queueName",)
 CHANNEL_DIMS = BASE_DIMS + ("channelName", "channelType")
@@ -62,11 +63,11 @@ PARAMETERS = (
     ("qmgrName", "string", "$.name", "队列管理器", "取IBMMQ实例名称；实例名应配置为队列管理器名", False, False),
     ("hostIp", "string", "$.ip", "部署主机IP", "取ARTIFACT_INST继承ip，用于维度与部署定位", False, False),
     ("installPath", "string", "$.installPath", "安装路径", "取ARTIFACT_INST继承installPath，用于定位bin目录", False, False),
-    ("mqBinPath", "string", "", "IBM MQ bin目录", "手动填写或留空；为空时按installPath和常见安装目录探测", True, True),
+    ("mqBinPath", "string", "", "IBM MQ bin目录", "手动填写或留空；Linux/Windows均按installPath和常见安装目录探测", True, True),
     ("queueFilter", "string", ".*", "队列过滤正则", "默认监控全部非SYSTEM.前缀队列", True, True),
     ("includeSystemQueues", "string", "false", "包含系统队列", "默认排除SYSTEM.前缀队列", True, True),
     ("processMonitor", "string", "true", "启用进程资源采集", "默认启用，按cmdline分组输出进程资源", True, True),
-    ("sampleInterval", "float", "0.2", "CPU采样间隔(秒)", "两次/proc CPU计数间隔，默认0.2，范围0.05-2", True, True),
+    ("sampleInterval", "float", "0.2", "CPU采样间隔(秒)", "Linux两次/proc CPU采样间隔；Windows读取CIM格式化计数，默认0.2，范围0.05-2", True, True),
     ("commandTimeout", "int", "10", "MQ命令超时(秒)", "dspmq/runmqsc超时时间，默认10，范围1-60", True, True),
 )
 
@@ -120,6 +121,29 @@ def write_resource_discovery():
     write_json(KIT / "resource_discovery_define.json", [{
         "objectId": OBJECT_ID, "category": "平台资源.消息队列", "type": "ARTIFACT_INST@ONEMODEL",
     }])
+
+def validate_platform_support():
+    source = (KIT / "src/ibmmq_monitor.py").read_text(encoding="utf-8")
+    readme = (KIT / "readme").read_text(encoding="utf-8")
+    required_source = (
+        'def is_windows():',
+        'def mq_command(',
+        'def windows_process_sample(',
+        'os.name == "nt"',
+        'taskkill',
+        'Get-CimInstance',
+        'WMIC.exe',
+    )
+    missing_source = [item for item in required_source if item not in source]
+    if missing_source:
+        raise RuntimeError("[validate_platform_support] 采集脚本缺少Windows支持: %s" % ", ".join(missing_source))
+    if (KIT / "src/ibmmq_monitor.py").read_bytes() != (KIT / "src/ibmmq_monitor.orig").read_bytes():
+        raise RuntimeError("[validate_platform_support] .py与.orig必须保持一致")
+    for platform in SUPPORTED_PLATFORMS:
+        if platform not in readme:
+            raise RuntimeError("[validate_platform_support] readme未声明支持平台: %s" % platform)
+
+
 def plugin_yaml():
     lines = [
         "type: simple-script", "name: %s" % NAME, 'version: "%s"' % VERSION,
@@ -142,7 +166,7 @@ def plugin_yaml():
     lines.extend([
         "agentType: easyops", "category: 消息队列", "scriptType: python",
         "interpreter: \"\"", "samplerType: metric_sampler",
-        "memo: \"按IBM MQ队列管理器实例调用dspmq/runmqsc，采集IBM MQ队列管理器、监听器、通道、队列深度和进程资源指标。\"",
+        "memo: \"同时支持Linux/Windows执行节点；按IBM MQ队列管理器实例调用dspmq/runmqsc，采集队列管理器、监听器、通道、队列深度和进程资源指标。\"",
         "icon: null", "relateObjectId: IBMMQ@ONEMODEL",
     ])
     return "\n".join(lines) + "\n"
@@ -234,6 +258,7 @@ def main():
     parser = argparse.ArgumentParser(description="生成IBM MQ监控套件离线产物")
     parser.add_argument("--skip-zip", action="store_true", help="只生成源目录定义，不生成Hub ZIP")
     args = parser.parse_args()
+    validate_platform_support()
     write_resource_discovery()
     write_definitions()
     (KIT / "plugin.yaml").write_text(plugin_yaml(), encoding="utf-8")
@@ -243,7 +268,7 @@ def main():
         HUB.mkdir(parents=True, exist_ok=True)
         shutil.copyfile(xlsx, HUB / XLSX_NAME)
     package = None if args.skip_zip else build_zip()
-    print("生成完成: metrics=%d, xlsx=%s, zip=%s" % (len(METRICS), xlsx, package or "skipped"))
+    print("生成完成: platforms=%s, metrics=%d, xlsx=%s, zip=%s" % (",".join(SUPPORTED_PLATFORMS), len(METRICS), xlsx, package or "skipped"))
 
 
 if __name__ == "__main__":

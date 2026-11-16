@@ -3,17 +3,20 @@
 """IBM MQ 本地队列管理器监控脚本，参数由 EASYOPS_COLLECTOR_* 环境变量注入。"""
 from __future__ import division, print_function
 import argparse
+import csv
 import json
+import locale
 import math
 import os
 import re
+import signal
 import subprocess
 import sys
 import threading
 import time
 import traceback
 
-VERSION = "0.2.0"
+VERSION = "0.3.0"
 STATUS_COMMAND = "DISPLAY QSTATUS(*) CURDEPTH MSGAGE IPPROCS OPPROCS"
 QUEUE_COMMAND = "DISPLAY QLOCAL(*) CURDEPTH MAXDEPTH"
 CHANNEL_COMMAND = "DISPLAY CHSTATUS(*) CHANNEL CHLTYPE STATUS MSGS BYTES"
@@ -38,7 +41,7 @@ def config():
         raise ValueError("[config] commandTimeout必须在1到60之间")
     if interval < 0.05 or interval > 2:
         raise ValueError("[config] sampleInterval必须在0.05到2之间")
-    return {
+    settings = {
         "ibmmqInstanceId": env("instanceId"),
         "qmgrName": env("qmgrName"),
         "hostIp": env("hostIp"),
@@ -51,13 +54,24 @@ def config():
         "interval": interval,
     }
     if not settings["qmgrName"] or settings["qmgrName"].startswith("$."):
-        raise ValueError("[config] IBMMQ_QMGR实例缺少qmgrName，无法定位队列管理器")
+        raise ValueError("[config] IBMMQ实例缺少qmgrName，无法定位队列管理器")
+    return settings
 
 
 def decode(value):
     if isinstance(value, bytes):
+        preferred = locale.getpreferredencoding(False) or "utf-8"
+        for encoding in ("utf-8", preferred, "cp936", "gbk"):
+            try:
+                return value.decode(encoding)
+            except (LookupError, UnicodeDecodeError):
+                pass
         return value.decode("utf-8", "replace")
     return value or ""
+
+
+def is_windows():
+    return os.name == "nt"
 
 
 def execute(args, settings, input_text=None):
@@ -67,11 +81,30 @@ def execute(args, settings, input_text=None):
         if process is not None and process.poll() is None:
             expired[0] = True
             try:
-                process.kill()
-            except OSError:
+                if is_windows():
+                    subprocess.call(
+                        ["taskkill", "/PID", str(process.pid), "/T", "/F"],
+                        stdout=subprocess.PIPE,
+                        stderr=subprocess.PIPE,
+                    )
+                elif hasattr(os, "killpg"):
+                    os.killpg(process.pid, signal.SIGKILL)
+                else:
+                    process.kill()
+            except (OSError, subprocess.CalledProcessError):
                 pass
+
+    popen_kwargs = {}
+    if not is_windows() and "start_new_session" in subprocess.Popen.__init__.__code__.co_varnames:
+        popen_kwargs = {"start_new_session": True}
     try:
-        process = subprocess.Popen(args, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        process = subprocess.Popen(
+            args,
+            stdin=subprocess.PIPE,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            **popen_kwargs
+        )
         timer = threading.Timer(settings["timeout"], stop_process)
         timer.daemon = True
         timer.start()
@@ -93,26 +126,49 @@ def execute(args, settings, input_text=None):
 def find_mq_bin(settings):
     configured = settings["mqBinPath"]
     install_path = settings.get("installPath", "")
-    if install_path:
-        candidates = [install_path if install_path.endswith("/bin") else install_path.rstrip("/") + "/bin"]
-    else:
-        candidates = []
+    command = "dspmq.exe" if is_windows() else "dspmq"
+
+    def candidate_bin(path):
+        if not path or path.startswith("$."):
+            return None
+        if os.path.basename(path).lower() == command:
+            return os.path.dirname(path)
+        return path if os.path.basename(path).lower() == "bin" else path.rstrip("\\/") + os.sep + "bin"
+
+    def usable(path):
+        return bool(path) and os.path.isfile(os.path.join(path, command))
+
+    candidates = []
     if configured and not configured.startswith("$."):
-        path = os.path.join(configured, "dspmq")
-        if os.access(path, os.X_OK):
-            return configured
+        configured_bin = candidate_bin(configured)
+        if configured_bin:
+            candidates.append(configured_bin)
     installation_path = os.environ.get("MQ_INSTALLATION_PATH")
     if installation_path:
         candidates.append(os.path.join(installation_path, "bin"))
-    candidates.extend([install_path.rstrip("/") + "/bin" if install_path and not install_path.endswith("/bin") else install_path, "/opt/mqm/bin", "/opt/ibm/mq/bin", "/usr/mqm/bin"])
+    if install_path and not install_path.startswith("$."):
+        candidates.append(candidate_bin(install_path))
+    if is_windows():
+        candidates.extend([
+            r"C:\Program Files\IBM\MQ\bin",
+            r"C:\Program Files (x86)\IBM\MQ\bin",
+        ])
+    else:
+        candidates.extend(["/opt/mqm/bin", "/opt/ibm/mq/bin", "/usr/mqm/bin"])
     path_env = os.environ.get("PATH", "")
     for name in path_env.split(os.pathsep):
         if name:
             candidates.append(name)
     for candidate in candidates:
-        if os.access(os.path.join(candidate, "dspmq"), os.X_OK):
+        if usable(candidate):
             return candidate
     return ""
+
+
+def mq_command(mq_bin, name):
+    filename = name + (".exe" if is_windows() else "")
+    path = os.path.join(mq_bin, filename)
+    return path.replace("/", "\\") if is_windows() else path
 
 
 def parse_attributes(line):
@@ -136,7 +192,7 @@ def numeric(value, default=0.0):
 
 
 def discover_qmgrs(mq_bin, settings):
-    args = [os.path.join(mq_bin, "dspmq"), "-o", "status"]
+    args = [mq_command(mq_bin, "dspmq"), "-o", "status"]
     if settings["qmgrName"]:
         args.extend(["-m", settings["qmgrName"]])
     returncode, output = execute(args, settings)
@@ -152,8 +208,9 @@ def discover_qmgrs(mq_bin, settings):
 
 
 def run_mqsc(mq_bin, qmgr_name, settings):
-    commands = "\n".join([QUEUE_COMMAND, STATUS_COMMAND, CHANNEL_COMMAND, LISTENER_COMMAND, "EXIT"]) + "\n"
-    args = [os.path.join(mq_bin, "runmqsc"), qmgr_name]
+    newline = "\r\n" if is_windows() else "\n"
+    commands = newline.join([QUEUE_COMMAND, STATUS_COMMAND, CHANNEL_COMMAND, LISTENER_COMMAND, "EXIT"]) + newline
+    args = [mq_command(mq_bin, "runmqsc"), qmgr_name]
     returncode, output = execute(args, settings, commands)
     return returncode, output
 
@@ -261,18 +318,140 @@ def read_process(pid):
     return row
 
 
+
+def json_objects(text):
+    if not text.strip():
+        return []
+    data = json.loads(text)
+    if isinstance(data, list):
+        return data
+    return [data] if isinstance(data, dict) else []
+
+
+def run_powershell(command, settings):
+    system_root = os.environ.get("SystemRoot", r"C:\Windows")
+    powershell = os.path.join(
+        system_root,
+        "System32",
+        "WindowsPowerShell",
+        "v1.0",
+        "powershell.exe",
+    )
+    if not os.path.isfile(powershell):
+        return 1, ""
+    return execute(
+        [powershell, "-NoProfile", "-NonInteractive", "-ExecutionPolicy", "Bypass", "-Command", command],
+        settings,
+    )
+
+
+def wmic_process_sample(settings):
+    system_root = os.environ.get("SystemRoot", r"C:\Windows")
+    wmic = os.path.join(system_root, "System32", "wbem", "WMIC.exe")
+    if not os.path.isfile(wmic):
+        return []
+    returncode, output = execute(
+        [wmic, "PATH", "Win32_Process", "GET", "ProcessId,ExecutablePath,CommandLine", "/FORMAT:CSV"],
+        settings,
+    )
+    if returncode != 0:
+        return []
+    headers = None
+    rows = []
+    for values in csv.reader(output.splitlines()):
+        if not values:
+            continue
+        if headers is None and "CommandLine" in values:
+            headers = [value.strip().lower() for value in values]
+            continue
+        if headers:
+            rows.append(dict(zip(headers, values)))
+    return rows
+
+
+def windows_process_sample(settings):
+    process_command = (
+        "Get-CimInstance -ClassName Win32_Process |"
+        " Select-Object ProcessId,ExecutablePath,CommandLine |"
+        " ConvertTo-Json -Compress"
+    )
+    perf_command = (
+        "Get-CimInstance -ClassName Win32_PerfFormattedData_PerfProc_Process |"
+        " Select-Object IDProcess,PercentProcessorTime,ThreadCount,HandleCount,WorkingSetPrivate |"
+        " ConvertTo-Json -Compress"
+    )
+    process_returncode, process_output = run_powershell(process_command, settings)
+    if process_returncode != 0:
+        process_rows = [
+            {
+                "ProcessId": row.get("processid", ""),
+                "ExecutablePath": row.get("executablepath", ""),
+                "CommandLine": row.get("commandline", ""),
+            }
+            for row in wmic_process_sample(settings)
+        ]
+    else:
+        process_rows = json_objects(process_output)
+
+    perf_by_pid = {}
+    perf_returncode, perf_output = run_powershell(perf_command, settings)
+    if perf_returncode == 0:
+        for perf in json_objects(perf_output):
+            perf_by_pid[str(perf.get("IDProcess", ""))] = perf
+
+    rows = []
+    for item in process_rows:
+        pid_text = str(item.get("ProcessId", "")).strip()
+        if not pid_text:
+            continue
+        cmdline = str(item.get("CommandLine") or item.get("ExecutablePath") or "")
+        executable = str(item.get("ExecutablePath") or "")
+        if not executable and cmdline:
+            executable = cmdline.split()[0]
+        perf = perf_by_pid.get(pid_text, {})
+        rows.append({
+            "pid": float(pid_text),
+            "executable": executable,
+            "cmdline": cmdline,
+            "userTicks": 0.0,
+            "threads": numeric(perf.get("ThreadCount", 0)),
+            "memoryBytes": numeric(perf.get("WorkingSetPrivate", 0)),
+            "fdCount": numeric(perf.get("HandleCount", 0)),
+            "cpuPercent": numeric(perf.get("PercentProcessorTime", 0)),
+        })
+    return rows
+
+
 def ibm_mq_process(row, qmgr_name):
-    executable = row["executable"].lower()
+    executable = row["executable"].replace("\\", "/").lower()
     basename = os.path.basename(executable)
+    if basename.endswith(".exe"):
+        basename = basename[:-4]
     cmdline = row["cmdline"].lower()
-    mq_path = "/opt/mqm/" in executable or "/opt/ibm/mq/" in executable or "/usr/mqm/" in executable
-    core_names = ("runmqlsr", "amqzxma0", "amqzlaa0", "amqzlsa0", "amqrmppa", "amqzmuc0")
+    mq_path = any(part in executable for part in ("/opt/mqm/", "/opt/ibm/mq/", "/usr/mqm/", "/ibm/mq/"))
+    core_names = ("runmqlsr", "amqmsrv", "amqzxma0", "amqzlaa0", "amqzlsa0", "amqrmppa", "amqzmuc0")
     if qmgr_name and qmgr_name.lower() not in cmdline:
         return False
     return basename in core_names or (mq_path and basename.startswith("amq"))
 
 
 def collect_processes(qmgr_name, settings):
+    if is_windows():
+        rows = [row for row in windows_process_sample(settings) if ibm_mq_process(row, qmgr_name)]
+        grouped = {}
+        for row in rows:
+            key = row["cmdline"][:512]
+            if key not in grouped:
+                grouped[key] = {"cmdline": key, "alive": 0.0, "count": 0.0, "cpu": 0.0,
+                                "memory": 0.0, "threads": 0.0, "fds": 0.0}
+            grouped[key]["alive"] = 1.0
+            grouped[key]["count"] += 1.0
+            grouped[key]["cpu"] += max(0.0, row["cpuPercent"])
+            grouped[key]["memory"] += row["memoryBytes"]
+            grouped[key]["threads"] += row["threads"]
+            grouped[key]["fds"] += row["fdCount"]
+        return grouped
+
     first = {}
     for name in os.listdir("/proc"):
         if not name.isdigit():
@@ -392,7 +571,20 @@ def collect(settings):
 
 
 def main(argv=None):
-    parser = argparse.ArgumentParser(description="IBM MQ队列管理器本地监控。参数由EASYOPS_COLLECTOR_*环境变量注入；仅支持Linux执行节点。")
+    parser = argparse.ArgumentParser(
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        description=(
+            "IBM MQ队列管理器本地监控，同时支持Linux和Windows执行节点。"
+            "参数由EASYOPS_COLLECTOR_*环境变量注入。"
+        ),
+        epilog=(
+            "示例：\n"
+            "  EASYOPS_COLLECTOR_instanceId=i1 EASYOPS_COLLECTOR_qmgrName=QM1 %(prog)s\n"
+            "  EASYOPS_COLLECTOR_mqBinPath=/opt/mqm/bin EASYOPS_COLLECTOR_qmgrName=QM1 %(prog)s\n"
+            "  EASYOPS_COLLECTOR_mqBinPath='C:\\Program Files\\IBM\\MQ\\bin' EASYOPS_COLLECTOR_qmgrName=QM1 %(prog)s\n\n"
+            "Linux默认探测/opt/mqm/bin、/opt/ibm/mq/bin、/usr/mqm/bin；Windows默认探测Program Files下IBM MQ bin目录。"
+        ),
+    )
     parser.add_argument("--version", action="version", version=VERSION)
     parser.parse_args(argv)
     try:
