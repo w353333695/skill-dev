@@ -1,5 +1,6 @@
 import hashlib
 import hmac
+import io
 import json
 import os
 import shutil
@@ -10,6 +11,7 @@ import time
 import unittest
 import uuid
 import zipfile
+from contextlib import redirect_stderr
 
 import yaml
 from pathlib import Path
@@ -17,7 +19,7 @@ from unittest import mock
 
 KIT = Path(__file__).resolve().parents[2] / "monitor-kits/host-deploy-instance-monitoring"
 SOURCE = KIT / "src/host_deploy_instance_monitor.py"
-PACKAGE = Path(__file__).resolve().parents[3] / "hub/monitor-kits/监控套件_主机部署实例监控_0.1.8.zip"
+PACKAGE = Path(__file__).resolve().parents[3] / "hub/monitor-kits/监控套件_主机部署实例监控_0.1.9.zip"
 WORKTREE_ROOT = Path(__file__).resolve().parents[7]
 
 
@@ -37,11 +39,13 @@ class HostDeployInstanceMonitorTests(unittest.TestCase):
             "EASYOPS_COLLECTOR_cacheTtlDays": "7",
             "EASYOPS_COLLECTOR_sampleInterval": "0.2",
             "EASYOPS_COLLECTOR_requestTimeout": "10",
+            "EASYOPS_COLLECTOR_logLevel": "DEBUG",
         }
         with mock.patch.dict(os.environ, env, clear=True):
             settings = m["config"]()
         self.assertEqual(settings["hostInstanceId"], "65eb86f148251")
         self.assertEqual(settings["cacheTtlSeconds"], 604800)
+        self.assertEqual(settings["logLevel"], "DEBUG")
         with mock.patch.dict(os.environ, {"EASYOPS_COLLECTOR_instanceId": "$.instanceId"}, clear=True):
             with self.assertRaises(ValueError):
                 m["config"]()
@@ -78,7 +82,7 @@ class HostDeployInstanceMonitorTests(unittest.TestCase):
         refreshed = dict(process)
         refreshed.update({"utime": 16.0, "stime": 5.0})
         settings = {
-            "hostInstanceId": "host1", "sampleInterval": 0.0,
+            "hostInstanceId": "host1", "sampleInterval": 0.0, "logLevel": "DEBUG",
         }
         target = {
             "instanceId": "deploy1", "installPath": "/usr/local/easyops/redis",
@@ -87,8 +91,10 @@ class HostDeployInstanceMonitorTests(unittest.TestCase):
         }
         clocks = iter([101.0, 102.0])
         with mock.patch.object(m["time"], "sleep"), mock.patch.object(m["time"], "time", side_effect=lambda: next(clocks)), \
-             mock.patch.dict(m, {"parse_proc_stat": mock.Mock(return_value=refreshed), "process_socket_inodes": mock.Mock(return_value=({"inode1"}, True)), "process_memory_bytes": mock.Mock(return_value=1000.0), "process_fd_usage": mock.Mock(return_value=(100, 1024))}):
-            result = m["collect_target"](target, [process], {6379: {"inode1"}}, 1000.0, 100.0, 2000.0, settings, 2000.0, 10.0, 1.0, 1)
+            mock.patch.dict(m, {"read_file": mock.Mock(return_value=b"123 (redis-server) R"), "parse_proc_stat": mock.Mock(return_value=refreshed), "process_socket_inodes": mock.Mock(return_value=({"inode1"}, True)), "process_memory_bytes": mock.Mock(return_value=1000.0), "process_fd_usage": mock.Mock(return_value=(100, 1024))}):
+            stderr = io.StringIO()
+            with redirect_stderr(stderr):
+                result = m["collect_target"](target, [process], {6379: {"inode1"}}, 1000.0, 100.0, 2000.0, settings, 2000.0, 10.0, 1.0, 1)
         self.assertEqual(len(result), 3)
         process_row, port_row, target_row = result
         self.assertEqual(process_row["dims"]["deployInstanceId"], "deploy1")
@@ -109,6 +115,44 @@ class HostDeployInstanceMonitorTests(unittest.TestCase):
         self.assertNotIn("cmdline", target_row["dims"])
         self.assertNotIn("port", target_row["dims"])
         self.assertEqual(set(target_row["vals"]), set(m["TARGET_METRIC_KEYS"]))
+        log_rows = [json.loads(line) for line in stderr.getvalue().splitlines()]
+        self.assertEqual({row["stage"] for row in log_rows}, {"target.start", "port.match", "process.metrics", "port.metrics", "target.metrics"})
+        self.assertTrue(all(row["level"] == "DEBUG" for row in log_rows))
+        self.assertNotIn("./bin/redis-server", stderr.getvalue())
+        self.assertNotIn("accessKey", stderr.getvalue())
+        self.assertNotIn("secretKey", stderr.getvalue())
+
+    def test_collect_target_fallback_logs_traceback_and_five_metrics(self):
+        m = module()
+        settings = {
+            "hostInstanceId": "host1", "hostUuid": "uuid", "hostIp": "ip",
+            "gateway": "http://gateway", "accessKey": "ak", "secretKey": "sk",
+            "sampleInterval": 0.0, "cacheTtlSeconds": 604800.0, "logLevel": "DEBUG",
+        }
+        target = {"instanceId": "deploy1", "installPath": "/redis"}
+        with mock.patch.dict(m, {
+            "ensure_cache": mock.Mock(return_value=({"refreshedAt": 1990.0, "targets": [target]}, 1.0)),
+            "list_processes": mock.Mock(return_value=[]),
+            "listening_ports": mock.Mock(return_value={}),
+            "boot_time": mock.Mock(return_value=1000.0),
+            "clock_ticks": mock.Mock(return_value=100.0),
+            "memory_total_bytes": mock.Mock(return_value=2000.0),
+            "collect_target": mock.Mock(side_effect=RuntimeError("target boom")),
+        }):
+            stderr = io.StringIO()
+            with redirect_stderr(stderr):
+                result = m["collect"](settings)
+        self.assertEqual(len(result), 1)
+        self.assertEqual(set(result[0]["vals"]), {
+            "deploy_instance_config_valid", "deploy_instance_collect_success",
+            "host_deploy_instance_target_count", "host_deploy_cache_age_seconds",
+            "host_deploy_cache_refresh_success",
+        })
+        log_rows = [json.loads(line) for line in stderr.getvalue().splitlines()]
+        failed = next(row for row in log_rows if row["stage"] == "target.collect_failed")
+        self.assertEqual(failed["level"], "ERROR")
+        self.assertEqual(failed["fallbackMetricCount"], 5)
+        self.assertIn("RuntimeError: target boom", failed["traceback"])
 
     def test_collect_target_splits_process_and_port_dimensions(self):
         m = module()
@@ -120,7 +164,8 @@ class HostDeployInstanceMonitorTests(unittest.TestCase):
         clocks = iter([101.0, 102.0])
         with mock.patch.object(m["time"], "sleep"), mock.patch.object(m["time"], "time", side_effect=lambda: next(clocks)), \
              mock.patch.dict(m, {"parse_proc_stat": mock.Mock(side_effect=[refreshed_first, refreshed_second]), "process_socket_inodes": mock.Mock(return_value=({"inode1"}, True)), "process_memory_bytes": mock.Mock(side_effect=[1000.0, 3000.0]), "process_fd_usage": mock.Mock(side_effect=[(100, 1024), (200, 2048)])}):
-            rows = m["collect_target"](target, [first, second], {6379: {"inode1"}}, 1000.0, 100.0, 4000.0, {"hostInstanceId": "host1", "sampleInterval": 0.0}, 2000.0, 10.0, 1.0, 1)
+            with redirect_stderr(io.StringIO()):
+                rows = m["collect_target"](target, [first, second], {6379: {"inode1"}}, 1000.0, 100.0, 4000.0, {"hostInstanceId": "host1", "sampleInterval": 0.0}, 2000.0, 10.0, 1.0, 1)
         self.assertEqual(len(rows), 5)
         self.assertEqual([row["dims"].get("cmdline") for row in rows[:2]], ["redis-server", "redis-sentinel"])
         self.assertEqual(rows[2]["dims"]["port"], "6379")
@@ -140,12 +185,14 @@ class HostDeployInstanceMonitorTests(unittest.TestCase):
             }
             data = {"version": 1, "refreshedAt": time.time() - 10, "targets": []}
             m["write_json_atomic"](m["cache_path"](settings), data)
-            cache, success = m["ensure_cache"](settings, time.time())
+            with redirect_stderr(io.StringIO()):
+                cache, success = m["ensure_cache"](settings, time.time())
             self.assertEqual(success, 1.0)
             self.assertEqual(cache["targets"], [])
             data["refreshedAt"] = time.time() - 100000
             m["write_json_atomic"](m["cache_path"](settings), data)
-            cache, success = m["ensure_cache"](settings, time.time())
+            with redirect_stderr(io.StringIO()):
+                cache, success = m["ensure_cache"](settings, time.time())
             self.assertEqual(success, 0.0)
             self.assertEqual(cache["targets"], [])
             self.assertEqual(os.stat(m["cache_path"](settings)).st_mode & 0o777, 0o600)
@@ -163,7 +210,7 @@ class HostDeployInstanceMonitorTests(unittest.TestCase):
     def test_help_and_version(self):
         result = subprocess.run([sys.executable, str(SOURCE), "--version"], capture_output=True, text=True, env={**os.environ, "PYTHONDONTWRITEBYTECODE": "1"})
         self.assertEqual(result.returncode, 0)
-        self.assertEqual(result.stdout.strip(), "0.1.8")
+        self.assertEqual(result.stdout.strip(), "0.1.9")
 
     def test_python2_json_output_uses_ascii_escape(self):
         source = SOURCE.read_text(encoding="utf-8")
@@ -194,6 +241,11 @@ class HostDeployInstanceMonitorTests(unittest.TestCase):
             self.assertFalse(params[name]["isEncrypt"])
         for name in ("openapiAk", "openapiSk", "openapiAccessKey", "openapiSecretKey"):
             self.assertNotIn(name, params)
+        self.assertEqual(params["logLevel"]["valueType"], "string")
+        self.assertEqual(params["logLevel"]["defaultValue"], "ERROR")
+        self.assertEqual(params["logLevel"]["use"], "collectParams")
+        self.assertFalse(params["logLevel"]["isFromSecret"])
+        self.assertFalse(params["logLevel"]["isEncrypt"])
 
     def test_definitions_and_package(self):
         origins = json.loads((KIT / "origin_metric.json").read_text(encoding="utf-8"))

@@ -1,6 +1,6 @@
 type: simple-script
 name: 主机部署实例监控
-version: "0.1.8"
+version: "0.1.9"
 command:
     collect:
         interpreter: ""
@@ -20,6 +20,7 @@ params:
     - openapiSkText
     - sampleInterval
     - requestTimeout
+    - logLevel
 paramDefine:
     - {name: instanceId, valueType: string, defaultValue: $.instanceId, display: false, displayName: "主机实例ID", description: "取HOST模型instanceId，用于缓存文件隔离；必填", use: collectParams, optional: false, isFromSecret: false, isEncrypt: false, extraArgs: null}
     - {name: hostUuid, valueType: string, defaultValue: $._uuid, display: false, displayName: "主机UUID", description: "取HOST._uuid，OpenAPI优先用它匹配部署实例uuid；缺失时使用主机IP", use: collectParams, optional: true, isFromSecret: false, isEncrypt: false, extraArgs: null}
@@ -31,6 +32,7 @@ paramDefine:
     - {name: openapiSkText, valueType: string, defaultValue: "", display: true, displayName: "OpenAPI SK", description: "普通字符串任务参数或EASYOPS_OPENAPI_SK；不启用Secret引用和加密，不写日志", use: collectParams, optional: false, isFromSecret: false, isEncrypt: false, extraArgs: null}
     - {name: sampleInterval, valueType: string, defaultValue: "0.2", display: true, displayName: "CPU采样间隔(秒)", description: "两次/proc进程CPU计数间隔，默认0.2秒，范围0.05-2", use: collectParams, optional: true, isFromSecret: false, isEncrypt: false, extraArgs: null}
     - {name: requestTimeout, valueType: int, defaultValue: "10", display: true, displayName: "OpenAPI超时(秒)", description: "OpenAPI请求超时，默认10秒，范围3-30", use: collectParams, optional: true, isFromSecret: false, isEncrypt: false, extraArgs: null}
+    - {name: logLevel, valueType: string, defaultValue: ERROR, display: true, displayName: "日志级别", description: "默认ERROR；DEBUG输出结构化采集诊断到stderr，不输出AK/SK或完整命令行", use: collectParams, optional: true, isFromSecret: false, isEncrypt: false, extraArgs: null}
 agentType: easyops
 category: 基础设施.计算资源
 scriptType: python

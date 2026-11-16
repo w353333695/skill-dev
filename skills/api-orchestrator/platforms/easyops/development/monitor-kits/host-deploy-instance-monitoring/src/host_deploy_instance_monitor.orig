@@ -20,7 +20,7 @@ else:
     from urllib import urlencode
     from urllib2 import Request, urlopen
 
-VERSION = "0.1.8"
+VERSION = "0.1.9"
 OBJECT_ID = "ARTIFACT_INST@ONEMODEL"
 OPENAPI_PATH = "/cmdbservice/v3/object/ARTIFACT_INST@ONEMODEL/instance/_search"
 OPENAPI_HOST = "openapi.easyops-only.com"
@@ -42,6 +42,21 @@ TARGET_METRIC_KEYS = [
     "host_deploy_cache_age_seconds", "host_deploy_cache_refresh_success",
 ]
 METRIC_KEYS = PROCESS_METRIC_KEYS + PORT_METRIC_KEYS + TARGET_METRIC_KEYS
+
+
+def value_digest(value):
+    return hashlib.sha1(text(value).encode("utf-8")).hexdigest()[:12]
+
+
+def log_event(settings, level, stage, **fields):
+    configured_level = text(settings.get("logLevel", "ERROR")).upper()
+    if level == "DEBUG" and configured_level != "DEBUG":
+        return
+    if level not in ("DEBUG", "ERROR"):
+        return
+    payload = {"level": level, "stage": stage}
+    payload.update(fields)
+    sys.stderr.write("%s\n" % json.dumps(payload, separators=(",", ":"), allow_nan=False))
 
 
 def text(value):
@@ -70,14 +85,17 @@ def config():
         cache_ttl_days = float(env("cacheTtlDays", "7"))
         sample_interval = float(env("sampleInterval", "0.2"))
         request_timeout = float(env("requestTimeout", "10"))
+        log_level = env("logLevel", "ERROR").upper()
     except ValueError:
-        raise ValueError("[config] 缓存有效期、采样间隔或请求超时必须是数字")
+        raise ValueError("[config] 缓存有效期、采样间隔、请求超时或日志级别格式错误")
     if not 1 <= cache_ttl_days <= 90:
         raise ValueError("[config] cacheTtlDays必须在1到90之间")
     if not 0.05 <= sample_interval <= 2:
         raise ValueError("[config] sampleInterval必须在0.05到2之间")
     if not 3 <= request_timeout <= 30:
         raise ValueError("[config] requestTimeout必须在3到30之间")
+    if log_level not in ("ERROR", "DEBUG"):
+        raise ValueError("[config] logLevel仅支持ERROR或DEBUG")
     return {
         "hostInstanceId": host_instance_id,
         "hostUuid": env("hostUuid"),
@@ -89,6 +107,7 @@ def config():
         "secretKey": env("openapiSkText") or os.environ.get("EASYOPS_OPENAPI_SK", ""),
         "sampleInterval": sample_interval,
         "requestTimeout": request_timeout,
+        "logLevel": log_level,
     }
 
 
@@ -116,6 +135,30 @@ def write_json_atomic(path, data):
 
 def cache_path(settings):
     return os.path.join(settings["cacheDir"], settings["hostInstanceId"] + ".json")
+
+
+def target_debug_summary(target):
+    process_list = target.get("processList") if isinstance(target.get("processList"), list) else []
+    groups = target.get("processMatchGroups") if isinstance(target.get("processMatchGroups"), list) else []
+    return {
+        "instanceId": text(target.get("instanceId")),
+        "objectId": text(target.get("_object_id")),
+        "installPath": text(target.get("installPath")),
+        "ports": normalize_ports(target),
+        "processListCount": len(process_list),
+        "processList": [
+            {
+                "pname": text(item.get("pname")) if isinstance(item, dict) else "",
+                "cmdlineHash": value_digest(item.get("cmdline", "")) if isinstance(item, dict) else "",
+            }
+            for item in process_list if isinstance(item, dict)
+        ],
+        "processMatchGroupCount": len(groups),
+        "processMatchKeywordCounts": [
+            len(item.get("cmdline", [])) if isinstance(item, dict) and isinstance(item.get("cmdline"), list) else 0
+            for item in groups
+        ],
+    }
 
 
 def load_cache(path):
@@ -164,6 +207,7 @@ def search_targets(settings):
     conditions = [item for item in conditions if list(item.values())[0]]
     if not conditions:
         raise ValueError("[search_targets] 缺少hostUuid/hostIp，无法定位部署实例")
+    log_event(settings, "DEBUG", "openapi.start", path=OPENAPI_PATH, conditionTypes=sorted(list(item.keys())[0] for item in conditions), pageLimit=100)
     fields = ["instanceId", "_object_id", "installPath", "version", "ip", "uuid", "ports", "processList", "processMatchGroups"]
     targets = []
     seen = set()
@@ -174,11 +218,15 @@ def search_targets(settings):
             "query": {"isMonitor": "是", "$or": conditions},
         }).encode("utf-8")
         query = sign_openapi("POST", OPENAPI_PATH, "application/json", body, settings["accessKey"], settings["secretKey"])
-        result = http_json(
-            settings["gateway"].rstrip("/") + OPENAPI_PATH, query, body,
-            {"Host": OPENAPI_HOST, "Content-Type": "application/json"},
-            settings["requestTimeout"],
-        )
+        try:
+            result = http_json(
+                settings["gateway"].rstrip("/") + OPENAPI_PATH, query, body,
+                {"Host": OPENAPI_HOST, "Content-Type": "application/json"},
+                settings["requestTimeout"],
+            )
+        except Exception:
+            log_event(settings, "ERROR", "openapi.request_failed", page=page, traceback=traceback.format_exc())
+            raise
         if result.get("code") not in (0, "0", None):
             raise RuntimeError("[search_targets] OpenAPI业务错误code=%s" % text(result.get("code")))
         data = result.get("data") or {}
@@ -188,6 +236,7 @@ def search_targets(settings):
                 seen.add(instance_id)
                 targets.append(row)
         total = int(data.get("total") or 0)
+        log_event(settings, "DEBUG", "openapi.page", page=page, returned=len(data.get("list") or []), total=total, kept=len(targets))
         if page * 1000 >= total:
             break
     return targets
@@ -213,12 +262,15 @@ def ensure_cache(settings, now):
     path = cache_path(settings)
     cache = load_cache(path)
     expired = cache is None or now - cache["refreshedAt"] > settings["cacheTtlSeconds"]
+    log_event(settings, "DEBUG", "cache.check", path=path, exists=cache is not None, ageSeconds=max(now - cache["refreshedAt"], 0.0) if cache else None, expired=expired, targetCount=len(cache.get("targets", [])) if cache else 0)
     refresh_success = 1.0
     if expired:
         try:
             cache = refresh_cache(settings, now)
             write_json_atomic(path, cache)
+            log_event(settings, "DEBUG", "cache.refresh_success", path=path, targetCount=len(cache.get("targets", [])))
         except Exception:
+            log_event(settings, "ERROR", "cache.refresh_failed", path=path, hasOldCache=cache is not None, traceback=traceback.format_exc())
             if cache is None:
                 raise
             refresh_success = 0.0
@@ -457,13 +509,17 @@ def collect_target(target, processes, sockets, boot_ts, ticks, mem_total, settin
     matched = match_target_processes(target, processes)
     expected_ports = normalize_ports(target)
     matched_inodes, fd_readable = process_socket_inodes(matched)
+    log_event(settings, "DEBUG", "target.start", target=target_debug_summary(target), processCount=len(processes), matchedProcessCount=len(matched), matchedPids=[item["pid"] for item in matched], matchedCmdlineHashes=[value_digest(item.get("cmdline", "")) for item in matched], expectedPorts=expected_ports, fdReadable=fd_readable, matchedSocketInodeCount=len(matched_inodes))
     listening = []
     for port in expected_ports:
         global_inodes = sockets.get(port, set())
+        intersect_inodes = matched_inodes.intersection(global_inodes)
+        reason = "process_socket" if matched_inodes and intersect_inodes else "global_socket_without_fd" if not fd_readable and global_inodes else "not_listening"
         if matched_inodes and matched_inodes.intersection(global_inodes):
             listening.append(port)
         elif not fd_readable and global_inodes:
             listening.append(port)
+        log_event(settings, "DEBUG", "port.match", deployInstanceId=text(target.get("instanceId")), port=port, reason=reason, globalSocketInodeCount=len(global_inodes), intersectSocketInodeCount=len(intersect_inodes))
     before_by_cmdline = {}
     for item in matched:
         cmdline = text(item.get("cmdline"))
@@ -476,6 +532,7 @@ def collect_target(target, processes, sockets, boot_ts, ticks, mem_total, settin
             parsed = parse_proc_stat(read_file("/proc/%d/stat" % item["pid"]))
         except (IOError, OSError):
             parsed = None
+            log_event(settings, "ERROR", "process.refresh_stat_failed", deployInstanceId=text(target.get("instanceId")), pid=item["pid"], traceback=traceback.format_exc())
         if parsed:
             parsed["cmdline"], parsed["cwd"] = item["cmdline"], item["cwd"]
             refreshed[item["pid"]] = parsed
@@ -524,6 +581,7 @@ def collect_target(target, processes, sockets, boot_ts, ticks, mem_total, settin
             "deploy_instance_process_fd_count": float(fd_count) if readable_fd_count else -1.0,
             "deploy_instance_process_fd_usage_percent": fd_usage,
         }
+        log_event(settings, "DEBUG", "process.metrics", deployInstanceId=text(target.get("instanceId")), cmdlineHash=value_digest(cmdline), refreshedProcessCount=len(group), beforeTicks=before, afterTicks=after, values=process_values)
         rows.append({"dims": dict(base_dims, cmdline=cmdline), "vals": process_values})
     for port in expected_ports or [""]:
         is_listening = port in listening
@@ -535,40 +593,52 @@ def collect_target(target, processes, sockets, boot_ts, ticks, mem_total, settin
             "deploy_instance_port_listen_ratio_pct": 100.0 if not expected_ports or is_listening else 0.0,
             "deploy_instance_config_valid": 1.0 if config_valid else 0.0,
         }
+        log_event(settings, "DEBUG", "port.metrics", deployInstanceId=text(target.get("instanceId")), port=text(port), values=port_values)
         rows.append({"dims": dict(base_dims, port=text(port)), "vals": port_values})
-    rows.append({"dims": dict(base_dims), "vals": {
+    target_values = {
         "deploy_instance_collect_success": 1.0,
         "host_deploy_instance_target_count": float(target_count),
         "host_deploy_cache_age_seconds": cache_age,
         "host_deploy_cache_refresh_success": refresh_success,
-    }})
+    }
+    log_event(settings, "DEBUG", "target.metrics", deployInstanceId=text(target.get("instanceId")), values=target_values)
+    rows.append({"dims": dict(base_dims), "vals": target_values})
     return rows
 
 
 def collect(settings):
     now = time.time()
+    log_event(settings, "DEBUG", "collect.start", version=VERSION, hostInstanceId=settings["hostInstanceId"], hasHostUuid=bool(settings["hostUuid"]), hasHostIp=bool(settings["hostIp"]), cacheTtlSeconds=settings["cacheTtlSeconds"], sampleInterval=settings["sampleInterval"])
     cache, refresh_success = ensure_cache(settings, now)
     cache_age = max(now - cache["refreshedAt"], 0.0)
     targets = [row for row in cache.get("targets", []) if isinstance(row, dict) and text(row.get("instanceId"))]
     processes, sockets = list_processes(), listening_ports()
     boot_ts, ticks, mem_total = boot_time(), clock_ticks(), memory_total_bytes()
+    log_event(settings, "DEBUG", "local.snapshot", targetCount=len(targets), processCount=len(processes), listeningPorts=sorted(sockets.keys()), bootTimestamp=boot_ts, clockTicks=ticks, memoryTotalBytes=mem_total)
     output = []
     for target in targets:
         try:
             output.extend(collect_target(target, processes, sockets, boot_ts, ticks, mem_total, settings, now, cache_age, refresh_success, len(targets)))
         except Exception:
+            log_event(settings, "ERROR", "target.collect_failed", deployInstanceId=text(target.get("instanceId")), fallbackMetricCount=5, traceback=traceback.format_exc())
             output.append({"dims": {"hostInstanceId": settings["hostInstanceId"], "deployInstanceId": text(target.get("instanceId")), "installPath": text(target.get("installPath"))}, "vals": {"deploy_instance_config_valid": 0.0, "deploy_instance_collect_success": 0.0, "host_deploy_instance_target_count": float(len(targets)), "host_deploy_cache_age_seconds": cache_age, "host_deploy_cache_refresh_success": refresh_success}})
+    metric_counts = {}
+    for row in output:
+        for key in row.get("vals", {}):
+            metric_counts[key] = metric_counts.get(key, 0) + 1
+    log_event(settings, "DEBUG", "collect.output", rowCount=len(output), uniqueMetricCount=len(metric_counts), expectedMetricCount=len(METRIC_KEYS), missingMetrics=sorted(set(METRIC_KEYS) - set(metric_counts)), metricCounts=dict(sorted(metric_counts.items())))
     return output
 
 
 def main(argv=None):
     parser = argparse.ArgumentParser(
         description="主机部署实例本机监控：按主机instanceId读取7天缓存，OpenAPI刷新isMonitor=是的ARTIFACT_INST目标，采集进程、端口、CPU、内存和句柄指标。",
-        epilog="参数均由 EASYOPS_COLLECTOR_* 环境变量注入：instanceId/hostUuid/hostIp/cacheDir/cacheTtlDays/openapiGateway/openapiAkText/openapiSkText/sampleInterval/requestTimeout。正常输出JSON数组；顶层异常输出COLLECT_ERROR并保持退出码0。示例：EASYOPS_COLLECTOR_instanceId=65eb86f148251 EASYOPS_COLLECTOR_hostUuid=f907... EASYOPS_COLLECTOR_hostIp=192.168.110.24 EASYOPS_COLLECTOR_openapiGateway=http://192.168.110.24 EASYOPS_OPENAPI_AK=... EASYOPS_OPENAPI_SK=... python host_deploy_instance_monitor.py")
+        epilog="参数均由 EASYOPS_COLLECTOR_* 环境变量注入：instanceId/hostUuid/hostIp/cacheDir/cacheTtlDays/openapiGateway/openapiAkText/openapiSkText/sampleInterval/requestTimeout/logLevel。logLevel=DEBUG时诊断JSON写stderr且不包含AK/SK，stdout保持纯JSON数组；默认ERROR只输出异常。顶层异常输出COLLECT_ERROR并保持退出码0。示例：EASYOPS_COLLECTOR_instanceId=65eb86f148251 EASYOPS_COLLECTOR_hostUuid=f907... EASYOPS_COLLECTOR_hostIp=192.168.110.24 EASYOPS_COLLECTOR_openapiGateway=http://192.168.110.24 EASYOPS_OPENAPI_AK=... EASYOPS_OPENAPI_SK=... EASYOPS_COLLECTOR_logLevel=DEBUG python host_deploy_instance_monitor.py")
     parser.add_argument("--version", action="version", version=VERSION)
     parser.parse_args(argv)
     try:
         settings = config()
+        log_event(settings, "DEBUG", "config.ready", version=VERSION, logLevel=settings["logLevel"], cacheDir=settings["cacheDir"], gatewayConfigured=bool(settings["gateway"]), accessKeyConfigured=bool(settings["accessKey"]), secretKeyConfigured=bool(settings["secretKey"]))
         sys.stdout.write("%s\n" % json.dumps(collect(settings), allow_nan=False))
     except Exception:
         sys.stdout.write("COLLECT_ERROR: [main] %s\n" % traceback.format_exc())
