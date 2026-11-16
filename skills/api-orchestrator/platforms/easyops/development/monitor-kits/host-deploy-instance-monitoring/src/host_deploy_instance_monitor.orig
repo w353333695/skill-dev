@@ -22,7 +22,7 @@ else:
     from urllib import urlencode
     from urllib2 import Request, urlopen
 
-VERSION = "0.1.10"
+VERSION = "0.1.11"
 IS_WINDOWS = os.name == "nt"
 OBJECT_ID = "ARTIFACT_INST@ONEMODEL"
 OPENAPI_PATH = "/cmdbservice/v3/object/ARTIFACT_INST@ONEMODEL/instance/_search"
@@ -100,13 +100,14 @@ def config():
         raise ValueError("[config] requestTimeout必须在3到30之间")
     if log_level not in ("ERROR", "DEBUG"):
         raise ValueError("[config] logLevel仅支持ERROR或DEBUG")
-    return {
+    settings = {
         "hostInstanceId": host_instance_id,
         "hostUuid": env("hostUuid"),
         "hostIp": env("hostIp"),
         "cacheDir": normalized_cache_dir(env("cacheDir", default_cache_dir())),
         "cacheTtlSeconds": cache_ttl_days * 86400,
-        "gateway": env("openapiGateway") or os.environ.get("EASYOPS_OPENAPI_GATEWAY_URL", ""),
+        "gateway": "",
+        "gatewaySource": "missing",
         "accessKey": env("openapiAkText") or os.environ.get("EASYOPS_OPENAPI_AK", ""),
         "secretKey": env("openapiSkText") or os.environ.get("EASYOPS_OPENAPI_SK", ""),
         "sampleInterval": sample_interval,
@@ -114,6 +115,10 @@ def config():
         "logLevel": log_level,
         "windows": IS_WINDOWS,
     }
+    settings["gateway"], settings["gatewaySource"] = resolve_openapi_gateway(
+        env("openapiGateway") or os.environ.get("EASYOPS_OPENAPI_GATEWAY_URL", "")
+    )
+    return settings
 
 
 def read_file(path):
@@ -136,6 +141,49 @@ def write_json_atomic(path, data):
         os.fsync(handle.fileno())
     os.chmod(temporary, 0o600)
     replace_file(temporary, path)
+
+
+def agent_config_paths():
+    if IS_WINDOWS:
+        return [r"C:\easyops\agent\conf\conf.yaml", r"C:\easyOps\agent\conf\conf.yaml"]
+    return ["/usr/local/easyops/agent/conf/conf.yaml"]
+
+
+def gateway_from_agent_config(path):
+    section = ""
+    for raw_line in decode_bytes(read_file(path)).splitlines():
+        line = raw_line.strip()
+        if not line or line.startswith("#"):
+            continue
+        if not raw_line[:1].isspace():
+            section = line.split(":", 1)[0].strip()
+            continue
+        if section != "command":
+            continue
+        match = re.match(r"^(?:-\s*)?ip\s*:\s*(['\"]?)([^#'\"]+)", line)
+        if not match:
+            continue
+        host = match.group(2).strip().split(",", 1)[0].strip()
+        if not host or host.startswith("__"):
+            continue
+        if ":" in host and not host.startswith("["):
+            host = "[%s]" % host
+        return "http://%s" % host
+    return ""
+
+
+def resolve_openapi_gateway(configured_gateway):
+    for path in agent_config_paths():
+        try:
+            gateway = gateway_from_agent_config(path)
+        except (IOError, OSError):
+            continue
+        if gateway:
+            return gateway, "agentConfig"
+    configured_gateway = text(configured_gateway).strip().rstrip("/")
+    if configured_gateway:
+        return configured_gateway, "param"
+    return "", "missing"
 
 
 def default_cache_dir():
@@ -820,12 +868,12 @@ def collect(settings):
 def main(argv=None):
     parser = argparse.ArgumentParser(
         description="主机部署实例本机监控：按主机instanceId读取7天缓存，OpenAPI刷新isMonitor=是的ARTIFACT_INST目标，采集进程、端口、CPU、内存和句柄指标。",
-        epilog="参数均由 EASYOPS_COLLECTOR_* 环境变量注入：instanceId/hostUuid/hostIp/cacheDir/cacheTtlDays/openapiGateway/openapiAkText/openapiSkText/sampleInterval/requestTimeout/logLevel。logLevel=DEBUG时诊断JSON写stderr且不包含AK/SK，stdout保持纯JSON数组；默认ERROR只输出异常。顶层异常输出COLLECT_ERROR并保持退出码0。示例：EASYOPS_COLLECTOR_instanceId=65eb86f148251 EASYOPS_COLLECTOR_hostUuid=f907... EASYOPS_COLLECTOR_hostIp=192.168.110.24 EASYOPS_COLLECTOR_openapiGateway=http://192.168.110.24 EASYOPS_OPENAPI_AK=... EASYOPS_OPENAPI_SK=... EASYOPS_COLLECTOR_logLevel=DEBUG python host_deploy_instance_monitor.py")
+        epilog="参数均由 EASYOPS_COLLECTOR_* 环境变量注入：instanceId/hostUuid/hostIp/cacheDir/cacheTtlDays/openapiGateway(兜底)/openapiAkText/openapiSkText/sampleInterval/requestTimeout/logLevel。logLevel=DEBUG时诊断JSON写stderr且不包含AK/SK，stdout保持纯JSON数组；默认ERROR只输出异常。顶层异常输出COLLECT_ERROR并保持退出码0。示例：EASYOPS_COLLECTOR_instanceId=65eb86f148251 EASYOPS_COLLECTOR_hostUuid=f907... EASYOPS_COLLECTOR_hostIp=192.168.110.24 EASYOPS_COLLECTOR_openapiGateway=http://192.168.110.24 EASYOPS_OPENAPI_AK=... EASYOPS_OPENAPI_SK=... EASYOPS_COLLECTOR_logLevel=DEBUG python host_deploy_instance_monitor.py")
     parser.add_argument("--version", action="version", version=VERSION)
     parser.parse_args(argv)
     try:
         settings = config()
-        log_event(settings, "DEBUG", "config.ready", version=VERSION, logLevel=settings["logLevel"], cacheDir=settings["cacheDir"], gatewayConfigured=bool(settings["gateway"]), accessKeyConfigured=bool(settings["accessKey"]), secretKeyConfigured=bool(settings["secretKey"]))
+        log_event(settings, "DEBUG", "config.ready", version=VERSION, logLevel=settings["logLevel"], cacheDir=settings["cacheDir"], gatewayConfigured=bool(settings["gateway"]), gatewaySource=settings["gatewaySource"], accessKeyConfigured=bool(settings["accessKey"]), secretKeyConfigured=bool(settings["secretKey"]))
         sys.stdout.write("%s\n" % json.dumps(collect(settings), allow_nan=False))
     except Exception:
         sys.stdout.write("COLLECT_ERROR: [main] %s\n" % traceback.format_exc())

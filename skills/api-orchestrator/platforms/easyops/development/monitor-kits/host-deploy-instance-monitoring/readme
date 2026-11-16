@@ -4,10 +4,11 @@
 
 目标发现流程：
 
-1. 优先读取 `<cacheDir>/<hostInstanceId>.json`。
-2. 缓存不存在、损坏或超过 `cacheTtlDays`（默认7天）时，调用 OpenAPI `POST /cmdbservice/v3/object/ARTIFACT_INST@ONEMODEL/instance/_search`。
-3. OpenAPI 查询 `isMonitor=是`，并按 `host.instanceId`、部署实例 `uuid` 或 `ip` 匹配当前主机；结果原子写回缓存。
-4. 若缓存过期但 OpenAPI 失败，允许继续使用旧缓存并输出 `host_deploy_cache_refresh_success=0`；无缓存可用时采集报错。
+1. OpenAPI网关地址默认读取执行主机agent配置：Linux `/usr/local/easyops/agent/conf/conf.yaml`，Windows `C:\easyops\agent\conf\conf.yaml`，取`command.server_groups[0].hosts[0].ip`第一项并使用`http://<ip>`；旧任务`openapiGateway`参数或环境变量仅作为兼容兜底。
+2. 优先读取 `<cacheDir>/<hostInstanceId>.json`。
+3. 缓存不存在、损坏或超过 `cacheTtlDays`（默认7天）时，调用 OpenAPI `POST /cmdbservice/v3/object/ARTIFACT_INST@ONEMODEL/instance/_search`。
+4. OpenAPI 查询 `isMonitor=是`，并按 `host.instanceId`、部署实例 `uuid` 或 `ip` 匹配当前主机；结果原子写回缓存。
+5. 若缓存过期但 OpenAPI 失败，允许继续使用旧缓存并输出 `host_deploy_cache_refresh_success=0`；无缓存可用时采集报错。
 
 目标匹配依据：优先使用 `processMatchGroups.cmdline`；无匹配关键字组时使用 `processList` 的 `pname/cwd/cmdline`，并参考 `installPath`。端口检查读取 `/proc/net/tcp*` 与进程 socket inode；无法读取进程 fd 时退化为检查主机端口监听。
 
@@ -15,7 +16,7 @@
 
 指标包含：进程存活、进程/线程/僵尸进程数量、启动时间与运行时长、期望与实际监听端口、端口缺失数与监听比例、进程内存、CPU、句柄数与句柄使用率、目标配置有效性、采集成功率和缓存状态。进程相关指标带`cmdline`维度并按命令行分组输出；端口相关指标带`port`维度，每个期望端口单独输出监听状态。Linux与Windows均输出同一套22项指标定义，便于告警和看板复用。
 
-OpenAPI AK/SK 通过普通字符串任务参数 `openapiAkText`、`openapiSkText` 或 `EASYOPS_OPENAPI_AK`、`EASYOPS_OPENAPI_SK` 环境变量注入；网关地址可通过任务参数或 `EASYOPS_OPENAPI_GATEWAY_URL` 注入。脚本不记录密钥。OpenAPI 主体需要有 `ARTIFACT_INST@ONEMODEL` 读权限，网关需放行 search URI。
+OpenAPI AK/SK 通过普通字符串任务参数 `openapiAkText`、`openapiSkText` 或 `EASYOPS_OPENAPI_AK`、`EASYOPS_OPENAPI_SK` 环境变量注入；网关地址默认从agent配置读取，旧任务参数或 `EASYOPS_OPENAPI_GATEWAY_URL` 仅作兜底。脚本不记录密钥。OpenAPI 主体需要有 `ARTIFACT_INST@ONEMODEL` 读权限，网关需放行 search URI。
 
 诊断日志：`logLevel` 默认 `ERROR`，仅输出异常；设为 `DEBUG` 时向 stderr 输出结构化 JSON 诊断，包括配置就绪、缓存检查/刷新、OpenAPI分页、目标配置摘要、进程匹配数量与PID、端口关联判定、每组指标值和最终22项覆盖统计。诊断不输出AK/SK或完整进程命令行，命令行仅输出短哈希；stdout始终保持纯JSON数组。若日志出现`target.collect_failed`，其traceback会解释该目标为何退化为仅5项兜底指标。
 
