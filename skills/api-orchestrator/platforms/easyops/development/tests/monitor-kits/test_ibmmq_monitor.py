@@ -97,16 +97,11 @@ class IBMMQMonitorTest(unittest.TestCase):
         self.assertEqual(by_key["ibmmq_listener_status"], 1.0)
         self.assertIn("DISPLAY QSTATUS", calls[0][1])
 
-    def test_model_and_discovery(self):
-        model = json.loads((KIT / "IBMMQ_QMGR@ONEMODEL.json").read_text())[0]
-        self.assertEqual(model["objectId"], "IBMMQ_QMGR@ONEMODEL")
-        self.assertEqual(model["parentObjectId"], "ARTIFACT_INST@ONEMODEL")
-        self.assertEqual(model["category"], "应用资源.中间件")
-        attrs = {row["id"] for row in model["attrList"]}
-        self.assertTrue({"qmgrName", "mqBinPath", "listenerPort", "listenerNames", "version", "isMonitor"}.issubset(attrs))
+    def test_resource_discovery_and_no_model_override(self):
         discovery = json.loads((KIT / "resource_discovery_define.json").read_text())
-        self.assertEqual(discovery[0]["objectId"], "IBMMQ_QMGR@ONEMODEL")
+        self.assertEqual(discovery[0]["objectId"], "IBMMQ@ONEMODEL")
         self.assertEqual(discovery[0]["type"], "ARTIFACT_INST@ONEMODEL")
+        self.assertFalse((KIT / "IBMMQ@ONEMODEL.json").exists())
 
     def test_definitions(self):
         plugin = yaml.safe_load((KIT / "plugin.yaml").read_text())
@@ -114,7 +109,7 @@ class IBMMQMonitorTest(unittest.TestCase):
         aliases = json.loads((KIT / "alias_metric.json").read_text())
         metric_sets = json.loads((KIT / "metric_set.json").read_text())
         self.assertEqual(plugin["name"], "IBM MQ监控")
-        self.assertEqual(plugin["relateObjectId"], "IBMMQ_QMGR@ONEMODEL")
+        self.assertEqual(plugin["relateObjectId"], "IBMMQ@ONEMODEL")
         self.assertEqual(len(origins), 30)
         self.assertEqual({row["key"] for row in origins}, {row["name"] for row in aliases})
         self.assertTrue(all(isinstance(row, dict) and row.get("name") for row in metric_sets))
@@ -125,7 +120,7 @@ class IBMMQMonitorTest(unittest.TestCase):
     def test_alert_xlsx(self):
         workbook = load_workbook(XLSX, data_only=False)
         sheet = workbook.active
-        self.assertEqual(sheet["B3"].value, "IBMMQ_QMGR@ONEMODEL")
+        self.assertEqual(sheet["B3"].value, "IBMMQ@ONEMODEL")
         conditions = json.loads(sheet["R3"].value)
         expected = {
             "ibmmq_qmgr_status", "ibmmq_process_alive", "ibmmq_listener_status",
@@ -145,6 +140,8 @@ class IBMMQMonitorTest(unittest.TestCase):
                 self.assertEqual(mode, 0o755 if item.is_dir() else 0o664)
             self.assertIn("IBM MQ监控/src/ibmmq_monitor.orig", package.namelist())
             self.assertIn("IBM MQ监控/IBM_MQ监控_告警规则模板_0.2.0.xlsx", package.namelist())
+            self.assertIn("IBM MQ监控/resource_discovery_define.json", package.namelist())
+            self.assertNotIn("IBM MQ监控/IBMMQ@ONEMODEL.json", package.namelist())
 
 
 if __name__ == "__main__":

@@ -1,16 +1,16 @@
 IBM MQ监控套件
 
-版本：0.2.0；关联模型：`IBMMQ_QMGR@ONEMODEL`（IBM MQ队列管理器实例）。
+版本：0.2.0；关联现网内置模型：`IBMMQ@ONEMODEL`（IBMMQ实例）。
 
 ## 模型与执行
 
-`IBMMQ_QMGR@ONEMODEL` 继承 `ARTIFACT_INST@ONEMODEL`，复用部署实例继承的 `ip`、`installPath`、`processList` 与主机/部署关系；新增 `qmgrName`、`mqBinPath`、`listenerPort`、`listenerNames`、`version`、`environment`、`isMonitor` 等字段。一个实例对应 `ip + qmgrName` 的一个队列管理器。
+`IBMMQ@ONEMODEL` 已存在且继承 `ARTIFACT_INST@ONEMODEL`，具备 `ip`、`installPath`、`processList/processMatchGroups`、`isMonitor` 与部署主机关系。本套件不导入或修改受保护模型；一个实例对应 `ip + name` 中的一个队列管理器，`name` 必须填写队列管理器名。
 
-监控任务按实例读取 `$.instanceId`、`$.qmgrName`、`$.ip`、`$.installPath` 和 `$.mqBinPath`，执行节点应能通过部署实例与主机关联在目标主机本地执行命令。
+监控任务按实例读取 `$.instanceId`、`$.name`、`$.ip`、`$.installPath`，并可通过任务参数覆盖MQ命令目录。执行节点应通过 `ARTIFACT_INST@ONEMODEL_host_artifactInsts_HOST` 继承关系定位部署主机。
 
 ## 采集链路
 
-1. 优先按 `$.mqBinPath` 定位命令，其次使用 `$.installPath/bin`、`MQ_INSTALLATION_PATH/bin`、常见安装目录和 `PATH`。
+1. 优先使用任务参数 `mqBinPath`，其次使用 `$.installPath/bin`、`MQ_INSTALLATION_PATH/bin`、常见安装目录和 `PATH`。
 2. 执行 `dspmq -m <qmgrName> -o status` 确认目标队列管理器存在并读取状态。
 3. 执行 `runmqsc <qmgrName>` 批量查询队列、队列状态、通道状态和监听器状态。
 4. 默认排除 `SYSTEM.` 前缀队列，可用 `queueFilter` 正则筛选；可选读取 `/proc` 采集进程CPU、内存、线程和句柄。
@@ -19,10 +19,10 @@ IBM MQ监控套件
 ## 参数
 
 - `instanceId`：取 `$.instanceId`，IBM MQ实例维度。
-- `qmgrName`：取 `$.qmgrName`，必填，一个实例只采集一个队列管理器。
+- `qmgrName`：取 `$.name`，必填；实例名必须等于队列管理器名。
 - `hostIp`：取继承字段 `$.ip`，用于维度和部署定位。
 - `installPath`：取继承字段 `$.installPath`，用于定位bin目录。
-- `mqBinPath`：取 `$.mqBinPath`；为空时自动探测。
+- `mqBinPath`：手填命令目录；为空时自动探测。
 - `queueFilter`：队列名正则，默认 `.*`。
 - `includeSystemQueues`：默认 `false`，排除系统队列。
 - `processMonitor`：默认 `true`，采集进程资源。

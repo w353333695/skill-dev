@@ -1,7 +1,7 @@
 [
   {
-    "objectId": "IBMMQ_QMGR@ONEMODEL",
-    "category": "应用资源.中间件",
+    "objectId": "IBMMQ@ONEMODEL",
+    "category": "平台资源.消息队列",
     "type": "ARTIFACT_INST@ONEMODEL"
   }
 ]

@@ -15,7 +15,7 @@ KIT = ROOT / "monitor-kits/ibmmq-monitoring"
 HUB = ROOT.parent / "hub/monitor-kits"
 NAME = "IBM MQ监控"
 VERSION = "0.2.0"
-OBJECT_ID = "IBMMQ_QMGR@ONEMODEL"
+OBJECT_ID = "IBMMQ@ONEMODEL"
 XLSX_NAME = "IBM_MQ监控_告警规则模板_0.2.0.xlsx"
 ZIP_NAME = "监控套件_IBM_MQ监控_0.2.0.zip"
 BASE_DIMS = ("ibmmqInstanceId", "qmgrName", "hostIp", "installPath")
@@ -58,11 +58,11 @@ METRICS = (
     ("ibmmq_process_fd_count", "进程打开句柄数", "个", "进程资源", PROCESS_DIMS),
 )
 PARAMETERS = (
-    ("instanceId", "string", "$.instanceId", "IBM MQ实例ID", "取IBMMQ_QMGR.instanceId，用于实例维度", False, False),
-    ("qmgrName", "string", "$.qmgrName", "队列管理器", "取IBMMQ_QMGR.qmgrName；一个实例对应一个队列管理器", False, False),
+    ("instanceId", "string", "$.instanceId", "IBM MQ实例ID", "取IBMMQ.instanceId，用于实例维度", False, False),
+    ("qmgrName", "string", "$.name", "队列管理器", "取IBMMQ实例名称；实例名应配置为队列管理器名", False, False),
     ("hostIp", "string", "$.ip", "部署主机IP", "取ARTIFACT_INST继承ip，用于维度与部署定位", False, False),
     ("installPath", "string", "$.installPath", "安装路径", "取ARTIFACT_INST继承installPath，用于定位bin目录", False, False),
-    ("mqBinPath", "string", "$.mqBinPath", "IBM MQ bin目录", "取IBMMQ_QMGR.mqBinPath；为空时按installPath和常见安装目录探测", True, True),
+    ("mqBinPath", "string", "", "IBM MQ bin目录", "手动填写或留空；为空时按installPath和常见安装目录探测", True, True),
     ("queueFilter", "string", ".*", "队列过滤正则", "默认监控全部非SYSTEM.前缀队列", True, True),
     ("includeSystemQueues", "string", "false", "包含系统队列", "默认排除SYSTEM.前缀队列", True, True),
     ("processMonitor", "string", "true", "启用进程资源采集", "默认启用，按cmdline分组输出进程资源", True, True),
@@ -116,41 +116,10 @@ def attr_define(attr_id, name, value_type, description, required=False, enum_val
     }
 
 
-def write_model():
-    attrs = [
-        attr_define("qmgrName", "队列管理器名称", "str", "dspmq返回的QMNAME，实例业务主键之一", True),
-        attr_define("mqBinPath", "命令目录", "str", "dspmq/runmqsc所在bin目录；为空时按installPath探测"),
-        attr_define("listenerPort", "TCP监听端口", "int", "runmqlsr监听端口；多监听器以逗号分隔时建议拆分子实例"),
-        attr_define("listenerNames", "监听器名称", "str", "runmqsc DISPLAY LSSTATUS返回的监听器名，多个用英文逗号分隔"),
-        attr_define("version", "IBM MQ版本", "str", "dspmqver或安装目录元数据"),
-        attr_define("environment", "环境类型", "enum", "prod/test/uat/other", enum_values=["prod", "test", "uat", "other"]),
-        attr_define("isMonitor", "是否监控", "bool", "自动发现默认置为true，实例下线时置为false", default=True),
-        attr_define("discoverSource", "发现来源", "enum", "dspmq/process/manual", enum_values=["dspmq", "process", "manual"]),
-        attr_define("lastDiscoverTime", "最近发现时间", "str", "最近一次自动发现或校准时间"),
-    ]
-    model = {
-        "objectId": OBJECT_ID, "name": "IBM MQ队列管理器实例", "memo": "IBM MQ部署实例，一个hostIp+qmgrName对应一个队列管理器",
-        "protected": False, "category": "应用资源.中间件", "system": "", "notifyDenied": True,
-        "view": {
-            "attr_authorizers": {}, "attr_category_order": ["基本信息", "IBM MQ配置"],
-            "attr_order": ["name", "qmgrName", "mqBinPath", "listenerPort", "listenerNames", "version", "environment", "isMonitor", "discoverSource", "lastDiscoverTime", "ip", "ports", "installPath", "processList", "collectedTs"],
-            "hide_columns": ["resourceInstanceId", "uuid", "containerId", "resourceDescription", "collectedDataStatus", "deploymentMode", "type", "collectedJobIds"],
-            "relation_default_attr": None, "relation_group_order": [], "relation_order": [],
-            "show_key": ["qmgrName", "ip"], "trans_hier_relation_list": None, "visible": True,
-        },
-        "attrList": attrs, "relation_groups": [], "relation_list": [], "indexList": [],
-        "updateAuthorizers": [], "deleteAuthorizers": [], "readAuthorizers": [],
-        "wordIndexDenied": False, "_version": 1, "creator": "easyops", "modifier": "easyops",
-        "isAbstract": False, "parentObjectId": "ARTIFACT_INST@ONEMODEL",
-        "parentObjectIds": ["ARTIFACT_INST@ONEMODEL", "RESOURCE@ONEMODEL"],
-        "permissionDenied": False,
-    }
-    write_json(KIT / (OBJECT_ID + ".json"), [model])
+def write_resource_discovery():
     write_json(KIT / "resource_discovery_define.json", [{
-        "objectId": OBJECT_ID, "category": "应用资源.中间件", "type": "ARTIFACT_INST@ONEMODEL",
+        "objectId": OBJECT_ID, "category": "平台资源.消息队列", "type": "ARTIFACT_INST@ONEMODEL",
     }])
-
-
 def plugin_yaml():
     lines = [
         "type: simple-script", "name: %s" % NAME, 'version: "%s"' % VERSION,
@@ -171,10 +140,10 @@ def plugin_yaml():
             )
         )
     lines.extend([
-        "agentType: easyops", "category: 中间件.消息队列", "scriptType: python",
+        "agentType: easyops", "category: 消息队列", "scriptType: python",
         "interpreter: \"\"", "samplerType: metric_sampler",
         "memo: \"按IBM MQ队列管理器实例调用dspmq/runmqsc，采集IBM MQ队列管理器、监听器、通道、队列深度和进程资源指标。\"",
-        "icon: null", "relateObjectId: IBMMQ_QMGR@ONEMODEL",
+        "icon: null", "relateObjectId: IBMMQ@ONEMODEL",
     ])
     return "\n".join(lines) + "\n"
 
@@ -245,7 +214,6 @@ def build_zip():
         (KIT / "plugin.yaml", NAME + "/plugin.yaml"),
         (KIT / "package.conf.yaml", NAME + "/package.conf.yaml"),
         (KIT / "readme", NAME + "/readme"),
-        (KIT / (OBJECT_ID + ".json"), NAME + "/" + OBJECT_ID + ".json"),
         (KIT / "resource_discovery_define.json", NAME + "/resource_discovery_define.json"),
         (KIT / "metric_set.json", NAME + "/metric_set.json"),
         (KIT / "origin_metric.json", NAME + "/origin_metric.json"),
@@ -266,7 +234,7 @@ def main():
     parser = argparse.ArgumentParser(description="生成IBM MQ监控套件离线产物")
     parser.add_argument("--skip-zip", action="store_true", help="只生成源目录定义，不生成Hub ZIP")
     args = parser.parse_args()
-    write_model()
+    write_resource_discovery()
     write_definitions()
     (KIT / "plugin.yaml").write_text(plugin_yaml(), encoding="utf-8")
     (KIT / "package.conf.yaml").write_text('name: %s\nversion: "%s"\n' % (NAME, VERSION), encoding="utf-8")

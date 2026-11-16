@@ -35,7 +35,7 @@
       "采集状态"
     ],
     "name": "ibmmq_collect_success",
-    "objectId": "IBMMQ_QMGR@ONEMODEL",
+    "objectId": "IBMMQ@ONEMODEL",
     "originalMetrics": [
       "ibmmq_collect_success"
     ],
@@ -78,7 +78,7 @@
       "采集状态"
     ],
     "name": "ibmmq_discovery_success",
-    "objectId": "IBMMQ_QMGR@ONEMODEL",
+    "objectId": "IBMMQ@ONEMODEL",
     "originalMetrics": [
       "ibmmq_discovery_success"
     ],
@@ -103,7 +103,7 @@
       "队列管理器"
     ],
     "name": "ibmmq_qmgr_count",
-    "objectId": "IBMMQ_QMGR@ONEMODEL",
+    "objectId": "IBMMQ@ONEMODEL",
     "originalMetrics": [
       "ibmmq_qmgr_count"
     ],
@@ -146,7 +146,7 @@
       "队列管理器"
     ],
     "name": "ibmmq_qmgr_status",
-    "objectId": "IBMMQ_QMGR@ONEMODEL",
+    "objectId": "IBMMQ@ONEMODEL",
     "originalMetrics": [
       "ibmmq_qmgr_status"
     ],
@@ -189,7 +189,7 @@
       "采集状态"
     ],
     "name": "ibmmq_sc_command_success",
-    "objectId": "IBMMQ_QMGR@ONEMODEL",
+    "objectId": "IBMMQ@ONEMODEL",
     "originalMetrics": [
       "ibmmq_sc_command_success"
     ],
@@ -232,7 +232,7 @@
       "队列"
     ],
     "name": "ibmmq_queue_total",
-    "objectId": "IBMMQ_QMGR@ONEMODEL",
+    "objectId": "IBMMQ@ONEMODEL",
     "originalMetrics": [
       "ibmmq_queue_total"
     ],
@@ -275,7 +275,7 @@
       "队列"
     ],
     "name": "ibmmq_queue_depth_total",
-    "objectId": "IBMMQ_QMGR@ONEMODEL",
+    "objectId": "IBMMQ@ONEMODEL",
     "originalMetrics": [
       "ibmmq_queue_depth_total"
     ],
@@ -318,7 +318,7 @@
       "队列"
     ],
     "name": "ibmmq_queue_max_depth",
-    "objectId": "IBMMQ_QMGR@ONEMODEL",
+    "objectId": "IBMMQ@ONEMODEL",
     "originalMetrics": [
       "ibmmq_queue_max_depth"
     ],
@@ -361,7 +361,7 @@
       "队列"
     ],
     "name": "ibmmq_queue_max_usage_percent",
-    "objectId": "IBMMQ_QMGR@ONEMODEL",
+    "objectId": "IBMMQ@ONEMODEL",
     "originalMetrics": [
       "ibmmq_queue_max_usage_percent"
     ],
@@ -410,7 +410,7 @@
       "队列明细"
     ],
     "name": "ibmmq_queue_current_depth",
-    "objectId": "IBMMQ_QMGR@ONEMODEL",
+    "objectId": "IBMMQ@ONEMODEL",
     "originalMetrics": [
       "ibmmq_queue_current_depth"
     ],
@@ -459,7 +459,7 @@
       "队列明细"
     ],
     "name": "ibmmq_queue_max_depth_config",
-    "objectId": "IBMMQ_QMGR@ONEMODEL",
+    "objectId": "IBMMQ@ONEMODEL",
     "originalMetrics": [
       "ibmmq_queue_max_depth_config"
     ],
@@ -508,7 +508,7 @@
       "队列明细"
     ],
     "name": "ibmmq_queue_usage_percent",
-    "objectId": "IBMMQ_QMGR@ONEMODEL",
+    "objectId": "IBMMQ@ONEMODEL",
     "originalMetrics": [
       "ibmmq_queue_usage_percent"
     ],
@@ -557,7 +557,7 @@
       "队列明细"
     ],
     "name": "ibmmq_queue_oldest_message_age_seconds",
-    "objectId": "IBMMQ_QMGR@ONEMODEL",
+    "objectId": "IBMMQ@ONEMODEL",
     "originalMetrics": [
       "ibmmq_queue_oldest_message_age_seconds"
     ],
@@ -606,7 +606,7 @@
       "队列明细"
     ],
     "name": "ibmmq_queue_input_handles",
-    "objectId": "IBMMQ_QMGR@ONEMODEL",
+    "objectId": "IBMMQ@ONEMODEL",
     "originalMetrics": [
       "ibmmq_queue_input_handles"
     ],
@@ -655,7 +655,7 @@
       "队列明细"
     ],
     "name": "ibmmq_queue_output_handles",
-    "objectId": "IBMMQ_QMGR@ONEMODEL",
+    "objectId": "IBMMQ@ONEMODEL",
     "originalMetrics": [
       "ibmmq_queue_output_handles"
     ],
@@ -698,7 +698,7 @@
       "监听器"
     ],
     "name": "ibmmq_listener_total",
-    "objectId": "IBMMQ_QMGR@ONEMODEL",
+    "objectId": "IBMMQ@ONEMODEL",
     "originalMetrics": [
       "ibmmq_listener_total"
     ],
@@ -741,7 +741,7 @@
       "监听器"
     ],
     "name": "ibmmq_listener_running_count",
-    "objectId": "IBMMQ_QMGR@ONEMODEL",
+    "objectId": "IBMMQ@ONEMODEL",
     "originalMetrics": [
       "ibmmq_listener_running_count"
     ],
@@ -796,7 +796,7 @@
       "监听器明细"
     ],
     "name": "ibmmq_listener_status",
-    "objectId": "IBMMQ_QMGR@ONEMODEL",
+    "objectId": "IBMMQ@ONEMODEL",
     "originalMetrics": [
       "ibmmq_listener_status"
     ],
@@ -839,7 +839,7 @@
       "通道"
     ],
     "name": "ibmmq_channel_total",
-    "objectId": "IBMMQ_QMGR@ONEMODEL",
+    "objectId": "IBMMQ@ONEMODEL",
     "originalMetrics": [
       "ibmmq_channel_total"
     ],
@@ -882,7 +882,7 @@
       "通道"
     ],
     "name": "ibmmq_channel_running_count",
-    "objectId": "IBMMQ_QMGR@ONEMODEL",
+    "objectId": "IBMMQ@ONEMODEL",
     "originalMetrics": [
       "ibmmq_channel_running_count"
     ],
@@ -925,7 +925,7 @@
       "通道"
     ],
     "name": "ibmmq_channel_retrying_count",
-    "objectId": "IBMMQ_QMGR@ONEMODEL",
+    "objectId": "IBMMQ@ONEMODEL",
     "originalMetrics": [
       "ibmmq_channel_retrying_count"
     ],
@@ -980,7 +980,7 @@
       "通道明细"
     ],
     "name": "ibmmq_channel_status",
-    "objectId": "IBMMQ_QMGR@ONEMODEL",
+    "objectId": "IBMMQ@ONEMODEL",
     "originalMetrics": [
       "ibmmq_channel_status"
     ],
@@ -1035,7 +1035,7 @@
       "通道明细"
     ],
     "name": "ibmmq_channel_messages",
-    "objectId": "IBMMQ_QMGR@ONEMODEL",
+    "objectId": "IBMMQ@ONEMODEL",
     "originalMetrics": [
       "ibmmq_channel_messages"
     ],
@@ -1090,7 +1090,7 @@
       "通道明细"
     ],
     "name": "ibmmq_channel_bytes",
-    "objectId": "IBMMQ_QMGR@ONEMODEL",
+    "objectId": "IBMMQ@ONEMODEL",
     "originalMetrics": [
       "ibmmq_channel_bytes"
     ],
@@ -1139,7 +1139,7 @@
       "进程资源"
     ],
     "name": "ibmmq_process_alive",
-    "objectId": "IBMMQ_QMGR@ONEMODEL",
+    "objectId": "IBMMQ@ONEMODEL",
     "originalMetrics": [
       "ibmmq_process_alive"
     ],
@@ -1188,7 +1188,7 @@
       "进程资源"
     ],
     "name": "ibmmq_process_count",
-    "objectId": "IBMMQ_QMGR@ONEMODEL",
+    "objectId": "IBMMQ@ONEMODEL",
     "originalMetrics": [
       "ibmmq_process_count"
     ],
@@ -1237,7 +1237,7 @@
       "进程资源"
     ],
     "name": "ibmmq_process_cpu_percent",
-    "objectId": "IBMMQ_QMGR@ONEMODEL",
+    "objectId": "IBMMQ@ONEMODEL",
     "originalMetrics": [
       "ibmmq_process_cpu_percent"
     ],
@@ -1286,7 +1286,7 @@
       "进程资源"
     ],
     "name": "ibmmq_process_memory_bytes",
-    "objectId": "IBMMQ_QMGR@ONEMODEL",
+    "objectId": "IBMMQ@ONEMODEL",
     "originalMetrics": [
       "ibmmq_process_memory_bytes"
     ],
@@ -1335,7 +1335,7 @@
       "进程资源"
     ],
     "name": "ibmmq_process_thread_count",
-    "objectId": "IBMMQ_QMGR@ONEMODEL",
+    "objectId": "IBMMQ@ONEMODEL",
     "originalMetrics": [
       "ibmmq_process_thread_count"
     ],
@@ -1384,7 +1384,7 @@
       "进程资源"
     ],
     "name": "ibmmq_process_fd_count",
-    "objectId": "IBMMQ_QMGR@ONEMODEL",
+    "objectId": "IBMMQ@ONEMODEL",
     "originalMetrics": [
       "ibmmq_process_fd_count"
     ],

@@ -115,7 +115,7 @@ python3 skills/api-orchestrator/platforms/easyops/development/scripts/validate_m
 
 ## IBM MQ监控（2026-11-16）
 
-新增 `IBM MQ监控` 0.2.0：绑定自定义中间件实例模型 `IBMMQ_QMGR@ONEMODEL`（继承 `ARTIFACT_INST@ONEMODEL`），按 `ip+qmgrName` 实例调用 `dspmq/runmqsc`，采集队列管理器、监听器、通道、队列深度/占用率/最老消息年龄和进程资源；模型与进程/cmdline 自动发现规律见 `IBM_MQ监控模型与自动发现_2026-11-16.md`。已完成离线结构、解析和模板回归；未导入 EasyOps，也未连接真实 IBM MQ 实例验收。
+新增 `IBM MQ监控` 0.2.0：绑定现网内置中间件实例模型 `IBMMQ@ONEMODEL`（继承 `ARTIFACT_INST@ONEMODEL`），按 `ip+name` 实例调用 `dspmq/runmqsc`，采集队列管理器、监听器、通道、队列深度/占用率/最老消息年龄和进程资源；模型与进程/cmdline 自动发现规律见 `IBM_MQ监控模型与自动发现_2026-11-16.md`。已完成离线结构、解析和模板回归；未导入 EasyOps，也未连接真实 IBM MQ 实例验收。
 
 ## 主机部署实例监控（2026-11-12）
 
