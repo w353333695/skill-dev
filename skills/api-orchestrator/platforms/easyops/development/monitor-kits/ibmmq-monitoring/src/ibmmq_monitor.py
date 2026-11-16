@@ -16,7 +16,7 @@ import threading
 import time
 import traceback
 
-VERSION = "0.4.4"
+VERSION = "0.4.5"
 QMGR_COMMAND = "DISPLAY QMGR DEADQ"
 STATUS_COMMAND = "DISPLAY QSTATUS(*) CURDEPTH MSGAGE IPPROCS OPPROCS"
 QUEUE_COMMAND = "DISPLAY QLOCAL(*) CURDEPTH MAXDEPTH USAGE GET PUT"
@@ -86,6 +86,7 @@ def config():
         "ibmmqInstanceId": env("instanceId"),
         "hostIp": env("hostIp"),
         "installPath": env("installPath"),
+        "processList": env("processList"),
         "queueFilter": env("queueFilter", ".*"),
         "includeSystemQueues": env("includeSystemQueues", "false").lower() in ("1", "true", "yes"),
         "processMonitor": env("processMonitor", "true").lower() in ("1", "true", "yes"),
@@ -94,9 +95,9 @@ def config():
         "interval": interval,
     }
     LOGGER.debug(
-        "[config] version=%s platform=%s installPath=%s queueFilter=%s includeSystemQueues=%s "
+        "[config] version=%s platform=%s installPath=%s processListConfigured=%s queueFilter=%s includeSystemQueues=%s "
         "processMonitor=%s logLevel=%s timeout=%s interval=%s",
-        VERSION, os.name, settings["installPath"], settings["queueFilter"],
+        VERSION, os.name, settings["installPath"], bool(settings["processList"]), settings["queueFilter"],
         settings["includeSystemQueues"], settings["processMonitor"], settings["logLevel"],
         settings["timeout"], settings["interval"],
     )
@@ -221,6 +222,80 @@ def mq_command(mq_bin, name):
     return path.replace("/", "\\") if is_windows() else path
 
 
+def shell_quote(value):
+    return "'" + str(value).replace("'", "'\\''") + "'"
+
+
+def valid_linux_user(name):
+    return bool(re.match(r"^[A-Za-z_][A-Za-z0-9._-]{0,31}$", name or ""))
+
+
+def execute_as_user(args, settings, input_text=None, run_user=""):
+    if not run_user:
+        return execute(args, settings, input_text)
+    if is_windows():
+        LOGGER.debug("[execute_as_user] skip su platform=windows user=%s", run_user)
+        return execute(args, settings, input_text)
+    if not valid_linux_user(run_user):
+        LOGGER.error("[execute_as_user] invalid linux user=%s fallback=currentUser", run_user)
+        return execute(args, settings, input_text)
+    command = " ".join(shell_quote(arg) for arg in args)
+    wrapped_args = ["su", "-", run_user, "-c", command]
+    return execute(wrapped_args, settings, input_text)
+
+
+def process_qmgr_name(item):
+    command_line = item.get("cmdline", "") if isinstance(item, dict) else ""
+    match = re.search(r"(?i)(?:^|\s)-m(?:\s*=|\s*)(['\"]?)([^'\"\s]+)\1", str(command_line))
+    return match.group(2) if match else ""
+
+
+def process_run_user(item):
+    user = item.get("user", "") if isinstance(item, dict) else ""
+    return str(user).strip()
+
+
+def process_targets(settings):
+    value = settings.get("processList", "")
+    if not value:
+        LOGGER.debug("[process_targets] processList empty fallback=dspmq")
+        return []
+    if isinstance(value, (list, tuple)):
+        items = list(value)
+    else:
+        try:
+            items = json.loads(value)
+        except (TypeError, ValueError):
+            LOGGER.error("[process_targets] parse processList failed fallback=dspmq rawType=%s", type(value).__name__)
+            return []
+    if not isinstance(items, (list, tuple)):
+        LOGGER.error("[process_targets] processList is not list fallback=dspmq itemType=%s", type(items).__name__)
+        return []
+    targets = []
+    seen = {}
+    for item in items:
+        qmgr_name = process_qmgr_name(item)
+        run_user = process_run_user(item)
+        if not qmgr_name:
+            LOGGER.debug("[process_targets] skip item reason=noQmgrName itemType=%s", type(item).__name__)
+            continue
+        if qmgr_name in seen:
+            existing = targets[[row["qmgrName"] for row in targets].index(qmgr_name)]
+            if run_user and not existing["runUser"]:
+                existing["runUser"] = run_user
+            elif run_user and existing["runUser"] != run_user:
+                LOGGER.error(
+                    "[process_targets] conflicting users qmgr=%s selected=%s ignored=%s",
+                    qmgr_name, existing["runUser"], run_user,
+                )
+            continue
+        seen[qmgr_name] = run_user
+        targets.append({"qmgrName": qmgr_name, "runUser": run_user})
+        LOGGER.debug("[process_targets] found qmgr=%s runUser=%s", qmgr_name, run_user or "<unset>")
+    LOGGER.debug("[process_targets] count=%d targets=%s", len(targets), json.dumps(targets))
+    return targets
+
+
 def parse_attributes(line):
     result = {}
     pattern = re.compile(r"([A-Z][A-Z0-9_]{1,40})\s*\(([^()]*)\)")
@@ -241,9 +316,9 @@ def numeric(value, default=0.0):
         return default
 
 
-def discover_qmgrs(mq_bin, settings):
+def discover_qmgrs(mq_bin, settings, run_user=""):
     args = [mq_command(mq_bin, "dspmq"), "-o", "status"]
-    returncode, output = execute(args, settings)
+    returncode, output = execute_as_user(args, settings, run_user=run_user)
     qmgrs = []
     for line in output.splitlines():
         attrs = parse_attributes(line)
@@ -257,13 +332,44 @@ def discover_qmgrs(mq_bin, settings):
     return qmgrs, returncode
 
 
-def run_mqsc(mq_bin, qmgr_name, settings):
+def discover_process_qmgrs(mq_bin, settings, targets):
+    qmgrs = []
+    return_codes = []
+    for target in targets:
+        try:
+            discovered, returncode = discover_qmgrs(mq_bin, settings, target.get("runUser", ""))
+        except RuntimeError:
+            LOGGER.exception("[discover_process_qmgrs] dspmq failed qmgr=%s runUser=%s", target["qmgrName"], target.get("runUser", ""))
+            discovered, returncode = [], 20
+        return_codes.append(returncode)
+        matched = [row for row in discovered if row["qmgrName"] == target["qmgrName"]]
+        if matched:
+            row = dict(matched[0])
+            row["targetMatched"] = True
+        else:
+            LOGGER.error(
+                "[discover_process_qmgrs] target missing in dspmq result qmgr=%s returncode=%s",
+                target["qmgrName"], returncode,
+            )
+            row = {"qmgrName": target["qmgrName"], "status": "", "dspmqReturnCode": returncode}
+            row["targetMatched"] = False
+        row["runUser"] = target.get("runUser", "")
+        qmgrs.append(row)
+    aggregate_returncode = 0 if return_codes and all(code == 0 for code in return_codes) else (return_codes[0] if return_codes else 1)
+    LOGGER.debug(
+        "[discover_process_qmgrs] targets=%d selected=%d returncode=%s qmgrs=%s",
+        len(targets), len(qmgrs), aggregate_returncode, json.dumps(qmgrs),
+    )
+    return qmgrs, aggregate_returncode
+
+
+def run_mqsc(mq_bin, qmgr_name, settings, run_user=""):
     newline = "\r\n" if is_windows() else "\n"
     commands = newline.join([
         QMGR_COMMAND, QUEUE_COMMAND, STATUS_COMMAND, CHANNEL_COMMAND, LISTENER_COMMAND, "EXIT"
     ]) + newline
     args = [mq_command(mq_bin, "runmqsc"), qmgr_name]
-    returncode, output = execute(args, settings, commands)
+    returncode, output = execute_as_user(args, settings, commands, run_user)
     return returncode, output
 
 
@@ -564,14 +670,17 @@ def collect_processes(qmgr_name, settings):
 
 
 def collect_qmgr(qmgr, mq_bin, settings):
-    LOGGER.debug("[collect_qmgr] start qmgr=%s status=%s mqBin=%s", qmgr["qmgrName"], qmgr.get("status", ""), mq_bin)
+    LOGGER.debug(
+        "[collect_qmgr] start qmgr=%s status=%s runUser=%s mqBin=%s",
+        qmgr["qmgrName"], qmgr.get("status", ""), qmgr.get("runUser") or "<currentUser>", mq_bin,
+    )
     base = {"ibmmqInstanceId": settings["ibmmqInstanceId"], "qmgrName": qmgr["qmgrName"], "hostIp": settings.get("hostIp", ""), "installPath": settings.get("installPath", "") or os.path.dirname(mq_bin)}
     values = {
         "ibmmq_qmgr_status": 1.0 if qmgr.get("status", "").upper() == "RUNNING" else 0.0,
-        "ibmmq_discovery_success": 1.0,
+        "ibmmq_discovery_success": float(qmgr.get("dspmqReturnCode", 0) == 0 and qmgr.get("targetMatched", True)),
     }
     rows = [dict(dims=dict(base), vals=dict(values))]
-    returncode, output = run_mqsc(mq_bin, qmgr["qmgrName"], settings)
+    returncode, output = run_mqsc(mq_bin, qmgr["qmgrName"], settings, qmgr.get("runUser", ""))
     command_success = float(returncode == 0 and "COMMAND ACCEPTED" in output.upper())
     queues, channels, listeners, dead_queue_name = parse_mqsc(output, settings)
     if command_success != 1.0:
@@ -679,7 +788,11 @@ def collect(settings):
     mq_bin = find_mq_bin(settings)
     if not mq_bin:
         raise RuntimeError("[collect] 未找到可执行dspmq；请确认installPath、MQ_INSTALLATION_PATH、PATH或常见IBM MQ安装目录可用")
-    qmgrs, returncode = discover_qmgrs(mq_bin, settings)
+    targets = process_targets(settings)
+    if targets:
+        qmgrs, returncode = discover_process_qmgrs(mq_bin, settings, targets)
+    else:
+        qmgrs, returncode = discover_qmgrs(mq_bin, settings)
     output = []
     for qmgr in qmgrs:
         output.extend(collect_qmgr(qmgr, mq_bin, settings))
@@ -719,9 +832,10 @@ def main(argv=None):
         epilog=(
             "示例：\n"
             "  EASYOPS_COLLECTOR_instanceId=i1 EASYOPS_COLLECTOR_installPath=/opt/mqm %(prog)s\n"
+            "  EASYOPS_COLLECTOR_processList='[{\"cmdline\":\"/opt/mqm/bin/runmqlsr -m QM1\",\"user\":\"mqm\"}]' %(prog)s\n"
             "  EASYOPS_COLLECTOR_installPath=/opt/mqm %(prog)s\n"
             "  EASYOPS_COLLECTOR_installPath='C:\\Program Files\\IBM\\MQ' %(prog)s\n\n"
-            "Linux默认探测/opt/mqm/bin、/opt/ibm/mq/bin、/usr/mqm/bin；Windows默认探测Program Files下IBM MQ bin目录。"
+            "Linux默认探测/opt/mqm/bin、/opt/ibm/mq/bin、/usr/mqm/bin，并按processList.user使用su -执行；Windows默认探测Program Files下IBM MQ bin目录，使用Agent当前用户执行。"
         ),
     )
     parser.add_argument("--version", action="version", version=VERSION)

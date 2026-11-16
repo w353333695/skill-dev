@@ -14,11 +14,11 @@ ROOT = Path(__file__).resolve().parents[1]
 KIT = ROOT / "monitor-kits/ibmmq-monitoring"
 HUB = ROOT.parent / "hub/monitor-kits"
 NAME = "IBM MQ监控"
-VERSION = "0.4.4"
+VERSION = "0.4.5"
 SUPPORTED_PLATFORMS = ("Linux", "Windows")
 OBJECT_ID = "IBMMQ@ONEMODEL"
-XLSX_NAME = "IBM_MQ监控_告警规则模板_0.4.4.xlsx"
-ZIP_NAME = "监控套件_IBM_MQ监控_0.4.4.zip"
+XLSX_NAME = "IBM_MQ监控_告警规则模板_0.4.5.xlsx"
+ZIP_NAME = "监控套件_IBM_MQ监控_0.4.5.zip"
 BASE_DIMS = ("ibmmqInstanceId", "qmgrName", "hostIp", "installPath")
 QUEUE_DIMS = BASE_DIMS + ("queueName",)
 CHANNEL_DIMS = BASE_DIMS + ("channelName", "channelType")
@@ -124,6 +124,7 @@ PARAMETERS = (
     ("instanceId", "string", "$.instanceId", "IBM MQ实例ID", "取IBMMQ.instanceId，用于实例维度", False, False),
     ("hostIp", "string", "$.ip", "部署主机IP", "取ARTIFACT_INST继承ip，用于维度与部署定位", False, False),
     ("installPath", "string", "$.installPath", "安装路径", "取ARTIFACT_INST继承installPath，用于定位bin目录", False, False),
+    ("processList", "string", "$.processList", "进程列表", "取ARTIFACT_INST继承processList，兼容JSON字符串或list[dict]；解析队列管理器与运行用户，Linux用su -执行MQ命令", True, False),
     ("queueFilter", "string", ".*", "队列过滤正则", "默认监控全部非SYSTEM.前缀队列", True, True),
     ("includeSystemQueues", "string", "false", "包含系统队列", "默认排除SYSTEM.前缀队列", True, True),
     ("processMonitor", "string", "true", "启用进程资源采集", "默认启用，按cmdline分组输出进程资源", True, True),
@@ -198,6 +199,10 @@ def validate_platform_support():
         'LOG_LEVELS = ("DEBUG", "INFO", "WARN", "ERROR")',
         'def setup_logging(',
         'stdout_handler = logging.StreamHandler(sys.stdout)',
+        'def process_targets(',
+        'item.get("cmdline", "")',
+        'item.get("user", "")',
+        '"su", "-", run_user, "-c"',
     )
     missing_source = [item for item in required_source if item not in source]
     if missing_source:
@@ -210,6 +215,8 @@ def validate_platform_support():
     parameter_names = {row[0] for row in PARAMETERS}
     if "logLevel" not in parameter_names:
         raise RuntimeError("[validate_platform_support] 缺少logLevel参数")
+    if "processList" not in parameter_names:
+        raise RuntimeError("[validate_platform_support] 缺少processList参数")
     if len(METRIC_DISPLAY_NAMES) != len(METRICS):
         raise RuntimeError("[validate_platform_support] 中文名称数量必须等于指标数量")
     if set(METRIC_DISPLAY_NAMES) != {row[0] for row in METRICS}:
@@ -238,7 +245,7 @@ def plugin_yaml():
     lines.extend([
         "agentType: easyops", "category: 消息队列", "scriptType: python",
         "interpreter: \"\"", "samplerType: metric_sampler",
-        "memo: \"同时支持Linux/Windows执行节点；自动探测MQ命令目录并用dspmq枚举本地队列管理器，采集队列管理器、监听器、通道、本地/传输/死信队列和进程资源指标。\"",
+        "memo: \"同时支持Linux/Windows执行节点；按CMDB processList的cmdline/user定位队列管理器并切换运行用户，采集队列管理器、监听器、通道、本地/传输/死信队列和进程资源指标。\"",
         "icon: null", "relateObjectId: IBMMQ@ONEMODEL",
     ])
     return "\n".join(lines) + "\n"
