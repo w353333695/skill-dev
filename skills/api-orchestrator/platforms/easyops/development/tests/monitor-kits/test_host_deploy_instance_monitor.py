@@ -99,6 +99,7 @@ class HostDeployInstanceMonitorTests(unittest.TestCase):
         self.assertEqual(process_row["vals"]["deploy_instance_process_cpu_percent"], 6.0)
         self.assertEqual(process_row["vals"]["deploy_instance_process_memory_percent"], 50.0)
         self.assertAlmostEqual(process_row["vals"]["deploy_instance_process_fd_usage_percent"], 9.765625)
+        self.assertEqual(set().union(*(row["vals"] for row in result)), set(m["METRIC_KEYS"]))
         self.assertEqual(set(process_row["vals"]), set(m["PROCESS_METRIC_KEYS"]))
         self.assertEqual(port_row["dims"]["port"], "6379")
         self.assertEqual(port_row["vals"]["deploy_instance_port_listen"], 1.0)
