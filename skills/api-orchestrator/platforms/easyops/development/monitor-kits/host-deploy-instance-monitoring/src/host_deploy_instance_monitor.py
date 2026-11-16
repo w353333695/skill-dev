@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 """HOST 本地部署实例进程与端口监控脚本，参数由 EASYOPS_COLLECTOR_* 注入。"""
 import argparse
+import calendar
 import errno
 import hashlib
 import hmac
@@ -9,6 +10,7 @@ import json
 import os
 import re
 import stat
+import subprocess
 import sys
 import time
 import traceback
@@ -20,7 +22,8 @@ else:
     from urllib import urlencode
     from urllib2 import Request, urlopen
 
-VERSION = "0.1.9"
+VERSION = "0.1.11"
+IS_WINDOWS = os.name == "nt"
 OBJECT_ID = "ARTIFACT_INST@ONEMODEL"
 OPENAPI_PATH = "/cmdbservice/v3/object/ARTIFACT_INST@ONEMODEL/instance/_search"
 OPENAPI_HOST = "openapi.easyops-only.com"
@@ -42,6 +45,7 @@ TARGET_METRIC_KEYS = [
     "host_deploy_cache_age_seconds", "host_deploy_cache_refresh_success",
 ]
 METRIC_KEYS = PROCESS_METRIC_KEYS + PORT_METRIC_KEYS + TARGET_METRIC_KEYS
+WINDOWS_PROCESS_CACHE = {}
 
 
 def value_digest(value):
@@ -96,19 +100,25 @@ def config():
         raise ValueError("[config] requestTimeout必须在3到30之间")
     if log_level not in ("ERROR", "DEBUG"):
         raise ValueError("[config] logLevel仅支持ERROR或DEBUG")
-    return {
+    settings = {
         "hostInstanceId": host_instance_id,
         "hostUuid": env("hostUuid"),
         "hostIp": env("hostIp"),
-        "cacheDir": env("cacheDir", "/tmp/easyops/deploy-instance-monitor"),
+        "cacheDir": normalized_cache_dir(env("cacheDir", default_cache_dir())),
         "cacheTtlSeconds": cache_ttl_days * 86400,
-        "gateway": env("openapiGateway") or os.environ.get("EASYOPS_OPENAPI_GATEWAY_URL", ""),
+        "gateway": "",
+        "gatewaySource": "missing",
         "accessKey": env("openapiAkText") or os.environ.get("EASYOPS_OPENAPI_AK", ""),
         "secretKey": env("openapiSkText") or os.environ.get("EASYOPS_OPENAPI_SK", ""),
         "sampleInterval": sample_interval,
         "requestTimeout": request_timeout,
         "logLevel": log_level,
+        "windows": IS_WINDOWS,
     }
+    settings["gateway"], settings["gatewaySource"] = resolve_openapi_gateway(
+        env("openapiGateway") or os.environ.get("EASYOPS_OPENAPI_GATEWAY_URL", "")
+    )
+    return settings
 
 
 def read_file(path):
@@ -130,7 +140,74 @@ def write_json_atomic(path, data):
         handle.flush()
         os.fsync(handle.fileno())
     os.chmod(temporary, 0o600)
-    os.rename(temporary, path)
+    replace_file(temporary, path)
+
+
+def agent_config_paths():
+    if IS_WINDOWS:
+        return [r"C:\easyops\agent\conf\conf.yaml", r"C:\easyOps\agent\conf\conf.yaml"]
+    return ["/usr/local/easyops/agent/conf/conf.yaml"]
+
+
+def gateway_from_agent_config(path):
+    section = ""
+    for raw_line in decode_bytes(read_file(path)).splitlines():
+        line = raw_line.strip()
+        if not line or line.startswith("#"):
+            continue
+        if not raw_line[:1].isspace():
+            section = line.split(":", 1)[0].strip()
+            continue
+        if section != "command":
+            continue
+        match = re.match(r"^(?:-\s*)?ip\s*:\s*(['\"]?)([^#'\"]+)", line)
+        if not match:
+            continue
+        host = match.group(2).strip().split(",", 1)[0].strip()
+        if not host or host.startswith("__"):
+            continue
+        if ":" in host and not host.startswith("["):
+            host = "[%s]" % host
+        return "http://%s" % host
+    return ""
+
+
+def resolve_openapi_gateway(configured_gateway):
+    for path in agent_config_paths():
+        try:
+            gateway = gateway_from_agent_config(path)
+        except (IOError, OSError):
+            continue
+        if gateway:
+            return gateway, "agentConfig"
+    configured_gateway = text(configured_gateway).strip().rstrip("/")
+    if configured_gateway:
+        return configured_gateway, "param"
+    return "", "missing"
+
+
+def default_cache_dir():
+    if not IS_WINDOWS:
+        return "/tmp/easyops/deploy-instance-monitor"
+    system_root = os.environ.get("SystemRoot", r"C:\Windows")
+    return os.path.join(system_root, "Temp", "easyops", "deploy-instance-monitor")
+
+
+def normalized_cache_dir(path):
+    if IS_WINDOWS and path == "/tmp/easyops/deploy-instance-monitor":
+        return default_cache_dir()
+    return path
+
+
+def replace_file(source, target):
+    if not IS_WINDOWS or not os.path.exists(target):
+        os.rename(source, target)
+        return
+    try:
+        os.rename(source, target)
+    except OSError:
+        os.remove(target)
+        os.rename(source, target)
 
 
 def cache_path(settings):
@@ -279,8 +356,112 @@ def ensure_cache(settings, now):
 
 def decode_bytes(value):
     if isinstance(value, bytes):
-        return value.decode("utf-8", "replace")
+        encoding = "mbcs" if IS_WINDOWS else "utf-8"
+        return value.decode(encoding, "replace")
     return text(value)
+
+
+def run_windows_command(arguments):
+    if not IS_WINDOWS:
+        raise OSError("[run_windows_command] 仅支持Windows")
+    process = subprocess.Popen(list(arguments), stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    stdout, stderr = process.communicate()
+    if process.returncode != 0:
+        error = decode_bytes(stderr).strip()
+        raise OSError("Windows命令执行失败(%s): %s" % (process.returncode, error))
+    return decode_bytes(stdout)
+
+
+def windows_json(command):
+    payload = run_windows_command([
+        "powershell.exe", "-NoProfile", "-NonInteractive", "-ExecutionPolicy", "Bypass",
+        "-Command", "$ErrorActionPreference='Stop'; " + command,
+    ]).strip().lstrip(u"﻿")
+    return json.loads(payload or "null")
+
+
+def parse_windows_datetime(value):
+    value = text(value)
+    embedded = re.search(r"/Date\((-?\d+)", value)
+    if embedded:
+        return int(embedded.group(1)) / 1000.0
+    wmi = re.match(r"^(\d{4})(\d{2})(\d{2})(\d{2})(\d{2})(\d{2})(?:\.(\d+))?([+-]\d{3,4})?$", value)
+    iso = re.match(r"^(\d{4})-(\d{2})-(\d{2})[T ](\d{2}):(\d{2}):(\d{2})(?:\.(\d+))?(Z|[+-]\d{2}:\d{2})?$", value)
+    match = wmi or iso
+    if not match:
+        return -1.0
+    year, month, day, hour, minute, second = [int(match.group(index)) for index in range(1, 7)]
+    fraction = text(match.group(7) or "0")[:6].ljust(6, "0")
+    timestamp = calendar.timegm((year, month, day, hour, minute, second, 0, 0, 0)) + float(fraction) / 1000000.0
+    zone = match.group(8)
+    if zone and zone not in ("Z",):
+        zone_text = zone.replace(":", "")
+        zone_sign = -1 if zone_text.startswith("-") else 1
+        zone_digits = zone_text.lstrip("+-")
+        if len(zone_digits) == 3:
+            offset = int(zone_digits) * 60
+        else:
+            offset = int(zone_digits[-4:-2]) * 3600 + int(zone_digits[-2:]) * 60
+        offset *= zone_sign
+        timestamp -= offset
+    return timestamp
+
+
+def parse_windows_process_row(row):
+    if not isinstance(row, dict):
+        return None
+    try:
+        pid = int(row.get("ProcessId") or 0)
+        if pid <= 0:
+            return None
+        executable = text(row.get("ExecutablePath"))
+        name = text(row.get("Name"))
+        cmdline = text(row.get("CommandLine")) or executable or name
+        user_time = float(row.get("UserModeTime") or 0) / 10000000.0
+        kernel_time = float(row.get("KernelModeTime") or 0) / 10000000.0
+        return {
+            "pid": pid,
+            "comm": name or basename(executable),
+            "state": "",
+            "utime": user_time,
+            "stime": kernel_time,
+            "threads": int(row.get("ThreadCount") or 0),
+            "start_timestamp": parse_windows_datetime(row.get("CreationDate")),
+            "cmdline": cmdline,
+            "cwd": "",
+            "memory_bytes": max(float(row.get("WorkingSetSize") or 0), 0.0),
+            "fd_count": int(row.get("HandleCount") or 0),
+        }
+    except (TypeError, ValueError):
+        return None
+
+
+def windows_process_snapshot():
+    payload = windows_json(
+        "Get-CimInstance Win32_Process | Select-Object ProcessId,Name,CommandLine,"
+        "ExecutablePath,CreationDate,UserModeTime,KernelModeTime,ThreadCount,"
+        "WorkingSetSize,HandleCount | ConvertTo-Json -Compress -Depth 3"
+    )
+    rows = payload if isinstance(payload, list) else [payload]
+    processes = [parsed for parsed in (parse_windows_process_row(row) for row in rows) if parsed]
+    if not processes:
+        raise OSError("Windows进程查询结果为空")
+    WINDOWS_PROCESS_CACHE.clear()
+    for process in processes:
+        WINDOWS_PROCESS_CACHE[process["pid"]] = process
+    return processes
+
+
+def refresh_process_record(process, force=False):
+    if not IS_WINDOWS:
+        return parse_proc_stat(read_file("/proc/%d/stat" % process["pid"]))
+    if force:
+        windows_process_snapshot()
+    refreshed = WINDOWS_PROCESS_CACHE.get(process["pid"])
+    if refreshed is None:
+        windows_process_snapshot()
+        refreshed = WINDOWS_PROCESS_CACHE.get(process["pid"])
+    return dict(refreshed) if refreshed is not None else None
 
 
 def read_link(path):
@@ -310,6 +491,8 @@ def parse_proc_stat(payload):
 
 
 def list_processes():
+    if IS_WINDOWS:
+        return windows_process_snapshot()
     processes = []
     for name in os.listdir("/proc"):
         if not name.isdigit():
@@ -333,13 +516,18 @@ def list_processes():
 
 
 def path_prefix(value, prefix):
-    value = text(value).rstrip("/") or "/"
-    prefix = text(prefix).rstrip("/")
+    value = normalize_windows_path(value) or "/"
+    prefix = normalize_windows_path(prefix)
     return bool(prefix) and (value == prefix or value.startswith(prefix + "/"))
 
 
+def normalize_windows_path(value):
+    value = text(value).replace("\\", "/").rstrip("/")
+    return value.lower() if IS_WINDOWS else value
+
+
 def basename(value):
-    return text(value).rstrip("/").rsplit("/", 1)[-1]
+    return text(value).replace("\\", "/").rstrip("/").rsplit("/", 1)[-1]
 
 
 def match_one_process(process, expected, install_path):
@@ -351,12 +539,14 @@ def match_one_process(process, expected, install_path):
     expected_cwd = text(expected.get("cwd"))
     expected_name = text(expected.get("pname"))
     actual_names = [process.get("comm", ""), basename(cmdline.split(" ", 1)[0])]
+    normalized_cmdline = normalize_windows_path(cmdline)
+    actual_names = [normalize_windows_path(item) for item in actual_names]
     score = 0
-    if install_path in cmdline or path_prefix(cwd, install_path):
+    if normalize_windows_path(install_path) in normalize_windows_path(cmdline) or path_prefix(cwd, install_path):
         score += 2
-    if expected_name and expected_name in actual_names:
+    if expected_name and normalize_windows_path(expected_name) in actual_names:
         score += 2
-    if expected_cmdline and expected_cmdline in cmdline:
+    if expected_cmdline and normalize_windows_path(expected_cmdline) in normalized_cmdline:
         score += 2
     if expected_cwd and path_prefix(cwd, expected_cwd):
         score += 2
@@ -369,7 +559,8 @@ def match_keyword_group(process, group):
         return False
     keywords = [text(item) for item in keywords if text(item)]
     cmdline = process.get("cmdline", "")
-    return bool(keywords and cmdline) and all(keyword in cmdline for keyword in keywords)
+    normalized_cmdline = normalize_windows_path(cmdline)
+    return bool(keywords and cmdline) and all(normalize_windows_path(keyword) in normalized_cmdline for keyword in keywords)
 
 
 def match_target_processes(target, processes):
@@ -384,10 +575,16 @@ def match_target_processes(target, processes):
         return [process for process in processes if any(match_one_process(process, item, install_path) for item in expected)]
     if not install_path:
         return []
-    return [process for process in processes if install_path in process.get("cmdline", "") or path_prefix(process.get("cwd", ""), install_path)]
+    return [process for process in processes if normalize_windows_path(install_path) in normalize_windows_path(process.get("cmdline", "")) or path_prefix(process.get("cwd", ""), install_path)]
 
 
 def boot_time():
+    if IS_WINDOWS:
+        payload = windows_json(
+            "Get-CimInstance Win32_OperatingSystem | Select-Object LastBootUpTime | ConvertTo-Json -Compress"
+        )
+        row = payload[0] if isinstance(payload, list) and payload else payload
+        return parse_windows_datetime(row.get("LastBootUpTime")) if isinstance(row, dict) else -1.0
     try:
         for line in decode_bytes(read_file("/proc/stat")).splitlines():
             if line.startswith("btime "):
@@ -412,6 +609,17 @@ def page_size():
 
 
 def memory_total_bytes():
+    if IS_WINDOWS:
+        payload = windows_json(
+            "Get-CimInstance Win32_OperatingSystem | Select-Object TotalVisibleMemorySize | ConvertTo-Json -Compress"
+        )
+        row = payload[0] if isinstance(payload, list) and payload else payload
+        if isinstance(row, dict):
+            try:
+                return float(row.get("TotalVisibleMemorySize") or 0) * 1048576.0
+            except (TypeError, ValueError):
+                return -1.0
+        return -1.0
     try:
         for line in decode_bytes(read_file("/proc/meminfo")).splitlines():
             if line.startswith("MemTotal:"):
@@ -422,6 +630,9 @@ def memory_total_bytes():
 
 
 def process_memory_bytes(pid):
+    if IS_WINDOWS:
+        process = WINDOWS_PROCESS_CACHE.get(pid) or {}
+        return float(process.get("memory_bytes", -1.0))
     try:
         return float(read_file("/proc/%d/statm" % pid).decode("utf-8", "replace").split()[1]) * page_size()
     except (IOError, OSError, IndexError, ValueError):
@@ -429,6 +640,12 @@ def process_memory_bytes(pid):
 
 
 def process_fd_usage(pid):
+    if IS_WINDOWS:
+        process = WINDOWS_PROCESS_CACHE.get(pid) or {}
+        try:
+            return int(process.get("fd_count", -1)), -1
+        except (TypeError, ValueError):
+            return -1, -1
     try:
         used = len(os.listdir("/proc/%d/fd" % pid))
     except OSError:
@@ -466,7 +683,18 @@ def parse_socket_table(path):
     return result
 
 
+def parse_windows_netstat(payload):
+    result = {}
+    for line in decode_bytes(payload).splitlines():
+        match = re.match(r"^\s*TCP\s+\S+:(\d+)\s+\S+\s+LISTENING\s+(\d+)\s*$", line, re.I)
+        if match:
+            result.setdefault(int(match.group(1)), set()).add(match.group(2))
+    return result
+
+
 def listening_ports():
+    if IS_WINDOWS:
+        return parse_windows_netstat(run_windows_command(["netstat.exe", "-ano", "-p", "tcp"]))
     result = {}
     for path in ("/proc/net/tcp", "/proc/net/tcp6"):
         for port, inodes in parse_socket_table(path).items():
@@ -475,6 +703,8 @@ def listening_ports():
 
 
 def process_socket_inodes(processes):
+    if IS_WINDOWS:
+        return set(text(process["pid"]) for process in processes), True
     inodes = set()
     readable = False
     for process in processes:
@@ -527,9 +757,11 @@ def collect_target(target, processes, sockets, boot_ts, ticks, mem_total, settin
     sample_started = time.time()
     time.sleep(settings["sampleInterval"])
     refreshed = {}
+    if IS_WINDOWS:
+        windows_process_snapshot()
     for item in matched:
         try:
-            parsed = parse_proc_stat(read_file("/proc/%d/stat" % item["pid"]))
+            parsed = refresh_process_record(item)
         except (IOError, OSError):
             parsed = None
             log_event(settings, "ERROR", "process.refresh_stat_failed", deployInstanceId=text(target.get("instanceId")), pid=item["pid"], traceback=traceback.format_exc())
@@ -554,7 +786,10 @@ def collect_target(target, processes, sockets, boot_ts, ticks, mem_total, settin
         memory_bytes = sum(max(process_memory_bytes(item["pid"]), 0.0) for item in group)
         thread_count = sum(item["threads"] for item in group)
         zombie_count = sum(1 for item in group if item["state"] == "Z")
-        starts = [boot_ts + float(item["startTimeTicks"]) / ticks for item in group] if boot_ts >= 0 else []
+        if IS_WINDOWS:
+            starts = [float(item["start_timestamp"]) for item in group if item.get("start_timestamp", -1) >= 0]
+        else:
+            starts = [boot_ts + float(item["startTimeTicks"]) / ticks for item in group] if boot_ts >= 0 else []
         fd_count = fd_limit = 0
         readable_fd_count = 0
         for item in group:
@@ -577,7 +812,7 @@ def collect_target(target, processes, sockets, boot_ts, ticks, mem_total, settin
             "deploy_instance_process_uptime_seconds": max(now - min(starts), 0.0) if starts else -1.0,
             "deploy_instance_process_memory_bytes": memory_bytes if group else 0.0,
             "deploy_instance_process_memory_percent": memory_bytes * 100.0 / mem_total if group and mem_total > 0 else -1.0,
-            "deploy_instance_process_cpu_percent": max(float(after - before) / (elapsed * ticks) * 100.0, 0.0) if group else -1.0,
+            "deploy_instance_process_cpu_percent": max(float(after - before) / elapsed * 100.0 if IS_WINDOWS else float(after - before) / (elapsed * ticks) * 100.0, 0.0) if group else -1.0,
             "deploy_instance_process_fd_count": float(fd_count) if readable_fd_count else -1.0,
             "deploy_instance_process_fd_usage_percent": fd_usage,
         }
@@ -633,12 +868,12 @@ def collect(settings):
 def main(argv=None):
     parser = argparse.ArgumentParser(
         description="主机部署实例本机监控：按主机instanceId读取7天缓存，OpenAPI刷新isMonitor=是的ARTIFACT_INST目标，采集进程、端口、CPU、内存和句柄指标。",
-        epilog="参数均由 EASYOPS_COLLECTOR_* 环境变量注入：instanceId/hostUuid/hostIp/cacheDir/cacheTtlDays/openapiGateway/openapiAkText/openapiSkText/sampleInterval/requestTimeout/logLevel。logLevel=DEBUG时诊断JSON写stderr且不包含AK/SK，stdout保持纯JSON数组；默认ERROR只输出异常。顶层异常输出COLLECT_ERROR并保持退出码0。示例：EASYOPS_COLLECTOR_instanceId=65eb86f148251 EASYOPS_COLLECTOR_hostUuid=f907... EASYOPS_COLLECTOR_hostIp=192.168.110.24 EASYOPS_COLLECTOR_openapiGateway=http://192.168.110.24 EASYOPS_OPENAPI_AK=... EASYOPS_OPENAPI_SK=... EASYOPS_COLLECTOR_logLevel=DEBUG python host_deploy_instance_monitor.py")
+        epilog="参数均由 EASYOPS_COLLECTOR_* 环境变量注入：instanceId/hostUuid/hostIp/cacheDir/cacheTtlDays/openapiGateway(兜底)/openapiAkText/openapiSkText/sampleInterval/requestTimeout/logLevel。logLevel=DEBUG时诊断JSON写stderr且不包含AK/SK，stdout保持纯JSON数组；默认ERROR只输出异常。顶层异常输出COLLECT_ERROR并保持退出码0。示例：EASYOPS_COLLECTOR_instanceId=65eb86f148251 EASYOPS_COLLECTOR_hostUuid=f907... EASYOPS_COLLECTOR_hostIp=192.168.110.24 EASYOPS_COLLECTOR_openapiGateway=http://192.168.110.24 EASYOPS_OPENAPI_AK=... EASYOPS_OPENAPI_SK=... EASYOPS_COLLECTOR_logLevel=DEBUG python host_deploy_instance_monitor.py")
     parser.add_argument("--version", action="version", version=VERSION)
     parser.parse_args(argv)
     try:
         settings = config()
-        log_event(settings, "DEBUG", "config.ready", version=VERSION, logLevel=settings["logLevel"], cacheDir=settings["cacheDir"], gatewayConfigured=bool(settings["gateway"]), accessKeyConfigured=bool(settings["accessKey"]), secretKeyConfigured=bool(settings["secretKey"]))
+        log_event(settings, "DEBUG", "config.ready", version=VERSION, logLevel=settings["logLevel"], cacheDir=settings["cacheDir"], gatewayConfigured=bool(settings["gateway"]), gatewaySource=settings["gatewaySource"], accessKeyConfigured=bool(settings["accessKey"]), secretKeyConfigured=bool(settings["secretKey"]))
         sys.stdout.write("%s\n" % json.dumps(collect(settings), allow_nan=False))
     except Exception:
         sys.stdout.write("COLLECT_ERROR: [main] %s\n" % traceback.format_exc())
