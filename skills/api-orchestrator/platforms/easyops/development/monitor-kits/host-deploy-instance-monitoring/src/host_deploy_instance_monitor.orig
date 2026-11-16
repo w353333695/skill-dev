@@ -22,7 +22,7 @@ else:
     from urllib import urlencode
     from urllib2 import Request, urlopen
 
-VERSION = "0.1.12"
+VERSION = "0.1.13"
 IS_WINDOWS = os.name == "nt"
 OBJECT_ID = "ARTIFACT_INST@ONEMODEL"
 OPENAPI_PATH = "/cmdbservice/v3/object/ARTIFACT_INST@ONEMODEL/instance/_search"
@@ -121,8 +121,9 @@ def config():
         sample_interval = float(env("sampleInterval", "0.2"))
         request_timeout = float(env("requestTimeout", "10"))
         log_level = env("logLevel", "ERROR").upper()
+        openapi_scheme = env("openapiScheme", "https").lower()
     except ValueError:
-        raise ValueError("[config] 缓存有效期、采样间隔、请求超时或日志级别格式错误")
+        raise ValueError("[config] 缓存有效期、采样间隔、请求超时、日志级别或OpenAPI协议格式错误")
     if not 1 <= cache_ttl_days <= 90:
         raise ValueError("[config] cacheTtlDays必须在1到90之间")
     if not 0.05 <= sample_interval <= 2:
@@ -131,6 +132,8 @@ def config():
         raise ValueError("[config] requestTimeout必须在3到30之间")
     if log_level not in ("ERROR", "DEBUG"):
         raise ValueError("[config] logLevel仅支持ERROR或DEBUG")
+    if openapi_scheme not in ("http", "https"):
+        raise ValueError("[config] openapiScheme仅支持http或https")
     settings = {
         "hostInstanceId": host_instance_id,
         "hostUuid": env("hostUuid"),
@@ -143,6 +146,7 @@ def config():
         "cacheTtlSeconds": cache_ttl_days * 86400,
         "gateway": "",
         "gatewaySource": "missing",
+        "openapiScheme": openapi_scheme,
         "accessKey": env("openapiAkText") or os.environ.get("EASYOPS_OPENAPI_AK", ""),
         "secretKey": env("openapiSkText") or os.environ.get("EASYOPS_OPENAPI_SK", ""),
         "sampleInterval": sample_interval,
@@ -151,7 +155,8 @@ def config():
         "windows": IS_WINDOWS,
     }
     settings["gateway"], settings["gatewaySource"] = resolve_openapi_gateway(
-        env("openapiGateway") or os.environ.get("EASYOPS_OPENAPI_GATEWAY_URL", "")
+        env("openapiGateway") or os.environ.get("EASYOPS_OPENAPI_GATEWAY_URL", ""),
+        openapi_scheme,
     )
     return settings
 
@@ -184,7 +189,7 @@ def agent_config_paths():
     return ["/usr/local/easyops/agent/conf/conf.yaml"]
 
 
-def gateway_from_agent_config(path):
+def gateway_from_agent_config(path, scheme):
     section = ""
     for raw_line in decode_bytes(read_file(path)).splitlines():
         line = raw_line.strip()
@@ -203,14 +208,14 @@ def gateway_from_agent_config(path):
             continue
         if ":" in host and not host.startswith("["):
             host = "[%s]" % host
-        return "http://%s" % host
+        return "%s://%s" % (scheme, host)
     return ""
 
 
-def resolve_openapi_gateway(configured_gateway):
+def resolve_openapi_gateway(configured_gateway, openapi_scheme="https"):
     for path in agent_config_paths():
         try:
-            gateway = gateway_from_agent_config(path)
+            gateway = gateway_from_agent_config(path, openapi_scheme)
         except (IOError, OSError):
             continue
         if gateway:
@@ -311,15 +316,15 @@ def http_json(url, query, body, headers, timeout):
 def search_targets(settings):
     if not settings["gateway"] or not settings["accessKey"] or not settings["secretKey"]:
         raise ValueError("[search_targets] 缺少OpenAPI网关地址或AK/SK")
-    conditions = [
-        {"host.instanceId": settings["hostInstanceId"]},
-        {"uuid": settings["hostUuid"]},
-        {"ip": settings["hostIp"]},
-    ]
-    conditions = [item for item in conditions if list(item.values())[0]]
-    if not conditions:
+    if settings["hostUuid"]:
+        condition_field, condition_value = "uuid", settings["hostUuid"]
+    elif settings["hostIp"]:
+        condition_field, condition_value = "ip", settings["hostIp"]
+    elif settings["hostInstanceId"]:
+        condition_field, condition_value = "host.instanceId", settings["hostInstanceId"]
+    else:
         raise ValueError("[search_targets] 缺少hostUuid/hostIp，无法定位部署实例")
-    log_event(settings, "DEBUG", "openapi.start", path=OPENAPI_PATH, conditionTypes=sorted(list(item.keys())[0] for item in conditions), pageLimit=100)
+    log_event(settings, "DEBUG", "openapi.start", path=OPENAPI_PATH, conditionType=condition_field, pageLimit=100)
     fields = ["instanceId", "_object_id", "installPath", "version", "ip", "uuid", "ports", "processList", "processMatchGroups"]
     targets = []
     seen = set()
@@ -327,7 +332,7 @@ def search_targets(settings):
         body = json.dumps({
             "fields": fields, "page": page, "page_size": 1000,
             "ignore_missing_field_error": True,
-            "query": {"isMonitor": "是", "$or": conditions},
+            "query": {"isMonitor": "是", condition_field: condition_value},
         }).encode("utf-8")
         query = sign_openapi("POST", OPENAPI_PATH, "application/json", body, settings["accessKey"], settings["secretKey"])
         try:
@@ -903,12 +908,12 @@ def collect(settings):
 def main(argv=None):
     parser = argparse.ArgumentParser(
         description="主机部署实例本机监控：按主机instanceId读取7天缓存，OpenAPI刷新isMonitor=是的ARTIFACT_INST目标，采集进程、端口、CPU、内存和句柄指标。",
-        epilog="参数均由 EASYOPS_COLLECTOR_* 环境变量注入：instanceId/hostUuid/hostIp/cacheDir/cacheTtlDays/openapiGateway(兜底)/openapiAkText/openapiSkText/sampleInterval/requestTimeout/logLevel。logLevel=DEBUG时诊断JSON写入缓存目录<hostInstanceId>.debug.log且不包含AK/SK，stdout/stderr均不混入诊断；默认ERROR只输出异常。顶层异常输出COLLECT_ERROR并保持退出码0。示例：EASYOPS_COLLECTOR_instanceId=65eb86f148251 EASYOPS_COLLECTOR_hostUuid=f907... EASYOPS_COLLECTOR_hostIp=192.168.110.24 EASYOPS_COLLECTOR_openapiGateway=http://192.168.110.24 EASYOPS_OPENAPI_AK=... EASYOPS_OPENAPI_SK=... EASYOPS_COLLECTOR_logLevel=DEBUG python host_deploy_instance_monitor.py")
+        epilog="参数均由 EASYOPS_COLLECTOR_* 环境变量注入：instanceId/hostUuid/hostIp/cacheDir/cacheTtlDays/openapiScheme(默认https)/openapiGateway(兜底)/openapiAkText/openapiSkText/sampleInterval/requestTimeout/logLevel。logLevel=DEBUG时诊断JSON写入缓存目录<hostInstanceId>.debug.log且不包含AK/SK，stdout/stderr均不混入诊断；默认ERROR只输出异常。顶层异常输出COLLECT_ERROR并保持退出码0。示例：EASYOPS_COLLECTOR_instanceId=65eb86f148251 EASYOPS_COLLECTOR_hostUuid=f907... EASYOPS_COLLECTOR_hostIp=192.168.110.24 EASYOPS_COLLECTOR_openapiGateway=http://192.168.110.24 EASYOPS_OPENAPI_AK=... EASYOPS_OPENAPI_SK=... EASYOPS_COLLECTOR_logLevel=DEBUG python host_deploy_instance_monitor.py")
     parser.add_argument("--version", action="version", version=VERSION)
     parser.parse_args(argv)
     try:
         settings = config()
-        log_event(settings, "DEBUG", "config.ready", version=VERSION, logLevel=settings["logLevel"], cacheDir=settings["cacheDir"], gatewayConfigured=bool(settings["gateway"]), gatewaySource=settings["gatewaySource"], accessKeyConfigured=bool(settings["accessKey"]), secretKeyConfigured=bool(settings["secretKey"]))
+        log_event(settings, "DEBUG", "config.ready", version=VERSION, logLevel=settings["logLevel"], cacheDir=settings["cacheDir"], gatewayConfigured=bool(settings["gateway"]), gatewaySource=settings["gatewaySource"], openapiScheme=settings["openapiScheme"], accessKeyConfigured=bool(settings["accessKey"]), secretKeyConfigured=bool(settings["secretKey"]))
         sys.stdout.write("%s\n" % json.dumps(collect(settings), allow_nan=False))
     except Exception:
         sys.stdout.write("COLLECT_ERROR: [main] %s\n" % traceback.format_exc())

@@ -19,7 +19,7 @@ from unittest import mock
 
 KIT = Path(__file__).resolve().parents[2] / "monitor-kits/host-deploy-instance-monitoring"
 SOURCE = KIT / "src/host_deploy_instance_monitor.py"
-PACKAGE = Path(__file__).resolve().parents[3] / "hub/monitor-kits/监控套件_主机部署实例监控_0.1.12.zip"
+PACKAGE = Path(__file__).resolve().parents[3] / "hub/monitor-kits/监控套件_主机部署实例监控_0.1.13.zip"
 WORKTREE_ROOT = Path(__file__).resolve().parents[7]
 
 
@@ -46,9 +46,24 @@ class HostDeployInstanceMonitorTests(unittest.TestCase):
         self.assertEqual(settings["hostInstanceId"], "65eb86f148251")
         self.assertEqual(settings["cacheTtlSeconds"], 604800)
         self.assertEqual(settings["logLevel"], "DEBUG")
-        with mock.patch.dict(m, {"resolve_openapi_gateway": mock.Mock(return_value=("http://192.168.110.24", "agentConfig"))}):
+        self.assertEqual(settings["openapiScheme"], "https")
+        gateway_mock = mock.Mock(return_value=("http://192.168.110.24", "agentConfig"))
+        with mock.patch.dict(m, {"resolve_openapi_gateway": gateway_mock}):
             with mock.patch.dict(os.environ, env, clear=True):
-                self.assertEqual(m["config"]()["gateway"], "http://192.168.110.24")
+                configured = m["config"]()
+        self.assertEqual(configured["gateway"], "http://192.168.110.24")
+        gateway_mock.assert_called_with("", "https")
+        http_env = dict(env, EASYOPS_COLLECTOR_openapiScheme="http")
+        gateway_mock = mock.Mock(return_value=("http://192.168.110.24", "agentConfig"))
+        with mock.patch.dict(m, {"resolve_openapi_gateway": gateway_mock}):
+            with mock.patch.dict(os.environ, http_env, clear=True):
+                configured = m["config"]()
+        self.assertEqual(configured["openapiScheme"], "http")
+        gateway_mock.assert_called_with("", "http")
+        invalid_env = dict(env, EASYOPS_COLLECTOR_openapiScheme="ftp")
+        with mock.patch.dict(os.environ, invalid_env, clear=True):
+            with self.assertRaises(ValueError):
+                m["config"]()
         with mock.patch.dict(os.environ, {"EASYOPS_COLLECTOR_instanceId": "$.instanceId"}, clear=True):
             with self.assertRaises(ValueError):
                 m["config"]()
@@ -89,17 +104,41 @@ class HostDeployInstanceMonitorTests(unittest.TestCase):
             self.assertEqual(m["text"](value), value)
             self.assertEqual(m["normalize_windows_path"](value), value)
 
-    def test_openapi_gateway_from_agent_config(self):
+    def test_openapi_gateway_scheme_defaults_to_https(self):
         m = module()
         payload = b"""base:\n  client_id: 1888\nreport:\n  server_groups:\n    - hosts:\n        - ip: 10.0.0.2\ncommand:\n  server_groups:\n    - name: default\n      hosts:\n        - ip: 192.168.110.24,192.168.110.25\n          port: 5511\n"""
         with mock.patch.dict(m, {"read_file": mock.Mock(return_value=payload)}):
-            self.assertEqual(m["gateway_from_agent_config"]("/agent/conf.yaml"), "http://192.168.110.24")
+            self.assertEqual(m["gateway_from_agent_config"]("/agent/conf.yaml", "https"), "https://192.168.110.24")
+            self.assertEqual(m["gateway_from_agent_config"]("/agent/conf.yaml", "http"), "http://192.168.110.24")
         self.assertEqual(m["resolve_openapi_gateway"]("http://10.1.1.1/"), ("http://10.1.1.1", "param"))
         with mock.patch.dict(m, {
             "agent_config_paths": mock.Mock(return_value=["/agent/conf.yaml"]),
             "read_file": mock.Mock(return_value=payload),
         }):
-            self.assertEqual(m["resolve_openapi_gateway"]("http://10.1.1.1/"), ("http://192.168.110.24", "agentConfig"))
+            self.assertEqual(m["resolve_openapi_gateway"]("", "https"), ("https://192.168.110.24", "agentConfig"))
+            self.assertEqual(m["resolve_openapi_gateway"]("", "http"), ("http://192.168.110.24", "agentConfig"))
+
+    def test_search_targets_uses_one_condition(self):
+        m = module()
+        settings = {
+            "hostInstanceId": "host-instance", "hostUuid": "agent-uuid", "hostIp": "192.168.110.24",
+            "gateway": "https://192.168.110.24", "accessKey": "ak", "secretKey": "sk",
+            "requestTimeout": 10.0, "logLevel": "ERROR", "debugLogPath": "",
+        }
+        http_json = mock.Mock(return_value={"code": 0, "data": {"list": [], "total": 0}})
+        with mock.patch.dict(m, {"sign_openapi": mock.Mock(return_value={}), "http_json": http_json}):
+            m["search_targets"](settings)
+        body = json.loads(http_json.call_args[0][2])
+        self.assertEqual(body["query"], {"isMonitor": "是", "uuid": "agent-uuid"})
+        settings["hostUuid"] = ""
+        with mock.patch.dict(m, {"sign_openapi": mock.Mock(return_value={}), "http_json": http_json}):
+            m["search_targets"](settings)
+        body = json.loads(http_json.call_args[0][2])
+        self.assertEqual(body["query"], {"isMonitor": "是", "ip": "192.168.110.24"})
+        source = SOURCE.read_text(encoding="utf-8")
+        orig = SOURCE.with_suffix(".orig").read_text(encoding="utf-8")
+        self.assertNotIn("$or", source)
+        self.assertNotIn("$or", orig)
 
     def test_process_match_prefers_process_list(self):
         m = module()
@@ -323,7 +362,7 @@ class HostDeployInstanceMonitorTests(unittest.TestCase):
     def test_help_and_version(self):
         result = subprocess.run([sys.executable, str(SOURCE), "--version"], capture_output=True, text=True, env={**os.environ, "PYTHONDONTWRITEBYTECODE": "1"})
         self.assertEqual(result.returncode, 0)
-        self.assertEqual(result.stdout.strip(), "0.1.12")
+        self.assertEqual(result.stdout.strip(), "0.1.13")
 
     def test_python2_json_output_uses_ascii_escape(self):
         source = SOURCE.read_text(encoding="utf-8")
@@ -348,6 +387,12 @@ class HostDeployInstanceMonitorTests(unittest.TestCase):
             self.assertFalse(params[name]["display"])
         self.assertFalse(params["openapiGateway"]["display"])
         self.assertTrue(params["openapiGateway"]["optional"])
+        self.assertEqual(params["openapiScheme"]["valueType"], "string")
+        self.assertEqual(params["openapiScheme"]["defaultValue"], "https")
+        self.assertEqual(params["openapiScheme"]["use"], "collectParams")
+        self.assertTrue(params["openapiScheme"]["display"])
+        self.assertFalse(params["openapiScheme"]["isFromSecret"])
+        self.assertFalse(params["openapiScheme"]["isEncrypt"])
         for name in ("openapiAkText", "openapiSkText"):
             self.assertTrue(params[name]["display"])
             self.assertEqual(params[name]["valueType"], "string")
@@ -388,6 +433,8 @@ class HostDeployInstanceMonitorTests(unittest.TestCase):
                 self.assertFalse(packaged_params[name]["display"])
             self.assertFalse(packaged_params["openapiGateway"]["display"])
             self.assertTrue(packaged_params["openapiGateway"]["optional"])
+            self.assertEqual(packaged_params["openapiScheme"]["defaultValue"], "https")
+            self.assertEqual(packaged_params["openapiScheme"]["use"], "collectParams")
             for name in ("openapiAkText", "openapiSkText"):
                 self.assertTrue(packaged_params[name]["display"])
                 self.assertEqual(packaged_params[name]["valueType"], "string")

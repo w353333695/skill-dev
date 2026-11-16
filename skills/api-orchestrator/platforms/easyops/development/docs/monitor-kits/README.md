@@ -119,4 +119,4 @@ python3 skills/api-orchestrator/platforms/easyops/development/scripts/validate_m
 
 ## 主机部署实例监控（2026-11-12）
 
-新增 `主机部署实例监控` 0.1.0：绑定 HOST，按主机 instanceId 读取本地缓存，缓存缺失或超过7天时通过 OpenAPI search 刷新 `ARTIFACT_INST@ONEMODEL` 中 `isMonitor=是` 的部署实例；采集进程、端口、CPU、内存和句柄指标。数据结构、抽象模型更新坑位和导入验收见 `主机部署实例监控_数据结构与离线交付_2026-11-12.md`。套件0.1.1已导入为66010484e0751并回读available；OpenAPI真实调用、任务激活和目标主机采集尚未验收。
+当前版本 `主机部署实例监控` 0.1.13：绑定 HOST，读取本地缓存，缓存缺失或超过7天时通过 OpenAPI search 刷新 `ARTIFACT_INST@ONEMODEL` 中 `isMonitor=是` 的部署实例；目标定位使用uuid/ip/instanceId单条件，agent配置发现的OpenAPI地址默认使用HTTPS。采集进程、端口、CPU、内存和句柄指标。数据结构、抽象模型更新坑位和导入验收见 `主机部署实例监控_数据结构与离线交付_2026-11-12.md`。

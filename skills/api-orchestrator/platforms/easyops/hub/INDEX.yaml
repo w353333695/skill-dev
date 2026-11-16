@@ -21,9 +21,10 @@ items:
   - id: host-deploy-instance-monitor-kit
     name: 主机部署实例监控
     category: monitor-kits
-    files: [监控套件_主机部署实例监控_0.1.12.zip, 主机部署实例监控_告警规则模板_0.1.12.xlsx]
-    version: "0.1.12"
+    files: [监控套件_主机部署实例监控_0.1.13.zip, 主机部署实例监控_告警规则模板_0.1.13.xlsx]
+    version: "0.1.13"
     history:
+      - {ver: "0.1.13", date: "2026-11-16", change: "OpenAPI目标发现改为uuid/ip/instanceId单条件，避免组合条件被误判为NoSQL注入；新增openapiScheme参数并默认HTTPS"}
       - {ver: "0.1.1", date: "2026-11-12", change: "修正成品包仅保留XLSX告警模板，避免同时导入JSON与XLSX生成重复告警定义；OpenAPI凭证参数使用password类型"}
       - {ver: "0.1.2", date: "2026-11-12", change: "修正metric_set.json为对象数组并补齐通用校验，避免指标集未生成导致前端创建任务无法加载"}
       - {ver: "0.1.3", date: "2026-11-12", change: "AK/SK参数更名为openapiAk/openapiSk并改为password加密手填模式，关闭Secret引用继承导致的传参问题"}
@@ -38,7 +39,7 @@ items:
       - {ver: "0.1.11", date: "2026-11-16", change: "OpenAPI网关默认从agent conf.yaml读取command服务IP，旧openapiGateway参数仅配置缺失时兜底并前端隐藏"}
       - {ver: "0.1.12", date: "2026-11-16", change: "保留Python2 unicode中文命令行避免进程匹配异常；DEBUG日志改写缓存侧车文件，防止debug接口合并stderr破坏JSON数组"}
     scenario: 主机关联部署实例的本机进程、端口和资源监控
-    notes: "需配置OpenAPI网关地址与AK/SK并放行实例search；openapiAkText/openapiSkText为普通string+collectParams+非Secret+不加密，主机instanceId/uuid/ip保持动态注入且前端隐藏；Linux/Windows输出同一套22项指标与4个指标集(3/11/5/3)。Windows通过PowerShell/CIM和netstat采集，OpenAPI网关优先从agent conf.yaml读取command服务IP；句柄上限不可直接获取时usage输出-1；可临时设置logLevel=DEBUG，脱敏过程日志写入缓存目录hostInstanceId.debug.log。"
+    notes: "需配置OpenAPI AK/SK并放行实例search；openapiAkText/openapiSkText为普通string+collectParams+非Secret+不加密，主机instanceId/uuid/ip保持动态注入且前端隐藏；Linux/Windows输出同一套22项指标与4个指标集(3/11/5/3)。Windows通过PowerShell/CIM和netstat采集，OpenAPI网关优先从agent conf.yaml读取command服务IP并按openapiScheme拼接，默认https；句柄上限不可直接获取时usage输出-1；可临时设置logLevel=DEBUG，脱敏过程日志写入缓存目录hostInstanceId.debug.log。"
     added: "2026-11-12"
   - id: ping-monitor-kit
     name: 主机Ping监控
