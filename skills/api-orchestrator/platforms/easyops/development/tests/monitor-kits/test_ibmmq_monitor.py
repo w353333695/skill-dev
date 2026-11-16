@@ -15,8 +15,8 @@ import yaml
 BASE = Path(__file__).resolve().parents[2]
 KIT = BASE / "monitor-kits/ibmmq-monitoring"
 SOURCE = KIT / "src/ibmmq_monitor.orig"
-PACKAGE = BASE.parent / "hub/monitor-kits/监控套件_IBM_MQ监控_0.4.3.zip"
-XLSX = KIT / "IBM_MQ监控_告警规则模板_0.4.3.xlsx"
+PACKAGE = BASE.parent / "hub/monitor-kits/监控套件_IBM_MQ监控_0.4.4.zip"
+XLSX = KIT / "IBM_MQ监控_告警规则模板_0.4.4.xlsx"
 
 
 def module():
@@ -41,7 +41,7 @@ class IBMMQMonitorTest(unittest.TestCase):
     def test_version(self):
         result = subprocess.run([sys.executable, str(SOURCE), "--version"], capture_output=True, text=True)
         self.assertEqual(result.returncode, 0)
-        self.assertIn("0.4.3", result.stdout)
+        self.assertIn("0.4.4", result.stdout)
 
     def test_orig_and_runtime_are_identical(self):
         self.assertEqual(SOURCE.read_bytes(), (KIT / "src/ibmmq_monitor.py").read_bytes())
@@ -115,10 +115,40 @@ class IBMMQMonitorTest(unittest.TestCase):
         with mock.patch.dict(os.environ, env), self.assertLogs(self.m.LOGGER, level="DEBUG") as logs:
             settings = self.m.config()
         self.assertEqual(settings["logLevel"], "DEBUG")
-        self.assertTrue(any("[config] version=0.4.3" in message for message in logs.output))
+        self.assertTrue(any("[config] version=0.4.4" in message for message in logs.output))
         with mock.patch.dict(os.environ, {"EASYOPS_COLLECTOR_logLevel": "VERBOSE"}):
             with self.assertRaises(ValueError):
                 self.m.config()
+
+    def test_debug_logs_mirror_to_stdout(self):
+        import io
+        stdout = io.StringIO()
+        stderr = io.StringIO()
+        with mock.patch.object(sys, "stdout", stdout), mock.patch.object(sys, "stderr", stderr):
+            self.m.setup_logging("DEBUG")
+            self.m.LOGGER.debug("[test] frontend-visible")
+        self.assertIn("[test] frontend-visible", stdout.getvalue())
+        self.assertIn("[test] frontend-visible", stderr.getvalue())
+        self.m.LOGGER.handlers = []
+
+    def test_debug_stdout_contains_logs_and_final_json(self):
+        import io
+        stdout = io.StringIO()
+        stderr = io.StringIO()
+        settings = dict(self.settings, logLevel="DEBUG")
+        def collect_debug(_settings):
+            self.m.LOGGER.debug("[frontend] diagnostic payload")
+            return []
+        with mock.patch.dict(os.environ, {"EASYOPS_COLLECTOR_logLevel": "DEBUG"}), \
+             mock.patch.object(sys, "stdout", stdout), mock.patch.object(sys, "stderr", stderr), \
+             mock.patch.object(self.m, "config", return_value=settings), \
+             mock.patch.object(self.m, "collect", side_effect=collect_debug):
+            result = self.m.main([])
+        self.assertEqual(result, 0)
+        self.assertIn("[frontend] diagnostic payload", stdout.getvalue())
+        self.assertIn("[frontend] diagnostic payload", stderr.getvalue())
+        self.assertTrue(stdout.getvalue().rstrip().endswith("[]"))
+        self.m.LOGGER.handlers = []
 
     def test_collect_logs_missing_metric_summary(self):
         qmgrs = [{"qmgrName": "QM1", "status": "Running"}]
@@ -249,7 +279,7 @@ class IBMMQMonitorTest(unittest.TestCase):
         self.assertEqual(plugin["name"], "IBM MQ监控")
         self.assertEqual(plugin["relateObjectId"], "IBMMQ@ONEMODEL")
         self.assertIn("Linux/Windows", plugin["memo"])
-        self.assertEqual(plugin["version"], "0.4.3")
+        self.assertEqual(plugin["version"], "0.4.4")
         self.assertNotIn("qmgrName", plugin["params"])
         self.assertNotIn("mqBinPath", plugin["params"])
         self.assertIn("logLevel", plugin["params"])
@@ -299,7 +329,7 @@ class IBMMQMonitorTest(unittest.TestCase):
                 mode = stat.S_IMODE(item.external_attr >> 16)
                 self.assertEqual(mode, 0o755 if item.is_dir() else 0o664)
             self.assertIn("IBM MQ监控/src/ibmmq_monitor.orig", package.namelist())
-            self.assertIn("IBM MQ监控/IBM_MQ监控_告警规则模板_0.4.3.xlsx", package.namelist())
+            self.assertIn("IBM MQ监控/IBM_MQ监控_告警规则模板_0.4.4.xlsx", package.namelist())
             self.assertIn("IBM MQ监控/resource_discovery_define.json", package.namelist())
             self.assertNotIn("IBM MQ监控/IBMMQ@ONEMODEL.json", package.namelist())
 

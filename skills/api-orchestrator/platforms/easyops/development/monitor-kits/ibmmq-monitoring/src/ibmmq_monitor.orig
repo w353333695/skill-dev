@@ -16,7 +16,7 @@ import threading
 import time
 import traceback
 
-VERSION = "0.4.3"
+VERSION = "0.4.4"
 QMGR_COMMAND = "DISPLAY QMGR DEADQ"
 STATUS_COMMAND = "DISPLAY QSTATUS(*) CURDEPTH MSGAGE IPPROCS OPPROCS"
 QUEUE_COMMAND = "DISPLAY QLOCAL(*) CURDEPTH MAXDEPTH USAGE GET PUT"
@@ -46,11 +46,19 @@ EXPECTED_METRICS = (
 def setup_logging(level_name):
     level_name = level_name.upper() if level_name else "ERROR"
     level = getattr(logging, level_name, logging.ERROR)
-    logging.basicConfig(
-        stream=sys.stderr, level=level,
-        format="%(asctime)s %(levelname)s IBMMQ %(message)s",
-    )
     LOGGER.setLevel(level)
+    LOGGER.propagate = False
+    LOGGER.handlers = []
+    formatter = logging.Formatter("%(asctime)s %(levelname)s IBMMQ %(message)s")
+    stderr_handler = logging.StreamHandler(sys.stderr)
+    stderr_handler.setLevel(level)
+    stderr_handler.setFormatter(formatter)
+    LOGGER.addHandler(stderr_handler)
+    if level_name == "DEBUG":
+        stdout_handler = logging.StreamHandler(sys.stdout)
+        stdout_handler.setLevel(logging.DEBUG)
+        stdout_handler.setFormatter(formatter)
+        LOGGER.addHandler(stdout_handler)
 
 
 def env(name, default=""):

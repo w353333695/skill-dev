@@ -14,11 +14,11 @@ ROOT = Path(__file__).resolve().parents[1]
 KIT = ROOT / "monitor-kits/ibmmq-monitoring"
 HUB = ROOT.parent / "hub/monitor-kits"
 NAME = "IBM MQ监控"
-VERSION = "0.4.3"
+VERSION = "0.4.4"
 SUPPORTED_PLATFORMS = ("Linux", "Windows")
 OBJECT_ID = "IBMMQ@ONEMODEL"
-XLSX_NAME = "IBM_MQ监控_告警规则模板_0.4.3.xlsx"
-ZIP_NAME = "监控套件_IBM_MQ监控_0.4.3.zip"
+XLSX_NAME = "IBM_MQ监控_告警规则模板_0.4.4.xlsx"
+ZIP_NAME = "监控套件_IBM_MQ监控_0.4.4.zip"
 BASE_DIMS = ("ibmmqInstanceId", "qmgrName", "hostIp", "installPath")
 QUEUE_DIMS = BASE_DIMS + ("queueName",)
 CHANNEL_DIMS = BASE_DIMS + ("channelName", "channelType")
@@ -127,7 +127,7 @@ PARAMETERS = (
     ("queueFilter", "string", ".*", "队列过滤正则", "默认监控全部非SYSTEM.前缀队列", True, True),
     ("includeSystemQueues", "string", "false", "包含系统队列", "默认排除SYSTEM.前缀队列", True, True),
     ("processMonitor", "string", "true", "启用进程资源采集", "默认启用，按cmdline分组输出进程资源", True, True),
-    ("logLevel", "string", "ERROR", "日志级别", "默认ERROR；排查缺失指标时改为DEBUG，日志输出到stderr便于导出", True, True),
+    ("logLevel", "string", "ERROR", "日志级别", "默认ERROR；DEBUG诊断模式同时输出日志到stdout/stderr，前端可直接复制，采集JSON在末尾", True, True),
     ("sampleInterval", "float", "0.2", "CPU采样间隔(秒)", "Linux两次/proc CPU采样间隔；Windows读取CIM格式化计数，默认0.2，范围0.05-2", True, True),
     ("commandTimeout", "int", "10", "MQ命令超时(秒)", "dspmq/runmqsc超时时间，默认10，范围1-60", True, True),
 )
@@ -197,6 +197,7 @@ def validate_platform_support():
         'import logging',
         'LOG_LEVELS = ("DEBUG", "INFO", "WARN", "ERROR")',
         'def setup_logging(',
+        'stdout_handler = logging.StreamHandler(sys.stdout)',
     )
     missing_source = [item for item in required_source if item not in source]
     if missing_source:
