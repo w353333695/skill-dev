@@ -5,18 +5,23 @@
     "instanceId": "",
     "key": "ibmmq_collect_success",
     "labels": [
-      "hostInstanceId",
+      "ibmmqInstanceId",
       "qmgrName",
+      "hostIp",
       "installPath"
     ],
     "metricType": "gauge",
     "tagDefine": [
       {
-        "name": "hostInstanceId",
+        "name": "ibmmqInstanceId",
         "readOnly": false
       },
       {
         "name": "qmgrName",
+        "readOnly": false
+      },
+      {
+        "name": "hostIp",
         "readOnly": false
       },
       {
@@ -31,18 +36,23 @@
     "instanceId": "",
     "key": "ibmmq_discovery_success",
     "labels": [
-      "hostInstanceId",
+      "ibmmqInstanceId",
       "qmgrName",
+      "hostIp",
       "installPath"
     ],
     "metricType": "gauge",
     "tagDefine": [
       {
-        "name": "hostInstanceId",
+        "name": "ibmmqInstanceId",
         "readOnly": false
       },
       {
         "name": "qmgrName",
+        "readOnly": false
+      },
+      {
+        "name": "hostIp",
         "readOnly": false
       },
       {
@@ -57,12 +67,12 @@
     "instanceId": "",
     "key": "ibmmq_qmgr_count",
     "labels": [
-      "hostInstanceId"
+      "ibmmqInstanceId"
     ],
     "metricType": "gauge",
     "tagDefine": [
       {
-        "name": "hostInstanceId",
+        "name": "ibmmqInstanceId",
         "readOnly": false
       }
     ]
@@ -73,18 +83,23 @@
     "instanceId": "",
     "key": "ibmmq_qmgr_status",
     "labels": [
-      "hostInstanceId",
+      "ibmmqInstanceId",
       "qmgrName",
+      "hostIp",
       "installPath"
     ],
     "metricType": "gauge",
     "tagDefine": [
       {
-        "name": "hostInstanceId",
+        "name": "ibmmqInstanceId",
         "readOnly": false
       },
       {
         "name": "qmgrName",
+        "readOnly": false
+      },
+      {
+        "name": "hostIp",
         "readOnly": false
       },
       {
@@ -99,18 +114,23 @@
     "instanceId": "",
     "key": "ibmmq_sc_command_success",
     "labels": [
-      "hostInstanceId",
+      "ibmmqInstanceId",
       "qmgrName",
+      "hostIp",
       "installPath"
     ],
     "metricType": "gauge",
     "tagDefine": [
       {
-        "name": "hostInstanceId",
+        "name": "ibmmqInstanceId",
         "readOnly": false
       },
       {
         "name": "qmgrName",
+        "readOnly": false
+      },
+      {
+        "name": "hostIp",
         "readOnly": false
       },
       {
@@ -125,18 +145,23 @@
     "instanceId": "",
     "key": "ibmmq_queue_total",
     "labels": [
-      "hostInstanceId",
+      "ibmmqInstanceId",
       "qmgrName",
+      "hostIp",
       "installPath"
     ],
     "metricType": "gauge",
     "tagDefine": [
       {
-        "name": "hostInstanceId",
+        "name": "ibmmqInstanceId",
         "readOnly": false
       },
       {
         "name": "qmgrName",
+        "readOnly": false
+      },
+      {
+        "name": "hostIp",
         "readOnly": false
       },
       {
@@ -151,18 +176,23 @@
     "instanceId": "",
     "key": "ibmmq_queue_depth_total",
     "labels": [
-      "hostInstanceId",
+      "ibmmqInstanceId",
       "qmgrName",
+      "hostIp",
       "installPath"
     ],
     "metricType": "gauge",
     "tagDefine": [
       {
-        "name": "hostInstanceId",
+        "name": "ibmmqInstanceId",
         "readOnly": false
       },
       {
         "name": "qmgrName",
+        "readOnly": false
+      },
+      {
+        "name": "hostIp",
         "readOnly": false
       },
       {
@@ -177,18 +207,23 @@
     "instanceId": "",
     "key": "ibmmq_queue_max_depth",
     "labels": [
-      "hostInstanceId",
+      "ibmmqInstanceId",
       "qmgrName",
+      "hostIp",
       "installPath"
     ],
     "metricType": "gauge",
     "tagDefine": [
       {
-        "name": "hostInstanceId",
+        "name": "ibmmqInstanceId",
         "readOnly": false
       },
       {
         "name": "qmgrName",
+        "readOnly": false
+      },
+      {
+        "name": "hostIp",
         "readOnly": false
       },
       {
@@ -203,18 +238,23 @@
     "instanceId": "",
     "key": "ibmmq_queue_max_usage_percent",
     "labels": [
-      "hostInstanceId",
+      "ibmmqInstanceId",
       "qmgrName",
+      "hostIp",
       "installPath"
     ],
     "metricType": "gauge",
     "tagDefine": [
       {
-        "name": "hostInstanceId",
+        "name": "ibmmqInstanceId",
         "readOnly": false
       },
       {
         "name": "qmgrName",
+        "readOnly": false
+      },
+      {
+        "name": "hostIp",
         "readOnly": false
       },
       {
@@ -229,19 +269,24 @@
     "instanceId": "",
     "key": "ibmmq_queue_current_depth",
     "labels": [
-      "hostInstanceId",
+      "ibmmqInstanceId",
       "qmgrName",
+      "hostIp",
       "installPath",
       "queueName"
     ],
     "metricType": "gauge",
     "tagDefine": [
       {
-        "name": "hostInstanceId",
+        "name": "ibmmqInstanceId",
         "readOnly": false
       },
       {
         "name": "qmgrName",
+        "readOnly": false
+      },
+      {
+        "name": "hostIp",
         "readOnly": false
       },
       {
@@ -260,19 +305,24 @@
     "instanceId": "",
     "key": "ibmmq_queue_max_depth_config",
     "labels": [
-      "hostInstanceId",
+      "ibmmqInstanceId",
       "qmgrName",
+      "hostIp",
       "installPath",
       "queueName"
     ],
     "metricType": "gauge",
     "tagDefine": [
       {
-        "name": "hostInstanceId",
+        "name": "ibmmqInstanceId",
         "readOnly": false
       },
       {
         "name": "qmgrName",
+        "readOnly": false
+      },
+      {
+        "name": "hostIp",
         "readOnly": false
       },
       {
@@ -291,19 +341,24 @@
     "instanceId": "",
     "key": "ibmmq_queue_usage_percent",
     "labels": [
-      "hostInstanceId",
+      "ibmmqInstanceId",
       "qmgrName",
+      "hostIp",
       "installPath",
       "queueName"
     ],
     "metricType": "gauge",
     "tagDefine": [
       {
-        "name": "hostInstanceId",
+        "name": "ibmmqInstanceId",
         "readOnly": false
       },
       {
         "name": "qmgrName",
+        "readOnly": false
+      },
+      {
+        "name": "hostIp",
         "readOnly": false
       },
       {
@@ -322,19 +377,24 @@
     "instanceId": "",
     "key": "ibmmq_queue_oldest_message_age_seconds",
     "labels": [
-      "hostInstanceId",
+      "ibmmqInstanceId",
       "qmgrName",
+      "hostIp",
       "installPath",
       "queueName"
     ],
     "metricType": "gauge",
     "tagDefine": [
       {
-        "name": "hostInstanceId",
+        "name": "ibmmqInstanceId",
         "readOnly": false
       },
       {
         "name": "qmgrName",
+        "readOnly": false
+      },
+      {
+        "name": "hostIp",
         "readOnly": false
       },
       {
@@ -353,19 +413,24 @@
     "instanceId": "",
     "key": "ibmmq_queue_input_handles",
     "labels": [
-      "hostInstanceId",
+      "ibmmqInstanceId",
       "qmgrName",
+      "hostIp",
       "installPath",
       "queueName"
     ],
     "metricType": "gauge",
     "tagDefine": [
       {
-        "name": "hostInstanceId",
+        "name": "ibmmqInstanceId",
         "readOnly": false
       },
       {
         "name": "qmgrName",
+        "readOnly": false
+      },
+      {
+        "name": "hostIp",
         "readOnly": false
       },
       {
@@ -384,19 +449,24 @@
     "instanceId": "",
     "key": "ibmmq_queue_output_handles",
     "labels": [
-      "hostInstanceId",
+      "ibmmqInstanceId",
       "qmgrName",
+      "hostIp",
       "installPath",
       "queueName"
     ],
     "metricType": "gauge",
     "tagDefine": [
       {
-        "name": "hostInstanceId",
+        "name": "ibmmqInstanceId",
         "readOnly": false
       },
       {
         "name": "qmgrName",
+        "readOnly": false
+      },
+      {
+        "name": "hostIp",
         "readOnly": false
       },
       {
@@ -415,18 +485,23 @@
     "instanceId": "",
     "key": "ibmmq_listener_total",
     "labels": [
-      "hostInstanceId",
+      "ibmmqInstanceId",
       "qmgrName",
+      "hostIp",
       "installPath"
     ],
     "metricType": "gauge",
     "tagDefine": [
       {
-        "name": "hostInstanceId",
+        "name": "ibmmqInstanceId",
         "readOnly": false
       },
       {
         "name": "qmgrName",
+        "readOnly": false
+      },
+      {
+        "name": "hostIp",
         "readOnly": false
       },
       {
@@ -441,18 +516,23 @@
     "instanceId": "",
     "key": "ibmmq_listener_running_count",
     "labels": [
-      "hostInstanceId",
+      "ibmmqInstanceId",
       "qmgrName",
+      "hostIp",
       "installPath"
     ],
     "metricType": "gauge",
     "tagDefine": [
       {
-        "name": "hostInstanceId",
+        "name": "ibmmqInstanceId",
         "readOnly": false
       },
       {
         "name": "qmgrName",
+        "readOnly": false
+      },
+      {
+        "name": "hostIp",
         "readOnly": false
       },
       {
@@ -467,8 +547,9 @@
     "instanceId": "",
     "key": "ibmmq_listener_status",
     "labels": [
-      "hostInstanceId",
+      "ibmmqInstanceId",
       "qmgrName",
+      "hostIp",
       "installPath",
       "listenerName",
       "port"
@@ -476,11 +557,15 @@
     "metricType": "gauge",
     "tagDefine": [
       {
-        "name": "hostInstanceId",
+        "name": "ibmmqInstanceId",
         "readOnly": false
       },
       {
         "name": "qmgrName",
+        "readOnly": false
+      },
+      {
+        "name": "hostIp",
         "readOnly": false
       },
       {
@@ -503,18 +588,23 @@
     "instanceId": "",
     "key": "ibmmq_channel_total",
     "labels": [
-      "hostInstanceId",
+      "ibmmqInstanceId",
       "qmgrName",
+      "hostIp",
       "installPath"
     ],
     "metricType": "gauge",
     "tagDefine": [
       {
-        "name": "hostInstanceId",
+        "name": "ibmmqInstanceId",
         "readOnly": false
       },
       {
         "name": "qmgrName",
+        "readOnly": false
+      },
+      {
+        "name": "hostIp",
         "readOnly": false
       },
       {
@@ -529,18 +619,23 @@
     "instanceId": "",
     "key": "ibmmq_channel_running_count",
     "labels": [
-      "hostInstanceId",
+      "ibmmqInstanceId",
       "qmgrName",
+      "hostIp",
       "installPath"
     ],
     "metricType": "gauge",
     "tagDefine": [
       {
-        "name": "hostInstanceId",
+        "name": "ibmmqInstanceId",
         "readOnly": false
       },
       {
         "name": "qmgrName",
+        "readOnly": false
+      },
+      {
+        "name": "hostIp",
         "readOnly": false
       },
       {
@@ -555,18 +650,23 @@
     "instanceId": "",
     "key": "ibmmq_channel_retrying_count",
     "labels": [
-      "hostInstanceId",
+      "ibmmqInstanceId",
       "qmgrName",
+      "hostIp",
       "installPath"
     ],
     "metricType": "gauge",
     "tagDefine": [
       {
-        "name": "hostInstanceId",
+        "name": "ibmmqInstanceId",
         "readOnly": false
       },
       {
         "name": "qmgrName",
+        "readOnly": false
+      },
+      {
+        "name": "hostIp",
         "readOnly": false
       },
       {
@@ -581,8 +681,9 @@
     "instanceId": "",
     "key": "ibmmq_channel_status",
     "labels": [
-      "hostInstanceId",
+      "ibmmqInstanceId",
       "qmgrName",
+      "hostIp",
       "installPath",
       "channelName",
       "channelType"
@@ -590,11 +691,15 @@
     "metricType": "gauge",
     "tagDefine": [
       {
-        "name": "hostInstanceId",
+        "name": "ibmmqInstanceId",
         "readOnly": false
       },
       {
         "name": "qmgrName",
+        "readOnly": false
+      },
+      {
+        "name": "hostIp",
         "readOnly": false
       },
       {
@@ -617,8 +722,9 @@
     "instanceId": "",
     "key": "ibmmq_channel_messages",
     "labels": [
-      "hostInstanceId",
+      "ibmmqInstanceId",
       "qmgrName",
+      "hostIp",
       "installPath",
       "channelName",
       "channelType"
@@ -626,11 +732,15 @@
     "metricType": "gauge",
     "tagDefine": [
       {
-        "name": "hostInstanceId",
+        "name": "ibmmqInstanceId",
         "readOnly": false
       },
       {
         "name": "qmgrName",
+        "readOnly": false
+      },
+      {
+        "name": "hostIp",
         "readOnly": false
       },
       {
@@ -653,8 +763,9 @@
     "instanceId": "",
     "key": "ibmmq_channel_bytes",
     "labels": [
-      "hostInstanceId",
+      "ibmmqInstanceId",
       "qmgrName",
+      "hostIp",
       "installPath",
       "channelName",
       "channelType"
@@ -662,11 +773,15 @@
     "metricType": "gauge",
     "tagDefine": [
       {
-        "name": "hostInstanceId",
+        "name": "ibmmqInstanceId",
         "readOnly": false
       },
       {
         "name": "qmgrName",
+        "readOnly": false
+      },
+      {
+        "name": "hostIp",
         "readOnly": false
       },
       {
@@ -689,19 +804,24 @@
     "instanceId": "",
     "key": "ibmmq_process_alive",
     "labels": [
-      "hostInstanceId",
+      "ibmmqInstanceId",
       "qmgrName",
+      "hostIp",
       "installPath",
       "cmdline"
     ],
     "metricType": "gauge",
     "tagDefine": [
       {
-        "name": "hostInstanceId",
+        "name": "ibmmqInstanceId",
         "readOnly": false
       },
       {
         "name": "qmgrName",
+        "readOnly": false
+      },
+      {
+        "name": "hostIp",
         "readOnly": false
       },
       {
@@ -720,19 +840,24 @@
     "instanceId": "",
     "key": "ibmmq_process_count",
     "labels": [
-      "hostInstanceId",
+      "ibmmqInstanceId",
       "qmgrName",
+      "hostIp",
       "installPath",
       "cmdline"
     ],
     "metricType": "gauge",
     "tagDefine": [
       {
-        "name": "hostInstanceId",
+        "name": "ibmmqInstanceId",
         "readOnly": false
       },
       {
         "name": "qmgrName",
+        "readOnly": false
+      },
+      {
+        "name": "hostIp",
         "readOnly": false
       },
       {
@@ -751,19 +876,24 @@
     "instanceId": "",
     "key": "ibmmq_process_cpu_percent",
     "labels": [
-      "hostInstanceId",
+      "ibmmqInstanceId",
       "qmgrName",
+      "hostIp",
       "installPath",
       "cmdline"
     ],
     "metricType": "gauge",
     "tagDefine": [
       {
-        "name": "hostInstanceId",
+        "name": "ibmmqInstanceId",
         "readOnly": false
       },
       {
         "name": "qmgrName",
+        "readOnly": false
+      },
+      {
+        "name": "hostIp",
         "readOnly": false
       },
       {
@@ -782,19 +912,24 @@
     "instanceId": "",
     "key": "ibmmq_process_memory_bytes",
     "labels": [
-      "hostInstanceId",
+      "ibmmqInstanceId",
       "qmgrName",
+      "hostIp",
       "installPath",
       "cmdline"
     ],
     "metricType": "gauge",
     "tagDefine": [
       {
-        "name": "hostInstanceId",
+        "name": "ibmmqInstanceId",
         "readOnly": false
       },
       {
         "name": "qmgrName",
+        "readOnly": false
+      },
+      {
+        "name": "hostIp",
         "readOnly": false
       },
       {
@@ -813,19 +948,24 @@
     "instanceId": "",
     "key": "ibmmq_process_thread_count",
     "labels": [
-      "hostInstanceId",
+      "ibmmqInstanceId",
       "qmgrName",
+      "hostIp",
       "installPath",
       "cmdline"
     ],
     "metricType": "gauge",
     "tagDefine": [
       {
-        "name": "hostInstanceId",
+        "name": "ibmmqInstanceId",
         "readOnly": false
       },
       {
         "name": "qmgrName",
+        "readOnly": false
+      },
+      {
+        "name": "hostIp",
         "readOnly": false
       },
       {
@@ -844,19 +984,24 @@
     "instanceId": "",
     "key": "ibmmq_process_fd_count",
     "labels": [
-      "hostInstanceId",
+      "ibmmqInstanceId",
       "qmgrName",
+      "hostIp",
       "installPath",
       "cmdline"
     ],
     "metricType": "gauge",
     "tagDefine": [
       {
-        "name": "hostInstanceId",
+        "name": "ibmmqInstanceId",
         "readOnly": false
       },
       {
         "name": "qmgrName",
+        "readOnly": false
+      },
+      {
+        "name": "hostIp",
         "readOnly": false
       },
       {

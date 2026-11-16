@@ -1,0 +1,343 @@
+[
+  {
+    "objectId": "IBMMQ_QMGR@ONEMODEL",
+    "name": "IBM MQ队列管理器实例",
+    "memo": "IBM MQ部署实例，一个hostIp+qmgrName对应一个队列管理器",
+    "protected": false,
+    "category": "应用资源.中间件",
+    "system": "",
+    "notifyDenied": true,
+    "view": {
+      "attr_authorizers": {},
+      "attr_category_order": [
+        "基本信息",
+        "IBM MQ配置"
+      ],
+      "attr_order": [
+        "name",
+        "qmgrName",
+        "mqBinPath",
+        "listenerPort",
+        "listenerNames",
+        "version",
+        "environment",
+        "isMonitor",
+        "discoverSource",
+        "lastDiscoverTime",
+        "ip",
+        "ports",
+        "installPath",
+        "processList",
+        "collectedTs"
+      ],
+      "hide_columns": [
+        "resourceInstanceId",
+        "uuid",
+        "containerId",
+        "resourceDescription",
+        "collectedDataStatus",
+        "deploymentMode",
+        "type",
+        "collectedJobIds"
+      ],
+      "relation_default_attr": null,
+      "relation_group_order": [],
+      "relation_order": [],
+      "show_key": [
+        "qmgrName",
+        "ip"
+      ],
+      "trans_hier_relation_list": null,
+      "visible": true
+    },
+    "attrList": [
+      {
+        "id": "qmgrName",
+        "name": "队列管理器名称",
+        "protected": true,
+        "custom": "false",
+        "readonly": "false",
+        "required": "true",
+        "unique": "false",
+        "tag": [
+          "基本信息"
+        ],
+        "value": {
+          "type": "str",
+          "regex": null,
+          "default_type": "",
+          "default": null,
+          "struct_define": [],
+          "mode": "default",
+          "prefix": "",
+          "start_value": 0,
+          "series_number_length": 0
+        },
+        "wordIndexDenied": false,
+        "description": "dspmq返回的QMNAME，实例业务主键之一",
+        "tips": "",
+        "isInherit": false,
+        "inheritObjectId": "",
+        "notifyDenied": false
+      },
+      {
+        "id": "mqBinPath",
+        "name": "命令目录",
+        "protected": true,
+        "custom": "false",
+        "readonly": "false",
+        "required": "false",
+        "unique": "false",
+        "tag": [
+          "IBM MQ配置"
+        ],
+        "value": {
+          "type": "str",
+          "regex": null,
+          "default_type": "",
+          "default": null,
+          "struct_define": [],
+          "mode": "default",
+          "prefix": "",
+          "start_value": 0,
+          "series_number_length": 0
+        },
+        "wordIndexDenied": false,
+        "description": "dspmq/runmqsc所在bin目录；为空时按installPath探测",
+        "tips": "",
+        "isInherit": false,
+        "inheritObjectId": "",
+        "notifyDenied": false
+      },
+      {
+        "id": "listenerPort",
+        "name": "TCP监听端口",
+        "protected": true,
+        "custom": "false",
+        "readonly": "false",
+        "required": "false",
+        "unique": "false",
+        "tag": [
+          "IBM MQ配置"
+        ],
+        "value": {
+          "type": "int",
+          "regex": null,
+          "default_type": "",
+          "default": null,
+          "struct_define": [],
+          "mode": "default",
+          "prefix": "",
+          "start_value": 0,
+          "series_number_length": 0
+        },
+        "wordIndexDenied": false,
+        "description": "runmqlsr监听端口；多监听器以逗号分隔时建议拆分子实例",
+        "tips": "",
+        "isInherit": false,
+        "inheritObjectId": "",
+        "notifyDenied": false
+      },
+      {
+        "id": "listenerNames",
+        "name": "监听器名称",
+        "protected": true,
+        "custom": "false",
+        "readonly": "false",
+        "required": "false",
+        "unique": "false",
+        "tag": [
+          "IBM MQ配置"
+        ],
+        "value": {
+          "type": "str",
+          "regex": null,
+          "default_type": "",
+          "default": null,
+          "struct_define": [],
+          "mode": "default",
+          "prefix": "",
+          "start_value": 0,
+          "series_number_length": 0
+        },
+        "wordIndexDenied": false,
+        "description": "runmqsc DISPLAY LSSTATUS返回的监听器名，多个用英文逗号分隔",
+        "tips": "",
+        "isInherit": false,
+        "inheritObjectId": "",
+        "notifyDenied": false
+      },
+      {
+        "id": "version",
+        "name": "IBM MQ版本",
+        "protected": true,
+        "custom": "false",
+        "readonly": "false",
+        "required": "false",
+        "unique": "false",
+        "tag": [
+          "IBM MQ配置"
+        ],
+        "value": {
+          "type": "str",
+          "regex": null,
+          "default_type": "",
+          "default": null,
+          "struct_define": [],
+          "mode": "default",
+          "prefix": "",
+          "start_value": 0,
+          "series_number_length": 0
+        },
+        "wordIndexDenied": false,
+        "description": "dspmqver或安装目录元数据",
+        "tips": "",
+        "isInherit": false,
+        "inheritObjectId": "",
+        "notifyDenied": false
+      },
+      {
+        "id": "environment",
+        "name": "环境类型",
+        "protected": true,
+        "custom": "false",
+        "readonly": "false",
+        "required": "false",
+        "unique": "false",
+        "tag": [
+          "IBM MQ配置"
+        ],
+        "value": {
+          "type": "enum",
+          "regex": [
+            "prod",
+            "test",
+            "uat",
+            "other"
+          ],
+          "default_type": "",
+          "default": null,
+          "struct_define": [],
+          "mode": "default",
+          "prefix": "",
+          "start_value": 0,
+          "series_number_length": 0
+        },
+        "wordIndexDenied": false,
+        "description": "prod/test/uat/other",
+        "tips": "",
+        "isInherit": false,
+        "inheritObjectId": "",
+        "notifyDenied": false
+      },
+      {
+        "id": "isMonitor",
+        "name": "是否监控",
+        "protected": true,
+        "custom": "false",
+        "readonly": "false",
+        "required": "false",
+        "unique": "false",
+        "tag": [
+          "IBM MQ配置"
+        ],
+        "value": {
+          "type": "bool",
+          "regex": null,
+          "default_type": "value",
+          "default": true,
+          "struct_define": [],
+          "mode": "default",
+          "prefix": "",
+          "start_value": 0,
+          "series_number_length": 0
+        },
+        "wordIndexDenied": false,
+        "description": "自动发现默认置为true，实例下线时置为false",
+        "tips": "",
+        "isInherit": false,
+        "inheritObjectId": "",
+        "notifyDenied": false
+      },
+      {
+        "id": "discoverSource",
+        "name": "发现来源",
+        "protected": true,
+        "custom": "false",
+        "readonly": "false",
+        "required": "false",
+        "unique": "false",
+        "tag": [
+          "IBM MQ配置"
+        ],
+        "value": {
+          "type": "enum",
+          "regex": [
+            "dspmq",
+            "process",
+            "manual"
+          ],
+          "default_type": "",
+          "default": null,
+          "struct_define": [],
+          "mode": "default",
+          "prefix": "",
+          "start_value": 0,
+          "series_number_length": 0
+        },
+        "wordIndexDenied": false,
+        "description": "dspmq/process/manual",
+        "tips": "",
+        "isInherit": false,
+        "inheritObjectId": "",
+        "notifyDenied": false
+      },
+      {
+        "id": "lastDiscoverTime",
+        "name": "最近发现时间",
+        "protected": true,
+        "custom": "false",
+        "readonly": "false",
+        "required": "false",
+        "unique": "false",
+        "tag": [
+          "IBM MQ配置"
+        ],
+        "value": {
+          "type": "str",
+          "regex": null,
+          "default_type": "",
+          "default": null,
+          "struct_define": [],
+          "mode": "default",
+          "prefix": "",
+          "start_value": 0,
+          "series_number_length": 0
+        },
+        "wordIndexDenied": false,
+        "description": "最近一次自动发现或校准时间",
+        "tips": "",
+        "isInherit": false,
+        "inheritObjectId": "",
+        "notifyDenied": false
+      }
+    ],
+    "relation_groups": [],
+    "relation_list": [],
+    "indexList": [],
+    "updateAuthorizers": [],
+    "deleteAuthorizers": [],
+    "readAuthorizers": [],
+    "wordIndexDenied": false,
+    "_version": 1,
+    "creator": "easyops",
+    "modifier": "easyops",
+    "isAbstract": false,
+    "parentObjectId": "ARTIFACT_INST@ONEMODEL",
+    "parentObjectIds": [
+      "ARTIFACT_INST@ONEMODEL",
+      "RESOURCE@ONEMODEL"
+    ],
+    "permissionDenied": false
+  }
+]

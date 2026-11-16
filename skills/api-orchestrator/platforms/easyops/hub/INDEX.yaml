@@ -21,12 +21,13 @@ items:
   - id: ibmmq-monitor-kit
     name: IBM MQ监控
     category: monitor-kits
-    files: [监控套件_IBM_MQ监控_0.1.0.zip, IBM_MQ监控_告警规则模板_0.1.0.xlsx]
-    version: "0.1.0"
+    files: [监控套件_IBM_MQ监控_0.2.0.zip, IBM_MQ监控_告警规则模板_0.2.0.xlsx]
+    version: "0.2.0"
     history:
+      - {ver: "0.2.0", date: "2026-11-16", change: "关联模型改为IBMMQ_QMGR@ONEMODEL部署实例，继承ARTIFACT_INST并新增资源发现定义"}
       - {ver: "0.1.0", date: "2026-11-16", change: "初版：Linux本机dspmq/runmqsc采集队列管理器、监听器、通道、队列深度和进程资源，并配套XLSX告警模板"}
     scenario: Linux主机本地IBM MQ队列管理器监控
-    notes: "绑定HOST执行；需执行用户具备dspmq/runmqsc权限。已完成离线回归，未导入平台，未真实IBM MQ实例验收。"
+    notes: "绑定IBMMQ_QMGR部署实例；需通过部署实例/主机关联在目标主机执行，且用户具备dspmq/runmqsc权限。已完成离线回归，未导入平台，未真实IBM MQ实例验收。"
     added: "2026-11-16"
   - id: host-deploy-instance-monitor-kit
     name: 主机部署实例监控

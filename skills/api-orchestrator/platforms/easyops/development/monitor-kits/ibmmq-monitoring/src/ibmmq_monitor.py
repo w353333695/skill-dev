@@ -13,7 +13,7 @@ import threading
 import time
 import traceback
 
-VERSION = "0.1.0"
+VERSION = "0.2.0"
 STATUS_COMMAND = "DISPLAY QSTATUS(*) CURDEPTH MSGAGE IPPROCS OPPROCS"
 QUEUE_COMMAND = "DISPLAY QLOCAL(*) CURDEPTH MAXDEPTH"
 CHANNEL_COMMAND = "DISPLAY CHSTATUS(*) CHANNEL CHLTYPE STATUS MSGS BYTES"
@@ -39,8 +39,10 @@ def config():
     if interval < 0.05 or interval > 2:
         raise ValueError("[config] sampleInterval必须在0.05到2之间")
     return {
-        "hostInstanceId": env("instanceId"),
+        "ibmmqInstanceId": env("instanceId"),
         "qmgrName": env("qmgrName"),
+        "hostIp": env("hostIp"),
+        "installPath": env("installPath"),
         "mqBinPath": env("mqBinPath"),
         "queueFilter": env("queueFilter", ".*"),
         "includeSystemQueues": env("includeSystemQueues", "false").lower() in ("1", "true", "yes"),
@@ -48,6 +50,8 @@ def config():
         "timeout": timeout,
         "interval": interval,
     }
+    if not settings["qmgrName"] or settings["qmgrName"].startswith("$."):
+        raise ValueError("[config] IBMMQ_QMGR实例缺少qmgrName，无法定位队列管理器")
 
 
 def decode(value):
@@ -88,15 +92,19 @@ def execute(args, settings, input_text=None):
 
 def find_mq_bin(settings):
     configured = settings["mqBinPath"]
+    install_path = settings.get("installPath", "")
+    if install_path:
+        candidates = [install_path if install_path.endswith("/bin") else install_path.rstrip("/") + "/bin"]
+    else:
+        candidates = []
     if configured and not configured.startswith("$."):
         path = os.path.join(configured, "dspmq")
         if os.access(path, os.X_OK):
             return configured
-    candidates = []
     installation_path = os.environ.get("MQ_INSTALLATION_PATH")
     if installation_path:
         candidates.append(os.path.join(installation_path, "bin"))
-    candidates.extend(["/opt/mqm/bin", "/opt/ibm/mq/bin", "/usr/mqm/bin"])
+    candidates.extend([install_path.rstrip("/") + "/bin" if install_path and not install_path.endswith("/bin") else install_path, "/opt/mqm/bin", "/opt/ibm/mq/bin", "/usr/mqm/bin"])
     path_env = os.environ.get("PATH", "")
     for name in path_env.split(os.pathsep):
         if name:
@@ -122,7 +130,7 @@ def parse_attributes(line):
 def numeric(value, default=0.0):
     try:
         number = float(value)
-        return number if math.isfinite(number) else default
+        return number if not (math.isnan(number) or math.isinf(number)) else default
     except (TypeError, ValueError):
         return default
 
@@ -296,7 +304,7 @@ def collect_processes(qmgr_name, settings):
 
 
 def collect_qmgr(qmgr, mq_bin, settings):
-    base = {"hostInstanceId": settings["hostInstanceId"], "qmgrName": qmgr["qmgrName"], "installPath": os.path.dirname(mq_bin)}
+    base = {"ibmmqInstanceId": settings["ibmmqInstanceId"], "qmgrName": qmgr["qmgrName"], "hostIp": settings.get("hostIp", ""), "installPath": settings.get("installPath", "") or os.path.dirname(mq_bin)}
     values = {
         "ibmmq_qmgr_status": 1.0 if qmgr.get("status", "").upper() == "RUNNING" else 0.0,
         "ibmmq_discovery_success": 1.0,
@@ -365,13 +373,18 @@ def collect(settings):
     output = []
     for qmgr in qmgrs:
         output.extend(collect_qmgr(qmgr, mq_bin, settings))
-    output.append(dict(dims={"hostInstanceId": settings["hostInstanceId"]}, vals={
+    target_found = len(qmgrs) == 1
+    output.append(dict(dims={"ibmmqInstanceId": settings["ibmmqInstanceId"]}, vals={
         "ibmmq_qmgr_count": float(len(qmgrs)),
-        "ibmmq_collect_success": 1.0,
+        "ibmmq_collect_success": float(target_found),
     }))
     if not qmgrs:
-        output.append(dict(dims={"hostInstanceId": settings["hostInstanceId"]}, vals={
-            "ibmmq_qmgr_count": 0.0,
+        base = {
+            "ibmmqInstanceId": settings["ibmmqInstanceId"], "qmgrName": settings["qmgrName"],
+            "hostIp": settings.get("hostIp", ""), "installPath": settings.get("installPath", ""),
+        }
+        output.append(dict(dims=base, vals={
+            "ibmmq_qmgr_status": 0.0,
             "ibmmq_discovery_success": float(returncode == 0),
             "ibmmq_collect_success": 0.0,
         }))
