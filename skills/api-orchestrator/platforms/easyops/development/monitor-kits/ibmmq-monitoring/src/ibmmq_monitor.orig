@@ -1,7 +1,6 @@
 #!/usr/local/easyops/python/bin/python
 # -*- coding: utf-8 -*-
 """IBM MQ 本地队列管理器监控脚本，参数由 EASYOPS_COLLECTOR_* 环境变量注入。"""
-from __future__ import division, print_function
 import argparse
 import csv
 import json
@@ -16,7 +15,7 @@ import threading
 import time
 import traceback
 
-VERSION = "0.4.0"
+VERSION = "0.4.1"
 QMGR_COMMAND = "DISPLAY QMGR DEADQ"
 STATUS_COMMAND = "DISPLAY QSTATUS(*) CURDEPTH MSGAGE IPPROCS OPPROCS"
 QUEUE_COMMAND = "DISPLAY QLOCAL(*) CURDEPTH MAXDEPTH USAGE GET PUT"
@@ -516,7 +515,7 @@ def collect_qmgr(qmgr, mq_bin, settings):
         "ibmmq_queue_total": float(len(queues)),
         "ibmmq_queue_depth_total": float(sum(row.get("currentDepth", 0.0) for row in queues)),
         "ibmmq_queue_max_depth": max([row.get("maxDepth", 0.0) for row in queues] or [0.0]),
-        "ibmmq_queue_max_usage_percent": max([row.get("currentDepth", 0.0) / row.get("maxDepth", 1.0) * 100.0 for row in queues] or [0.0]),
+        "ibmmq_queue_max_usage_percent": max([float(row.get("currentDepth", 0.0)) / row.get("maxDepth", 1.0) * 100.0 for row in queues] or [0.0]),
         "ibmmq_listener_total": float(len(listeners)),
         "ibmmq_listener_running_count": float(sum(1 for row in listeners if normalize_status(row["status"]) == 1.0)),
         "ibmmq_channel_total": float(len(channels)),
@@ -529,7 +528,7 @@ def collect_qmgr(qmgr, mq_bin, settings):
         vals = {
             "ibmmq_queue_current_depth": row.get("currentDepth", 0.0),
             "ibmmq_queue_max_depth": row.get("maxDepth", 0.0),
-            "ibmmq_queue_usage_percent": row.get("currentDepth", 0.0) / row.get("maxDepth", 1.0) * 100.0,
+            "ibmmq_queue_usage_percent": float(row.get("currentDepth", 0.0)) / row.get("maxDepth", 1.0) * 100.0,
         }
         if "oldestMessageAge" in row:
             vals["ibmmq_queue_oldest_message_age_seconds"] = row["oldestMessageAge"]
@@ -545,7 +544,7 @@ def collect_qmgr(qmgr, mq_bin, settings):
             vals.update({
                 "ibmmq_transmission_queue_current_depth": row.get("currentDepth", 0.0),
                 "ibmmq_transmission_queue_max_depth": row.get("maxDepth", 0.0),
-                "ibmmq_transmission_queue_usage_percent": row.get("currentDepth", 0.0) / row.get("maxDepth", 1.0) * 100.0,
+                "ibmmq_transmission_queue_usage_percent": float(row.get("currentDepth", 0.0)) / row.get("maxDepth", 1.0) * 100.0,
             })
             if "getEnabled" in row:
                 vals["ibmmq_transmission_queue_get_enabled"] = 1.0 if row["getEnabled"] else 0.0
@@ -556,7 +555,7 @@ def collect_qmgr(qmgr, mq_bin, settings):
                 "ibmmq_dlq_configured": 1.0,
                 "ibmmq_dlq_current_depth": row.get("currentDepth", 0.0),
                 "ibmmq_dlq_max_depth": row.get("maxDepth", 0.0),
-                "ibmmq_dlq_usage_percent": row.get("currentDepth", 0.0) / row.get("maxDepth", 1.0) * 100.0,
+                "ibmmq_dlq_usage_percent": float(row.get("currentDepth", 0.0)) / row.get("maxDepth", 1.0) * 100.0,
             })
             if "getEnabled" in row:
                 vals["ibmmq_dlq_get_enabled"] = 1.0 if row["getEnabled"] else 0.0
@@ -636,7 +635,7 @@ def main(argv=None):
     parser.add_argument("--version", action="version", version=VERSION)
     parser.parse_args(argv)
     try:
-        print(json.dumps(collect(config()), ensure_ascii=True, allow_nan=False))
+        sys.stdout.write(json.dumps(collect(config()), ensure_ascii=True, allow_nan=False) + "\n")
     except Exception:
         sys.stdout.write("COLLECT_ERROR: [main] " + traceback.format_exc())
     return 0

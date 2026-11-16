@@ -1,6 +1,6 @@
 IBM MQ监控套件
 
-版本：0.4.0；同时支持Linux和Windows执行节点。关联现网内置模型：`IBMMQ@ONEMODEL`（IBMMQ实例）。
+版本：0.4.1；同时支持Linux和Windows执行节点。关联现网内置模型：`IBMMQ@ONEMODEL`（IBMMQ实例）。
 
 ## 模型与执行
 
@@ -36,8 +36,8 @@ IBM MQ监控套件
 ## 权限与限制
 
 - 执行用户必须能运行 `dspmq`/`runmqsc` 并读取队列管理器状态；推荐由部署了IBM MQ的 `mqm` 用户或等权账号执行。
-- 本套件0.4.0同时支持Linux和Windows执行节点；Windows默认探测 `C:\Program Files\IBM\MQ\bin` 与 `C:\Program Files (x86)\IBM\MQ\bin`，命令会追加 `.exe`。
-- 告警模板为 `IBM_MQ监控_告警规则模板_0.4.0.xlsx`，需通过事件中心Excel入口导入。本地/传输队列占用率80%/90%、死信队列深度连续2点大于0、队列管理器和监听器单点异常对齐本次Zabbix导出模板；队列绝对深度1000/5000和最老消息年龄300/900秒为补充策略，生产使用前必须按队列SLA调整。GET/PUT异常默认只采集展示，不启用告警，与Zabbix导出中禁用触发器的策略一致。
+- 本套件0.4.1同时支持Linux和Windows执行节点；Windows默认探测 `C:\Program Files\IBM\MQ\bin` 与 `C:\Program Files (x86)\IBM\MQ\bin`，命令会追加 `.exe`。
+- 告警模板为 `IBM_MQ监控_告警规则模板_0.4.1.xlsx`，需通过事件中心Excel入口导入。本地/传输队列占用率80%/90%、死信队列深度连续2点大于0、队列管理器和监听器单点异常对齐本次Zabbix导出模板；队列绝对深度1000/5000和最老消息年龄300/900秒为补充策略，生产使用前必须按队列SLA调整。GET/PUT异常默认只采集展示，不启用告警，与Zabbix导出中禁用触发器的策略一致。
 - 套件按本地MQ命令采集，不做客户端Put/Get链路拨测；目标实例到执行主机的关联需在导入后用真实任务验证。
 
 ## 离线验证
@@ -45,6 +45,6 @@ IBM MQ监控套件
 ```bash
 python3 development/scripts/build_ibmmq_monitor_kit.py
 python3 development/scripts/validate_monitor_kit.py development/monitor-kits/ibmmq-monitoring
-python3 development/scripts/validate_monitor_kit.py ../hub/monitor-kits/监控套件_IBM_MQ监控_0.4.0.zip
+python3 development/scripts/validate_monitor_kit.py ../hub/monitor-kits/监控套件_IBM_MQ监控_0.4.1.zip
 cd development && python3 -m unittest discover -s tests/monitor-kits -p 'test_ibmmq_monitor.py'
 ```

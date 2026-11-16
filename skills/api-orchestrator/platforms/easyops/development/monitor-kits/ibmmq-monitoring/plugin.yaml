@@ -1,6 +1,6 @@
 type: simple-script
 name: IBM MQ监控
-version: "0.4.0"
+version: "0.4.1"
 command:
     collect:
         interpreter: ""
