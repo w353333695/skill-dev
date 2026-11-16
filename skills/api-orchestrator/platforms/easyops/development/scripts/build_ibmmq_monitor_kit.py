@@ -14,11 +14,11 @@ ROOT = Path(__file__).resolve().parents[1]
 KIT = ROOT / "monitor-kits/ibmmq-monitoring"
 HUB = ROOT.parent / "hub/monitor-kits"
 NAME = "IBM MQ监控"
-VERSION = "0.4.2"
+VERSION = "0.4.3"
 SUPPORTED_PLATFORMS = ("Linux", "Windows")
 OBJECT_ID = "IBMMQ@ONEMODEL"
-XLSX_NAME = "IBM_MQ监控_告警规则模板_0.4.2.xlsx"
-ZIP_NAME = "监控套件_IBM_MQ监控_0.4.2.zip"
+XLSX_NAME = "IBM_MQ监控_告警规则模板_0.4.3.xlsx"
+ZIP_NAME = "监控套件_IBM_MQ监控_0.4.3.zip"
 BASE_DIMS = ("ibmmqInstanceId", "qmgrName", "hostIp", "installPath")
 QUEUE_DIMS = BASE_DIMS + ("queueName",)
 CHANNEL_DIMS = BASE_DIMS + ("channelName", "channelType")
@@ -73,6 +73,53 @@ METRICS = (
     ("ibmmq_process_thread_count", "进程线程数", "个", "进程资源", PROCESS_DIMS),
     ("ibmmq_process_fd_count", "进程打开句柄数", "个", "进程资源", PROCESS_DIMS),
 )
+METRIC_DISPLAY_NAMES = {
+    "ibmmq_collect_success": "采集成功",
+    "ibmmq_discovery_success": "队列管理器发现成功",
+    "ibmmq_qmgr_count": "队列管理器数量",
+    "ibmmq_qmgr_status": "队列管理器状态",
+    "ibmmq_sc_command_success": "runmqsc命令成功",
+    "ibmmq_queue_total": "监控队列数量",
+    "ibmmq_queue_depth_total": "队列深度合计",
+    "ibmmq_queue_max_depth": "队列最大深度",
+    "ibmmq_queue_max_usage_percent": "队列最大占用率",
+    "ibmmq_queue_current_depth": "队列当前深度",
+    "ibmmq_queue_max_depth_config": "队列配置最大深度",
+    "ibmmq_queue_usage_percent": "队列占用率",
+    "ibmmq_queue_oldest_message_age_seconds": "队列最老消息年龄",
+    "ibmmq_queue_input_handles": "队列输入句柄数",
+    "ibmmq_queue_output_handles": "队列输出句柄数",
+    "ibmmq_queue_get_enabled": "队列GET状态",
+    "ibmmq_queue_put_enabled": "队列PUT状态",
+    "ibmmq_transmission_queue_current_depth": "传输队列当前深度",
+    "ibmmq_transmission_queue_max_depth": "传输队列最大深度",
+    "ibmmq_transmission_queue_usage_percent": "传输队列占用率",
+    "ibmmq_transmission_queue_get_enabled": "传输队列GET状态",
+    "ibmmq_transmission_queue_put_enabled": "传输队列PUT状态",
+    "ibmmq_dlq_configured": "死信队列已配置",
+    "ibmmq_dlq_current_depth": "死信队列当前深度",
+    "ibmmq_dlq_max_depth": "死信队列最大深度",
+    "ibmmq_dlq_usage_percent": "死信队列占用率",
+    "ibmmq_dlq_get_enabled": "死信队列GET状态",
+    "ibmmq_dlq_put_enabled": "死信队列PUT状态",
+    "ibmmq_listener_total": "监听器数量",
+    "ibmmq_listener_running_count": "运行中监听器数量",
+    "ibmmq_listener_status": "监听器状态",
+    "ibmmq_channel_total": "通道数量",
+    "ibmmq_channel_running_count": "运行中通道数量",
+    "ibmmq_channel_retrying_count": "重试通道数量",
+    "ibmmq_channel_status": "通道状态",
+    "ibmmq_channel_messages": "通道消息数",
+    "ibmmq_channel_bytes": "通道字节数",
+    "ibmmq_channel_bytes_received": "通道接收字节数",
+    "ibmmq_channel_bytes_sent": "通道发送字节数",
+    "ibmmq_process_alive": "进程存活状态",
+    "ibmmq_process_count": "进程数量",
+    "ibmmq_process_cpu_percent": "进程CPU使用率",
+    "ibmmq_process_memory_bytes": "进程内存",
+    "ibmmq_process_thread_count": "进程线程数",
+    "ibmmq_process_fd_count": "进程句柄数",
+}
 PARAMETERS = (
     ("instanceId", "string", "$.instanceId", "IBM MQ实例ID", "取IBMMQ.instanceId，用于实例维度", False, False),
     ("hostIp", "string", "$.ip", "部署主机IP", "取ARTIFACT_INST继承ip，用于维度与部署定位", False, False),
@@ -80,6 +127,7 @@ PARAMETERS = (
     ("queueFilter", "string", ".*", "队列过滤正则", "默认监控全部非SYSTEM.前缀队列", True, True),
     ("includeSystemQueues", "string", "false", "包含系统队列", "默认排除SYSTEM.前缀队列", True, True),
     ("processMonitor", "string", "true", "启用进程资源采集", "默认启用，按cmdline分组输出进程资源", True, True),
+    ("logLevel", "string", "ERROR", "日志级别", "默认ERROR；排查缺失指标时改为DEBUG，日志输出到stderr便于导出", True, True),
     ("sampleInterval", "float", "0.2", "CPU采样间隔(秒)", "Linux两次/proc CPU采样间隔；Windows读取CIM格式化计数，默认0.2，范围0.05-2", True, True),
     ("commandTimeout", "int", "10", "MQ命令超时(秒)", "dspmq/runmqsc超时时间，默认10，范围1-60", True, True),
 )
@@ -105,7 +153,7 @@ def write_definitions():
         })
         aliases.append({
             "agentType": "easyops", "dataType": "double", "description": description,
-            "dims": dim_rows(dims), "displayName": key, "expression": "",
+            "dims": dim_rows(dims), "displayName": METRIC_DISPLAY_NAMES[key], "expression": "",
             "metricSet": [metric_set], "name": key, "objectId": OBJECT_ID,
             "originalMetrics": [key], "type": "normal", "unit": unit,
         })
@@ -146,6 +194,9 @@ def validate_platform_support():
         'taskkill',
         'Get-CimInstance',
         'WMIC.exe',
+        'import logging',
+        'LOG_LEVELS = ("DEBUG", "INFO", "WARN", "ERROR")',
+        'def setup_logging(',
     )
     missing_source = [item for item in required_source if item not in source]
     if missing_source:
@@ -155,6 +206,13 @@ def validate_platform_support():
     for platform in SUPPORTED_PLATFORMS:
         if platform not in readme:
             raise RuntimeError("[validate_platform_support] readme未声明支持平台: %s" % platform)
+    parameter_names = {row[0] for row in PARAMETERS}
+    if "logLevel" not in parameter_names:
+        raise RuntimeError("[validate_platform_support] 缺少logLevel参数")
+    if len(METRIC_DISPLAY_NAMES) != len(METRICS):
+        raise RuntimeError("[validate_platform_support] 中文名称数量必须等于指标数量")
+    if set(METRIC_DISPLAY_NAMES) != {row[0] for row in METRICS}:
+        raise RuntimeError("[validate_platform_support] 中文名称与指标key不一致")
 
 
 def plugin_yaml():

@@ -15,8 +15,8 @@ import yaml
 BASE = Path(__file__).resolve().parents[2]
 KIT = BASE / "monitor-kits/ibmmq-monitoring"
 SOURCE = KIT / "src/ibmmq_monitor.orig"
-PACKAGE = BASE.parent / "hub/monitor-kits/监控套件_IBM_MQ监控_0.4.2.zip"
-XLSX = KIT / "IBM_MQ监控_告警规则模板_0.4.2.xlsx"
+PACKAGE = BASE.parent / "hub/monitor-kits/监控套件_IBM_MQ监控_0.4.3.zip"
+XLSX = KIT / "IBM_MQ监控_告警规则模板_0.4.3.xlsx"
 
 
 def module():
@@ -35,13 +35,13 @@ class IBMMQMonitorTest(unittest.TestCase):
             "ibmmqInstanceId": "ibmmq-1", "hostIp": "192.168.1.10",
             "installPath": "/opt/mqm",
             "queueFilter": ".*", "includeSystemQueues": False, "processMonitor": False,
-            "timeout": 1, "interval": 0,
+            "logLevel": "ERROR", "timeout": 1, "interval": 0,
         }
 
     def test_version(self):
         result = subprocess.run([sys.executable, str(SOURCE), "--version"], capture_output=True, text=True)
         self.assertEqual(result.returncode, 0)
-        self.assertIn("0.4.2", result.stdout)
+        self.assertIn("0.4.3", result.stdout)
 
     def test_orig_and_runtime_are_identical(self):
         self.assertEqual(SOURCE.read_bytes(), (KIT / "src/ibmmq_monitor.py").read_bytes())
@@ -99,12 +99,55 @@ class IBMMQMonitorTest(unittest.TestCase):
             settings = self.m.config()
         self.assertNotIn("qmgrName", settings)
         self.assertNotIn("mqBinPath", settings)
+        self.assertEqual(settings["logLevel"], "ERROR")
         dspmq_output = "QMNAME(QM1) STATUS(Running)\nQMNAME(QM2) STATUS(Running)"
         with mock.patch.object(self.m, "execute", return_value=(0, dspmq_output)) as command_execute:
             qmgrs, returncode = self.m.discover_qmgrs("/opt/mqm/bin", settings)
         self.assertEqual(returncode, 0)
         self.assertEqual([row["qmgrName"] for row in qmgrs], ["QM1", "QM2"])
         self.assertEqual(command_execute.call_args[0][0], ["/opt/mqm/bin/dspmq", "-o", "status"])
+
+    def test_log_level_validation_and_debug_output(self):
+        env = {
+            "EASYOPS_COLLECTOR_instanceId": "i1",
+            "EASYOPS_COLLECTOR_logLevel": "DEBUG",
+        }
+        with mock.patch.dict(os.environ, env), self.assertLogs(self.m.LOGGER, level="DEBUG") as logs:
+            settings = self.m.config()
+        self.assertEqual(settings["logLevel"], "DEBUG")
+        self.assertTrue(any("[config] version=0.4.3" in message for message in logs.output))
+        with mock.patch.dict(os.environ, {"EASYOPS_COLLECTOR_logLevel": "VERBOSE"}):
+            with self.assertRaises(ValueError):
+                self.m.config()
+
+    def test_collect_logs_missing_metric_summary(self):
+        qmgrs = [{"qmgrName": "QM1", "status": "Running"}]
+        with mock.patch.object(self.m, "find_mq_bin", return_value="/opt/mqm/bin"), \
+             mock.patch.object(self.m, "discover_qmgrs", return_value=(qmgrs, 0)), \
+             mock.patch.object(self.m, "collect_qmgr", return_value=[{"vals": {"ibmmq_qmgr_status": 1.0}}]), \
+             self.assertLogs(self.m.LOGGER, level="ERROR") as logs:
+            rows = self.m.collect(self.settings)
+        self.assertTrue(rows)
+        self.assertTrue(any("[collect] metric gaps count=" in message for message in logs.output))
+
+    def test_debug_logs_cover_mqsc_parsing_and_filter_reasons(self):
+        output = "\n".join([
+            "QMNAME(QM1) DEADQ(SYSTEM.DEAD.LETTER.QUEUE)",
+            "QNAME(APP.Q) CURDEPTH(1) MAXDEPTH(10) USAGE(NORMAL)",
+            "QNAME(SYSTEM.ADMIN.Q) CURDEPTH(2) MAXDEPTH(10)",
+            "CHANNEL(SDR.CH) CHLTYPE(SDR) STATUS(RUNNING) BYTSRCVD(1) BYTSSENT(2)",
+            "LISTENER(TCP.1) PORT(1414) STATUS(RUNNING)",
+        ])
+        with self.assertLogs(self.m.LOGGER, level="DEBUG") as logs:
+            queues, channels, listeners, dead_queue_name = self.m.parse_mqsc(output, self.settings)
+        self.assertEqual(len(queues), 1)
+        self.assertEqual(dead_queue_name, "SYSTEM.DEAD.LETTER.QUEUE")
+        self.assertEqual(len(channels), 1)
+        self.assertEqual(len(listeners), 1)
+        text = "\n".join(logs.output)
+        self.assertIn("[parse_mqsc] discovered queues=", text)
+        self.assertIn("exclude queue=SYSTEM.ADMIN.Q reason=SYSTEM_PREFIX", text)
+        self.assertIn("[parse_mqsc] select queue=APP.Q", text)
 
     def test_collect_auto_discovers_all_qmgrs(self):
         qmgrs = [
@@ -113,7 +156,8 @@ class IBMMQMonitorTest(unittest.TestCase):
         ]
         with mock.patch.object(self.m, "find_mq_bin", return_value="/opt/mqm/bin"), \
              mock.patch.object(self.m, "discover_qmgrs", return_value=(qmgrs, 0)), \
-             mock.patch.object(self.m, "collect_qmgr", side_effect=lambda qmgr, mq_bin, settings: [{"vals": {"ibmmq_qmgr_status": 1.0}}]):
+             mock.patch.object(self.m, "collect_qmgr", side_effect=lambda qmgr, mq_bin, settings: [{"vals": {"ibmmq_qmgr_status": 1.0}}]), \
+             self.assertLogs(self.m.LOGGER, level="ERROR"):
             rows = self.m.collect(self.settings)
         self.assertEqual(len(rows), 3)
         self.assertEqual(rows[-1]["vals"]["ibmmq_qmgr_count"], 2.0)
@@ -205,14 +249,19 @@ class IBMMQMonitorTest(unittest.TestCase):
         self.assertEqual(plugin["name"], "IBM MQ监控")
         self.assertEqual(plugin["relateObjectId"], "IBMMQ@ONEMODEL")
         self.assertIn("Linux/Windows", plugin["memo"])
-        self.assertEqual(plugin["version"], "0.4.2")
+        self.assertEqual(plugin["version"], "0.4.3")
         self.assertNotIn("qmgrName", plugin["params"])
         self.assertNotIn("mqBinPath", plugin["params"])
+        self.assertIn("logLevel", plugin["params"])
         self.assertNotIn("qmgrName", {row["name"] for row in plugin["paramDefine"]})
         self.assertNotIn("mqBinPath", {row["name"] for row in plugin["paramDefine"]})
+        log_level = next(row for row in plugin["paramDefine"] if row["name"] == "logLevel")
+        self.assertEqual(log_level["defaultValue"], "ERROR")
         self.assertEqual(len(origins), 45)
         self.assertEqual(len(aliases), 45)
         self.assertEqual(len(metric_sets), 11)
+        self.assertEqual(len({row["displayName"] for row in aliases}), 45)
+        self.assertTrue(all(any("\u4e00" <= char <= "\u9fff" for char in row["displayName"]) for row in aliases))
         self.assertEqual({row["key"] for row in origins}, {row["name"] for row in aliases})
         self.assertTrue(all(isinstance(row, dict) and row.get("name") for row in metric_sets))
         origin_dimensions = {row["key"]: set(row["labels"]) for row in origins}
@@ -250,7 +299,7 @@ class IBMMQMonitorTest(unittest.TestCase):
                 mode = stat.S_IMODE(item.external_attr >> 16)
                 self.assertEqual(mode, 0o755 if item.is_dir() else 0o664)
             self.assertIn("IBM MQ监控/src/ibmmq_monitor.orig", package.namelist())
-            self.assertIn("IBM MQ监控/IBM_MQ监控_告警规则模板_0.4.2.xlsx", package.namelist())
+            self.assertIn("IBM MQ监控/IBM_MQ监控_告警规则模板_0.4.3.xlsx", package.namelist())
             self.assertIn("IBM MQ监控/resource_discovery_define.json", package.namelist())
             self.assertNotIn("IBM MQ监控/IBMMQ@ONEMODEL.json", package.namelist())
 

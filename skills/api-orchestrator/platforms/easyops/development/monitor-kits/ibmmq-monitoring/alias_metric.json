@@ -29,7 +29,7 @@
         "originDimName": "installPath"
       }
     ],
-    "displayName": "ibmmq_collect_success",
+    "displayName": "采集成功",
     "expression": "",
     "metricSet": [
       "采集状态"
@@ -72,7 +72,7 @@
         "originDimName": "installPath"
       }
     ],
-    "displayName": "ibmmq_discovery_success",
+    "displayName": "队列管理器发现成功",
     "expression": "",
     "metricSet": [
       "采集状态"
@@ -97,7 +97,7 @@
         "originDimName": "ibmmqInstanceId"
       }
     ],
-    "displayName": "ibmmq_qmgr_count",
+    "displayName": "队列管理器数量",
     "expression": "",
     "metricSet": [
       "队列管理器"
@@ -140,7 +140,7 @@
         "originDimName": "installPath"
       }
     ],
-    "displayName": "ibmmq_qmgr_status",
+    "displayName": "队列管理器状态",
     "expression": "",
     "metricSet": [
       "队列管理器"
@@ -183,7 +183,7 @@
         "originDimName": "installPath"
       }
     ],
-    "displayName": "ibmmq_sc_command_success",
+    "displayName": "runmqsc命令成功",
     "expression": "",
     "metricSet": [
       "采集状态"
@@ -226,7 +226,7 @@
         "originDimName": "installPath"
       }
     ],
-    "displayName": "ibmmq_queue_total",
+    "displayName": "监控队列数量",
     "expression": "",
     "metricSet": [
       "队列"
@@ -269,7 +269,7 @@
         "originDimName": "installPath"
       }
     ],
-    "displayName": "ibmmq_queue_depth_total",
+    "displayName": "队列深度合计",
     "expression": "",
     "metricSet": [
       "队列"
@@ -312,7 +312,7 @@
         "originDimName": "installPath"
       }
     ],
-    "displayName": "ibmmq_queue_max_depth",
+    "displayName": "队列最大深度",
     "expression": "",
     "metricSet": [
       "队列"
@@ -355,7 +355,7 @@
         "originDimName": "installPath"
       }
     ],
-    "displayName": "ibmmq_queue_max_usage_percent",
+    "displayName": "队列最大占用率",
     "expression": "",
     "metricSet": [
       "队列"
@@ -404,7 +404,7 @@
         "originDimName": "queueName"
       }
     ],
-    "displayName": "ibmmq_queue_current_depth",
+    "displayName": "队列当前深度",
     "expression": "",
     "metricSet": [
       "队列明细"
@@ -453,7 +453,7 @@
         "originDimName": "queueName"
       }
     ],
-    "displayName": "ibmmq_queue_max_depth_config",
+    "displayName": "队列配置最大深度",
     "expression": "",
     "metricSet": [
       "队列明细"
@@ -502,7 +502,7 @@
         "originDimName": "queueName"
       }
     ],
-    "displayName": "ibmmq_queue_usage_percent",
+    "displayName": "队列占用率",
     "expression": "",
     "metricSet": [
       "队列明细"
@@ -551,7 +551,7 @@
         "originDimName": "queueName"
       }
     ],
-    "displayName": "ibmmq_queue_oldest_message_age_seconds",
+    "displayName": "队列最老消息年龄",
     "expression": "",
     "metricSet": [
       "队列明细"
@@ -600,7 +600,7 @@
         "originDimName": "queueName"
       }
     ],
-    "displayName": "ibmmq_queue_input_handles",
+    "displayName": "队列输入句柄数",
     "expression": "",
     "metricSet": [
       "队列明细"
@@ -649,7 +649,7 @@
         "originDimName": "queueName"
       }
     ],
-    "displayName": "ibmmq_queue_output_handles",
+    "displayName": "队列输出句柄数",
     "expression": "",
     "metricSet": [
       "队列明细"
@@ -698,7 +698,7 @@
         "originDimName": "queueName"
       }
     ],
-    "displayName": "ibmmq_queue_get_enabled",
+    "displayName": "队列GET状态",
     "expression": "",
     "metricSet": [
       "队列明细"
@@ -747,7 +747,7 @@
         "originDimName": "queueName"
       }
     ],
-    "displayName": "ibmmq_queue_put_enabled",
+    "displayName": "队列PUT状态",
     "expression": "",
     "metricSet": [
       "队列明细"
@@ -796,7 +796,7 @@
         "originDimName": "queueName"
       }
     ],
-    "displayName": "ibmmq_transmission_queue_current_depth",
+    "displayName": "传输队列当前深度",
     "expression": "",
     "metricSet": [
       "传输队列"
@@ -845,7 +845,7 @@
         "originDimName": "queueName"
       }
     ],
-    "displayName": "ibmmq_transmission_queue_max_depth",
+    "displayName": "传输队列最大深度",
     "expression": "",
     "metricSet": [
       "传输队列"
@@ -894,7 +894,7 @@
         "originDimName": "queueName"
       }
     ],
-    "displayName": "ibmmq_transmission_queue_usage_percent",
+    "displayName": "传输队列占用率",
     "expression": "",
     "metricSet": [
       "传输队列"
@@ -943,7 +943,7 @@
         "originDimName": "queueName"
       }
     ],
-    "displayName": "ibmmq_transmission_queue_get_enabled",
+    "displayName": "传输队列GET状态",
     "expression": "",
     "metricSet": [
       "传输队列"
@@ -992,7 +992,7 @@
         "originDimName": "queueName"
       }
     ],
-    "displayName": "ibmmq_transmission_queue_put_enabled",
+    "displayName": "传输队列PUT状态",
     "expression": "",
     "metricSet": [
       "传输队列"
@@ -1041,7 +1041,7 @@
         "originDimName": "queueName"
       }
     ],
-    "displayName": "ibmmq_dlq_configured",
+    "displayName": "死信队列已配置",
     "expression": "",
     "metricSet": [
       "死信队列"
@@ -1090,7 +1090,7 @@
         "originDimName": "queueName"
       }
     ],
-    "displayName": "ibmmq_dlq_current_depth",
+    "displayName": "死信队列当前深度",
     "expression": "",
     "metricSet": [
       "死信队列"
@@ -1139,7 +1139,7 @@
         "originDimName": "queueName"
       }
     ],
-    "displayName": "ibmmq_dlq_max_depth",
+    "displayName": "死信队列最大深度",
     "expression": "",
     "metricSet": [
       "死信队列"
@@ -1188,7 +1188,7 @@
         "originDimName": "queueName"
       }
     ],
-    "displayName": "ibmmq_dlq_usage_percent",
+    "displayName": "死信队列占用率",
     "expression": "",
     "metricSet": [
       "死信队列"
@@ -1237,7 +1237,7 @@
         "originDimName": "queueName"
       }
     ],
-    "displayName": "ibmmq_dlq_get_enabled",
+    "displayName": "死信队列GET状态",
     "expression": "",
     "metricSet": [
       "死信队列"
@@ -1286,7 +1286,7 @@
         "originDimName": "queueName"
       }
     ],
-    "displayName": "ibmmq_dlq_put_enabled",
+    "displayName": "死信队列PUT状态",
     "expression": "",
     "metricSet": [
       "死信队列"
@@ -1329,7 +1329,7 @@
         "originDimName": "installPath"
       }
     ],
-    "displayName": "ibmmq_listener_total",
+    "displayName": "监听器数量",
     "expression": "",
     "metricSet": [
       "监听器"
@@ -1372,7 +1372,7 @@
         "originDimName": "installPath"
       }
     ],
-    "displayName": "ibmmq_listener_running_count",
+    "displayName": "运行中监听器数量",
     "expression": "",
     "metricSet": [
       "监听器"
@@ -1427,7 +1427,7 @@
         "originDimName": "port"
       }
     ],
-    "displayName": "ibmmq_listener_status",
+    "displayName": "监听器状态",
     "expression": "",
     "metricSet": [
       "监听器明细"
@@ -1470,7 +1470,7 @@
         "originDimName": "installPath"
       }
     ],
-    "displayName": "ibmmq_channel_total",
+    "displayName": "通道数量",
     "expression": "",
     "metricSet": [
       "通道"
@@ -1513,7 +1513,7 @@
         "originDimName": "installPath"
       }
     ],
-    "displayName": "ibmmq_channel_running_count",
+    "displayName": "运行中通道数量",
     "expression": "",
     "metricSet": [
       "通道"
@@ -1556,7 +1556,7 @@
         "originDimName": "installPath"
       }
     ],
-    "displayName": "ibmmq_channel_retrying_count",
+    "displayName": "重试通道数量",
     "expression": "",
     "metricSet": [
       "通道"
@@ -1611,7 +1611,7 @@
         "originDimName": "channelType"
       }
     ],
-    "displayName": "ibmmq_channel_status",
+    "displayName": "通道状态",
     "expression": "",
     "metricSet": [
       "通道明细"
@@ -1666,7 +1666,7 @@
         "originDimName": "channelType"
       }
     ],
-    "displayName": "ibmmq_channel_messages",
+    "displayName": "通道消息数",
     "expression": "",
     "metricSet": [
       "通道明细"
@@ -1721,7 +1721,7 @@
         "originDimName": "channelType"
       }
     ],
-    "displayName": "ibmmq_channel_bytes",
+    "displayName": "通道字节数",
     "expression": "",
     "metricSet": [
       "通道明细"
@@ -1776,7 +1776,7 @@
         "originDimName": "channelType"
       }
     ],
-    "displayName": "ibmmq_channel_bytes_received",
+    "displayName": "通道接收字节数",
     "expression": "",
     "metricSet": [
       "通道明细"
@@ -1831,7 +1831,7 @@
         "originDimName": "channelType"
       }
     ],
-    "displayName": "ibmmq_channel_bytes_sent",
+    "displayName": "通道发送字节数",
     "expression": "",
     "metricSet": [
       "通道明细"
@@ -1880,7 +1880,7 @@
         "originDimName": "cmdline"
       }
     ],
-    "displayName": "ibmmq_process_alive",
+    "displayName": "进程存活状态",
     "expression": "",
     "metricSet": [
       "进程资源"
@@ -1929,7 +1929,7 @@
         "originDimName": "cmdline"
       }
     ],
-    "displayName": "ibmmq_process_count",
+    "displayName": "进程数量",
     "expression": "",
     "metricSet": [
       "进程资源"
@@ -1978,7 +1978,7 @@
         "originDimName": "cmdline"
       }
     ],
-    "displayName": "ibmmq_process_cpu_percent",
+    "displayName": "进程CPU使用率",
     "expression": "",
     "metricSet": [
       "进程资源"
@@ -2027,7 +2027,7 @@
         "originDimName": "cmdline"
       }
     ],
-    "displayName": "ibmmq_process_memory_bytes",
+    "displayName": "进程内存",
     "expression": "",
     "metricSet": [
       "进程资源"
@@ -2076,7 +2076,7 @@
         "originDimName": "cmdline"
       }
     ],
-    "displayName": "ibmmq_process_thread_count",
+    "displayName": "进程线程数",
     "expression": "",
     "metricSet": [
       "进程资源"
@@ -2125,7 +2125,7 @@
         "originDimName": "cmdline"
       }
     ],
-    "displayName": "ibmmq_process_fd_count",
+    "displayName": "进程句柄数",
     "expression": "",
     "metricSet": [
       "进程资源"

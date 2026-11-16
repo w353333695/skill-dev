@@ -4,6 +4,7 @@
 import argparse
 import csv
 import json
+import logging
 import locale
 import math
 import os
@@ -15,12 +16,41 @@ import threading
 import time
 import traceback
 
-VERSION = "0.4.2"
+VERSION = "0.4.3"
 QMGR_COMMAND = "DISPLAY QMGR DEADQ"
 STATUS_COMMAND = "DISPLAY QSTATUS(*) CURDEPTH MSGAGE IPPROCS OPPROCS"
 QUEUE_COMMAND = "DISPLAY QLOCAL(*) CURDEPTH MAXDEPTH USAGE GET PUT"
 CHANNEL_COMMAND = "DISPLAY CHSTATUS(*) CHANNEL CHLTYPE STATUS MSGS BYTSRCVD BYTSSENT"
 LISTENER_COMMAND = "DISPLAY LSSTATUS(*) LISTENER PORT STATUS"
+LOG_LEVELS = ("DEBUG", "INFO", "WARN", "ERROR")
+LOGGER = logging.getLogger("ibmmq_monitor")
+EXPECTED_METRICS = (
+    "ibmmq_collect_success", "ibmmq_discovery_success", "ibmmq_qmgr_count", "ibmmq_qmgr_status",
+    "ibmmq_sc_command_success", "ibmmq_queue_total", "ibmmq_queue_depth_total", "ibmmq_queue_max_depth",
+    "ibmmq_queue_max_usage_percent", "ibmmq_queue_current_depth", "ibmmq_queue_max_depth_config",
+    "ibmmq_queue_usage_percent", "ibmmq_queue_oldest_message_age_seconds", "ibmmq_queue_input_handles",
+    "ibmmq_queue_output_handles", "ibmmq_queue_get_enabled", "ibmmq_queue_put_enabled",
+    "ibmmq_transmission_queue_current_depth", "ibmmq_transmission_queue_max_depth",
+    "ibmmq_transmission_queue_usage_percent", "ibmmq_transmission_queue_get_enabled",
+    "ibmmq_transmission_queue_put_enabled", "ibmmq_dlq_configured", "ibmmq_dlq_current_depth",
+    "ibmmq_dlq_max_depth", "ibmmq_dlq_usage_percent", "ibmmq_dlq_get_enabled", "ibmmq_dlq_put_enabled",
+    "ibmmq_listener_total", "ibmmq_listener_running_count", "ibmmq_listener_status",
+    "ibmmq_channel_total", "ibmmq_channel_running_count", "ibmmq_channel_retrying_count",
+    "ibmmq_channel_status", "ibmmq_channel_messages", "ibmmq_channel_bytes",
+    "ibmmq_channel_bytes_received", "ibmmq_channel_bytes_sent", "ibmmq_process_alive",
+    "ibmmq_process_count", "ibmmq_process_cpu_percent", "ibmmq_process_memory_bytes",
+    "ibmmq_process_thread_count", "ibmmq_process_fd_count",
+)
+
+
+def setup_logging(level_name):
+    level_name = level_name.upper() if level_name else "ERROR"
+    level = getattr(logging, level_name, logging.ERROR)
+    logging.basicConfig(
+        stream=sys.stderr, level=level,
+        format="%(asctime)s %(levelname)s IBMMQ %(message)s",
+    )
+    LOGGER.setLevel(level)
 
 
 def env(name, default=""):
@@ -35,12 +65,15 @@ def config():
     try:
         timeout = int(env("commandTimeout", "10"))
         interval = float(env("sampleInterval", "0.2"))
+        log_level = env("logLevel", "ERROR").upper()
     except ValueError:
-        raise ValueError("[config] commandTimeout必须为整数，sampleInterval必须为数字")
+        raise ValueError("[config] commandTimeout必须为整数，sampleInterval必须为数字，logLevel必须合法")
     if timeout < 1 or timeout > 60:
         raise ValueError("[config] commandTimeout必须在1到60之间")
     if interval < 0.05 or interval > 2:
         raise ValueError("[config] sampleInterval必须在0.05到2之间")
+    if log_level not in LOG_LEVELS:
+        raise ValueError("[config] logLevel只支持DEBUG/INFO/WARN/ERROR")
     settings = {
         "ibmmqInstanceId": env("instanceId"),
         "hostIp": env("hostIp"),
@@ -48,9 +81,17 @@ def config():
         "queueFilter": env("queueFilter", ".*"),
         "includeSystemQueues": env("includeSystemQueues", "false").lower() in ("1", "true", "yes"),
         "processMonitor": env("processMonitor", "true").lower() in ("1", "true", "yes"),
+        "logLevel": log_level,
         "timeout": timeout,
         "interval": interval,
     }
+    LOGGER.debug(
+        "[config] version=%s platform=%s installPath=%s queueFilter=%s includeSystemQueues=%s "
+        "processMonitor=%s logLevel=%s timeout=%s interval=%s",
+        VERSION, os.name, settings["installPath"], settings["queueFilter"],
+        settings["includeSystemQueues"], settings["processMonitor"], settings["logLevel"],
+        settings["timeout"], settings["interval"],
+    )
     return settings
 
 
@@ -73,6 +114,7 @@ def is_windows():
 def execute(args, settings, input_text=None):
     process = None
     expired = [False]
+    LOGGER.debug("[execute] start args=%s timeout=%s input=<%s>", repr(args), settings["timeout"], input_text or "")
     def stop_process():
         if process is not None and process.poll() is None:
             expired[0] = True
@@ -109,8 +151,13 @@ def execute(args, settings, input_text=None):
         timer.cancel()
         text = decode(stdout) + "\n" + decode(stderr)
         if expired[0]:
+            LOGGER.error("[execute] timeout args=%s timeout=%s output=<%s>", repr(args), settings["timeout"], text.strip())
             return 124, text + "\nAMQ9999E: command timeout"
+        LOGGER.debug("[execute] finish args=%s returncode=%s output=<%s>", repr(args), process.returncode or 0, text.strip())
         return process.returncode or 0, text
+    except Exception:
+        LOGGER.exception("[execute] failed args=%s", repr(args))
+        raise
     finally:
         if process is not None and process.poll() is None:
             try:
@@ -151,8 +198,12 @@ def find_mq_bin(settings):
         if name:
             candidates.append(name)
     for candidate in candidates:
-        if usable(candidate):
+        candidate_usable = usable(candidate)
+        LOGGER.debug("[find_mq_bin] candidate=%s command=%s usable=%s", candidate, command, candidate_usable)
+        if candidate_usable:
+            LOGGER.debug("[find_mq_bin] selected=%s", candidate)
             return candidate
+    LOGGER.error("[find_mq_bin] not found candidates=%s command=%s", repr(candidates), command)
     return ""
 
 
@@ -192,7 +243,9 @@ def discover_qmgrs(mq_bin, settings):
         if name and not any(row["qmgrName"] == name for row in qmgrs):
             qmgrs.append({"qmgrName": name, "status": attrs.get("STATUS", ""), "dspmqReturnCode": returncode})
     if not qmgrs and returncode != 0:
+        LOGGER.error("[discover_qmgrs] failed returncode=%s output=<%s>", returncode, output.strip())
         raise RuntimeError("[discover_qmgrs] dspmq执行失败: " + output.strip()[-500:])
+    LOGGER.debug("[discover_qmgrs] count=%d qmgrs=%s", len(qmgrs), json.dumps(qmgrs))
     return qmgrs, returncode
 
 
@@ -215,6 +268,7 @@ def parse_mqsc(output, settings):
         attrs = parse_attributes(line)
         if not attrs:
             continue
+        LOGGER.debug("[parse_mqsc] line=<%s> attrs=%s", line, json.dumps(attrs, sort_keys=True))
         if attrs.get("QMNAME") and attrs.get("DEADQ"):
             dead_queue_name = attrs["DEADQ"]
         queue_name = attrs.get("QNAME") or attrs.get("QUEUE")
@@ -259,17 +313,28 @@ def parse_mqsc(output, settings):
             })
     selected_queues = []
     pattern = re.compile(settings["queueFilter"])
+    LOGGER.debug(
+        "[parse_mqsc] discovered queues=%d channels=%d listeners=%d deadQueue=%s",
+        len(queues), len(channels), len(listeners), dead_queue_name or "<unset>",
+    )
     for name in sorted(queues):
         is_dead_queue = bool(dead_queue_name) and name.upper() == dead_queue_name.upper()
         if not settings["includeSystemQueues"] and name.upper().startswith("SYSTEM.") and not is_dead_queue:
+            LOGGER.debug("[parse_mqsc] exclude queue=%s reason=SYSTEM_PREFIX", name)
             continue
         if not pattern.search(name):
+            LOGGER.debug("[parse_mqsc] exclude queue=%s reason=QUEUE_FILTER pattern=%s", name, settings["queueFilter"])
             continue
         row = queues[name]
         row["queueName"] = name
         row["isDeadQueue"] = is_dead_queue
         row["isTransmissionQueue"] = row.get("usage") == "XMITQ"
         selected_queues.append(row)
+        LOGGER.debug(
+            "[parse_mqsc] select queue=%s deadQueue=%s transmissionQueue=%s fields=%s",
+            name, is_dead_queue, row["isTransmissionQueue"], json.dumps(row, sort_keys=True),
+        )
+    LOGGER.debug("[parse_mqsc] selected queues=%d", len(selected_queues))
     return selected_queues, channels, listeners, dead_queue_name
 
 
@@ -441,6 +506,7 @@ def ibm_mq_process(row, qmgr_name):
 
 
 def collect_processes(qmgr_name, settings):
+    LOGGER.debug("[collect_processes] start qmgr=%s platform=%s", qmgr_name, os.name)
     if is_windows():
         rows = [row for row in windows_process_sample(settings) if ibm_mq_process(row, qmgr_name)]
         grouped = {}
@@ -455,6 +521,7 @@ def collect_processes(qmgr_name, settings):
             grouped[key]["memory"] += row["memoryBytes"]
             grouped[key]["threads"] += row["threads"]
             grouped[key]["fds"] += row["fdCount"]
+        LOGGER.debug("[collect_processes] qmgr=%s matched=%d groups=%d", qmgr_name, len(rows), len(grouped))
         return grouped
 
     first = {}
@@ -484,10 +551,12 @@ def collect_processes(qmgr_name, settings):
         grouped[key]["memory"] += row["memoryBytes"]
         grouped[key]["threads"] += row["threads"]
         grouped[key]["fds"] += row["fdCount"]
+    LOGGER.debug("[collect_processes] qmgr=%s matched=%d groups=%d", qmgr_name, len(first), len(grouped))
     return grouped
 
 
 def collect_qmgr(qmgr, mq_bin, settings):
+    LOGGER.debug("[collect_qmgr] start qmgr=%s status=%s mqBin=%s", qmgr["qmgrName"], qmgr.get("status", ""), mq_bin)
     base = {"ibmmqInstanceId": settings["ibmmqInstanceId"], "qmgrName": qmgr["qmgrName"], "hostIp": settings.get("hostIp", ""), "installPath": settings.get("installPath", "") or os.path.dirname(mq_bin)}
     values = {
         "ibmmq_qmgr_status": 1.0 if qmgr.get("status", "").upper() == "RUNNING" else 0.0,
@@ -497,6 +566,15 @@ def collect_qmgr(qmgr, mq_bin, settings):
     returncode, output = run_mqsc(mq_bin, qmgr["qmgrName"], settings)
     command_success = float(returncode == 0 and "COMMAND ACCEPTED" in output.upper())
     queues, channels, listeners, dead_queue_name = parse_mqsc(output, settings)
+    if command_success != 1.0:
+        LOGGER.error("[collect_qmgr] runmqsc failed qmgr=%s returncode=%s output=<%s>", qmgr["qmgrName"], returncode, output.strip())
+    LOGGER.debug(
+        "[collect_qmgr] parsed qmgr=%s queues=%d transmissionQueues=%d deadQueues=%d channels=%d "
+        "listeners=%d deadQueueConfig=%s commandSuccess=%s",
+        qmgr["qmgrName"], len(queues), sum(1 for row in queues if row.get("isTransmissionQueue")),
+        sum(1 for row in queues if row.get("isDeadQueue")), len(channels), len(listeners),
+        dead_queue_name or "<unset>", command_success,
+    )
     summary = dict(base)
     summary_values = {
         "ibmmq_collect_success": 1.0,
@@ -562,13 +640,19 @@ def collect_qmgr(qmgr, mq_bin, settings):
             channel_values["ibmmq_channel_bytes_sent"] = row["bytesSent"]
         if row.get("bytes"):
             channel_values["ibmmq_channel_bytes"] = row["bytes"]
+        LOGGER.debug(
+            "[collect_qmgr] channel=%s type=%s status=%s messages=%s bytes=%s bytesReceived=%s bytesSent=%s",
+            row["channelName"], row["channelType"], row["status"], row["messages"], row["bytes"],
+            row["bytesReceived"], row["bytesSent"],
+        )
         rows.append(dict(dims=dict(base, channelName=row["channelName"], channelType=row["channelType"]), vals=channel_values))
     for row in listeners:
         rows.append(dict(dims=dict(base, listenerName=row["listenerName"], port=row["port"]), vals={
             "ibmmq_listener_status": normalize_status(row["status"]),
         }))
     if settings["processMonitor"]:
-        for row in collect_processes(qmgr["qmgrName"], settings).values():
+        process_rows = collect_processes(qmgr["qmgrName"], settings)
+        for row in process_rows.values():
             rows.append(dict(dims=dict(base, cmdline=row["cmdline"]), vals={
                 "ibmmq_process_alive": row["alive"],
                 "ibmmq_process_count": row["count"],
@@ -577,6 +661,9 @@ def collect_qmgr(qmgr, mq_bin, settings):
                 "ibmmq_process_thread_count": row["threads"],
                 "ibmmq_process_fd_count": row["fds"],
             }))
+    else:
+        LOGGER.debug("[collect_qmgr] process metrics skipped qmgr=%s reason=processMonitorDisabled", qmgr["qmgrName"])
+    LOGGER.debug("[collect_qmgr] finish qmgr=%s rows=%d metrics=%s", qmgr["qmgrName"], len(rows), json.dumps(sorted(set(key for row in rows for key in row["vals"]))))
     return rows
 
 
@@ -594,6 +681,7 @@ def collect(settings):
         "ibmmq_collect_success": float(target_found),
     }))
     if not qmgrs:
+        LOGGER.error("[collect] queue manager discovery returned empty returncode=%s", returncode)
         base = {
             "ibmmqInstanceId": settings["ibmmqInstanceId"], "qmgrName": "",
             "hostIp": settings.get("hostIp", ""), "installPath": settings.get("installPath", ""),
@@ -603,6 +691,13 @@ def collect(settings):
             "ibmmq_discovery_success": float(returncode == 0),
             "ibmmq_collect_success": 0.0,
         }))
+    emitted_metrics = set(key for row in output for key in row["vals"])
+    missing_metrics = [key for key in EXPECTED_METRICS if key not in emitted_metrics]
+    if missing_metrics:
+        LOGGER.error("[collect] metric gaps count=%d metrics=%s", len(missing_metrics), ",".join(missing_metrics))
+    else:
+        LOGGER.debug("[collect] all %d expected metrics emitted", len(EXPECTED_METRICS))
+    LOGGER.debug("[collect] finish rows=%d metrics=%s payload=%s", len(output), ",".join(sorted(emitted_metrics)), json.dumps(output))
     return output
 
 
@@ -624,8 +719,10 @@ def main(argv=None):
     parser.add_argument("--version", action="version", version=VERSION)
     parser.parse_args(argv)
     try:
+        setup_logging(env("logLevel", "ERROR"))
         sys.stdout.write(json.dumps(collect(config()), ensure_ascii=True, allow_nan=False) + "\n")
     except Exception:
+        LOGGER.exception("[main] collection failed")
         sys.stdout.write("COLLECT_ERROR: [main] " + traceback.format_exc())
     return 0
 
