@@ -1,6 +1,6 @@
 type: simple-script
 name: IBM MQ监控
-version: "0.3.0"
+version: "0.4.0"
 command:
     collect:
         interpreter: ""
@@ -36,6 +36,6 @@ category: 消息队列
 scriptType: python
 interpreter: ""
 samplerType: metric_sampler
-memo: "同时支持Linux/Windows执行节点；按IBM MQ队列管理器实例调用dspmq/runmqsc，采集队列管理器、监听器、通道、队列深度和进程资源指标。"
+memo: "同时支持Linux/Windows执行节点；按IBM MQ队列管理器实例调用dspmq/runmqsc，采集队列管理器、监听器、通道、本地/传输/死信队列和进程资源指标。"
 icon: null
 relateObjectId: IBMMQ@ONEMODEL

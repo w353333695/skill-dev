@@ -16,10 +16,11 @@ import threading
 import time
 import traceback
 
-VERSION = "0.3.0"
+VERSION = "0.4.0"
+QMGR_COMMAND = "DISPLAY QMGR DEADQ"
 STATUS_COMMAND = "DISPLAY QSTATUS(*) CURDEPTH MSGAGE IPPROCS OPPROCS"
-QUEUE_COMMAND = "DISPLAY QLOCAL(*) CURDEPTH MAXDEPTH"
-CHANNEL_COMMAND = "DISPLAY CHSTATUS(*) CHANNEL CHLTYPE STATUS MSGS BYTES"
+QUEUE_COMMAND = "DISPLAY QLOCAL(*) CURDEPTH MAXDEPTH USAGE GET PUT"
+CHANNEL_COMMAND = "DISPLAY CHSTATUS(*) CHANNEL CHLTYPE STATUS MSGS BYTSRCVD BYTSSENT"
 LISTENER_COMMAND = "DISPLAY LSSTATUS(*) LISTENER PORT STATUS"
 
 
@@ -209,7 +210,9 @@ def discover_qmgrs(mq_bin, settings):
 
 def run_mqsc(mq_bin, qmgr_name, settings):
     newline = "\r\n" if is_windows() else "\n"
-    commands = newline.join([QUEUE_COMMAND, STATUS_COMMAND, CHANNEL_COMMAND, LISTENER_COMMAND, "EXIT"]) + newline
+    commands = newline.join([
+        QMGR_COMMAND, QUEUE_COMMAND, STATUS_COMMAND, CHANNEL_COMMAND, LISTENER_COMMAND, "EXIT"
+    ]) + newline
     args = [mq_command(mq_bin, "runmqsc"), qmgr_name]
     returncode, output = execute(args, settings, commands)
     return returncode, output
@@ -219,10 +222,13 @@ def parse_mqsc(output, settings):
     queues = {}
     channels = []
     listeners = []
+    dead_queue_name = ""
     for line in output.splitlines():
         attrs = parse_attributes(line)
         if not attrs:
             continue
+        if attrs.get("QMNAME") and attrs.get("DEADQ"):
+            dead_queue_name = attrs["DEADQ"]
         queue_name = attrs.get("QNAME") or attrs.get("QUEUE")
         if queue_name:
             name = queue_name
@@ -233,6 +239,12 @@ def parse_mqsc(output, settings):
                 row["currentDepth"] = numeric(attrs.get("CURDEPTH"))
             if "MAXDEPTH" in attrs:
                 row["maxDepth"] = numeric(attrs.get("MAXDEPTH"), 1.0)
+            if "USAGE" in attrs:
+                row["usage"] = attrs["USAGE"].upper()
+            if "GET" in attrs:
+                row["getEnabled"] = attrs["GET"].upper() == "ENABLED"
+            if "PUT" in attrs:
+                row["putEnabled"] = attrs["PUT"].upper() == "ENABLED"
             if "MSGAGE" in attrs:
                 row["oldestMessageAge"] = numeric(attrs.get("MSGAGE"))
             if "IPPROCS" in attrs:
@@ -247,6 +259,8 @@ def parse_mqsc(output, settings):
                 "status": attrs.get("STATUS", ""),
                 "messages": numeric(attrs.get("MSGNO", attrs.get("MSGS", 0))),
                 "bytes": numeric(attrs.get("BYTES", attrs.get("BYTS", 0))),
+                "bytesReceived": numeric(attrs.get("BYTSRCVD", 0)),
+                "bytesSent": numeric(attrs.get("BYTSSENT", 0)),
             })
         listener_name = attrs.get("LISTENER")
         if listener_name:
@@ -258,14 +272,17 @@ def parse_mqsc(output, settings):
     selected_queues = []
     pattern = re.compile(settings["queueFilter"])
     for name in sorted(queues):
-        if not settings["includeSystemQueues"] and name.upper().startswith("SYSTEM."):
+        is_dead_queue = bool(dead_queue_name) and name.upper() == dead_queue_name.upper()
+        if not settings["includeSystemQueues"] and name.upper().startswith("SYSTEM.") and not is_dead_queue:
             continue
         if not pattern.search(name):
             continue
         row = queues[name]
         row["queueName"] = name
+        row["isDeadQueue"] = is_dead_queue
+        row["isTransmissionQueue"] = row.get("usage") == "XMITQ"
         selected_queues.append(row)
-    return selected_queues, channels, listeners
+    return selected_queues, channels, listeners, dead_queue_name
 
 
 def normalize_status(status):
@@ -491,7 +508,7 @@ def collect_qmgr(qmgr, mq_bin, settings):
     rows = [dict(dims=dict(base), vals=dict(values))]
     returncode, output = run_mqsc(mq_bin, qmgr["qmgrName"], settings)
     command_success = float(returncode == 0 and "COMMAND ACCEPTED" in output.upper())
-    queues, channels, listeners = parse_mqsc(output, settings)
+    queues, channels, listeners, dead_queue_name = parse_mqsc(output, settings)
     summary = dict(base)
     summary_values = {
         "ibmmq_collect_success": 1.0,
@@ -520,13 +537,44 @@ def collect_qmgr(qmgr, mq_bin, settings):
             vals["ibmmq_queue_input_handles"] = row["inputHandles"]
         if "outputHandles" in row:
             vals["ibmmq_queue_output_handles"] = row["outputHandles"]
+        if "getEnabled" in row:
+            vals["ibmmq_queue_get_enabled"] = 1.0 if row["getEnabled"] else 0.0
+        if "putEnabled" in row:
+            vals["ibmmq_queue_put_enabled"] = 1.0 if row["putEnabled"] else 0.0
+        if row.get("isTransmissionQueue"):
+            vals.update({
+                "ibmmq_transmission_queue_current_depth": row.get("currentDepth", 0.0),
+                "ibmmq_transmission_queue_max_depth": row.get("maxDepth", 0.0),
+                "ibmmq_transmission_queue_usage_percent": row.get("currentDepth", 0.0) / row.get("maxDepth", 1.0) * 100.0,
+            })
+            if "getEnabled" in row:
+                vals["ibmmq_transmission_queue_get_enabled"] = 1.0 if row["getEnabled"] else 0.0
+            if "putEnabled" in row:
+                vals["ibmmq_transmission_queue_put_enabled"] = 1.0 if row["putEnabled"] else 0.0
+        if row.get("isDeadQueue"):
+            vals.update({
+                "ibmmq_dlq_configured": 1.0,
+                "ibmmq_dlq_current_depth": row.get("currentDepth", 0.0),
+                "ibmmq_dlq_max_depth": row.get("maxDepth", 0.0),
+                "ibmmq_dlq_usage_percent": row.get("currentDepth", 0.0) / row.get("maxDepth", 1.0) * 100.0,
+            })
+            if "getEnabled" in row:
+                vals["ibmmq_dlq_get_enabled"] = 1.0 if row["getEnabled"] else 0.0
+            if "putEnabled" in row:
+                vals["ibmmq_dlq_put_enabled"] = 1.0 if row["putEnabled"] else 0.0
         rows.append(dict(dims=dims, vals=vals))
     for row in channels:
-        rows.append(dict(dims=dict(base, channelName=row["channelName"], channelType=row["channelType"]), vals={
+        channel_values = {
             "ibmmq_channel_status": normalize_status(row["status"]),
             "ibmmq_channel_messages": row["messages"],
-            "ibmmq_channel_bytes": row["bytes"],
-        }))
+        }
+        if "bytesReceived" in row:
+            channel_values["ibmmq_channel_bytes_received"] = row["bytesReceived"]
+        if "bytesSent" in row:
+            channel_values["ibmmq_channel_bytes_sent"] = row["bytesSent"]
+        if row.get("bytes"):
+            channel_values["ibmmq_channel_bytes"] = row["bytes"]
+        rows.append(dict(dims=dict(base, channelName=row["channelName"], channelType=row["channelType"]), vals=channel_values))
     for row in listeners:
         rows.append(dict(dims=dict(base, listenerName=row["listenerName"], port=row["port"]), vals={
             "ibmmq_listener_status": normalize_status(row["status"]),

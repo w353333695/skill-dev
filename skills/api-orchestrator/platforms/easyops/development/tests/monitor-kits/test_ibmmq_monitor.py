@@ -15,8 +15,8 @@ import yaml
 BASE = Path(__file__).resolve().parents[2]
 KIT = BASE / "monitor-kits/ibmmq-monitoring"
 SOURCE = KIT / "src/ibmmq_monitor.orig"
-PACKAGE = BASE.parent / "hub/monitor-kits/监控套件_IBM_MQ监控_0.3.0.zip"
-XLSX = KIT / "IBM_MQ监控_告警规则模板_0.3.0.xlsx"
+PACKAGE = BASE.parent / "hub/monitor-kits/监控套件_IBM_MQ监控_0.4.0.zip"
+XLSX = KIT / "IBM_MQ监控_告警规则模板_0.4.0.xlsx"
 
 
 def module():
@@ -41,7 +41,7 @@ class IBMMQMonitorTest(unittest.TestCase):
     def test_version(self):
         result = subprocess.run([sys.executable, str(SOURCE), "--version"], capture_output=True, text=True)
         self.assertEqual(result.returncode, 0)
-        self.assertIn("0.3.0", result.stdout)
+        self.assertIn("0.4.0", result.stdout)
 
     def test_orig_and_runtime_are_identical(self):
         self.assertEqual(SOURCE.read_bytes(), (KIT / "src/ibmmq_monitor.py").read_bytes())
@@ -77,6 +77,14 @@ class IBMMQMonitorTest(unittest.TestCase):
             self.assertEqual(row["threads"], 4.0)
             self.assertEqual(row["fds"], 50.0)
 
+    def test_mqsc_input_includes_zabbix_metric_sources(self):
+        with mock.patch.object(self.m, "execute", return_value=(0, "COMMAND ACCEPTED")) as command_execute:
+            self.m.run_mqsc("/opt/mqm/bin", "QM1", self.settings)
+        mqsc_input = command_execute.call_args[0][2]
+        self.assertIn("DISPLAY QMGR DEADQ", mqsc_input)
+        self.assertIn("DISPLAY QLOCAL(*) CURDEPTH MAXDEPTH USAGE GET PUT", mqsc_input)
+        self.assertIn("DISPLAY CHSTATUS(*) CHANNEL CHLTYPE STATUS MSGS BYTSRCVD BYTSSENT", mqsc_input)
+
     def test_config_requires_qmgr(self):
         with mock.patch.dict(os.environ, {"EASYOPS_COLLECTOR_qmgrName": "$.name"}):
             with self.assertRaises(ValueError):
@@ -84,34 +92,46 @@ class IBMMQMonitorTest(unittest.TestCase):
 
     def test_parse_mqsc(self):
         output = "\n".join([
-            "   1 : DISPLAY QLOCAL(*) CURDEPTH MAXDEPTH",
-            "     QNAME(APP.Q)               CURDEPTH( 12) MAXDEPTH(100)",
+            "   1 : DISPLAY QMGR DEADQ",
+            "     QMNAME(QM1)                DEADQ(SYSTEM.DEAD.LETTER.QUEUE)",
+            "   2 : DISPLAY QLOCAL(*) CURDEPTH MAXDEPTH USAGE GET PUT",
+            "     QNAME(APP.Q)               CURDEPTH( 12) MAXDEPTH(100) USAGE(NORMAL) GET(ENABLED) PUT(ENABLED)",
+            "     QNAME(XMIT.Q)              CURDEPTH( 3)  MAXDEPTH(10)  USAGE(XMITQ) GET(ENABLED) PUT(DISABLED)",
+            "     QNAME(SYSTEM.DEAD.LETTER.QUEUE) CURDEPTH(1) MAXDEPTH(10) USAGE(NORMAL) GET(ENABLED) PUT(ENABLED)",
             "     QNAME(SYSTEM.ADMIN.Q)      CURDEPTH( 1)  MAXDEPTH(5000)",
-            "   5 : DISPLAY QSTATUS(*)",
+            "   6 : DISPLAY QSTATUS(*)",
             "     QUEUE(APP.Q)               MSGAGE( 45)  IPPROCS(1) OPPROCS(2)",
-            "   9 : DISPLAY CHSTATUS(*)",
-            "     CHANNEL(SENDER.CH)         CHLTYPE(SDR) STATUS(RUNNING) MSGNO(10) BYTES(200)",
+            "   10 : DISPLAY CHSTATUS(*)",
+            "     CHANNEL(SENDER.CH)         CHLTYPE(SDR) STATUS(RUNNING) MSGNO(10) BYTSRCVD(200) BYTSSENT(300)",
             "     CHANNEL(RECV.CH)           CHLTYPE(RCVR) STATUS(RETRYING)",
-            "  13 : DISPLAY LSSTATUS(*)",
+            "  14 : DISPLAY LSSTATUS(*)",
             "     LISTENER(TCP.LISTENER)     PORT(1414)   STATUS(RUNNING)",
         ])
-        queues, channels, listeners = self.m.parse_mqsc(output, self.settings)
-        self.assertEqual([row["queueName"] for row in queues], ["APP.Q"])
+        queues, channels, listeners, dead_queue_name = self.m.parse_mqsc(output, self.settings)
+        self.assertEqual(dead_queue_name, "SYSTEM.DEAD.LETTER.QUEUE")
+        self.assertEqual([row["queueName"] for row in queues], ["APP.Q", "SYSTEM.DEAD.LETTER.QUEUE", "XMIT.Q"])
         self.assertEqual(queues[0]["currentDepth"], 12.0)
         self.assertEqual(queues[0]["maxDepth"], 100.0)
         self.assertEqual(queues[0]["oldestMessageAge"], 45.0)
+        self.assertTrue(queues[1]["isDeadQueue"])
+        self.assertTrue(queues[2]["isTransmissionQueue"])
         self.assertEqual(len(channels), 2)
         self.assertEqual(self.m.normalize_status(channels[0]["status"]), 1.0)
         self.assertEqual(self.m.normalize_status(channels[1]["status"]), 0.0)
+        self.assertEqual(channels[0]["bytesReceived"], 200.0)
+        self.assertEqual(channels[0]["bytesSent"], 300.0)
         self.assertEqual(listeners[0]["port"], "1414")
 
     def test_collect_qmgr_outputs(self):
         qmgr = {"qmgrName": "QM1", "status": "Running"}
         mqsc = "\n".join([
             "COMMAND ACCEPTED",
-            "QNAME(APP.Q) CURDEPTH(20) MAXDEPTH(100)",
+            "QMNAME(QM1) DEADQ(SYSTEM.DEAD.LETTER.QUEUE)",
+            "QNAME(APP.Q) CURDEPTH(20) MAXDEPTH(100) USAGE(NORMAL) GET(ENABLED) PUT(ENABLED)",
+            "QNAME(XMIT.Q) CURDEPTH(9) MAXDEPTH(10) USAGE(XMITQ) GET(ENABLED) PUT(DISABLED)",
+            "QNAME(SYSTEM.DEAD.LETTER.QUEUE) CURDEPTH(1) MAXDEPTH(10) GET(ENABLED) PUT(ENABLED)",
             "QUEUE(APP.Q) MSGAGE(301)",
-            "CHANNEL(SDR.CH) CHLTYPE(SDR) STATUS(RUNNING) MSGS(3) BYTES(9)",
+            "CHANNEL(SDR.CH) CHLTYPE(SDR) STATUS(RUNNING) MSGS(3) BYTSRCVD(9) BYTSSENT(11)",
             "LISTENER(TCP.1) PORT(1414) STATUS(RUNNING)",
         ])
         calls = []
@@ -127,8 +147,17 @@ class IBMMQMonitorTest(unittest.TestCase):
         self.assertEqual(by_key["ibmmq_qmgr_status"], 1.0)
         self.assertEqual(by_key["ibmmq_collect_success"], 1.0)
         self.assertEqual(by_key["ibmmq_sc_command_success"], 1.0)
-        self.assertEqual(by_key["ibmmq_queue_current_depth"], 20.0)
-        self.assertEqual(by_key["ibmmq_queue_usage_percent"], 20.0)
+        queue_metrics = [value for row in rows for key, value in row["vals"].items() if key == "ibmmq_queue_current_depth"]
+        usage_metrics = [value for row in rows for key, value in row["vals"].items() if key == "ibmmq_queue_usage_percent"]
+        self.assertIn(20.0, queue_metrics)
+        self.assertIn(20.0, usage_metrics)
+        self.assertEqual(by_key["ibmmq_queue_get_enabled"], 1.0)
+        self.assertEqual(by_key["ibmmq_transmission_queue_usage_percent"], 90.0)
+        self.assertEqual(by_key["ibmmq_transmission_queue_put_enabled"], 0.0)
+        self.assertEqual(by_key["ibmmq_dlq_configured"], 1.0)
+        self.assertEqual(by_key["ibmmq_dlq_current_depth"], 1.0)
+        self.assertEqual(by_key["ibmmq_channel_bytes_received"], 9.0)
+        self.assertEqual(by_key["ibmmq_channel_bytes_sent"], 11.0)
         self.assertEqual(by_key["ibmmq_channel_status"], 1.0)
         self.assertEqual(by_key["ibmmq_listener_status"], 1.0)
         self.assertIn("DISPLAY QSTATUS", calls[0][1])
@@ -147,7 +176,10 @@ class IBMMQMonitorTest(unittest.TestCase):
         self.assertEqual(plugin["name"], "IBM MQ监控")
         self.assertEqual(plugin["relateObjectId"], "IBMMQ@ONEMODEL")
         self.assertIn("Linux/Windows", plugin["memo"])
-        self.assertEqual(len(origins), 30)
+        self.assertEqual(plugin["version"], "0.4.0")
+        self.assertEqual(len(origins), 45)
+        self.assertEqual(len(aliases), 45)
+        self.assertEqual(len(metric_sets), 11)
         self.assertEqual({row["key"] for row in origins}, {row["name"] for row in aliases})
         self.assertTrue(all(isinstance(row, dict) and row.get("name") for row in metric_sets))
         origin_dimensions = {row["key"]: set(row["labels"]) for row in origins}
@@ -163,8 +195,17 @@ class IBMMQMonitorTest(unittest.TestCase):
             "ibmmq_qmgr_status", "ibmmq_process_alive", "ibmmq_listener_status",
             "ibmmq_channel_status", "ibmmq_queue_current_depth",
             "ibmmq_queue_usage_percent", "ibmmq_queue_oldest_message_age_seconds",
+            "ibmmq_transmission_queue_usage_percent", "ibmmq_dlq_current_depth",
         }
         self.assertTrue(expected.issubset({row["metricName"] for row in conditions}))
+        by_metric = {row["metricName"]: row for row in conditions}
+        self.assertEqual(by_metric["ibmmq_dlq_current_depth"]["alertCount"], 2)
+        self.assertEqual(by_metric["ibmmq_dlq_current_depth"]["detectWindow"], 2)
+        self.assertEqual(
+            [item["threshold"] for item in by_metric["ibmmq_queue_usage_percent"]["comparators"]],
+            [80, 90],
+        )
+        self.assertNotIn("ibmmq_queue_get_enabled", {row["metricName"] for row in conditions})
 
     def test_package(self):
         if not PACKAGE.exists():
@@ -176,7 +217,7 @@ class IBMMQMonitorTest(unittest.TestCase):
                 mode = stat.S_IMODE(item.external_attr >> 16)
                 self.assertEqual(mode, 0o755 if item.is_dir() else 0o664)
             self.assertIn("IBM MQ监控/src/ibmmq_monitor.orig", package.namelist())
-            self.assertIn("IBM MQ监控/IBM_MQ监控_告警规则模板_0.3.0.xlsx", package.namelist())
+            self.assertIn("IBM MQ监控/IBM_MQ监控_告警规则模板_0.4.0.xlsx", package.namelist())
             self.assertIn("IBM MQ监控/resource_discovery_define.json", package.namelist())
             self.assertNotIn("IBM MQ监控/IBMMQ@ONEMODEL.json", package.namelist())
 

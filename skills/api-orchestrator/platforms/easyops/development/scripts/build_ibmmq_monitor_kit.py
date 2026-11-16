@@ -14,11 +14,11 @@ ROOT = Path(__file__).resolve().parents[1]
 KIT = ROOT / "monitor-kits/ibmmq-monitoring"
 HUB = ROOT.parent / "hub/monitor-kits"
 NAME = "IBM MQ监控"
-VERSION = "0.3.0"
+VERSION = "0.4.0"
 SUPPORTED_PLATFORMS = ("Linux", "Windows")
 OBJECT_ID = "IBMMQ@ONEMODEL"
-XLSX_NAME = "IBM_MQ监控_告警规则模板_0.3.0.xlsx"
-ZIP_NAME = "监控套件_IBM_MQ监控_0.3.0.zip"
+XLSX_NAME = "IBM_MQ监控_告警规则模板_0.4.0.xlsx"
+ZIP_NAME = "监控套件_IBM_MQ监控_0.4.0.zip"
 BASE_DIMS = ("ibmmqInstanceId", "qmgrName", "hostIp", "installPath")
 QUEUE_DIMS = BASE_DIMS + ("queueName",)
 CHANNEL_DIMS = BASE_DIMS + ("channelName", "channelType")
@@ -42,6 +42,19 @@ METRICS = (
     ("ibmmq_queue_oldest_message_age_seconds", "队列最老消息年龄", "s", "队列明细", QUEUE_DIMS),
     ("ibmmq_queue_input_handles", "队列输入句柄数", "个", "队列明细", QUEUE_DIMS),
     ("ibmmq_queue_output_handles", "队列输出句柄数", "个", "队列明细", QUEUE_DIMS),
+    ("ibmmq_queue_get_enabled", "队列GET启用状态；1 ENABLED，0 DISABLED", "", "队列明细", QUEUE_DIMS),
+    ("ibmmq_queue_put_enabled", "队列PUT启用状态；1 ENABLED，0 DISABLED", "", "队列明细", QUEUE_DIMS),
+    ("ibmmq_transmission_queue_current_depth", "传输队列当前消息深度", "条", "传输队列", QUEUE_DIMS),
+    ("ibmmq_transmission_queue_max_depth", "传输队列配置最大深度", "条", "传输队列", QUEUE_DIMS),
+    ("ibmmq_transmission_queue_usage_percent", "传输队列深度占最大深度比例", "%", "传输队列", QUEUE_DIMS),
+    ("ibmmq_transmission_queue_get_enabled", "传输队列GET启用状态；1 ENABLED，0 DISABLED", "", "传输队列", QUEUE_DIMS),
+    ("ibmmq_transmission_queue_put_enabled", "传输队列PUT启用状态；1 ENABLED，0 DISABLED", "", "传输队列", QUEUE_DIMS),
+    ("ibmmq_dlq_configured", "死信队列已配置且被采集；1是", "", "死信队列", QUEUE_DIMS),
+    ("ibmmq_dlq_current_depth", "死信队列当前消息深度", "条", "死信队列", QUEUE_DIMS),
+    ("ibmmq_dlq_max_depth", "死信队列配置最大深度", "条", "死信队列", QUEUE_DIMS),
+    ("ibmmq_dlq_usage_percent", "死信队列深度占最大深度比例", "%", "死信队列", QUEUE_DIMS),
+    ("ibmmq_dlq_get_enabled", "死信队列GET启用状态；1 ENABLED，0 DISABLED", "", "死信队列", QUEUE_DIMS),
+    ("ibmmq_dlq_put_enabled", "死信队列PUT启用状态；1 ENABLED，0 DISABLED", "", "死信队列", QUEUE_DIMS),
     ("ibmmq_listener_total", "监听器数量", "个", "监听器", BASE_DIMS),
     ("ibmmq_listener_running_count", "Running状态监听器数量", "个", "监听器", BASE_DIMS),
     ("ibmmq_listener_status", "监听器状态；1 Running，0.5 Starting，0.25 Standby，0异常", "", "监听器明细", LISTENER_DIMS),
@@ -51,6 +64,8 @@ METRICS = (
     ("ibmmq_channel_status", "通道状态；1 Running，0.5 Starting，0.25 Paused，0异常", "", "通道明细", CHANNEL_DIMS),
     ("ibmmq_channel_messages", "通道发送或接收消息计数", "条", "通道明细", CHANNEL_DIMS),
     ("ibmmq_channel_bytes", "通道发送或接收字节数", "B", "通道明细", CHANNEL_DIMS),
+    ("ibmmq_channel_bytes_received", "通道接收字节数", "B", "通道明细", CHANNEL_DIMS),
+    ("ibmmq_channel_bytes_sent", "通道发送字节数", "B", "通道明细", CHANNEL_DIMS),
     ("ibmmq_process_alive", "匹配到的进程命令行是否存活；1存活", "", "进程资源", PROCESS_DIMS),
     ("ibmmq_process_count", "同命令行IBM MQ进程数量", "个", "进程资源", PROCESS_DIMS),
     ("ibmmq_process_cpu_percent", "进程CPU使用率", "%", "进程资源", PROCESS_DIMS),
@@ -166,7 +181,7 @@ def plugin_yaml():
     lines.extend([
         "agentType: easyops", "category: 消息队列", "scriptType: python",
         "interpreter: \"\"", "samplerType: metric_sampler",
-        "memo: \"同时支持Linux/Windows执行节点；按IBM MQ队列管理器实例调用dspmq/runmqsc，采集队列管理器、监听器、通道、队列深度和进程资源指标。\"",
+        "memo: \"同时支持Linux/Windows执行节点；按IBM MQ队列管理器实例调用dspmq/runmqsc，采集队列管理器、监听器、通道、本地/传输/死信队列和进程资源指标。\"",
         "icon: null", "relateObjectId: IBMMQ@ONEMODEL",
     ])
     return "\n".join(lines) + "\n"
@@ -176,14 +191,16 @@ def alert_conditions():
     rules = (
         ("ibmmq_collect_success", "equal", 0, 1, 1, 1, (("warning", 0), ("critical", 0))),
         ("ibmmq_discovery_success", "equal", 0, 1, 1, 1, (("warning", 0),)),
-        ("ibmmq_qmgr_status", "equal", 0, 3, 1, 3, (("warning", 0), ("critical", 0))),
+        ("ibmmq_qmgr_status", "equal", 0, 1, 1, 1, (("warning", 0), ("critical", 0))),
         ("ibmmq_sc_command_success", "equal", 0, 1, 1, 1, (("warning", 0),)),
         ("ibmmq_process_alive", "equal", 0, 3, 1, 3, (("critical", 0),)),
-        ("ibmmq_listener_status", "equal", 0, 3, 1, 3, (("warning", 0), ("critical", 0))),
+        ("ibmmq_listener_status", "equal", 0, 1, 1, 1, (("warning", 0), ("critical", 0))),
         ("ibmmq_channel_status", "equal", 0, 3, 1, 3, (("warning", 0),)),
         ("ibmmq_channel_retrying_count", "bigger_than", 0, 3, 1, 3, (("warning", 0),)),
         ("ibmmq_queue_current_depth", "bigger_than", 1000, 3, 1, 3, (("warning", 1000), ("critical", 5000))),
         ("ibmmq_queue_usage_percent", "bigger_than", 80, 3, 1, 3, (("warning", 80), ("critical", 90))),
+        ("ibmmq_transmission_queue_usage_percent", "bigger_than", 80, 3, 1, 3, (("warning", 80), ("critical", 90))),
+        ("ibmmq_dlq_current_depth", "bigger_than", 0, 2, 1, 2, (("critical", 0),)),
         ("ibmmq_queue_oldest_message_age_seconds", "bigger_than", 300, 3, 1, 3, (("warning", 300), ("critical", 900))),
     )
     result = []
@@ -208,7 +225,7 @@ def build_xlsx():
     sheet["B3"] = OBJECT_ID
     sheet["C3"] = "{hostname} IBM MQ监控告警"
     sheet["E3"] = "{hostname} IBM MQ队列管理器告警"
-    sheet["M3"] = "IBM MQ队列管理器实例默认告警；状态和采集类连续3点触发，队列阈值按占用率、深度和最老消息年龄分层。"
+    sheet["M3"] = "IBM MQ队列管理器实例默认告警；对齐Zabbix的队列占用率80%/90%、死信队列深度连续2点Critical、队列管理器/监听器单点异常；绝对深度和消息年龄为补充策略。"
     sheet["R3"] = json.dumps(alert_conditions(), ensure_ascii=False, separators=(",", ":"))
     sheet["W3"] = "{hostname} IBM MQ监控目标"
     sheet["X3"] = "IBM MQ队列管理器实例目标，实例继承部署实例主机与安装路径信息。"
