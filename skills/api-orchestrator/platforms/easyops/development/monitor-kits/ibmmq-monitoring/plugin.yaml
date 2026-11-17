@@ -1,6 +1,6 @@
 type: simple-script
 name: IBM MQ监控
-version: "0.4.5"
+version: "0.4.6"
 command:
     collect:
         interpreter: ""
@@ -13,7 +13,8 @@ params:
     - instanceId
     - hostIp
     - installPath
-    - processList
+    - processCmdlineList
+    - processUserList
     - queueFilter
     - includeSystemQueues
     - processMonitor
@@ -24,7 +25,8 @@ paramDefine:
     - {name: instanceId, valueType: string, defaultValue: "$.instanceId", display: false, displayName: "IBM MQ实例ID", description: "取IBMMQ.instanceId，用于实例维度", use: collectParams, optional: false, isFromSecret: false, isEncrypt: false, extraArgs: null}
     - {name: hostIp, valueType: string, defaultValue: "$.ip", display: false, displayName: "部署主机IP", description: "取ARTIFACT_INST继承ip，用于维度与部署定位", use: collectParams, optional: false, isFromSecret: false, isEncrypt: false, extraArgs: null}
     - {name: installPath, valueType: string, defaultValue: "$.installPath", display: false, displayName: "安装路径", description: "取ARTIFACT_INST继承installPath，用于定位bin目录", use: collectParams, optional: false, isFromSecret: false, isEncrypt: false, extraArgs: null}
-    - {name: processList, valueType: string, defaultValue: "$.processList", display: false, displayName: "进程列表", description: "取ARTIFACT_INST继承processList，兼容JSON字符串或list[dict]；解析队列管理器与运行用户，Linux用su -执行MQ命令", use: collectParams, optional: true, isFromSecret: false, isEncrypt: false, extraArgs: null}
+    - {name: processCmdlineList, valueType: string, defaultValue: "$.processList.cmdline.join()", display: false, displayName: "进程命令行列表", description: "取processList.cmdline并合并为数组；从cmdline的-m参数解析队列管理器", use: collectParams, optional: true, isFromSecret: false, isEncrypt: false, extraArgs: null}
+    - {name: processUserList, valueType: string, defaultValue: "$.processList.user.join()", display: false, displayName: "进程运行用户列表", description: "取processList.user并合并为数组；Linux按运行用户su -执行MQ命令", use: collectParams, optional: true, isFromSecret: false, isEncrypt: false, extraArgs: null}
     - {name: queueFilter, valueType: string, defaultValue: ".*", display: true, displayName: "队列过滤正则", description: "默认监控全部非SYSTEM.前缀队列", use: collectParams, optional: true, isFromSecret: false, isEncrypt: false, extraArgs: null}
     - {name: includeSystemQueues, valueType: string, defaultValue: "false", display: true, displayName: "包含系统队列", description: "默认排除SYSTEM.前缀队列", use: collectParams, optional: true, isFromSecret: false, isEncrypt: false, extraArgs: null}
     - {name: processMonitor, valueType: string, defaultValue: "true", display: true, displayName: "启用进程资源采集", description: "默认启用，按cmdline分组输出进程资源", use: collectParams, optional: true, isFromSecret: false, isEncrypt: false, extraArgs: null}

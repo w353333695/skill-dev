@@ -52,6 +52,22 @@ dollar_attr_syntax:
       mechanism: "通过 ( 定位函数名；join 把同一 paramName 的多组结果合并成数组去重排序。"
       source: "cmdb_path_helper.go:55-62 getFunction; param_extract.go:215-246 mergeJoinParams"
 
+  structs_array_expansion:
+    rule: |
+      $.structs数组 不是"整段数组取值"，而是被 getParamGroupsFromInstance 按数组元素递归展开：
+      每个结构体元素生成一个 paramGroup，脚本环境变量只会拿到该元素的 JSON 对象字符串。
+      因此 $.processList 会让每个进程生成一组执行参数，现象等价于脚本拿到 $.processList[0] 的单dict。
+    whole_array_join_limit:
+      rule: "$.structs数组.join() 不能可靠合并整个结构体数组：进入数组递归前函数标记已被剥离，mergeJoinParams 不生效。"
+      evidence: "param_extract.go:130-142 把唯一属性替换为空属性并递归；param_extract.go:64-82 遍历数组；param_extract.go:215-231 仅对仍有属性的 join 参数合并。"
+    correct_usage:
+      rule: "需要合并数组时，应对结构体子字段分别取值，如 $.processList.cmdline.join()、$.processList.user.join()。"
+      warning: "两个子字段分别join后会去重排序，原始同一结构体内部的关联关系会丢失；仅当业务能用唯一用户、候选用户或字段自身独立使用时采用，不得假设按下标一一配对。"
+    evidence:
+      - "param_extract_test.go:40-70 断言 $.nodes 展开为两个paramGroup，每个var1均为单struct JSON"
+      - "param_extract_test.go:247-280 断言 $.nodes.ip.join() 才输出数组"
+    source: "collector_service/agent_job/cmdb_path_helper/{param_extract.go,param_extract_test.go}，2026-11-17源码复核"
+
     - name: "跨实例关系（CMDB PathSearch 展开）"
       syntax: "靠 SearchAllPaths 在 CMDB 端做关联查询，结果展开成 struct 再走本地 path 取值"
       mechanism: "cmdb_path_helper 本地只走 struct 字段递归；跨实例关联靠 SearchAllPaths 的 PathSearchV3 在 CMDB 端查，把 $.field 路径作为 Fields 让 CMDB 一次查回。"
@@ -150,6 +166,8 @@ value_serialization:
     脚本必须 json.loads 解析（py2）。
     示例：EASYOPS_COLLECTOR_auth='{"community":"public","snmpVersion":"2c"}'
     → auth = json.loads(os.environ.get('EASYOPS_COLLECTOR_auth', '{}'))
+    structs 数组字段另有递归展开规则：直接 $.array 会生成多组参数并传单dict JSON；
+    需要合并时用子字段 $.array.field.join()。
   source: "cmdb_path_helper.go:164-188 convertValueToString/trimListJson"
 
 # -----------------------------------------------------------------------------

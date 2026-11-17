@@ -16,7 +16,7 @@ import threading
 import time
 import traceback
 
-VERSION = "0.4.5"
+VERSION = "0.4.6"
 QMGR_COMMAND = "DISPLAY QMGR DEADQ"
 STATUS_COMMAND = "DISPLAY QSTATUS(*) CURDEPTH MSGAGE IPPROCS OPPROCS"
 QUEUE_COMMAND = "DISPLAY QLOCAL(*) CURDEPTH MAXDEPTH USAGE GET PUT"
@@ -87,6 +87,8 @@ def config():
         "hostIp": env("hostIp"),
         "installPath": env("installPath"),
         "processList": env("processList"),
+        "processCmdlineList": env("processCmdlineList"),
+        "processUserList": env("processUserList"),
         "queueFilter": env("queueFilter", ".*"),
         "includeSystemQueues": env("includeSystemQueues", "false").lower() in ("1", "true", "yes"),
         "processMonitor": env("processMonitor", "true").lower() in ("1", "true", "yes"),
@@ -95,9 +97,11 @@ def config():
         "interval": interval,
     }
     LOGGER.debug(
-        "[config] version=%s platform=%s installPath=%s processListConfigured=%s queueFilter=%s includeSystemQueues=%s "
+        "[config] version=%s platform=%s installPath=%s processListConfigured=%s processCmdlineListConfigured=%s "
+        "processUserListConfigured=%s queueFilter=%s includeSystemQueues=%s "
         "processMonitor=%s logLevel=%s timeout=%s interval=%s",
-        VERSION, os.name, settings["installPath"], bool(settings["processList"]), settings["queueFilter"],
+        VERSION, os.name, settings["installPath"], bool(settings["processList"]),
+        bool(settings["processCmdlineList"]), bool(settings["processUserList"]), settings["queueFilter"],
         settings["includeSystemQueues"], settings["processMonitor"], settings["logLevel"],
         settings["timeout"], settings["interval"],
     )
@@ -244,10 +248,14 @@ def execute_as_user(args, settings, input_text=None, run_user=""):
     return execute(wrapped_args, settings, input_text)
 
 
-def process_qmgr_name(item):
-    command_line = item.get("cmdline", "") if isinstance(item, dict) else ""
+def qmgr_name_from_cmdline(command_line):
     match = re.search(r"(?i)(?:^|\s)-m(?:\s*=|\s*)(['\"]?)([^'\"\s]+)\1", str(command_line))
     return match.group(2) if match else ""
+
+
+def process_qmgr_name(item):
+    command_line = item.get("cmdline", "") if isinstance(item, dict) else ""
+    return qmgr_name_from_cmdline(command_line)
 
 
 def process_run_user(item):
@@ -255,7 +263,71 @@ def process_run_user(item):
     return str(user).strip()
 
 
+def json_items(value, name):
+    if not value:
+        return []
+    if isinstance(value, (list, tuple)):
+        return list(value)
+    try:
+        parsed = json.loads(value)
+    except (TypeError, ValueError):
+        LOGGER.error("[json_items] parse failed name=%s rawType=%s", name, type(value).__name__)
+        return []
+    if isinstance(parsed, dict):
+        return [parsed]
+    if isinstance(parsed, (list, tuple)):
+        return list(parsed)
+    LOGGER.error("[json_items] unsupported type name=%s parsedType=%s", name, type(parsed).__name__)
+    return []
+
+
+def decode_process_item(item):
+    if not isinstance(item, str):
+        return item
+    try:
+        return json.loads(item)
+    except (TypeError, ValueError):
+        return item
+
+
+def joined_field_targets(settings):
+    command_lines = json_items(settings.get("processCmdlineList", ""), "processCmdlineList")
+    if not command_lines:
+        return []
+    user_items = json_items(settings.get("processUserList", ""), "processUserList")
+    users = []
+    for user_item in user_items:
+        user_item = decode_process_item(user_item)
+        user = user_item.strip() if isinstance(user_item, str) else process_run_user(user_item)
+        if user and user not in users:
+            users.append(user)
+    run_user = ""
+    if len(users) == 1:
+        run_user = users[0]
+    elif len(users) > 1:
+        run_user = "mqm" if "mqm" in users else ""
+        LOGGER.error("[process_targets] multiple users lost struct association users=%s selected=%s", ",".join(users), run_user or "<currentUser>")
+    targets = []
+    seen = {}
+    for command_item in command_lines:
+        command_item = decode_process_item(command_item)
+        if isinstance(command_item, dict):
+            qmgr_name = process_qmgr_name(command_item)
+        else:
+            qmgr_name = qmgr_name_from_cmdline(command_item)
+        if not qmgr_name or qmgr_name in seen:
+            continue
+        seen[qmgr_name] = True
+        targets.append({"qmgrName": qmgr_name, "runUser": run_user})
+        LOGGER.debug("[process_targets] joined field qmgr=%s runUser=%s", qmgr_name, run_user or "<unset>")
+    return targets
+
+
 def process_targets(settings):
+    joined_targets = joined_field_targets(settings)
+    if joined_targets:
+        LOGGER.debug("[process_targets] count=%d source=joinedFields targets=%s", len(joined_targets), json.dumps(joined_targets))
+        return joined_targets
     value = settings.get("processList", "")
     if not value:
         LOGGER.debug("[process_targets] processList empty fallback=dspmq")
@@ -263,17 +335,11 @@ def process_targets(settings):
     if isinstance(value, (list, tuple)):
         items = list(value)
     else:
-        try:
-            items = json.loads(value)
-        except (TypeError, ValueError):
-            LOGGER.error("[process_targets] parse processList failed fallback=dspmq rawType=%s", type(value).__name__)
-            return []
-    if not isinstance(items, (list, tuple)):
-        LOGGER.error("[process_targets] processList is not list fallback=dspmq itemType=%s", type(items).__name__)
-        return []
+        items = json_items(value, "processList")
     targets = []
     seen = {}
     for item in items:
+        item = decode_process_item(item)
         qmgr_name = process_qmgr_name(item)
         run_user = process_run_user(item)
         if not qmgr_name:
@@ -832,7 +898,7 @@ def main(argv=None):
         epilog=(
             "示例：\n"
             "  EASYOPS_COLLECTOR_instanceId=i1 EASYOPS_COLLECTOR_installPath=/opt/mqm %(prog)s\n"
-            "  EASYOPS_COLLECTOR_processList='[{\"cmdline\":\"/opt/mqm/bin/runmqlsr -m QM1\",\"user\":\"mqm\"}]' %(prog)s\n"
+            "  EASYOPS_COLLECTOR_processCmdlineList='[\"/opt/mqm/bin/runmqlsr -m QM1\"]' EASYOPS_COLLECTOR_processUserList='[\"mqm\"]' %(prog)s\n"
             "  EASYOPS_COLLECTOR_installPath=/opt/mqm %(prog)s\n"
             "  EASYOPS_COLLECTOR_installPath='C:\\Program Files\\IBM\\MQ' %(prog)s\n\n"
             "Linux默认探测/opt/mqm/bin、/opt/ibm/mq/bin、/usr/mqm/bin，并按processList.user使用su -执行；Windows默认探测Program Files下IBM MQ bin目录，使用Agent当前用户执行。"
