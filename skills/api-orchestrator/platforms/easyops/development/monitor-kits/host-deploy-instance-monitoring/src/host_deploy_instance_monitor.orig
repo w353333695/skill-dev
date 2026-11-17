@@ -24,7 +24,7 @@ else:
     from urllib import urlencode
     from urllib2 import Request, urlopen
 
-VERSION = "0.1.16"
+VERSION = "0.1.17"
 IS_WINDOWS = os.name == "nt"
 OBJECT_ID = "ARTIFACT_INST@ONEMODEL"
 OPENAPI_PATH = "/cmdbservice/v3/object/ARTIFACT_INST@ONEMODEL/instance/_search"
@@ -78,6 +78,10 @@ def write_debug_log(path, payload):
             handle.write(("%s\n" % payload).encode("utf-8"))
     except (IOError, OSError):
         pass
+
+
+def debug_enabled(settings):
+    return text(settings.get("logLevel", "ERROR")).upper() == "DEBUG"
 
 
 def log_event(settings, level, stage, **fields):
@@ -333,38 +337,56 @@ def search_targets(settings):
         condition_field, condition_value = "host.instanceId", settings["hostInstanceId"]
     else:
         raise ValueError("[search_targets] 缺少hostUuid/hostIp，无法定位部署实例")
-    log_event(settings, "DEBUG", "openapi.start", path=OPENAPI_PATH, conditionType=condition_field, pageLimit=100)
+    url = settings["gateway"].rstrip("/") + OPENAPI_PATH
     fields = ["instanceId", "_object_id", "installPath", "version", "ip", "uuid", "ports", "processList", "processMatchGroups"]
+    request_query = {"isMonitor": "是", condition_field: condition_value}
+    log_event(settings, "DEBUG", "openapi.start", method="POST", url=url, objectId=OBJECT_ID, query=request_query, fields=fields, pageSize=1000, pageLimit=100, requestTimeout=settings["requestTimeout"], gatewaySource=settings.get("gatewaySource"), openapiScheme=settings.get("openapiScheme"), accessKeyConfigured=True, secretKeyConfigured=True, signatureAlgorithm="HMAC-SHA1")
+
+    def request_page(page, page_size, query_body, purpose):
+        body = json.dumps({
+            "fields": fields, "page": page, "page_size": page_size,
+            "ignore_missing_field_error": True, "query": query_body,
+        }).encode("utf-8")
+        log_event(settings, "DEBUG", "openapi.request", purpose=purpose, method="POST", url=url, objectId=OBJECT_ID, query=query_body, fields=fields, page=page, pageSize=page_size, bodyBytes=len(body), headerHost=OPENAPI_HOST, contentType="application/json", timeout=settings["requestTimeout"])
+        signed_query = sign_openapi("POST", OPENAPI_PATH, "application/json", body, settings["accessKey"], settings["secretKey"])
+        try:
+            result = http_json(url, signed_query, body, {"Host": OPENAPI_HOST, "Content-Type": "application/json"}, settings["requestTimeout"])
+        except Exception:
+            log_event(settings, "ERROR", "openapi.request_failed", purpose=purpose, method="POST", url=url, query=query_body, page=page, pageSize=page_size, traceback=traceback.format_exc())
+            raise
+        if result.get("code") not in (0, "0", None):
+            log_event(settings, "ERROR", "openapi.business_error", purpose=purpose, url=url, query=query_body, page=page, code=text(result.get("code")), message=safe_error_text(text(result.get("message") or result.get("error") or "")))
+            raise RuntimeError("[search_targets] OpenAPI business error code=%s" % safe_error_text(text(result.get("code"))))
+        data = result.get("data") or {}
+        rows = data.get("list") if isinstance(data.get("list"), list) else []
+        try:
+            total = int(data.get("total") or 0)
+        except (TypeError, ValueError):
+            total = 0
+        log_event(settings, "DEBUG", "openapi.response", purpose=purpose, url=url, page=page, code=result.get("code"), message=text(result.get("message") or result.get("error") or ""), returned=len(rows), total=total)
+        return result, data, rows, total
+
     targets = []
     seen = set()
     for page in range(1, 101):
-        body = json.dumps({
-            "fields": fields, "page": page, "page_size": 1000,
-            "ignore_missing_field_error": True,
-            "query": {"isMonitor": "是", condition_field: condition_value},
-        }).encode("utf-8")
-        query = sign_openapi("POST", OPENAPI_PATH, "application/json", body, settings["accessKey"], settings["secretKey"])
-        try:
-            result = http_json(
-                settings["gateway"].rstrip("/") + OPENAPI_PATH, query, body,
-                {"Host": OPENAPI_HOST, "Content-Type": "application/json"},
-                settings["requestTimeout"],
-            )
-        except Exception:
-            log_event(settings, "ERROR", "openapi.request_failed", page=page, traceback=traceback.format_exc())
-            raise
-        if result.get("code") not in (0, "0", None):
-            raise RuntimeError("[search_targets] OpenAPI business error code=%s" % safe_error_text(text(result.get("code"))))
-        data = result.get("data") or {}
-        for row in data.get("list") or []:
+        result, data, rows, total = request_page(page, 1000, request_query, "search_host_targets")
+        for row in rows:
             instance_id = text(row.get("instanceId"))
             if instance_id and instance_id not in seen:
                 seen.add(instance_id)
                 targets.append(row)
-        total = int(data.get("total") or 0)
-        log_event(settings, "DEBUG", "openapi.page", page=page, returned=len(data.get("list") or []), total=total, kept=len(targets))
         if page * 1000 >= total:
             break
+
+    if not targets and debug_enabled(settings):
+        monitored_total = None
+        no_target_reason = "empty_search_result"
+        try:
+            result, data, rows, monitored_total = request_page(1, 1, {"isMonitor": "是"}, "diagnose_empty_result")
+            no_target_reason = "no_monitor_enabled_deploy_instances" if monitored_total == 0 else "host_condition_no_match"
+        except Exception:
+            log_event(settings, "ERROR", "openapi.empty_diagnosis_failed", url=url, traceback=traceback.format_exc())
+        log_event(settings, "DEBUG", "openapi.no_targets", url=url, query=request_query, matchedTotal=0, monitoredTotal=monitored_total, reason=no_target_reason)
     return targets
 
 

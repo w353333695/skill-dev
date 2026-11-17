@@ -19,7 +19,7 @@ from unittest import mock
 
 KIT = Path(__file__).resolve().parents[2] / "monitor-kits/host-deploy-instance-monitoring"
 SOURCE = KIT / "src/host_deploy_instance_monitor.py"
-PACKAGE = Path(__file__).resolve().parents[3] / "hub/monitor-kits/监控套件_主机部署实例监控_0.1.16.zip"
+PACKAGE = Path(__file__).resolve().parents[3] / "hub/monitor-kits/监控套件_主机部署实例监控_0.1.17.zip"
 WORKTREE_ROOT = Path(__file__).resolve().parents[7]
 
 
@@ -139,6 +139,45 @@ class HostDeployInstanceMonitorTests(unittest.TestCase):
         orig = SOURCE.with_suffix(".orig").read_text(encoding="utf-8")
         self.assertNotIn("$or", source)
         self.assertNotIn("$or", orig)
+
+    def test_search_targets_debug_logs_request_and_empty_reason(self):
+        m = module()
+        log_path = WORKTREE_ROOT / ".local" / ("test-openapi-debug-" + uuid.uuid4().hex) / "host1.debug.log"
+        settings = {
+            "hostInstanceId": "host-instance", "hostUuid": "agent-uuid", "hostIp": "192.168.110.24",
+            "gateway": "https://192.168.110.24", "accessKey": "ak-secret", "secretKey": "sk-secret",
+            "requestTimeout": 10.0, "logLevel": "DEBUG", "debugLogPath": str(log_path),
+            "gatewaySource": "agentConfig", "openapiScheme": "https",
+        }
+        def http_json(url, query, body, headers, timeout):
+            payload = json.loads(body.decode("utf-8"))
+            if payload["query"].get("uuid") == "agent-uuid":
+                return {"code": 0, "message": "", "data": {"list": [], "total": 0}}
+            return {"code": 0, "message": "", "data": {"list": [{"instanceId": "other"}], "total": 3}}
+        http_json_mock = mock.Mock(side_effect=http_json)
+        with mock.patch.dict(m, {"sign_openapi": mock.Mock(return_value={}), "http_json": http_json_mock}):
+            self.assertEqual(m["search_targets"](settings), [])
+        self.assertEqual(http_json_mock.call_count, 2)
+        first_body = json.loads(http_json_mock.call_args_list[0][0][2].decode("utf-8"))
+        second_body = json.loads(http_json_mock.call_args_list[1][0][2].decode("utf-8"))
+        self.assertEqual(first_body["query"], {"isMonitor": "是", "uuid": "agent-uuid"})
+        self.assertEqual(first_body["page_size"], 1000)
+        self.assertEqual(second_body["query"], {"isMonitor": "是"})
+        self.assertEqual(second_body["page_size"], 1)
+        rows = [json.loads(line) for line in log_path.read_text(encoding="utf-8").splitlines()]
+        stages = [row["stage"] for row in rows]
+        for stage in ("openapi.start", "openapi.request", "openapi.response", "openapi.no_targets"):
+            self.assertIn(stage, stages)
+        no_targets = next(row for row in rows if row["stage"] == "openapi.no_targets")
+        self.assertEqual(no_targets["reason"], "host_condition_no_match")
+        self.assertEqual(no_targets["monitoredTotal"], 3)
+        request_rows = [row for row in rows if row["stage"] == "openapi.request"]
+        self.assertEqual(request_rows[0]["url"], "https://192.168.110.24" + m["OPENAPI_PATH"])
+        self.assertEqual(request_rows[0]["query"], {"isMonitor": "是", "uuid": "agent-uuid"})
+        log_content = log_path.read_text(encoding="utf-8")
+        self.assertNotIn("ak-secret", log_content)
+        self.assertNotIn("sk-secret", log_content)
+        self.assertNotIn("signature=", log_content)
 
     def test_process_match_prefers_process_list(self):
         m = module()
@@ -443,7 +482,7 @@ class HostDeployInstanceMonitorTests(unittest.TestCase):
     def test_help_and_version(self):
         result = subprocess.run([sys.executable, str(SOURCE), "--version"], capture_output=True, text=True, env={**os.environ, "PYTHONDONTWRITEBYTECODE": "1"})
         self.assertEqual(result.returncode, 0)
-        self.assertEqual(result.stdout.strip(), "0.1.16")
+        self.assertEqual(result.stdout.strip(), "0.1.17")
 
     def test_python2_json_output_uses_ascii_escape(self):
         source = SOURCE.read_text(encoding="utf-8")

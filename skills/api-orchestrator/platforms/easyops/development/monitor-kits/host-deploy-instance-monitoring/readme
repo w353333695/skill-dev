@@ -18,6 +18,6 @@
 
 OpenAPI AK/SK 通过普通字符串任务参数 `openapiAkText`、`openapiSkText` 或 `EASYOPS_OPENAPI_AK`、`EASYOPS_OPENAPI_SK` 环境变量注入；网关地址默认从agent配置读取并按 `openapiScheme`（默认`https`，可选`http`）拼接；旧任务完整地址参数或 `EASYOPS_OPENAPI_GATEWAY_URL` 仅作兜底。脚本不记录密钥。OpenAPI 主体需要有 `ARTIFACT_INST@ONEMODEL` 读权限，网关需放行 search URI。
 
-诊断日志：`logLevel` 默认 `ERROR`，仅输出异常；设为 `DEBUG` 时将结构化 JSON 诊断写入 `<cacheDir>/<hostInstanceId>.debug.log`（超过5MB轮转为`.1`），包括配置就绪、缓存检查/刷新、OpenAPI分页、目标配置摘要、进程匹配数量与PID、端口关联判定、每组指标值和最终22项覆盖统计。诊断不输出AK/SK或完整进程命令行，命令行仅输出短哈希；stdout/stderr始终保持纯净，避免debug-collector-job把日志合并进data后破坏JSON数组解析。若日志出现`target.collect_failed`，其traceback会解释该目标为何退化为仅5项兜底指标。
+诊断日志：`logLevel` 默认 `ERROR`，仅输出异常；设为 `DEBUG` 时将结构化 JSON 诊断写入 `<cacheDir>/<hostInstanceId>.debug.log`（超过5MB轮转为`.1`），包括配置就绪、缓存检查/刷新、OpenAPI分页、目标配置摘要、进程匹配数量与PID、端口关联判定、每组指标值和最终22项覆盖统计。诊断会记录OpenAPI每次请求的URL、query、fields、分页、响应code/total/返回数；交集为空时额外记录仅按isMonitor统计的诊断请求，区分“全局无监控实例”和“当前主机条件无匹配”。诊断不输出AK/SK、签名或完整进程命令行，命令行仅输出短哈希；stdout/stderr始终保持纯净，避免debug-collector-job把日志合并进data后破坏JSON数组解析。若日志出现`target.collect_failed`，其traceback会解释该目标为何退化为仅5项兜底指标。
 
 注意：本套件只做本机进程/端口/内核计数采集，不校验业务协议返回，也不能替代健康检查接口或应用日志诊断。

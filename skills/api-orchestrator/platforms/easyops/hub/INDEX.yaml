@@ -21,9 +21,10 @@ items:
   - id: host-deploy-instance-monitor-kit
     name: 主机部署实例监控
     category: monitor-kits
-    files: [监控套件_主机部署实例监控_0.1.16.zip, 主机部署实例监控_告警规则模板_0.1.16.xlsx]
-    version: "0.1.16"
+    files: [监控套件_主机部署实例监控_0.1.17.zip, 主机部署实例监控_告警规则模板_0.1.17.xlsx]
+    version: "0.1.17"
     history:
+      - {ver: "0.1.17", date: "2026-11-17", change: "DEBUG日志记录OpenAPI请求/响应详情，并对空目标做监控总数诊断，区分全局无监控实例与主机条件无匹配"}
       - {ver: "0.1.16", date: "2026-11-17", change: "兼容旧Windows PowerShell：CIM/JSON失败时回退WMI/CSV，覆盖进程、启动时间与总内存查询"}
       - {ver: "0.1.15", date: "2026-11-17", change: "Windows/OpenAPI动态错误在Python 2下转unicode_escape ASCII，修复OSError不可打印并保留原始PowerShell错误"}
       - {ver: "0.1.14", date: "2026-11-17", change: "修复Windows PowerShell本地化错误在Python 2下掩盖真实异常的问题，动态异常消息使用unicode格式串"}
