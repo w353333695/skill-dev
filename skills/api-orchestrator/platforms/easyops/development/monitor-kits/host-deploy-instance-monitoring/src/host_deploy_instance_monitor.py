@@ -22,7 +22,7 @@ else:
     from urllib import urlencode
     from urllib2 import Request, urlopen
 
-VERSION = "0.1.13"
+VERSION = "0.1.14"
 IS_WINDOWS = os.name == "nt"
 OBJECT_ID = "ARTIFACT_INST@ONEMODEL"
 OPENAPI_PATH = "/cmdbservice/v3/object/ARTIFACT_INST@ONEMODEL/instance/_search"
@@ -306,7 +306,7 @@ def http_json(url, query, body, headers, timeout):
         response = urlopen(request, timeout=timeout)
         payload = response.read()
     except Exception as exc:
-        raise RuntimeError("[http_json] OpenAPI请求失败: %s" % exc.__class__.__name__)
+        raise RuntimeError(u"[http_json] OpenAPI请求失败: %s" % exc.__class__.__name__)
     try:
         return json.loads(payload.decode("utf-8", "replace"))
     except (TypeError, ValueError):
@@ -345,7 +345,7 @@ def search_targets(settings):
             log_event(settings, "ERROR", "openapi.request_failed", page=page, traceback=traceback.format_exc())
             raise
         if result.get("code") not in (0, "0", None):
-            raise RuntimeError("[search_targets] OpenAPI业务错误code=%s" % text(result.get("code")))
+            raise RuntimeError(u"[search_targets] OpenAPI业务错误code=%s" % text(result.get("code")))
         data = result.get("data") or {}
         for row in data.get("list") or []:
             instance_id = text(row.get("instanceId"))
@@ -408,7 +408,7 @@ def run_windows_command(arguments):
     stdout, stderr = process.communicate()
     if process.returncode != 0:
         error = decode_bytes(stderr).strip()
-        raise OSError("Windows命令执行失败(%s): %s" % (process.returncode, error))
+        raise OSError(u"Windows命令执行失败(%s): %s" % (process.returncode, error))
     return decode_bytes(stdout)
 
 

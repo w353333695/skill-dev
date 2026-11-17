@@ -21,9 +21,10 @@ items:
   - id: host-deploy-instance-monitor-kit
     name: 主机部署实例监控
     category: monitor-kits
-    files: [监控套件_主机部署实例监控_0.1.13.zip, 主机部署实例监控_告警规则模板_0.1.13.xlsx]
-    version: "0.1.13"
+    files: [监控套件_主机部署实例监控_0.1.14.zip, 主机部署实例监控_告警规则模板_0.1.14.xlsx]
+    version: "0.1.14"
     history:
+      - {ver: "0.1.14", date: "2026-11-17", change: "修复Windows PowerShell本地化错误在Python 2下掩盖真实异常的问题，动态异常消息使用unicode格式串"}
       - {ver: "0.1.13", date: "2026-11-16", change: "OpenAPI目标发现改为uuid/ip/instanceId单条件，避免组合条件被误判为NoSQL注入；新增openapiScheme参数并默认HTTPS"}
       - {ver: "0.1.1", date: "2026-11-12", change: "修正成品包仅保留XLSX告警模板，避免同时导入JSON与XLSX生成重复告警定义；OpenAPI凭证参数使用password类型"}
       - {ver: "0.1.2", date: "2026-11-12", change: "修正metric_set.json为对象数组并补齐通用校验，避免指标集未生成导致前端创建任务无法加载"}
