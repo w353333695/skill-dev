@@ -3,9 +3,11 @@
 """HOST 本地部署实例进程与端口监控脚本，参数由 EASYOPS_COLLECTOR_* 注入。"""
 import argparse
 import calendar
+import csv
 import errno
 import hashlib
 import hmac
+import io
 import json
 import os
 import re
@@ -22,7 +24,7 @@ else:
     from urllib import urlencode
     from urllib2 import Request, urlopen
 
-VERSION = "0.1.15"
+VERSION = "0.1.16"
 IS_WINDOWS = os.name == "nt"
 OBJECT_ID = "ARTIFACT_INST@ONEMODEL"
 OPENAPI_PATH = "/cmdbservice/v3/object/ARTIFACT_INST@ONEMODEL/instance/_search"
@@ -427,6 +429,47 @@ def windows_json(command):
     return json.loads(payload or "null")
 
 
+def parse_windows_csv(payload):
+    payload = text(payload).strip().lstrip(u"﻿")
+    if not payload:
+        return []
+    if sys.version_info[0] == 2:
+        stream = io.BytesIO(payload.encode("utf-8"))
+    else:
+        stream = io.StringIO(payload)
+    rows = []
+    for row in csv.DictReader(stream):
+        if sys.version_info[0] == 2:
+            decoded = {}
+            for key, value in row.items():
+                decoded_key = key.decode("utf-8", "replace") if isinstance(key, bytes) else key
+                decoded_value = value.decode("utf-8", "replace") if isinstance(value, bytes) else value
+                decoded[decoded_key] = decoded_value
+            row = decoded
+        rows.append(row)
+    return rows
+
+
+def windows_csv(command):
+    payload = run_windows_command([
+        "powershell.exe", "-NoProfile", "-NonInteractive", "-ExecutionPolicy", "Bypass",
+        "-Command", "$ErrorActionPreference='Stop'; " + command,
+    ])
+    return parse_windows_csv(payload)
+
+
+def windows_query_rows(cim_command, wmi_command):
+    try:
+        payload = windows_json(cim_command)
+        return payload if isinstance(payload, list) else [payload]
+    except (OSError, ValueError) as exc:
+        message = safe_error_text(exc)
+        markers = ("Get-CimInstance", "ConvertTo-Json", "CommandNotFoundException")
+        if not any(marker in message for marker in markers):
+            raise
+        return windows_csv(wmi_command)
+
+
 def parse_windows_datetime(value):
     value = text(value)
     embedded = re.search(r"/Date\((-?\d+)", value)
@@ -484,12 +527,14 @@ def parse_windows_process_row(row):
 
 
 def windows_process_snapshot():
-    payload = windows_json(
+    rows = windows_query_rows(
         "Get-CimInstance Win32_Process | Select-Object ProcessId,Name,CommandLine,"
         "ExecutablePath,CreationDate,UserModeTime,KernelModeTime,ThreadCount,"
-        "WorkingSetSize,HandleCount | ConvertTo-Json -Compress -Depth 3"
+        "WorkingSetSize,HandleCount | ConvertTo-Json -Compress -Depth 3",
+        "Get-WmiObject Win32_Process | Select-Object ProcessId,Name,CommandLine,"
+        "ExecutablePath,CreationDate,UserModeTime,KernelModeTime,ThreadCount,"
+        "WorkingSetSize,HandleCount | ConvertTo-Csv -NoTypeInformation"
     )
-    rows = payload if isinstance(payload, list) else [payload]
     processes = [parsed for parsed in (parse_windows_process_row(row) for row in rows) if parsed]
     if not processes:
         raise OSError("Windows进程查询结果为空")
@@ -627,10 +672,11 @@ def match_target_processes(target, processes):
 
 def boot_time():
     if IS_WINDOWS:
-        payload = windows_json(
-            "Get-CimInstance Win32_OperatingSystem | Select-Object LastBootUpTime | ConvertTo-Json -Compress"
+        rows = windows_query_rows(
+            "Get-CimInstance Win32_OperatingSystem | Select-Object LastBootUpTime | ConvertTo-Json -Compress",
+            "Get-WmiObject Win32_OperatingSystem | Select-Object LastBootUpTime | ConvertTo-Csv -NoTypeInformation"
         )
-        row = payload[0] if isinstance(payload, list) and payload else payload
+        row = rows[0] if rows else None
         return parse_windows_datetime(row.get("LastBootUpTime")) if isinstance(row, dict) else -1.0
     try:
         for line in decode_bytes(read_file("/proc/stat")).splitlines():
@@ -657,10 +703,11 @@ def page_size():
 
 def memory_total_bytes():
     if IS_WINDOWS:
-        payload = windows_json(
-            "Get-CimInstance Win32_OperatingSystem | Select-Object TotalVisibleMemorySize | ConvertTo-Json -Compress"
+        rows = windows_query_rows(
+            "Get-CimInstance Win32_OperatingSystem | Select-Object TotalVisibleMemorySize | ConvertTo-Json -Compress",
+            "Get-WmiObject Win32_OperatingSystem | Select-Object TotalVisibleMemorySize | ConvertTo-Csv -NoTypeInformation"
         )
-        row = payload[0] if isinstance(payload, list) and payload else payload
+        row = rows[0] if rows else None
         if isinstance(row, dict):
             try:
                 return float(row.get("TotalVisibleMemorySize") or 0) * 1048576.0
