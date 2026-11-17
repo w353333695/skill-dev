@@ -22,7 +22,7 @@ else:
     from urllib import urlencode
     from urllib2 import Request, urlopen
 
-VERSION = "0.1.14"
+VERSION = "0.1.15"
 IS_WINDOWS = os.name == "nt"
 OBJECT_ID = "ARTIFACT_INST@ONEMODEL"
 OPENAPI_PATH = "/cmdbservice/v3/object/ARTIFACT_INST@ONEMODEL/instance/_search"
@@ -100,6 +100,13 @@ def text(value):
     if sys.version_info[0] == 2 and isinstance(value, unicode):
         return value
     return str(value)
+
+
+def safe_error_text(value):
+    value = text(value)
+    if sys.version_info[0] == 2 and isinstance(value, unicode):
+        return value.encode("unicode_escape")
+    return value
 
 
 def env(name, default=""):
@@ -345,7 +352,7 @@ def search_targets(settings):
             log_event(settings, "ERROR", "openapi.request_failed", page=page, traceback=traceback.format_exc())
             raise
         if result.get("code") not in (0, "0", None):
-            raise RuntimeError(u"[search_targets] OpenAPI业务错误code=%s" % text(result.get("code")))
+            raise RuntimeError("[search_targets] OpenAPI business error code=%s" % safe_error_text(text(result.get("code"))))
         data = result.get("data") or {}
         for row in data.get("list") or []:
             instance_id = text(row.get("instanceId"))
@@ -407,8 +414,8 @@ def run_windows_command(arguments):
     process = subprocess.Popen(list(arguments), stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     stdout, stderr = process.communicate()
     if process.returncode != 0:
-        error = decode_bytes(stderr).strip()
-        raise OSError(u"Windows命令执行失败(%s): %s" % (process.returncode, error))
+        error = safe_error_text(decode_bytes(stderr)).strip()
+        raise OSError("Windows command failed(%s): %s" % (process.returncode, error))
     return decode_bytes(stdout)
 
 

@@ -19,7 +19,7 @@ from unittest import mock
 
 KIT = Path(__file__).resolve().parents[2] / "monitor-kits/host-deploy-instance-monitoring"
 SOURCE = KIT / "src/host_deploy_instance_monitor.py"
-PACKAGE = Path(__file__).resolve().parents[3] / "hub/monitor-kits/监控套件_主机部署实例监控_0.1.14.zip"
+PACKAGE = Path(__file__).resolve().parents[3] / "hub/monitor-kits/监控套件_主机部署实例监控_0.1.15.zip"
 WORKTREE_ROOT = Path(__file__).resolve().parents[7]
 
 
@@ -164,17 +164,27 @@ class HostDeployInstanceMonitorTests(unittest.TestCase):
     def test_windows_command_error_keeps_unicode_message_py2_safe(self):
         m = module()
         error_text = "无法启动 Windows PowerShell"
+        py2_sys = mock.Mock(version_info=(2, 7, 18, "final", 0))
+        self.assertEqual(m["safe_error_text"](error_text), error_text)
+        with mock.patch.dict(m, {"sys": py2_sys, "unicode": str}):
+            escaped = m["safe_error_text"](error_text)
+        self.assertEqual(escaped, error_text.encode("unicode_escape"))
+        self.assertTrue(escaped.decode("ascii").isascii())
         process = mock.Mock(returncode=1, communicate=mock.Mock(return_value=(b"", b"ignored")))
         with mock.patch.dict(m, {
             "IS_WINDOWS": True,
             "decode_bytes": mock.Mock(return_value=error_text),
+            "sys": py2_sys,
+            "unicode": str,
             "subprocess": mock.Mock(Popen=mock.Mock(return_value=process)),
         }):
             with self.assertRaises(OSError) as raised:
                 m["run_windows_command"](["powershell.exe", "-Command", "exit 1"])
-        self.assertIn(error_text, str(raised.exception))
+        self.assertIn(r"\\u65e0\\u6cd5", str(raised.exception))
+        self.assertTrue(str(raised.exception).isascii())
         source = SOURCE.read_text(encoding="utf-8")
-        self.assertIn('raise OSError(u"Windows命令执行失败', source)
+        self.assertIn("safe_error_text(decode_bytes(stderr))", source)
+        self.assertIn('raise OSError("Windows command failed', source)
 
     def test_windows_process_and_netstat_parsers(self):
         m = module()
@@ -377,7 +387,7 @@ class HostDeployInstanceMonitorTests(unittest.TestCase):
     def test_help_and_version(self):
         result = subprocess.run([sys.executable, str(SOURCE), "--version"], capture_output=True, text=True, env={**os.environ, "PYTHONDONTWRITEBYTECODE": "1"})
         self.assertEqual(result.returncode, 0)
-        self.assertEqual(result.stdout.strip(), "0.1.14")
+        self.assertEqual(result.stdout.strip(), "0.1.15")
 
     def test_python2_json_output_uses_ascii_escape(self):
         source = SOURCE.read_text(encoding="utf-8")
