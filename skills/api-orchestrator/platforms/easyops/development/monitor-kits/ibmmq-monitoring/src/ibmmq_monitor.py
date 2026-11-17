@@ -16,7 +16,7 @@ import threading
 import time
 import traceback
 
-VERSION = "0.4.7"
+VERSION = "0.4.8"
 QMGR_COMMAND = "DISPLAY QMGR DEADQ"
 STATUS_COMMAND = "DISPLAY QSTATUS(*) CURDEPTH MSGAGE IPPROCS OPPROCS"
 QUEUE_COMMAND = "DISPLAY QLOCAL(*) CURDEPTH MAXDEPTH USAGE GET PUT"
@@ -898,7 +898,7 @@ def main(argv=None):
         epilog=(
             "示例：\n"
             "  EASYOPS_COLLECTOR_instanceId=i1 EASYOPS_COLLECTOR_installPath=/opt/mqm %(prog)s\n"
-            "  EASYOPS_COLLECTOR_processCmdlineList='[\"/opt/mqm/bin/runmqlsr -m QM1\"]' EASYOPS_COLLECTOR_processUserList='[\"mqm\"]' %(prog)s\n"
+            "  EASYOPS_COLLECTOR_processList='{\"cmdline\":\"/opt/mqm/bin/runmqlsr -m QM1\",\"user\":\"mqm\"}' %(prog)s\n"
             "  EASYOPS_COLLECTOR_installPath=/opt/mqm %(prog)s\n"
             "  EASYOPS_COLLECTOR_installPath='C:\\Program Files\\IBM\\MQ' %(prog)s\n\n"
             "Linux默认探测/opt/mqm/bin、/opt/ibm/mq/bin、/usr/mqm/bin，并按processList.user使用su -执行；Windows默认探测Program Files下IBM MQ bin目录，使用Agent当前用户执行。"

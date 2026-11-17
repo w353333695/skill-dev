@@ -15,8 +15,8 @@ import yaml
 BASE = Path(__file__).resolve().parents[2]
 KIT = BASE / "monitor-kits/ibmmq-monitoring"
 SOURCE = KIT / "src/ibmmq_monitor.orig"
-PACKAGE = BASE.parent / "hub/monitor-kits/监控套件_IBM_MQ监控_0.4.7.zip"
-XLSX = KIT / "IBM_MQ监控_告警规则模板_0.4.7.xlsx"
+PACKAGE = BASE.parent / "hub/monitor-kits/监控套件_IBM_MQ监控_0.4.8.zip"
+XLSX = KIT / "IBM_MQ监控_告警规则模板_0.4.8.xlsx"
 
 
 def module():
@@ -41,7 +41,7 @@ class IBMMQMonitorTest(unittest.TestCase):
     def test_version(self):
         result = subprocess.run([sys.executable, str(SOURCE), "--version"], capture_output=True, text=True)
         self.assertEqual(result.returncode, 0)
-        self.assertIn("0.4.7", result.stdout)
+        self.assertIn("0.4.8", result.stdout)
 
     def test_orig_and_runtime_are_identical(self):
         self.assertEqual(SOURCE.read_bytes(), (KIT / "src/ibmmq_monitor.py").read_bytes())
@@ -100,6 +100,39 @@ class IBMMQMonitorTest(unittest.TestCase):
             [{"qmgrName": "QM_005", "runUser": "mqm"}],
         )
 
+    def test_single_process_param_group_preserves_user_and_outputs_metrics(self):
+        settings = dict(
+            self.settings,
+            processList=json.dumps({
+                "cmdline": "/opt/mqm/bin/runmqlsr -r -m QM_001 -t TCP -p 18086",
+                "user": "mqm",
+            }),
+        )
+        mqsc = "\n".join([
+            "COMMAND ACCEPTED",
+            "QMNAME(QM_001) DEADQ(SYSTEM.DEAD.LETTER.QUEUE)",
+            "QNAME(APP.Q) CURDEPTH(1) MAXDEPTH(10) USAGE(NORMAL) GET(ENABLED) PUT(ENABLED)",
+            "QUEUE(APP.Q) MSGAGE(2) IPPROCS(1) OPPROCS(1)",
+            "CHANNEL(SENDER.CH) CHLTYPE(SDR) STATUS(RUNNING) MSGS(3) BYTSRCVD(4) BYTSSENT(5)",
+            "LISTENER(TCP.1) PORT(18086) STATUS(RUNNING)",
+        ])
+        calls = []
+        def execute(args, settings, input_text=None):
+            calls.append(args)
+            if args[0].endswith("dspmq"):
+                return 0, "QMNAME(QM_001) STATUS(Running)"
+            return 0, mqsc
+        with mock.patch.object(self.m, "find_mq_bin", return_value="/opt/mqm/bin"), \
+             mock.patch.object(self.m, "execute", side_effect=execute):
+            rows = self.m.collect(settings)
+        self.assertTrue(rows)
+        self.assertEqual(calls[0], ["su", "-", "mqm", "-c", "'/opt/mqm/bin/dspmq' '-o' 'status'"])
+        self.assertEqual(calls[1], ["su", "-", "mqm", "-c", "'/opt/mqm/bin/runmqsc' 'QM_001'"])
+        emitted = {key for row in rows for key in row["vals"]}
+        self.assertIn("ibmmq_qmgr_status", emitted)
+        self.assertIn("ibmmq_channel_status", emitted)
+        self.assertIn("ibmmq_listener_status", emitted)
+
     def test_joined_process_fields_extract_all_qmgrs(self):
         settings = dict(
             self.settings,
@@ -113,6 +146,19 @@ class IBMMQMonitorTest(unittest.TestCase):
         self.assertEqual(self.m.process_targets(settings), [
             {"qmgrName": "QM_006", "runUser": "mqm"},
             {"qmgrName": "QM_007", "runUser": "mqm"},
+        ])
+
+    def test_collector_expansion_runs_one_param_group_per_qmgr(self):
+        param_groups = [
+            json.dumps({"cmdline": "/opt/mqm/bin/runmqlsr -m QM_001 -p 1414", "user": "mqm1"}),
+            json.dumps({"cmdline": "/opt/mqm/bin/runmqlsr -m QM_002 -p 1415", "user": "mqm2"}),
+        ]
+        targets = []
+        for process_list in param_groups:
+            targets.extend(self.m.process_targets(dict(self.settings, processList=process_list)))
+        self.assertEqual(targets, [
+            {"qmgrName": "QM_001", "runUser": "mqm1"},
+            {"qmgrName": "QM_002", "runUser": "mqm2"},
         ])
 
     def test_process_list_accepts_native_dict_list(self):
@@ -222,7 +268,7 @@ class IBMMQMonitorTest(unittest.TestCase):
         with mock.patch.dict(os.environ, env), self.assertLogs(self.m.LOGGER, level="DEBUG") as logs:
             settings = self.m.config()
         self.assertEqual(settings["logLevel"], "DEBUG")
-        self.assertTrue(any("[config] version=0.4.7" in message for message in logs.output))
+        self.assertTrue(any("[config] version=0.4.8" in message for message in logs.output))
         with mock.patch.dict(os.environ, {"EASYOPS_COLLECTOR_logLevel": "VERBOSE"}):
             with self.assertRaises(ValueError):
                 self.m.config()
@@ -378,6 +424,14 @@ class IBMMQMonitorTest(unittest.TestCase):
         self.assertEqual(discovery[0]["type"], "ARTIFACT_INST@ONEMODEL")
         self.assertFalse((KIT / "IBMMQ@ONEMODEL.json").exists())
 
+    def test_plugin_dynamic_params_satisfy_agent_string_contract(self):
+        plugin = yaml.safe_load((KIT / "plugin.yaml").read_text())
+        self.assertIn("processList", plugin["params"])
+        for row in plugin["paramDefine"]:
+            if row["defaultValue"].startswith("$."):
+                self.assertIsInstance(row["defaultValue"], str)
+                self.assertFalse(row["defaultValue"].endswith(".join()"))
+
     def test_definitions(self):
         plugin = yaml.safe_load((KIT / "plugin.yaml").read_text())
         origins = json.loads((KIT / "origin_metric.json").read_text())
@@ -386,18 +440,19 @@ class IBMMQMonitorTest(unittest.TestCase):
         self.assertEqual(plugin["name"], "IBM MQ监控")
         self.assertEqual(plugin["relateObjectId"], "IBMMQ@ONEMODEL")
         self.assertIn("Linux/Windows", plugin["memo"])
-        self.assertEqual(plugin["version"], "0.4.7")
+        self.assertEqual(plugin["version"], "0.4.8")
         self.assertNotIn("qmgrName", plugin["params"])
         self.assertNotIn("mqBinPath", plugin["params"])
-        self.assertIn("processCmdlineList", plugin["params"])
-        self.assertIn("processUserList", plugin["params"])
+        self.assertIn("processList", plugin["params"])
+        self.assertNotIn("processCmdlineList", plugin["params"])
+        self.assertNotIn("processUserList", plugin["params"])
         self.assertIn("logLevel", plugin["params"])
         self.assertNotIn("qmgrName", {row["name"] for row in plugin["paramDefine"]})
         self.assertNotIn("mqBinPath", {row["name"] for row in plugin["paramDefine"]})
-        cmdline_list = next(row for row in plugin["paramDefine"] if row["name"] == "processCmdlineList")
-        user_list = next(row for row in plugin["paramDefine"] if row["name"] == "processUserList")
-        self.assertEqual(cmdline_list["defaultValue"], "$.processList.cmdline.join()")
-        self.assertEqual(user_list["defaultValue"], "$.processList.user.join()")
+        process_list = next(row for row in plugin["paramDefine"] if row["name"] == "processList")
+        self.assertEqual(process_list["defaultValue"], "$.processList")
+        self.assertEqual(process_list["valueType"], "string")
+        self.assertFalse(any(row["defaultValue"].endswith(".join()") for row in plugin["paramDefine"]))
         log_level = next(row for row in plugin["paramDefine"] if row["name"] == "logLevel")
         self.assertEqual(log_level["defaultValue"], "ERROR")
         self.assertEqual(len(origins), 45)
@@ -442,7 +497,7 @@ class IBMMQMonitorTest(unittest.TestCase):
                 mode = stat.S_IMODE(item.external_attr >> 16)
                 self.assertEqual(mode, 0o755 if item.is_dir() else 0o664)
             self.assertIn("IBM MQ监控/src/ibmmq_monitor.orig", package.namelist())
-            self.assertIn("IBM MQ监控/IBM_MQ监控_告警规则模板_0.4.7.xlsx", package.namelist())
+            self.assertIn("IBM MQ监控/IBM_MQ监控_告警规则模板_0.4.8.xlsx", package.namelist())
             self.assertIn("IBM MQ监控/resource_discovery_define.json", package.namelist())
             self.assertNotIn("IBM MQ监控/IBMMQ@ONEMODEL.json", package.namelist())
 

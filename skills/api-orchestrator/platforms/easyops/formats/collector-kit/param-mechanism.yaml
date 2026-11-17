@@ -49,7 +49,7 @@ dollar_attr_syntax:
 
     - name: "末尾 join 函数"
       syntax: "$.netdports[?(@.isMonitor == 是)].ifName.join()"
-      mechanism: "通过 ( 定位函数名；join 把同一 paramName 的多组结果合并成数组去重排序。"
+      mechanism: "通过 ( 定位函数名；join 把同一 paramName 的多组结果合并成数组去重排序，产物是原生数组而非JSON字符串。"
       source: "cmdb_path_helper.go:55-62 getFunction; param_extract.go:215-246 mergeJoinParams"
 
   structs_array_expansion:
@@ -61,17 +61,16 @@ dollar_attr_syntax:
       rule: "$.structs数组.join() 不能可靠合并整个结构体数组：进入数组递归前函数标记已被剥离，mergeJoinParams 不生效。"
       evidence: "param_extract.go:130-142 把唯一属性替换为空属性并递归；param_extract.go:64-82 遍历数组；param_extract.go:215-231 仅对仍有属性的 join 参数合并。"
     correct_usage:
-      rule: "需要合并数组时，应对结构体子字段分别取值，如 $.processList.cmdline.join()、$.processList.user.join()。"
-      warning: "两个子字段分别join后会去重排序，原始同一结构体内部的关联关系会丢失；仅当业务能用唯一用户、候选用户或字段自身独立使用时采用，不得假设按下标一一配对。"
+      rule: "EasyOps simple-script 采集参数必须使用 $.structs数组 本身或最终能得到标量/JSON字符串的路径，让 collector_service 按元素展开；脚本解析单dict JSON。"
+      warning: "禁止把 $.xxx.join() 作为simple-script动态参数DefaultValue：collector_service产物是[]interface{}，而easy_metric_sampler Agent契约为ParamGroups []map[string]string，数组会导致任务反序列化失败且脚本不执行。"
+    agent_string_contract:
+      rule: "easy_metric_sampler InstanceConfig.ParamGroups为[]map[string]string；所有注入脚本的动态参数值必须是string。"
+      evidence: "easy_metric_sampler/internal/types/config.go:12-17；easy_metric_sampler/collector/easyops.go:266-269。"
     evidence:
       - "param_extract_test.go:40-70 断言 $.nodes 展开为两个paramGroup，每个var1均为单struct JSON"
-      - "param_extract_test.go:247-280 断言 $.nodes.ip.join() 才输出数组"
-    source: "collector_service/agent_job/cmdb_path_helper/{param_extract.go,param_extract_test.go}，2026-11-17源码复核"
-
-    - name: "跨实例关系（CMDB PathSearch 展开）"
-      syntax: "靠 SearchAllPaths 在 CMDB 端做关联查询，结果展开成 struct 再走本地 path 取值"
-      mechanism: "cmdb_path_helper 本地只走 struct 字段递归；跨实例关联靠 SearchAllPaths 的 PathSearchV3 在 CMDB 端查，把 $.field 路径作为 Fields 让 CMDB 一次查回。"
-      source: "cmdb_path_helper.go:113-162,190-230 SearchAllPaths"
+      - "param_extract_test.go:247-280 断言 $.nodes.ip.join() 输出原生数组"
+      - "IBM MQ 0.4.6生产debug复核：join参数进入Agent前为数组，任务无脚本输出"
+    source: "collector_service/agent_job/cmdb_path_helper/{param_extract.go,param_extract_test.go}；easy_metric_sampler/internal/types/config.go，2026-11-17源码复核"
 
   process_sampler_parameter_shape:
     rule: "现有CMDB process_sampler套件的动态参数元数据通常使用 use=collectParams；结构体字段按 $.结构体字段拆分并声明 valueType=cmdb。use=collectorParams 或把整段结构仅声明为 string 可能导致前端任务配置与网络套件行为不一致。"

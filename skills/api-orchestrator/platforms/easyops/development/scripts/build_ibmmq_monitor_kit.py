@@ -14,11 +14,11 @@ ROOT = Path(__file__).resolve().parents[1]
 KIT = ROOT / "monitor-kits/ibmmq-monitoring"
 HUB = ROOT.parent / "hub/monitor-kits"
 NAME = "IBM MQ监控"
-VERSION = "0.4.7"
+VERSION = "0.4.8"
 SUPPORTED_PLATFORMS = ("Linux", "Windows")
 OBJECT_ID = "IBMMQ@ONEMODEL"
-XLSX_NAME = "IBM_MQ监控_告警规则模板_0.4.7.xlsx"
-ZIP_NAME = "监控套件_IBM_MQ监控_0.4.7.zip"
+XLSX_NAME = "IBM_MQ监控_告警规则模板_0.4.8.xlsx"
+ZIP_NAME = "监控套件_IBM_MQ监控_0.4.8.zip"
 BASE_DIMS = ("ibmmqInstanceId", "qmgrName", "hostIp", "installPath")
 QUEUE_DIMS = BASE_DIMS + ("queueName",)
 CHANNEL_DIMS = BASE_DIMS + ("channelName", "channelType")
@@ -124,8 +124,7 @@ PARAMETERS = (
     ("instanceId", "string", "$.instanceId", "IBM MQ实例ID", "取IBMMQ.instanceId，用于实例维度", False, False),
     ("hostIp", "string", "$.ip", "部署主机IP", "取ARTIFACT_INST继承ip，用于维度与部署定位", False, False),
     ("installPath", "string", "$.installPath", "安装路径", "取ARTIFACT_INST继承installPath，用于定位bin目录", False, False),
-    ("processCmdlineList", "string", "$.processList.cmdline.join()", "进程命令行列表", "取processList.cmdline并合并为数组；从cmdline的-m参数解析队列管理器", True, False),
-    ("processUserList", "string", "$.processList.user.join()", "进程运行用户列表", "取processList.user并合并为数组；Linux按运行用户su -执行MQ命令", True, False),
+    ("processList", "string", "$.processList", "进程结构", "取processList单元素dict JSON；从cmdline解析队列管理器并使用user切换Linux运行用户", True, False),
     ("queueFilter", "string", ".*", "队列过滤正则", "默认监控全部非SYSTEM.前缀队列", True, True),
     ("includeSystemQueues", "string", "false", "包含系统队列", "默认排除SYSTEM.前缀队列", True, True),
     ("processMonitor", "string", "true", "启用进程资源采集", "默认启用，按cmdline分组输出进程资源", True, True),
@@ -217,9 +216,11 @@ def validate_platform_support():
     parameter_names = {row[0] for row in PARAMETERS}
     if "logLevel" not in parameter_names:
         raise RuntimeError("[validate_platform_support] 缺少logLevel参数")
-    for parameter_name in ("processCmdlineList", "processUserList"):
-        if parameter_name not in parameter_names:
-            raise RuntimeError("[validate_platform_support] 缺少%s参数" % parameter_name)
+    if "processList" not in parameter_names:
+        raise RuntimeError("[validate_platform_support] 缺少processList参数")
+    for _, _, default, *_ in PARAMETERS:
+        if default.endswith(".join()"):
+            raise RuntimeError("[validate_platform_support] 禁止join动态参数：%s；Agent ParamGroups值必须是string" % default)
     if len(METRIC_DISPLAY_NAMES) != len(METRICS):
         raise RuntimeError("[validate_platform_support] 中文名称数量必须等于指标数量")
     if set(METRIC_DISPLAY_NAMES) != {row[0] for row in METRICS}:
