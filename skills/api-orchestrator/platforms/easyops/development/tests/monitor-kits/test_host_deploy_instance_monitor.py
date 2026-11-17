@@ -508,6 +508,7 @@ class HostDeployInstanceMonitorTests(unittest.TestCase):
             self.skipTest("package not built yet")
         with zipfile.ZipFile(PACKAGE) as package:
             self.assertEqual(package.namelist()[0], "主机部署实例监控/")
+            self.assertIn("主机部署实例监控/src/", package.namelist())
             packaged_plugin = yaml.safe_load(package.read("主机部署实例监控/plugin.yaml").decode("utf-8"))
             packaged_params = {row["name"]: row for row in packaged_plugin["paramDefine"]}
             for name in ("instanceId", "hostUuid", "hostIp"):

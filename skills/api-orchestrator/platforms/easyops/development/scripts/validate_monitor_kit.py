@@ -161,6 +161,18 @@ def validate_zip(path):
         if len(roots) != 1:
             raise ValidationError("ZIP 必须只有一个顶层套件目录，实际为 %s" % sorted(roots))
         root_name = next(iter(roots)) + "/"
+        directories = {name for name in names if name.endswith("/")}
+        for name in names:
+            if name.endswith("/"):
+                continue
+            current = name.rsplit("/", 1)[0]
+            missing = []
+            while current:
+                if current + "/" not in directories:
+                    missing.append(current + "/")
+                current = current.rsplit("/", 1)[0] if "/" in current else ""
+            if missing:
+                raise ValidationError("ZIP 文件 %s 缺少显式父目录条目 %s；EasyOps Go解压器不会自动创建父目录" % (name, sorted(missing)))
         temp = Path(".monitor-kit-validation")
         if temp.exists():
             raise ValidationError("临时校验目录已存在，请删除后重试: %s" % temp)
