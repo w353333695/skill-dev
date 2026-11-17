@@ -16,7 +16,7 @@ import threading
 import time
 import traceback
 
-VERSION = "0.4.8"
+VERSION = "0.4.9"
 QMGR_COMMAND = "DISPLAY QMGR DEADQ"
 STATUS_COMMAND = "DISPLAY QSTATUS(*) CURDEPTH MSGAGE IPPROCS OPPROCS"
 QUEUE_COMMAND = "DISPLAY QLOCAL(*) CURDEPTH MAXDEPTH USAGE GET PUT"
@@ -374,6 +374,27 @@ def parse_attributes(line):
     return result
 
 
+def mqsc_attribute_blocks(output):
+    blocks = []
+    current = []
+    identity_keys = ("QMNAME", "QNAME", "QUEUE", "CHANNEL", "LISTENER")
+    command_pattern = re.compile(r"^\s*\d+\s*:")
+    for raw_line in output.splitlines():
+        line = raw_line.strip()
+        attrs = parse_attributes(line)
+        command_boundary = bool(command_pattern.match(line))
+        identity_boundary = any(key in attrs for key in identity_keys)
+        if command_boundary or identity_boundary:
+            if current:
+                blocks.append(current)
+            current = []
+        if attrs:
+            current.append(attrs)
+    if current:
+        blocks.append(current)
+    return [dict(pair for attrs in block for pair in attrs.items()) for block in blocks]
+
+
 def numeric(value, default=0.0):
     try:
         number = float(value)
@@ -444,11 +465,10 @@ def parse_mqsc(output, settings):
     channels = []
     listeners = []
     dead_queue_name = ""
-    for line in output.splitlines():
-        attrs = parse_attributes(line)
+    for attrs in mqsc_attribute_blocks(output):
         if not attrs:
             continue
-        LOGGER.debug("[parse_mqsc] line=<%s> attrs=%s", line, json.dumps(attrs, sort_keys=True))
+        LOGGER.debug("[parse_mqsc] line=<%s> attrs=%s", json.dumps(attrs, sort_keys=True), json.dumps(attrs, sort_keys=True))
         if attrs.get("QMNAME") and attrs.get("DEADQ"):
             dead_queue_name = attrs["DEADQ"]
         queue_name = attrs.get("QNAME") or attrs.get("QUEUE")
@@ -484,6 +504,8 @@ def parse_mqsc(output, settings):
                 "bytesReceived": numeric(attrs.get("BYTSRCVD", 0)),
                 "bytesSent": numeric(attrs.get("BYTSSENT", 0)),
             })
+            if "BYTES" not in attrs and "BYTS" not in attrs:
+                channels[-1]["bytes"] = channels[-1]["bytesReceived"] + channels[-1]["bytesSent"]
         listener_name = attrs.get("LISTENER")
         if listener_name:
             listeners.append({
@@ -520,11 +542,11 @@ def parse_mqsc(output, settings):
 
 def normalize_status(status):
     value = (status or "").upper()
-    if "RUNNING" in value:
+    if "RUNNING" in value or "正在运行" in (status or ""):
         return 1.0
-    if "STARTING" in value or "INITIAL" in value or "BINDING" in value:
+    if "STARTING" in value or "INITIAL" in value or "BINDING" in value or "正在启动" in (status or "") or "初始化" in (status or ""):
         return 0.5
-    if "PAUSED" in value or "STANDBY" in value:
+    if "PAUSED" in value or "STANDBY" in value or "已暂停" in (status or "") or "备用" in (status or ""):
         return 0.25
     return 0.0
 
@@ -742,12 +764,14 @@ def collect_qmgr(qmgr, mq_bin, settings):
     )
     base = {"ibmmqInstanceId": settings["ibmmqInstanceId"], "qmgrName": qmgr["qmgrName"], "hostIp": settings.get("hostIp", ""), "installPath": settings.get("installPath", "") or os.path.dirname(mq_bin)}
     values = {
-        "ibmmq_qmgr_status": 1.0 if qmgr.get("status", "").upper() == "RUNNING" else 0.0,
+        "ibmmq_qmgr_status": normalize_status(qmgr.get("status", "")),
         "ibmmq_discovery_success": float(qmgr.get("dspmqReturnCode", 0) == 0 and qmgr.get("targetMatched", True)),
     }
     rows = [dict(dims=dict(base), vals=dict(values))]
     returncode, output = run_mqsc(mq_bin, qmgr["qmgrName"], settings, qmgr.get("runUser", ""))
-    command_success = float(returncode == 0 and "COMMAND ACCEPTED" in output.upper())
+    command_success = float(returncode == 0 and any(marker in output for marker in (
+        "COMMAND ACCEPTED", "所有命令均无语法错误", "已处理所有的有效 MQSC 命令",
+    )))
     queues, channels, listeners, dead_queue_name = parse_mqsc(output, settings)
     if command_success != 1.0:
         LOGGER.error("[collect_qmgr] runmqsc failed qmgr=%s returncode=%s output=<%s>", qmgr["qmgrName"], returncode, output.strip())
@@ -780,6 +804,8 @@ def collect_qmgr(qmgr, mq_bin, settings):
             "ibmmq_queue_max_depth": row.get("maxDepth", 0.0),
             "ibmmq_queue_usage_percent": float(row.get("currentDepth", 0.0)) / row.get("maxDepth", 1.0) * 100.0,
         }
+        if "maxDepth" in row:
+            vals["ibmmq_queue_max_depth_config"] = row["maxDepth"]
         if "oldestMessageAge" in row:
             vals["ibmmq_queue_oldest_message_age_seconds"] = row["oldestMessageAge"]
         if "inputHandles" in row:
@@ -816,13 +842,12 @@ def collect_qmgr(qmgr, mq_bin, settings):
         channel_values = {
             "ibmmq_channel_status": normalize_status(row["status"]),
             "ibmmq_channel_messages": row["messages"],
+            "ibmmq_channel_bytes": row["bytes"],
         }
         if "bytesReceived" in row:
             channel_values["ibmmq_channel_bytes_received"] = row["bytesReceived"]
         if "bytesSent" in row:
             channel_values["ibmmq_channel_bytes_sent"] = row["bytesSent"]
-        if row.get("bytes"):
-            channel_values["ibmmq_channel_bytes"] = row["bytes"]
         LOGGER.debug(
             "[collect_qmgr] channel=%s type=%s status=%s messages=%s bytes=%s bytesReceived=%s bytesSent=%s",
             row["channelName"], row["channelType"], row["status"], row["messages"], row["bytes"],

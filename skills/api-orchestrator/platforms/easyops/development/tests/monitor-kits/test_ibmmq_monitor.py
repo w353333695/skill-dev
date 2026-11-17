@@ -15,8 +15,8 @@ import yaml
 BASE = Path(__file__).resolve().parents[2]
 KIT = BASE / "monitor-kits/ibmmq-monitoring"
 SOURCE = KIT / "src/ibmmq_monitor.orig"
-PACKAGE = BASE.parent / "hub/monitor-kits/监控套件_IBM_MQ监控_0.4.8.zip"
-XLSX = KIT / "IBM_MQ监控_告警规则模板_0.4.8.xlsx"
+PACKAGE = BASE.parent / "hub/monitor-kits/监控套件_IBM_MQ监控_0.4.9.zip"
+XLSX = KIT / "IBM_MQ监控_告警规则模板_0.4.9.xlsx"
 
 
 def module():
@@ -41,7 +41,7 @@ class IBMMQMonitorTest(unittest.TestCase):
     def test_version(self):
         result = subprocess.run([sys.executable, str(SOURCE), "--version"], capture_output=True, text=True)
         self.assertEqual(result.returncode, 0)
-        self.assertIn("0.4.8", result.stdout)
+        self.assertIn("0.4.9", result.stdout)
 
     def test_orig_and_runtime_are_identical(self):
         self.assertEqual(SOURCE.read_bytes(), (KIT / "src/ibmmq_monitor.py").read_bytes())
@@ -268,7 +268,7 @@ class IBMMQMonitorTest(unittest.TestCase):
         with mock.patch.dict(os.environ, env), self.assertLogs(self.m.LOGGER, level="DEBUG") as logs:
             settings = self.m.config()
         self.assertEqual(settings["logLevel"], "DEBUG")
-        self.assertTrue(any("[config] version=0.4.8" in message for message in logs.output))
+        self.assertTrue(any("[config] version=0.4.9" in message for message in logs.output))
         with mock.patch.dict(os.environ, {"EASYOPS_COLLECTOR_logLevel": "VERBOSE"}):
             with self.assertRaises(ValueError):
                 self.m.config()
@@ -378,6 +378,67 @@ class IBMMQMonitorTest(unittest.TestCase):
         self.assertEqual(channels[0]["bytesSent"], 300.0)
         self.assertEqual(listeners[0]["port"], "1414")
 
+    def test_parse_mqsc_merges_wrapped_attribute_lines(self):
+        output = "\r\n".join([
+            "     1 : DISPLAY QMGR DEADQ",
+            "AMQ8408I: 显示队列管理器的细节。",
+            "   QMNAME(QM1)                          DEADQ(DLQ)",
+            "     2 : DISPLAY QLOCAL(*) CURDEPTH MAXDEPTH USAGE GET PUT",
+            "AMQ8409I: 显示队列细节。",
+            "   QUEUE(APP.Q)                         TYPE(QLOCAL)",
+            "   CURDEPTH(12)                         GET(ENABLED)",
+            "   MAXDEPTH(100)                        PUT(ENABLED)",
+            "   USAGE(NORMAL)",
+            "     3 : DISPLAY QSTATUS(*) CURDEPTH MSGAGE IPPROCS OPPROCS",
+            "AMQ8450I: 显示队列状态详细信息。",
+            "   QUEUE(APP.Q)                         TYPE(QUEUE)",
+            "   CURDEPTH(12)                         IPPROCS(1)",
+            "   MSGAGE(45)                           OPPROCS(2)",
+            "     4 : DISPLAY CHSTATUS(*) CHLTYPE STATUS MSGS BYTSRCVD BYTSSENT",
+            "AMQ8646I: 显示通道状态详细信息。",
+            "   CHANNEL(SENDER.CH)                   CHLTYPE(SDR)",
+            "   STATUS(RUNNING)                      MSGS(3)",
+            "   BYTSRCVD(9)                          BYTSSENT(11)",
+        ])
+        queues, channels, _, dead_queue_name = self.m.parse_mqsc(output, self.settings)
+        self.assertEqual(dead_queue_name, "DLQ")
+        self.assertEqual(queues[0]["currentDepth"], 12.0)
+        self.assertEqual(queues[0]["maxDepth"], 100.0)
+        self.assertEqual(queues[0]["oldestMessageAge"], 45.0)
+        self.assertEqual(queues[0]["inputHandles"], 1.0)
+        self.assertEqual(queues[0]["outputHandles"], 2.0)
+        self.assertTrue(queues[0]["getEnabled"])
+        self.assertTrue(queues[0]["putEnabled"])
+        self.assertEqual(channels[0]["bytes"], 20.0)
+
+    def test_collect_qmgr_accepts_localized_success_and_status(self):
+        qmgr = {"qmgrName": "QM1", "status": "正在运行"}
+        mqsc = "\r\n".join([
+            "已读取 5 个 MQSC 命令。",
+            "所有命令均无语法错误。",
+            "已处理所有的有效 MQSC 命令。",
+            "QMNAME(QM1) DEADQ(DLQ)",
+            "QUEUE(APP.Q) TYPE(QLOCAL)",
+            "CURDEPTH(20) GET(ENABLED)",
+            "MAXDEPTH(100) PUT(ENABLED)",
+            "USAGE(NORMAL)",
+            "QUEUE(APP.Q) MSGAGE(301) IPPROCS(1) OPPROCS(2)",
+            "CHANNEL(SDR.CH) CHLTYPE(SDR) STATUS(RUNNING) MSGS(3) BYTSRCVD(9) BYTSSENT(11)",
+            "LISTENER(TCP.1) PORT(1414) STATUS(RUNNING)",
+        ])
+        def execute(args, settings, input_text=None):
+            return 0, mqsc if args[0].endswith("runmqsc") else "QMNAME(QM1) STATUS(正在运行)"
+        with mock.patch.object(self.m, "execute", side_effect=execute):
+            rows = self.m.collect_qmgr(qmgr, "/opt/mqm/bin", self.settings)
+        values = {}
+        for row in rows:
+            values.update(row["vals"])
+        self.assertEqual(values["ibmmq_qmgr_status"], 1.0)
+        self.assertEqual(values["ibmmq_sc_command_success"], 1.0)
+        self.assertEqual(values["ibmmq_queue_max_depth_config"], 100.0)
+        self.assertEqual(values["ibmmq_queue_oldest_message_age_seconds"], 301.0)
+        self.assertEqual(values["ibmmq_channel_bytes"], 20.0)
+
     def test_collect_qmgr_outputs(self):
         qmgr = {"qmgrName": "QM1", "status": "Running"}
         mqsc = "\n".join([
@@ -440,7 +501,7 @@ class IBMMQMonitorTest(unittest.TestCase):
         self.assertEqual(plugin["name"], "IBM MQ监控")
         self.assertEqual(plugin["relateObjectId"], "IBMMQ@ONEMODEL")
         self.assertIn("Linux/Windows", plugin["memo"])
-        self.assertEqual(plugin["version"], "0.4.8")
+        self.assertEqual(plugin["version"], "0.4.9")
         self.assertNotIn("qmgrName", plugin["params"])
         self.assertNotIn("mqBinPath", plugin["params"])
         self.assertIn("processList", plugin["params"])
@@ -497,7 +558,7 @@ class IBMMQMonitorTest(unittest.TestCase):
                 mode = stat.S_IMODE(item.external_attr >> 16)
                 self.assertEqual(mode, 0o755 if item.is_dir() else 0o664)
             self.assertIn("IBM MQ监控/src/ibmmq_monitor.orig", package.namelist())
-            self.assertIn("IBM MQ监控/IBM_MQ监控_告警规则模板_0.4.8.xlsx", package.namelist())
+            self.assertIn("IBM MQ监控/IBM_MQ监控_告警规则模板_0.4.9.xlsx", package.namelist())
             self.assertIn("IBM MQ监控/resource_discovery_define.json", package.namelist())
             self.assertNotIn("IBM MQ监控/IBMMQ@ONEMODEL.json", package.namelist())
 

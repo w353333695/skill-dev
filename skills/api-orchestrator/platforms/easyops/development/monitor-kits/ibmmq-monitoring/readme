@@ -1,6 +1,6 @@
 IBM MQ监控套件
 
-版本：0.4.8；同时支持Linux和Windows执行节点。关联现网内置模型：`IBMMQ@ONEMODEL`（IBMMQ实例）。
+版本：0.4.9；同时支持Linux和Windows执行节点。关联现网内置模型：`IBMMQ@ONEMODEL`（IBMMQ实例）。
 
 ## 模型与执行
 
@@ -8,7 +8,7 @@ IBM MQ监控套件
 
 监控任务按实例读取 `$.instanceId`、`$.ip`、`$.installPath`、`$.processList`。执行节点应通过 `ARTIFACT_INST@ONEMODEL_host_artifactInsts_HOST` 继承关系定位部署主机。
 
-`processList` 来自现网父模型 `ARTIFACT_INST@ONEMODEL`，类型为 `structs`；每个元素的字段契约为 `cwd/cmdline/pname/confPath/logPaths/ports/user`。collector_service对 `$.processList` 会按元素展开并让脚本拿到单dict JSON；0.4.8利用该行为保留cmdline/user原结构关联。`$.processList.cmdline.join()`和`$.processList.user.join()`会生成原生数组，违反Agent ParamGroups string契约，0.4.6因此出现任务无输出；0.4.8不再把join路径写入插件参数。
+`processList` 来自现网父模型 `ARTIFACT_INST@ONEMODEL`，类型为 `structs`；每个元素的字段契约为 `cwd/cmdline/pname/confPath/logPaths/ports/user`。collector_service对 `$.processList` 会按元素展开并让脚本拿到单dict JSON；0.4.8起利用该行为保留cmdline/user原结构关联。`$.processList.cmdline.join()`和`$.processList.user.join()`会生成原生数组，违反Agent ParamGroups string契约，0.4.6因此出现任务无输出；0.4.8不再把join路径写入插件参数。
 
 ## 采集链路
 
@@ -40,8 +40,8 @@ IBM MQ监控套件
 ## 权限与限制
 
 - Linux Agent执行账号必须能通过 `su - <processList.user>` 切换到IBM MQ进程运行用户；Windows Agent需以具备 `dspmq.exe/runmqsc.exe` 权限的用户执行。
-- 本套件0.4.8同时支持Linux和Windows执行节点；Windows默认探测 `C:\Program Files\IBM\MQ\bin` 与 `C:\Program Files (x86)\IBM\MQ\bin`，命令会追加 `.exe`；`qmgrName`优先由`processList.cmdline`推导，缺失时由`dspmq`自动发现，`mqBinPath`不再作为任务参数。
-- 告警模板为 `IBM_MQ监控_告警规则模板_0.4.8.xlsx`，需通过事件中心Excel入口导入。本地/传输队列占用率80%/90%、死信队列深度连续2点大于0、队列管理器和监听器单点异常对齐本次Zabbix导出模板；队列绝对深度1000/5000和最老消息年龄300/900秒为补充策略，生产使用前必须按队列SLA调整。GET/PUT异常默认只采集展示，不启用告警，与Zabbix导出中禁用触发器的策略一致。
+- 本套件0.4.9同时支持Linux和Windows执行节点；Windows默认探测 `C:\Program Files\IBM\MQ\bin` 与 `C:\Program Files (x86)\IBM\MQ\bin`，命令会追加 `.exe`；`qmgrName`优先由`processList.cmdline`推导，缺失时由`dspmq`自动发现，`mqBinPath`不再作为任务参数。
+- 告警模板为 `IBM_MQ监控_告警规则模板_0.4.9.xlsx`，需通过事件中心Excel入口导入。本地/传输队列占用率80%/90%、死信队列深度连续2点大于0、队列管理器和监听器单点异常对齐本次Zabbix导出模板；队列绝对深度1000/5000和最老消息年龄300/900秒为补充策略，生产使用前必须按队列SLA调整。GET/PUT异常默认只采集展示，不启用告警，与Zabbix导出中禁用触发器的策略一致。
 - 排查“指标未采集”时，将任务参数 `logLevel` 改为 `DEBUG` 并在前端执行输出中直接复制stdout日志：日志包含MQ命令目录候选、命令输入/返回码/原始输出、队列过滤原因、队列管理器分类计数、通道字段和最终缺失指标清单。DEBUG可能影响指标自动解析，仅作诊断，完成后恢复ERROR；默认 `ERROR` 仅输出缺失指标名摘要到stderr。
 - 套件按本地MQ命令采集，不做客户端Put/Get链路拨测；目标实例到执行主机的关联需在导入后用真实任务验证。
 
@@ -50,6 +50,6 @@ IBM MQ监控套件
 ```bash
 python3 development/scripts/build_ibmmq_monitor_kit.py
 python3 development/scripts/validate_monitor_kit.py development/monitor-kits/ibmmq-monitoring
-python3 development/scripts/validate_monitor_kit.py ../hub/monitor-kits/监控套件_IBM_MQ监控_0.4.8.zip
+python3 development/scripts/validate_monitor_kit.py ../hub/monitor-kits/监控套件_IBM_MQ监控_0.4.9.zip
 cd development && python3 -m unittest discover -s tests/monitor-kits -p 'test_ibmmq_monitor.py'
 ```
