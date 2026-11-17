@@ -15,8 +15,8 @@ import yaml
 BASE = Path(__file__).resolve().parents[2]
 KIT = BASE / "monitor-kits/ibmmq-monitoring"
 SOURCE = KIT / "src/ibmmq_monitor.orig"
-PACKAGE = BASE.parent / "hub/monitor-kits/监控套件_IBM_MQ监控_0.4.6.zip"
-XLSX = KIT / "IBM_MQ监控_告警规则模板_0.4.6.xlsx"
+PACKAGE = BASE.parent / "hub/monitor-kits/监控套件_IBM_MQ监控_0.4.7.zip"
+XLSX = KIT / "IBM_MQ监控_告警规则模板_0.4.7.xlsx"
 
 
 def module():
@@ -41,7 +41,7 @@ class IBMMQMonitorTest(unittest.TestCase):
     def test_version(self):
         result = subprocess.run([sys.executable, str(SOURCE), "--version"], capture_output=True, text=True)
         self.assertEqual(result.returncode, 0)
-        self.assertIn("0.4.6", result.stdout)
+        self.assertIn("0.4.7", result.stdout)
 
     def test_orig_and_runtime_are_identical(self):
         self.assertEqual(SOURCE.read_bytes(), (KIT / "src/ibmmq_monitor.py").read_bytes())
@@ -178,13 +178,23 @@ class IBMMQMonitorTest(unittest.TestCase):
         self.assertEqual([row["runUser"] for row in qmgrs], ["mqm1", "mqm2"])
         self.assertEqual([call.args[2] for call in discovery.call_args_list], ["mqm1", "mqm2"])
 
+    def test_ibm_mq_75_status_commands_avoid_redundant_keywords(self):
+        self.assertEqual(
+            self.m.CHANNEL_COMMAND,
+            "DISPLAY CHSTATUS(*) CHLTYPE STATUS MSGS BYTSRCVD BYTSSENT",
+        )
+        self.assertEqual(self.m.LISTENER_COMMAND, "DISPLAY LSSTATUS(*) PORT STATUS")
+
     def test_mqsc_input_includes_zabbix_metric_sources(self):
         with mock.patch.object(self.m, "execute", return_value=(0, "COMMAND ACCEPTED")) as command_execute:
             self.m.run_mqsc("/opt/mqm/bin", "QM1", self.settings)
         mqsc_input = command_execute.call_args[0][2]
         self.assertIn("DISPLAY QMGR DEADQ", mqsc_input)
         self.assertIn("DISPLAY QLOCAL(*) CURDEPTH MAXDEPTH USAGE GET PUT", mqsc_input)
-        self.assertIn("DISPLAY CHSTATUS(*) CHANNEL CHLTYPE STATUS MSGS BYTSRCVD BYTSSENT", mqsc_input)
+        self.assertIn("DISPLAY CHSTATUS(*) CHLTYPE STATUS MSGS BYTSRCVD BYTSSENT", mqsc_input)
+        self.assertIn("DISPLAY LSSTATUS(*) PORT STATUS", mqsc_input)
+        self.assertNotIn("DISPLAY CHSTATUS(*) CHANNEL ", mqsc_input)
+        self.assertNotIn("DISPLAY LSSTATUS(*) LISTENER ", mqsc_input)
 
     def test_config_and_qmgr_discovery_do_not_use_manual_parameters(self):
         env = {
@@ -212,7 +222,7 @@ class IBMMQMonitorTest(unittest.TestCase):
         with mock.patch.dict(os.environ, env), self.assertLogs(self.m.LOGGER, level="DEBUG") as logs:
             settings = self.m.config()
         self.assertEqual(settings["logLevel"], "DEBUG")
-        self.assertTrue(any("[config] version=0.4.6" in message for message in logs.output))
+        self.assertTrue(any("[config] version=0.4.7" in message for message in logs.output))
         with mock.patch.dict(os.environ, {"EASYOPS_COLLECTOR_logLevel": "VERBOSE"}):
             with self.assertRaises(ValueError):
                 self.m.config()
@@ -376,7 +386,7 @@ class IBMMQMonitorTest(unittest.TestCase):
         self.assertEqual(plugin["name"], "IBM MQ监控")
         self.assertEqual(plugin["relateObjectId"], "IBMMQ@ONEMODEL")
         self.assertIn("Linux/Windows", plugin["memo"])
-        self.assertEqual(plugin["version"], "0.4.6")
+        self.assertEqual(plugin["version"], "0.4.7")
         self.assertNotIn("qmgrName", plugin["params"])
         self.assertNotIn("mqBinPath", plugin["params"])
         self.assertIn("processCmdlineList", plugin["params"])
@@ -432,7 +442,7 @@ class IBMMQMonitorTest(unittest.TestCase):
                 mode = stat.S_IMODE(item.external_attr >> 16)
                 self.assertEqual(mode, 0o755 if item.is_dir() else 0o664)
             self.assertIn("IBM MQ监控/src/ibmmq_monitor.orig", package.namelist())
-            self.assertIn("IBM MQ监控/IBM_MQ监控_告警规则模板_0.4.6.xlsx", package.namelist())
+            self.assertIn("IBM MQ监控/IBM_MQ监控_告警规则模板_0.4.7.xlsx", package.namelist())
             self.assertIn("IBM MQ监控/resource_discovery_define.json", package.namelist())
             self.assertNotIn("IBM MQ监控/IBMMQ@ONEMODEL.json", package.namelist())
 
