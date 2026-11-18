@@ -15,8 +15,8 @@ import yaml
 BASE = Path(__file__).resolve().parents[2]
 KIT = BASE / "monitor-kits/ibmmq-monitoring"
 SOURCE = KIT / "src/ibmmq_monitor.orig"
-PACKAGE = BASE.parent / "hub/monitor-kits/监控套件_IBM_MQ监控_0.4.9.zip"
-XLSX = KIT / "IBM_MQ监控_告警规则模板_0.4.9.xlsx"
+PACKAGE = BASE.parent / "hub/monitor-kits/监控套件_IBM_MQ监控_0.4.10.zip"
+XLSX = KIT / "IBM_MQ监控_告警规则模板_0.4.10.xlsx"
 
 
 def module():
@@ -41,7 +41,7 @@ class IBMMQMonitorTest(unittest.TestCase):
     def test_version(self):
         result = subprocess.run([sys.executable, str(SOURCE), "--version"], capture_output=True, text=True)
         self.assertEqual(result.returncode, 0)
-        self.assertIn("0.4.9", result.stdout)
+        self.assertIn("0.4.10", result.stdout)
 
     def test_orig_and_runtime_are_identical(self):
         self.assertEqual(SOURCE.read_bytes(), (KIT / "src/ibmmq_monitor.py").read_bytes())
@@ -268,7 +268,7 @@ class IBMMQMonitorTest(unittest.TestCase):
         with mock.patch.dict(os.environ, env), self.assertLogs(self.m.LOGGER, level="DEBUG") as logs:
             settings = self.m.config()
         self.assertEqual(settings["logLevel"], "DEBUG")
-        self.assertTrue(any("[config] version=0.4.9" in message for message in logs.output))
+        self.assertTrue(any("[config] version=0.4.10" in message for message in logs.output))
         with mock.patch.dict(os.environ, {"EASYOPS_COLLECTOR_logLevel": "VERBOSE"}):
             with self.assertRaises(ValueError):
                 self.m.config()
@@ -377,6 +377,13 @@ class IBMMQMonitorTest(unittest.TestCase):
         self.assertEqual(channels[0]["bytesReceived"], 200.0)
         self.assertEqual(channels[0]["bytesSent"], 300.0)
         self.assertEqual(listeners[0]["port"], "1414")
+
+    def test_python2_unicode_and_utf8_byte_text_matching(self):
+        running = self.m.decode(u"正在运行".encode("utf-8"))
+        self.assertTrue(self.m.contains_text(running, u"正在".encode("utf-8")))
+        self.assertEqual(self.m.normalize_status(running), 1.0)
+        success = self.m.decode("runmqsc ok\n".encode("ascii") + u"所有命令均无语法错误".encode("utf-8"))
+        self.assertTrue(self.m.contains_text(success, u"所有命令".encode("utf-8")))
 
     def test_parse_mqsc_merges_wrapped_attribute_lines(self):
         output = "\r\n".join([
@@ -501,7 +508,7 @@ class IBMMQMonitorTest(unittest.TestCase):
         self.assertEqual(plugin["name"], "IBM MQ监控")
         self.assertEqual(plugin["relateObjectId"], "IBMMQ@ONEMODEL")
         self.assertIn("Linux/Windows", plugin["memo"])
-        self.assertEqual(plugin["version"], "0.4.9")
+        self.assertEqual(plugin["version"], "0.4.10")
         self.assertNotIn("qmgrName", plugin["params"])
         self.assertNotIn("mqBinPath", plugin["params"])
         self.assertIn("processList", plugin["params"])
@@ -558,7 +565,7 @@ class IBMMQMonitorTest(unittest.TestCase):
                 mode = stat.S_IMODE(item.external_attr >> 16)
                 self.assertEqual(mode, 0o755 if item.is_dir() else 0o664)
             self.assertIn("IBM MQ监控/src/ibmmq_monitor.orig", package.namelist())
-            self.assertIn("IBM MQ监控/IBM_MQ监控_告警规则模板_0.4.9.xlsx", package.namelist())
+            self.assertIn("IBM MQ监控/IBM_MQ监控_告警规则模板_0.4.10.xlsx", package.namelist())
             self.assertIn("IBM MQ监控/resource_discovery_define.json", package.namelist())
             self.assertNotIn("IBM MQ监控/IBMMQ@ONEMODEL.json", package.namelist())
 

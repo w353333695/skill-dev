@@ -16,7 +16,7 @@ import threading
 import time
 import traceback
 
-VERSION = "0.4.9"
+VERSION = "0.4.10"
 QMGR_COMMAND = "DISPLAY QMGR DEADQ"
 STATUS_COMMAND = "DISPLAY QSTATUS(*) CURDEPTH MSGAGE IPPROCS OPPROCS"
 QUEUE_COMMAND = "DISPLAY QLOCAL(*) CURDEPTH MAXDEPTH USAGE GET PUT"
@@ -118,6 +118,10 @@ def decode(value):
                 pass
         return value.decode("utf-8", "replace")
     return value or ""
+
+
+def contains_text(value, expected):
+    return decode(expected) in decode(value)
 
 
 def is_windows():
@@ -542,11 +546,11 @@ def parse_mqsc(output, settings):
 
 def normalize_status(status):
     value = (status or "").upper()
-    if "RUNNING" in value or "正在运行" in (status or ""):
+    if "RUNNING" in value or contains_text(status, "正在运行"):
         return 1.0
-    if "STARTING" in value or "INITIAL" in value or "BINDING" in value or "正在启动" in (status or "") or "初始化" in (status or ""):
+    if "STARTING" in value or "INITIAL" in value or "BINDING" in value or contains_text(status, "正在启动") or contains_text(status, "初始化"):
         return 0.5
-    if "PAUSED" in value or "STANDBY" in value or "已暂停" in (status or "") or "备用" in (status or ""):
+    if "PAUSED" in value or "STANDBY" in value or contains_text(status, "已暂停") or contains_text(status, "备用"):
         return 0.25
     return 0.0
 
@@ -769,7 +773,7 @@ def collect_qmgr(qmgr, mq_bin, settings):
     }
     rows = [dict(dims=dict(base), vals=dict(values))]
     returncode, output = run_mqsc(mq_bin, qmgr["qmgrName"], settings, qmgr.get("runUser", ""))
-    command_success = float(returncode == 0 and any(marker in output for marker in (
+    command_success = float(returncode == 0 and any(contains_text(output, marker) for marker in (
         "COMMAND ACCEPTED", "所有命令均无语法错误", "已处理所有的有效 MQSC 命令",
     )))
     queues, channels, listeners, dead_queue_name = parse_mqsc(output, settings)
