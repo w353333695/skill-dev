@@ -1,0 +1,55 @@
+IBM MQ监控套件
+
+版本：0.4.10；同时支持Linux和Windows执行节点。关联现网内置模型：`IBMMQ@ONEMODEL`（IBMMQ实例）。
+
+## 模型与执行
+
+`IBMMQ@ONEMODEL` 已存在且继承 `ARTIFACT_INST@ONEMODEL`，具备 `ip`、`installPath`、`processList/processMatchGroups`、`isMonitor` 与部署主机关系。本套件不导入或修改受保护模型；采集不依赖实例 `name` 手工指定队列管理器，而是在执行节点自动枚举。
+
+监控任务按实例读取 `$.instanceId`、`$.ip`、`$.installPath`、`$.processList`。执行节点应通过 `ARTIFACT_INST@ONEMODEL_host_artifactInsts_HOST` 继承关系定位部署主机。
+
+`processList` 来自现网父模型 `ARTIFACT_INST@ONEMODEL`，类型为 `structs`；每个元素的字段契约为 `cwd/cmdline/pname/confPath/logPaths/ports/user`。collector_service对 `$.processList` 会按元素展开并让脚本拿到单dict JSON；0.4.8起利用该行为保留cmdline/user原结构关联。`$.processList.cmdline.join()`和`$.processList.user.join()`会生成原生数组，违反Agent ParamGroups string契约，0.4.6因此出现任务无输出；0.4.8不再把join路径写入插件参数。
+
+## 采集链路
+
+1. 自动按 `$.installPath/bin`、`MQ_INSTALLATION_PATH/bin`、常见安装目录和 `PATH` 定位 `dspmq`。
+2. 解析当前paramGroup的单进程dict，按cmdline `-m` 得到目标队列管理器并保留user关联；字段缺失、JSON非法或没有 `-m` 时回退为原有 `dspmq` 全量自动发现。
+3. Linux下按队列管理器循环执行 `su - <user> -c <绝对路径命令>`，分别运行 `dspmq -o status` 校准状态和 `runmqsc <qmgrName>` 批量查询；Windows不支持`su`，仍用Agent当前用户执行。同一队列管理器多条进程用户冲突时保留首个非空用户并输出ERROR日志。
+4. `runmqsc` 批量查询队列管理器死信队列配置、队列定义/状态、通道状态和监听器状态；0.4.7按IBM MQ 7.5 MQSC语法移除`CHSTATUS`后的`CHANNEL`与`LSSTATUS`后的`LISTENER`冗余参数，避免两命令AMQ8405语法错误；死信队列按 `DEADQ` 精确识别，即使名为 `SYSTEM.` 前缀也强制纳入。
+5. 默认排除 `SYSTEM.` 前缀队列，可用 `queueFilter` 正则筛选；Linux读取 `/proc`，Windows通过PowerShell CIM（`Win32_Process`、`Win32_PerfFormattedData_PerfProc_Process`）采集进程CPU、内存、线程和句柄，PowerShell不可用时降级WMIC。
+6. 非DEBUG模式stdout输出纯JSON数组；DEBUG诊断模式将详细日志镜像输出到stdout/stderr，采集JSON放在stdout末尾；无法进入采集时输出 `COLLECT_ERROR:` 与完整traceback，退出码保持0。
+
+## 参数
+
+- `instanceId`：取 `$.instanceId`，IBM MQ实例维度。
+- `hostIp`：取继承字段 `$.ip`，用于维度和部署定位。
+- `installPath`：取继承字段 `$.installPath`，用于定位bin目录。
+- `processList`：取 `$.processList`，collector_service按进程展开为单dict JSON字符串；脚本解析cmdline中的`-m <qmgrName>`和user，Linux用该用户执行`su -`。
+- `queueFilter`：队列名正则，默认 `.*`。
+- `includeSystemQueues`：默认 `false`，排除系统队列。
+- `processMonitor`：默认 `true`，采集进程资源。
+- `logLevel`：默认 `ERROR`；排查缺失指标时改为 `DEBUG`，详细日志同时输出到stdout和stderr，前端可直接复制，采集JSON在stdout末尾。
+- `sampleInterval`：Linux进程CPU两次采样间隔，默认0.2秒；Windows读取CIM格式化性能计数。
+- `commandTimeout`：MQ命令超时，默认10秒。
+
+## 指标
+
+共45项、11个指标集：采集状态、队列管理器、队列汇总/明细、传输队列、死信队列、监听器汇总/明细、通道汇总/明细和进程资源。基础维度为 `ibmmqInstanceId/qmgrName/hostIp/installPath`；队列、通道、监听器和进程分别追加自身维度。关键指标包括队列管理器/监听器/通道状态、本地队列与传输队列深度/占用率、死信队列深度/占用率、GET/PUT状态、通道收发字节数和进程CPU/内存/线程/句柄。
+所有别名指标均配置中文 `displayName`，例如“队列占用率”“死信队列当前深度”“通道接收字节数”“进程CPU使用率”，提升监控前端可读性。
+
+## 权限与限制
+
+- Linux Agent执行账号必须能通过 `su - <processList.user>` 切换到IBM MQ进程运行用户；Windows Agent需以具备 `dspmq.exe/runmqsc.exe` 权限的用户执行。
+- 本套件0.4.10同时支持Linux和Windows执行节点；Windows默认探测 `C:\Program Files\IBM\MQ\bin` 与 `C:\Program Files (x86)\IBM\MQ\bin`，命令会追加 `.exe`；`qmgrName`优先由`processList.cmdline`推导，缺失时由`dspmq`自动发现，`mqBinPath`不再作为任务参数。
+- 告警模板为 `IBM_MQ监控_告警规则模板_0.4.10.xlsx`，需通过事件中心Excel入口导入。本地/传输队列占用率80%/90%、死信队列深度连续2点大于0、队列管理器和监听器单点异常对齐本次Zabbix导出模板；队列绝对深度1000/5000和最老消息年龄300/900秒为补充策略，生产使用前必须按队列SLA调整。GET/PUT异常默认只采集展示，不启用告警，与Zabbix导出中禁用触发器的策略一致。
+- 排查“指标未采集”时，将任务参数 `logLevel` 改为 `DEBUG` 并在前端执行输出中直接复制stdout日志：日志包含MQ命令目录候选、命令输入/返回码/原始输出、队列过滤原因、队列管理器分类计数、通道字段和最终缺失指标清单。DEBUG可能影响指标自动解析，仅作诊断，完成后恢复ERROR；默认 `ERROR` 仅输出缺失指标名摘要到stderr。
+- 套件按本地MQ命令采集，不做客户端Put/Get链路拨测；目标实例到执行主机的关联需在导入后用真实任务验证。
+
+## 离线验证
+
+```bash
+python3 development/scripts/build_ibmmq_monitor_kit.py
+python3 development/scripts/validate_monitor_kit.py development/monitor-kits/ibmmq-monitoring
+python3 development/scripts/validate_monitor_kit.py ../hub/monitor-kits/监控套件_IBM_MQ监控_0.4.10.zip
+cd development && python3 -m unittest discover -s tests/monitor-kits -p 'test_ibmmq_monitor.py'
+```

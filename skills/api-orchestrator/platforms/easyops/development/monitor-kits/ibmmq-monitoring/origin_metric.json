@@ -1,0 +1,1567 @@
+[
+  {
+    "agentType": "easyops",
+    "dataType": "double",
+    "instanceId": "",
+    "key": "ibmmq_collect_success",
+    "labels": [
+      "ibmmqInstanceId",
+      "qmgrName",
+      "hostIp",
+      "installPath"
+    ],
+    "metricType": "gauge",
+    "tagDefine": [
+      {
+        "name": "ibmmqInstanceId",
+        "readOnly": false
+      },
+      {
+        "name": "qmgrName",
+        "readOnly": false
+      },
+      {
+        "name": "hostIp",
+        "readOnly": false
+      },
+      {
+        "name": "installPath",
+        "readOnly": false
+      }
+    ]
+  },
+  {
+    "agentType": "easyops",
+    "dataType": "double",
+    "instanceId": "",
+    "key": "ibmmq_discovery_success",
+    "labels": [
+      "ibmmqInstanceId",
+      "qmgrName",
+      "hostIp",
+      "installPath"
+    ],
+    "metricType": "gauge",
+    "tagDefine": [
+      {
+        "name": "ibmmqInstanceId",
+        "readOnly": false
+      },
+      {
+        "name": "qmgrName",
+        "readOnly": false
+      },
+      {
+        "name": "hostIp",
+        "readOnly": false
+      },
+      {
+        "name": "installPath",
+        "readOnly": false
+      }
+    ]
+  },
+  {
+    "agentType": "easyops",
+    "dataType": "double",
+    "instanceId": "",
+    "key": "ibmmq_qmgr_count",
+    "labels": [
+      "ibmmqInstanceId"
+    ],
+    "metricType": "gauge",
+    "tagDefine": [
+      {
+        "name": "ibmmqInstanceId",
+        "readOnly": false
+      }
+    ]
+  },
+  {
+    "agentType": "easyops",
+    "dataType": "double",
+    "instanceId": "",
+    "key": "ibmmq_qmgr_status",
+    "labels": [
+      "ibmmqInstanceId",
+      "qmgrName",
+      "hostIp",
+      "installPath"
+    ],
+    "metricType": "gauge",
+    "tagDefine": [
+      {
+        "name": "ibmmqInstanceId",
+        "readOnly": false
+      },
+      {
+        "name": "qmgrName",
+        "readOnly": false
+      },
+      {
+        "name": "hostIp",
+        "readOnly": false
+      },
+      {
+        "name": "installPath",
+        "readOnly": false
+      }
+    ]
+  },
+  {
+    "agentType": "easyops",
+    "dataType": "double",
+    "instanceId": "",
+    "key": "ibmmq_sc_command_success",
+    "labels": [
+      "ibmmqInstanceId",
+      "qmgrName",
+      "hostIp",
+      "installPath"
+    ],
+    "metricType": "gauge",
+    "tagDefine": [
+      {
+        "name": "ibmmqInstanceId",
+        "readOnly": false
+      },
+      {
+        "name": "qmgrName",
+        "readOnly": false
+      },
+      {
+        "name": "hostIp",
+        "readOnly": false
+      },
+      {
+        "name": "installPath",
+        "readOnly": false
+      }
+    ]
+  },
+  {
+    "agentType": "easyops",
+    "dataType": "double",
+    "instanceId": "",
+    "key": "ibmmq_queue_total",
+    "labels": [
+      "ibmmqInstanceId",
+      "qmgrName",
+      "hostIp",
+      "installPath"
+    ],
+    "metricType": "gauge",
+    "tagDefine": [
+      {
+        "name": "ibmmqInstanceId",
+        "readOnly": false
+      },
+      {
+        "name": "qmgrName",
+        "readOnly": false
+      },
+      {
+        "name": "hostIp",
+        "readOnly": false
+      },
+      {
+        "name": "installPath",
+        "readOnly": false
+      }
+    ]
+  },
+  {
+    "agentType": "easyops",
+    "dataType": "double",
+    "instanceId": "",
+    "key": "ibmmq_queue_depth_total",
+    "labels": [
+      "ibmmqInstanceId",
+      "qmgrName",
+      "hostIp",
+      "installPath"
+    ],
+    "metricType": "gauge",
+    "tagDefine": [
+      {
+        "name": "ibmmqInstanceId",
+        "readOnly": false
+      },
+      {
+        "name": "qmgrName",
+        "readOnly": false
+      },
+      {
+        "name": "hostIp",
+        "readOnly": false
+      },
+      {
+        "name": "installPath",
+        "readOnly": false
+      }
+    ]
+  },
+  {
+    "agentType": "easyops",
+    "dataType": "double",
+    "instanceId": "",
+    "key": "ibmmq_queue_max_depth",
+    "labels": [
+      "ibmmqInstanceId",
+      "qmgrName",
+      "hostIp",
+      "installPath"
+    ],
+    "metricType": "gauge",
+    "tagDefine": [
+      {
+        "name": "ibmmqInstanceId",
+        "readOnly": false
+      },
+      {
+        "name": "qmgrName",
+        "readOnly": false
+      },
+      {
+        "name": "hostIp",
+        "readOnly": false
+      },
+      {
+        "name": "installPath",
+        "readOnly": false
+      }
+    ]
+  },
+  {
+    "agentType": "easyops",
+    "dataType": "double",
+    "instanceId": "",
+    "key": "ibmmq_queue_max_usage_percent",
+    "labels": [
+      "ibmmqInstanceId",
+      "qmgrName",
+      "hostIp",
+      "installPath"
+    ],
+    "metricType": "gauge",
+    "tagDefine": [
+      {
+        "name": "ibmmqInstanceId",
+        "readOnly": false
+      },
+      {
+        "name": "qmgrName",
+        "readOnly": false
+      },
+      {
+        "name": "hostIp",
+        "readOnly": false
+      },
+      {
+        "name": "installPath",
+        "readOnly": false
+      }
+    ]
+  },
+  {
+    "agentType": "easyops",
+    "dataType": "double",
+    "instanceId": "",
+    "key": "ibmmq_queue_current_depth",
+    "labels": [
+      "ibmmqInstanceId",
+      "qmgrName",
+      "hostIp",
+      "installPath",
+      "queueName"
+    ],
+    "metricType": "gauge",
+    "tagDefine": [
+      {
+        "name": "ibmmqInstanceId",
+        "readOnly": false
+      },
+      {
+        "name": "qmgrName",
+        "readOnly": false
+      },
+      {
+        "name": "hostIp",
+        "readOnly": false
+      },
+      {
+        "name": "installPath",
+        "readOnly": false
+      },
+      {
+        "name": "queueName",
+        "readOnly": false
+      }
+    ]
+  },
+  {
+    "agentType": "easyops",
+    "dataType": "double",
+    "instanceId": "",
+    "key": "ibmmq_queue_max_depth_config",
+    "labels": [
+      "ibmmqInstanceId",
+      "qmgrName",
+      "hostIp",
+      "installPath",
+      "queueName"
+    ],
+    "metricType": "gauge",
+    "tagDefine": [
+      {
+        "name": "ibmmqInstanceId",
+        "readOnly": false
+      },
+      {
+        "name": "qmgrName",
+        "readOnly": false
+      },
+      {
+        "name": "hostIp",
+        "readOnly": false
+      },
+      {
+        "name": "installPath",
+        "readOnly": false
+      },
+      {
+        "name": "queueName",
+        "readOnly": false
+      }
+    ]
+  },
+  {
+    "agentType": "easyops",
+    "dataType": "double",
+    "instanceId": "",
+    "key": "ibmmq_queue_usage_percent",
+    "labels": [
+      "ibmmqInstanceId",
+      "qmgrName",
+      "hostIp",
+      "installPath",
+      "queueName"
+    ],
+    "metricType": "gauge",
+    "tagDefine": [
+      {
+        "name": "ibmmqInstanceId",
+        "readOnly": false
+      },
+      {
+        "name": "qmgrName",
+        "readOnly": false
+      },
+      {
+        "name": "hostIp",
+        "readOnly": false
+      },
+      {
+        "name": "installPath",
+        "readOnly": false
+      },
+      {
+        "name": "queueName",
+        "readOnly": false
+      }
+    ]
+  },
+  {
+    "agentType": "easyops",
+    "dataType": "double",
+    "instanceId": "",
+    "key": "ibmmq_queue_oldest_message_age_seconds",
+    "labels": [
+      "ibmmqInstanceId",
+      "qmgrName",
+      "hostIp",
+      "installPath",
+      "queueName"
+    ],
+    "metricType": "gauge",
+    "tagDefine": [
+      {
+        "name": "ibmmqInstanceId",
+        "readOnly": false
+      },
+      {
+        "name": "qmgrName",
+        "readOnly": false
+      },
+      {
+        "name": "hostIp",
+        "readOnly": false
+      },
+      {
+        "name": "installPath",
+        "readOnly": false
+      },
+      {
+        "name": "queueName",
+        "readOnly": false
+      }
+    ]
+  },
+  {
+    "agentType": "easyops",
+    "dataType": "double",
+    "instanceId": "",
+    "key": "ibmmq_queue_input_handles",
+    "labels": [
+      "ibmmqInstanceId",
+      "qmgrName",
+      "hostIp",
+      "installPath",
+      "queueName"
+    ],
+    "metricType": "gauge",
+    "tagDefine": [
+      {
+        "name": "ibmmqInstanceId",
+        "readOnly": false
+      },
+      {
+        "name": "qmgrName",
+        "readOnly": false
+      },
+      {
+        "name": "hostIp",
+        "readOnly": false
+      },
+      {
+        "name": "installPath",
+        "readOnly": false
+      },
+      {
+        "name": "queueName",
+        "readOnly": false
+      }
+    ]
+  },
+  {
+    "agentType": "easyops",
+    "dataType": "double",
+    "instanceId": "",
+    "key": "ibmmq_queue_output_handles",
+    "labels": [
+      "ibmmqInstanceId",
+      "qmgrName",
+      "hostIp",
+      "installPath",
+      "queueName"
+    ],
+    "metricType": "gauge",
+    "tagDefine": [
+      {
+        "name": "ibmmqInstanceId",
+        "readOnly": false
+      },
+      {
+        "name": "qmgrName",
+        "readOnly": false
+      },
+      {
+        "name": "hostIp",
+        "readOnly": false
+      },
+      {
+        "name": "installPath",
+        "readOnly": false
+      },
+      {
+        "name": "queueName",
+        "readOnly": false
+      }
+    ]
+  },
+  {
+    "agentType": "easyops",
+    "dataType": "double",
+    "instanceId": "",
+    "key": "ibmmq_queue_get_enabled",
+    "labels": [
+      "ibmmqInstanceId",
+      "qmgrName",
+      "hostIp",
+      "installPath",
+      "queueName"
+    ],
+    "metricType": "gauge",
+    "tagDefine": [
+      {
+        "name": "ibmmqInstanceId",
+        "readOnly": false
+      },
+      {
+        "name": "qmgrName",
+        "readOnly": false
+      },
+      {
+        "name": "hostIp",
+        "readOnly": false
+      },
+      {
+        "name": "installPath",
+        "readOnly": false
+      },
+      {
+        "name": "queueName",
+        "readOnly": false
+      }
+    ]
+  },
+  {
+    "agentType": "easyops",
+    "dataType": "double",
+    "instanceId": "",
+    "key": "ibmmq_queue_put_enabled",
+    "labels": [
+      "ibmmqInstanceId",
+      "qmgrName",
+      "hostIp",
+      "installPath",
+      "queueName"
+    ],
+    "metricType": "gauge",
+    "tagDefine": [
+      {
+        "name": "ibmmqInstanceId",
+        "readOnly": false
+      },
+      {
+        "name": "qmgrName",
+        "readOnly": false
+      },
+      {
+        "name": "hostIp",
+        "readOnly": false
+      },
+      {
+        "name": "installPath",
+        "readOnly": false
+      },
+      {
+        "name": "queueName",
+        "readOnly": false
+      }
+    ]
+  },
+  {
+    "agentType": "easyops",
+    "dataType": "double",
+    "instanceId": "",
+    "key": "ibmmq_transmission_queue_current_depth",
+    "labels": [
+      "ibmmqInstanceId",
+      "qmgrName",
+      "hostIp",
+      "installPath",
+      "queueName"
+    ],
+    "metricType": "gauge",
+    "tagDefine": [
+      {
+        "name": "ibmmqInstanceId",
+        "readOnly": false
+      },
+      {
+        "name": "qmgrName",
+        "readOnly": false
+      },
+      {
+        "name": "hostIp",
+        "readOnly": false
+      },
+      {
+        "name": "installPath",
+        "readOnly": false
+      },
+      {
+        "name": "queueName",
+        "readOnly": false
+      }
+    ]
+  },
+  {
+    "agentType": "easyops",
+    "dataType": "double",
+    "instanceId": "",
+    "key": "ibmmq_transmission_queue_max_depth",
+    "labels": [
+      "ibmmqInstanceId",
+      "qmgrName",
+      "hostIp",
+      "installPath",
+      "queueName"
+    ],
+    "metricType": "gauge",
+    "tagDefine": [
+      {
+        "name": "ibmmqInstanceId",
+        "readOnly": false
+      },
+      {
+        "name": "qmgrName",
+        "readOnly": false
+      },
+      {
+        "name": "hostIp",
+        "readOnly": false
+      },
+      {
+        "name": "installPath",
+        "readOnly": false
+      },
+      {
+        "name": "queueName",
+        "readOnly": false
+      }
+    ]
+  },
+  {
+    "agentType": "easyops",
+    "dataType": "double",
+    "instanceId": "",
+    "key": "ibmmq_transmission_queue_usage_percent",
+    "labels": [
+      "ibmmqInstanceId",
+      "qmgrName",
+      "hostIp",
+      "installPath",
+      "queueName"
+    ],
+    "metricType": "gauge",
+    "tagDefine": [
+      {
+        "name": "ibmmqInstanceId",
+        "readOnly": false
+      },
+      {
+        "name": "qmgrName",
+        "readOnly": false
+      },
+      {
+        "name": "hostIp",
+        "readOnly": false
+      },
+      {
+        "name": "installPath",
+        "readOnly": false
+      },
+      {
+        "name": "queueName",
+        "readOnly": false
+      }
+    ]
+  },
+  {
+    "agentType": "easyops",
+    "dataType": "double",
+    "instanceId": "",
+    "key": "ibmmq_transmission_queue_get_enabled",
+    "labels": [
+      "ibmmqInstanceId",
+      "qmgrName",
+      "hostIp",
+      "installPath",
+      "queueName"
+    ],
+    "metricType": "gauge",
+    "tagDefine": [
+      {
+        "name": "ibmmqInstanceId",
+        "readOnly": false
+      },
+      {
+        "name": "qmgrName",
+        "readOnly": false
+      },
+      {
+        "name": "hostIp",
+        "readOnly": false
+      },
+      {
+        "name": "installPath",
+        "readOnly": false
+      },
+      {
+        "name": "queueName",
+        "readOnly": false
+      }
+    ]
+  },
+  {
+    "agentType": "easyops",
+    "dataType": "double",
+    "instanceId": "",
+    "key": "ibmmq_transmission_queue_put_enabled",
+    "labels": [
+      "ibmmqInstanceId",
+      "qmgrName",
+      "hostIp",
+      "installPath",
+      "queueName"
+    ],
+    "metricType": "gauge",
+    "tagDefine": [
+      {
+        "name": "ibmmqInstanceId",
+        "readOnly": false
+      },
+      {
+        "name": "qmgrName",
+        "readOnly": false
+      },
+      {
+        "name": "hostIp",
+        "readOnly": false
+      },
+      {
+        "name": "installPath",
+        "readOnly": false
+      },
+      {
+        "name": "queueName",
+        "readOnly": false
+      }
+    ]
+  },
+  {
+    "agentType": "easyops",
+    "dataType": "double",
+    "instanceId": "",
+    "key": "ibmmq_dlq_configured",
+    "labels": [
+      "ibmmqInstanceId",
+      "qmgrName",
+      "hostIp",
+      "installPath",
+      "queueName"
+    ],
+    "metricType": "gauge",
+    "tagDefine": [
+      {
+        "name": "ibmmqInstanceId",
+        "readOnly": false
+      },
+      {
+        "name": "qmgrName",
+        "readOnly": false
+      },
+      {
+        "name": "hostIp",
+        "readOnly": false
+      },
+      {
+        "name": "installPath",
+        "readOnly": false
+      },
+      {
+        "name": "queueName",
+        "readOnly": false
+      }
+    ]
+  },
+  {
+    "agentType": "easyops",
+    "dataType": "double",
+    "instanceId": "",
+    "key": "ibmmq_dlq_current_depth",
+    "labels": [
+      "ibmmqInstanceId",
+      "qmgrName",
+      "hostIp",
+      "installPath",
+      "queueName"
+    ],
+    "metricType": "gauge",
+    "tagDefine": [
+      {
+        "name": "ibmmqInstanceId",
+        "readOnly": false
+      },
+      {
+        "name": "qmgrName",
+        "readOnly": false
+      },
+      {
+        "name": "hostIp",
+        "readOnly": false
+      },
+      {
+        "name": "installPath",
+        "readOnly": false
+      },
+      {
+        "name": "queueName",
+        "readOnly": false
+      }
+    ]
+  },
+  {
+    "agentType": "easyops",
+    "dataType": "double",
+    "instanceId": "",
+    "key": "ibmmq_dlq_max_depth",
+    "labels": [
+      "ibmmqInstanceId",
+      "qmgrName",
+      "hostIp",
+      "installPath",
+      "queueName"
+    ],
+    "metricType": "gauge",
+    "tagDefine": [
+      {
+        "name": "ibmmqInstanceId",
+        "readOnly": false
+      },
+      {
+        "name": "qmgrName",
+        "readOnly": false
+      },
+      {
+        "name": "hostIp",
+        "readOnly": false
+      },
+      {
+        "name": "installPath",
+        "readOnly": false
+      },
+      {
+        "name": "queueName",
+        "readOnly": false
+      }
+    ]
+  },
+  {
+    "agentType": "easyops",
+    "dataType": "double",
+    "instanceId": "",
+    "key": "ibmmq_dlq_usage_percent",
+    "labels": [
+      "ibmmqInstanceId",
+      "qmgrName",
+      "hostIp",
+      "installPath",
+      "queueName"
+    ],
+    "metricType": "gauge",
+    "tagDefine": [
+      {
+        "name": "ibmmqInstanceId",
+        "readOnly": false
+      },
+      {
+        "name": "qmgrName",
+        "readOnly": false
+      },
+      {
+        "name": "hostIp",
+        "readOnly": false
+      },
+      {
+        "name": "installPath",
+        "readOnly": false
+      },
+      {
+        "name": "queueName",
+        "readOnly": false
+      }
+    ]
+  },
+  {
+    "agentType": "easyops",
+    "dataType": "double",
+    "instanceId": "",
+    "key": "ibmmq_dlq_get_enabled",
+    "labels": [
+      "ibmmqInstanceId",
+      "qmgrName",
+      "hostIp",
+      "installPath",
+      "queueName"
+    ],
+    "metricType": "gauge",
+    "tagDefine": [
+      {
+        "name": "ibmmqInstanceId",
+        "readOnly": false
+      },
+      {
+        "name": "qmgrName",
+        "readOnly": false
+      },
+      {
+        "name": "hostIp",
+        "readOnly": false
+      },
+      {
+        "name": "installPath",
+        "readOnly": false
+      },
+      {
+        "name": "queueName",
+        "readOnly": false
+      }
+    ]
+  },
+  {
+    "agentType": "easyops",
+    "dataType": "double",
+    "instanceId": "",
+    "key": "ibmmq_dlq_put_enabled",
+    "labels": [
+      "ibmmqInstanceId",
+      "qmgrName",
+      "hostIp",
+      "installPath",
+      "queueName"
+    ],
+    "metricType": "gauge",
+    "tagDefine": [
+      {
+        "name": "ibmmqInstanceId",
+        "readOnly": false
+      },
+      {
+        "name": "qmgrName",
+        "readOnly": false
+      },
+      {
+        "name": "hostIp",
+        "readOnly": false
+      },
+      {
+        "name": "installPath",
+        "readOnly": false
+      },
+      {
+        "name": "queueName",
+        "readOnly": false
+      }
+    ]
+  },
+  {
+    "agentType": "easyops",
+    "dataType": "double",
+    "instanceId": "",
+    "key": "ibmmq_listener_total",
+    "labels": [
+      "ibmmqInstanceId",
+      "qmgrName",
+      "hostIp",
+      "installPath"
+    ],
+    "metricType": "gauge",
+    "tagDefine": [
+      {
+        "name": "ibmmqInstanceId",
+        "readOnly": false
+      },
+      {
+        "name": "qmgrName",
+        "readOnly": false
+      },
+      {
+        "name": "hostIp",
+        "readOnly": false
+      },
+      {
+        "name": "installPath",
+        "readOnly": false
+      }
+    ]
+  },
+  {
+    "agentType": "easyops",
+    "dataType": "double",
+    "instanceId": "",
+    "key": "ibmmq_listener_running_count",
+    "labels": [
+      "ibmmqInstanceId",
+      "qmgrName",
+      "hostIp",
+      "installPath"
+    ],
+    "metricType": "gauge",
+    "tagDefine": [
+      {
+        "name": "ibmmqInstanceId",
+        "readOnly": false
+      },
+      {
+        "name": "qmgrName",
+        "readOnly": false
+      },
+      {
+        "name": "hostIp",
+        "readOnly": false
+      },
+      {
+        "name": "installPath",
+        "readOnly": false
+      }
+    ]
+  },
+  {
+    "agentType": "easyops",
+    "dataType": "double",
+    "instanceId": "",
+    "key": "ibmmq_listener_status",
+    "labels": [
+      "ibmmqInstanceId",
+      "qmgrName",
+      "hostIp",
+      "installPath",
+      "listenerName",
+      "port"
+    ],
+    "metricType": "gauge",
+    "tagDefine": [
+      {
+        "name": "ibmmqInstanceId",
+        "readOnly": false
+      },
+      {
+        "name": "qmgrName",
+        "readOnly": false
+      },
+      {
+        "name": "hostIp",
+        "readOnly": false
+      },
+      {
+        "name": "installPath",
+        "readOnly": false
+      },
+      {
+        "name": "listenerName",
+        "readOnly": false
+      },
+      {
+        "name": "port",
+        "readOnly": false
+      }
+    ]
+  },
+  {
+    "agentType": "easyops",
+    "dataType": "double",
+    "instanceId": "",
+    "key": "ibmmq_channel_total",
+    "labels": [
+      "ibmmqInstanceId",
+      "qmgrName",
+      "hostIp",
+      "installPath"
+    ],
+    "metricType": "gauge",
+    "tagDefine": [
+      {
+        "name": "ibmmqInstanceId",
+        "readOnly": false
+      },
+      {
+        "name": "qmgrName",
+        "readOnly": false
+      },
+      {
+        "name": "hostIp",
+        "readOnly": false
+      },
+      {
+        "name": "installPath",
+        "readOnly": false
+      }
+    ]
+  },
+  {
+    "agentType": "easyops",
+    "dataType": "double",
+    "instanceId": "",
+    "key": "ibmmq_channel_running_count",
+    "labels": [
+      "ibmmqInstanceId",
+      "qmgrName",
+      "hostIp",
+      "installPath"
+    ],
+    "metricType": "gauge",
+    "tagDefine": [
+      {
+        "name": "ibmmqInstanceId",
+        "readOnly": false
+      },
+      {
+        "name": "qmgrName",
+        "readOnly": false
+      },
+      {
+        "name": "hostIp",
+        "readOnly": false
+      },
+      {
+        "name": "installPath",
+        "readOnly": false
+      }
+    ]
+  },
+  {
+    "agentType": "easyops",
+    "dataType": "double",
+    "instanceId": "",
+    "key": "ibmmq_channel_retrying_count",
+    "labels": [
+      "ibmmqInstanceId",
+      "qmgrName",
+      "hostIp",
+      "installPath"
+    ],
+    "metricType": "gauge",
+    "tagDefine": [
+      {
+        "name": "ibmmqInstanceId",
+        "readOnly": false
+      },
+      {
+        "name": "qmgrName",
+        "readOnly": false
+      },
+      {
+        "name": "hostIp",
+        "readOnly": false
+      },
+      {
+        "name": "installPath",
+        "readOnly": false
+      }
+    ]
+  },
+  {
+    "agentType": "easyops",
+    "dataType": "double",
+    "instanceId": "",
+    "key": "ibmmq_channel_status",
+    "labels": [
+      "ibmmqInstanceId",
+      "qmgrName",
+      "hostIp",
+      "installPath",
+      "channelName",
+      "channelType"
+    ],
+    "metricType": "gauge",
+    "tagDefine": [
+      {
+        "name": "ibmmqInstanceId",
+        "readOnly": false
+      },
+      {
+        "name": "qmgrName",
+        "readOnly": false
+      },
+      {
+        "name": "hostIp",
+        "readOnly": false
+      },
+      {
+        "name": "installPath",
+        "readOnly": false
+      },
+      {
+        "name": "channelName",
+        "readOnly": false
+      },
+      {
+        "name": "channelType",
+        "readOnly": false
+      }
+    ]
+  },
+  {
+    "agentType": "easyops",
+    "dataType": "double",
+    "instanceId": "",
+    "key": "ibmmq_channel_messages",
+    "labels": [
+      "ibmmqInstanceId",
+      "qmgrName",
+      "hostIp",
+      "installPath",
+      "channelName",
+      "channelType"
+    ],
+    "metricType": "gauge",
+    "tagDefine": [
+      {
+        "name": "ibmmqInstanceId",
+        "readOnly": false
+      },
+      {
+        "name": "qmgrName",
+        "readOnly": false
+      },
+      {
+        "name": "hostIp",
+        "readOnly": false
+      },
+      {
+        "name": "installPath",
+        "readOnly": false
+      },
+      {
+        "name": "channelName",
+        "readOnly": false
+      },
+      {
+        "name": "channelType",
+        "readOnly": false
+      }
+    ]
+  },
+  {
+    "agentType": "easyops",
+    "dataType": "double",
+    "instanceId": "",
+    "key": "ibmmq_channel_bytes",
+    "labels": [
+      "ibmmqInstanceId",
+      "qmgrName",
+      "hostIp",
+      "installPath",
+      "channelName",
+      "channelType"
+    ],
+    "metricType": "gauge",
+    "tagDefine": [
+      {
+        "name": "ibmmqInstanceId",
+        "readOnly": false
+      },
+      {
+        "name": "qmgrName",
+        "readOnly": false
+      },
+      {
+        "name": "hostIp",
+        "readOnly": false
+      },
+      {
+        "name": "installPath",
+        "readOnly": false
+      },
+      {
+        "name": "channelName",
+        "readOnly": false
+      },
+      {
+        "name": "channelType",
+        "readOnly": false
+      }
+    ]
+  },
+  {
+    "agentType": "easyops",
+    "dataType": "double",
+    "instanceId": "",
+    "key": "ibmmq_channel_bytes_received",
+    "labels": [
+      "ibmmqInstanceId",
+      "qmgrName",
+      "hostIp",
+      "installPath",
+      "channelName",
+      "channelType"
+    ],
+    "metricType": "gauge",
+    "tagDefine": [
+      {
+        "name": "ibmmqInstanceId",
+        "readOnly": false
+      },
+      {
+        "name": "qmgrName",
+        "readOnly": false
+      },
+      {
+        "name": "hostIp",
+        "readOnly": false
+      },
+      {
+        "name": "installPath",
+        "readOnly": false
+      },
+      {
+        "name": "channelName",
+        "readOnly": false
+      },
+      {
+        "name": "channelType",
+        "readOnly": false
+      }
+    ]
+  },
+  {
+    "agentType": "easyops",
+    "dataType": "double",
+    "instanceId": "",
+    "key": "ibmmq_channel_bytes_sent",
+    "labels": [
+      "ibmmqInstanceId",
+      "qmgrName",
+      "hostIp",
+      "installPath",
+      "channelName",
+      "channelType"
+    ],
+    "metricType": "gauge",
+    "tagDefine": [
+      {
+        "name": "ibmmqInstanceId",
+        "readOnly": false
+      },
+      {
+        "name": "qmgrName",
+        "readOnly": false
+      },
+      {
+        "name": "hostIp",
+        "readOnly": false
+      },
+      {
+        "name": "installPath",
+        "readOnly": false
+      },
+      {
+        "name": "channelName",
+        "readOnly": false
+      },
+      {
+        "name": "channelType",
+        "readOnly": false
+      }
+    ]
+  },
+  {
+    "agentType": "easyops",
+    "dataType": "double",
+    "instanceId": "",
+    "key": "ibmmq_process_alive",
+    "labels": [
+      "ibmmqInstanceId",
+      "qmgrName",
+      "hostIp",
+      "installPath",
+      "cmdline"
+    ],
+    "metricType": "gauge",
+    "tagDefine": [
+      {
+        "name": "ibmmqInstanceId",
+        "readOnly": false
+      },
+      {
+        "name": "qmgrName",
+        "readOnly": false
+      },
+      {
+        "name": "hostIp",
+        "readOnly": false
+      },
+      {
+        "name": "installPath",
+        "readOnly": false
+      },
+      {
+        "name": "cmdline",
+        "readOnly": false
+      }
+    ]
+  },
+  {
+    "agentType": "easyops",
+    "dataType": "double",
+    "instanceId": "",
+    "key": "ibmmq_process_count",
+    "labels": [
+      "ibmmqInstanceId",
+      "qmgrName",
+      "hostIp",
+      "installPath",
+      "cmdline"
+    ],
+    "metricType": "gauge",
+    "tagDefine": [
+      {
+        "name": "ibmmqInstanceId",
+        "readOnly": false
+      },
+      {
+        "name": "qmgrName",
+        "readOnly": false
+      },
+      {
+        "name": "hostIp",
+        "readOnly": false
+      },
+      {
+        "name": "installPath",
+        "readOnly": false
+      },
+      {
+        "name": "cmdline",
+        "readOnly": false
+      }
+    ]
+  },
+  {
+    "agentType": "easyops",
+    "dataType": "double",
+    "instanceId": "",
+    "key": "ibmmq_process_cpu_percent",
+    "labels": [
+      "ibmmqInstanceId",
+      "qmgrName",
+      "hostIp",
+      "installPath",
+      "cmdline"
+    ],
+    "metricType": "gauge",
+    "tagDefine": [
+      {
+        "name": "ibmmqInstanceId",
+        "readOnly": false
+      },
+      {
+        "name": "qmgrName",
+        "readOnly": false
+      },
+      {
+        "name": "hostIp",
+        "readOnly": false
+      },
+      {
+        "name": "installPath",
+        "readOnly": false
+      },
+      {
+        "name": "cmdline",
+        "readOnly": false
+      }
+    ]
+  },
+  {
+    "agentType": "easyops",
+    "dataType": "double",
+    "instanceId": "",
+    "key": "ibmmq_process_memory_bytes",
+    "labels": [
+      "ibmmqInstanceId",
+      "qmgrName",
+      "hostIp",
+      "installPath",
+      "cmdline"
+    ],
+    "metricType": "gauge",
+    "tagDefine": [
+      {
+        "name": "ibmmqInstanceId",
+        "readOnly": false
+      },
+      {
+        "name": "qmgrName",
+        "readOnly": false
+      },
+      {
+        "name": "hostIp",
+        "readOnly": false
+      },
+      {
+        "name": "installPath",
+        "readOnly": false
+      },
+      {
+        "name": "cmdline",
+        "readOnly": false
+      }
+    ]
+  },
+  {
+    "agentType": "easyops",
+    "dataType": "double",
+    "instanceId": "",
+    "key": "ibmmq_process_thread_count",
+    "labels": [
+      "ibmmqInstanceId",
+      "qmgrName",
+      "hostIp",
+      "installPath",
+      "cmdline"
+    ],
+    "metricType": "gauge",
+    "tagDefine": [
+      {
+        "name": "ibmmqInstanceId",
+        "readOnly": false
+      },
+      {
+        "name": "qmgrName",
+        "readOnly": false
+      },
+      {
+        "name": "hostIp",
+        "readOnly": false
+      },
+      {
+        "name": "installPath",
+        "readOnly": false
+      },
+      {
+        "name": "cmdline",
+        "readOnly": false
+      }
+    ]
+  },
+  {
+    "agentType": "easyops",
+    "dataType": "double",
+    "instanceId": "",
+    "key": "ibmmq_process_fd_count",
+    "labels": [
+      "ibmmqInstanceId",
+      "qmgrName",
+      "hostIp",
+      "installPath",
+      "cmdline"
+    ],
+    "metricType": "gauge",
+    "tagDefine": [
+      {
+        "name": "ibmmqInstanceId",
+        "readOnly": false
+      },
+      {
+        "name": "qmgrName",
+        "readOnly": false
+      },
+      {
+        "name": "hostIp",
+        "readOnly": false
+      },
+      {
+        "name": "installPath",
+        "readOnly": false
+      },
+      {
+        "name": "cmdline",
+        "readOnly": false
+      }
+    ]
+  }
+]

@@ -4,6 +4,14 @@
 
 涉及 ZIP 结构、文件权限、导入失败、版本递增、Hub 成品管理等公共问题，先读取 `../common/README.md` 和其中的公共文档，不在本目录重复维护。
 
+## 双平台本地采集强制要求
+
+本地部署中间件监控套件立项时必须先核对产品官方支持平台。IBM MQ等官方同时支持Windows和Linux的产品，套件必须同时实现并测试两个平台：命令定位、可执行扩展名、进程资源采集、readme、plugin memo、Hub索引和离线回归缺一不可。确有单平台限制时必须在所有交付说明中显式写“仅支持XX”，并说明另一平台的阻塞原因。
+
+## 本地采集日志与缺失指标排障强制要求
+
+本地命令行监控套件必须提供 `logLevel` 参数，默认 `ERROR`，可选 `DEBUG/INFO/WARN/ERROR`。非DEBUG模式采集stdout必须保持纯JSON数组，日志写入stderr；DEBUG诊断模式必须把同一份日志镜像输出到stdout和stderr，让前端直接获取完整日志，采集JSON放在stdout末尾。DEBUG输出可能导致自动指标解析失败，仅用于一次性排障，排障完成后必须恢复ERROR。默认ERROR只输出命令失败、致命异常和缺失指标摘要；DEBUG必须能导出后独立定位问题，至少包含命令路径与参数、输入命令、返回码和原始输出、目录探测候选、资源解析/过滤原因、每个队列管理器的分类计数、最终输出指标清单，以及未出现指标名清单。日志不得输出凭证、Cookie、密钥或数据库连接串。新增或优化指标时，离线测试必须覆盖日志默认级别、DEBUG stdout镜像、stderr镜像和指标缺失摘要。
+
 ## 告警规则模板
 
 告警规则模板统一使用 Hub 成品采用的 `.xlsx` 格式，通过事件中心的告警规则 Excel 导入入口使用；不再维护其他告警规则交付格式。
@@ -116,6 +124,10 @@ python3 skills/api-orchestrator/platforms/easyops/development/scripts/validate_m
 
 - [请求示例、用户验收与排障结论纠正](监控套件网关启用与立即采集_2026-11-11.md)
 - 接口权威：`../../../easyops-collector-service.yaml`；流程：`../../../flows/activate-and-test-monitor-kit.yaml`。
+
+## IBM MQ监控（2026-11-16）
+
+新增 `IBM MQ监控` 0.4.10：绑定现网内置中间件实例模型 `IBMMQ@ONEMODEL`（继承 `ARTIFACT_INST@ONEMODEL`），同时支持Linux和Windows执行节点。采集读取真实CMDB `processList` structs契约（元素字段`cwd/cmdline/pname/confPath/logPaths/ports/user`）；0.4.8复核collector_service与easy_metric_sampler源码后使用`$.processList`让平台按进程展开为单dict JSON字符串，脚本从cmdline解析队列管理器并保留user关联。禁止`$.processList.cmdline.join()`/`$.processList.user.join()`作为simple-script动态参数：join产物是原生数组，违反Agent `ParamGroups []map[string]string`契约，0.4.6因此出现任务无脚本输出。Linux按队列管理器用`su - <user>`执行`dspmq/runmqsc`，Windows保持Agent当前用户执行，字段缺失或非法时回退`dspmq`全量自动发现。再调用 `runmqsc` 采集队列管理器、监听器、通道、本地/传输/死信队列、GET/PUT、通道收发字节数和进程资源；不再暴露 `qmgrName/mqBinPath` 任务参数，模型与进程/cmdline 自动发现规律见 `IBM_MQ监控模型与自动发现_2026-11-16.md`。45个别名指标均已配置中文名。已按Zabbix导出模板对齐队列占用率80%/90%、死信队列深度连续2点Critical、队列管理器/监听器单点异常等阈值；GET/PUT异常按Zabbix禁用触发器处理为仅采集展示。0.2.0曾导入插件`6605ad8dec33d`并激活成功，回读`enabled`、9个指标集、30个别名指标与维度映射、1条资源发现配置均正确。0.4.10完成双平台离线模拟回归、目录/ZIP校验、34项专项单测和两段真实DEBUG日志回放，修复MQSC属性换行、中文运行状态、中文成功回显解析及Python 2 ASCII解码异常；保留0.4.7的IBM MQ 7.5通道/监听器MQSC语法修复，采集脚本不依赖`from __future__ import`，支持默认ERROR与DEBUG前端直读排障日志，尚未导入线上，未创建正式采集任务，也未连接真实 IBM MQ 实例执行采集。
 
 ## 主机部署实例监控（2026-11-12）
 
