@@ -133,3 +133,11 @@ python3 skills/api-orchestrator/platforms/easyops/development/scripts/validate_m
 ## 主机部署实例监控（2026-11-12）
 
 当前版本 `主机部署实例监控` 0.1.18：绑定 HOST，读取本地缓存，缓存缺失或超过7天时通过 OpenAPI search 刷新 `ARTIFACT_INST@ONEMODEL` 中 `isMonitor=是` 的部署实例；目标定位使用uuid/ip/instanceId单条件，agent配置发现的OpenAPI地址默认使用HTTPS。采集进程、端口、CPU、内存和句柄指标。数据结构、抽象模型更新坑位和导入验收见 `主机部署实例监控_数据结构与离线交付_2026-11-12.md`。
+
+## vCenter监控（2026-11-19）
+
+新增 `vCenter监控` 0.1.0：关联 `CLOUD_PROVIDER@ONEMODEL`（模型零修改），地址默认动态参数 `$.url`（模型已有url属性），username/password 任务参数手填且 password 用 `valueType=password + isEncrypt=true`（用户确认手填加密）。采集脚本依赖 agent py2 内置 pyVim/pyVmomi（无需 vendor）；一次 SmartConnect 完成认证预检+采集（复用连接，认证失败即跳过本轮）；按数据中心分批 PropertyCollector 拉 ComputeResource/HostSystem/VirtualMachine/Datastore 属性，再分批 QueryPerf（intervalId=20 实时）取数据存储 totalRead/WriteLatency 与宿主机 net.received/transmitted；perf 缺失按实体跳过不伪造。35 个别名指标/5 指标集，维度 vc→datacenter→cluster→datastore/host/vm 名称动态枚举。指标与告警对齐 zabbix54 导出现网（3394项/1362触发器提取归并，见套件 sources.md）：存储空间 usage>85/95%、读写延迟≥1000ms、宿主机重启 uptime≤600s、集群红/黄、电源状态 diff。验收：导入 instanceId=6609e070e86b5 status=available，v1 `/api/v1/plugin/metrics/list` 35/35 别名落库中文名全覆盖（该环境无 v2 collector-metric-names 端点），激活 totalStatus=success 且 metricSet 资源 35 项逐条 success，回读 aliasDims 逐层继承正确；真机采集待部署方建云平台实例后验证。
+
+### 激活请求经网关被 301 降级 GET 的坑（2026-11-19）
+
+api-cli 经前端网关调 `kit.activate`（合约路径 `@1.0.19`）时，网关对合约路径返回重定向，POST 被降级为 GET，后端报「register: POST ... req: GET ... Matching route not found」——降级与 http/https 入口无关（https+insecure 复现同样错误）。已验证可用配方即 `systems.yaml#collector_service.runtime.gateway_monitor_lifecycle.internal_activation`：curl 直连 `EASYOPS_COLLECTOR_SERVICE_BACKEND_URL`（:12000）POST `/api/v1/collector/kit/activate`，headers 带 Host/org/user + `giraffe-contract-name: easyops.api.collector_service.job.ActivateCollectorKit`（无@版本），body 不变，返回 code=0/totalStatus=success。api-cli `--insecure` 用于跳过自签证书校验（网关 HTTPS 需要）；导入手感是 curl -F 直连 8151。

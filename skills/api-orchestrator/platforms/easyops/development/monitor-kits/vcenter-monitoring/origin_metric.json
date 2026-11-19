@@ -1,0 +1,1107 @@
+[
+ {
+  "agentType": "easyops",
+  "dataType": "double",
+  "instanceId": "",
+  "key": "vcenter_available",
+  "labels": [
+   "vc"
+  ],
+  "metricType": "gauge",
+  "tagDefine": [
+   {
+    "name": "vc",
+    "readOnly": false
+   }
+  ]
+ },
+ {
+  "agentType": "easyops",
+  "dataType": "double",
+  "instanceId": "",
+  "key": "vcenter_collect_complete",
+  "labels": [
+   "vc"
+  ],
+  "metricType": "gauge",
+  "tagDefine": [
+   {
+    "name": "vc",
+    "readOnly": false
+   }
+  ]
+ },
+ {
+  "agentType": "easyops",
+  "dataType": "double",
+  "instanceId": "",
+  "key": "vcenter_error_count",
+  "labels": [
+   "vc"
+  ],
+  "metricType": "gauge",
+  "tagDefine": [
+   {
+    "name": "vc",
+    "readOnly": false
+   }
+  ]
+ },
+ {
+  "agentType": "easyops",
+  "dataType": "double",
+  "instanceId": "",
+  "key": "vcenter_duration_seconds",
+  "labels": [
+   "vc"
+  ],
+  "metricType": "gauge",
+  "tagDefine": [
+   {
+    "name": "vc",
+    "readOnly": false
+   }
+  ]
+ },
+ {
+  "agentType": "easyops",
+  "dataType": "double",
+  "instanceId": "",
+  "key": "vcenter_cluster_status",
+  "labels": [
+   "vc",
+   "datacenter",
+   "cluster"
+  ],
+  "metricType": "gauge",
+  "tagDefine": [
+   {
+    "name": "vc",
+    "readOnly": false
+   },
+   {
+    "name": "datacenter",
+    "readOnly": false
+   },
+   {
+    "name": "cluster",
+    "readOnly": false
+   }
+  ]
+ },
+ {
+  "agentType": "easyops",
+  "dataType": "double",
+  "instanceId": "",
+  "key": "vcenter_cluster_host_total",
+  "labels": [
+   "vc",
+   "datacenter",
+   "cluster"
+  ],
+  "metricType": "gauge",
+  "tagDefine": [
+   {
+    "name": "vc",
+    "readOnly": false
+   },
+   {
+    "name": "datacenter",
+    "readOnly": false
+   },
+   {
+    "name": "cluster",
+    "readOnly": false
+   }
+  ]
+ },
+ {
+  "agentType": "easyops",
+  "dataType": "double",
+  "instanceId": "",
+  "key": "vcenter_cluster_vm_total",
+  "labels": [
+   "vc",
+   "datacenter",
+   "cluster"
+  ],
+  "metricType": "gauge",
+  "tagDefine": [
+   {
+    "name": "vc",
+    "readOnly": false
+   },
+   {
+    "name": "datacenter",
+    "readOnly": false
+   },
+   {
+    "name": "cluster",
+    "readOnly": false
+   }
+  ]
+ },
+ {
+  "agentType": "easyops",
+  "dataType": "double",
+  "instanceId": "",
+  "key": "vcenter_cluster_vm_powered_on",
+  "labels": [
+   "vc",
+   "datacenter",
+   "cluster"
+  ],
+  "metricType": "gauge",
+  "tagDefine": [
+   {
+    "name": "vc",
+    "readOnly": false
+   },
+   {
+    "name": "datacenter",
+    "readOnly": false
+   },
+   {
+    "name": "cluster",
+    "readOnly": false
+   }
+  ]
+ },
+ {
+  "agentType": "easyops",
+  "dataType": "double",
+  "instanceId": "",
+  "key": "vcenter_cluster_vm_powered_off",
+  "labels": [
+   "vc",
+   "datacenter",
+   "cluster"
+  ],
+  "metricType": "gauge",
+  "tagDefine": [
+   {
+    "name": "vc",
+    "readOnly": false
+   },
+   {
+    "name": "datacenter",
+    "readOnly": false
+   },
+   {
+    "name": "cluster",
+    "readOnly": false
+   }
+  ]
+ },
+ {
+  "agentType": "easyops",
+  "dataType": "double",
+  "instanceId": "",
+  "key": "vcenter_cluster_vm_suspended",
+  "labels": [
+   "vc",
+   "datacenter",
+   "cluster"
+  ],
+  "metricType": "gauge",
+  "tagDefine": [
+   {
+    "name": "vc",
+    "readOnly": false
+   },
+   {
+    "name": "datacenter",
+    "readOnly": false
+   },
+   {
+    "name": "cluster",
+    "readOnly": false
+   }
+  ]
+ },
+ {
+  "agentType": "easyops",
+  "dataType": "double",
+  "instanceId": "",
+  "key": "vcenter_cluster_cpu_usage_pct",
+  "labels": [
+   "vc",
+   "datacenter",
+   "cluster"
+  ],
+  "metricType": "gauge",
+  "tagDefine": [
+   {
+    "name": "vc",
+    "readOnly": false
+   },
+   {
+    "name": "datacenter",
+    "readOnly": false
+   },
+   {
+    "name": "cluster",
+    "readOnly": false
+   }
+  ]
+ },
+ {
+  "agentType": "easyops",
+  "dataType": "double",
+  "instanceId": "",
+  "key": "vcenter_cluster_mem_usage_pct",
+  "labels": [
+   "vc",
+   "datacenter",
+   "cluster"
+  ],
+  "metricType": "gauge",
+  "tagDefine": [
+   {
+    "name": "vc",
+    "readOnly": false
+   },
+   {
+    "name": "datacenter",
+    "readOnly": false
+   },
+   {
+    "name": "cluster",
+    "readOnly": false
+   }
+  ]
+ },
+ {
+  "agentType": "easyops",
+  "dataType": "double",
+  "instanceId": "",
+  "key": "vcenter_datastore_accessible",
+  "labels": [
+   "vc",
+   "datacenter",
+   "cluster",
+   "datastore"
+  ],
+  "metricType": "gauge",
+  "tagDefine": [
+   {
+    "name": "vc",
+    "readOnly": false
+   },
+   {
+    "name": "datacenter",
+    "readOnly": false
+   },
+   {
+    "name": "cluster",
+    "readOnly": false
+   },
+   {
+    "name": "datastore",
+    "readOnly": false
+   }
+  ]
+ },
+ {
+  "agentType": "easyops",
+  "dataType": "double",
+  "instanceId": "",
+  "key": "vcenter_datastore_capacity_gb",
+  "labels": [
+   "vc",
+   "datacenter",
+   "cluster",
+   "datastore"
+  ],
+  "metricType": "gauge",
+  "tagDefine": [
+   {
+    "name": "vc",
+    "readOnly": false
+   },
+   {
+    "name": "datacenter",
+    "readOnly": false
+   },
+   {
+    "name": "cluster",
+    "readOnly": false
+   },
+   {
+    "name": "datastore",
+    "readOnly": false
+   }
+  ]
+ },
+ {
+  "agentType": "easyops",
+  "dataType": "double",
+  "instanceId": "",
+  "key": "vcenter_datastore_free_gb",
+  "labels": [
+   "vc",
+   "datacenter",
+   "cluster",
+   "datastore"
+  ],
+  "metricType": "gauge",
+  "tagDefine": [
+   {
+    "name": "vc",
+    "readOnly": false
+   },
+   {
+    "name": "datacenter",
+    "readOnly": false
+   },
+   {
+    "name": "cluster",
+    "readOnly": false
+   },
+   {
+    "name": "datastore",
+    "readOnly": false
+   }
+  ]
+ },
+ {
+  "agentType": "easyops",
+  "dataType": "double",
+  "instanceId": "",
+  "key": "vcenter_datastore_usage_pct",
+  "labels": [
+   "vc",
+   "datacenter",
+   "cluster",
+   "datastore"
+  ],
+  "metricType": "gauge",
+  "tagDefine": [
+   {
+    "name": "vc",
+    "readOnly": false
+   },
+   {
+    "name": "datacenter",
+    "readOnly": false
+   },
+   {
+    "name": "cluster",
+    "readOnly": false
+   },
+   {
+    "name": "datastore",
+    "readOnly": false
+   }
+  ]
+ },
+ {
+  "agentType": "easyops",
+  "dataType": "double",
+  "instanceId": "",
+  "key": "vcenter_datastore_read_latency_ms",
+  "labels": [
+   "vc",
+   "datacenter",
+   "cluster",
+   "datastore"
+  ],
+  "metricType": "gauge",
+  "tagDefine": [
+   {
+    "name": "vc",
+    "readOnly": false
+   },
+   {
+    "name": "datacenter",
+    "readOnly": false
+   },
+   {
+    "name": "cluster",
+    "readOnly": false
+   },
+   {
+    "name": "datastore",
+    "readOnly": false
+   }
+  ]
+ },
+ {
+  "agentType": "easyops",
+  "dataType": "double",
+  "instanceId": "",
+  "key": "vcenter_datastore_write_latency_ms",
+  "labels": [
+   "vc",
+   "datacenter",
+   "cluster",
+   "datastore"
+  ],
+  "metricType": "gauge",
+  "tagDefine": [
+   {
+    "name": "vc",
+    "readOnly": false
+   },
+   {
+    "name": "datacenter",
+    "readOnly": false
+   },
+   {
+    "name": "cluster",
+    "readOnly": false
+   },
+   {
+    "name": "datastore",
+    "readOnly": false
+   }
+  ]
+ },
+ {
+  "agentType": "easyops",
+  "dataType": "double",
+  "instanceId": "",
+  "key": "vcenter_host_connection_state",
+  "labels": [
+   "vc",
+   "datacenter",
+   "cluster",
+   "datastore",
+   "host"
+  ],
+  "metricType": "gauge",
+  "tagDefine": [
+   {
+    "name": "vc",
+    "readOnly": false
+   },
+   {
+    "name": "datacenter",
+    "readOnly": false
+   },
+   {
+    "name": "cluster",
+    "readOnly": false
+   },
+   {
+    "name": "datastore",
+    "readOnly": false
+   },
+   {
+    "name": "host",
+    "readOnly": false
+   }
+  ]
+ },
+ {
+  "agentType": "easyops",
+  "dataType": "double",
+  "instanceId": "",
+  "key": "vcenter_host_power_state",
+  "labels": [
+   "vc",
+   "datacenter",
+   "cluster",
+   "datastore",
+   "host"
+  ],
+  "metricType": "gauge",
+  "tagDefine": [
+   {
+    "name": "vc",
+    "readOnly": false
+   },
+   {
+    "name": "datacenter",
+    "readOnly": false
+   },
+   {
+    "name": "cluster",
+    "readOnly": false
+   },
+   {
+    "name": "datastore",
+    "readOnly": false
+   },
+   {
+    "name": "host",
+    "readOnly": false
+   }
+  ]
+ },
+ {
+  "agentType": "easyops",
+  "dataType": "double",
+  "instanceId": "",
+  "key": "vcenter_host_overall_status",
+  "labels": [
+   "vc",
+   "datacenter",
+   "cluster",
+   "datastore",
+   "host"
+  ],
+  "metricType": "gauge",
+  "tagDefine": [
+   {
+    "name": "vc",
+    "readOnly": false
+   },
+   {
+    "name": "datacenter",
+    "readOnly": false
+   },
+   {
+    "name": "cluster",
+    "readOnly": false
+   },
+   {
+    "name": "datastore",
+    "readOnly": false
+   },
+   {
+    "name": "host",
+    "readOnly": false
+   }
+  ]
+ },
+ {
+  "agentType": "easyops",
+  "dataType": "double",
+  "instanceId": "",
+  "key": "vcenter_host_cpu_usage_pct",
+  "labels": [
+   "vc",
+   "datacenter",
+   "cluster",
+   "datastore",
+   "host"
+  ],
+  "metricType": "gauge",
+  "tagDefine": [
+   {
+    "name": "vc",
+    "readOnly": false
+   },
+   {
+    "name": "datacenter",
+    "readOnly": false
+   },
+   {
+    "name": "cluster",
+    "readOnly": false
+   },
+   {
+    "name": "datastore",
+    "readOnly": false
+   },
+   {
+    "name": "host",
+    "readOnly": false
+   }
+  ]
+ },
+ {
+  "agentType": "easyops",
+  "dataType": "double",
+  "instanceId": "",
+  "key": "vcenter_host_mem_usage_pct",
+  "labels": [
+   "vc",
+   "datacenter",
+   "cluster",
+   "datastore",
+   "host"
+  ],
+  "metricType": "gauge",
+  "tagDefine": [
+   {
+    "name": "vc",
+    "readOnly": false
+   },
+   {
+    "name": "datacenter",
+    "readOnly": false
+   },
+   {
+    "name": "cluster",
+    "readOnly": false
+   },
+   {
+    "name": "datastore",
+    "readOnly": false
+   },
+   {
+    "name": "host",
+    "readOnly": false
+   }
+  ]
+ },
+ {
+  "agentType": "easyops",
+  "dataType": "double",
+  "instanceId": "",
+  "key": "vcenter_host_mem_ballooned_pct",
+  "labels": [
+   "vc",
+   "datacenter",
+   "cluster",
+   "datastore",
+   "host"
+  ],
+  "metricType": "gauge",
+  "tagDefine": [
+   {
+    "name": "vc",
+    "readOnly": false
+   },
+   {
+    "name": "datacenter",
+    "readOnly": false
+   },
+   {
+    "name": "cluster",
+    "readOnly": false
+   },
+   {
+    "name": "datastore",
+    "readOnly": false
+   },
+   {
+    "name": "host",
+    "readOnly": false
+   }
+  ]
+ },
+ {
+  "agentType": "easyops",
+  "dataType": "double",
+  "instanceId": "",
+  "key": "vcenter_host_net_in_kbps",
+  "labels": [
+   "vc",
+   "datacenter",
+   "cluster",
+   "datastore",
+   "host"
+  ],
+  "metricType": "gauge",
+  "tagDefine": [
+   {
+    "name": "vc",
+    "readOnly": false
+   },
+   {
+    "name": "datacenter",
+    "readOnly": false
+   },
+   {
+    "name": "cluster",
+    "readOnly": false
+   },
+   {
+    "name": "datastore",
+    "readOnly": false
+   },
+   {
+    "name": "host",
+    "readOnly": false
+   }
+  ]
+ },
+ {
+  "agentType": "easyops",
+  "dataType": "double",
+  "instanceId": "",
+  "key": "vcenter_host_net_out_kbps",
+  "labels": [
+   "vc",
+   "datacenter",
+   "cluster",
+   "datastore",
+   "host"
+  ],
+  "metricType": "gauge",
+  "tagDefine": [
+   {
+    "name": "vc",
+    "readOnly": false
+   },
+   {
+    "name": "datacenter",
+    "readOnly": false
+   },
+   {
+    "name": "cluster",
+    "readOnly": false
+   },
+   {
+    "name": "datastore",
+    "readOnly": false
+   },
+   {
+    "name": "host",
+    "readOnly": false
+   }
+  ]
+ },
+ {
+  "agentType": "easyops",
+  "dataType": "double",
+  "instanceId": "",
+  "key": "vcenter_host_uptime_seconds",
+  "labels": [
+   "vc",
+   "datacenter",
+   "cluster",
+   "datastore",
+   "host"
+  ],
+  "metricType": "gauge",
+  "tagDefine": [
+   {
+    "name": "vc",
+    "readOnly": false
+   },
+   {
+    "name": "datacenter",
+    "readOnly": false
+   },
+   {
+    "name": "cluster",
+    "readOnly": false
+   },
+   {
+    "name": "datastore",
+    "readOnly": false
+   },
+   {
+    "name": "host",
+    "readOnly": false
+   }
+  ]
+ },
+ {
+  "agentType": "easyops",
+  "dataType": "double",
+  "instanceId": "",
+  "key": "vcenter_host_vm_count",
+  "labels": [
+   "vc",
+   "datacenter",
+   "cluster",
+   "datastore",
+   "host"
+  ],
+  "metricType": "gauge",
+  "tagDefine": [
+   {
+    "name": "vc",
+    "readOnly": false
+   },
+   {
+    "name": "datacenter",
+    "readOnly": false
+   },
+   {
+    "name": "cluster",
+    "readOnly": false
+   },
+   {
+    "name": "datastore",
+    "readOnly": false
+   },
+   {
+    "name": "host",
+    "readOnly": false
+   }
+  ]
+ },
+ {
+  "agentType": "easyops",
+  "dataType": "double",
+  "instanceId": "",
+  "key": "vcenter_vm_power_state",
+  "labels": [
+   "vc",
+   "datacenter",
+   "cluster",
+   "datastore",
+   "host",
+   "vm"
+  ],
+  "metricType": "gauge",
+  "tagDefine": [
+   {
+    "name": "vc",
+    "readOnly": false
+   },
+   {
+    "name": "datacenter",
+    "readOnly": false
+   },
+   {
+    "name": "cluster",
+    "readOnly": false
+   },
+   {
+    "name": "datastore",
+    "readOnly": false
+   },
+   {
+    "name": "host",
+    "readOnly": false
+   },
+   {
+    "name": "vm",
+    "readOnly": false
+   }
+  ]
+ },
+ {
+  "agentType": "easyops",
+  "dataType": "double",
+  "instanceId": "",
+  "key": "vcenter_vm_cpu_usage_pct",
+  "labels": [
+   "vc",
+   "datacenter",
+   "cluster",
+   "datastore",
+   "host",
+   "vm"
+  ],
+  "metricType": "gauge",
+  "tagDefine": [
+   {
+    "name": "vc",
+    "readOnly": false
+   },
+   {
+    "name": "datacenter",
+    "readOnly": false
+   },
+   {
+    "name": "cluster",
+    "readOnly": false
+   },
+   {
+    "name": "datastore",
+    "readOnly": false
+   },
+   {
+    "name": "host",
+    "readOnly": false
+   },
+   {
+    "name": "vm",
+    "readOnly": false
+   }
+  ]
+ },
+ {
+  "agentType": "easyops",
+  "dataType": "double",
+  "instanceId": "",
+  "key": "vcenter_vm_mem_usage_pct",
+  "labels": [
+   "vc",
+   "datacenter",
+   "cluster",
+   "datastore",
+   "host",
+   "vm"
+  ],
+  "metricType": "gauge",
+  "tagDefine": [
+   {
+    "name": "vc",
+    "readOnly": false
+   },
+   {
+    "name": "datacenter",
+    "readOnly": false
+   },
+   {
+    "name": "cluster",
+    "readOnly": false
+   },
+   {
+    "name": "datastore",
+    "readOnly": false
+   },
+   {
+    "name": "host",
+    "readOnly": false
+   },
+   {
+    "name": "vm",
+    "readOnly": false
+   }
+  ]
+ },
+ {
+  "agentType": "easyops",
+  "dataType": "double",
+  "instanceId": "",
+  "key": "vcenter_vm_storage_committed_gb",
+  "labels": [
+   "vc",
+   "datacenter",
+   "cluster",
+   "datastore",
+   "host",
+   "vm"
+  ],
+  "metricType": "gauge",
+  "tagDefine": [
+   {
+    "name": "vc",
+    "readOnly": false
+   },
+   {
+    "name": "datacenter",
+    "readOnly": false
+   },
+   {
+    "name": "cluster",
+    "readOnly": false
+   },
+   {
+    "name": "datastore",
+    "readOnly": false
+   },
+   {
+    "name": "host",
+    "readOnly": false
+   },
+   {
+    "name": "vm",
+    "readOnly": false
+   }
+  ]
+ },
+ {
+  "agentType": "easyops",
+  "dataType": "double",
+  "instanceId": "",
+  "key": "vcenter_vm_storage_usage_pct",
+  "labels": [
+   "vc",
+   "datacenter",
+   "cluster",
+   "datastore",
+   "host",
+   "vm"
+  ],
+  "metricType": "gauge",
+  "tagDefine": [
+   {
+    "name": "vc",
+    "readOnly": false
+   },
+   {
+    "name": "datacenter",
+    "readOnly": false
+   },
+   {
+    "name": "cluster",
+    "readOnly": false
+   },
+   {
+    "name": "datastore",
+    "readOnly": false
+   },
+   {
+    "name": "host",
+    "readOnly": false
+   },
+   {
+    "name": "vm",
+    "readOnly": false
+   }
+  ]
+ },
+ {
+  "agentType": "easyops",
+  "dataType": "double",
+  "instanceId": "",
+  "key": "vcenter_vm_tools_status",
+  "labels": [
+   "vc",
+   "datacenter",
+   "cluster",
+   "datastore",
+   "host",
+   "vm"
+  ],
+  "metricType": "gauge",
+  "tagDefine": [
+   {
+    "name": "vc",
+    "readOnly": false
+   },
+   {
+    "name": "datacenter",
+    "readOnly": false
+   },
+   {
+    "name": "cluster",
+    "readOnly": false
+   },
+   {
+    "name": "datastore",
+    "readOnly": false
+   },
+   {
+    "name": "host",
+    "readOnly": false
+   },
+   {
+    "name": "vm",
+    "readOnly": false
+   }
+  ]
+ },
+ {
+  "agentType": "easyops",
+  "dataType": "double",
+  "instanceId": "",
+  "key": "vcenter_vm_uptime_seconds",
+  "labels": [
+   "vc",
+   "datacenter",
+   "cluster",
+   "datastore",
+   "host",
+   "vm"
+  ],
+  "metricType": "gauge",
+  "tagDefine": [
+   {
+    "name": "vc",
+    "readOnly": false
+   },
+   {
+    "name": "datacenter",
+    "readOnly": false
+   },
+   {
+    "name": "cluster",
+    "readOnly": false
+   },
+   {
+    "name": "datastore",
+    "readOnly": false
+   },
+   {
+    "name": "host",
+    "readOnly": false
+   },
+   {
+    "name": "vm",
+    "readOnly": false
+   }
+  ]
+ }
+]

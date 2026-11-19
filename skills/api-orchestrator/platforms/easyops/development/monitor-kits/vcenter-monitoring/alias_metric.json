@@ -1,0 +1,1531 @@
+[
+ {
+  "agentType": "easyops",
+  "dataType": "double",
+  "description": "vCenter SDK 会话建立成功 1/0",
+  "dims": [
+   {
+    "dimDisplayName": "vCenter地址",
+    "dimName": "vc",
+    "isArray": false,
+    "originDimName": "vc"
+   }
+  ],
+  "displayName": "vCenter-连接可用",
+  "expression": "",
+  "metricSet": [
+   "平台状态"
+  ],
+  "name": "vcenter_available",
+  "objectId": "CLOUD_PROVIDER@ONEMODEL",
+  "originalMetrics": [
+   "vcenter_available"
+  ],
+  "type": "normal",
+  "unit": ""
+ },
+ {
+  "agentType": "easyops",
+  "dataType": "double",
+  "description": "本轮无局部采集错误 1/0",
+  "dims": [
+   {
+    "dimDisplayName": "vCenter地址",
+    "dimName": "vc",
+    "isArray": false,
+    "originDimName": "vc"
+   }
+  ],
+  "displayName": "vCenter-采集完整",
+  "expression": "",
+  "metricSet": [
+   "平台状态"
+  ],
+  "name": "vcenter_collect_complete",
+  "objectId": "CLOUD_PROVIDER@ONEMODEL",
+  "originalMetrics": [
+   "vcenter_collect_complete"
+  ],
+  "type": "normal",
+  "unit": ""
+ },
+ {
+  "agentType": "easyops",
+  "dataType": "double",
+  "description": "本轮局部对象采集失败次数",
+  "dims": [
+   {
+    "dimDisplayName": "vCenter地址",
+    "dimName": "vc",
+    "isArray": false,
+    "originDimName": "vc"
+   }
+  ],
+  "displayName": "vCenter-采集错误数",
+  "expression": "",
+  "metricSet": [
+   "平台状态"
+  ],
+  "name": "vcenter_error_count",
+  "objectId": "CLOUD_PROVIDER@ONEMODEL",
+  "originalMetrics": [
+   "vcenter_error_count"
+  ],
+  "type": "normal",
+  "unit": ""
+ },
+ {
+  "agentType": "easyops",
+  "dataType": "double",
+  "description": "本轮对象遍历与组装耗时",
+  "dims": [
+   {
+    "dimDisplayName": "vCenter地址",
+    "dimName": "vc",
+    "isArray": false,
+    "originDimName": "vc"
+   }
+  ],
+  "displayName": "vCenter-采集耗时",
+  "expression": "",
+  "metricSet": [
+   "平台状态"
+  ],
+  "name": "vcenter_duration_seconds",
+  "objectId": "CLOUD_PROVIDER@ONEMODEL",
+  "originalMetrics": [
+   "vcenter_duration_seconds"
+  ],
+  "type": "normal",
+  "unit": "s"
+ },
+ {
+  "agentType": "easyops",
+  "dataType": "double",
+  "description": "0绿色/1黄色/2红色/3未知",
+  "dims": [
+   {
+    "dimDisplayName": "vCenter地址",
+    "dimName": "vc",
+    "isArray": false,
+    "originDimName": "vc"
+   },
+   {
+    "dimDisplayName": "数据中心",
+    "dimName": "datacenter",
+    "isArray": false,
+    "originDimName": "datacenter"
+   },
+   {
+    "dimDisplayName": "集群",
+    "dimName": "cluster",
+    "isArray": false,
+    "originDimName": "cluster"
+   }
+  ],
+  "displayName": "vCenter-集群状态",
+  "expression": "",
+  "metricSet": [
+   "集群"
+  ],
+  "name": "vcenter_cluster_status",
+  "objectId": "CLOUD_PROVIDER@ONEMODEL",
+  "originalMetrics": [
+   "vcenter_cluster_status"
+  ],
+  "type": "normal",
+  "unit": ""
+ },
+ {
+  "agentType": "easyops",
+  "dataType": "double",
+  "description": "集群内宿主机数量",
+  "dims": [
+   {
+    "dimDisplayName": "vCenter地址",
+    "dimName": "vc",
+    "isArray": false,
+    "originDimName": "vc"
+   },
+   {
+    "dimDisplayName": "数据中心",
+    "dimName": "datacenter",
+    "isArray": false,
+    "originDimName": "datacenter"
+   },
+   {
+    "dimDisplayName": "集群",
+    "dimName": "cluster",
+    "isArray": false,
+    "originDimName": "cluster"
+   }
+  ],
+  "displayName": "vCenter-宿主机总数",
+  "expression": "",
+  "metricSet": [
+   "集群"
+  ],
+  "name": "vcenter_cluster_host_total",
+  "objectId": "CLOUD_PROVIDER@ONEMODEL",
+  "originalMetrics": [
+   "vcenter_cluster_host_total"
+  ],
+  "type": "normal",
+  "unit": ""
+ },
+ {
+  "agentType": "easyops",
+  "dataType": "double",
+  "description": "集群内虚拟机数量（按运行时归属宿主机统计）",
+  "dims": [
+   {
+    "dimDisplayName": "vCenter地址",
+    "dimName": "vc",
+    "isArray": false,
+    "originDimName": "vc"
+   },
+   {
+    "dimDisplayName": "数据中心",
+    "dimName": "datacenter",
+    "isArray": false,
+    "originDimName": "datacenter"
+   },
+   {
+    "dimDisplayName": "集群",
+    "dimName": "cluster",
+    "isArray": false,
+    "originDimName": "cluster"
+   }
+  ],
+  "displayName": "vCenter-虚拟机总数",
+  "expression": "",
+  "metricSet": [
+   "集群"
+  ],
+  "name": "vcenter_cluster_vm_total",
+  "objectId": "CLOUD_PROVIDER@ONEMODEL",
+  "originalMetrics": [
+   "vcenter_cluster_vm_total"
+  ],
+  "type": "normal",
+  "unit": ""
+ },
+ {
+  "agentType": "easyops",
+  "dataType": "double",
+  "description": "电源状态 poweredOn 的虚拟机数量",
+  "dims": [
+   {
+    "dimDisplayName": "vCenter地址",
+    "dimName": "vc",
+    "isArray": false,
+    "originDimName": "vc"
+   },
+   {
+    "dimDisplayName": "数据中心",
+    "dimName": "datacenter",
+    "isArray": false,
+    "originDimName": "datacenter"
+   },
+   {
+    "dimDisplayName": "集群",
+    "dimName": "cluster",
+    "isArray": false,
+    "originDimName": "cluster"
+   }
+  ],
+  "displayName": "vCenter-运行虚拟机数",
+  "expression": "",
+  "metricSet": [
+   "集群"
+  ],
+  "name": "vcenter_cluster_vm_powered_on",
+  "objectId": "CLOUD_PROVIDER@ONEMODEL",
+  "originalMetrics": [
+   "vcenter_cluster_vm_powered_on"
+  ],
+  "type": "normal",
+  "unit": ""
+ },
+ {
+  "agentType": "easyops",
+  "dataType": "double",
+  "description": "电源状态 poweredOff 的虚拟机数量",
+  "dims": [
+   {
+    "dimDisplayName": "vCenter地址",
+    "dimName": "vc",
+    "isArray": false,
+    "originDimName": "vc"
+   },
+   {
+    "dimDisplayName": "数据中心",
+    "dimName": "datacenter",
+    "isArray": false,
+    "originDimName": "datacenter"
+   },
+   {
+    "dimDisplayName": "集群",
+    "dimName": "cluster",
+    "isArray": false,
+    "originDimName": "cluster"
+   }
+  ],
+  "displayName": "vCenter-关闭虚拟机数",
+  "expression": "",
+  "metricSet": [
+   "集群"
+  ],
+  "name": "vcenter_cluster_vm_powered_off",
+  "objectId": "CLOUD_PROVIDER@ONEMODEL",
+  "originalMetrics": [
+   "vcenter_cluster_vm_powered_off"
+  ],
+  "type": "normal",
+  "unit": ""
+ },
+ {
+  "agentType": "easyops",
+  "dataType": "double",
+  "description": "电源状态 suspended 的虚拟机数量",
+  "dims": [
+   {
+    "dimDisplayName": "vCenter地址",
+    "dimName": "vc",
+    "isArray": false,
+    "originDimName": "vc"
+   },
+   {
+    "dimDisplayName": "数据中心",
+    "dimName": "datacenter",
+    "isArray": false,
+    "originDimName": "datacenter"
+   },
+   {
+    "dimDisplayName": "集群",
+    "dimName": "cluster",
+    "isArray": false,
+    "originDimName": "cluster"
+   }
+  ],
+  "displayName": "vCenter-挂起虚拟机数",
+  "expression": "",
+  "metricSet": [
+   "集群"
+  ],
+  "name": "vcenter_cluster_vm_suspended",
+  "objectId": "CLOUD_PROVIDER@ONEMODEL",
+  "originalMetrics": [
+   "vcenter_cluster_vm_suspended"
+  ],
+  "type": "normal",
+  "unit": ""
+ },
+ {
+  "agentType": "easyops",
+  "dataType": "double",
+  "description": "宿主机CPU使用量合计/集群有效CPU容量（缺失回退宿主机规格合计）",
+  "dims": [
+   {
+    "dimDisplayName": "vCenter地址",
+    "dimName": "vc",
+    "isArray": false,
+    "originDimName": "vc"
+   },
+   {
+    "dimDisplayName": "数据中心",
+    "dimName": "datacenter",
+    "isArray": false,
+    "originDimName": "datacenter"
+   },
+   {
+    "dimDisplayName": "集群",
+    "dimName": "cluster",
+    "isArray": false,
+    "originDimName": "cluster"
+   }
+  ],
+  "displayName": "vCenter-集群CPU使用率",
+  "expression": "",
+  "metricSet": [
+   "集群"
+  ],
+  "name": "vcenter_cluster_cpu_usage_pct",
+  "objectId": "CLOUD_PROVIDER@ONEMODEL",
+  "originalMetrics": [
+   "vcenter_cluster_cpu_usage_pct"
+  ],
+  "type": "normal",
+  "unit": "%"
+ },
+ {
+  "agentType": "easyops",
+  "dataType": "double",
+  "description": "宿主机内存使用量合计/集群有效内存容量（缺失回退宿主机规格合计）",
+  "dims": [
+   {
+    "dimDisplayName": "vCenter地址",
+    "dimName": "vc",
+    "isArray": false,
+    "originDimName": "vc"
+   },
+   {
+    "dimDisplayName": "数据中心",
+    "dimName": "datacenter",
+    "isArray": false,
+    "originDimName": "datacenter"
+   },
+   {
+    "dimDisplayName": "集群",
+    "dimName": "cluster",
+    "isArray": false,
+    "originDimName": "cluster"
+   }
+  ],
+  "displayName": "vCenter-集群内存使用率",
+  "expression": "",
+  "metricSet": [
+   "集群"
+  ],
+  "name": "vcenter_cluster_mem_usage_pct",
+  "objectId": "CLOUD_PROVIDER@ONEMODEL",
+  "originalMetrics": [
+   "vcenter_cluster_mem_usage_pct"
+  ],
+  "type": "normal",
+  "unit": "%"
+ },
+ {
+  "agentType": "easyops",
+  "dataType": "double",
+  "description": "数据存储 accessible 状态 1/0",
+  "dims": [
+   {
+    "dimDisplayName": "vCenter地址",
+    "dimName": "vc",
+    "isArray": false,
+    "originDimName": "vc"
+   },
+   {
+    "dimDisplayName": "数据中心",
+    "dimName": "datacenter",
+    "isArray": false,
+    "originDimName": "datacenter"
+   },
+   {
+    "dimDisplayName": "集群",
+    "dimName": "cluster",
+    "isArray": false,
+    "originDimName": "cluster"
+   },
+   {
+    "dimDisplayName": "数据存储",
+    "dimName": "datastore",
+    "isArray": false,
+    "originDimName": "datastore"
+   }
+  ],
+  "displayName": "vCenter-存储可访问",
+  "expression": "",
+  "metricSet": [
+   "数据存储"
+  ],
+  "name": "vcenter_datastore_accessible",
+  "objectId": "CLOUD_PROVIDER@ONEMODEL",
+  "originalMetrics": [
+   "vcenter_datastore_accessible"
+  ],
+  "type": "normal",
+  "unit": ""
+ },
+ {
+  "agentType": "easyops",
+  "dataType": "double",
+  "description": "数据存储总容量",
+  "dims": [
+   {
+    "dimDisplayName": "vCenter地址",
+    "dimName": "vc",
+    "isArray": false,
+    "originDimName": "vc"
+   },
+   {
+    "dimDisplayName": "数据中心",
+    "dimName": "datacenter",
+    "isArray": false,
+    "originDimName": "datacenter"
+   },
+   {
+    "dimDisplayName": "集群",
+    "dimName": "cluster",
+    "isArray": false,
+    "originDimName": "cluster"
+   },
+   {
+    "dimDisplayName": "数据存储",
+    "dimName": "datastore",
+    "isArray": false,
+    "originDimName": "datastore"
+   }
+  ],
+  "displayName": "vCenter-存储总容量",
+  "expression": "",
+  "metricSet": [
+   "数据存储"
+  ],
+  "name": "vcenter_datastore_capacity_gb",
+  "objectId": "CLOUD_PROVIDER@ONEMODEL",
+  "originalMetrics": [
+   "vcenter_datastore_capacity_gb"
+  ],
+  "type": "normal",
+  "unit": "GB"
+ },
+ {
+  "agentType": "easyops",
+  "dataType": "double",
+  "description": "数据存储剩余可用空间",
+  "dims": [
+   {
+    "dimDisplayName": "vCenter地址",
+    "dimName": "vc",
+    "isArray": false,
+    "originDimName": "vc"
+   },
+   {
+    "dimDisplayName": "数据中心",
+    "dimName": "datacenter",
+    "isArray": false,
+    "originDimName": "datacenter"
+   },
+   {
+    "dimDisplayName": "集群",
+    "dimName": "cluster",
+    "isArray": false,
+    "originDimName": "cluster"
+   },
+   {
+    "dimDisplayName": "数据存储",
+    "dimName": "datastore",
+    "isArray": false,
+    "originDimName": "datastore"
+   }
+  ],
+  "displayName": "vCenter-存储可用空间",
+  "expression": "",
+  "metricSet": [
+   "数据存储"
+  ],
+  "name": "vcenter_datastore_free_gb",
+  "objectId": "CLOUD_PROVIDER@ONEMODEL",
+  "originalMetrics": [
+   "vcenter_datastore_free_gb"
+  ],
+  "type": "normal",
+  "unit": "GB"
+ },
+ {
+  "agentType": "easyops",
+  "dataType": "double",
+  "description": "(容量-可用)/容量 百分比",
+  "dims": [
+   {
+    "dimDisplayName": "vCenter地址",
+    "dimName": "vc",
+    "isArray": false,
+    "originDimName": "vc"
+   },
+   {
+    "dimDisplayName": "数据中心",
+    "dimName": "datacenter",
+    "isArray": false,
+    "originDimName": "datacenter"
+   },
+   {
+    "dimDisplayName": "集群",
+    "dimName": "cluster",
+    "isArray": false,
+    "originDimName": "cluster"
+   },
+   {
+    "dimDisplayName": "数据存储",
+    "dimName": "datastore",
+    "isArray": false,
+    "originDimName": "datastore"
+   }
+  ],
+  "displayName": "vCenter-存储使用率",
+  "expression": "",
+  "metricSet": [
+   "数据存储"
+  ],
+  "name": "vcenter_datastore_usage_pct",
+  "objectId": "CLOUD_PROVIDER@ONEMODEL",
+  "originalMetrics": [
+   "vcenter_datastore_usage_pct"
+  ],
+  "type": "normal",
+  "unit": "%"
+ },
+ {
+  "agentType": "easyops",
+  "dataType": "double",
+  "description": "perf计数器 datastore.totalReadLatency 平均读延迟",
+  "dims": [
+   {
+    "dimDisplayName": "vCenter地址",
+    "dimName": "vc",
+    "isArray": false,
+    "originDimName": "vc"
+   },
+   {
+    "dimDisplayName": "数据中心",
+    "dimName": "datacenter",
+    "isArray": false,
+    "originDimName": "datacenter"
+   },
+   {
+    "dimDisplayName": "集群",
+    "dimName": "cluster",
+    "isArray": false,
+    "originDimName": "cluster"
+   },
+   {
+    "dimDisplayName": "数据存储",
+    "dimName": "datastore",
+    "isArray": false,
+    "originDimName": "datastore"
+   }
+  ],
+  "displayName": "vCenter-存储读延迟",
+  "expression": "",
+  "metricSet": [
+   "数据存储"
+  ],
+  "name": "vcenter_datastore_read_latency_ms",
+  "objectId": "CLOUD_PROVIDER@ONEMODEL",
+  "originalMetrics": [
+   "vcenter_datastore_read_latency_ms"
+  ],
+  "type": "normal",
+  "unit": "ms"
+ },
+ {
+  "agentType": "easyops",
+  "dataType": "double",
+  "description": "perf计数器 datastore.totalWriteLatency 平均写延迟",
+  "dims": [
+   {
+    "dimDisplayName": "vCenter地址",
+    "dimName": "vc",
+    "isArray": false,
+    "originDimName": "vc"
+   },
+   {
+    "dimDisplayName": "数据中心",
+    "dimName": "datacenter",
+    "isArray": false,
+    "originDimName": "datacenter"
+   },
+   {
+    "dimDisplayName": "集群",
+    "dimName": "cluster",
+    "isArray": false,
+    "originDimName": "cluster"
+   },
+   {
+    "dimDisplayName": "数据存储",
+    "dimName": "datastore",
+    "isArray": false,
+    "originDimName": "datastore"
+   }
+  ],
+  "displayName": "vCenter-存储写延迟",
+  "expression": "",
+  "metricSet": [
+   "数据存储"
+  ],
+  "name": "vcenter_datastore_write_latency_ms",
+  "objectId": "CLOUD_PROVIDER@ONEMODEL",
+  "originalMetrics": [
+   "vcenter_datastore_write_latency_ms"
+  ],
+  "type": "normal",
+  "unit": "ms"
+ },
+ {
+  "agentType": "easyops",
+  "dataType": "double",
+  "description": "0已连接/1已断开/2无响应/3未知",
+  "dims": [
+   {
+    "dimDisplayName": "vCenter地址",
+    "dimName": "vc",
+    "isArray": false,
+    "originDimName": "vc"
+   },
+   {
+    "dimDisplayName": "数据中心",
+    "dimName": "datacenter",
+    "isArray": false,
+    "originDimName": "datacenter"
+   },
+   {
+    "dimDisplayName": "集群",
+    "dimName": "cluster",
+    "isArray": false,
+    "originDimName": "cluster"
+   },
+   {
+    "dimDisplayName": "数据存储",
+    "dimName": "datastore",
+    "isArray": false,
+    "originDimName": "datastore"
+   },
+   {
+    "dimDisplayName": "宿主机",
+    "dimName": "host",
+    "isArray": false,
+    "originDimName": "host"
+   }
+  ],
+  "displayName": "vCenter-宿主机连接状态",
+  "expression": "",
+  "metricSet": [
+   "宿主机"
+  ],
+  "name": "vcenter_host_connection_state",
+  "objectId": "CLOUD_PROVIDER@ONEMODEL",
+  "originalMetrics": [
+   "vcenter_host_connection_state"
+  ],
+  "type": "normal",
+  "unit": ""
+ },
+ {
+  "agentType": "easyops",
+  "dataType": "double",
+  "description": "1运行/0关机/2待机/3未知",
+  "dims": [
+   {
+    "dimDisplayName": "vCenter地址",
+    "dimName": "vc",
+    "isArray": false,
+    "originDimName": "vc"
+   },
+   {
+    "dimDisplayName": "数据中心",
+    "dimName": "datacenter",
+    "isArray": false,
+    "originDimName": "datacenter"
+   },
+   {
+    "dimDisplayName": "集群",
+    "dimName": "cluster",
+    "isArray": false,
+    "originDimName": "cluster"
+   },
+   {
+    "dimDisplayName": "数据存储",
+    "dimName": "datastore",
+    "isArray": false,
+    "originDimName": "datastore"
+   },
+   {
+    "dimDisplayName": "宿主机",
+    "dimName": "host",
+    "isArray": false,
+    "originDimName": "host"
+   }
+  ],
+  "displayName": "vCenter-宿主机电源状态",
+  "expression": "",
+  "metricSet": [
+   "宿主机"
+  ],
+  "name": "vcenter_host_power_state",
+  "objectId": "CLOUD_PROVIDER@ONEMODEL",
+  "originalMetrics": [
+   "vcenter_host_power_state"
+  ],
+  "type": "normal",
+  "unit": ""
+ },
+ {
+  "agentType": "easyops",
+  "dataType": "double",
+  "description": "vCenter overallStatus 0绿色/1黄色/2红色/3灰色未知",
+  "dims": [
+   {
+    "dimDisplayName": "vCenter地址",
+    "dimName": "vc",
+    "isArray": false,
+    "originDimName": "vc"
+   },
+   {
+    "dimDisplayName": "数据中心",
+    "dimName": "datacenter",
+    "isArray": false,
+    "originDimName": "datacenter"
+   },
+   {
+    "dimDisplayName": "集群",
+    "dimName": "cluster",
+    "isArray": false,
+    "originDimName": "cluster"
+   },
+   {
+    "dimDisplayName": "数据存储",
+    "dimName": "datastore",
+    "isArray": false,
+    "originDimName": "datastore"
+   },
+   {
+    "dimDisplayName": "宿主机",
+    "dimName": "host",
+    "isArray": false,
+    "originDimName": "host"
+   }
+  ],
+  "displayName": "vCenter-宿主机总体状态",
+  "expression": "",
+  "metricSet": [
+   "宿主机"
+  ],
+  "name": "vcenter_host_overall_status",
+  "objectId": "CLOUD_PROVIDER@ONEMODEL",
+  "originalMetrics": [
+   "vcenter_host_overall_status"
+  ],
+  "type": "normal",
+  "unit": ""
+ },
+ {
+  "agentType": "easyops",
+  "dataType": "double",
+  "description": "overallCpuUsage/(核心数×核心频率)",
+  "dims": [
+   {
+    "dimDisplayName": "vCenter地址",
+    "dimName": "vc",
+    "isArray": false,
+    "originDimName": "vc"
+   },
+   {
+    "dimDisplayName": "数据中心",
+    "dimName": "datacenter",
+    "isArray": false,
+    "originDimName": "datacenter"
+   },
+   {
+    "dimDisplayName": "集群",
+    "dimName": "cluster",
+    "isArray": false,
+    "originDimName": "cluster"
+   },
+   {
+    "dimDisplayName": "数据存储",
+    "dimName": "datastore",
+    "isArray": false,
+    "originDimName": "datastore"
+   },
+   {
+    "dimDisplayName": "宿主机",
+    "dimName": "host",
+    "isArray": false,
+    "originDimName": "host"
+   }
+  ],
+  "displayName": "vCenter-宿主机CPU使用率",
+  "expression": "",
+  "metricSet": [
+   "宿主机"
+  ],
+  "name": "vcenter_host_cpu_usage_pct",
+  "objectId": "CLOUD_PROVIDER@ONEMODEL",
+  "originalMetrics": [
+   "vcenter_host_cpu_usage_pct"
+  ],
+  "type": "normal",
+  "unit": "%"
+ },
+ {
+  "agentType": "easyops",
+  "dataType": "double",
+  "description": "overallMemoryUsage/物理内存",
+  "dims": [
+   {
+    "dimDisplayName": "vCenter地址",
+    "dimName": "vc",
+    "isArray": false,
+    "originDimName": "vc"
+   },
+   {
+    "dimDisplayName": "数据中心",
+    "dimName": "datacenter",
+    "isArray": false,
+    "originDimName": "datacenter"
+   },
+   {
+    "dimDisplayName": "集群",
+    "dimName": "cluster",
+    "isArray": false,
+    "originDimName": "cluster"
+   },
+   {
+    "dimDisplayName": "数据存储",
+    "dimName": "datastore",
+    "isArray": false,
+    "originDimName": "datastore"
+   },
+   {
+    "dimDisplayName": "宿主机",
+    "dimName": "host",
+    "isArray": false,
+    "originDimName": "host"
+   }
+  ],
+  "displayName": "vCenter-宿主机内存使用率",
+  "expression": "",
+  "metricSet": [
+   "宿主机"
+  ],
+  "name": "vcenter_host_mem_usage_pct",
+  "objectId": "CLOUD_PROVIDER@ONEMODEL",
+  "originalMetrics": [
+   "vcenter_host_mem_usage_pct"
+  ],
+  "type": "normal",
+  "unit": "%"
+ },
+ {
+  "agentType": "easyops",
+  "dataType": "double",
+  "description": "balloonedMemory/物理内存，内存压力大时升高",
+  "dims": [
+   {
+    "dimDisplayName": "vCenter地址",
+    "dimName": "vc",
+    "isArray": false,
+    "originDimName": "vc"
+   },
+   {
+    "dimDisplayName": "数据中心",
+    "dimName": "datacenter",
+    "isArray": false,
+    "originDimName": "datacenter"
+   },
+   {
+    "dimDisplayName": "集群",
+    "dimName": "cluster",
+    "isArray": false,
+    "originDimName": "cluster"
+   },
+   {
+    "dimDisplayName": "数据存储",
+    "dimName": "datastore",
+    "isArray": false,
+    "originDimName": "datastore"
+   },
+   {
+    "dimDisplayName": "宿主机",
+    "dimName": "host",
+    "isArray": false,
+    "originDimName": "host"
+   }
+  ],
+  "displayName": "vCenter-宿主机气球内存占比",
+  "expression": "",
+  "metricSet": [
+   "宿主机"
+  ],
+  "name": "vcenter_host_mem_ballooned_pct",
+  "objectId": "CLOUD_PROVIDER@ONEMODEL",
+  "originalMetrics": [
+   "vcenter_host_mem_ballooned_pct"
+  ],
+  "type": "normal",
+  "unit": "%"
+ },
+ {
+  "agentType": "easyops",
+  "dataType": "double",
+  "description": "perf计数器 net.received",
+  "dims": [
+   {
+    "dimDisplayName": "vCenter地址",
+    "dimName": "vc",
+    "isArray": false,
+    "originDimName": "vc"
+   },
+   {
+    "dimDisplayName": "数据中心",
+    "dimName": "datacenter",
+    "isArray": false,
+    "originDimName": "datacenter"
+   },
+   {
+    "dimDisplayName": "集群",
+    "dimName": "cluster",
+    "isArray": false,
+    "originDimName": "cluster"
+   },
+   {
+    "dimDisplayName": "数据存储",
+    "dimName": "datastore",
+    "isArray": false,
+    "originDimName": "datastore"
+   },
+   {
+    "dimDisplayName": "宿主机",
+    "dimName": "host",
+    "isArray": false,
+    "originDimName": "host"
+   }
+  ],
+  "displayName": "vCenter-宿主机网络流入",
+  "expression": "",
+  "metricSet": [
+   "宿主机"
+  ],
+  "name": "vcenter_host_net_in_kbps",
+  "objectId": "CLOUD_PROVIDER@ONEMODEL",
+  "originalMetrics": [
+   "vcenter_host_net_in_kbps"
+  ],
+  "type": "normal",
+  "unit": "kbps"
+ },
+ {
+  "agentType": "easyops",
+  "dataType": "double",
+  "description": "perf计数器 net.transmitted",
+  "dims": [
+   {
+    "dimDisplayName": "vCenter地址",
+    "dimName": "vc",
+    "isArray": false,
+    "originDimName": "vc"
+   },
+   {
+    "dimDisplayName": "数据中心",
+    "dimName": "datacenter",
+    "isArray": false,
+    "originDimName": "datacenter"
+   },
+   {
+    "dimDisplayName": "集群",
+    "dimName": "cluster",
+    "isArray": false,
+    "originDimName": "cluster"
+   },
+   {
+    "dimDisplayName": "数据存储",
+    "dimName": "datastore",
+    "isArray": false,
+    "originDimName": "datastore"
+   },
+   {
+    "dimDisplayName": "宿主机",
+    "dimName": "host",
+    "isArray": false,
+    "originDimName": "host"
+   }
+  ],
+  "displayName": "vCenter-宿主机网络流出",
+  "expression": "",
+  "metricSet": [
+   "宿主机"
+  ],
+  "name": "vcenter_host_net_out_kbps",
+  "objectId": "CLOUD_PROVIDER@ONEMODEL",
+  "originalMetrics": [
+   "vcenter_host_net_out_kbps"
+  ],
+  "type": "normal",
+  "unit": "kbps"
+ },
+ {
+  "agentType": "easyops",
+  "dataType": "double",
+  "description": "最近一次开机以来的秒数",
+  "dims": [
+   {
+    "dimDisplayName": "vCenter地址",
+    "dimName": "vc",
+    "isArray": false,
+    "originDimName": "vc"
+   },
+   {
+    "dimDisplayName": "数据中心",
+    "dimName": "datacenter",
+    "isArray": false,
+    "originDimName": "datacenter"
+   },
+   {
+    "dimDisplayName": "集群",
+    "dimName": "cluster",
+    "isArray": false,
+    "originDimName": "cluster"
+   },
+   {
+    "dimDisplayName": "数据存储",
+    "dimName": "datastore",
+    "isArray": false,
+    "originDimName": "datastore"
+   },
+   {
+    "dimDisplayName": "宿主机",
+    "dimName": "host",
+    "isArray": false,
+    "originDimName": "host"
+   }
+  ],
+  "displayName": "vCenter-宿主机运行时长",
+  "expression": "",
+  "metricSet": [
+   "宿主机"
+  ],
+  "name": "vcenter_host_uptime_seconds",
+  "objectId": "CLOUD_PROVIDER@ONEMODEL",
+  "originalMetrics": [
+   "vcenter_host_uptime_seconds"
+  ],
+  "type": "normal",
+  "unit": "s"
+ },
+ {
+  "agentType": "easyops",
+  "dataType": "double",
+  "description": "该宿主机上虚拟机数量",
+  "dims": [
+   {
+    "dimDisplayName": "vCenter地址",
+    "dimName": "vc",
+    "isArray": false,
+    "originDimName": "vc"
+   },
+   {
+    "dimDisplayName": "数据中心",
+    "dimName": "datacenter",
+    "isArray": false,
+    "originDimName": "datacenter"
+   },
+   {
+    "dimDisplayName": "集群",
+    "dimName": "cluster",
+    "isArray": false,
+    "originDimName": "cluster"
+   },
+   {
+    "dimDisplayName": "数据存储",
+    "dimName": "datastore",
+    "isArray": false,
+    "originDimName": "datastore"
+   },
+   {
+    "dimDisplayName": "宿主机",
+    "dimName": "host",
+    "isArray": false,
+    "originDimName": "host"
+   }
+  ],
+  "displayName": "vCenter-宿主机虚拟机数",
+  "expression": "",
+  "metricSet": [
+   "宿主机"
+  ],
+  "name": "vcenter_host_vm_count",
+  "objectId": "CLOUD_PROVIDER@ONEMODEL",
+  "originalMetrics": [
+   "vcenter_host_vm_count"
+  ],
+  "type": "normal",
+  "unit": ""
+ },
+ {
+  "agentType": "easyops",
+  "dataType": "double",
+  "description": "0关机/1运行/2挂起/3未知",
+  "dims": [
+   {
+    "dimDisplayName": "vCenter地址",
+    "dimName": "vc",
+    "isArray": false,
+    "originDimName": "vc"
+   },
+   {
+    "dimDisplayName": "数据中心",
+    "dimName": "datacenter",
+    "isArray": false,
+    "originDimName": "datacenter"
+   },
+   {
+    "dimDisplayName": "集群",
+    "dimName": "cluster",
+    "isArray": false,
+    "originDimName": "cluster"
+   },
+   {
+    "dimDisplayName": "数据存储",
+    "dimName": "datastore",
+    "isArray": false,
+    "originDimName": "datastore"
+   },
+   {
+    "dimDisplayName": "宿主机",
+    "dimName": "host",
+    "isArray": false,
+    "originDimName": "host"
+   },
+   {
+    "dimDisplayName": "虚拟机",
+    "dimName": "vm",
+    "isArray": false,
+    "originDimName": "vm"
+   }
+  ],
+  "displayName": "vCenter-虚拟机电源状态",
+  "expression": "",
+  "metricSet": [
+   "虚拟机"
+  ],
+  "name": "vcenter_vm_power_state",
+  "objectId": "CLOUD_PROVIDER@ONEMODEL",
+  "originalMetrics": [
+   "vcenter_vm_power_state"
+  ],
+  "type": "normal",
+  "unit": ""
+ },
+ {
+  "agentType": "easyops",
+  "dataType": "double",
+  "description": "overallCpuUsage/maxCpuUsage",
+  "dims": [
+   {
+    "dimDisplayName": "vCenter地址",
+    "dimName": "vc",
+    "isArray": false,
+    "originDimName": "vc"
+   },
+   {
+    "dimDisplayName": "数据中心",
+    "dimName": "datacenter",
+    "isArray": false,
+    "originDimName": "datacenter"
+   },
+   {
+    "dimDisplayName": "集群",
+    "dimName": "cluster",
+    "isArray": false,
+    "originDimName": "cluster"
+   },
+   {
+    "dimDisplayName": "数据存储",
+    "dimName": "datastore",
+    "isArray": false,
+    "originDimName": "datastore"
+   },
+   {
+    "dimDisplayName": "宿主机",
+    "dimName": "host",
+    "isArray": false,
+    "originDimName": "host"
+   },
+   {
+    "dimDisplayName": "虚拟机",
+    "dimName": "vm",
+    "isArray": false,
+    "originDimName": "vm"
+   }
+  ],
+  "displayName": "vCenter-虚拟机CPU使用率",
+  "expression": "",
+  "metricSet": [
+   "虚拟机"
+  ],
+  "name": "vcenter_vm_cpu_usage_pct",
+  "objectId": "CLOUD_PROVIDER@ONEMODEL",
+  "originalMetrics": [
+   "vcenter_vm_cpu_usage_pct"
+  ],
+  "type": "normal",
+  "unit": "%"
+ },
+ {
+  "agentType": "easyops",
+  "dataType": "double",
+  "description": "guestMemoryUsage/maxMemoryUsage",
+  "dims": [
+   {
+    "dimDisplayName": "vCenter地址",
+    "dimName": "vc",
+    "isArray": false,
+    "originDimName": "vc"
+   },
+   {
+    "dimDisplayName": "数据中心",
+    "dimName": "datacenter",
+    "isArray": false,
+    "originDimName": "datacenter"
+   },
+   {
+    "dimDisplayName": "集群",
+    "dimName": "cluster",
+    "isArray": false,
+    "originDimName": "cluster"
+   },
+   {
+    "dimDisplayName": "数据存储",
+    "dimName": "datastore",
+    "isArray": false,
+    "originDimName": "datastore"
+   },
+   {
+    "dimDisplayName": "宿主机",
+    "dimName": "host",
+    "isArray": false,
+    "originDimName": "host"
+   },
+   {
+    "dimDisplayName": "虚拟机",
+    "dimName": "vm",
+    "isArray": false,
+    "originDimName": "vm"
+   }
+  ],
+  "displayName": "vCenter-虚拟机内存使用率",
+  "expression": "",
+  "metricSet": [
+   "虚拟机"
+  ],
+  "name": "vcenter_vm_mem_usage_pct",
+  "objectId": "CLOUD_PROVIDER@ONEMODEL",
+  "originalMetrics": [
+   "vcenter_vm_mem_usage_pct"
+  ],
+  "type": "normal",
+  "unit": "%"
+ },
+ {
+  "agentType": "easyops",
+  "dataType": "double",
+  "description": "summary.storage.committed",
+  "dims": [
+   {
+    "dimDisplayName": "vCenter地址",
+    "dimName": "vc",
+    "isArray": false,
+    "originDimName": "vc"
+   },
+   {
+    "dimDisplayName": "数据中心",
+    "dimName": "datacenter",
+    "isArray": false,
+    "originDimName": "datacenter"
+   },
+   {
+    "dimDisplayName": "集群",
+    "dimName": "cluster",
+    "isArray": false,
+    "originDimName": "cluster"
+   },
+   {
+    "dimDisplayName": "数据存储",
+    "dimName": "datastore",
+    "isArray": false,
+    "originDimName": "datastore"
+   },
+   {
+    "dimDisplayName": "宿主机",
+    "dimName": "host",
+    "isArray": false,
+    "originDimName": "host"
+   },
+   {
+    "dimDisplayName": "虚拟机",
+    "dimName": "vm",
+    "isArray": false,
+    "originDimName": "vm"
+   }
+  ],
+  "displayName": "vCenter-虚拟机已提交存储",
+  "expression": "",
+  "metricSet": [
+   "虚拟机"
+  ],
+  "name": "vcenter_vm_storage_committed_gb",
+  "objectId": "CLOUD_PROVIDER@ONEMODEL",
+  "originalMetrics": [
+   "vcenter_vm_storage_committed_gb"
+  ],
+  "type": "normal",
+  "unit": "GB"
+ },
+ {
+  "agentType": "easyops",
+  "dataType": "double",
+  "description": "committed/(committed+uncommitted)",
+  "dims": [
+   {
+    "dimDisplayName": "vCenter地址",
+    "dimName": "vc",
+    "isArray": false,
+    "originDimName": "vc"
+   },
+   {
+    "dimDisplayName": "数据中心",
+    "dimName": "datacenter",
+    "isArray": false,
+    "originDimName": "datacenter"
+   },
+   {
+    "dimDisplayName": "集群",
+    "dimName": "cluster",
+    "isArray": false,
+    "originDimName": "cluster"
+   },
+   {
+    "dimDisplayName": "数据存储",
+    "dimName": "datastore",
+    "isArray": false,
+    "originDimName": "datastore"
+   },
+   {
+    "dimDisplayName": "宿主机",
+    "dimName": "host",
+    "isArray": false,
+    "originDimName": "host"
+   },
+   {
+    "dimDisplayName": "虚拟机",
+    "dimName": "vm",
+    "isArray": false,
+    "originDimName": "vm"
+   }
+  ],
+  "displayName": "vCenter-虚拟机存储使用率",
+  "expression": "",
+  "metricSet": [
+   "虚拟机"
+  ],
+  "name": "vcenter_vm_storage_usage_pct",
+  "objectId": "CLOUD_PROVIDER@ONEMODEL",
+  "originalMetrics": [
+   "vcenter_vm_storage_usage_pct"
+  ],
+  "type": "normal",
+  "unit": "%"
+ },
+ {
+  "agentType": "easyops",
+  "dataType": "double",
+  "description": "0正常/1待升级/2未运行/3未安装/4未知",
+  "dims": [
+   {
+    "dimDisplayName": "vCenter地址",
+    "dimName": "vc",
+    "isArray": false,
+    "originDimName": "vc"
+   },
+   {
+    "dimDisplayName": "数据中心",
+    "dimName": "datacenter",
+    "isArray": false,
+    "originDimName": "datacenter"
+   },
+   {
+    "dimDisplayName": "集群",
+    "dimName": "cluster",
+    "isArray": false,
+    "originDimName": "cluster"
+   },
+   {
+    "dimDisplayName": "数据存储",
+    "dimName": "datastore",
+    "isArray": false,
+    "originDimName": "datastore"
+   },
+   {
+    "dimDisplayName": "宿主机",
+    "dimName": "host",
+    "isArray": false,
+    "originDimName": "host"
+   },
+   {
+    "dimDisplayName": "虚拟机",
+    "dimName": "vm",
+    "isArray": false,
+    "originDimName": "vm"
+   }
+  ],
+  "displayName": "vCenter-虚拟机Tools状态",
+  "expression": "",
+  "metricSet": [
+   "虚拟机"
+  ],
+  "name": "vcenter_vm_tools_status",
+  "objectId": "CLOUD_PROVIDER@ONEMODEL",
+  "originalMetrics": [
+   "vcenter_vm_tools_status"
+  ],
+  "type": "normal",
+  "unit": ""
+ },
+ {
+  "agentType": "easyops",
+  "dataType": "double",
+  "description": "运行中虚拟机自 bootTime 起的秒数",
+  "dims": [
+   {
+    "dimDisplayName": "vCenter地址",
+    "dimName": "vc",
+    "isArray": false,
+    "originDimName": "vc"
+   },
+   {
+    "dimDisplayName": "数据中心",
+    "dimName": "datacenter",
+    "isArray": false,
+    "originDimName": "datacenter"
+   },
+   {
+    "dimDisplayName": "集群",
+    "dimName": "cluster",
+    "isArray": false,
+    "originDimName": "cluster"
+   },
+   {
+    "dimDisplayName": "数据存储",
+    "dimName": "datastore",
+    "isArray": false,
+    "originDimName": "datastore"
+   },
+   {
+    "dimDisplayName": "宿主机",
+    "dimName": "host",
+    "isArray": false,
+    "originDimName": "host"
+   },
+   {
+    "dimDisplayName": "虚拟机",
+    "dimName": "vm",
+    "isArray": false,
+    "originDimName": "vm"
+   }
+  ],
+  "displayName": "vCenter-虚拟机运行时长",
+  "expression": "",
+  "metricSet": [
+   "虚拟机"
+  ],
+  "name": "vcenter_vm_uptime_seconds",
+  "objectId": "CLOUD_PROVIDER@ONEMODEL",
+  "originalMetrics": [
+   "vcenter_vm_uptime_seconds"
+  ],
+  "type": "normal",
+  "unit": "s"
+ }
+]
