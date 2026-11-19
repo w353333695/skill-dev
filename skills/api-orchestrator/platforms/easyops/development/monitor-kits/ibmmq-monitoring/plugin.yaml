@@ -1,0 +1,41 @@
+type: simple-script
+name: IBM MQ监控
+version: "0.4.10"
+command:
+    collect:
+        interpreter: ""
+        scriptPath:
+            - src
+            - ibmmq_monitor.py
+        type: python
+        user: ""
+params:
+    - instanceId
+    - hostIp
+    - installPath
+    - processList
+    - queueFilter
+    - includeSystemQueues
+    - processMonitor
+    - logLevel
+    - sampleInterval
+    - commandTimeout
+paramDefine:
+    - {name: instanceId, valueType: string, defaultValue: "$.instanceId", display: false, displayName: "IBM MQ实例ID", description: "取IBMMQ.instanceId，用于实例维度", use: collectParams, optional: false, isFromSecret: false, isEncrypt: false, extraArgs: null}
+    - {name: hostIp, valueType: string, defaultValue: "$.ip", display: false, displayName: "部署主机IP", description: "取ARTIFACT_INST继承ip，用于维度与部署定位", use: collectParams, optional: false, isFromSecret: false, isEncrypt: false, extraArgs: null}
+    - {name: installPath, valueType: string, defaultValue: "$.installPath", display: false, displayName: "安装路径", description: "取ARTIFACT_INST继承installPath，用于定位bin目录", use: collectParams, optional: false, isFromSecret: false, isEncrypt: false, extraArgs: null}
+    - {name: processList, valueType: string, defaultValue: "$.processList", display: false, displayName: "进程结构", description: "取processList单元素dict JSON；从cmdline解析队列管理器并使用user切换Linux运行用户", use: collectParams, optional: true, isFromSecret: false, isEncrypt: false, extraArgs: null}
+    - {name: queueFilter, valueType: string, defaultValue: ".*", display: true, displayName: "队列过滤正则", description: "默认监控全部非SYSTEM.前缀队列", use: collectParams, optional: true, isFromSecret: false, isEncrypt: false, extraArgs: null}
+    - {name: includeSystemQueues, valueType: string, defaultValue: "false", display: true, displayName: "包含系统队列", description: "默认排除SYSTEM.前缀队列", use: collectParams, optional: true, isFromSecret: false, isEncrypt: false, extraArgs: null}
+    - {name: processMonitor, valueType: string, defaultValue: "true", display: true, displayName: "启用进程资源采集", description: "默认启用，按cmdline分组输出进程资源", use: collectParams, optional: true, isFromSecret: false, isEncrypt: false, extraArgs: null}
+    - {name: logLevel, valueType: string, defaultValue: "ERROR", display: true, displayName: "日志级别", description: "默认ERROR；DEBUG诊断模式同时输出日志到stdout/stderr，前端可直接复制，采集JSON在末尾", use: collectParams, optional: true, isFromSecret: false, isEncrypt: false, extraArgs: null}
+    - {name: sampleInterval, valueType: float, defaultValue: "0.2", display: true, displayName: "CPU采样间隔(秒)", description: "Linux两次/proc CPU采样间隔；Windows读取CIM格式化计数，默认0.2，范围0.05-2", use: collectParams, optional: true, isFromSecret: false, isEncrypt: false, extraArgs: null}
+    - {name: commandTimeout, valueType: int, defaultValue: "10", display: true, displayName: "MQ命令超时(秒)", description: "dspmq/runmqsc超时时间，默认10，范围1-60", use: collectParams, optional: true, isFromSecret: false, isEncrypt: false, extraArgs: null}
+agentType: easyops
+category: 消息队列
+scriptType: python
+interpreter: ""
+samplerType: metric_sampler
+memo: "同时支持Linux/Windows执行节点；按CMDB processList的cmdline/user定位队列管理器并切换运行用户，采集队列管理器、监听器、通道、本地/传输/死信队列和进程资源指标。"
+icon: null
+relateObjectId: IBMMQ@ONEMODEL
