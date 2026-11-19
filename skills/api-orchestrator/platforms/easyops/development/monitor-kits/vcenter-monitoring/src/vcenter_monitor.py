@@ -162,11 +162,11 @@ def config():
         raise ValueError("address 未配置或仍为 $. 动态路径占位（需在模型实例 url 或任务参数中提供真实地址）")
     scheme, host, port = normalize_address(address)
     username = get_param("username")
-    password = get_param("password")
+    password = get_param("passwordText")
     if not username:
         raise ValueError("username 未配置")
     if not password:
-        raise ValueError("password 未配置")
+        raise ValueError("passwordText 未配置")
     timeout_text = get_param("timeout", "60")
     try:
         timeout = int(timeout_text)

@@ -277,8 +277,8 @@ param_define_fields:
     type: string
     required: true
     enum: [string, int, boolean, password]
-    desc: "数据类型。password 用于敏感字段（配合 isEncrypt）。"
-    source: "plugin-config.md:77"
+    desc: "数据类型。password 仅作前端掩码展示用；手填凭证（账号/密码/AK/SK）统一用 string，见 isEncrypt 口径。"
+    source: "plugin-config.md:77; 2026-11-19 vCenter 0.1.2 手填凭证统一口径"
 
   defaultValue:
     type: string
@@ -321,13 +321,13 @@ param_define_fields:
   isEncrypt:
     type: bool
     required: false
-    desc: "是否加密存储。手填常量密码/凭证须true；$.属性引用必须false，即使属性是密码也不能加密表达式，详见param-mechanism.yaml#cmdb_dynamic_parameter_safety。日志一律脱敏。⚠️Update 时对已存在参数强制保留旧值（不可修改）。"
-    source: "plugin-config.md:84; easyops_plugin_service.go:199-202,715-718"
+    desc: "是否加密存储。【唯一口径】手填凭证必须false：任一手填参数 isEncrypt=true 触发平台下发链路 decrypt，明文报 illegal base64 data（vCenter 0.1.1/host-deploy 0.1.6 双实测）；true 仅限值确为密文的 Secret 链路。$.属性引用必须false，详见param-mechanism.yaml#cmdb_dynamic_parameter_safety。⚠️Update 时对已存在参数强制保留旧值（不可修改），改标志必须参数更名。唯一权威描述见 development/docs/common/套件开发_导入权限与打包规范.md。"
+    source: "easyops_plugin_service.go:199-202,715-718; 2026-11-19 vCenter 0.1.1 目标环境实战"
 
   isFromSecret:
     type: bool
     required: false
-    desc: "是否从密钥管理获取。仅显式密钥引用用true；$.属性引用必须false，不与CMDB取值混用。⚠️Update 时强制保留旧值。任一 param isFromSecret=true 且无 secretName 参数时，平台自动注入 secretName（见 param-mechanism.yaml）。"
+    desc: "是否从密钥管理获取。【唯一口径】仅显式密钥引用可用true（必须配套 secretName 参数）；手填凭证必须false（true 触发下发链路 decrypt，明文报 illegal base64 data）；$.属性引用必须false。⚠️Update 时强制保留旧值，改标志必须参数更名。唯一权威描述见 development/docs/common/套件开发_导入权限与打包规范.md。任一 param isFromSecret=true 且无 secretName 参数时，平台自动注入 secretName（见 param-mechanism.yaml）。"
     source: "plugin-config.md:85; easyops_plugin_service.go:138-165"
 
   secretName:

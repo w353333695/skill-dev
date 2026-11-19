@@ -31,6 +31,40 @@ class MonitorKitValidatorTests(unittest.TestCase):
                 module.validate_dir(root)
             self.assertIn("不能启用isFromSecret", str(context.exception))
 
+    def test_manual_plaintext_with_encrypt_flag_rejected(self):
+        """手填明文 + isEncrypt=true：平台下发 decrypt 报 illegal base64 data，校验器阻断。"""
+        module = validator()
+        with tempfile.TemporaryDirectory(dir=WORKTREE_ROOT / ".local") as temporary:
+            root = Path(temporary) / "kit"
+            root.mkdir()
+            (root / "plugin.yaml").write_text(
+                "name: test-kit\nversion: 1.0.0\nparamDefine:\n"
+                "    - {name: passwordText, valueType: string, defaultValue: \"\", optional: false, isFromSecret: false, isEncrypt: true}\n",
+                encoding="utf-8",
+            )
+            with self.assertRaises(module.ValidationError) as context:
+                module.validate_dir(root)
+            self.assertIn("illegal base64 data", str(context.exception))
+
+    def test_manual_credential_plain_string_passes(self):
+        """手填凭证唯一口径：string + isFromSecret=false + isEncrypt=false 校验通过。"""
+        module = validator()
+        with tempfile.TemporaryDirectory(dir=WORKTREE_ROOT / ".local") as temporary:
+            root = Path(temporary) / "kit"
+            root.mkdir()
+            (root / "plugin.yaml").write_text(
+                "name: test-kit\nversion: 1.0.0\nparamDefine:\n"
+                "    - {name: passwordText, valueType: string, defaultValue: \"\", optional: false, isFromSecret: false, isEncrypt: false}\n",
+                encoding="utf-8",
+            )
+            (root / "origin_metric.json").write_text(json.dumps([{"key": "m", "labels": []}]), encoding="utf-8")
+            (root / "metric_set.json").write_text(json.dumps([{"name": "s"}]), encoding="utf-8")
+            (root / "alias_metric.json").write_text(json.dumps([
+                {"name": "m", "objectId": "HOST", "dataType": "double", "type": "normal",
+                 "dims": [], "metricSet": ["s"], "originalMetrics": ["m"]}
+            ]), encoding="utf-8")
+            self.assertIn("目录校验通过", module.validate_dir(root))
+
     def test_metric_set_must_be_object_array(self):
         module = validator()
         with tempfile.TemporaryDirectory(dir=WORKTREE_ROOT / ".local") as temporary:

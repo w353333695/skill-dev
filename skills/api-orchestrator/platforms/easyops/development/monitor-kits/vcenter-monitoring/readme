@@ -10,8 +10,10 @@ address：必填，默认动态属性 $.url（模型已有 url 属性），也�
   支持 https://host/sdk、http://host:port/sdk、host、host:port 写法，https 缺省端口 443，
   脚本自动剥掉 /sdk 路径后缀；创建任务时可替换为实际属性路径。
 username：必填，任务参数手填；建议只读权限专用账号。
-password：必填，任务参数手填，valueType=password 加密存储（isEncrypt=true）；
-  平台在任务运行时解密注入，脚本与日志全程不输出密码。
+passwordText：必填，任务参数手填，string 明文（0.1.2 起；旧名 password 已废弃）；
+  🔴isFromSecret/isEncrypt 必须为 false——任一为 true 平台下发时走 decrypt，手填明文
+  报 illegal base64 data；套件升级对同名参数强制继承旧标志，改标志必须参数更名。
+  密码全程不写日志和 DEBUG 输出。
 timeout：可选，默认 60 秒，范围 10-300；连接认证、对象遍历和 perf 查询共用该总预算，
   超出预算停止本轮遍历（collect_complete=0），下一周期重新采集；大环境建议 300 秒。
 logLevel：可选，默认 ERROR；DEBUG 把结构化诊断按 COLLECT_ERROR: 协议整体输出到 stdout，

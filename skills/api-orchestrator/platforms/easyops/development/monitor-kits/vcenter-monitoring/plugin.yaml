@@ -1,20 +1,23 @@
 # =============================================================================
 # vCenter监控 plugin.yaml
 # 关联模型：CLOUD_PROVIDER@ONEMODEL（云平台，基础设施.云资源，2026-11-19 实查存在）
-# 地址默认动态参数 $.url（模型已有 url 属性）；账号密码为任务参数前端手填，
-# password 用 valueType=password + isEncrypt=true（用户确认），不从密钥管理获取。
+# 地址默认动态参数 $.url（模型已有 url 属性）；账号密码为任务参数前端手填。
+# 🔴手填凭证唯一口径：valueType=string + isFromSecret=false + isEncrypt=false——
+#   isFromSecret/isEncrypt 任一为 true 会触发平台下发链路 decrypt，手填明文报
+#   illegal base64 data（0.1.1 实战）；同名参数升级强制继承旧标志，改标志必须
+#   参数更名（password→passwordText，host-deploy openapiAkText 同先例）。
 # 采集脚本 py2.7（agent 内置 pyVim/pyVmomi），输出 metric_sampler 纯 JSON 数组。
 # =============================================================================
 type: simple-script
 name: vCenter监控
-version: 0.1.1
+version: 0.1.2
 agentType: easyops
 samplerType: metric_sampler
 relateObjectId: CLOUD_PROVIDER@ONEMODEL
 scriptType: python
 category: 基础设施.云资源
 protected: false
-memo: 通过vCenter SDK（pyVmomi）动态枚举数据中心、集群、数据存储、宿主机和虚拟机，采集平台可用性、集群状态与容量、数据存储空间与IO延迟、宿主机连接/电源/资源使用率、虚拟机电源/资源/存储/Tools状态关键指标。地址默认取云平台实例url属性；账号密码任务手填（密码加密存储）。logLevel=DEBUG时诊断日志经COLLECT_ERROR:协议直达前端任务输出。采集周期建议不小于300秒。
+memo: 通过vCenter SDK（pyVmomi）动态枚举数据中心、集群、数据存储、宿主机和虚拟机，采集平台可用性、集群状态与容量、数据存储空间与IO延迟、宿主机连接/电源/资源使用率、虚拟机电源/资源/存储/Tools状态关键指标。地址默认取云平台实例url属性；账号密码任务手填（string明文，不落日志）。logLevel=DEBUG时诊断日志经COLLECT_ERROR:协议直达前端任务输出。采集周期建议不小于300秒。
 noPackage: false
 command:
   collect:
@@ -25,7 +28,7 @@ command:
 paramDefine:
   - {name: address, valueType: string, defaultValue: "$.url", display: true, displayName: "vCenter地址", description: "默认取云平台实例url属性；支持 https://host/sdk、host、host:port 写法，https缺省端口443；创建任务时可替换为任意属性路径或手填", use: collectParams, optional: false, isFromSecret: false, isEncrypt: false, extraArgs: null}
   - {name: username, valueType: string, defaultValue: "", display: true, displayName: "用户名", description: "vCenter账号，手填；建议使用只读权限专用账号", use: collectParams, optional: false, isFromSecret: false, isEncrypt: false, extraArgs: null}
-  - {name: password, valueType: password, defaultValue: "", display: true, displayName: "密码", description: "vCenter密码，手填，加密存储；不写入日志和DEBUG输出", use: collectParams, optional: false, isFromSecret: false, isEncrypt: true, extraArgs: null}
+  - {name: passwordText, valueType: string, defaultValue: "", display: true, displayName: "密码", description: "vCenter密码，手填string明文；isFromSecret/isEncrypt必须为false（true会触发平台decrypt报illegal base64 data）；全程不写日志", use: collectParams, optional: false, isFromSecret: false, isEncrypt: false, extraArgs: null}
   - {name: timeout, valueType: int, defaultValue: "60", display: true, displayName: "采集超时(秒)", description: "连接与采集总超时，默认60秒，范围10-300；大环境建议300且采集周期不小于600秒", use: collectParams, optional: true, isFromSecret: false, isEncrypt: false, extraArgs: null}
   - {name: logLevel, valueType: string, defaultValue: "ERROR", display: true, displayName: "日志级别", description: "默认ERROR零输出；DEBUG把结构化诊断按COLLECT_ERROR:协议整体输出到stdout（前端任务输出直接复制，无需登执行主机），指标JSON保留在METRICS:之后，不含密码", use: collectParams, optional: true, isFromSecret: false, isEncrypt: false, extraArgs: null}
-params: [address, username, password, timeout, logLevel]
+params: [address, username, passwordText, timeout, logLevel]

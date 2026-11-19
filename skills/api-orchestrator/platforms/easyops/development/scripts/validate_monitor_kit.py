@@ -94,10 +94,14 @@ def validate_dir(root, require_name_match=False):
         encrypt = bool(re.search(r"isEncrypt:\s*true", line))
         if default.startswith("$.") and (from_secret or encrypt):
             raise ValidationError("paramDefine.%s 使用$.动态取值时 isFromSecret/isEncrypt 必须为false" % param_name)
-        if "valueType: password" in line and not default and "optional: false" in line and from_secret and "secretName" not in param_names:
-            raise ValidationError("paramDefine.%s 是必填手填password，不能启用isFromSecret；应配置isEncrypt=true且isFromSecret=false" % param_name)
-        if "valueType: password" in line and not from_secret and not encrypt:
-            raise ValidationError("paramDefine.%s 是password时必须启用isEncrypt" % param_name)
+        # 手填凭证唯一口径（2026-11-19 vCenter 0.1.1 实战：isFromSecret/isEncrypt=true 触发
+        # 平台下发链路 decrypt，手填明文报 illegal base64 data）：手填参数两个标志都必须 false；
+        # isFromSecret=true 仅限显式密钥引用（必须配套 secretName 参数）；isEncrypt=true
+        # 仅限值确为密文的 Secret 链路。同名参数升级强制继承旧标志，改标志必须参数更名。
+        if not default.startswith("$.") and from_secret and "secretName" not in param_names:
+            raise ValidationError("paramDefine.%s 启用isFromSecret但缺少secretName密钥引用参数；手填凭证不能启用isFromSecret，必须isFromSecret=false" % param_name)
+        if not default.startswith("$.") and not from_secret and encrypt:
+            raise ValidationError("paramDefine.%s 手填明文不能启用isEncrypt（平台下发decrypt报illegal base64 data）；手填凭证必须isEncrypt=false，isEncrypt=true仅限Secret密文链路" % param_name)
     origin = load_json(root / "origin_metric.json", "origin_metric.json")
     metric_keys = {row.get("key") for row in origin if isinstance(row, dict) and row.get("key")}
     metric_sets = load_json(root / "metric_set.json", "metric_set.json")
