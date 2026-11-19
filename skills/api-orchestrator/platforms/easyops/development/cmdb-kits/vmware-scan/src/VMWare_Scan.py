@@ -131,6 +131,18 @@ def hardware_serial(host_obj):
     return ''
 
 
+def remove_invalid_sn(values):
+    """上报前最后一道保护：异常 SN 直接删除整个键值对。"""
+    value = values.get('sn')
+    if value is None or (value or '').strip().lower() in set([
+            '', 'none', 'null', 'n/a', 'na', 'unknown', 'not specified',
+            'not available', 'default string', 'system serial number',
+            'chassis serial number', 'to be filled by o.e.m.',
+            'to be filled by oem', '0', '00000000']):
+        values.pop('sn', None)
+    return values
+
+
 class EasyVcenter:
     def __init__(self, host, port, user, pwd, instance_id="", no_collect_vm=False):
         self.host = host
@@ -1188,6 +1200,7 @@ class EasyVcenter:
                 vals['sn'] = sn
             else:
                 logger.warning('[get_physical_server_list] host=%s invalid SN omitted', obj._moId)
+            remove_invalid_sn(vals)
             physical_server_keys.append(dict(key))
             vals['resourceInstanceId'] = '{}_{}'.format(self.resource_name, obj._moId)
 

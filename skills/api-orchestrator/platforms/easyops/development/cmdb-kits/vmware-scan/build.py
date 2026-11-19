@@ -6,14 +6,14 @@ import stat
 import zipfile
 from pathlib import Path
 
-VERSION = '0.1.1'
+VERSION = '0.1.2'
 ROOT = 'VMWare扫描/'
 
 
 def main():
     parser = argparse.ArgumentParser(
         description='从原始导出 ZIP 构建按 businessIp 匹配的 VMWare扫描套件；不访问远端。',
-        epilog='示例：python build.py --base original.zip --output CMDB采集套件_VMWare扫描_0.1.1.zip')
+        epilog='示例：python build.py --base original.zip --output CMDB采集套件_VMWare扫描_0.1.2.zip')
     parser.add_argument('--base', type=Path, required=True, help='原始现网导出 ZIP（必填，无默认值）')
     parser.add_argument('--output', type=Path, required=True, help='新版输出 ZIP（必填，无默认值；覆盖同路径）')
     parser.add_argument('--version', action='version', version=VERSION)
