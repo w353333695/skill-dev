@@ -461,9 +461,8 @@ class EasyVcenter:
                     "pks": ["name"],
                     "upsert": True,
                     "set_relation_ids": [
-                        # "VMWARE_DATA_CENTER",
                         "VMWARE_VIRTUAL_MACHINE",
-                    ]
+                    ] + (["_physicalServer"] if physical_relation else [])
                 },
                 "vals": item
             }
@@ -493,7 +492,7 @@ class EasyVcenter:
                     for dis in obj.info.vmfs.extent:
                         disk_name = dis.diskName
             except AttributeError as e:
-                logger.warning('Unable to get disk name, error:{}'.format(e))
+                logger.warning('[get_store_list] disk name unavailable: %s', traceback.format_exc())
             ds_capacity = obj.summary.capacity
             ds_freespace = obj.summary.freeSpace
             ds_uncommitted = obj.summary.uncommitted if obj.summary.uncommitted else 0
@@ -917,14 +916,15 @@ class EasyVcenter:
                 vals['type'] = pool_info['type']
                 vals['cloudProvider'] = [{'instanceId': self.provider_instance_id}]
                 vals['cloudResources'] = pool_info['cloudResources']
-                vals['physicalServers'] = pool_info['physicalServers']
+                if pool_info['physicalServers']:
+                    vals['physicalServers'] = pool_info['physicalServers']
                 self.result.append({
                     "dims": {
                         "objectId": RESOURCE_POOL_OBJECT_ID,
                         "object_id": RESOURCE_POOL_OBJECT_ID,
                         "pks": ["id"],
                         "upsert": True,
-                        "set_relation_ids": ["cloudProvider", "cloudResources", "physicalServers"]
+                        "set_relation_ids": ["cloudProvider", "cloudResources"] + (["physicalServers"] if vals.get("physicalServers") else [])
                     },
                     "vals": vals
                 })
@@ -1249,7 +1249,8 @@ class EasyVcenter:
                 if obj.info and obj.info.vmfs and obj.info.vmfs.extent:
                     for dis in obj.info.vmfs.extent:
                         disk_name = dis.diskName if dis and dis.diskName else ""
-            except AttributeError as e:
+            except AttributeError:
+                logger.warning('[get_cloud_disk_list] disk name unavailable: %s', traceback.format_exc())
                 disk_name = ""
             ds_capacity = obj.summary.capacity if obj.summary else 0
             ds_freespace = obj.summary.freeSpace if obj.summary else 0
