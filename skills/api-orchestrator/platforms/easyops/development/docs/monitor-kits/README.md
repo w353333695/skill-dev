@@ -41,6 +41,7 @@ EasyOps 旧执行环境可能使用 Python 2.7。脚本源码或采集数据包�
 
 Python 2 的 `/proc`、OpenAPI 或命令输出解码后可能得到 `unicode`。通用文本归一函数不能对它直接执行 `str(value)`：Python 2 会按 ASCII 编码并在中文字符处抛出 `UnicodeEncodeError`。应显式保留 `unicode` 值，仅字节串按 UTF-8 解码；JSON 输出继续使用默认 ASCII escape。
 
+Windows Python 2的`traceback.format_exc()`可能返回GBK等本地编码字节串，直接进入`json.dumps`会按UTF-8解码并抛`UnicodeDecodeError`，进而掩盖原始采集异常。监控脚本写DEBUG/ERROR侧车日志前必须递归归一化payload：字节按系统编码解码、非ASCII转escape、数值/布尔保持原类型，最终日志保持JSON合法。
 `debug-collector-job` 可能把脚本 stderr 合并进 `resultList[].data`。DEBUG/局部 ERROR 结构化日志不能写 stdout 或 stderr，否则会与最终 JSON 数组拼成多段文本并触发 `json unmarshal data failed`。诊断应写入缓存目录侧车文件（如 `<cacheDir>/<hostInstanceId>.debug.log`），并做大小轮转；stdout 仅保留指标 JSON 数组，顶层致命异常仍按 `COLLECT_ERROR:` 协议输出。
 
 
@@ -119,4 +120,4 @@ python3 skills/api-orchestrator/platforms/easyops/development/scripts/validate_m
 
 ## 主机部署实例监控（2026-11-12）
 
-当前版本 `主机部署实例监控` 0.1.17：绑定 HOST，读取本地缓存，缓存缺失或超过7天时通过 OpenAPI search 刷新 `ARTIFACT_INST@ONEMODEL` 中 `isMonitor=是` 的部署实例；目标定位使用uuid/ip/instanceId单条件，agent配置发现的OpenAPI地址默认使用HTTPS。采集进程、端口、CPU、内存和句柄指标。数据结构、抽象模型更新坑位和导入验收见 `主机部署实例监控_数据结构与离线交付_2026-11-12.md`。
+当前版本 `主机部署实例监控` 0.1.18：绑定 HOST，读取本地缓存，缓存缺失或超过7天时通过 OpenAPI search 刷新 `ARTIFACT_INST@ONEMODEL` 中 `isMonitor=是` 的部署实例；目标定位使用uuid/ip/instanceId单条件，agent配置发现的OpenAPI地址默认使用HTTPS。采集进程、端口、CPU、内存和句柄指标。数据结构、抽象模型更新坑位和导入验收见 `主机部署实例监控_数据结构与离线交付_2026-11-12.md`。

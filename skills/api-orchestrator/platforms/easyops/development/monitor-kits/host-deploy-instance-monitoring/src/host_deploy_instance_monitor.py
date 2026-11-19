@@ -24,7 +24,7 @@ else:
     from urllib import urlencode
     from urllib2 import Request, urlopen
 
-VERSION = "0.1.17"
+VERSION = "0.1.18"
 IS_WINDOWS = os.name == "nt"
 OBJECT_ID = "ARTIFACT_INST@ONEMODEL"
 OPENAPI_PATH = "/cmdbservice/v3/object/ARTIFACT_INST@ONEMODEL/instance/_search"
@@ -95,7 +95,7 @@ def log_event(settings, level, stage, **fields):
     log_path = settings.get("debugLogPath")
     if not log_path:
         return
-    write_debug_log(log_path, json.dumps(payload, separators=(",", ":"), allow_nan=False))
+    write_debug_log(log_path, json.dumps(safe_log_value(payload), separators=(",", ":"), allow_nan=False))
 
 
 def text(value):
@@ -109,9 +109,27 @@ def text(value):
 
 
 def safe_error_text(value):
-    value = text(value)
+    if value is None:
+        return ""
+    if isinstance(value, bytes):
+        value = decode_bytes(value)
+    else:
+        value = text(value)
     if sys.version_info[0] == 2 and isinstance(value, unicode):
         return value.encode("unicode_escape")
+    return value
+
+
+def safe_log_value(value):
+    if isinstance(value, dict):
+        return dict((key, safe_log_value(item)) for key, item in value.items())
+    if isinstance(value, (list, tuple)):
+        return [safe_log_value(item) for item in value]
+    if value is None or isinstance(value, (bool, int, float)):
+        return value
+    value = safe_error_text(value)
+    if sys.version_info[0] == 2 and isinstance(value, bytes):
+        return value.decode("ascii")
     return value
 
 

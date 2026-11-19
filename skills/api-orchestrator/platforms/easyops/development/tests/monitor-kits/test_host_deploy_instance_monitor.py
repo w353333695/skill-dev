@@ -19,7 +19,7 @@ from unittest import mock
 
 KIT = Path(__file__).resolve().parents[2] / "monitor-kits/host-deploy-instance-monitoring"
 SOURCE = KIT / "src/host_deploy_instance_monitor.py"
-PACKAGE = Path(__file__).resolve().parents[3] / "hub/monitor-kits/监控套件_主机部署实例监控_0.1.17.zip"
+PACKAGE = Path(__file__).resolve().parents[3] / "hub/monitor-kits/监控套件_主机部署实例监控_0.1.18.zip"
 WORKTREE_ROOT = Path(__file__).resolve().parents[7]
 
 
@@ -224,6 +224,28 @@ class HostDeployInstanceMonitorTests(unittest.TestCase):
         source = SOURCE.read_text(encoding="utf-8")
         self.assertIn("safe_error_text(decode_bytes(stderr))", source)
         self.assertIn('raise OSError("Windows command failed', source)
+
+    def test_log_event_serializes_windows_py2_traceback(self):
+        m = module()
+        log_path = WORKTREE_ROOT / ".local" / ("test-windows-py2-log-" + uuid.uuid4().hex) / "host1.debug.log"
+        py2_sys = mock.Mock(version_info=(2, 7, 18, "final", 0))
+        localized_traceback = "Traceback: 无法连接服务器".encode("gbk")
+        settings = {"logLevel": "DEBUG", "debugLogPath": str(log_path)}
+        with mock.patch.dict(m, {
+            "IS_WINDOWS": True,
+            "decode_bytes": mock.Mock(return_value="Traceback: 无法连接服务器"),
+            "sys": py2_sys,
+            "unicode": str,
+        }):
+            m["log_event"](settings, "ERROR", "cache.refresh_failed", path="C:\\cache\\host1.json", traceback=localized_traceback)
+        content = log_path.read_text(encoding="utf-8")
+        row = json.loads(content)
+        self.assertEqual(row["stage"], "cache.refresh_failed")
+        self.assertIn("Traceback", row["traceback"])
+        self.assertTrue(row["traceback"].isascii())
+        self.assertNotIn("无法连接服务器", content)
+        source = SOURCE.read_text(encoding="utf-8")
+        self.assertIn("json.dumps(safe_log_value(payload)", source)
 
     def test_windows_process_and_netstat_parsers(self):
         m = module()
@@ -482,7 +504,7 @@ class HostDeployInstanceMonitorTests(unittest.TestCase):
     def test_help_and_version(self):
         result = subprocess.run([sys.executable, str(SOURCE), "--version"], capture_output=True, text=True, env={**os.environ, "PYTHONDONTWRITEBYTECODE": "1"})
         self.assertEqual(result.returncode, 0)
-        self.assertEqual(result.stdout.strip(), "0.1.17")
+        self.assertEqual(result.stdout.strip(), "0.1.18")
 
     def test_python2_json_output_uses_ascii_escape(self):
         source = SOURCE.read_text(encoding="utf-8")
