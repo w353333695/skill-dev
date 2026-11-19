@@ -14,8 +14,8 @@ password：必填，任务参数手填，valueType=password 加密存储（isEnc
   平台在任务运行时解密注入，脚本与日志全程不输出密码。
 timeout：可选，默认 60 秒，范围 10-300；连接认证、对象遍历和 perf 查询共用该总预算，
   超出预算停止本轮遍历（collect_complete=0），下一周期重新采集；大环境建议 300 秒。
-logLevel：可选，默认 ERROR；DEBUG 把结构化诊断写入缓存目录侧车文件，不污染 stdout/stderr。
-cacheDir：可选，默认 /tmp/easyops/vcenter-monitor（Windows 映射 SystemRoot\Temp\easyops\vcenter-monitor）。
+logLevel：可选，默认 ERROR；DEBUG 把结构化诊断按 COLLECT_ERROR: 协议整体输出到 stdout，
+  前端任务输出里直接复制（无需登执行主机取文件），指标 JSON 保留在 METRICS: 之后。
 
 三、采集与预检行为
 预检与采集复用同一次 SmartConnect：认证成功才算预检通过，失败立即跳过本轮采集
@@ -46,7 +46,9 @@ duration_seconds=遍历耗时。vCenter 的 version/fullname 为字符串不进�
 
 六、日志
 默认 ERROR 级别不产生任何 stdout/stderr 输出；顶层致命异常按 COLLECT_ERROR: 协议输出并退出 0。
-DEBUG 模式写缓存目录 vcenter-<主机>.debug.log（JSON 行，超 5MB 轮转 .old），包含：
+DEBUG 模式（跨环境排障专用）：诊断日志全程内存缓冲，采集完成后按 COLLECT_ERROR: 协议把
+全部诊断行输出到 stdout——前端把 stdout 全文当错误正文直接展示，免登执行主机取日志；
+指标 JSON 保留在末尾 METRICS: 标记之后，需要时可提取复验。诊断行含（JSON 格式，中文转义）：
 配置概要（脱敏，无密码）、连接结果（api 版本）、数据中心/对象遍历计数、perf 查询结果数、
 缺失指标清单、局部 WARN 与完整脱敏 traceback、最终输出统计。排障完成后恢复默认 ERROR。
 

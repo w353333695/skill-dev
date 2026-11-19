@@ -14,7 +14,8 @@ BASE_XLSX = BASE_DIR / "host-deploy-instance-monitoring/主机部署实例监控
 KIT = BASE_DIR / "vcenter-monitoring"
 OBJECT_ID = "CLOUD_PROVIDER@ONEMODEL"
 NAME = "vCenter监控"
-VERSION = "0.1.0"
+# 版本随套件 package.conf.yaml，保证告警模板与套件同版本交付
+VERSION = __import__("yaml").safe_load((KIT / "package.conf.yaml").read_text(encoding="utf-8"))["version"]
 OUTPUT = KIT / ("vCenter监控_告警规则模板_%s.xlsx" % VERSION)
 
 

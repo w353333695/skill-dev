@@ -40,12 +40,13 @@ def bump_version():
     new_version = ".".join(parts)
     plugin_path = KIT / "plugin.yaml"
     text = plugin_path.read_text(encoding="utf-8")
-    text = re.sub(r"(?m)^version:\s*[\"']?[^\"'\s]+", "version: %s" % new_version, text, count=1)
+    # 整行替换（不吞行内引号，避免 "0.1.1"" 残留）
+    text = re.sub(r"(?m)^version:.*$", "version: %s" % new_version, text, count=1)
     plugin_path.write_text(text, encoding="utf-8")
     conf_path = KIT / "package.conf.yaml"
     if conf_path.exists():
         conf_text = conf_path.read_text(encoding="utf-8")
-        conf_text = re.sub(r"(?m)^version:\s*[\"']?[^\"'\s]+", 'version: "%s"' % new_version,
+        conf_text = re.sub(r"(?m)^version:.*$", 'version: "%s"' % new_version,
                            conf_text, count=1)
         conf_path.write_text(conf_text, encoding="utf-8")
     print("version bumped: %s -> %s" % (version, new_version))

@@ -7,7 +7,6 @@ import sys
 import time
 import types
 import unittest
-import uuid
 from contextlib import redirect_stdout
 from datetime import datetime, timedelta
 from pathlib import Path
@@ -16,7 +15,6 @@ from unittest import mock
 
 KIT = Path(__file__).resolve().parents[2] / "monitor-kits/vcenter-monitoring"
 SOURCE = KIT / "src/vcenter_monitor.py"
-WORKTREE_ROOT = Path(__file__).resolve().parents[7]
 
 
 def _kwarg_type(cls_name):
@@ -174,37 +172,45 @@ class UtilTests(unittest.TestCase):
 
 
 class DebugLogTests(unittest.TestCase):
-    def test_debug_log_stays_off_standard_streams_and_rotates(self):
+    def test_debug_buffered_until_dump_and_off_standard_streams(self):
+        """DEBUG 日志内存缓冲：event 期间不碰 stdout/stderr，dump_lines 输出 ASCII 安全 JSON 行。"""
         m = collect_namespace()
-        log_root = WORKTREE_ROOT / ".local" / ("vcenter-log-" + uuid.uuid4().hex)
-        log_path = log_root / "vcenter-vc.debug.log"
-        logger = m["DebugLog"]("DEBUG", str(log_path))
+        logger = m["DebugLog"]("DEBUG")
         stdout = io.StringIO()
         with redirect_stdout(stdout):
             logger.event("DEBUG", "config.ready", host=u"生产主机", username="svc-monitor")
             logger.traceback_event("WARN", "probe", "[probe]")
-        self.assertEqual(stdout.getvalue(), "")
-        self.assertTrue(log_path.exists())
-        # JSON 行按行解析；中文以 \uXXXX 转义落盘（py2/3 稳定），值解析回 unicode 不丢
-        entries = [json.loads(line) for line in
-                   log_path.read_text(encoding="utf-8").strip().split("\n")]
+            lines = logger.dump_lines()
+        self.assertEqual(stdout.getvalue(), "")  # 缓冲期间 stdout 干净
+        self.assertEqual(len(lines), 2)
+        entries = [json.loads(line[len("[DEBUG] "):]) for line in lines]
         self.assertEqual(entries[0]["host"], u"生产主机")
         self.assertEqual(entries[0]["username"], "svc-monitor")
         self.assertIn("traceback", entries[1])
-        # DEBUG 级 logger：INFO 也落盘（高于等于自身级别都写）
-        logger.event("INFO", "info.at_debug_level")
-        self.assertIn("info.at_debug_level", log_path.read_text(encoding="utf-8"))
-        # ERROR 级 logger：完全静默不写文件（fatal 走 COLLECT_ERROR stdout 协议，
-        # 局部错误经 error_count/collect_complete 数值指标可见）
-        error_log_path = log_root / "vcenter-error.debug.log"
-        error_logger = m["DebugLog"]("ERROR", str(error_log_path))
-        error_logger.event("ERROR", "loud.error")
-        self.assertFalse(error_log_path.exists())
-        # 轮转
-        log_path.write_text("x" * (m["DEBUG_LOG_MAX_BYTES"] + 1), encoding="utf-8")
-        logger.event("DEBUG", "after.rotation")
-        self.assertTrue((log_root / "vcenter-vc.debug.log.old").exists())
-        self.assertLess(os.path.getsize(str(log_path)), m["DEBUG_LOG_MAX_BYTES"] + 100)
+        for line in lines:
+            line.encode("ascii")  # 每行可 ASCII 编码（中文 \uXXXX 转义，py2 安全）
+        # 密码不在缓冲条目里（调用方不发即不落）
+        self.assertNotIn("password", entries[0])
+
+    def test_error_level_logger_is_silent(self):
+        """默认 ERROR 级别：任何 event 都不缓冲不输出（fatal 走 COLLECT_ERROR stdout 协议）。"""
+        m = collect_namespace()
+        logger = m["DebugLog"]("ERROR")
+        logger.event("DEBUG", "quiet.debug")
+        logger.event("WARN", "quiet.warn")
+        logger.event("ERROR", "loud.error")
+        self.assertEqual(logger.entries, [])
+        self.assertEqual(logger.dump_lines(), [])
+
+    def test_non_debug_levels_fully_silent(self):
+        """INFO/WARN 档与 ERROR 同为完全静默（仅 DEBUG 档缓冲进 stdout 协议）。"""
+        m = collect_namespace()
+        for level_name in ("INFO", "WARN"):
+            logger = m["DebugLog"](level_name)
+            logger.event("DEBUG", "quiet.debug")
+            logger.event(level_name, "same.level")
+            self.assertEqual(logger.entries, [], level_name)
+            self.assertEqual(logger.dump_lines(), [], level_name)
 
 
 class CollectTests(unittest.TestCase):
@@ -254,7 +260,7 @@ class CollectTests(unittest.TestCase):
         m = collect_namespace()
         fake = self.build_fake()
         cfg = {"vcDim": "9.132.63.82:443"}
-        log = m["DebugLog"]("ERROR", "/nonexistent/vcenter.debug.log")
+        log = m["DebugLog"]("ERROR")
 
         m_state = {"dcs": [{"obj": fake["vc_ref"], "name": u"生产数据中心"}]}
         orig_collect = m["collect_datacenter_names"]
@@ -324,7 +330,7 @@ class CollectTests(unittest.TestCase):
     def test_missing_perf_and_none_values_are_skipped_not_faked(self):
         m = collect_namespace()
         fake = self.build_fake()
-        log = m["DebugLog"]("ERROR", "/nonexistent/vcenter.debug.log")
+        log = m["DebugLog"]("ERROR")
         m["collect_datacenter_names"] = lambda content: [{"obj": fake["vc_ref"], "name": "DC"}]
         m["retrieve_rows"] = lambda pc, from_obj, select_set, prop_specs: fake["rows"]
         m["query_perf"] = lambda content, entity_slots, log, deadline: {}
@@ -340,9 +346,7 @@ class CollectTests(unittest.TestCase):
         records = [{"dims": {"vc": "x"}, "vals": {"vcenter_available": 1.0}}]
         m["config"] = lambda: {"scheme": "https", "host": "vc", "port": 443,
                                "username": "u", "password": "p", "timeout": 60,
-                               "logLevel": "ERROR", "cacheDir": "/tmp/easyops/vcenter-monitor",
-                               "debugLogPath": "/nonexistent/vcenter-vc.debug.log",
-                               "vcDim": "vc:443"}
+                               "logLevel": "ERROR", "vcDim": "vc:443"}
         m["connect_vcenter"] = lambda cfg, log: object()
         m["disconnect"] = lambda si, log: None
         m["collect_vcenter"] = lambda si, cfg, log, deadline: records
@@ -351,6 +355,32 @@ class CollectTests(unittest.TestCase):
             rc = m["main"]()
         self.assertEqual(rc, 0)
         self.assertEqual(json.loads(stdout.getvalue()), records)
+
+    def test_main_debug_mode_emits_collect_error_protocol_with_metrics_tail(self):
+        """DEBUG 模式：stdout 按 COLLECT_ERROR: 协议输出诊断行（前端当错误正文直接展示），
+        指标 JSON 保留在 METRICS: 之后可提取；不含密码。"""
+        m = collect_namespace()
+        records = [{"dims": {"vc": "x"}, "vals": {"vcenter_available": 1.0}}]
+        m["config"] = lambda: {"scheme": "https", "host": "vc", "port": 443,
+                               "username": "svc-monitor", "password": "vcenter-secret",
+                               "timeout": 60, "logLevel": "DEBUG", "vcDim": "vc:443"}
+        m["connect_vcenter"] = lambda cfg, log: object()
+        m["disconnect"] = lambda si, log: None
+        m["collect_vcenter"] = lambda si, cfg, log, deadline: records
+        stdout = io.StringIO()
+        with redirect_stdout(stdout):
+            rc = m["main"]()
+        self.assertEqual(rc, 0)
+        output = stdout.getvalue()
+        self.assertTrue(output.startswith("COLLECT_ERROR:"), output[:200])
+        self.assertIn("[DEBUG]", output)
+        self.assertIn("METRICS:", output)
+        tail = output.split("METRICS:\n", 1)[1]
+        self.assertEqual(json.loads(tail), records)  # METRICS 之后仍是可解析 JSON
+        self.assertNotIn("vcenter-secret", output)
+        # 诊断行含 config.ready（用户名可见、密码不出现）
+        self.assertIn("svc-monitor", output)
+        self.assertIn("config.ready", output)
 
 
 class FatalProtocolTests(unittest.TestCase):

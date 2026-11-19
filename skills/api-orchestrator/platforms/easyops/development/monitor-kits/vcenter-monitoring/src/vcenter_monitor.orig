@@ -6,7 +6,8 @@ vCenter监控 采集脚本（simple-script / metric_sampler）
 通过 vCenter SDK（pyVim/pyVmomi，agent py2 内置）动态枚举数据中心、集群、数据存储、
 宿主机和虚拟机，输出关键状态与使用率指标。stdout 正常只输出纯 JSON 数组
 [{dims, vals}]；顶层致命异常输出 COLLECT_ERROR: + 脱敏 traceback 并 exit 0；
-DEBUG 诊断写缓存目录侧车文件（不进 stdout/stderr），不含密码。
+DEBUG 模式诊断日志缓冲后按 COLLECT_ERROR: 协议整体输出到 stdout（前端直接可见、
+免登执行主机取日志），指标 JSON 保留在 METRICS: 之后；任何模式都不含密码。
 
 参数经环境变量 EASYOPS_COLLECTOR_<name> 注入（平台按 paramDefine 注入）。
 依赖：agent 内置 pyVim.connect.SmartConnect 与 pyVmomi.vim；Python 2.7/3 兼容。
@@ -30,7 +31,6 @@ else:
     NUM_TYPES = (int, float)
 
 LOG_LEVELS = {"DEBUG": 10, "INFO": 20, "WARN": 30, "ERROR": 40}
-DEBUG_LOG_MAX_BYTES = 5 * 1024 * 1024
 
 # 枚举映射：全部输出数值（metric_sampler vals 必须数值型）
 CONNECTION_STATE_MAP = {"connected": 0, "disconnected": 1, "notResponding": 2}
@@ -126,12 +126,14 @@ def normalize_address(address):
 
 
 class DebugLog(object):
-    """DEBUG 诊断侧车日志：只写文件，绝不写 stdout/stderr（前端 JSON 纪律，0.1.12 教训）。"""
+    """DEBUG 诊断日志：内存缓冲，采集结束后由 main() 按前端可见协议整体输出到 stdout
+    （不写文件、不写 stderr——免登执行主机取日志，前端直接复制）。
+    非 DEBUG 级别零缓冲零输出；密码任何级别都不入日志。"""
 
-    def __init__(self, level_name, path):
+    def __init__(self, level_name):
         self.level = LOG_LEVELS.get((level_name or "ERROR").upper(), 40)
-        self.path = path
         self.enabled = self.level <= LOG_LEVELS["DEBUG"]
+        self.entries = []
 
     def event(self, level, stage, **fields):
         if not self.enabled or LOG_LEVELS.get(level, 40) < self.level:
@@ -141,24 +143,16 @@ class DebugLog(object):
             if isinstance(value, bytes):
                 value = safe_text(value)
             entry[key] = value
-        try:
-            parent = os.path.dirname(self.path)
-            if parent and not os.path.isdir(parent):
-                os.makedirs(parent)
-            try:
-                if os.path.exists(self.path) and os.path.getsize(self.path) > DEBUG_LOG_MAX_BYTES:
-                    os.rename(self.path, self.path + ".old")
-            except Exception:
-                pass
-            with open(self.path, "a") as handle:
-                handle.write(json.dumps(entry, default=ascii_line) + "\n")
-        except Exception:
-            pass  # 诊断日志失败不影响采集输出
+        self.entries.append(entry)
 
     def traceback_event(self, level, stage, marker):
         """异常日志：函数标记 + format_exc()（日志纪律：只有 str(e) 无法定位行号）。"""
         detail = ascii_line(traceback.format_exc())
         self.event(level, stage, error=marker, traceback=detail)
+
+    def dump_lines(self):
+        """输出用 ASCII 安全行序列（json.dumps 默认 ensure_ascii，中文转 \\uXXXX 不丢值）。"""
+        return ["[DEBUG] %s" % json.dumps(entry) for entry in self.entries]
 
 
 def config():
@@ -183,13 +177,10 @@ def config():
     log_level = (get_param("logLevel", "ERROR") or "ERROR").upper()
     if log_level not in LOG_LEVELS:
         raise ValueError("logLevel 仅支持 DEBUG/INFO/WARN/ERROR: %s" % ascii_line(log_level))
-    cache_dir = get_param("cacheDir") or "/tmp/easyops/vcenter-monitor"
-    debug_log_path = os.path.join(cache_dir, "vcenter-%s.debug.log" % ascii_line(host))
     return {
         "scheme": scheme, "host": host, "port": port,
         "username": username, "password": password,
         "timeout": timeout, "logLevel": log_level,
-        "cacheDir": cache_dir, "debugLogPath": debug_log_path,
         "vcDim": "%s:%s" % (ascii_line(host), port),
     }
 
@@ -683,10 +674,9 @@ def collect_vcenter(service_instance, cfg, log, deadline):
 
 def main():
     cfg = config()
-    log = DebugLog(cfg["logLevel"], cfg["debugLogPath"])
+    log = DebugLog(cfg["logLevel"])
     log.event("DEBUG", "config.ready", scheme=cfg["scheme"], host=cfg["host"], port=cfg["port"],
-              username=cfg["username"], timeout=cfg["timeout"], logLevel=cfg["logLevel"],
-              cacheDir=cfg["cacheDir"])
+              username=cfg["username"], timeout=cfg["timeout"], logLevel=cfg["logLevel"])
     deadline = time.time() + cfg["timeout"]
     service_instance = connect_vcenter(cfg, log)
     try:
@@ -695,8 +685,18 @@ def main():
         disconnect(service_instance, log)
     if not records:
         raise ValueError("未产出任何指标记录（检查地址/账号权限及 vCenter 对象）")
-    write_out(json.dumps(records))
-    write_out("\n")
+    if log.enabled:
+        # DEBUG 模式：故意按 COLLECT_ERROR: 协议输出，前端把 stdout 全文当错误正文
+        # 直接展示——诊断日志免登执行主机即可复制；指标 JSON 保留在 METRICS: 之后可提取。
+        write_out("COLLECT_ERROR:\n")
+        for line in log.dump_lines():
+            write_out(line + "\n")
+        write_out("METRICS:\n")
+        write_out(json.dumps(records))
+        write_out("\n")
+    else:
+        write_out(json.dumps(records))
+        write_out("\n")
     return 0
 
 
