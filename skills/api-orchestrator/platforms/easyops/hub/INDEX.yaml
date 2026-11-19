@@ -10,12 +10,13 @@ items:
   - id: vmware-scan-cmdb-kit
     name: VMWare扫描
     category: cmdb-kits
-    files: [CMDB采集套件_VMWare扫描_1762419598.zip]
-    version: "1762419598"
+    files: [CMDB采集套件_VMWare扫描_0.1.1.zip]
+    version: "0.1.1"
     history:
       - {ver: "1762419598", date: "2026-11-19", change: "现网1762419597升级：物理机按businessIp匹配且upsert=false；优先Management VMkernel IP，多候选和采集内重复IP跳过；过滤占位SN；云平台/虚拟机/资源池/存储/旧模型宿主机统一物理机关联键；补.orig及导入说明"}
+      - {ver: "0.1.1", date: "2026-11-19", change: "统一语义版本号；再次核对交付包、Hub包、远端导出源码和执行输出，物理机dims.pks为businessIp，sn仅为普通属性"}
     scenario: VMware vCenter资源与关系CMDB采集，物理机以ESXi管理业务IP关联已有资产
-    notes: "已导入当前110.24环境原套件65dc3d92b51dd，status=available，版本及packageVersion=1762419598；重新导出.py/.orig与交付源码逐字节一致，15项离线回归通过。日志来自另一环境，该环境未导入、未实采，未验证Python2解释器；未触发采集或同步已有任务。目标台账businessIp须唯一且对应ESXi管理IP，脚本仅检测采集内重复IP；IP复用/变更须人工核对。沿用原包CLOUD_PROVIDER模型快照，跨环境导入前需备份比较；不修改物理机唯一约束。原参数与凭证标志保持不变。"
+    notes: "已导入当前110.24环境原套件65dc3d92b51dd，status=available，版本及packageVersion=0.1.1；重新导出.py/.orig与交付源码逐字节一致，15项离线回归通过。日志来自另一环境，该环境未导入、未实采，未验证Python2解释器；未触发采集或同步已有任务。目标台账businessIp须唯一且对应ESXi管理IP，脚本仅检测采集内重复IP；IP复用/变更须人工核对。沿用原包CLOUD_PROVIDER模型快照，跨环境导入前需备份比较；不修改物理机唯一约束。原参数与凭证标志保持不变。"
     added: "2026-11-19"
   - id: vcenter-monitor-kit
     name: vCenter监控

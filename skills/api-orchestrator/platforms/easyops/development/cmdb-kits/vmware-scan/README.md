@@ -1,4 +1,4 @@
-# VMWare扫描 1762419598
+# VMWare扫描 0.1.1
 
 基于现网套件 65dc3d92b51dd（1762419597）导出改造。
 
@@ -13,7 +13,7 @@
 
 ## 导入与验收
 
-在采集套件管理中导入 ZIP；同名套件使用升级。API 为 `PUT /api/v1/plugin/import_update/{instanceId}`，multipart 字段 `attachment`（ZIP）及 `version=1762419598`。
+在采集套件管理中导入 ZIP；同名套件使用升级。API 为 `PUT /api/v1/plugin/import_update/{instanceId}`，multipart 字段 `attachment`（ZIP）及 `version=0.1.1`。
 
 跨环境导入前必须备份同名套件及关联模型，比较包内原有 CLOUD_PROVIDER 模型快照后导入；该快照沿用源包，不能无审查覆盖目标环境自定义字段。可从包中移除模型快照后复核目标已有模型满足原套件依赖。
 
