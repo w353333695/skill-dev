@@ -234,6 +234,27 @@
     "agentType": "easyops",
     "dataType": "double",
     "instanceId": "",
+    "key": "os_mem_shared",
+    "labels": [
+      "ip",
+      "osType"
+    ],
+    "metricType": "gauge",
+    "tagDefine": [
+      {
+        "name": "ip",
+        "readOnly": false
+      },
+      {
+        "name": "osType",
+        "readOnly": false
+      }
+    ]
+  },
+  {
+    "agentType": "easyops",
+    "dataType": "double",
+    "instanceId": "",
     "key": "os_mem_buffer",
     "labels": [
       "ip",
@@ -655,6 +676,27 @@
       },
       {
         "name": "resourceName",
+        "readOnly": false
+      }
+    ]
+  },
+  {
+    "agentType": "easyops",
+    "dataType": "double",
+    "instanceId": "",
+    "key": "os_mem_used",
+    "labels": [
+      "ip",
+      "osType"
+    ],
+    "metricType": "gauge",
+    "tagDefine": [
+      {
+        "name": "ip",
+        "readOnly": false
+      },
+      {
+        "name": "osType",
         "readOnly": false
       }
     ]

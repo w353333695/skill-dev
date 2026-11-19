@@ -331,6 +331,36 @@
   },
   {
     "dataType": "double",
+    "description": "共享内存，单位：KB",
+    "dims": [
+      {
+        "dimDisplayName": "ip",
+        "dimName": "ip",
+        "isArray": false,
+        "originDimName": "ip"
+      },
+      {
+        "dimDisplayName": "osType",
+        "dimName": "osType",
+        "isArray": false,
+        "originDimName": "osType"
+      }
+    ],
+    "displayName": "操作系统SNMP-共享内存",
+    "expression": "",
+    "metricSet": [
+      "内存与Swap"
+    ],
+    "name": "os_mem_shared",
+    "objectId": "HOST",
+    "originalMetrics": [
+      "os_mem_shared"
+    ],
+    "type": "normal",
+    "unit": ""
+  },
+  {
+    "dataType": "double",
     "description": "物理内存缓冲区，单位：KB",
     "dims": [
       {
@@ -481,7 +511,7 @@
   },
   {
     "dataType": "double",
-    "description": "文件系统总容量，单位：字节",
+    "description": "分区总容量，Windows显示盘符，Linux显示挂载点，单位：字节",
     "dims": [
       {
         "dimDisplayName": "ip",
@@ -514,7 +544,7 @@
         "originDimName": "resourceName"
       }
     ],
-    "displayName": "操作系统SNMP-文件系统总容量",
+    "displayName": "操作系统SNMP-分区总容量",
     "expression": "",
     "metricSet": [
       "文件系统"
@@ -529,7 +559,7 @@
   },
   {
     "dataType": "double",
-    "description": "文件系统已用容量，单位：字节",
+    "description": "分区已用容量，Windows显示盘符，Linux显示挂载点，单位：字节",
     "dims": [
       {
         "dimDisplayName": "ip",
@@ -562,7 +592,7 @@
         "originDimName": "resourceName"
       }
     ],
-    "displayName": "操作系统SNMP-文件系统已用容量",
+    "displayName": "操作系统SNMP-分区已用容量",
     "expression": "",
     "metricSet": [
       "文件系统"
@@ -577,7 +607,7 @@
   },
   {
     "dataType": "double",
-    "description": "文件系统容量使用率，单位：百分比",
+    "description": "分区容量使用率，Windows显示盘符，Linux显示挂载点，单位：百分比",
     "dims": [
       {
         "dimDisplayName": "ip",
@@ -610,7 +640,7 @@
         "originDimName": "resourceName"
       }
     ],
-    "displayName": "操作系统SNMP-文件系统使用率",
+    "displayName": "操作系统SNMP-分区使用率",
     "expression": "",
     "metricSet": [
       "文件系统"
@@ -913,7 +943,7 @@
   },
   {
     "dataType": "double",
-    "description": "物理内存使用率，单位：百分比",
+    "description": "有效已用物理内存；Linux去除Shared/Buffer/Cache，Windows使用SNMP Agent已用口径，单位：KB",
     "dims": [
       {
         "dimDisplayName": "ip",
@@ -928,7 +958,37 @@
         "originDimName": "osType"
       }
     ],
-    "displayName": "操作系统SNMP-物理内存使用率",
+    "displayName": "操作系统SNMP-有效已用物理内存",
+    "expression": "",
+    "metricSet": [
+      "内存与Swap"
+    ],
+    "name": "os_mem_used",
+    "objectId": "HOST",
+    "originalMetrics": [
+      "os_mem_used"
+    ],
+    "type": "normal",
+    "unit": ""
+  },
+  {
+    "dataType": "double",
+    "description": "有效物理内存使用率；Linux去除Shared/Buffer/Cache，Windows使用SNMP Agent已用口径，单位：百分比",
+    "dims": [
+      {
+        "dimDisplayName": "ip",
+        "dimName": "ip",
+        "isArray": false,
+        "originDimName": "ip"
+      },
+      {
+        "dimDisplayName": "osType",
+        "dimName": "osType",
+        "isArray": false,
+        "originDimName": "osType"
+      }
+    ],
+    "displayName": "操作系统SNMP-有效物理内存使用率",
     "expression": "",
     "metricSet": [
       "内存与Swap"

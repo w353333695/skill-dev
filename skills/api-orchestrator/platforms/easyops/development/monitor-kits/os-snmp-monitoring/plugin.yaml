@@ -1,6 +1,6 @@
 type: simple-script
 name: 操作系统SNMP监控
-version: "0.1.11"
+version: "0.1.12"
 command:
     collect:
         interpreter: ""
@@ -21,6 +21,7 @@ params:
     - privProtocol
     - privKey
     - contextName
+    - fsExcludePaths
 paramDefine:
     - {name: ip, valueType: string, defaultValue: $.ip, display: true, displayName: "操作系统IP", description: "取HOST模型的ip属性，不是BMC管理口IP", use: collectParams, optional: false, isFromSecret: false, isEncrypt: false, extraArgs: null}
     - {name: snmpPort, valueType: int, defaultValue: $.snmp_conf.snmpPort, display: true, displayName: "SNMP端口", description: "取HOST.snmp_conf.snmpPort，默认161", use: collectParams, optional: true, isFromSecret: false, isEncrypt: false, extraArgs: null}
@@ -33,6 +34,7 @@ paramDefine:
     - {name: privProtocol, valueType: string, defaultValue: $.snmp_conf.privProtocol, display: true, displayName: "SNMPv3加密协议", description: "取HOST.snmp_conf.privProtocol：DES/AES", use: collectParams, optional: true, isFromSecret: false, isEncrypt: false, extraArgs: null}
     - {name: privKey, valueType: cmdb, defaultValue: $.snmp_conf.privKey, display: true, displayName: "SNMPv3加密密钥", description: "取HOST.snmp_conf.privKey", use: collectParams, optional: true, isFromSecret: false, isEncrypt: false, extraArgs: null}
     - {name: contextName, valueType: string, defaultValue: $.snmp_conf.contextName, display: true, displayName: "SNMPv3上下文", description: "取HOST.snmp_conf.contextName", use: collectParams, optional: true, isFromSecret: false, isEncrypt: false, extraArgs: null}
+    - {name: fsExcludePaths, valueType: string, defaultValue: "/boot,/boot/efi", display: true, displayName: "排除分区", description: "按规范化分区名精确排除；Linux为挂载点，Windows为盘符，多个值用逗号分隔，none表示不排除", use: collectParams, optional: true, isFromSecret: false, isEncrypt: false, extraArgs: null}
 agentType: easyops
 category: 操作系统.带内监控
 scriptType: python

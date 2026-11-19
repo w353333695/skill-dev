@@ -67,6 +67,7 @@ BASE = {
     "hr_memory": "1.3.6.1.2.1.25.2.2.0",
     "mem_total_real": "1.3.6.1.4.1.2021.4.5.0",
     "mem_avail_real": "1.3.6.1.4.1.2021.4.6.0",
+    "mem_shared": "1.3.6.1.4.1.2021.4.13.0",
     "mem_buffer": "1.3.6.1.4.1.2021.4.14.0",
     "mem_cached": "1.3.6.1.4.1.2021.4.15.0",
     "mem_total_swap": "1.3.6.1.4.1.2021.4.3.0",
@@ -77,7 +78,7 @@ BASE = {
     "hr_processor_load": "1.3.6.1.2.1.25.3.3.1.2",
 }
 TABLES = {
-    "storage_type": "1.3.6.1.2.1.25.2.3.1.3",
+    "storage_type": "1.3.6.1.2.1.25.2.3.1.2",
     "storage_unit": "1.3.6.1.2.1.25.2.3.1.4",
     "storage_size": "1.3.6.1.2.1.25.2.3.1.5",
     "storage_used": "1.3.6.1.2.1.25.2.3.1.6",
@@ -90,6 +91,8 @@ TABLES = {
     "if_out_octets": "1.3.6.1.2.1.2.2.1.16",
     "if_out_errors": "1.3.6.1.2.1.2.2.1.20",
 }
+STORAGE_FIXED_DISK = "1.3.6.1.2.1.25.2.1.4"
+STORAGE_RAM = "1.3.6.1.2.1.25.2.1.2"
 
 
 def env(name, default=""):
@@ -147,6 +150,8 @@ def parse_value(text):
         return value[7:].strip().strip('"')
     if value.startswith("Hex-STRING:"):
         return value[11:].strip()
+    if value.startswith("OID:"):
+        return value[4:].strip().strip('"')
     if value.startswith("Timeticks:"):
         match = re.search(r"\(([-+]?\d+)\)", value)
         return float(match.group(1)) / 100.0 if match else 0.0
@@ -180,9 +185,35 @@ def numeric(value, default=0.0):
         return default
 
 
+def storage_type_oid(value):
+    match = re.search(r"(\d+(?:\.\d+)+)", to_text(value))
+    return match.group(1) if match else ""
+
+
+def normalize_partition_name(name, os_type):
+    name = to_text(name).strip()
+    if os_type == "windows":
+        match = re.match(r"(?i)^\s*([a-z]):[\\/]?", name)
+        if match:
+            return match.group(1).upper() + u":\\"
+        return name
+    if name != u"/":
+        name = name.rstrip(u"/")
+    return name or u"/"
+
+
+def excluded_partitions(os_type):
+    value = env_any("fsExcludePaths", "fs_exclude_paths") or "/boot,/boot/efi"
+    if to_text(value).lower() in ("null", "none"):
+        return set()
+    items = re.split(r"[,;]", to_text(value))
+    return set(normalize_partition_name(item, os_type) for item in items if to_text(item).strip())
+
+
 def main():
     if "--help" in sys.argv or "-h" in sys.argv:
-        write_stdout(u"采集带内 Linux/Windows 操作系统 SNMP 指标；凭证通过 EASYOPS_COLLECTOR_* 参数传入。\n")
+        write_stdout(u"采集带内 Linux/Windows 操作系统 SNMP 指标；凭证和fsExcludePaths通过 EASYOPS_COLLECTOR_* 参数传入。\n")
+        write_stdout(u"fsExcludePaths默认/boot,/boot/efi；仅匹配规范化后的分区名，Linux为挂载点，Windows为盘符。\n")
         return 0
     now = int(time.time() * 1000)
     ip = env("ip", "127.0.0.1")
@@ -217,10 +248,16 @@ def main():
             append_error(errors, error)
     total_real = vals.get("os_mem_total_real", 0)
     avail_real = vals.get("os_mem_avail_real", 0)
+    mem_shared = vals.get("os_mem_shared", 0)
+    mem_buffer = vals.get("os_mem_buffer", 0)
+    mem_cached = vals.get("os_mem_cached", 0)
     total_swap = vals.get("os_mem_total_swap", 0)
     avail_swap = vals.get("os_mem_avail_swap", 0)
     if total_real > 0:
-        vals["os_mem_pused"] = (total_real - avail_real) * 100.0 / total_real
+        mem_used = total_real - avail_real - mem_shared - mem_buffer - mem_cached
+        mem_used = min(max(mem_used, 0.0), total_real)
+        vals["os_mem_used"] = mem_used
+        vals["os_mem_pused"] = mem_used * 100.0 / total_real
     if total_swap > 0:
         vals["os_swap_pused"] = (total_swap - avail_swap) * 100.0 / total_swap
     processor_lines, _ = run_snmp(BASE["hr_processor_load"], walk=True)
@@ -230,21 +267,35 @@ def main():
         vals["os_cpu_count"] = len(processor_loads)
     records = [{"dims": tags, "vals": vals, "timestamp": now}]
     storage = {key: parse_table(run_snmp(oid, walk=True)[0]) for key, oid in TABLES.items() if key.startswith("storage_")}
+    excludes = excluded_partitions(tags["osType"])
+    memory_storage = None
     for index, size in storage["storage_size"].items():
         unit = numeric(storage["storage_unit"].get(index), 1)
         used = numeric(storage["storage_used"].get(index), 0)
         if size <= 0:
             continue
-        resource_name = to_text(storage["storage_name"].get(index, index))
+        storage_type = storage_type_oid(storage["storage_type"].get(index))
+        if storage_type == STORAGE_RAM:
+            memory_storage = (size, used, unit)
+        if storage_type != STORAGE_FIXED_DISK:
+            continue
+        resource_name = normalize_partition_name(storage["storage_name"].get(index, index), tags["osType"])
+        if resource_name in excludes:
+            continue
         resource = dict(tags, resourceType="filesystem", resourceIndex=index, resourceName=resource_name)
         records.append({"dims": resource, "vals": {"os_fs_total_bytes": size * unit, "os_fs_used_bytes": used * unit, "os_fs_pused": used * 100.0 / size}, "timestamp": now})
+    if total_real <= 0 and memory_storage:
+        size, used, unit = memory_storage
+        vals["os_mem_total_real"] = size * unit / 1024.0
+        vals["os_mem_used"] = used * unit / 1024.0
+        vals["os_mem_pused"] = used * 100.0 / size
     interfaces = {key: parse_table(run_snmp(oid, walk=True)[0]) for key, oid in TABLES.items() if key.startswith("if_")}
     for index, name in interfaces["if_descr"].items():
         resource = dict(tags, resourceType="interface", resourceIndex=index, resourceName=to_text(name))
         records.append({"dims": resource, "vals": {"os_if_speed_bps": numeric(interfaces["if_speed"].get(index)), "os_if_oper_status": numeric(interfaces["if_oper"].get(index)), "os_if_in_octets": numeric(interfaces["if_in_octets"].get(index)), "os_if_out_octets": numeric(interfaces["if_out_octets"].get(index)), "os_if_in_errors": numeric(interfaces["if_in_errors"].get(index)), "os_if_out_errors": numeric(interfaces["if_out_errors"].get(index))}, "timestamp": now})
     if errors:
         records[0]["vals"]["os_snmp_error"] = u"; ".join(to_text(item) for item in errors[:3])
-    write_stdout(json.dumps(records, ensure_ascii=False))
+    write_stdout(json.dumps(records))
     write_stdout("\n")
     return 0
 

@@ -66,6 +66,7 @@ Restart-Service SNMP
 - `securityLevel`、`securityName`：取 `HOST.snmp_conf` 对应字段
 - `authProtocol`、`authKey`：取 `HOST.snmp_conf` 对应字段
 - `privProtocol`、`privKey`、`contextName`：取 `HOST.snmp_conf` 对应字段
+- `fsExcludePaths`：任务级普通参数，默认 `/boot,/boot/efi`；按规范化后的分区名精确排除并忽略末尾斜杠，Linux 为挂载点，Windows 为 `C:\` 这类盘符，多个值用逗号或分号分隔；配置 `none` 表示不排除任何分区
 
 生产环境优先 SNMPv3 `authPriv`。本套件的 SNMP 凭证来自 HOST 的 `snmp_conf` CMDB 属性，因此参数定义使用 `valueType=cmdb`，并且 `isFromSecret=false`、`isEncrypt=false`；敏感性由 CMDB 字段权限控制，不通过任务密钥覆盖。不要把凭证写入公开文档或日志。
 
@@ -81,10 +82,10 @@ Restart-Service SNMP
 
 - 基础：SNMP 可用性、系统描述、运行时间、进程数。
 - CPU：处理器数量、CPU 使用率、Linux 1/5/15 分钟负载。
-- 内存：物理内存总量、可用、Buffer、Cache、Swap。
-- 文件系统：总容量、已用容量、使用率；按 HOST-RESOURCES-MIB 发现。
+- 内存：物理内存总量、可用、Shared、Buffer、Cache、有效已用、有效使用率、Swap；Linux 有效使用率按 `总量-MemFree-Shared-Buffer-Cache` 近似计算，Windows 无 UCD 缓存明细时回退使用 HOST-RESOURCES 物理内存行。
+- 分区：总容量、已用容量、使用率；仅保留 HOST-RESOURCES-MIB `hrStorageFixedDisk`，Linux 显示挂载点，Windows 显示盘符，默认排除 `/boot` 和 `/boot/efi`。
 - 网络：接口速率、运行状态、入/出流量和错误计数。
-- 默认告警：SNMP 不可用、CPU 80%/95%、内存 80%/90%、文件系统 80%/90%、接口状态异常。
+- 默认告警：SNMP 不可用、CPU 80%/95%、内存 80%/90%、分区 80%/90%、接口状态异常。
 
 Windows SNMP 通常不提供 Linux UCD-SNMP-MIB 的 load average；缺失指标会跳过，不伪造为零。单项 OID 不支持不影响其他指标采集；`sysDescr` 和系统 OID 均无法读取时判定 SNMP 不可用。
 
