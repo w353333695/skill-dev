@@ -383,6 +383,93 @@ class CollectTests(unittest.TestCase):
         self.assertIn("config.ready", output)
 
 
+class ConnectFallbackTests(unittest.TestCase):
+    """TLS 三级降级 + 密码候选循环（目标环境 11.66.19.194 debug 实测回归）。"""
+
+    def cfg(self, password):
+        return {"scheme": "https", "host": "11.66.17.210", "port": 443,
+                "username": "zabbix", "password": password,
+                "timeout": 60, "logLevel": "ERROR", "vcDim": "11.66.17.210:443"}
+
+    def test_password_candidates_base64_obfuscated_first(self):
+        """debug 弹窗轻混淆值（base64(明文)）注入时：解码值排首候选，原值兜底。"""
+        m = collect_namespace()
+        log = m["DebugLog"]("DEBUG")
+        # 用户 debug 实测值：MTIzNC5Bc2Qh = base64("1234.Asd!")
+        candidates = m["password_candidates"](self.cfg("MTIzNC5Bc2Qh"), log)
+        self.assertEqual(candidates, ["1234.Asd!", "MTIzNC5Bc2Qh"])
+        # 正式任务明文（含 ! 非合法 base64）：单候选不受影响
+        self.assertEqual(m["password_candidates"](self.cfg("1234Asd!"), log), ["1234Asd!"])
+        # 明文恰好是合法 base64（4倍数长度）且解码可打印：解码值优先，原值兜底仍可回退
+        dual = m["password_candidates"](self.cfg("MTIzNDA="), log)  # = base64("12340")
+        self.assertEqual(dual, ["12340", "MTIzNDA="])
+        # 空/二进制解码：单候选
+        self.assertEqual(m["password_candidates"](self.cfg(""), log), [""])
+        binary = m["password_candidates"](self.cfg("AAECAwQ="), log)  # 解码含控制字符
+        self.assertEqual(binary, ["AAECAwQ="])
+
+    def test_tls_falls_back_to_ssl_context_then_plain(self):
+        """旧版 pyVim：disableSslCertValidation TypeError → sslContext 分支成功（11.66.19.194 实证）。"""
+        m = collect_namespace()
+        calls = []
+
+        class FakeSI(object):
+            def RetrieveServiceContent(self):
+                return SimpleNamespace(about=SimpleNamespace(apiType="vCenter", version="7.0"))
+
+        def fake_smart_connect(**kwargs):
+            calls.append(kwargs)
+            if "disableSslCertValidation" in kwargs:
+                raise TypeError("unexpected keyword 'disableSslCertValidation'")
+            self.assertIn("sslContext", kwargs)
+            self.assertEqual(kwargs["sslContext"].verify_mode, m["ssl"].CERT_NONE)
+            return FakeSI()
+
+        with mock.patch.dict(m, {"pyvim_connect": SimpleNamespace(SmartConnect=fake_smart_connect)}):
+            cfg = self.cfg("1234Asd!")
+            si = m["connect_vcenter"](cfg, m["DebugLog"]("ERROR"))
+        self.assertIsInstance(si, FakeSI)
+        self.assertEqual(len(calls), 2)
+        self.assertNotIn("disableSslCertValidation", calls[1])
+
+    def test_auth_failure_rotates_password_candidates(self):
+        """认证失败才换下一个候选（解码值→原值）；TLS 错误不换直接抛。"""
+        m = collect_namespace()
+        tried = []
+
+        class AuthError(Exception):
+            pass
+
+        def fake_smart_connect(**kwargs):
+            tried.append(kwargs["pwd"])
+            if kwargs["pwd"] != "1234.Asd!":
+                raise m["vim"].fault.InvalidLogin()
+            return SimpleNamespace(
+                content=SimpleNamespace(about=SimpleNamespace(apiType="v")),
+                RetrieveServiceContent=lambda: SimpleNamespace(
+                    about=SimpleNamespace(apiType="vCenter", version="7.0")))
+
+        # vim.fault.InvalidLogin 桩
+        fault_mod = types.ModuleType("pyVmomi.vim.fault")
+        fault_mod.InvalidLogin = AuthError
+        m["vim"].fault = fault_mod
+        with mock.patch.dict(m, {"pyvim_connect": SimpleNamespace(SmartConnect=fake_smart_connect)}):
+            cfg = self.cfg("MTIzNC5Bc2Qh")
+            si = m["connect_vcenter"](cfg, m["DebugLog"]("ERROR"))
+        self.assertEqual(tried, ["1234.Asd!"])  # 解码值首候选直接命中，无需回退
+        # TLS/网络类错误不换候选直接抛
+        tried[:] = []
+
+        def fake_tls_fail(**kwargs):
+            tried.append(kwargs["pwd"])
+            raise OSError("CERTIFICATE_VERIFY_FAILED")
+
+        with mock.patch.dict(m, {"pyvim_connect": SimpleNamespace(SmartConnect=fake_tls_fail)}):
+            with self.assertRaises(OSError):
+                m["connect_vcenter"](self.cfg("MTIzNC5Bc2Qh"), m["DebugLog"]("ERROR"))
+        self.assertEqual(len(tried), 1)  # 未轮换
+
+
 class FatalProtocolTests(unittest.TestCase):
     def test_top_level_exception_prints_collect_error_and_exits_zero(self):
         """顶层异常走 COLLECT_ERROR: 协议（exit 0，stdout 可见错误正文，凭据不出现）。

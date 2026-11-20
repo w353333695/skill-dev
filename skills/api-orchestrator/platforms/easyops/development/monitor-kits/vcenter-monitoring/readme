@@ -23,7 +23,13 @@ logLevel：可选，默认 ERROR；DEBUG 把结构化诊断按 COLLECT_ERROR: �
 三、采集与预检行为
 预检与采集复用同一次 SmartConnect：认证成功才算预检通过，失败立即跳过本轮采集
 （stdout 输出 COLLECT_ERROR: + 脱敏 traceback，退出 0 供前端展示错误正文），不轮询不重试。
-https 自签证书默认不校验；旧版 pyVim 不支持 disableSslCertValidation 参数时按默认行为直连。
+https 自签证书三级降级（0.1.4）：① disableSslCertValidation（新版 pyVim）→
+② sslContext=CERT_NONE（中版 pyVim，目标环境实证旧版无①参数但默认校验证书会
+CERTIFICATE_VERIFY_FAILED）→ ③ 裸调（最老版）。
+密码候选兜底（0.1.4）：平台下发链路对 isEncrypt 参数解密失败时保原值注入
+（debug-collector-job 弹窗的轻混淆值即此形态，正式任务链路解密正常）——脚本检测
+注入值可 base64 解码为可打印文本时优先用解码值连接，认证失败自动回退原值；
+正式任务明文（含 ! 等非 base64 字符）不受影响。
 采集内容：一次连接内按数据中心分批 PropertyCollector 批量拉取
 ComputeResource/HostSystem/VirtualMachine/Datastore 属性，再分批 QueryPerf（实时 20 秒粒度）
 查询数据存储读/写延迟与宿主机网络吞吐；局部对象失败记录 WARN 并继续，不伪造健康值。

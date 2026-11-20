@@ -12,9 +12,11 @@ DEBUG 模式诊断日志缓冲后按 COLLECT_ERROR: 协议整体输出到 stdout
 参数经环境变量 EASYOPS_COLLECTOR_<name> 注入（平台按 paramDefine 注入）。
 依赖：agent 内置 pyVim.connect.SmartConnect 与 pyVmomi.vim；Python 2.7/3 兼容。
 """
+import base64
 import json
 import os
 import socket
+import ssl
 import sys
 import time
 import traceback
@@ -185,22 +187,97 @@ def config():
     }
 
 
-def connect_vcenter(cfg, log):
-    """连接 + 预检复用同一次 SmartConnect（认证成功才算预检通过，失败即跳过本轮采集）。
-    https 自签证书默认不校验；旧版 pyVim 不支持 disableSslCertValidation 参数时降级直连
-    （旧版 pyVim 默认即不校验证书）。套接字超时统一走 socket.setdefaulttimeout。"""
-    socket.setdefaulttimeout(cfg["timeout"])
+def _unverified_ssl_context():
+    """构造不校验证书的 SSL 上下文（py2.7.9+/py3 通用）；构造失败返回 None。"""
+    try:
+        context = ssl.SSLContext(ssl.PROTOCOL_SSLv23)
+        context.verify_mode = ssl.CERT_NONE
+        context.check_hostname = False
+        return context
+    except Exception:
+        return None
+
+
+def password_candidates(cfg, log):
+    """密码候选序列（debug-collector-job 场景兜底）：
+    平台下发链路对 isEncrypt 参数解密失败时保原值注入（job_generator.go decrypt
+    keep-original-value 分支），前端 debug 弹窗的轻混淆值是 base64(明文) 形态——
+    合法 base64 且解码为可打印文本时把解码值排为首候选，认证失败再回退原值。
+    正式任务注入的是明文（通常含 ! 等非 base64 字符），不受影响；原值恒在候选末位。"""
+    raw = cfg["password"]
+    candidates = [raw]
+    if not raw:
+        return candidates
+    try:
+        decoded = base64.b64decode(raw, validate=True)
+        text = safe_text(decoded)
+        if text and text != raw and all(32 <= ord(ch) < 127 for ch in text):
+            candidates.insert(0, text)
+            log.event("DEBUG", "connect.password_candidate_from_base64",
+                      note="注入值可base64解码为可打印文本，优先作为密码候选（正式任务不受影响）")
+    except Exception:
+        pass
+    return candidates
+
+
+def _smart_connect_once(cfg, log, pwd):
+    """单次 SmartConnect，https 三级证书降级：
+    ① disableSslCertValidation（新版 pyVim）→ ② sslContext=CERT_NONE（中版，
+    目标环境 11.66.19.194 实证走此分支——旧版无 disableSslCertValidation 参数
+    但有 sslContext，默认校验证书会 CERTIFICATE_VERIFY_FAILED）→ ③ 裸调（最老版）。"""
     kwargs = {"host": cfg["host"], "port": cfg["port"],
-              "user": cfg["username"], "pwd": cfg["password"]}
+              "user": cfg["username"], "pwd": pwd}
     if cfg["scheme"] == "https":
         try:
-            service_instance = pyvim_connect.SmartConnect(disableSslCertValidation=True, **kwargs)
+            return pyvim_connect.SmartConnect(disableSslCertValidation=True, **kwargs)
         except TypeError:
-            log.event("WARN", "connect.no_validation_kwarg", note="pyVim 旧版不支持 disableSslCertValidation，按默认行为直连")
-            service_instance = pyvim_connect.SmartConnect(**kwargs)
+            context = _unverified_ssl_context()
+            if context is not None:
+                try:
+                    return pyvim_connect.SmartConnect(sslContext=context, **kwargs)
+                except TypeError:
+                    log.event("WARN", "connect.no_ssl_context_kwarg",
+                              note="pyVim 旧版不支持 sslContext 与 disableSslCertValidation，按默认行为直连")
+                    return pyvim_connect.SmartConnect(**kwargs)
+            log.event("WARN", "connect.no_ssl_context_support",
+                      note="当前 python ssl 无 SSLContext，按默认行为直连")
+            return pyvim_connect.SmartConnect(**kwargs)
+    kwargs["protocol"] = "http"
+    return pyvim_connect.SmartConnect(**kwargs)
+
+
+def _is_auth_error(exc):
+    """仅认证类错误才换下一个密码候选；TLS/网络/超时错误直接抛（换密码无意义）。"""
+    name = exc.__class__.__name__
+    if name in ("InvalidLogin", "InvalidArgument", "NoPermission"):
+        return True
+    text = ascii_line(str(exc))
+    return ("InvalidLogin" in text or "authentication" in text.lower()
+            or "login" in text.lower() and "failed" in text.lower())
+
+
+def connect_vcenter(cfg, log):
+    """连接 + 预检复用同一次 SmartConnect（认证成功才算预检通过，失败即跳过本轮采集）。
+    密码候选循环见 password_candidates（仅认证失败才换下一个候选）；
+    套接字超时统一走 socket.setdefaulttimeout。"""
+    socket.setdefaulttimeout(cfg["timeout"])
+    candidates = password_candidates(cfg, log)
+    last_exc = None
+    for index, pwd in enumerate(candidates):
+        try:
+            service_instance = _smart_connect_once(cfg, log, pwd)
+            break
+        except SystemExit:
+            raise
+        except Exception as exc:
+            last_exc = exc
+            if index + 1 < len(candidates) and _is_auth_error(exc):
+                log.event("DEBUG", "connect.password_candidate_rejected",
+                          index=index, error=ascii_line(exc.__class__.__name__))
+                continue
+            raise
     else:
-        kwargs["protocol"] = "http"
-        service_instance = pyvim_connect.SmartConnect(**kwargs)
+        raise last_exc
     content = service_instance.RetrieveServiceContent()
     if content is None or getattr(content, "about", None) is None:
         raise ValueError("vCenter 服务内容获取失败")
