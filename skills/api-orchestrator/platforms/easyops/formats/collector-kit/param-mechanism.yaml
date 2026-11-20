@@ -261,6 +261,6 @@ cmdb_dynamic_parameter_safety:
 collector_diagnostic_logging:
   parameter: "声明可见常量参数log_level，默认ERROR，并由EASYOPS_COLLECTOR_log_level注入；允许DEBUG/WARNING，用户可自行调试，不把日志级别声明成$.设备属性。"
   levels: "缺失OID、空响应、解析不出值、组件缺值及未采到的最终指标记录WARN，继续其他指标。ERROR默认会过滤WARN，说明中应告知切换WARNING/DEBUG；基础前置条件失败/全无指标记录ERROR并raise，不能仅输出空数组冒充成功。"
-  debug: "DEBUG记录运行ID、请求序号、脱敏命令参数数组、耗时、退出码、完整原始响应/stdout/stderr、解析行和类型转换、候选MIB及回退、逐条指标和最终输出。存在HTTP API调用的脚本也应记录脱敏响应和状态；没有API的套件不要声称记录了API响应。日志量大，调试结束恢复ERROR。"
-  safety: "所有日志到stderr，stdout仅遵循采样器协议。严禁输出环境变量全集、完整认证header或明文凭证；命令-c/-A/-X对应值、原始响应和traceback中的已知密钥都要脱敏。except错误日志带函数名和traceback，用户分享日志前仍检查资产信息。"
-  regression: "回归验证默认ERROR与DEBUG切换、缺失指标WARN且部分结果不中断、原始响应不截断、命令/响应/异常均脱敏，以及日志不污染JSON stdout。"
+  debug: "DEBUG按套件能力记录排障证据，例如运行ID、请求序号、脱敏命令参数数组、耗时、退出码、原始或摘要响应、解析行和类型转换、候选回退、逐条指标和最终输出。存在HTTP API调用的脚本应记录脱敏请求上下文与响应状态；没有API的套件不要声称记录了API响应。日志量大，调试结束恢复ERROR。"
+  safety: "诊断日志通道必须匹配采样器与调试接口契约：独立命令可写stderr，metric_sampler经debug-collector-job调试时stderr可能被合并进data，应改用stdout错误协议或套件明确声明的侧车文件。严禁输出环境变量全集、完整认证header或明文凭证；命令-c/-A/-X对应值、原始响应和traceback中的已知密钥都要脱敏。except错误日志带函数名和traceback，用户分享日志前仍检查资产信息。"
+  regression: "回归验证默认ERROR与DEBUG切换、缺失指标WARN且部分结果不中断、原始响应不截断、命令/响应/异常均脱敏，以及成功路径stdout仍是采样器要求的JSON协议。"

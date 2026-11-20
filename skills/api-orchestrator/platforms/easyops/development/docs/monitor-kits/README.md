@@ -50,7 +50,10 @@ EasyOps 旧执行环境可能使用 Python 2.7。脚本源码或采集数据包�
 Python 2 的 `/proc`、OpenAPI 或命令输出解码后可能得到 `unicode`。通用文本归一函数不能对它直接执行 `str(value)`：Python 2 会按 ASCII 编码并在中文字符处抛出 `UnicodeEncodeError`。应显式保留 `unicode` 值，仅字节串按 UTF-8 解码；JSON 输出继续使用默认 ASCII escape。
 
 Windows Python 2的`traceback.format_exc()`可能返回GBK等本地编码字节串，直接进入`json.dumps`会按UTF-8解码并抛`UnicodeDecodeError`，进而掩盖原始采集异常。监控脚本输出DEBUG/ERROR诊断行前必须归一化文本：字节按系统编码解码、非ASCII转escape、数值/布尔保持原类型，最终每行保持ASCII安全且JSON合法。
-`debug-collector-job` 可能把脚本 stderr 合并进 `resultList[].data`，因此诊断日志不写stderr；诊断统一随 `COLLECT_ERROR:` 协议进stdout（前端按错误正文渲染，跨环境排障免登执行主机），顶层致命异常同协议输出，正常采集stdout保持纯JSON数组。不使用侧车文件方案（避免部署方登服务器取日志）。
+监控套件的诊断日志没有单一通用通道，必须在套件文档中声明并回归实际通道。`debug-collector-job` 可能把脚本 stderr 合并进 `resultList[].data`，因此不能在未确认合并行为时把DEBUG写到stderr。可选方案有两类：
+
+- stdout错误协议：顶层致命异常输出 `COLLECT_ERROR:` 与traceback到stdout，正常成功路径stdout仍保持纯JSON数组；若DEBUG也要前端可见，只能在错误路径或明确的调试协议中输出，且必须写清服务端会把非JSON展示为解析错误。
+- 侧车文件：成功路径stdout保持纯JSON数组，DEBUG/ERROR结构化日志写入套件声明的主机侧文件；优点是不破坏采样协议，缺点是请求OpenAPI失败时前端只能看到顶层异常摘要，请求URL/query/page等上下文需要登主机查看文件。
 
 
 ### 本次错误暴露实现（2026-11-05）

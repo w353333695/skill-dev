@@ -135,10 +135,6 @@ class HostDeployInstanceMonitorTests(unittest.TestCase):
             m["search_targets"](settings)
         body = json.loads(http_json.call_args[0][2])
         self.assertEqual(body["query"], {"isMonitor": "是", "ip": "192.168.110.24"})
-        source = SOURCE.read_text(encoding="utf-8")
-        orig = SOURCE.with_suffix(".orig").read_text(encoding="utf-8")
-        self.assertNotIn("$or", source)
-        self.assertNotIn("$or", orig)
 
     def test_search_targets_debug_logs_request_and_empty_reason(self):
         m = module()

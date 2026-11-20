@@ -113,7 +113,7 @@ output_protocols:
           "dims": {"object_id": "HOST", "pks": ["instanceId"], "upsert": true},
           "vals": {"instanceId": "...", "name": "...", "其他字段": "..."}
         }
-      ], ensure_ascii=False)
+      ])
       print "-----END GATHERING DATA-----"
     fields:
       dims:
@@ -164,7 +164,7 @@ python2_rules:
     rule: "用 py2 print 语句（print x），不用 print() 函数形式"
     why: "不能用 __future__ print_function —— 它必须放文件最顶部，但 agent 运行时会在脚本顶部注入内容，导致 __future__ 不在顶部而报错。所以只能用 py2 语句。"
     correct_examples:
-      stdout: "print json.dumps(result, ensure_ascii=False)        # 输出到 stdout（指标数据）"
+      stdout: "print json.dumps(result)                             # 输出到 stdout（指标数据，默认ASCII escape）"
       stderr: "import sys; print >> sys.stderr, 'error: ' + str(e)  # 错误输出 stderr"
     wrong_examples:
       - "from __future__ import print_function   # ❌ 运行时注入破坏顶部 __future__，报错"
@@ -199,9 +199,9 @@ python2_rules:
       - "异常用 except Exception as e:（py2 也支持，不用 except Exception, e: 旧语法）"
 
   json_output:
-    rule: "输出 JSON 时用 ensure_ascii=False 保留中文"
-    correct_example: "print json.dumps(result, ensure_ascii=False)"
-    note: "py2 的 json.dumps 默认 ensure_ascii=True 会转义中文为 \\uXXXX，监控数据需保留中文维度时设 False"
+    rule: "输出 JSON 时保持默认 ensure_ascii=True，中文输出为 \\uXXXX 转义"
+    correct_example: "print json.dumps(result)"
+    note: "Python 2.7 遇到中文字节串且设置 ensure_ascii=False 时，JSON encoder 可能先按ASCII解码并抛 UnicodeDecodeError；默认转义在Python 2/3均稳定且JSON语义不变"
 
   env_var:
     rule: "参数经环境变量 EASYOPS_COLLECTOR_<paramName> 传递，大小写敏感"
@@ -249,7 +249,7 @@ script_templates:
         try:
             params = get_params()
             data = collect_data(params)
-            print json.dumps(data, ensure_ascii=False)   # py2 print 语句
+            print json.dumps(data)                       # py2 print 语句
         except Exception:
             traceback.print_exc(file=sys.stderr)
             print '[]'   # 异常输出空数组保 stdout 合法
@@ -283,7 +283,7 @@ script_templates:
         try:
             data = collect_data(get_params())
             print '-----BEGIN GATHERING DATA-----'
-            print json.dumps(data, ensure_ascii=False)
+            print json.dumps(data)
             print '-----END GATHERING DATA-----'
         except Exception:
             traceback.print_exc(file=sys.stderr)
@@ -307,7 +307,7 @@ cmdb_process_sampler_diagnostics:
 # 监控 metric_sampler 前端可观测失败协议（2026-11-04）
 metric_sampler_frontend_error_protocol:
   rule: "脚本中不要直接以非零退出表示采集失败；前端依赖 stdout 展示错误正文。顶层异常输出 COLLECT_ERROR: 和完整 traceback 到 stdout，flush 后 exit 0。"
-  success: "main() 输出 json.dumps(result, ensure_ascii=False) 后 return 0。"
+  success: "main() 输出 json.dumps(result) 后 return 0。"
   failure: "if __name__ == '__main__': try: sys.exit(main()) except Exception: sys.stdout.write('COLLECT_ERROR\n'); traceback.print_exc(file=sys.stdout); sys.stdout.flush(); sys.exit(0)"
   scope: "simple-script + metric_sampler 监控套件；CMDB process_sampler 另遵循 GATHERING DATA 协议。"
   warning: "单指标/可选资源失败只记录 WARN 并继续，不伪造健康值；只有无法进入采集的异常才进入顶层 COLLECT_ERROR。"
