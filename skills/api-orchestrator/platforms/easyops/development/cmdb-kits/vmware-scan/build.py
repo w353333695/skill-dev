@@ -6,14 +6,14 @@ import stat
 import zipfile
 from pathlib import Path
 
-VERSION = '0.1.2'
+VERSION = '0.1.3'
 ROOT = 'VMWare扫描/'
 
 
 def main():
     parser = argparse.ArgumentParser(
         description='从原始导出 ZIP 构建按 businessIp 匹配的 VMWare扫描套件；不访问远端。',
-        epilog='示例：python build.py --base original.zip --output CMDB采集套件_VMWare扫描_0.1.2.zip')
+        epilog='示例：python build.py --base original.zip --output CMDB采集套件_VMWare扫描_0.1.3.zip')
     parser.add_argument('--base', type=Path, required=True, help='原始现网导出 ZIP（必填，无默认值）')
     parser.add_argument('--output', type=Path, required=True, help='新版输出 ZIP（必填，无默认值；覆盖同路径）')
     parser.add_argument('--version', action='version', version=VERSION)
@@ -30,6 +30,14 @@ def main():
             files[name] = archive.read(entry)
     assert b'1762419597' in files['plugin.yaml']
     files['plugin.yaml'] = files['plugin.yaml'].replace(b'1762419597', VERSION.encode())
+    files['plugin.yaml'] += b'\n'
+    import yaml
+    config = yaml.safe_load(files['plugin.yaml'])
+    config['params'].append('logLevel')
+    config['paramDefine'].append(dict(name='logLevel', valueType='string', defaultValue='ERROR', display=True,
+        displayName='日志级别', description='DEBUG输出宿主机管理IP选择诊断，排障后恢复ERROR',
+        use='collectorParams', optional=True, isFromSecret=False, isEncrypt=False))
+    files['plugin.yaml'] = yaml.safe_dump(config, allow_unicode=True, sort_keys=False).encode('utf-8')
     # 其他引用原版本的配置也要同步，防止包版本元数据不一致。
     if 'package.conf.yaml' in files:
         files['package.conf.yaml'] = files['package.conf.yaml'].replace(b'1762419597', VERSION.encode())

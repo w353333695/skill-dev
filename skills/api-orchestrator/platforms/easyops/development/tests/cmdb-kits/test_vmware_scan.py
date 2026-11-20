@@ -10,7 +10,7 @@ from types import SimpleNamespace as N
 SOURCE = Path(__file__).parents[2] / 'cmdb-kits/vmware-scan/src/VMWare_Scan.py'
 tree = ast.parse(SOURCE.read_text())
 nodes = [n for n in tree.body if isinstance(n, (ast.FunctionDef, ast.ClassDef))]
-namespace = {'socket': socket, 'logger': logging.getLogger('vmware-test'),
+namespace = {'_debug_level': 'ERROR', 'sys': __import__('sys'), 'json': __import__('json'), 'socket': socket, 'logger': logging.getLogger('vmware-test'),
              'vim': N(HostSystem=object), 'SERVER_OBJECT_ID': 'PHYSICAL_SERVER@ONEMODEL',
              'CLOUD_PROVIDER_OBJECT_ID': 'CLOUD_PROVIDER@ONEMODEL'}
 exec(compile(ast.Module(body=nodes, type_ignores=[]), str(SOURCE), 'exec'), namespace)

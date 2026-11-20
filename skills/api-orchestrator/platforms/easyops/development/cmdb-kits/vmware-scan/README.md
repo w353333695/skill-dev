@@ -1,4 +1,4 @@
-# VMWare扫描 0.1.2
+# VMWare扫描 0.1.3
 
 基于现网套件 65dc3d92b51dd（1762419597）导出改造。
 
@@ -13,7 +13,7 @@
 
 ## 导入与验收
 
-在采集套件管理中导入 ZIP；同名套件使用升级。API 为 `PUT /api/v1/plugin/import_update/{instanceId}`，multipart 字段 `attachment`（ZIP）及 `version=0.1.2`。
+在采集套件管理中导入 ZIP；同名套件使用升级。API 为 `PUT /api/v1/plugin/import_update/{instanceId}`，multipart 字段 `attachment`（ZIP）及 `version=0.1.3`。
 
 跨环境导入前必须备份同名套件及关联模型，比较包内原有 CLOUD_PROVIDER 模型快照后导入；该快照沿用源包，不能无审查覆盖目标环境自定义字段。可从包中移除模型快照后复核目标已有模型满足原套件依赖。
 
@@ -24,3 +24,6 @@
 离线回归覆盖日志中的 8 台宿主机、Management 网卡选择、重复 IP、空/多 IP、SN 候选回退和统一关联键。无真实 vCenter 访问，未完成目标环境实采及 Python 2 解释器运行验证。
 
 源码与回归保留在 development，Hub 仅保存可导入 ZIP。原始套件备份保留在本次任务 tmp 目录，可供回滚重打为新版本导入；平台版本不允许直接重复使用旧版本。
+
+## 管理IP诊断
+任务参数 logLevel=DEBUG；默认ERROR。同步套件和任务后采集一轮，复制 stderr 中 [DEBUG][management_ip]、[DEBUG][management_ip_result]、[DEBUG][physical_host_keys] 与跳过日志。日志不含凭证；含宿主标识、网卡标识及IP。采集stdout协议不变。排障后恢复ERROR。此次仅增加日志，保持原匹配行为。

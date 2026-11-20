@@ -31,6 +31,16 @@ except Exception:
     FORMAT = '[%(asctime)s (line:%(lineno)d) %(levelname)s] %(message)s'
     logging.basicConfig(level=logging.INFO, datefmt='%Y-%m-%d %H:%M:%S', format=FORMAT)
 logger = logging
+_debug_level = (os.environ.get('EASYOPS_COLLECTOR_logLevel') or os.environ.get('EASYOPS_LOG_LEVEL') or 'ERROR').upper()
+logger.setLevel(getattr(_builtin_logging, _debug_level, _builtin_logging.ERROR))
+
+
+def ip_debug(stage, data):
+    """仅记录宿主网卡身份和IP，不记录凭证；独立stderr保证前端日志可见。"""
+    if _debug_level == 'DEBUG':
+        sys.stderr.write('[DEBUG][%s] %s\n' % (stage, json.dumps(data, ensure_ascii=True)))
+        sys.stderr.flush()
+
 
 
 CLOUD_VM_OBJECT_ID = "CLOUD_VM@ONEMODEL"
@@ -82,6 +92,15 @@ def management_ip(host_obj):
     vnics = getattr(network, 'vnic', None) or []
     manager = getattr(config, 'virtualNicManagerInfo', None)
     net_configs = getattr(manager, 'netConfig', None) or []
+    ip_debug('management_ip', {
+        'host': getattr(host_obj, '_moId', ''),
+        'vnics': [{'key': getattr(n, 'key', ''), 'device': getattr(n, 'device', ''),
+                   'ip': getattr(getattr(getattr(n, 'spec', None), 'ip', None), 'ipAddress', '')} for n in vnics],
+        'netConfig': [{'nicType': getattr(n, 'nicType', ''),
+                       'selectedVnic': list(getattr(n, 'selectedVnic', None) or []),
+                       'candidateVnic': [{'key': getattr(v, 'key', ''), 'device': getattr(v, 'device', ''),
+                           'ip': getattr(getattr(getattr(v, 'spec', None), 'ip', None), 'ipAddress', '')}
+                           for v in (getattr(n, 'candidateVnic', None) or [])]} for n in net_configs]})
     selected = set()
     has_management_config = False
     for item in net_configs:
@@ -97,6 +116,9 @@ def management_ip(host_obj):
         address = valid_host_ip(getattr(ip_spec, 'ipAddress', ''))
         if address:
             candidates.add(address)
+    ip_debug('management_ip_result', {'host': getattr(host_obj, '_moId', ''),
+        'has_management_config': has_management_config, 'selected': sorted(selected),
+        'candidate_ips': sorted(candidates), 'reason': 'unique' if len(candidates) == 1 else 'no_match' if not candidates else 'multiple_ips'})
     if len(candidates) == 1:
         return next(iter(candidates))
     logger.warning('[management_ip] host=%s ambiguous_or_missing_management_ip count=%s',
@@ -171,6 +193,8 @@ class EasyVcenter:
                 self._physical_keys[host_id] = {'businessIp': address}
             else:
                 logger.warning('[physical_host_keys] duplicate_business_ip host=%s ip=%s skipped', host_id, address)
+        ip_debug('physical_host_keys', {'host_count': len(hosts), 'ip_counts': counts,
+            'accepted': self._physical_keys, 'skipped_hosts': [h._moId for h in hosts if h._moId not in self._physical_keys]})
         self._physical_hosts = hosts
         return self._physical_keys
 
