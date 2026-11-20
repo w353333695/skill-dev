@@ -24,7 +24,7 @@ else:
     from urllib import urlencode
     from urllib2 import Request, urlopen
 
-VERSION = "0.1.18"
+VERSION = "0.1.19"
 IS_WINDOWS = os.name == "nt"
 OBJECT_ID = "ARTIFACT_INST@ONEMODEL"
 OPENAPI_PATH = "/cmdbservice/v3/object/ARTIFACT_INST@ONEMODEL/instance/_search"
@@ -54,48 +54,22 @@ def value_digest(value):
     return hashlib.sha1(text(value).encode("utf-8")).hexdigest()[:12]
 
 
-DEBUG_LOG_MAX_BYTES = 5 * 1024 * 1024
-
-
-def write_debug_log(path, payload):
-    directory = os.path.dirname(path)
-    if directory:
-        try:
-            os.makedirs(directory, 0o700)
-        except OSError as exc:
-            if exc.errno != errno.EEXIST:
-                raise
-    try:
-        if os.path.exists(path) and os.path.getsize(path) >= DEBUG_LOG_MAX_BYTES:
-            rotated = "%s.1" % path
-            try:
-                if os.path.exists(rotated):
-                    os.remove(rotated)
-                os.rename(path, rotated)
-            except OSError:
-                pass
-        with open(path, "ab") as handle:
-            handle.write(("%s\n" % payload).encode("utf-8"))
-    except (IOError, OSError):
-        pass
-
-
 def debug_enabled(settings):
     return text(settings.get("logLevel", "ERROR")).upper() == "DEBUG"
 
 
 def log_event(settings, level, stage, **fields):
     configured_level = text(settings.get("logLevel", "ERROR")).upper()
-    if level == "DEBUG" and configured_level != "DEBUG":
-        return
-    if level not in ("DEBUG", "ERROR"):
+    if configured_level != "DEBUG" or level not in ("DEBUG", "ERROR"):
         return
     payload = {"level": level, "stage": stage}
     payload.update(fields)
-    log_path = settings.get("debugLogPath")
-    if not log_path:
-        return
-    write_debug_log(log_path, json.dumps(safe_log_value(payload), separators=(",", ":"), allow_nan=False))
+    settings.setdefault("debugEvents", []).append(safe_log_value(payload))
+
+
+def write_debug_events(settings):
+    for payload in settings.get("debugEvents", []):
+        sys.stdout.write("[DEBUG] %s\n" % json.dumps(payload, separators=(",", ":"), allow_nan=False))
 
 
 def text(value):
@@ -170,10 +144,6 @@ def config():
         "hostUuid": env("hostUuid"),
         "hostIp": env("hostIp"),
         "cacheDir": normalized_cache_dir(env("cacheDir", default_cache_dir())),
-        "debugLogPath": os.path.join(
-            normalized_cache_dir(env("cacheDir", default_cache_dir())),
-            host_instance_id + ".debug.log"
-        ),
         "cacheTtlSeconds": cache_ttl_days * 86400,
         "gateway": "",
         "gatewaySource": "missing",
@@ -1002,15 +972,25 @@ def collect(settings):
 def main(argv=None):
     parser = argparse.ArgumentParser(
         description="主机部署实例本机监控：按主机instanceId读取7天缓存，OpenAPI刷新isMonitor=是的ARTIFACT_INST目标，采集进程、端口、CPU、内存和句柄指标。",
-        epilog="参数均由 EASYOPS_COLLECTOR_* 环境变量注入：instanceId/hostUuid/hostIp/cacheDir/cacheTtlDays/openapiScheme(默认https)/openapiGateway(兜底)/openapiAkText/openapiSkText/sampleInterval/requestTimeout/logLevel。logLevel=DEBUG时诊断JSON写入缓存目录<hostInstanceId>.debug.log且不包含AK/SK，stdout/stderr均不混入诊断；默认ERROR只输出异常。顶层异常输出COLLECT_ERROR并保持退出码0。示例：EASYOPS_COLLECTOR_instanceId=65eb86f148251 EASYOPS_COLLECTOR_hostUuid=f907... EASYOPS_COLLECTOR_hostIp=192.168.110.24 EASYOPS_COLLECTOR_openapiGateway=http://192.168.110.24 EASYOPS_OPENAPI_AK=... EASYOPS_OPENAPI_SK=... EASYOPS_COLLECTOR_logLevel=DEBUG python host_deploy_instance_monitor.py")
+        epilog="参数均由 EASYOPS_COLLECTOR_* 环境变量注入：instanceId/hostUuid/hostIp/cacheDir/cacheTtlDays/openapiScheme(默认https)/openapiGateway(兜底)/openapiAkText/openapiSkText/sampleInterval/requestTimeout/logLevel。logLevel=DEBUG时先内存缓冲脱敏诊断JSON，结束后按COLLECT_ERROR协议输出到stdout，并在METRICS:后保留指标JSON，便于前端直接复制跨环境调试；默认ERROR仅顶层异常输出COLLECT_ERROR。诊断不写文件/stderr，不包含AK/SK或完整命令行。示例：EASYOPS_COLLECTOR_instanceId=65eb86f148251 EASYOPS_COLLECTOR_hostUuid=f907... EASYOPS_COLLECTOR_hostIp=192.168.110.24 EASYOPS_COLLECTOR_openapiGateway=http://192.168.110.24 EASYOPS_OPENAPI_AK=... EASYOPS_OPENAPI_SK=... EASYOPS_COLLECTOR_logLevel=DEBUG python host_deploy_instance_monitor.py")
     parser.add_argument("--version", action="version", version=VERSION)
     parser.parse_args(argv)
+    settings = None
     try:
         settings = config()
         log_event(settings, "DEBUG", "config.ready", version=VERSION, logLevel=settings["logLevel"], cacheDir=settings["cacheDir"], gatewayConfigured=bool(settings["gateway"]), gatewaySource=settings["gatewaySource"], openapiScheme=settings["openapiScheme"], accessKeyConfigured=bool(settings["accessKey"]), secretKeyConfigured=bool(settings["secretKey"]))
-        sys.stdout.write("%s\n" % json.dumps(collect(settings), allow_nan=False))
+        records = collect(settings)
+        if debug_enabled(settings):
+            sys.stdout.write("COLLECT_ERROR:\n")
+            write_debug_events(settings)
+            sys.stdout.write("METRICS:\n")
+        sys.stdout.write("%s\n" % json.dumps(records, allow_nan=False))
     except Exception:
-        sys.stdout.write("COLLECT_ERROR: [main] %s\n" % traceback.format_exc())
+        sys.stdout.write("COLLECT_ERROR:\n")
+        if settings is not None and debug_enabled(settings):
+            write_debug_events(settings)
+        fatal = {"level": "ERROR", "stage": "main.exception", "traceback": safe_error_text(traceback.format_exc())}
+        sys.stdout.write("[ERROR] %s\n" % json.dumps(safe_log_value(fatal), separators=(",", ":"), allow_nan=False))
     return 0
 
 

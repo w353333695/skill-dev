@@ -86,7 +86,7 @@ output_protocols:
       - "必须是 JSON 数组 [{...},...]，不是单对象 {...}"
       - "每条记录必须含 dims 和 vals"
       - "vals 值必须数值型（绘图/告警需要）"
-      - "正常采集 stdout 输出 JSON 数组；不要把调试或错误文本混入正常 JSON"
+      - "logLevel!=DEBUG 的正常采集 stdout 输出 JSON 数组；DEBUG诊断模式按 COLLECT_ERROR/[DEBUG]/METRICS 前端协议输出，不写文件或stderr"
       - "顶层异常必须输出 COLLECT_ERROR: 与 traceback 到 stdout，并最终 exit 0，确保前端能看到错误正文；不要直接非零 exit()"
     source: "simple-script-guide.md:146-181,401-421"
 
@@ -307,7 +307,7 @@ cmdb_process_sampler_diagnostics:
 # 监控 metric_sampler 前端可观测失败协议（2026-11-04）
 metric_sampler_frontend_error_protocol:
   rule: "脚本中不要直接以非零退出表示采集失败；前端依赖 stdout 展示错误正文。顶层异常输出 COLLECT_ERROR: 和完整 traceback 到 stdout，flush 后 exit 0。"
-  success: "main() 输出 json.dumps(result) 后 return 0。"
+  success: "logLevel!=DEBUG 时 main() 输出 json.dumps(result) 后 return 0；logLevel=DEBUG 时输出 COLLECT_ERROR:、缓冲[DEBUG] JSON行、METRICS:和 json.dumps(result)。"
   failure: "if __name__ == '__main__': try: sys.exit(main()) except Exception: sys.stdout.write('COLLECT_ERROR\n'); traceback.print_exc(file=sys.stdout); sys.stdout.flush(); sys.exit(0)"
   scope: "simple-script + metric_sampler 监控套件；CMDB process_sampler 另遵循 GATHERING DATA 协议。"
   warning: "单指标/可选资源失败只记录 WARN 并继续，不伪造健康值；只有无法进入采集的异常才进入顶层 COLLECT_ERROR。"

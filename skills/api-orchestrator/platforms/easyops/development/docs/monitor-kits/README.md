@@ -10,7 +10,7 @@
 
 ## 本地采集日志与缺失指标排障强制要求
 
-本地命令行监控套件必须提供 `logLevel` 参数，默认 `ERROR`，可选 `DEBUG/INFO/WARN/ERROR`。非DEBUG模式采集stdout必须保持纯JSON数组，日志零输出。DEBUG诊断模式的日志直接进stdout：按 `COLLECT_ERROR:` 协议输出（前端把stdout全文当错误正文展示，免登执行主机取日志），诊断行在前、指标JSON放在末尾 `METRICS:` 标记之后可提取复验；不写文件、不写stderr。DEBUG输出会让自动指标解析按错误处理，这正是前端可见日志的手段，仅用于一次性排障，排障完成后必须恢复ERROR。默认ERROR只输出命令失败、致命异常和缺失指标摘要（缺失经 error_count/collect_complete 等数值指标可见）；DEBUG必须独立定位问题，至少包含命令路径与参数、输入命令、返回码和原始输出、目录探测候选、资源解析/过滤原因、每个分类对象的计数、最终输出指标清单，以及未出现指标名清单。日志不得输出凭证、Cookie、密钥或数据库连接串。新增或优化指标时，离线测试必须覆盖日志默认级别静默、DEBUG的COLLECT_ERROR协议输出与METRICS尾部JSON可解析、指标缺失摘要。参照实现：vcenter-monitoring（DebugLog 内存缓冲 + main() 末尾统一输出）。
+本地命令行监控套件必须提供 `logLevel` 参数，默认 `ERROR`，可选 `DEBUG/INFO/WARN/ERROR`。非DEBUG模式成功路径stdout必须保持纯JSON数组，不输出过程日志；致命异常仍走`COLLECT_ERROR:`。DEBUG诊断模式的日志直接进stdout：按 `COLLECT_ERROR:` 协议输出（前端把stdout全文当错误正文展示，免登执行主机取日志），诊断行在前、指标JSON放在末尾 `METRICS:` 标记之后可提取复验；不写文件、不写stderr。DEBUG输出会让自动指标解析按错误处理，这正是前端可见日志的手段，仅用于一次性排障，排障完成后必须恢复ERROR。默认ERROR只输出命令失败、致命异常和缺失指标摘要（缺失经 error_count/collect_complete 等数值指标可见）；DEBUG必须独立定位问题，至少包含命令路径与参数、输入命令、返回码和原始输出、目录探测候选、资源解析/过滤原因、每个分类对象的计数、最终输出指标清单，以及未出现指标名清单。日志不得输出凭证、Cookie、密钥或数据库连接串。新增或优化指标时，离线测试必须覆盖日志默认级别静默、DEBUG的COLLECT_ERROR协议输出与METRICS尾部JSON可解析、指标缺失摘要。参照实现：vcenter-monitoring（DebugLog 内存缓冲 + main() 末尾统一输出）。
 
 ## 告警规则模板
 
@@ -43,22 +43,17 @@ if __name__ == '__main__':
         sys.exit(0)
 ```
 
-局部指标或可选资源失败只记录 WARN 并继续；只有无法进入采集的异常才进入顶层 `COLLECT_ERROR`。正常采集输出必须仍是纯 JSON 数组；不要把 traceback 写到 stderr 后直接 `exit(1)`，否则前端可能看不到错误。
+局部指标或可选资源失败只记录 WARN 并继续；只有无法进入采集的异常才进入顶层 `COLLECT_ERROR`。`logLevel!=DEBUG` 的正常采集输出必须仍是纯 JSON 数组；不要把 traceback 写到 stderr 后直接 `exit(1)`，否则前端可能看不到错误。
 
 EasyOps 旧执行环境可能使用 Python 2.7。脚本源码或采集数据包含中文时，`ensure_ascii=False` 会让 Python 2 的 JSON encoder 先按 ASCII 解码字节串并抛出 `UnicodeDecodeError`。监控脚本统一使用默认 `ensure_ascii=True`：输出为 `\\uXXXX`，JSON 语义不变，且 Python 2/3 均稳定。打包校验器必须阻断 Python 采集脚本中的 `ensure_ascii=False`。
 
 Python 2 的 `/proc`、OpenAPI 或命令输出解码后可能得到 `unicode`。通用文本归一函数不能对它直接执行 `str(value)`：Python 2 会按 ASCII 编码并在中文字符处抛出 `UnicodeEncodeError`。应显式保留 `unicode` 值，仅字节串按 UTF-8 解码；JSON 输出继续使用默认 ASCII escape。
 
 Windows Python 2的`traceback.format_exc()`可能返回GBK等本地编码字节串，直接进入`json.dumps`会按UTF-8解码并抛`UnicodeDecodeError`，进而掩盖原始采集异常。监控脚本输出DEBUG/ERROR诊断行前必须归一化文本：字节按系统编码解码、非ASCII转escape、数值/布尔保持原类型，最终每行保持ASCII安全且JSON合法。
-监控套件的诊断日志没有单一通用通道，必须在套件文档中声明并回归实际通道。`debug-collector-job` 可能把脚本 stderr 合并进 `resultList[].data`，因此不能在未确认合并行为时把DEBUG写到stderr。可选方案有两类：
-
-- stdout错误协议：顶层致命异常输出 `COLLECT_ERROR:` 与traceback到stdout，正常成功路径stdout仍保持纯JSON数组；若DEBUG也要前端可见，只能在错误路径或明确的调试协议中输出，且必须写清服务端会把非JSON展示为解析错误。
-- 侧车文件：成功路径stdout保持纯JSON数组，DEBUG/ERROR结构化日志写入套件声明的主机侧文件；优点是不破坏采样协议，缺点是请求OpenAPI失败时前端只能看到顶层异常摘要，请求URL/query/page等上下文需要登主机查看文件。
-
 
 ### 本次错误暴露实现（2026-11-05）
 
-监控套件脚本必须在 `__main__` 顶层捕获无法进入采集的异常：先使用带函数标记和 `traceback.format_exc()` 的 ERROR 日志记录，再向 stdout 输出固定前缀 `COLLECT_ERROR:`、完整 traceback，并以退出码 0 结束。这样 `metric_sampler` 前端可以直接展示实际异常正文；不能只写 stderr 或只依赖非零退出码。正常成功路径 stdout 仍只能输出 JSON 数组，局部 OID/可选组件失败使用 WARNING 并继续。
+监控套件脚本必须在 `__main__` 顶层捕获无法进入采集的异常：先使用带函数标记和 `traceback.format_exc()` 的 ERROR 事件，再向 stdout 输出固定前缀 `COLLECT_ERROR:` 和完整诊断，并以退出码 0 结束。这样 `metric_sampler` 前端可以直接展示实际异常正文；不能只写 stderr 或只依赖非零退出码。`logLevel!=DEBUG` 成功路径 stdout 只能输出 JSON 数组；DEBUG成功路径按上述stdout协议输出，局部可选资源失败使用ERROR/DEBUG事件并继续。
 
 ## 监控套件发布前契约校验（强制）
 
@@ -75,6 +70,7 @@ python3 skills/api-orchestrator/platforms/easyops/development/scripts/validate_m
 - `resource_discovery_define.json` 顶层不是数组，或条目缺少 `objectId`、`category`、`type`。
 - ZIP 顶层目录超过一个、缺少 `plugin.yaml`、版本号为空。
 - Python 采集脚本包含 `ensure_ascii=False`，在 Python 2.7 环境遇到中文字节串时触发 `UnicodeDecodeError`。
+- Python 采集脚本包含 `debugLogPath`、`.debug.log` 或 `logging.FileHandler`，把诊断日志写到主机侧文件，破坏前端直接复制调试正文的目标。
 
 ### 当前环境导入验收
 
@@ -141,7 +137,7 @@ python3 skills/api-orchestrator/platforms/easyops/development/scripts/validate_m
 
 新增 `vCenter监控` 0.1.0：关联 `CLOUD_PROVIDER@ONEMODEL`（模型零修改），地址默认动态参数 `$.url`（模型已有url属性），username/password 任务参数手填。采集脚本依赖 agent py2 内置 pyVim/pyVmomi（无需 vendor）；一次 SmartConnect 完成认证预检+采集（复用连接，认证失败即跳过本轮）；按数据中心分批 PropertyCollector 拉 ComputeResource/HostSystem/VirtualMachine/Datastore 属性，再分批 QueryPerf（intervalId=20 实时）取数据存储 totalRead/WriteLatency 与宿主机 net.received/transmitted；perf 缺失按实体跳过不伪造。35 个别名指标/5 指标集，维度 vc→datacenter→cluster→datastore/host/vm 名称动态枚举。指标与告警对齐 zabbix54 导出现网（3394项/1362触发器提取归并，见套件 sources.md）：存储空间 usage>85/95%、读写延迟≥1000ms、宿主机重启 uptime≤600s、集群红/黄、电源状态 diff。验收：导入 instanceId=6609e070e86b5 status=available，v1 `/api/v1/plugin/metrics/list` 35/35 别名落库中文名全覆盖（该环境无 v2 collector-metric-names 端点），激活 totalStatus=success 且 metricSet 资源 35 项逐条 success，回读 aliasDims 逐层继承正确；真机采集待部署方建云平台实例后验证。
 
-`vCenter监控` 0.1.1（2026-11-19）：logLevel=DEBUG 的诊断日志从缓存目录侧车文件改为**内存缓冲后按 `COLLECT_ERROR:` 协议整体输出到 stdout**——前端把 stdout 全文当错误正文直接展示，跨环境排障免登执行主机取日志；指标 JSON 保留在末尾 `METRICS:` 标记之后可提取复验；cacheDir 参数随之删除（paramDefine 收敛为 address/username/password/timeout/logLevel 5 个）。已 import_update 升级导入（instanceId 不变，回读 version=0.1.1、status=enabled、5 参数）并重新激活 totalStatus=success。该口径已提升为本目录「本地采集日志与缺失指标排障强制要求」的通用规则。
+`vCenter监控` 0.1.1（2026-11-19）：logLevel=DEBUG 的诊断日志统一为**内存缓冲后按 `COLLECT_ERROR:` 协议整体输出到 stdout**——前端把 stdout 全文当错误正文直接展示，跨环境排障免登执行主机取日志；指标 JSON 保留在末尾 `METRICS:` 标记之后可提取复验；cacheDir 参数随之删除（paramDefine 收敛为 address/username/password/timeout/logLevel 5 个）。已 import_update 升级导入（instanceId 不变，回读 version=0.1.1、status=enabled、5 参数）并重新激活 totalStatus=success。该口径已提升为本目录「本地采集日志与缺失指标排障强制要求」的通用规则。
 
 `vCenter监控` 0.1.2（2026-11-19）：排查目标环境手填密码报 `illegal base64 data at input byte 4`，当时误判为形态问题改出 passwordText 明文形态（string+两标志false）——该结论已废弃。
 

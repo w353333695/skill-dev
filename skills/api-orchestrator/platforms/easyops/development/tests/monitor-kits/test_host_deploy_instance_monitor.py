@@ -19,7 +19,7 @@ from unittest import mock
 
 KIT = Path(__file__).resolve().parents[2] / "monitor-kits/host-deploy-instance-monitoring"
 SOURCE = KIT / "src/host_deploy_instance_monitor.py"
-PACKAGE = Path(__file__).resolve().parents[3] / "hub/monitor-kits/监控套件_主机部署实例监控_0.1.18.zip"
+PACKAGE = Path(__file__).resolve().parents[3] / "hub/monitor-kits/监控套件_主机部署实例监控_0.1.19.zip"
 WORKTREE_ROOT = Path(__file__).resolve().parents[7]
 
 
@@ -68,31 +68,56 @@ class HostDeployInstanceMonitorTests(unittest.TestCase):
             with self.assertRaises(ValueError):
                 m["config"]()
 
-    def test_log_event_keeps_standard_streams_clean(self):
+    def test_log_event_buffers_until_stdout_dump(self):
         m = module()
-        log_root = WORKTREE_ROOT / ".local" / ("test-debug-log-" + uuid.uuid4().hex)
-        log_path = log_root / "host.debug.log"
-        settings = {"logLevel": "DEBUG", "debugLogPath": str(log_path)}
+        settings = {"logLevel": "DEBUG"}
         stdout, stderr = io.StringIO(), io.StringIO()
         with redirect_stdout(stdout), redirect_stderr(stderr):
             m["log_event"](settings, "DEBUG", "config.ready", value="中文")
-        self.assertEqual(stdout.getvalue(), "")
-        self.assertEqual(stderr.getvalue(), "")
-        rows = [json.loads(line) for line in log_path.read_text(encoding="utf-8").splitlines()]
-        self.assertEqual(rows, [{"level": "DEBUG", "stage": "config.ready", "value": "中文"}])
+            self.assertEqual(stdout.getvalue(), "")
+            self.assertEqual(stderr.getvalue(), "")
+            m["write_debug_events"](settings)
+        lines = stdout.getvalue().splitlines()
+        self.assertEqual(len(lines), 1)
+        self.assertTrue(lines[0].startswith("[DEBUG] "))
+        self.assertEqual(json.loads(lines[0][len("[DEBUG] "):]), {"level": "DEBUG", "stage": "config.ready", "value": "中文"})
 
-    def test_debug_log_rotation(self):
+    def test_error_level_does_not_buffer_process_logs(self):
         m = module()
-        log_root = WORKTREE_ROOT / ".local" / ("test-debug-log-" + uuid.uuid4().hex)
-        log_path = log_root / "host.debug.log"
-        try:
-            with mock.patch.dict(m, {"DEBUG_LOG_MAX_BYTES": 0}):
-                m["write_debug_log"](str(log_path), "first")
-                m["write_debug_log"](str(log_path), "second")
-            self.assertEqual((log_path.with_suffix(".log.1")).read_text(encoding="utf-8"), "first\n")
-            self.assertEqual(log_path.read_text(encoding="utf-8"), "second\n")
-        finally:
-            shutil.rmtree(log_root)
+        settings = {"logLevel": "ERROR"}
+        m["log_event"](settings, "ERROR", "target.collect_failed", traceback="boom")
+        self.assertIsNone(settings.get("debugEvents"))
+
+    def test_main_debug_mode_outputs_frontend_protocol_and_metrics_tail(self):
+        m = module()
+        records = [{"dims": {"hostInstanceId": "host1"}, "vals": {"host_deploy_cache_refresh_success": 1.0}}]
+        settings = {"logLevel": "DEBUG", "debugEvents": [], "cacheDir": "/tmp", "gateway": "", "gatewaySource": "missing", "openapiScheme": "https", "accessKey": "", "secretKey": ""}
+        with mock.patch.dict(m, {"config": mock.Mock(return_value=settings), "collect": mock.Mock(return_value=records)}):
+            stdout, stderr = io.StringIO(), io.StringIO()
+            with redirect_stdout(stdout), redirect_stderr(stderr):
+                self.assertEqual(m["main"]([]), 0)
+        output = stdout.getvalue()
+        self.assertEqual(stderr.getvalue(), "")
+        self.assertTrue(output.startswith("COLLECT_ERROR:\n"))
+        self.assertIn("[DEBUG] ", output)
+        self.assertIn("METRICS:\n", output)
+        self.assertEqual(json.loads(output.split("METRICS:\n", 1)[1]), records)
+
+    def test_main_debug_fatal_keeps_buffered_context(self):
+        m = module()
+        settings = {"logLevel": "DEBUG", "debugEvents": [], "cacheDir": "/tmp", "gateway": "", "gatewaySource": "missing", "openapiScheme": "https", "accessKey": "", "secretKey": ""}
+        m["log_event"](settings, "DEBUG", "openapi.request", url="https://gateway/search", query={"isMonitor": "是"})
+        with mock.patch.dict(m, {"config": mock.Mock(return_value=settings), "collect": mock.Mock(side_effect=RuntimeError("openapi boom"))}):
+            stdout, stderr = io.StringIO(), io.StringIO()
+            with redirect_stdout(stdout), redirect_stderr(stderr):
+                self.assertEqual(m["main"]([]), 0)
+        output = stdout.getvalue()
+        self.assertEqual(stderr.getvalue(), "")
+        self.assertTrue(output.startswith("COLLECT_ERROR:\n"))
+        self.assertIn("openapi.request", output)
+        self.assertIn("main.exception", output)
+        self.assertIn("openapi boom", output)
+        self.assertNotIn("METRICS:", output)
 
     def test_python2_unicode_text_is_not_ascii_encoded(self):
         m = module()
@@ -123,7 +148,7 @@ class HostDeployInstanceMonitorTests(unittest.TestCase):
         settings = {
             "hostInstanceId": "host-instance", "hostUuid": "agent-uuid", "hostIp": "192.168.110.24",
             "gateway": "https://192.168.110.24", "accessKey": "ak", "secretKey": "sk",
-            "requestTimeout": 10.0, "logLevel": "ERROR", "debugLogPath": "",
+            "requestTimeout": 10.0, "logLevel": "ERROR",
         }
         http_json = mock.Mock(return_value={"code": 0, "data": {"list": [], "total": 0}})
         with mock.patch.dict(m, {"sign_openapi": mock.Mock(return_value={}), "http_json": http_json}):
@@ -138,11 +163,10 @@ class HostDeployInstanceMonitorTests(unittest.TestCase):
 
     def test_search_targets_debug_logs_request_and_empty_reason(self):
         m = module()
-        log_path = WORKTREE_ROOT / ".local" / ("test-openapi-debug-" + uuid.uuid4().hex) / "host1.debug.log"
         settings = {
             "hostInstanceId": "host-instance", "hostUuid": "agent-uuid", "hostIp": "192.168.110.24",
             "gateway": "https://192.168.110.24", "accessKey": "ak-secret", "secretKey": "sk-secret",
-            "requestTimeout": 10.0, "logLevel": "DEBUG", "debugLogPath": str(log_path),
+            "requestTimeout": 10.0, "logLevel": "DEBUG",
             "gatewaySource": "agentConfig", "openapiScheme": "https",
         }
         def http_json(url, query, body, headers, timeout):
@@ -160,7 +184,7 @@ class HostDeployInstanceMonitorTests(unittest.TestCase):
         self.assertEqual(first_body["page_size"], 1000)
         self.assertEqual(second_body["query"], {"isMonitor": "是"})
         self.assertEqual(second_body["page_size"], 1)
-        rows = [json.loads(line) for line in log_path.read_text(encoding="utf-8").splitlines()]
+        rows = settings["debugEvents"]
         stages = [row["stage"] for row in rows]
         for stage in ("openapi.start", "openapi.request", "openapi.response", "openapi.no_targets"):
             self.assertIn(stage, stages)
@@ -170,7 +194,7 @@ class HostDeployInstanceMonitorTests(unittest.TestCase):
         request_rows = [row for row in rows if row["stage"] == "openapi.request"]
         self.assertEqual(request_rows[0]["url"], "https://192.168.110.24" + m["OPENAPI_PATH"])
         self.assertEqual(request_rows[0]["query"], {"isMonitor": "是", "uuid": "agent-uuid"})
-        log_content = log_path.read_text(encoding="utf-8")
+        log_content = "\n".join(json.dumps(row, ensure_ascii=True) for row in rows)
         self.assertNotIn("ak-secret", log_content)
         self.assertNotIn("sk-secret", log_content)
         self.assertNotIn("signature=", log_content)
@@ -223,10 +247,9 @@ class HostDeployInstanceMonitorTests(unittest.TestCase):
 
     def test_log_event_serializes_windows_py2_traceback(self):
         m = module()
-        log_path = WORKTREE_ROOT / ".local" / ("test-windows-py2-log-" + uuid.uuid4().hex) / "host1.debug.log"
         py2_sys = mock.Mock(version_info=(2, 7, 18, "final", 0))
         localized_traceback = "Traceback: 无法连接服务器".encode("gbk")
-        settings = {"logLevel": "DEBUG", "debugLogPath": str(log_path)}
+        settings = {"logLevel": "DEBUG"}
         with mock.patch.dict(m, {
             "IS_WINDOWS": True,
             "decode_bytes": mock.Mock(return_value="Traceback: 无法连接服务器"),
@@ -234,14 +257,14 @@ class HostDeployInstanceMonitorTests(unittest.TestCase):
             "unicode": str,
         }):
             m["log_event"](settings, "ERROR", "cache.refresh_failed", path="C:\\cache\\host1.json", traceback=localized_traceback)
-        content = log_path.read_text(encoding="utf-8")
-        row = json.loads(content)
+        row = settings["debugEvents"][0]
+        content = json.dumps(row, ensure_ascii=True)
         self.assertEqual(row["stage"], "cache.refresh_failed")
         self.assertIn("Traceback", row["traceback"])
         self.assertTrue(row["traceback"].isascii())
         self.assertNotIn("无法连接服务器", content)
         source = SOURCE.read_text(encoding="utf-8")
-        self.assertIn("json.dumps(safe_log_value(payload)", source)
+        self.assertIn('settings.setdefault("debugEvents", []).append(safe_log_value(payload))', source)
 
     def test_windows_process_and_netstat_parsers(self):
         m = module()
@@ -370,10 +393,8 @@ class HostDeployInstanceMonitorTests(unittest.TestCase):
         }
         refreshed = dict(process)
         refreshed.update({"utime": 16.0, "stime": 5.0})
-        log_root = WORKTREE_ROOT / ".local" / ("test-debug-log-" + uuid.uuid4().hex)
         settings = {
             "hostInstanceId": "host1", "sampleInterval": 0.0, "logLevel": "DEBUG",
-            "debugLogPath": str(log_root / "host1.debug.log"),
         }
         target = {
             "instanceId": "deploy1", "installPath": "/usr/local/easyops/redis",
@@ -404,9 +425,8 @@ class HostDeployInstanceMonitorTests(unittest.TestCase):
         self.assertNotIn("cmdline", target_row["dims"])
         self.assertNotIn("port", target_row["dims"])
         self.assertEqual(set(target_row["vals"]), set(m["TARGET_METRIC_KEYS"]))
-        log_path = Path(settings["debugLogPath"])
-        log_content = log_path.read_text(encoding="utf-8")
-        log_rows = [json.loads(line) for line in log_content.splitlines()]
+        log_rows = settings["debugEvents"]
+        log_content = "\n".join(json.dumps(row, ensure_ascii=True) for row in log_rows)
         self.assertEqual({row["stage"] for row in log_rows}, {"target.start", "port.match", "process.metrics", "port.metrics", "target.metrics"})
         self.assertTrue(all(row["level"] == "DEBUG" for row in log_rows))
         self.assertNotIn("./bin/redis-server", log_content)
@@ -419,7 +439,6 @@ class HostDeployInstanceMonitorTests(unittest.TestCase):
             "hostInstanceId": "host1", "hostUuid": "uuid", "hostIp": "ip",
             "gateway": "http://gateway", "accessKey": "ak", "secretKey": "sk",
             "sampleInterval": 0.0, "cacheTtlSeconds": 604800.0, "logLevel": "DEBUG",
-            "debugLogPath": str(WORKTREE_ROOT / ".local" / ("test-debug-log-" + uuid.uuid4().hex) / "host1.debug.log"),
         }
         target = {"instanceId": "deploy1", "installPath": "/redis"}
         with mock.patch.dict(m, {
@@ -438,7 +457,7 @@ class HostDeployInstanceMonitorTests(unittest.TestCase):
             "host_deploy_instance_target_count", "host_deploy_cache_age_seconds",
             "host_deploy_cache_refresh_success",
         })
-        log_rows = [json.loads(line) for line in Path(settings["debugLogPath"]).read_text(encoding="utf-8").splitlines()]
+        log_rows = settings["debugEvents"]
         failed = next(row for row in log_rows if row["stage"] == "target.collect_failed")
         self.assertEqual(failed["level"], "ERROR")
         self.assertEqual(failed["fallbackMetricCount"], 5)
@@ -500,7 +519,7 @@ class HostDeployInstanceMonitorTests(unittest.TestCase):
     def test_help_and_version(self):
         result = subprocess.run([sys.executable, str(SOURCE), "--version"], capture_output=True, text=True, env={**os.environ, "PYTHONDONTWRITEBYTECODE": "1"})
         self.assertEqual(result.returncode, 0)
-        self.assertEqual(result.stdout.strip(), "0.1.18")
+        self.assertEqual(result.stdout.strip(), "0.1.19")
 
     def test_python2_json_output_uses_ascii_escape(self):
         source = SOURCE.read_text(encoding="utf-8")
@@ -508,6 +527,9 @@ class HostDeployInstanceMonitorTests(unittest.TestCase):
         self.assertNotIn("ensure_ascii=False", source)
         self.assertNotIn("ensure_ascii=False", orig)
         self.assertEqual(source, orig)
+        for forbidden in ("debugLogPath", ".debug.log", "write_debug_log", "DEBUG_LOG_MAX_BYTES"):
+            self.assertNotIn(forbidden, source)
+            self.assertNotIn(forbidden, orig)
 
     def test_python_source_allows_parameter_injection_before_imports(self):
         source = SOURCE.read_text(encoding="utf-8")
@@ -544,6 +566,8 @@ class HostDeployInstanceMonitorTests(unittest.TestCase):
         self.assertEqual(params["logLevel"]["use"], "collectParams")
         self.assertFalse(params["logLevel"]["isFromSecret"])
         self.assertFalse(params["logLevel"]["isEncrypt"])
+        self.assertIn("输出到stdout", params["logLevel"]["description"])
+        self.assertIn("不写文件", params["logLevel"]["description"])
 
     def test_definitions_and_package(self):
         origins = json.loads((KIT / "origin_metric.json").read_text(encoding="utf-8"))

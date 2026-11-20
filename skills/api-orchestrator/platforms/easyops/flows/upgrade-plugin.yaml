@@ -12,7 +12,7 @@ key_rule: |
 parameter_and_log_preflight:
   reference: "formats/collector-kit/param-mechanism.yaml#cmdb_dynamic_parameter_safety"
   logging: "formats/collector-kit/param-mechanism.yaml#collector_diagnostic_logging"
-  required: "$.参数两鉴权标志均false；允许缺省的参数须optional并由脚本归一空值后兜底；升级后回读套件与已有任务以检查旧加密标志继承。日志默认ERROR，可选DEBUG查看脱敏命令、完整响应和转换；缺失指标有WARN且不中断其他指标。"
+  required: "$.参数两鉴权标志均false；允许缺省的参数须optional并由脚本归一空值后兜底；升级后回读套件与已有任务以检查旧加密标志继承。日志默认ERROR；DEBUG按COLLECT_ERROR/[DEBUG]/METRICS协议直接输出stdout，可查看脱敏命令、完整响应和转换，不写文件/stderr；缺失指标有WARN且不中断其他指标。"
 
 activation_preflight:
   reference: "formats/collector-kit/package-format.yaml#package_structure.activation_preflight"

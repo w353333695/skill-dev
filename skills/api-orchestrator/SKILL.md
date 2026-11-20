@@ -21,6 +21,7 @@ description: 通用 API 编排 skill——自然语言需求 → 跨系统调用
 - **知识 = platforms/ 资料**：系统目录/实体映射/对象关系/流程模板/格式包，全部可替换。
 - **公共开发知识优先读取**：涉及 EasyOps 套件、插件、脚本的开发、调试、打包、导入、升级或交付时，先读取 `platforms/<deployment>/development/docs/common/README.md` 及相关公共文档，再读取 `cmdb-kits/` 或 `monitor-kits/` 类型专属知识；不得只凭历史对话或临时文件复用经验。
 - **公共知识维护规则**：一条经验若适用于两个及以上套件类型，归档到 `development/docs/common/`；仅适用于 CMDB 或监控的知识分别归档到对应目录；稳定 schema 放 `formats/`；成品包只放 `hub/`，Hub 禁止半成品、tests、缓存、构建材料和临时文件，但允许归档已经验证、可运行、可复用的完整脚本源码。仍在开发中的源码留在 `development/`；开发脚本完成验收后可复制/迁移到 `hub/scripts/`，可同时提供源码目录和 tar.gz/zip 包，并更新 `hub/INDEX.yaml`；后续修复必须先验证，再更新 Hub 成品版本。完成交付或修复后必须更新对应索引，避免公共规则只存在于某个套件目录。
+- **知识一致性门禁**：更新平台知识前，先用关键词检索 skill、`platforms/<deployment>/`、格式规范、套件文档、测试和 Hub 索引，列出仍会被检索到的过期或相悖结论；除用户已明确确认的本次决策外，必须先向用户展示冲突并获得允许。用户确认清理后，同一提交内更新所有当前权威位置并运行回归；不得只追加新说法、不得留下多个当前口径，也不得把关键规则依赖 agent memory。版本历史只保留事实摘要，不得作为当前规则覆盖最新契约。
 - **部署根（platforms/auth/env 归一）**：三者默认归一到 `$PWD/.api-orchestrator`——**随调用时 cwd 走**；想固定则在 shell rc 里 `export API_CLI_DEPLOYMENT_ROOT=/abs/path`。**部署根不存在则停下引导用户初始化，禁止读 skill 自带 platforms/demo（开发样例，非运行时数据）。** 详见 orchestration.md「步骤 0」。
 
 ## 调度决策树（拿到需求先走这个）

@@ -26,14 +26,14 @@
 ## 响应验收
 
 1. 外层HTTP 200只是传输成功；必须检查业务响应`code=0`。
-2. 逐项检查`data.list[].resultList[]`：`error`非空即采集失败。
-3. `data`是采集脚本stdout原文；成功路径必须能被JSON反序列化，通常是指标数组。
+2. 逐项检查`data.list[].resultList[]`：`error`非空即采集失败；`data`为对象时还要检查`data.error`，DEBUG协议可能由服务端把stdout包装成该字段的JSON解析提示。
+3. `data`是采集脚本stdout原文。`logLevel!=DEBUG`的成功路径必须能被JSON反序列化，通常是指标数组；`logLevel=DEBUG`的成功路径按监控诊断协议返回`COLLECT_ERROR:`、`[DEBUG]`JSON行、`METRICS:`和指标JSON，服务端可能提示JSON反序列化失败但前端会展示完整正文。
 4. 响应`data.params`是实际合并后的任务参数、实例参数与instance mapping，可能包含凭证，日志和文档必须脱敏。
-5. 对监控套件，还应校验`data`覆盖预期指标键和维度；只看到接口返回不等于指标可用。
+5. 对监控套件，还应校验指标覆盖：非DEBUG解析`data`本身，DEBUG解析`METRICS:`后的JSON；只看到接口返回不等于指标可用。
 
 ## 错误解释
 
-- `json unmarshal data failed: invalid character 'C' looking for beginning of value`：脚本stdout以`COLLECT_ERROR:`开头，服务端把错误正文当JSON解析失败。应查看后续traceback定位真实异常，不能只改网关参数。
+- `json unmarshal data failed: invalid character 'C' looking for beginning of value`：脚本stdout以`COLLECT_ERROR:`开头，服务端把错误正文当JSON解析失败。应查看后续诊断行或traceback定位真实异常，不能只改网关参数；DEBUG模式出现该提示且存在`METRICS:`尾部属于预期前端可观测协议。
 - Python 2.7 `UnicodeDecodeError: 'ascii' codec can't decode byte ...`：脚本在`json.dumps(..., ensure_ascii=False)`中序列化含中文的字节串。Python 2会先按ASCII解码并失败。修复方式是移除`ensure_ascii=False`，使用默认ASCII escape；JSON中文显示为`\\uXXXX`但语义不变。
 - `empty jobs`：说明服务端没有为任何目标实例生成执行job。常见原因是`job.instanceIds`在目标模型中不存在、过滤路径为空，或执行器解析不到Agent；应先回读目标实例和`collectAgent`，不要先怀疑脚本stdout。
 - 省略`collectAgent`可能返回`target:@<org> not found,get info error`，因为临时job的执行UUID为空。`$.ip`和精确主机IP在目标`HOST`实例存在且`_uuid`有效时等价。

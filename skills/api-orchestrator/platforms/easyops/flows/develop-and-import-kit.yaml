@@ -21,7 +21,7 @@ key_rule: |
 parameter_and_log_preflight:
   reference: "formats/collector-kit/param-mechanism.yaml#cmdb_dynamic_parameter_safety"
   logging: "formats/collector-kit/param-mechanism.yaml#collector_diagnostic_logging"
-  required: "$.参数两鉴权标志均false；允许缺省的参数须optional并由脚本归一空值后兜底；升级后回读套件与已有任务以检查旧加密标志继承。日志默认ERROR，可选DEBUG查看脱敏命令、完整响应和转换；缺失指标有WARN且不中断其他指标。"
+  required: "$.参数两鉴权标志均false；允许缺省的参数须optional并由脚本归一空值后兜底；升级后回读套件与已有任务以检查旧加密标志继承。日志默认ERROR；DEBUG按COLLECT_ERROR/[DEBUG]/METRICS协议直接输出stdout，可查看脱敏命令、完整响应和转换，不写文件/stderr；缺失指标有WARN且不中断其他指标。"
 
 activation_preflight:
   reference: "formats/collector-kit/package-format.yaml#package_structure.activation_preflight"
@@ -92,7 +92,7 @@ steps:
           明文存的密码会在 detail 回显/任务参数/日志中泄漏。
   - n: 5
     desc: "本地模拟环境变量跑脚本并校验Python源码，验证输出格式（metric 检查 [{dims,vals}]；process 检查 GATHERING DATA 标记）"
-    expect: "stdout 输出合法 JSON；dims/vals 齐全；vals 数值型（metric）；py/orig均无from __future__ import，且参数注入到文件头后仍可编译"
+    expect: "ERROR模式stdout输出合法JSON；DEBUG模式输出COLLECT_ERROR/[DEBUG]/METRICS协议且尾部JSON可解析；dims/vals齐全；vals数值型（metric）；py/orig均无from __future__ import，且参数注入到文件头后仍可编译"
   - n: 6
     desc: "运行 validate_monitor_kit.py 后再打 zip（ZIP_STORED + UTF-8 flag，排除 .version/.git/__pycache__）"
     expect: "zip 顶层目录名 = plugin.yaml name；UTF-8 flag 全覆盖；校验器阻止from __future__导入、ensure_ascii=False、缓存文件和指标/维度契约错误"
