@@ -94,14 +94,17 @@ def validate_dir(root, require_name_match=False):
         encrypt = bool(re.search(r"isEncrypt:\s*true", line))
         if default.startswith("$.") and (from_secret or encrypt):
             raise ValidationError("paramDefine.%s 使用$.动态取值时 isFromSecret/isEncrypt 必须为false" % param_name)
-        # 手填凭证唯一口径（2026-11-19 vCenter 0.1.1 实战：isFromSecret/isEncrypt=true 触发
-        # 平台下发链路 decrypt，手填明文报 illegal base64 data）：手填参数两个标志都必须 false；
-        # isFromSecret=true 仅限显式密钥引用（必须配套 secretName 参数）；isEncrypt=true
-        # 仅限值确为密文的 Secret 链路。同名参数升级强制继承旧标志，改标志必须参数更名。
+        # 凭证参数口径（2026-11-20 按 DM监控套件 65dc3d3488b19 线上实证修正）：
+        # 加密手填 = string/任意类型 + isFromSecret:true + isEncrypt:true + 配套隐藏
+        # secretName 参数——缺 secretName 时 Secret 解密链路异常，手填值报 illegal
+        # base64 data（vCenter 0.1.1/0.1.2 无 secretName 实测）。
+        # 拦两类坏形态：① isFromSecret=true 无 secretName 配套；② 非 Secret 引用
+        # 却 isEncrypt=true（明文直存+加密标志，下发 decrypt 必炸）。
+        # 同名参数升级强制继承旧标志，改标志须评估继承（DM 形态同名继承一致则无需更名）。
         if not default.startswith("$.") and from_secret and "secretName" not in param_names:
-            raise ValidationError("paramDefine.%s 启用isFromSecret但缺少secretName密钥引用参数；手填凭证不能启用isFromSecret，必须isFromSecret=false" % param_name)
+            raise ValidationError("paramDefine.%s 启用isFromSecret但缺少配套secretName参数（display=false、use=collectorParams）；缺失时下发解密报illegal base64 data" % param_name)
         if not default.startswith("$.") and not from_secret and encrypt:
-            raise ValidationError("paramDefine.%s 手填明文不能启用isEncrypt（平台下发decrypt报illegal base64 data）；手填凭证必须isEncrypt=false，isEncrypt=true仅限Secret密文链路" % param_name)
+            raise ValidationError("paramDefine.%s 未走Secret引用却启用isEncrypt（明文直存+加密标志，下发decrypt报illegal base64 data）；加密手填请用isFromSecret=true+isEncrypt=true并配套secretName参数" % param_name)
     origin = load_json(root / "origin_metric.json", "origin_metric.json")
     metric_keys = {row.get("key") for row in origin if isinstance(row, dict) and row.get("key")}
     metric_sets = load_json(root / "metric_set.json", "metric_set.json")

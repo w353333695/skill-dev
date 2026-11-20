@@ -22,14 +22,15 @@ items:
   - id: vcenter-monitor-kit
     name: vCenter监控
     category: monitor-kits
-    files: [监控套件_vCenter监控_0.1.2.zip, vCenter监控_告警规则模板_0.1.2.xlsx]
-    version: "0.1.2"
+    files: [监控套件_vCenter监控_0.1.3.zip, vCenter监控_告警规则模板_0.1.3.xlsx]
+    version: "0.1.3"
     history:
+      - {ver: "0.1.3", date: "2026-11-20", change: "真根因修正：illegal base64 data 系缺配套secretName隐藏参数（对齐DM监控套件线上实证），非两标志为true本身；恢复password参数名（string+isFromSecret:true+isEncrypt:true）并新增隐藏secretName，与DM套件参数定义同构，前端加密输入；passwordText明文形态废弃。demo环境升级回读0.1.3/enabled、激活success"}
       - {ver: "0.1.2", date: "2026-11-19", change: "修复目标环境手填密码报illegal base64 data at input byte 4：根因isFromSecret/isEncrypt=true触发平台下发decrypt，手填明文非合法base64；同名参数升级强制继承旧标志，按host-deploy openapiAkText先例参数更名password→passwordText（string+两标志false）；该口径提升为唯一权威规范（common/套件开发_导入权限与打包规范.md），validate_monitor_kit同步阻断手填明文+isEncrypt=true"}
       - {ver: "0.1.1", date: "2026-11-19", change: "DEBUG诊断日志改为内存缓冲后按COLLECT_ERROR:协议整体输出到stdout（前端任务输出直接复制，免登执行主机取日志），指标JSON保留在末尾METRICS:之后；删除cacheDir参数（paramDefine收敛为5个）。已import_update升级导入并重新激活totalStatus=success"}
       - {ver: "0.1.0", date: "2026-11-19", change: "初版：pyVmomi采集数据中心/集群/数据存储/宿主机/虚拟机35项关键状态与使用率指标，5指标集，维度vc→datacenter→cluster→存储/宿主/VM名动态枚举；地址默认$.url，账号密码任务手填（password加密）；告警xlsx对齐现网Zabbix阈值（存储空间85/95%、读写延迟1000ms、宿主机重启10分钟、集群红/黄）"}
     scenario: vCenter云平台关键指标监控（集群/数据存储/宿主机/虚拟机三层维度动态枚举）
-    notes: "关联CLOUD_PROVIDER@ONEMODEL（模型零修改，地址取$.url属性，模型当前无实例需部署方先建实例并填url）；agent py2内置pyVim/pyVmomi无需vendor。已完成demo环境(110.24)导入+激活核验：instanceId=6609e070e86b5，0.1.1回读status=enabled、参数5个，别名指标35/35落库中文名全覆盖，激活totalStatus=success且metricSet资源35项success，回读维度逐层继承正确。排障：任务参数logLevel=DEBUG跑一轮，前端任务输出直接复制诊断日志（COLLECT_ERROR:协议），排障完恢复ERROR。密码参数为passwordText（string手填，旧password已废弃；isFromSecret/isEncrypt必须false否则decrypt报illegal base64 data）。真机采集未验证：需部署方创建CLOUD_PROVIDER实例并配置vCenter地址与凭证后，创建采集任务验证。采集周期建议≥300秒。"
+    notes: "关联CLOUD_PROVIDER@ONEMODEL（模型零修改，地址取$.url属性，模型当前无实例需部署方先建实例并填url）；agent py2内置pyVim/pyVmomi无需vendor。已完成demo环境(110.24)导入+激活核验：instanceId=6609e070e86b5，0.1.1回读status=enabled、参数5个，别名指标35/35落库中文名全覆盖，激活totalStatus=success且metricSet资源35项success，回读维度逐层继承正确。排障：任务参数logLevel=DEBUG跑一轮，前端任务输出直接复制诊断日志（COLLECT_ERROR:协议），排障完恢复ERROR。密码参数为password（string+isFromSecret/isEncrypt=true加密手填，配套隐藏secretName，对齐DM监控套件形态）。真机采集未验证：需部署方创建CLOUD_PROVIDER实例并配置vCenter地址与凭证后，创建采集任务验证。采集周期建议≥300秒。"
     added: "2026-11-19"
   - id: physical-server-ipmi-monitor-kit
     name: 物理服务器IPMI监控

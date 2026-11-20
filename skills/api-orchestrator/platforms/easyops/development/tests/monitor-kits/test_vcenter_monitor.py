@@ -103,7 +103,7 @@ class ConfigTests(unittest.TestCase):
         base = {
             "EASYOPS_COLLECTOR_address": "https://9.132.63.82/sdk",
             "EASYOPS_COLLECTOR_username": "svc-monitor",
-            "EASYOPS_COLLECTOR_passwordText": "secret",
+            "EASYOPS_COLLECTOR_password": "secret",
         }
         with mock.patch.dict(os.environ, base, clear=True):
             cfg = m["config"]()
@@ -113,7 +113,7 @@ class ConfigTests(unittest.TestCase):
         self.assertEqual(cfg["logLevel"], "ERROR")
         self.assertEqual(cfg["vcDim"], "9.132.63.82:443")
         self.assertEqual(cfg["password"], "secret")  # 连接需要；不进任何日志（见 DebugLogTests）
-        for missing in ("address", "username", "passwordText"):
+        for missing in ("address", "username", "password"):
             env = dict(base)
             env["EASYOPS_COLLECTOR_" + missing] = ""
             with mock.patch.dict(os.environ, env, clear=True):
@@ -404,7 +404,7 @@ class FatalProtocolTests(unittest.TestCase):
         env.update({
             "EASYOPS_COLLECTOR_address": "https://127.0.0.1:1/sdk",
             "EASYOPS_COLLECTOR_username": "svc-monitor",
-            "EASYOPS_COLLECTOR_passwordText": "vcenter-secret",
+            "EASYOPS_COLLECTOR_password": "vcenter-secret",
         })
         proc = subprocess.run([sys.executable, "-"], input=runner, env=env,
                               capture_output=True, text=True, timeout=120)

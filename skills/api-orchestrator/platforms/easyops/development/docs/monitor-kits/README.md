@@ -140,7 +140,9 @@ python3 skills/api-orchestrator/platforms/easyops/development/scripts/validate_m
 
 `vCenter监控` 0.1.1（2026-11-19）：logLevel=DEBUG 的诊断日志从缓存目录侧车文件改为**内存缓冲后按 `COLLECT_ERROR:` 协议整体输出到 stdout**——前端把 stdout 全文当错误正文直接展示，跨环境排障免登执行主机取日志；指标 JSON 保留在末尾 `METRICS:` 标记之后可提取复验；cacheDir 参数随之删除（paramDefine 收敛为 address/username/password/timeout/logLevel 5 个）。已 import_update 升级导入（instanceId 不变，回读 version=0.1.1、status=enabled、5 参数）并重新激活 totalStatus=success。该口径已提升为本目录「本地采集日志与缺失指标排障强制要求」的通用规则。
 
-`vCenter监控` 0.1.2（2026-11-19）：修复目标环境手填密码报 `illegal base64 data at input byte 4`——根因是密码参数 `isFromSecret/isEncrypt=true` 触发平台下发链路 decrypt，手填明文非合法 base64（host-deploy 0.1.6 同族坑）；因同名参数升级强制继承旧标志，按 host-deploy `openapiAkText` 先例**参数更名 `password→passwordText`**（string + 两标志 false）绕过继承。脚本改读 `EASYOPS_COLLECTOR_passwordText`；该口径已提升为唯一权威规范（`../common/套件开发_导入权限与打包规范.md`），`validate_monitor_kit.py` 同步阻断手填明文+isEncrypt=true 组合。0.1.1 的 `valueType=password+isEncrypt=true` 形态为已废弃的试验态，勿再复用。
+`vCenter监控` 0.1.2（2026-11-19）：排查目标环境手填密码报 `illegal base64 data at input byte 4`，当时误判为形态问题改出 passwordText 明文形态（string+两标志false）——该结论已废弃。
+
+`vCenter监控` 0.1.3（2026-11-20）：**真根因修正**——对比线上 DM监控套件（65dc3d3488b19，密码加密输入且正常工作）：其 password 为 `string + isFromSecret:true + isEncrypt:true` 且**配套隐藏 `secretName` 参数**（display=false、use=collectorParams）；illegal base64 data 的真根因是**缺 secretName 配套参数**导致平台 Secret 解密链路异常，而非两标志为 true 本身。0.1.3 完全对齐 DM 形态：恢复参数名 `password`（string+true+true）+ 新增隐藏 `secretName`，与 DM 套件参数定义同构；demo 环境 import_update 回读 version=0.1.3/enabled、password(string,True,True)+secretName、激活 totalStatus=success。目标环境 password 同名继承（已手工改成 DM 形态，继承值与包定义一致）升级无缝，已填密码值保留。加密口径已更新为唯一权威规范（`../common/套件开发_导入权限与打包规范.md`），validate_monitor_kit 阻断「isFromSecret=true 无 secretName 配套」与「非Secret引用却isEncrypt=true」两类坏形态。0.1.2 的 passwordText 明文形态废弃（参数已从包内移除，升级后任务需重填 password）。
 
 ### 激活请求经网关被 301 降级 GET 的坑（2026-11-19）
 

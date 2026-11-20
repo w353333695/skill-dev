@@ -29,10 +29,10 @@ class MonitorKitValidatorTests(unittest.TestCase):
             )
             with self.assertRaises(module.ValidationError) as context:
                 module.validate_dir(root)
-            self.assertIn("不能启用isFromSecret", str(context.exception))
+            self.assertIn("缺少配套secretName参数", str(context.exception))
 
     def test_manual_plaintext_with_encrypt_flag_rejected(self):
-        """手填明文 + isEncrypt=true：平台下发 decrypt 报 illegal base64 data，校验器阻断。"""
+        """非Secret引用却 isEncrypt=true（明文直存+加密标志）：下发 decrypt 必炸，校验器阻断。"""
         module = validator()
         with tempfile.TemporaryDirectory(dir=WORKTREE_ROOT / ".local") as temporary:
             root = Path(temporary) / "kit"
