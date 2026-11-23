@@ -20,7 +20,7 @@ from unittest import mock
 
 KIT = Path(__file__).resolve().parents[2] / "monitor-kits/host-deploy-instance-monitoring"
 SOURCE = KIT / "src/host_deploy_instance_monitor.py"
-PACKAGE = Path(__file__).resolve().parents[3] / "hub/monitor-kits/监控套件_主机部署实例监控_0.1.21.zip"
+PACKAGE = Path(__file__).resolve().parents[3] / "hub/monitor-kits/监控套件_主机部署实例监控_0.1.22.zip"
 WORKTREE_ROOT = Path(__file__).resolve().parents[7]
 
 
@@ -323,7 +323,8 @@ class HostDeployInstanceMonitorTests(unittest.TestCase):
         m = module()
         command = m["windows_base64_command"]("Get-WmiObject Source", m["WINDOWS_PROCESS_FIELDS"])
         self.assertIn("$values = @($_.ProcessId,$_.Name,$_.CommandLine", command)
-        self.assertIn("$_.CreationDate.ToUniversalTime()", command)
+        self.assertIn("if ($_.CreationDate -is [DateTime]) { $_.CreationDate.ToUniversalTime()", command)
+        self.assertIn("else { [string]$_.CreationDate }", command)
         self.assertNotIn("$.ProcessId", command)
         self.assertNotIn("$.Name", command)
 
@@ -555,7 +556,7 @@ class HostDeployInstanceMonitorTests(unittest.TestCase):
     def test_help_and_version(self):
         result = subprocess.run([sys.executable, str(SOURCE), "--version"], capture_output=True, text=True, env={**os.environ, "PYTHONDONTWRITEBYTECODE": "1"})
         self.assertEqual(result.returncode, 0)
-        self.assertEqual(result.stdout.strip(), "0.1.21")
+        self.assertEqual(result.stdout.strip(), "0.1.22")
 
     def test_python2_json_output_uses_ascii_escape(self):
         source = SOURCE.read_text(encoding="utf-8")

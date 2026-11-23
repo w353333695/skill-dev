@@ -1,6 +1,6 @@
 type: simple-script
 name: 主机部署实例监控
-version: "0.1.21"
+version: "0.1.22"
 command:
     collect:
         interpreter: ""
