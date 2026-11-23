@@ -24,7 +24,7 @@ else:
     from urllib import urlencode
     from urllib2 import Request, urlopen
 
-VERSION = "0.1.20"
+VERSION = "0.1.21"
 IS_WINDOWS = os.name == "nt"
 OBJECT_ID = "ARTIFACT_INST@ONEMODEL"
 OPENAPI_PATH = "/cmdbservice/v3/object/ARTIFACT_INST@ONEMODEL/instance/_search"
@@ -444,7 +444,7 @@ def windows_json(command):
 
 
 def windows_base64_command(query, fields):
-    expressions = dict((field, "$." + field) for field in fields)
+    expressions = dict((field, "$_." + field) for field in fields)
     if "CreationDate" in expressions:
         expressions["CreationDate"] = (
             '$(if ($_.CreationDate -eq $null) { "" } else { '
