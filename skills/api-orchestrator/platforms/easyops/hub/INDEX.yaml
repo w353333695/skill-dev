@@ -768,3 +768,24 @@ items:
     scenario: 多品牌存储阵列/NAS/SDS 的 SNMP 容量、健康与资源发现监控
     notes: "HTTP/API/SSH 专用模板不伪装为 SNMP；私有 OID 不可用时继续输出标准 MIB 指标"
     added: "2026-11-06"
+  - id: easyops-site-message-custom-sender
+    name: custom站内信
+    category: custom-msg-sender
+    files: [通知方式_custom站内信_1.0.1.zip]
+    version: "1.0.1"
+    history:
+      - {ver: "1.0.0", date: "2026-11-23", change: "从192.168.110.24/org1888导出enabled配置instanceId=65db358f40781；包含脚本源码、可直接create的notify_config.json和导入说明；向wwh实测send_message返回code=0且接收列表含wwh"}
+      - {ver: "1.0.1", date: "2026-11-23", change: "增加HTTP 200、业务code=0、JSON解析和请求异常校验；mock覆盖四类失败路径；线上配置instanceId=65db358f40781已更新并向wwh实测成功"}
+    scenario: EasyOps custom通知方式，通过ENS定位logic.sys_setting并调用site_msg接口给指定用户发送站内信
+    notes: "无serverConfig和凭证；导入需系统管理员，运行依赖EasyOps平台内ens_api与logic.sys_setting。msgsender返回create success表示脚本执行完成并返回接收列表。"
+    added: "2026-11-23"
+  - id: easyops-voice-custom-sender
+    name: custom语音通知
+    category: custom-msg-sender
+    files: [通知方式_custom语音通知_1.0.0.zip]
+    version: "1.0.0"
+    history:
+      - {ver: "1.0.0", date: "2026-11-23", change: "从192.168.110.24/org1888导出enabled配置instanceId=65378c79a2e21；包含脚本源码、可直接create的notify_config.json和导入说明；notify_method回读配置处于enabled"}
+    scenario: EasyOps custom通知方式，按用户WebSocket订阅主题推送带voice标记的监控告警消息
+    notes: "无serverConfig和凭证；仅已订阅monitor.alert.notify.<用户名>主题的在线用户会收到消息。脚本硬编码源环境ORG=1888和EASYOPS_USER=easyops，跨环境导入前需修改；本包归档时未做用户在线语音收听验收。"
+    added: "2026-11-23"
