@@ -2,12 +2,12 @@
 # -*- coding: utf-8 -*-
 """HOST 本地部署实例进程与端口监控脚本，参数由 EASYOPS_COLLECTOR_* 注入。"""
 import argparse
+import base64
+import binascii
 import calendar
-import csv
 import errno
 import hashlib
 import hmac
-import io
 import json
 import os
 import re
@@ -24,7 +24,7 @@ else:
     from urllib import urlencode
     from urllib2 import Request, urlopen
 
-VERSION = "0.1.19"
+VERSION = "0.1.20"
 IS_WINDOWS = os.name == "nt"
 OBJECT_ID = "ARTIFACT_INST@ONEMODEL"
 OPENAPI_PATH = "/cmdbservice/v3/object/ARTIFACT_INST@ONEMODEL/instance/_search"
@@ -48,6 +48,10 @@ TARGET_METRIC_KEYS = [
 ]
 METRIC_KEYS = PROCESS_METRIC_KEYS + PORT_METRIC_KEYS + TARGET_METRIC_KEYS
 WINDOWS_PROCESS_CACHE = {}
+WINDOWS_PROCESS_FIELDS = [
+    "ProcessId", "Name", "CommandLine", "ExecutablePath", "CreationDate",
+    "UserModeTime", "KernelModeTime", "ThreadCount", "WorkingSetSize", "HandleCount",
+]
 
 
 def value_digest(value):
@@ -439,45 +443,80 @@ def windows_json(command):
     return json.loads(payload or "null")
 
 
-def parse_windows_csv(payload):
-    payload = text(payload).strip().lstrip(u"﻿")
-    if not payload:
-        return []
-    if sys.version_info[0] == 2:
-        stream = io.BytesIO(payload.encode("utf-8"))
-    else:
-        stream = io.StringIO(payload)
-    rows = []
-    for row in csv.DictReader(stream):
-        if sys.version_info[0] == 2:
-            decoded = {}
-            for key, value in row.items():
-                decoded_key = key.decode("utf-8", "replace") if isinstance(key, bytes) else key
-                decoded_value = value.decode("utf-8", "replace") if isinstance(value, bytes) else value
-                decoded[decoded_key] = decoded_value
-            row = decoded
-        rows.append(row)
-    return rows
+def windows_base64_command(query, fields):
+    expressions = dict((field, "$." + field) for field in fields)
+    if "CreationDate" in expressions:
+        expressions["CreationDate"] = (
+            '$(if ($_.CreationDate -eq $null) { "" } else { '
+            '$_.CreationDate.ToUniversalTime().ToString("yyyyMMddHHmmss.ffffff+0000") })'
+        )
+    values = ",".join(expressions[field] for field in fields)
+    return (
+        query + " | ForEach-Object { $values = @(" + values + "); "
+        "(@($values | ForEach-Object { if ($_ -eq $null) { '' } else { "
+        "[Convert]::ToBase64String([Text.Encoding]::UTF8.GetBytes([string]$_)) } }) -join ',') }"
+    )
 
 
-def windows_csv(command):
-    payload = run_windows_command([
+def run_windows_command_text(command):
+    return run_windows_command([
         "powershell.exe", "-NoProfile", "-NonInteractive", "-ExecutionPolicy", "Bypass",
         "-Command", "$ErrorActionPreference='Stop'; " + command,
     ])
-    return parse_windows_csv(payload)
 
 
-def windows_query_rows(cim_command, wmi_command):
+def windows_query_rows(cim_command, wmi_command, fields):
     try:
         payload = windows_json(cim_command)
-        return payload if isinstance(payload, list) else [payload]
+        return parse_windows_base64_rows(payload, fields), "cim-base64"
     except (OSError, ValueError) as exc:
         message = safe_error_text(exc)
         markers = ("Get-CimInstance", "ConvertTo-Json", "CommandNotFoundException")
         if not any(marker in message for marker in markers):
             raise
-        return windows_csv(wmi_command)
+        return parse_windows_base64_rows(run_windows_command_text(wmi_command), fields), "wmi-base64"
+
+
+def parse_windows_base64_rows(payload, expected_fields=None):
+    fields = expected_fields or WINDOWS_PROCESS_FIELDS
+    lines = payload if isinstance(payload, list) else text(payload).splitlines()
+    rows = []
+    for line in lines:
+        line = text(line).strip().lstrip(u"\ufeff")
+        if not line:
+            continue
+        values = line.split(",")
+        if len(values) != len(fields):
+            raise ValueError(
+                "[parse_windows_base64_rows] Windows查询字段数错误: %d != %d"
+                % (len(values), len(fields))
+            )
+        row = {}
+        for index, name in enumerate(fields):
+            try:
+                row[name] = base64.b64decode(values[index]).decode("utf-8", "replace")
+            except (binascii.Error, TypeError, ValueError):
+                raise ValueError("[parse_windows_base64_rows] Windows字段Base64解码失败: %s" % name)
+        rows.append(row)
+    return rows
+
+
+def windows_row_diagnostics(rows, processes):
+    field_missing_counts = {}
+    for name in WINDOWS_PROCESS_FIELDS:
+        field_missing_counts[name] = sum(1 for row in rows if not text(row.get(name)))
+    command_line_newline_rows = sum(1 for item in processes if "\r" in item["cmdline"] or "\n" in item["cmdline"])
+    resource_zero_rows = sum(
+        1 for item in processes
+        if item["threads"] <= 0 or item["memory_bytes"] <= 0 or item["fd_count"] <= 0
+    )
+    invalid_start_rows = sum(1 for item in processes if item.get("start_timestamp", -1) < 0)
+    return {
+        "fieldMissingCounts": field_missing_counts,
+        "commandLineNewlineRows": command_line_newline_rows,
+        "resourceZeroRows": resource_zero_rows,
+        "invalidStartRows": invalid_start_rows,
+    }
 
 
 def parse_windows_datetime(value):
@@ -536,32 +575,42 @@ def parse_windows_process_row(row):
         return None
 
 
-def windows_process_snapshot():
-    rows = windows_query_rows(
-        "Get-CimInstance Win32_Process | Select-Object ProcessId,Name,CommandLine,"
-        "ExecutablePath,CreationDate,UserModeTime,KernelModeTime,ThreadCount,"
-        "WorkingSetSize,HandleCount | ConvertTo-Json -Compress -Depth 3",
-        "Get-WmiObject Win32_Process | Select-Object ProcessId,Name,CommandLine,"
-        "ExecutablePath,CreationDate,UserModeTime,KernelModeTime,ThreadCount,"
-        "WorkingSetSize,HandleCount | ConvertTo-Csv -NoTypeInformation"
+def windows_process_snapshot(settings=None, reason="initial"):
+    rows, query_mode = windows_query_rows(
+        windows_base64_command(
+            "Get-CimInstance Win32_Process | Select-Object ProcessId,Name,CommandLine,"
+            "ExecutablePath,CreationDate,UserModeTime,KernelModeTime,ThreadCount,"
+            "WorkingSetSize,HandleCount", WINDOWS_PROCESS_FIELDS
+        ) + " | ConvertTo-Json -Compress -Depth 3",
+        windows_base64_command(
+            "Get-WmiObject Win32_Process | Select-Object ProcessId,Name,CommandLine,"
+            "ExecutablePath,CreationDate,UserModeTime,KernelModeTime,ThreadCount,"
+            "WorkingSetSize,HandleCount", WINDOWS_PROCESS_FIELDS
+        ), WINDOWS_PROCESS_FIELDS,
     )
     processes = [parsed for parsed in (parse_windows_process_row(row) for row in rows) if parsed]
     if not processes:
         raise OSError("Windows进程查询结果为空")
+    if settings is not None:
+        log_event(
+            settings, "DEBUG", "windows.process.snapshot", queryMode=query_mode, reason=reason,
+            rowCount=len(rows), parsedProcessCount=len(processes),
+            **windows_row_diagnostics(rows, processes)
+        )
     WINDOWS_PROCESS_CACHE.clear()
     for process in processes:
         WINDOWS_PROCESS_CACHE[process["pid"]] = process
     return processes
 
 
-def refresh_process_record(process, force=False):
+def refresh_process_record(process, settings=None, force=False):
     if not IS_WINDOWS:
         return parse_proc_stat(read_file("/proc/%d/stat" % process["pid"]))
     if force:
-        windows_process_snapshot()
+        windows_process_snapshot(settings, "cpu_sample")
     refreshed = WINDOWS_PROCESS_CACHE.get(process["pid"])
     if refreshed is None:
-        windows_process_snapshot()
+        windows_process_snapshot(settings, "missing_process")
         refreshed = WINDOWS_PROCESS_CACHE.get(process["pid"])
     return dict(refreshed) if refreshed is not None else None
 
@@ -592,9 +641,9 @@ def parse_proc_stat(payload):
         return None
 
 
-def list_processes():
+def list_processes(settings=None):
     if IS_WINDOWS:
-        return windows_process_snapshot()
+        return windows_process_snapshot(settings, "initial")
     processes = []
     for name in os.listdir("/proc"):
         if not name.isdigit():
@@ -682,9 +731,16 @@ def match_target_processes(target, processes):
 
 def boot_time():
     if IS_WINDOWS:
-        rows = windows_query_rows(
-            "Get-CimInstance Win32_OperatingSystem | Select-Object LastBootUpTime | ConvertTo-Json -Compress",
-            "Get-WmiObject Win32_OperatingSystem | Select-Object LastBootUpTime | ConvertTo-Csv -NoTypeInformation"
+        rows, _query_mode = windows_query_rows(
+            windows_base64_command(
+                "Get-CimInstance Win32_OperatingSystem | Select-Object LastBootUpTime",
+                ["LastBootUpTime"],
+            ) + " | ConvertTo-Json -Compress",
+            windows_base64_command(
+                "Get-WmiObject Win32_OperatingSystem | Select-Object LastBootUpTime",
+                ["LastBootUpTime"],
+            ),
+            ["LastBootUpTime"],
         )
         row = rows[0] if rows else None
         return parse_windows_datetime(row.get("LastBootUpTime")) if isinstance(row, dict) else -1.0
@@ -713,9 +769,16 @@ def page_size():
 
 def memory_total_bytes():
     if IS_WINDOWS:
-        rows = windows_query_rows(
-            "Get-CimInstance Win32_OperatingSystem | Select-Object TotalVisibleMemorySize | ConvertTo-Json -Compress",
-            "Get-WmiObject Win32_OperatingSystem | Select-Object TotalVisibleMemorySize | ConvertTo-Csv -NoTypeInformation"
+        rows, _query_mode = windows_query_rows(
+            windows_base64_command(
+                "Get-CimInstance Win32_OperatingSystem | Select-Object TotalVisibleMemorySize",
+                ["TotalVisibleMemorySize"],
+            ) + " | ConvertTo-Json -Compress",
+            windows_base64_command(
+                "Get-WmiObject Win32_OperatingSystem | Select-Object TotalVisibleMemorySize",
+                ["TotalVisibleMemorySize"],
+            ),
+            ["TotalVisibleMemorySize"],
         )
         row = rows[0] if rows else None
         if isinstance(row, dict):
@@ -862,10 +925,10 @@ def collect_target(target, processes, sockets, boot_ts, ticks, mem_total, settin
     time.sleep(settings["sampleInterval"])
     refreshed = {}
     if IS_WINDOWS:
-        windows_process_snapshot()
+        windows_process_snapshot(settings, "cpu_sample")
     for item in matched:
         try:
-            parsed = refresh_process_record(item)
+            parsed = refresh_process_record(item, settings)
         except (IOError, OSError):
             parsed = None
             log_event(settings, "ERROR", "process.refresh_stat_failed", deployInstanceId=text(target.get("instanceId")), pid=item["pid"], traceback=traceback.format_exc())
@@ -920,7 +983,7 @@ def collect_target(target, processes, sockets, boot_ts, ticks, mem_total, settin
             "deploy_instance_process_fd_count": float(fd_count) if readable_fd_count else -1.0,
             "deploy_instance_process_fd_usage_percent": fd_usage,
         }
-        log_event(settings, "DEBUG", "process.metrics", deployInstanceId=text(target.get("instanceId")), cmdlineHash=value_digest(cmdline), refreshedProcessCount=len(group), beforeTicks=before, afterTicks=after, values=process_values)
+        log_event(settings, "DEBUG", "process.metrics", deployInstanceId=text(target.get("instanceId")), cmdlineHash=value_digest(cmdline), refreshedProcessCount=len(group), sampleElapsedSeconds=elapsed, beforeTicks=before, afterTicks=after, values=process_values)
         rows.append({"dims": dict(base_dims, cmdline=cmdline), "vals": process_values})
     for port in expected_ports or [""]:
         is_listening = port in listening
@@ -951,7 +1014,7 @@ def collect(settings):
     cache, refresh_success = ensure_cache(settings, now)
     cache_age = max(now - cache["refreshedAt"], 0.0)
     targets = [row for row in cache.get("targets", []) if isinstance(row, dict) and text(row.get("instanceId"))]
-    processes, sockets = list_processes(), listening_ports()
+    processes, sockets = list_processes(settings), listening_ports()
     boot_ts, ticks, mem_total = boot_time(), clock_ticks(), memory_total_bytes()
     log_event(settings, "DEBUG", "local.snapshot", targetCount=len(targets), processCount=len(processes), listeningPorts=sorted(sockets.keys()), bootTimestamp=boot_ts, clockTicks=ticks, memoryTotalBytes=mem_total)
     output = []

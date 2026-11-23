@@ -1,3 +1,4 @@
+import base64
 import hashlib
 import hmac
 import io
@@ -19,7 +20,7 @@ from unittest import mock
 
 KIT = Path(__file__).resolve().parents[2] / "monitor-kits/host-deploy-instance-monitoring"
 SOURCE = KIT / "src/host_deploy_instance_monitor.py"
-PACKAGE = Path(__file__).resolve().parents[3] / "hub/monitor-kits/监控套件_主机部署实例监控_0.1.19.zip"
+PACKAGE = Path(__file__).resolve().parents[3] / "hub/monitor-kits/监控套件_主机部署实例监控_0.1.20.zip"
 WORKTREE_ROOT = Path(__file__).resolve().parents[7]
 
 
@@ -290,60 +291,87 @@ class HostDeployInstanceMonitorTests(unittest.TestCase):
         self.assertEqual(m["parse_windows_netstat"](netstat), {8080: {"123"}})
 
 
-    def test_windows_csv_parser_handles_escaped_fields(self):
-        m = module()
-        payload = (
-            '"ProcessId","Name","CommandLine","ExecutablePath","CreationDate",'
-            '"UserModeTime","KernelModeTime","ThreadCount","WorkingSetSize","HandleCount"\r\n'
-            '"123","应用.exe","C:\\Program Files\\App\\app.exe --config 中文,配置",'
-            '"C:\\Program Files\\App\\app.exe","20261116103000.123456+480",'
-            '"10000000","5000000","4","1024","32"\r\n'
-        )
-        rows = m["parse_windows_csv"](payload)
-        self.assertEqual(len(rows), 1)
-        self.assertEqual(rows[0]["Name"], "应用.exe")
-        self.assertEqual(rows[0]["CommandLine"], r"C:\Program Files\App\app.exe --config 中文,配置")
-        self.assertEqual(m["parse_windows_process_row"](rows[0])["pid"], 123)
-
-    def test_windows_query_falls_back_to_wmi_csv(self):
-        m = module()
-        cim_command = "Get-CimInstance Source | ConvertTo-Json"
-        wmi_command = "Get-WmiObject Source | ConvertTo-Csv -NoTypeInformation"
-        with mock.patch.dict(m, {
-            "windows_json": mock.Mock(return_value=[{"ProcessId": 1}]),
-            "windows_csv": mock.Mock(return_value=[{"ProcessId": 2}]),
-        }):
-            self.assertEqual(m["windows_query_rows"](cim_command, wmi_command), [{"ProcessId": 1}])
-            m["windows_json"].assert_called_once_with(cim_command)
-            m["windows_csv"].assert_not_called()
-        unavailable = OSError("CommandNotFoundException: Get-CimInstance")
-        with mock.patch.dict(m, {
-            "windows_json": mock.Mock(side_effect=unavailable),
-            "windows_csv": mock.Mock(return_value=[{"ProcessId": 2}]),
-        }):
-            self.assertEqual(m["windows_query_rows"](cim_command, wmi_command), [{"ProcessId": 2}])
-            m["windows_csv"].assert_called_once_with(wmi_command)
-        with mock.patch.dict(m, {"windows_json": mock.Mock(side_effect=OSError("access denied")), "windows_csv": mock.Mock()}):
-            with self.assertRaises(OSError):
-                m["windows_query_rows"](cim_command, wmi_command)
-
-    def test_windows_process_snapshot_accepts_wmi_rows(self):
+    def test_windows_base64_parser_handles_multiline_and_quoted_fields(self):
         m = module()
         row = {
-            "ProcessId": "123", "Name": "app.exe",
-            "CommandLine": r"C:\Program Files\App\app.exe --port 8080",
+            "ProcessId": "123", "Name": "应用.exe",
+            "CommandLine": 'C:\\Program Files\\App\\IMA\r\nvServer.exe" --config 中文,配置',
             "ExecutablePath": r"C:\Program Files\App\app.exe",
             "CreationDate": "20261116103000.123456+480",
             "UserModeTime": "10000000", "KernelModeTime": "5000000",
             "ThreadCount": "4", "WorkingSetSize": "1024", "HandleCount": "32",
         }
-        with mock.patch.dict(m, {"windows_query_rows": mock.Mock(return_value=[row])}):
-            processes = m["windows_process_snapshot"]()
+        payload = ",".join(
+            base64.b64encode(str(row[field]).encode("utf-8")).decode("ascii")
+            for field in m["WINDOWS_PROCESS_FIELDS"]
+        )
+        rows = m["parse_windows_base64_rows"](payload)
+        process = m["parse_windows_process_row"](rows[0])
+        self.assertEqual(len(rows), 1)
+        self.assertEqual(rows[0]["Name"], "应用.exe")
+        self.assertEqual(rows[0]["CommandLine"], row["CommandLine"])
+        self.assertEqual(process["pid"], 123)
+        self.assertEqual(process["threads"], 4)
+        self.assertEqual(process["memory_bytes"], 1024.0)
+        self.assertEqual(process["fd_count"], 32)
+        diagnostics = m["windows_row_diagnostics"](rows, [process])
+        self.assertEqual(diagnostics["commandLineNewlineRows"], 1)
+        self.assertEqual(diagnostics["resourceZeroRows"], 0)
+        self.assertEqual(diagnostics["invalidStartRows"], 0)
+
+    def test_windows_query_falls_back_to_wmi_base64(self):
+        m = module()
+        cim_command = "Get-CimInstance Source | ConvertTo-Json"
+        wmi_command = "Get-WmiObject Source"
+        fields = ["Value"]
+        payload = base64.b64encode(b"legacy").decode("ascii")
+        with mock.patch.dict(m, {
+            "windows_json": mock.Mock(return_value=[payload]),
+            "run_windows_command_text": mock.Mock(),
+        }):
+            rows, query_mode = m["windows_query_rows"](cim_command, wmi_command, fields)
+            self.assertEqual(rows, [{"Value": "legacy"}])
+            self.assertEqual(query_mode, "cim-base64")
+            m["windows_json"].assert_called_once_with(cim_command)
+            m["run_windows_command_text"].assert_not_called()
+        unavailable = OSError("CommandNotFoundException: Get-CimInstance")
+        with mock.patch.dict(m, {
+            "windows_json": mock.Mock(side_effect=unavailable),
+            "run_windows_command_text": mock.Mock(return_value=payload),
+        }):
+            rows, query_mode = m["windows_query_rows"](cim_command, wmi_command, fields)
+            self.assertEqual(rows, [{"Value": "legacy"}])
+            self.assertEqual(query_mode, "wmi-base64")
+            m["run_windows_command_text"].assert_called_once_with(wmi_command)
+        with mock.patch.dict(m, {"windows_json": mock.Mock(side_effect=OSError("access denied"))}):
+            with self.assertRaises(OSError):
+                m["windows_query_rows"](cim_command, wmi_command, fields)
+
+    def test_windows_process_snapshot_diagnoses_resource_fields(self):
+        m = module()
+        row = {
+            "ProcessId": "123", "Name": "app.exe",
+            "CommandLine": 'C:\\Program Files\\App\\IMA\r\nvServer.exe"',
+            "ExecutablePath": r"C:\Program Files\App\app.exe",
+            "CreationDate": "20261116103000.123456+480",
+            "UserModeTime": "10000000", "KernelModeTime": "5000000",
+            "ThreadCount": "4", "WorkingSetSize": "1024", "HandleCount": "32",
+        }
+        settings = {"logLevel": "DEBUG"}
+        with mock.patch.dict(m, {
+            "windows_query_rows": mock.Mock(return_value=([row], "wmi-base64")),
+        }):
+            processes = m["windows_process_snapshot"](settings, "initial")
         self.assertEqual(processes[0]["pid"], 123)
         self.assertEqual(m["WINDOWS_PROCESS_CACHE"][123]["cmdline"], row["CommandLine"])
+        event = settings["debugEvents"][0]
+        self.assertEqual(event["stage"], "windows.process.snapshot")
+        self.assertEqual(event["queryMode"], "wmi-base64")
+        self.assertEqual(event["resourceZeroRows"], 0)
         source = SOURCE.read_text(encoding="utf-8")
         self.assertIn("Get-WmiObject Win32_Process", source)
         self.assertIn("Get-WmiObject Win32_OperatingSystem", source)
+        self.assertNotIn("ConvertTo-Csv", source)
 
     def test_windows_target_collect_and_path_matching(self):
         m = module()
@@ -519,7 +547,7 @@ class HostDeployInstanceMonitorTests(unittest.TestCase):
     def test_help_and_version(self):
         result = subprocess.run([sys.executable, str(SOURCE), "--version"], capture_output=True, text=True, env={**os.environ, "PYTHONDONTWRITEBYTECODE": "1"})
         self.assertEqual(result.returncode, 0)
-        self.assertEqual(result.stdout.strip(), "0.1.19")
+        self.assertEqual(result.stdout.strip(), "0.1.20")
 
     def test_python2_json_output_uses_ascii_escape(self):
         source = SOURCE.read_text(encoding="utf-8")
