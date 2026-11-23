@@ -385,6 +385,51 @@ class CollectTests(unittest.TestCase):
         self.assertIn("config.ready", output)
 
 
+class MoRefTypeCompatTests(unittest.TestCase):
+    """MoRef 类型名读取兼容（0.1.6 真机实证：新 pyVmomi MoRef 无 _type 属性）。"""
+
+    def test_assemble_rows_new_style_moref(self):
+        m = collect_namespace()
+        log = m["DebugLog"]("DEBUG")  # unknown 聚合断言需要 DEBUG 级缓冲
+
+        class NewRef(object):
+            """新版 pyVmomi 形态：仅 type 属性（字符串）。"""
+            def __init__(self, type_name):
+                self.type = type_name
+
+        class ClassTypeRef(object):
+            """type 属性为类对象形态。"""
+            type = staticmethod(lambda: None)  # 占位避免误用
+
+        rows = [
+            {"obj": NewRef("ComputeResource"), "props": {"name": "C1"}},
+            {"obj": NewRef("HostSystem"), "props": {"name": "h1"}},
+            {"obj": NewRef("VirtualMachine"), "props": {"name": "vm1"}},
+            {"obj": NewRef("Datastore"), "props": {"name": "ds1"}},
+            {"obj": NewRef("MysteryThing"), "props": {}},
+            {"obj": object(), "props": {}},  # 两种属性都读不到
+        ]
+        view = m["assemble_rows"](rows, log)
+        self.assertEqual(len(view["cr"]), 1)
+        self.assertEqual(len(view["host"]), 1)
+        self.assertEqual(len(view["vm"]), 1)
+        self.assertEqual(len(view["datastore"]), 1)
+        # unknown 聚合进日志：MysteryThing×1 + 空类型×1
+        unknown_entries = [e for e in log.entries if e.get("stage") == "rows.unknown_types"]
+        self.assertEqual(len(unknown_entries), 1)
+        self.assertEqual(unknown_entries[0]["counts"], {"MysteryThing": 1, "<empty>": 1})
+
+    def test_assemble_rows_unknown_aggregated_single_log(self):
+        """unknown 类型聚合成一条日志（0.1.6 教训：逐行刷屏几百行）。"""
+        m = collect_namespace()
+        log = m["DebugLog"]("DEBUG")
+        rows = [{"obj": object(), "props": {}} for _ in range(300)]
+        m["assemble_rows"](rows, log)
+        unknown_entries = [e for e in log.entries if e.get("stage") == "rows.unknown_types"]
+        self.assertEqual(len(unknown_entries), 1)  # 单条聚合
+        self.assertEqual(unknown_entries[0]["counts"].get("<empty>"), 300)
+
+
 class ConnectFallbackTests(unittest.TestCase):
     """TLS 三级降级 + 密码候选循环（目标环境 11.66.19.194 debug 实测回归）。"""
 

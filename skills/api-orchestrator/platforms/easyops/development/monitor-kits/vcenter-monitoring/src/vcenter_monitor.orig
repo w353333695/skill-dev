@@ -506,12 +506,29 @@ class MetricBuilder(object):
             self.records.append({"dims": record_dims, "vals": record_vals})
 
 
+def _mo_ref_type(obj):
+    """MoRef 类型名兼容（0.1.6 目标环境真机实证：新版 pyVmomi 的
+    ManagedObjectReference 类型名不在 _type 属性上，逐属性探测）：
+    _type 字符串（老版）→ type 属性字符串 → type 属性类对象取 __name__ → 空串。"""
+    kind = getattr(obj, "_type", None)
+    if isinstance(kind, str) and kind:
+        return kind
+    kind = getattr(obj, "type", None)
+    if isinstance(kind, str) and kind:
+        return kind
+    if isinstance(kind, type) or callable(kind):
+        return getattr(kind, "__name__", "")
+    return ""
+
+
 def assemble_rows(rows, log):
-    """属性批次按 MoRef 类型拆视图：cr/host 表 + vm/datastore 列表（保留 MoRef 供 perf）。"""
+    """属性批次按 MoRef 类型拆视图：cr/host 表 + vm/datastore 列表（保留 MoRef 供 perf）。
+    unknown 类型聚合计数（0.1.6 教训：逐行 DEBUG 日志刷屏几百行）。"""
     view = {"cr": {}, "host": {}, "vm": [], "datastore": []}
+    unknown = {}
     for row in rows:
         obj = row["obj"]
-        kind = getattr(obj, "_type", "")
+        kind = _mo_ref_type(obj)
         props = row["props"]
         if kind in ("ComputeResource", "ClusterComputeResource"):
             view["cr"][obj] = props
@@ -522,7 +539,9 @@ def assemble_rows(rows, log):
         elif kind == "Datastore":
             view["datastore"].append((obj, props))
         else:
-            log.event("DEBUG", "rows.unknown_type", type=str(kind))
+            unknown[str(kind) or "<empty>"] = unknown.get(str(kind) or "<empty>", 0) + 1
+    if unknown:
+        log.event("DEBUG", "rows.unknown_types", counts=unknown)
     return view
 
 
