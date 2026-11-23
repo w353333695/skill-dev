@@ -33,7 +33,9 @@ def stub_sdk_modules():
     sys.modules["pyVim.connect"] = pyvim_connect
     pyvmomi = types.ModuleType("pyVmomi")
     vim_mod = types.ModuleType("pyVmomi.vim")
-    for cls_name in ("PerfMetricId", "PerfQuerySpec"):
+    for cls_name in ("PerfMetricId", "PerfQuerySpec", "Folder", "Datacenter",
+                     "ComputeResource", "ClusterComputeResource", "HostSystem",
+                     "VirtualMachine", "Datastore"):
         setattr(vim_mod, cls_name, _kwarg_type(cls_name))
     vmodl_mod = types.ModuleType("pyVmomi.vmodl")
     query_mod = types.ModuleType("vmodl.query")
@@ -490,6 +492,44 @@ class ConnectFallbackTests(unittest.TestCase):
             with self.assertRaises(OSError):
                 m["connect_vcenter"](self.cfg("MTIzNC5Bc2Qh"), m["DebugLog"]("ERROR"))
         self.assertEqual(len(tried), 1)  # 未轮换
+
+
+class MoTypeCompatTests(unittest.TestCase):
+    """TraversalSpec/PropertySpec type 字段兼容（0.1.5 目标环境 TypeError 实证回归）。"""
+
+    def _strict_vmodl(self, m):
+        """复现目标环境 pyVmomi：TraversalSpec/PropertySpec 的 type 字段必须是类对象。"""
+        def check(name):
+            def __init__(self, **kw):
+                if not isinstance(kw.get('type'), type):
+                    raise TypeError('For "type" expected type type, but got %s'
+                                    % type(kw.get('type')).__name__)
+                self.__dict__.update(kw)
+            return type(name, (object,), {"__init__": __init__})
+        pc = m["vmodl"].query.PropertyCollector
+        pc.TraversalSpec = check("TraversalSpec")
+        pc.PropertySpec = check("PropertySpec")
+
+    def test_traversal_spec_uses_managed_object_class(self):
+        m = collect_namespace()
+        self._strict_vmodl(m)
+        specs = m["_folder_recursion_specs"]()
+        self.assertEqual(len(specs), 5)  # 全部构造成功（类对象通过严格校验）
+        spec = m["_ts"]("rootToDC", "Folder", "childEntity", [])
+        self.assertEqual(spec.path, "childEntity")
+
+    def test_mo_type_falls_back_to_string_when_class_missing(self):
+        m = collect_namespace()
+        # 极老版本/桩缺类属性：getattr(vim, name) 为 None → 退字符串
+        missing = types.ModuleType("pyVmomi.vim")  # 无 Folder 属性
+        with mock.patch.object(m["vim"], "Folder", None, create=True):
+            self.assertEqual(m["_mo_type"]("Folder"), "Folder")
+
+    def test_prop_spec_resolves_type(self):
+        m = collect_namespace()
+        self._strict_vmodl(m)
+        spec = m["_prop_spec"]("Datastore", ["name", "summary"])
+        self.assertTrue(isinstance(spec.type, type))
 
 
 class FatalProtocolTests(unittest.TestCase):

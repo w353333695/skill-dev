@@ -306,30 +306,43 @@ def disconnect(service_instance, log):
         log.traceback_event("WARN", "disconnect", "[disconnect]")
 
 
+def _mo_type(type_name):
+    """TraversalSpec/PropertySpec 的 type 字段兼容（0.1.5 目标环境实证）：
+    较新 pyVmomi 的 CheckField 要求传 ManagedObject **类对象**（传字符串报
+    TypeError: For "type" expected type type, but got str），老版本接受字符串——
+    类属性存在时优先类对象，缺失（极老版本桩）退字符串。"""
+    type_obj = getattr(vim, type_name, None)
+    if type_obj is not None:
+        return type_obj
+    return type_name
+
+
+def _ts(name, type_name, path, select_set):
+    """TraversalSpec 构造（type 兼容见 _mo_type）。"""
+    return vmodl.query.PropertyCollector.TraversalSpec(
+        name=name, type=_mo_type(type_name), path=path, skip=False,
+        selectSet=select_set)
+
+
 def _folder_recursion_specs():
     """Datacenter -> hostFolder(ComputeResource->HostSystem->VirtualMachine)
     与 -> datastoreFolder(Datastore) 的遍历链；嵌套 Folder 由 visitFolders 递归覆盖。
     PropertySpec type=ComputeResource 会同时命中 ClusterComputeResource（子类型）。"""
     selection = vmodl.query.PropertyCollector.SelectionSpec
-    traversal = vmodl.query.PropertyCollector.TraversalSpec
-    visit_folders = traversal(
-        name="visitFolders", type="Folder", path="childEntity", skip=False,
-        selectSet=[selection(name="visitFolders"), selection(name="crToH"), selection(name="hToVm")])
-    cr_to_h = traversal(
-        name="crToH", type="ComputeResource", path="host", skip=False,
-        selectSet=[selection(name="hToVm")])
-    h_to_vm = traversal(name="hToVm", type="HostSystem", path="vm", skip=False, selectSet=[])
-    dc_to_hf = traversal(
-        name="dcToHF", type="Datacenter", path="hostFolder", skip=False,
-        selectSet=[selection(name="visitFolders"), selection(name="crToH")])
-    dc_to_dsf = traversal(
-        name="dcToDSF", type="Datacenter", path="datastoreFolder", skip=False,
-        selectSet=[selection(name="visitFolders")])
+    visit_folders = _ts("visitFolders", "Folder", "childEntity",
+                        [selection(name="visitFolders"), selection(name="crToH"), selection(name="hToVm")])
+    cr_to_h = _ts("crToH", "ComputeResource", "host",
+                  [selection(name="hToVm")])
+    h_to_vm = _ts("hToVm", "HostSystem", "vm", [])
+    dc_to_hf = _ts("dcToHF", "Datacenter", "hostFolder",
+                   [selection(name="visitFolders"), selection(name="crToH")])
+    dc_to_dsf = _ts("dcToDSF", "Datacenter", "datastoreFolder",
+                    [selection(name="visitFolders")])
     return [dc_to_hf, dc_to_dsf, visit_folders, cr_to_h, h_to_vm]
 
 
 def _prop_spec(obj_type, props):
-    return vmodl.query.PropertyCollector.PropertySpec(type=obj_type, all=False, pathSet=props)
+    return vmodl.query.PropertyCollector.PropertySpec(type=_mo_type(obj_type), all=False, pathSet=props)
 
 
 def retrieve_rows(property_collector, from_obj, select_set, prop_specs):
@@ -356,11 +369,10 @@ def retrieve_rows(property_collector, from_obj, select_set, prop_specs):
 def collect_datacenter_names(content):
     """rootFolder 直接子层枚举 Datacenter。"""
     selection = vmodl.query.PropertyCollector.SelectionSpec
-    traversal = vmodl.query.PropertyCollector.TraversalSpec
     obj_spec = vmodl.query.PropertyCollector.ObjectSpec(
         obj=content.rootFolder, skip=True,
-        selectSet=[traversal(name="rootToDC", type="Folder", path="childEntity",
-                             skip=False, selectSet=[selection(name="rootToDC")])])
+        selectSet=[_ts("rootToDC", "Folder", "childEntity",
+                       [selection(name="rootToDC")])])
     filter_spec = vmodl.query.PropertyCollector.FilterSpec()
     filter_spec.propSet = [_prop_spec("Datacenter", ["name"])]
     filter_spec.objectSet = [obj_spec]

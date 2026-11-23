@@ -23,9 +23,10 @@ items:
   - id: vcenter-monitor-kit
     name: vCenter监控
     category: monitor-kits
-    files: [监控套件_vCenter监控_0.1.5.zip, vCenter监控_告警规则模板_0.1.5.xlsx]
-    version: "0.1.5"
+    files: [监控套件_vCenter监控_0.1.6.zip, vCenter监控_告警规则模板_0.1.6.xlsx]
+    version: "0.1.6"
     history:
+      - {ver: "0.1.6", date: "2026-11-23", change: "目标环境真机首采回归：登录链路全通（TLS降级+密钥管理密码注入成功），采挂在PropertyCollector构造——目标pyVmomi较新，TraversalSpec/PropertySpec的type字段要求ManagedObject类对象（传字符串报For type expected type got str）；_mo_type兼容（类对象优先、字符串兜底）覆盖全部5个TraversalSpec与4个PropertySpec"}
       - {ver: "0.1.5", date: "2026-11-23", change: "密码传参正解落地：目标环境实测正式链路注入值仍为base64（前端未平台加密）→源码定稿三条链路（job_generator.go decrypt）：推荐secretName走密钥管理（键名=password、值=base64(密码)，平台解码注入明文，DM脚本无解码逻辑即实证）；secretName参数改为display=true引导填写；全候选认证失败的COLLECT_ERROR带链路指引"}
       - {ver: "0.1.4", date: "2026-11-20", change: "目标环境debug实测两项修复：①TLS三级降级（目标pyVim旧版无disableSslCertValidation参数但默认校验证书→CERTIFICATE_VERIFY_FAILED，新增sslContext=CERT_NONE分支命中）；②密码候选兜底（源码job_generator.go证实decrypt失败保原值注入——debug弹窗轻混淆值即此形态，正式任务链路解密正常；脚本对可base64解码为可打印文本的注入值优先用解码值连接，认证失败回退原值）"}
       - {ver: "0.1.3", date: "2026-11-20", change: "真根因修正：illegal base64 data 系缺配套secretName隐藏参数（对齐DM监控套件线上实证），非两标志为true本身；恢复password参数名（string+isFromSecret:true+isEncrypt:true）并新增隐藏secretName，与DM套件参数定义同构，前端加密输入；passwordText明文形态废弃。demo环境升级回读0.1.3/enabled、激活success"}
