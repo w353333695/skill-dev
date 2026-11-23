@@ -432,6 +432,28 @@ class ConnectFallbackTests(unittest.TestCase):
         self.assertEqual(len(calls), 2)
         self.assertNotIn("disableSslCertValidation", calls[1])
 
+    def test_all_candidates_failed_hint_mentions_secret_chain(self):
+        """全部候选认证失败：错误信息带密钥管理链路指引，不回显候选值。"""
+        m = collect_namespace()
+
+        class InvalidLogin(Exception):
+            pass
+
+        def fake_smart_connect(**kwargs):
+            raise m["vim"].fault.InvalidLogin()
+
+        fault_mod = types.ModuleType("pyVmomi.vim.fault")
+        fault_mod.InvalidLogin = InvalidLogin
+        m["vim"].fault = fault_mod
+        with mock.patch.dict(m, {"pyvim_connect": SimpleNamespace(SmartConnect=fake_smart_connect)}):
+            with self.assertRaises(ValueError) as ctx:
+                m["connect_vcenter"](self.cfg("MTIzNC5Bc2Qh"), m["DebugLog"]("ERROR"))
+        msg = str(ctx.exception)
+        self.assertIn("密钥管理", msg)
+        self.assertIn("secretName", msg)
+        self.assertNotIn("MTIzNC5Bc2Qh", msg)
+        self.assertNotIn("1234.Asd!", msg)
+
     def test_auth_failure_rotates_password_candidates(self):
         """认证失败才换下一个候选（解码值→原值）；TLS 错误不换直接抛。"""
         m = collect_namespace()

@@ -11,7 +11,7 @@
 # =============================================================================
 type: simple-script
 name: vCenter监控
-version: 0.1.4
+version: 0.1.5
 agentType: easyops
 samplerType: metric_sampler
 relateObjectId: CLOUD_PROVIDER@ONEMODEL
@@ -29,8 +29,8 @@ command:
 paramDefine:
   - {name: address, valueType: string, defaultValue: "$.url", display: true, displayName: "vCenter地址", description: "默认取云平台实例url属性；支持 https://host/sdk、host、host:port 写法，https缺省端口443；创建任务时可替换为任意属性路径或手填", use: collectParams, optional: false, isFromSecret: false, isEncrypt: false, extraArgs: null}
   - {name: username, valueType: string, defaultValue: "", display: true, displayName: "用户名", description: "vCenter账号，手填；建议使用只读权限专用账号", use: collectParams, optional: false, isFromSecret: false, isEncrypt: false, extraArgs: null}
-  - {name: password, valueType: string, defaultValue: "", display: true, displayName: "密码", description: "vCenter密码，加密手填（isFromSecret/isEncrypt=true，须配套secretName参数）；全程不写日志", use: collectParams, optional: false, isFromSecret: true, isEncrypt: true, extraArgs: null}
-  - {name: secretName, valueType: string, defaultValue: "", display: false, displayName: "密钥实例名称", description: "密码Secret链路配套参数（display=false前端隐藏）；缺失会导致解密链路报illegal base64 data", use: collectorParams, optional: true, isFromSecret: false, isEncrypt: false, extraArgs: null}
+  - {name: password, valueType: string, defaultValue: "", display: true, displayName: "密码", description: "vCenter密码；推荐配合secretName走密钥管理链路（平台解密注入明文），前端输入值若为base64混淆形态脚本会自动尝试解码", use: collectParams, optional: false, isFromSecret: true, isEncrypt: true, extraArgs: null}
+  - {name: secretName, valueType: string, defaultValue: "", display: true, displayName: "密钥实例名称", description: "推荐填写：密钥管理中密钥实例的名称，实例键名须为password、值为base64(明文密码)；平台下发时从密钥管理取值并base64解码注入明文，这是加密密码最可靠的传参链路（源码job_generator.go decrypt分支）", use: collectorParams, optional: true, isFromSecret: false, isEncrypt: false, extraArgs: null}
   - {name: timeout, valueType: int, defaultValue: "60", display: true, displayName: "采集超时(秒)", description: "连接与采集总超时，默认60秒，范围10-300；大环境建议300且采集周期不小于600秒", use: collectParams, optional: true, isFromSecret: false, isEncrypt: false, extraArgs: null}
   - {name: logLevel, valueType: string, defaultValue: "ERROR", display: true, displayName: "日志级别", description: "默认ERROR零输出；DEBUG把结构化诊断按COLLECT_ERROR:协议整体输出到stdout（前端任务输出直接复制，无需登执行主机），指标JSON保留在METRICS:之后，不含密码", use: collectParams, optional: true, isFromSecret: false, isEncrypt: false, extraArgs: null}
 params: [address, username, password, secretName, timeout, logLevel]

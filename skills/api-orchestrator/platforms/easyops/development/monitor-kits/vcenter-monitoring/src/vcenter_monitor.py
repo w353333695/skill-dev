@@ -263,21 +263,34 @@ def connect_vcenter(cfg, log):
     socket.setdefaulttimeout(cfg["timeout"])
     candidates = password_candidates(cfg, log)
     last_exc = None
+    auth_exhausted = False
+    service_instance = None
     for index, pwd in enumerate(candidates):
         try:
             service_instance = _smart_connect_once(cfg, log, pwd)
+            auth_exhausted = False
             break
         except SystemExit:
             raise
         except Exception as exc:
+            if not _is_auth_error(exc):
+                raise  # TLS/网络/超时错误换密码无意义，原样抛
             last_exc = exc
-            if index + 1 < len(candidates) and _is_auth_error(exc):
+            auth_exhausted = True
+            if index + 1 < len(candidates):
                 log.event("DEBUG", "connect.password_candidate_rejected",
                           index=index, error=ascii_line(exc.__class__.__name__))
-                continue
-            raise
-    else:
-        raise last_exc
+    if auth_exhausted:
+        # 全部密码候选认证失败（job_generator.go decrypt 源码实证：IsEncrypt 参数
+        # 解密失败保原值注入——debug 弹窗轻混淆值即此形态，正式任务依赖前端正确
+        # 加密或密钥管理链路）。给出可执行的排障指引，不在错误里回显任何候选值。
+        hint = ("vCenter 认证失败（已尝试 %d 个密码候选）。若任务参数 password 注入的"
+                "是 base64/密文形态（平台 decrypt 失败保原值），请改用密钥管理链路："
+                "① 在密钥管理创建密钥实例（键名 password，值=base64(明文密码)，平台会"
+                "base64 解码后注入）；② 任务参数 secretName 填该密钥实例名称；"
+                "③ 或在正式任务创建页面重新输入密码（前端正式链路才会平台加密）。"
+                % len(candidates))
+        raise ValueError(ascii_line(hint))
     content = service_instance.RetrieveServiceContent()
     if content is None or getattr(content, "about", None) is None:
         raise ValueError("vCenter 服务内容获取失败")
