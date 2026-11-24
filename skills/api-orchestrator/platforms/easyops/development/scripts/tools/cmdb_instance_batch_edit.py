@@ -64,7 +64,7 @@ else:
 logging.basicConfig(level=logging.INFO, format='%(asctime)s %(levelname)s %(message)s')
 LOGGER = logging.getLogger('cmdb_instance_batch_edit')
 
-TOOL_VERSION = '1.0.0'
+TOOL_VERSION = '1.0.2'
 CMDB_PORT = 8079
 MODEL_OBJECT_ID = 'CMDB_MODEL@EASYOPS'
 PAGE_SIZE = 1000
@@ -293,17 +293,23 @@ def _internal_request(method, base_url, path, body=None, query=None):
 
 
 def _cmdb_base():
-    """CMDB 地址解析：注入的完整 URL > 注入的 host > agent conf > 报错。"""
-    value = globals().get('EASYOPS_CMDB_BACKEND_URL') or os.environ.get('EASYOPS_CMDB_BACKEND_URL')
-    if value:
-        return _text(value).rstrip('/')
-    value = globals().get('EASYOPS_CMDB_SERVICE_HOST') or os.environ.get('EASYOPS_CMDB_SERVICE_HOST')
-    if value:
-        return 'http://%s:%s' % (_host(value), _port(value, CMDB_PORT))
+    """CMDB 地址解析：agent conf > 注入的完整 URL > 注入的 EASYOPS_CMDB_HOST > EASYOPS_CMDB_SERVICE_HOST > 报错。
+
+    agent conf 的 command.server_groups[0].hosts[0].ip 是平台内网入口，agent 在 A 环境执行时
+    必须回到同一环境；注入的 EASYOPS_CMDB_SERVICE_HOST 在部分部署里解析到 127.0.0.1，
+    会导致 Connection refused（172.30.0.103 实测），因此不能优先于 agent conf。
+    """
     agent_host, _ = _agent_config_host_org()
     if agent_host:
         return 'http://%s:%s' % (_host(agent_host), CMDB_PORT)
-    raise RuntimeError(u'缺少 CMDB 服务地址：未注入 EASYOPS_CMDB_BACKEND_URL/EASYOPS_CMDB_SERVICE_HOST，也读不到 agent conf.yaml')
+    value = globals().get('EASYOPS_CMDB_BACKEND_URL') or os.environ.get('EASYOPS_CMDB_BACKEND_URL')
+    if value:
+        return _text(value).rstrip('/')
+    for name in ('EASYOPS_CMDB_HOST', 'EASYOPS_CMDB_SERVICE_HOST'):
+        value = globals().get(name) or os.environ.get(name)
+        if value:
+            return 'http://%s:%s' % (_host(value), _port(value, CMDB_PORT))
+    raise RuntimeError(u'缺少 CMDB 服务地址：读不到 agent conf.yaml，也未注入 EASYOPS_CMDB_BACKEND_URL/EASYOPS_CMDB_HOST/EASYOPS_CMDB_SERVICE_HOST')
 
 
 def cmdb(method, path, body=None, query=None):

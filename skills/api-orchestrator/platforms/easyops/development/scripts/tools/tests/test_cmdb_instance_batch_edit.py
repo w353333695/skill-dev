@@ -9,7 +9,7 @@ from unittest.mock import patch
 
 EASYOPS = Path(__file__).resolve().parents[4]
 SOURCE = EASYOPS / 'development' / 'scripts' / 'tools' / 'cmdb_instance_batch_edit.py'
-PACKAGE = EASYOPS / 'hub' / 'tools' / '工具_CMDB实例批量编辑_1.0.1.tar.gz'
+PACKAGE = EASYOPS / 'hub' / 'tools' / '工具_CMDB实例批量编辑_1.0.2.tar.gz'
 
 SPEC = importlib.util.spec_from_file_location('cmdb_instance_batch_edit', str(SOURCE))
 edit = importlib.util.module_from_spec(SPEC)
@@ -72,6 +72,37 @@ class ParseTests(unittest.TestCase):
     def test_parse_query_rejects_non_object(self):
         with self.assertRaises(ValueError):
             edit._parse_query('[1,2]')
+
+
+class CmdbBaseTests(unittest.TestCase):
+    """CMDB 地址解析优先级：agent conf > 注入 URL > EASYOPS_CMDB_HOST > EASYOPS_CMDB_SERVICE_HOST。"""
+
+    def test_agent_conf_wins_over_injected_service_host(self):
+        with patch.object(edit, '_agent_config_host_org', return_value=('172.30.0.90', '8888')), \
+             patch.object(edit, 'EASYOPS_CMDB_SERVICE_HOST', '127.0.0.1', create=True), \
+             patch.object(edit, 'EASYOPS_CMDB_HOST', '10.0.0.1', create=True):
+            self.assertEqual(edit._cmdb_base(), 'http://172.30.0.90:8079')
+
+    def test_backend_url_wins_when_agent_conf_missing(self):
+        with patch.object(edit, '_agent_config_host_org', return_value=('', '')), \
+             patch.object(edit, 'EASYOPS_CMDB_BACKEND_URL', 'http://10.0.0.9:9999/', create=True), \
+             patch.object(edit, 'EASYOPS_CMDB_HOST', '10.0.0.1', create=True):
+            self.assertEqual(edit._cmdb_base(), 'http://10.0.0.9:9999')
+
+    def test_cmdb_host_wins_over_service_host(self):
+        with patch.object(edit, '_agent_config_host_org', return_value=('', '')), \
+             patch.object(edit, 'EASYOPS_CMDB_HOST', '10.0.0.1', create=True), \
+             patch.object(edit, 'EASYOPS_CMDB_SERVICE_HOST', '10.0.0.2', create=True):
+            self.assertEqual(edit._cmdb_base(), 'http://10.0.0.1:8079')
+
+    def test_missing_everything_raises(self):
+        with patch.object(edit, '_agent_config_host_org', return_value=('', '')), \
+             patch.object(edit, 'EASYOPS_CMDB_BACKEND_URL', '', create=True), \
+             patch.object(edit, 'EASYOPS_CMDB_HOST', '', create=True), \
+             patch.object(edit, 'EASYOPS_CMDB_SERVICE_HOST', '', create=True):
+            with self.assertRaises(RuntimeError) as ctx:
+                edit._cmdb_base()
+            self.assertIn(u'缺少 CMDB 服务地址', str(ctx.exception))
 
 
 class ValidationTests(unittest.TestCase):
