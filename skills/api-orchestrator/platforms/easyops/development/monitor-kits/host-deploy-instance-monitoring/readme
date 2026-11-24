@@ -1,23 +1,36 @@
 主机部署实例监控套件
 
-关联模型：HOST。任务默认读取 `$.instanceId`、`$._uuid` 和 `$.ip`，在执行主机本地匹配部署实例进程与端口。
+## 适用范围
 
-目标发现流程：
+- 关联模型：HOST。用于监控当前执行主机上“是否监控=是”的部署实例。
+- 采集本机进程存活、进程资源、期望端口监听状态和采集缓存状态；不做业务接口拨测，也不能替代应用日志分析。
+- 支持 Linux 和 Windows。Windows 建议确认 Agent 自带 Python 可导入 psutil（5.8.0 已验证）；缺少 psutil 时会尝试系统命令兜底，但兼容性较弱。
 
-1. OpenAPI网关地址默认读取执行主机agent配置：Linux `/usr/local/easyops/agent/conf/conf.yaml`，Windows `C:\easyops\agent\conf\conf.yaml`，取`command.server_groups[0].hosts[0].ip`第一项，并按`openapiScheme`拼接地址，默认`https://<ip>`；旧任务`openapiGateway`完整地址参数或环境变量仅作为兼容兜底。
-2. 优先读取 `<cacheDir>/<hostInstanceId>.json`。
-3. 缓存不存在、损坏或超过 `cacheTtlDays`（默认7天）时，调用 OpenAPI `POST /cmdbservice/v3/object/ARTIFACT_INST@ONEMODEL/instance/_search`。
-4. OpenAPI 查询 `isMonitor=是`，并按单个定位条件匹配当前主机：优先部署实例 `uuid`，缺失时使用 `ip`，再缺失时使用 `host.instanceId`；结果原子写回缓存。
-5. 若缓存过期但 OpenAPI 失败，允许继续使用旧缓存并输出 `host_deploy_cache_refresh_success=0`；无缓存可用时采集报错。
+## 使用前置条件
 
-目标匹配依据：优先使用 `processMatchGroups.cmdline`；无匹配关键字组时使用 `processList` 的 `pname/cwd/cmdline`，并参考 `installPath`。端口检查读取 `/proc/net/tcp*` 与进程 socket inode；无法读取进程 fd 时退化为检查主机端口监听。
+1. 目标主机已安装 EasyOps Agent，采集任务能调度到该主机。
+2. 部署实例已设置“是否监控=是”，且 `processList`、`processMatchGroups`、`ports` 等配置能描述实际进程和端口。
+3. 已准备具备部署实例模型读权限的 OpenAPI AK/SK，并允许访问实例查询接口。
+4. Agent 所在主机可访问 OpenAPI 网关。网关地址默认从 Agent 配置发现，通常无需手填。
 
-操作系统兼容：Linux按上述 `/proc` 与 inode 方式采集。Windows通过 PowerShell `Get-CimInstance`/`Get-WmiObject` 查询 `Win32_Process/Win32_OperatingSystem`，PowerShell 侧逐字段Base64编码，Python侧严格解码，兼容多行和带引号的CommandLine；通过 `netstat -ano -p tcp` 按PID关联监听端口；路径匹配兼容反斜杠和大小写。Windows无僵尸进程语义，`zombie_process_count`输出0；句柄上限不可直接获取，`fd_count`为进程句柄数、`fd_usage_percent`输出-1。Windows下旧任务携带Linux默认缓存目录时会自动映射到 `%SystemRoot%\\Temp\\easyops\\deploy-instance-monitor`。
+## 参数填写
 
-指标包含：进程存活、进程/线程/僵尸进程数量、启动时间与运行时长、期望与实际监听端口、端口缺失数与监听比例、进程内存、CPU、句柄数与句柄使用率、目标配置有效性、采集成功率和缓存状态。进程相关指标带`cmdline`维度并按命令行分组输出；端口相关指标带`port`维度，每个期望端口单独输出监听状态。Linux与Windows均输出同一套22项指标定义，便于告警和看板复用。
+| 参数 | 建议值 | 说明 |
+| --- | --- | --- |
+| instanceId / hostUuid / hostIp | 保持默认 | 系统自动从 HOST 实例注入，请勿手工改写。 |
+| cacheDir | 保持默认 | 部署实例清单缓存目录；Windows 会自动映射到系统临时目录。 |
+| cacheTtlDays | 7 | 缓存有效期。超过后自动刷新部署实例清单。 |
+| openapiScheme | https | 网关仅支持 HTTP 时才改为 http。 |
+| openapiAkText / openapiSkText | 填写有效凭证 | 普通字符串参数；也可通过 Agent 环境变量注入。日志不会输出凭证。 |
+| sampleInterval | 0.2 | CPU 使用率采样间隔，范围 0.05-2 秒。 |
+| requestTimeout | 10 | OpenAPI 请求超时，范围 3-30 秒。 |
+| logLevel | ERROR | 排障时临时改为 DEBUG；完成后建议恢复 ERROR。 |
+| openapiGateway | 通常不填 | 仅 Agent 自动发现网关失败时，填写可访问的完整网关地址。 |
 
-OpenAPI AK/SK 通过普通字符串任务参数 `openapiAkText`、`openapiSkText` 或 `EASYOPS_OPENAPI_AK`、`EASYOPS_OPENAPI_SK` 环境变量注入；网关地址默认从agent配置读取并按 `openapiScheme`（默认`https`，可选`http`）拼接；旧任务完整地址参数或 `EASYOPS_OPENAPI_GATEWAY_URL` 仅作兜底。脚本不记录密钥。OpenAPI 主体需要有 `ARTIFACT_INST@ONEMODEL` 读权限，网关需放行 search URI。
+## 采集结果与排障
 
-诊断日志：`logLevel` 默认 `ERROR`，仅顶层异常输出`COLLECT_ERROR:`；设为 `DEBUG` 时，脚本会在采集期间内存缓冲结构化JSON诊断，结束后按前端可见协议直接输出stdout：先`COLLECT_ERROR:`，再逐行`[DEBUG] {json}`，最后`METRICS:`和指标JSON数组。内容包括配置就绪、缓存检查/刷新、OpenAPI请求输入与响应摘要、目标配置摘要、Windows快照查询模式与字段缺失统计、进程匹配数量与PID、端口关联判定、每组指标值和最终22项覆盖统计。OpenAPI会记录URL、query、fields、分页、响应code/total/返回数；交集为空时额外记录仅按isMonitor统计的诊断请求，区分“全局无监控实例”和“当前主机条件无匹配”。诊断不输出AK/SK、签名或完整进程命令行，命令行仅输出短哈希；Windows Python 2本地化traceback会先按系统编码解码并转ASCII escape。日志不写文件、不写stderr；前端可把`COLLECT_ERROR:`正文直接复制给LLM做跨环境调试，指标可从`METRICS:`后提取。若日志出现`target.collect_failed`，其traceback会解释该目标为何退化为仅5项兜底指标。
-
-注意：本套件只做本机进程/端口/内核计数采集，不校验业务协议返回，也不能替代健康检查接口或应用日志诊断。
+- 输出 22 项指标，包括进程存活、进程/线程/僵尸进程数、启动时间与运行时长、端口监听、内存、CPU、句柄和缓存状态。
+- 进程指标按 `cmdline` 维度分组；端口指标按 `port` 维度逐个期望端口输出。
+- Windows 无法获取句柄上限时，句柄数为实际值，句柄使用率输出 `-1`。
+- 无数据或数据异常时，将 `logLevel` 设为 `DEBUG` 后重试，并在前端复制完整输出用于排查。DEBUG 会显示配置、缓存、OpenAPI 请求、目标匹配、进程端口匹配和异常原因，不写日志文件。
+- 常见检查点：部署实例是否开启监控、主机 UUID/IP 是否能关联、AK/SK 是否有读权限、网关网络是否可达、进程匹配配置是否准确。

@@ -11,11 +11,17 @@ import hmac
 import json
 import os
 import re
+import socket
 import stat
 import subprocess
 import sys
 import time
 import traceback
+
+try:
+    import psutil
+except ImportError:
+    psutil = None
 
 if sys.version_info[0] >= 3:
     from urllib.parse import urlencode
@@ -24,7 +30,7 @@ else:
     from urllib import urlencode
     from urllib2 import Request, urlopen
 
-VERSION = "0.1.22"
+VERSION = "0.1.23"
 IS_WINDOWS = os.name == "nt"
 OBJECT_ID = "ARTIFACT_INST@ONEMODEL"
 OPENAPI_PATH = "/cmdbservice/v3/object/ARTIFACT_INST@ONEMODEL/instance/_search"
@@ -576,7 +582,111 @@ def parse_windows_process_row(row):
         return None
 
 
+def psutil_cmdline(value):
+    if isinstance(value, (list, tuple)):
+        return " ".join(text(item) for item in value if text(item))
+    return text(value)
+
+
+def windows_psutil_process_snapshot(settings=None, reason="initial"):
+    processes = []
+    access_denied_count = 0
+    command_line_missing_count = 0
+    for process in psutil.process_iter():
+        try:
+            pid = int(process.pid)
+            if pid <= 0:
+                continue
+            with process.oneshot():
+                try:
+                    name = text(process.name())
+                except psutil.AccessDenied:
+                    name = ""
+                    access_denied_count += 1
+                try:
+                    cmdline = psutil_cmdline(process.cmdline())
+                except psutil.AccessDenied:
+                    cmdline = ""
+                    access_denied_count += 1
+                if not cmdline:
+                    command_line_missing_count += 1
+                try:
+                    executable = text(process.exe())
+                except psutil.AccessDenied:
+                    executable = ""
+                    access_denied_count += 1
+                try:
+                    cpu_times = process.cpu_times()
+                    user_time = max(float(cpu_times.user), 0.0)
+                    kernel_time = max(float(cpu_times.system), 0.0)
+                except psutil.AccessDenied:
+                    user_time = kernel_time = 0.0
+                    access_denied_count += 1
+                try:
+                    threads = max(int(process.num_threads()), 0)
+                except psutil.AccessDenied:
+                    threads = 0
+                    access_denied_count += 1
+                try:
+                    start_timestamp = max(float(process.create_time()), -1.0)
+                except psutil.AccessDenied:
+                    start_timestamp = -1.0
+                    access_denied_count += 1
+                try:
+                    memory_bytes = max(float(process.memory_info().rss), 0.0)
+                except psutil.AccessDenied:
+                    memory_bytes = 0.0
+                    access_denied_count += 1
+                try:
+                    handle_count = max(int(process.num_handles()), 0)
+                except psutil.AccessDenied:
+                    handle_count = 0
+                    access_denied_count += 1
+            processes.append({
+                "pid": pid,
+                "comm": name or basename(executable),
+                "state": "",
+                "utime": user_time,
+                "stime": kernel_time,
+                "threads": threads,
+                "start_timestamp": start_timestamp,
+                "cmdline": cmdline or executable or name,
+                "cwd": "",
+                "memory_bytes": memory_bytes,
+                "fd_count": handle_count,
+            })
+        except (psutil.NoSuchProcess, psutil.ZombieProcess):
+            continue
+        except psutil.AccessDenied:
+            access_denied_count += 1
+    if not processes:
+        raise OSError("psutil未返回可用Windows进程")
+    resource_zero_rows = sum(
+        1 for item in processes
+        if item["threads"] <= 0 or item["memory_bytes"] <= 0 or item["fd_count"] <= 0
+    )
+    invalid_start_rows = sum(1 for item in processes if item.get("start_timestamp", -1) < 0)
+    log_event(
+        settings, "DEBUG", "windows.process.snapshot", queryMode="psutil", reason=reason,
+        psutilVersion=text(getattr(psutil, "__version__", "")), parsedProcessCount=len(processes),
+        accessDeniedCount=access_denied_count, commandLineMissingRows=command_line_missing_count,
+        resourceZeroRows=resource_zero_rows, invalidStartRows=invalid_start_rows,
+    )
+    WINDOWS_PROCESS_CACHE.clear()
+    for process in processes:
+        WINDOWS_PROCESS_CACHE[process["pid"]] = process
+    return processes
+
+
 def windows_process_snapshot(settings=None, reason="initial"):
+    if psutil is not None:
+        try:
+            return windows_psutil_process_snapshot(settings, reason)
+        except Exception:
+            log_event(
+                settings, "ERROR", "windows.psutil_failed", reason=reason,
+                traceback=safe_error_text(traceback.format_exc()),
+            )
     rows, query_mode = windows_query_rows(
         windows_base64_command(
             "Get-CimInstance Win32_Process | Select-Object ProcessId,Name,CommandLine,"
@@ -730,7 +840,14 @@ def match_target_processes(target, processes):
     return [process for process in processes if normalize_windows_path(install_path) in normalize_windows_path(process.get("cmdline", "")) or path_prefix(process.get("cwd", ""), install_path)]
 
 
-def boot_time():
+def boot_time(settings=None):
+    if IS_WINDOWS and psutil is not None:
+        try:
+            value = max(float(psutil.boot_time()), -1.0)
+            log_event(settings, "DEBUG", "windows.boot_time", queryMode="psutil", value=value)
+            return value
+        except Exception:
+            log_event(settings, "ERROR", "windows.psutil_boot_time_failed", traceback=safe_error_text(traceback.format_exc()))
     if IS_WINDOWS:
         rows, _query_mode = windows_query_rows(
             windows_base64_command(
@@ -768,7 +885,14 @@ def page_size():
         return 4096.0
 
 
-def memory_total_bytes():
+def memory_total_bytes(settings=None):
+    if IS_WINDOWS and psutil is not None:
+        try:
+            value = max(float(psutil.virtual_memory().total), 0.0)
+            log_event(settings, "DEBUG", "windows.memory_total", queryMode="psutil", value=value)
+            return value
+        except Exception:
+            log_event(settings, "ERROR", "windows.psutil_memory_total_failed", traceback=safe_error_text(traceback.format_exc()))
     if IS_WINDOWS:
         rows, _query_mode = windows_query_rows(
             windows_base64_command(
@@ -851,6 +975,27 @@ def parse_socket_table(path):
     return result
 
 
+def parse_psutil_connections(connections):
+    result = {}
+    for connection in connections or []:
+        local_address = getattr(connection, "laddr", None)
+        pid = getattr(connection, "pid", None)
+        if getattr(connection, "status", None) != psutil.CONN_LISTEN:
+            continue
+        if getattr(connection, "type", None) != socket.SOCK_STREAM:
+            continue
+        if not local_address or pid is None:
+            continue
+        port = getattr(local_address, "port", None)
+        try:
+            port = int(port)
+        except (TypeError, ValueError):
+            continue
+        if 0 < port <= 65535:
+            result.setdefault(port, set()).add(text(pid))
+    return result
+
+
 def parse_windows_netstat(payload):
     result = {}
     for line in decode_bytes(payload).splitlines():
@@ -860,7 +1005,14 @@ def parse_windows_netstat(payload):
     return result
 
 
-def listening_ports():
+def listening_ports(settings=None):
+    if IS_WINDOWS and psutil is not None:
+        try:
+            ports = parse_psutil_connections(psutil.net_connections(kind="inet"))
+            log_event(settings, "DEBUG", "windows.listening_ports", queryMode="psutil", portCount=len(ports))
+            return ports
+        except Exception:
+            log_event(settings, "ERROR", "windows.psutil_listening_ports_failed", traceback=safe_error_text(traceback.format_exc()))
     if IS_WINDOWS:
         return parse_windows_netstat(run_windows_command(["netstat.exe", "-ano", "-p", "tcp"]))
     result = {}
@@ -1015,8 +1167,8 @@ def collect(settings):
     cache, refresh_success = ensure_cache(settings, now)
     cache_age = max(now - cache["refreshedAt"], 0.0)
     targets = [row for row in cache.get("targets", []) if isinstance(row, dict) and text(row.get("instanceId"))]
-    processes, sockets = list_processes(settings), listening_ports()
-    boot_ts, ticks, mem_total = boot_time(), clock_ticks(), memory_total_bytes()
+    processes, sockets = list_processes(settings), listening_ports(settings)
+    boot_ts, ticks, mem_total = boot_time(settings), clock_ticks(), memory_total_bytes(settings)
     log_event(settings, "DEBUG", "local.snapshot", targetCount=len(targets), processCount=len(processes), listeningPorts=sorted(sockets.keys()), bootTimestamp=boot_ts, clockTicks=ticks, memoryTotalBytes=mem_total)
     output = []
     for target in targets:
