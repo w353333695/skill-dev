@@ -106,6 +106,23 @@ class HttpTests(unittest.TestCase):
     def test_header_value_is_bytes_on_py2(self):
         with patch.object(edit, 'IS_PY2', True), patch.object(edit, 'unicode', str, create=True):
             self.assertIsInstance(edit._header_value(u'中文'), bytes)
+    def test_import_group_sends_utf8_body_through_http(self):
+        class _Response(object):
+            status_code = 200
+            content = b'{"code":0,"data":{"insert_count":0,"update_count":1,"failed_count":0,"data":[]}}'
+
+        rows = [{'instanceId': 'a1'}]
+        changes = [{'attr': 'memo', 'value': u'中文值', 'line': 1, 'raw': '"中文值"'}]
+        with patch.object(edit.requests, 'request', return_value=_Response()) as request, \
+             patch.object(edit, '_cmdb_base', return_value='http://127.0.0.1:8079'), \
+             patch.object(edit, '_org', return_value='8888'):
+            result = edit._import_group('HOST', rows, changes)
+        self.assertEqual(result['update'], 1)
+        body = request.call_args[1]['data']
+        self.assertIsInstance(body, bytes)
+        self.assertIn(u'中文值'.encode('utf-8'), body)
+        self.assertTrue(request.call_args[1]['headers']['Content-Type'].startswith('application/json'))
+
 
 
 class CmdbBaseTests(unittest.TestCase):

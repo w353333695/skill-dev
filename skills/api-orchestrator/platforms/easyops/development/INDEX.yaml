@@ -338,7 +338,7 @@ items:
     files: [scripts/tools/cmdb_instance_batch_edit.py, scripts/tools/tests/test_cmdb_instance_batch_edit.py]
     version: "1.0.3"
     history:
-      - {ver: "1.0.3", date: "2026-11-24", change: "网络层改用 requests，修复 py2 httplib 的 unicode header + bytes body 拼接 ASCII 解码错误；header 转 bytes；补 3 项 HTTP 层回归；38 项离线回归通过；172.30.0.103 agent 含中文 body 预览真跑通过"}
+      - {ver: "1.0.3", date: "2026-11-24", change: "网络层改用 requests，修复 py2 httplib 的 unicode header + bytes body 拼接 ASCII 解码错误；header 转 bytes；补 3 项 HTTP 层回归；39 项离线回归通过；172.30.0.103 agent 含中文 body 预览真跑通过"}
       - {ver: "1.0.2", date: "2026-11-24", change: "修复 agent 上 CMDB 地址解析优先级：agent conf 优先，避免注入 EASYOPS_CMDB_SERVICE_HOST 指向 127.0.0.1 导致 Connection refused；补 4 项解析优先级回归；35 项离线回归通过；172.30.0.103 agent 预览真跑通过"}
       - {ver: "1.0.1", date: "2026-11-24", change: "支持父模型递归展开与按模型属性动态选字段；HOST 无 name 时 133116 修复；31 项离线回归与工具包结构校验通过"}
       - {ver: "1.0.0", date: "2026-11-24", change: "初版开发：父模型递归展开/参数解析/属性校验/按实例实际模型分组写入/回读比对；30 项离线回归与工具包结构校验通过"}

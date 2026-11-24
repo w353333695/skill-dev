@@ -479,7 +479,7 @@ items:
     files: [工具_CMDB实例批量编辑_1.0.3.tar.gz]
     version: "1.0.3"
     history:
-      - {ver: "1.0.3", date: "2026-11-24", change: "网络层改用 requests（未安装时回退 httplib）；修复 py2 下 unicode header 与 bytes body 拼接触发 'ascii' codec can't decode；header 统一转 bytes、body 统一 utf-8 bytes；38 项离线回归；172.30.0.103 agent 含中文 body 预览真跑通过（http_client=requests）"}
+      - {ver: "1.0.3", date: "2026-11-24", change: "网络层改用 requests（未安装时回退 httplib）；修复 py2 下 unicode header 与 bytes body 拼接触发 'ascii' codec can't decode；header 统一转 bytes、body 统一 utf-8 bytes；39 项离线回归；172.30.0.103 agent 含中文 body 预览真跑通过（http_client=requests）"}
       - {ver: "1.0.2", date: "2026-11-24", change: "修复 agent 上优先使用注入 EASYOPS_CMDB_SERVICE_HOST 导致 Connection refused：CMDB 地址改为 agent conf 优先，其次 EASYOPS_CMDB_BACKEND_URL/EASYOPS_CMDB_HOST/EASYOPS_CMDB_SERVICE_HOST；报告工具版本号与包版本对齐；35 项离线回归；172.30.0.103 agent 预览真跑通过"}
       - {ver: "1.0.1", date: "2026-11-24", change: "支持父模型：递归展开全部子模型、按 (实际模型,instanceId) 去重合并、子模型缺属性/只读整组跳过并报告；查询字段按模型属性动态选择，兼容无 name 的模型（HOST 实测 133116 修复）"}
       - {ver: "1.0.0", date: "2026-11-24", change: "初版入库：CMDB 模型单选 + query JSON + attr_id=value（JSON 值）批量更新；预览/执行双动作、属性与只读校验、按实例实际模型分组写入、回读校验；sandboxRun=true"}
