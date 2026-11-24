@@ -476,14 +476,15 @@ items:
   - id: cmdb-instance-batch-edit-tool
     name: CMDB实例批量编辑工具包
     category: tools
-    files: [工具_CMDB实例批量编辑_1.0.2.tar.gz]
-    version: "1.0.2"
+    files: [工具_CMDB实例批量编辑_1.0.3.tar.gz]
+    version: "1.0.3"
     history:
+      - {ver: "1.0.3", date: "2026-11-24", change: "网络层改用 requests（未安装时回退 httplib）；修复 py2 下 unicode header 与 bytes body 拼接触发 'ascii' codec can't decode；header 统一转 bytes、body 统一 utf-8 bytes；38 项离线回归；172.30.0.103 agent 含中文 body 预览真跑通过（http_client=requests）"}
       - {ver: "1.0.2", date: "2026-11-24", change: "修复 agent 上优先使用注入 EASYOPS_CMDB_SERVICE_HOST 导致 Connection refused：CMDB 地址改为 agent conf 优先，其次 EASYOPS_CMDB_BACKEND_URL/EASYOPS_CMDB_HOST/EASYOPS_CMDB_SERVICE_HOST；报告工具版本号与包版本对齐；35 项离线回归；172.30.0.103 agent 预览真跑通过"}
       - {ver: "1.0.1", date: "2026-11-24", change: "支持父模型：递归展开全部子模型、按 (实际模型,instanceId) 去重合并、子模型缺属性/只读整组跳过并报告；查询字段按模型属性动态选择，兼容无 name 的模型（HOST 实测 133116 修复）"}
       - {ver: "1.0.0", date: "2026-11-24", change: "初版入库：CMDB 模型单选 + query JSON + attr_id=value（JSON 值）批量更新；预览/执行双动作、属性与只读校验、按实例实际模型分组写入、回读校验；sandboxRun=true"}
     scenario: 按 CMDB 模型（支持父模型，自动递归展开子模型）与 query 条件批量修改实例属性——变更数据每行 attr_id=value（value 为 JSON，字符串带双引号），预览列出命中实例与变更前后值，执行按 instanceId 批量 upsert 并回读校验
-    notes: "toolId f9e4d55236dc4971bd27555a11a31e65；versionId 9383e9e3ce43479e855d5b6a36182f18（1.0.2，$latest_development）；sandboxRun=true；已导入 172.30.0.90（org 8888）并核对 content 与包内 script 逐字节一致、4 个入参与 sandboxRun 生效；父模型自动递归展开全部子模型，按实例实际模型分组写入，子模型缺属性/只读时整组跳过并报告；入参 cmdb_model(cmdbInstance 单选 CMDB_MODEL@EASYOPS)/query(strings)/changes(strings)/action(enum 预览|执行，默认预览)；🔴执行拒绝空 query；禁止改 instanceId/_object_id/_id/_uuid 与 ctime/mtime/creator/modifier；单次上限 10000 条；导入 POST /tools/import（multipart file）或前端工具管理导入；源码 ../development/scripts/tools/cmdb_instance_batch_edit.py；🔴沙箱执行当前被平台环境阻塞：logic.tool.sandbox 解析到 172.30.0.90，但 org 8888 的 CMDB HOST 没有 ip=172.30.0.90 的实例，tool_service loadTargetHosts 直接报 133114；需在 CMDB 补该 HOST 或调整沙箱 nameservice 后才能真跑"
+    notes: "toolId f9e4d55236dc4971bd27555a11a31e65；versionId a29c7bfed3be4e56a9a4d8de8f380603（1.0.3，$latest_development）；sandboxRun=true；已导入 172.30.0.90（org 8888）并核对 content 与包内 script 逐字节一致；网络层优先 requests（agent 自带），未安装时回退 httplib；父模型自动递归展开全部子模型，按实例实际模型分组写入，子模型缺属性/只读时整组跳过并报告；入参 cmdb_model(cmdbInstance 单选 CMDB_MODEL@EASYOPS)/query(strings)/changes(strings)/action(enum 预览|执行，默认预览)；🔴执行拒绝空 query；禁止改 instanceId/_object_id/_id/_uuid 与 ctime/mtime/creator/modifier；单次上限 10000 条；导入 POST /tools/import（multipart file）或前端工具管理导入；源码 ../development/scripts/tools/cmdb_instance_batch_edit.py；🔴沙箱当前状态：CMDB 已有 ip=172.30.0.90 的 HOST（instanceId 661010814b1ed），但 _agentStatus=未安装/_agentHeartBeat=-1，执行报 gateway connect err: EOF；需在 172.30.0.90 安装并启动 agent 后才能沙箱真跑"
     added: "2026-11-24"
   - id: openapi-demo-tool
     name: OpenAPI请求示例工具包

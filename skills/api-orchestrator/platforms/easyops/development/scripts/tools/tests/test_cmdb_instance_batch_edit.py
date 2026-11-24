@@ -9,7 +9,7 @@ from unittest.mock import patch
 
 EASYOPS = Path(__file__).resolve().parents[4]
 SOURCE = EASYOPS / 'development' / 'scripts' / 'tools' / 'cmdb_instance_batch_edit.py'
-PACKAGE = EASYOPS / 'hub' / 'tools' / '工具_CMDB实例批量编辑_1.0.2.tar.gz'
+PACKAGE = EASYOPS / 'hub' / 'tools' / '工具_CMDB实例批量编辑_1.0.3.tar.gz'
 
 SPEC = importlib.util.spec_from_file_location('cmdb_instance_batch_edit', str(SOURCE))
 edit = importlib.util.module_from_spec(SPEC)
@@ -72,6 +72,40 @@ class ParseTests(unittest.TestCase):
     def test_parse_query_rejects_non_object(self):
         with self.assertRaises(ValueError):
             edit._parse_query('[1,2]')
+
+
+class HttpTests(unittest.TestCase):
+    """网络层回归：优先 requests，body 统一 utf-8 bytes，py2 header 转 bytes。"""
+
+    class _FakeResponse(object):
+        status_code = 200
+        content = b'{"code":0,"data":{"ok":true}}'
+
+    def test_http_uses_requests_with_utf8_bytes_body(self):
+        fake = self._FakeResponse()
+        body = {'query': {'memo': u'中文测试'}}
+        with patch.object(edit.requests, 'request', return_value=fake) as request:
+            data = edit._http('POST', '127.0.0.1', 8079, '/object/HOST/instance/_search',
+                              body=body, query={'page': 1}, headers={'org': '8888', 'user': 'easyops'},
+                              timeout=7)
+        self.assertEqual(data['code'], 0)
+        args, kwargs = request.call_args
+        self.assertEqual(args[0], 'POST')
+        self.assertEqual(args[1], 'http://127.0.0.1:8079/object/HOST/instance/_search')
+        self.assertEqual(kwargs['data'], json.dumps(body, ensure_ascii=False).encode('utf-8'))
+        self.assertEqual(kwargs['params'], {'page': 1})
+        self.assertEqual(kwargs['timeout'], 7)
+        self.assertTrue(kwargs['verify'])
+        self.assertEqual(kwargs['headers']['org'], '8888')
+
+    def test_http_requests_https_disables_verify(self):
+        with patch.object(edit.requests, 'request', return_value=self._FakeResponse()) as request:
+            edit._http('GET', '127.0.0.1', 443, '/object/HOST', scheme='https')
+        self.assertFalse(request.call_args[1]['verify'])
+
+    def test_header_value_is_bytes_on_py2(self):
+        with patch.object(edit, 'IS_PY2', True), patch.object(edit, 'unicode', str, create=True):
+            self.assertIsInstance(edit._header_value(u'中文'), bytes)
 
 
 class CmdbBaseTests(unittest.TestCase):

@@ -33,7 +33,7 @@
     PutStr("summary", ...) 一行汇总
 
 运行环境：EasyOps 沙箱（sandboxRun=true，内部 agent 执行，Python 2.7）/ 本地 Python 3。
-依赖：仅标准库；yaml 可选（读取 agent conf.yaml，缺失时用最小文本解析兜底）。
+依赖：requests 优先（EasyOps agent 自带）；未安装时回退标准库 httplib；yaml 可选。
 """
 import json
 import logging
@@ -53,6 +53,16 @@ try:
 except ImportError:
     yaml = None
 
+try:
+    import requests
+except ImportError:
+    requests = None
+else:
+    try:
+        requests.packages.urllib3.disable_warnings()
+    except Exception:
+        pass
+
 IS_PY2 = sys.version_info[0] == 2
 if IS_PY2:
     import httplib as _http_client
@@ -62,9 +72,10 @@ else:
     import urllib.parse as _url_parse
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s %(levelname)s %(message)s')
+logging.getLogger('urllib3').setLevel(logging.WARNING)
 LOGGER = logging.getLogger('cmdb_instance_batch_edit')
 
-TOOL_VERSION = '1.0.2'
+TOOL_VERSION = '1.0.3'
 CMDB_PORT = 8079
 MODEL_OBJECT_ID = 'CMDB_MODEL@EASYOPS'
 PAGE_SIZE = 1000
@@ -243,12 +254,58 @@ def _json_bytes(value):
     return text.encode('utf-8')
 
 
+def _header_value(value):
+    """py2 下 requests/httplib 的 header 必须是 bytes，避免 unicode 与 bytes body 拼接触发 ASCII 解码。"""
+    text = _text(value)
+    if IS_PY2:
+        return text.encode('utf-8')
+    return text
+
+
 def _http(method, host, port, path, body=None, query=None, headers=None, timeout=30, scheme='http'):
+    """优先 requests；未安装时回退标准库 httplib（header 转 bytes，body 统一 utf-8 bytes）。"""
+    if requests is not None:
+        return _http_requests(method, host, port, path, body=body, query=query,
+                              headers=headers, timeout=timeout, scheme=scheme)
+    return _http_stdlib(method, host, port, path, body=body, query=query,
+                        headers=headers, timeout=timeout, scheme=scheme)
+
+
+def _http_requests(method, host, port, path, body=None, query=None, headers=None, timeout=30, scheme='http'):
+    url = '%s://%s:%s%s' % (scheme, host, port, path)
+    request_headers = {}
+    for key, value in (headers or {}).items():
+        request_headers[_text(key)] = _header_value(value)
+    payload = _json_bytes(body) if body is not None else None
+    response = requests.request(method, url, params=query or None, data=payload,
+                                headers=request_headers, timeout=timeout,
+                                verify=scheme.lower() != 'https')
+    raw = response.content
+    text = raw.decode('utf-8', 'replace') if isinstance(raw, bytes) else raw
+    try:
+        data = json.loads(text)
+    except Exception:
+        data = text
+    if response.status_code >= 400:
+        raise RuntimeError(u'HTTP %s %s: %s' % (response.status_code, path, _safe_error(data)))
+    if isinstance(data, dict) and data.get('code') not in (None, 0, '0'):
+        raise RuntimeError(u'API code %s: %s' % (data.get('code'), _safe_error(data)))
+    return data
+
+
+def _http_stdlib(method, host, port, path, body=None, query=None, headers=None, timeout=30, scheme='http'):
     params = query or {}
     if params:
         encoded = urllib.urlencode(params) if IS_PY2 else _url_parse.urlencode(params)
         path += ('&' if '?' in path else '?') + encoded
     payload = _json_bytes(body) if body is not None else None
+    raw_headers = {}
+    for key, value in (headers or {}).items():
+        key_text = _text(key)
+        if IS_PY2:
+            raw_headers[key_text.encode('utf-8')] = _header_value(value)
+        else:
+            raw_headers[key_text] = _header_value(value)
     connection = _http_client.HTTPSConnection if scheme.lower() == 'https' else _http_client.HTTPConnection
     if scheme.lower() == 'https' and ssl is not None:
         try:
@@ -258,7 +315,7 @@ def _http(method, host, port, path, body=None, query=None, headers=None, timeout
     else:
         conn = connection(host, port, timeout=timeout)
     try:
-        conn.request(method, path, payload, headers or {})
+        conn.request(method, path, payload, raw_headers)
         response = conn.getresponse()
         raw = response.read()
         status = response.status
@@ -872,6 +929,7 @@ def put_str(key, value):
 
 
 def main():
+    LOGGER.info('[main] http_client=%s', 'requests' if requests is not None else 'httplib')
     action = _text(_input('action', u'预览')).strip() or u'预览'
     if action not in (u'预览', u'执行'):
         raise ValueError(u'动作只支持 预览/执行，当前：%s' % action)

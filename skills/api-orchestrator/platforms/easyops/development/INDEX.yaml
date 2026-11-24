@@ -336,13 +336,14 @@ items:
     name: CMDB实例批量编辑脚本源码与离线回归
     category: scripts
     files: [scripts/tools/cmdb_instance_batch_edit.py, scripts/tools/tests/test_cmdb_instance_batch_edit.py]
-    version: "1.0.2"
+    version: "1.0.3"
     history:
+      - {ver: "1.0.3", date: "2026-11-24", change: "网络层改用 requests，修复 py2 httplib 的 unicode header + bytes body 拼接 ASCII 解码错误；header 转 bytes；补 3 项 HTTP 层回归；38 项离线回归通过；172.30.0.103 agent 含中文 body 预览真跑通过"}
       - {ver: "1.0.2", date: "2026-11-24", change: "修复 agent 上 CMDB 地址解析优先级：agent conf 优先，避免注入 EASYOPS_CMDB_SERVICE_HOST 指向 127.0.0.1 导致 Connection refused；补 4 项解析优先级回归；35 项离线回归通过；172.30.0.103 agent 预览真跑通过"}
       - {ver: "1.0.1", date: "2026-11-24", change: "支持父模型递归展开与按模型属性动态选字段；HOST 无 name 时 133116 修复；31 项离线回归与工具包结构校验通过"}
       - {ver: "1.0.0", date: "2026-11-24", change: "初版开发：父模型递归展开/参数解析/属性校验/按实例实际模型分组写入/回读比对；30 项离线回归与工具包结构校验通过"}
     scenario: CMDB 实例批量编辑工具源码（父模型递归展开、预览/执行、attr_id=value 的 JSON 值、instanceId 批量 upsert）
-    notes: "成品在../hub/tools/工具_CMDB实例批量编辑_1.0.2.tar.gz；已导入 172.30.0.90（org 8888）；脚本 py2/3 兼容，lib2to3 语法校验通过；172.30.0.103 agent 预览真跑通过；沙箱执行因 CMDB 缺 ip=172.30.0.90 的 HOST 实例报 133114，需平台侧补记录"
+    notes: "成品在../hub/tools/工具_CMDB实例批量编辑_1.0.3.tar.gz；已导入 172.30.0.90（org 8888）；脚本 py2/3 兼容，lib2to3 语法校验通过；网络层优先 requests、回退 httplib；172.30.0.103 agent 含中文 body 预览真跑通过；沙箱当前 HOST 已存在但 agent 未安装（gateway connect err: EOF），需平台侧装 agent"
     added: "2026-11-24"
   - id: monitor-kit-preflight-validator
     name: 监控套件契约校验器
