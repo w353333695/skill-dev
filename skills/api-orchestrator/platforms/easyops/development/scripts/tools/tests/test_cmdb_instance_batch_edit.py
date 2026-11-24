@@ -9,7 +9,7 @@ from unittest.mock import patch
 
 EASYOPS = Path(__file__).resolve().parents[4]
 SOURCE = EASYOPS / 'development' / 'scripts' / 'tools' / 'cmdb_instance_batch_edit.py'
-PACKAGE = EASYOPS / 'hub' / 'tools' / '工具_CMDB实例批量编辑_1.0.0.tar.gz'
+PACKAGE = EASYOPS / 'hub' / 'tools' / '工具_CMDB实例批量编辑_1.0.1.tar.gz'
 
 SPEC = importlib.util.spec_from_file_location('cmdb_instance_batch_edit', str(SOURCE))
 edit = importlib.util.module_from_spec(SPEC)
@@ -142,9 +142,26 @@ class ValidationTests(unittest.TestCase):
                 return [{'instanceId': 'b1', '_object_id': 'CHILD'}], 1
             return [], 0
 
+        changes = [{'attr': 'memo', 'value': 1, 'line': 1, 'raw': '1'}]
+        attr_map = {'PARENT': ({'memo': {'name': u'备注', 'readonly': False, 'type': 'str'}}, set()),
+                    'CHILD': ({'memo': {'name': u'备注', 'readonly': False, 'type': 'str'}}, set())}
         with patch.object(edit, '_search_instances', side_effect=fake_search):
-            rows = edit._search_models(['PARENT', 'CHILD'], {}, ['instanceId', '_object_id'])
+            rows = edit._search_models(['PARENT', 'CHILD'], {}, changes, attr_map)
         self.assertEqual([row['instanceId'] for row in rows], ['a1', 'b1'])
+
+    def test_search_fields_picks_existing_display_attr(self):
+        changes = [{'attr': 'memo', 'value': 1, 'line': 1, 'raw': '1'}]
+        host_map = {'HOST': ({'hostname': {'name': u'主机名', 'readonly': False, 'type': 'str'},
+                              'memo': {'name': u'备注', 'readonly': False, 'type': 'str'}}, set())}
+        self.assertEqual(edit._search_fields('HOST', changes, host_map),
+                         ['instanceId', '_object_id', 'hostname', 'memo'])
+        name_map = {'APP': ({'name': {'name': u'名称', 'readonly': False, 'type': 'str'},
+                             'memo': {'name': u'备注', 'readonly': False, 'type': 'str'}}, set())}
+        self.assertEqual(edit._search_fields('APP', changes, name_map),
+                         ['instanceId', '_object_id', 'name', 'memo'])
+        unknown_map = {'HOST': (None, None)}
+        self.assertEqual(edit._search_fields('HOST', changes, unknown_map),
+                         ['instanceId', '_object_id', 'memo'])
 
     def test_filter_groups_skips_models_missing_or_readonly_attr(self):
         attr_map = {
@@ -222,8 +239,9 @@ class WriteTests(unittest.TestCase):
                 rows.append({'instanceId': 'a2', 'memo': u'旧'})
             return rows, len(rows)
 
+        attr_map = {'HOST': ({'memo': {'name': u'备注', 'readonly': False, 'type': 'str'}}, set())}
         with patch.object(edit, '_search_instances', side_effect=fake_search):
-            result = edit._readback(groups, changes)
+            result = edit._readback(groups, changes, attr_map)
         self.assertEqual(result['ok'], 1)
         self.assertEqual(result['mismatch'], 1)
         self.assertEqual(result['missing'], 1)

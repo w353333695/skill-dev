@@ -506,11 +506,29 @@ def _model_attr_map(models):
     return result
 
 
-def _search_models(models, query, fields):
+def _search_fields(model_id, changes, attr_map):
+    """按模型属性定义选字段：展示字段取 name/deviceName/hostname/ip 中第一个存在的，
+    变更字段只请求该模型确实拥有的，避免请求不存在的 name 关系导致 133116。"""
+    attrs, relation_ids = attr_map.get(model_id, (None, None))
+    fields = ['instanceId', '_object_id']
+    if attrs is not None:
+        for display in ('name', 'deviceName', 'hostname', 'ip'):
+            if display in attrs:
+                fields.append(display)
+                break
+    for entry in changes:
+        attr = entry['attr']
+        if attrs is None or attr in attrs or attr in relation_ids:
+            fields.append(attr)
+    return fields
+
+
+def _search_models(models, query, changes, attr_map):
     """逐模型搜索并按 (实际模型, instanceId) 去重，父模型与子模型重复命中只保留一条。"""
     rows = []
     seen = set()
     for model_id in models:
+        fields = _search_fields(model_id, changes, attr_map)
         batch, _ = _search_instances(model_id, query, fields)
         for row in batch:
             instance_id = _text(row.get('instanceId') or row.get('id'))
@@ -589,7 +607,8 @@ def _filter_groups(groups, changes, attr_map):
 
 
 def _instance_label(row):
-    name = row.get('name') or row.get('deviceName') or row.get('objectId') or ''
+    name = (row.get('name') or row.get('deviceName') or row.get('hostname')
+            or row.get('ip') or row.get('objectId') or '')
     return _text(name)
 
 
@@ -693,11 +712,14 @@ def _import_group(model_id, rows, changes):
     return result
 
 
-def _readback(groups, changes):
+def _readback(groups, changes, attr_map):
     """按 instanceId 回读变更字段并比对；返回 {ok,mismatch,missing,details}。"""
     result = {'ok': 0, 'mismatch': 0, 'missing': 0, 'details': []}
-    fields = ['instanceId'] + [entry['attr'] for entry in changes]
     for model_id, rows in groups:
+        attrs, relation_ids = attr_map.get(model_id, (None, None))
+        fields = ['instanceId'] + [entry['attr'] for entry in changes
+                                   if attrs is None or entry['attr'] in attrs
+                                   or entry['attr'] in relation_ids]
         ids = [_text(row.get('instanceId') or row.get('id')) for row in rows]
         actual = {}
         for start in range(0, len(ids), BATCH_SIZE):
@@ -858,8 +880,7 @@ def main():
     if action == u'执行' and not query:
         raise ValueError(u'执行动作拒绝空 query：空条件会命中模型全部实例。请填写过滤条件；只想评估影响面请用「预览」。')
 
-    fields = ['instanceId', 'name', '_object_id'] + [entry['attr'] for entry in changes]
-    rows = _search_models(models, query, fields)
+    rows = _search_models(models, query, changes, attr_map)
     if len(rows) >= MAX_INSTANCES:
         raise ValueError(u'查询命中数达到单次上限 %d 条，已中止。请缩小查询范围。' % MAX_INSTANCES)
     all_groups = _group_rows(rows, model_id)
@@ -881,7 +902,7 @@ def main():
     for group_model, group_rows in groups:
         LOGGER.info('[main] import model=%s instances=%d', _text(group_model), len(group_rows))
         import_results.append(_import_group(group_model, group_rows, changes))
-    readback = _readback(groups, changes)
+    readback = _readback(groups, changes, attr_map)
     report, total_insert, total_update, total_failed, insert_warn = _execute_report(
         model_id, model_name, query, changes, rows, groups, import_results, readback,
         len(models), skipped)
