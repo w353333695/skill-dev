@@ -101,21 +101,65 @@ class ValidationTests(unittest.TestCase):
             {'attr': 'locked', 'value': 2, 'line': 3, 'raw': '2'},
             {'attr': 'memo', 'value': 3, 'line': 4, 'raw': '3'},
         ]
-        with patch.object(edit, '_model_attrs', return_value=(attrs, set())):
-            errors, _, _ = edit._validate_changes('HOST', changes)
+        errors = edit._validate_changes(changes, {'HOST': (attrs, set())})
         joined = '\n'.join(errors)
         self.assertIn('instanceId', joined)
-        self.assertIn('不属于模型', joined)
+        self.assertIn('不属于所选模型及其子模型', joined)
         self.assertIn('只读', joined)
         self.assertNotIn('memo', joined)
 
+    def test_validate_changes_allows_attr_defined_on_child(self):
+        changes = [{'attr': 'child_only', 'value': 1, 'line': 1, 'raw': '1'}]
+        attr_map = {
+            'PARENT': ({'memo': {'name': u'备注', 'readonly': False, 'type': 'str'}}, set()),
+            'CHILD': ({'child_only': {'name': u'子属性', 'readonly': False, 'type': 'str'}}, set()),
+        }
+        self.assertEqual(edit._validate_changes(changes, attr_map), [])
+
     def test_validate_changes_skips_model_check_when_detail_unavailable(self):
         changes = [{'attr': 'whatever', 'value': 1, 'line': 1, 'raw': '1'}]
-        with patch.object(edit, '_model_attrs', side_effect=RuntimeError('boom')):
-            errors, attrs, relation_ids = edit._validate_changes('HOST', changes)
-        self.assertEqual(errors, [])
-        self.assertEqual(attrs, {})
-        self.assertEqual(relation_ids, set())
+        self.assertEqual(edit._validate_changes(changes, {'HOST': (None, None)}), [])
+
+    def test_descendants_recurses_children_bfs(self):
+        def fake_cmdb(method, path, body=None, query=None):
+            parent = (query or {}).get('parentObjectId')
+            children = {
+                'PARENT': [{'objectId': 'CHILD_A'}, {'objectId': 'CHILD_B'}],
+                'CHILD_A': [{'objectId': 'GRANDCHILD'}],
+            }.get(parent, [])
+            return {'code': 0, 'data': {'list': children, 'total': len(children)}}
+
+        with patch.object(edit, 'cmdb', side_effect=fake_cmdb):
+            self.assertEqual(edit._descendants('PARENT'),
+                             ['PARENT', 'CHILD_A', 'CHILD_B', 'GRANDCHILD'])
+
+    def test_search_models_dedupes_parent_and_child(self):
+        def fake_search(object_id, query=None, fields=None):
+            if object_id == 'PARENT':
+                return ([{'instanceId': 'a1', '_object_id': 'PARENT'},
+                          {'instanceId': 'b1', '_object_id': 'CHILD'}], 2)
+            if object_id == 'CHILD':
+                return [{'instanceId': 'b1', '_object_id': 'CHILD'}], 1
+            return [], 0
+
+        with patch.object(edit, '_search_instances', side_effect=fake_search):
+            rows = edit._search_models(['PARENT', 'CHILD'], {}, ['instanceId', '_object_id'])
+        self.assertEqual([row['instanceId'] for row in rows], ['a1', 'b1'])
+
+    def test_filter_groups_skips_models_missing_or_readonly_attr(self):
+        attr_map = {
+            'PARENT': ({'memo': {'name': u'备注', 'readonly': False, 'type': 'str'}}, set()),
+            'CHILD': ({'other': {'name': u'其他', 'readonly': False, 'type': 'str'}}, set()),
+            'LOCKED': ({'memo': {'name': u'备注', 'readonly': True, 'type': 'str'}}, set()),
+        }
+        changes = [{'attr': 'memo', 'value': 1, 'line': 1, 'raw': '1'}]
+        groups = [('PARENT', [{'instanceId': 'a1'}]), ('CHILD', [{'instanceId': 'b1'}]),
+                  ('LOCKED', [{'instanceId': 'c1'}])]
+        kept, skipped = edit._filter_groups(groups, changes, attr_map)
+        self.assertEqual([model for model, _ in kept], ['PARENT'])
+        self.assertEqual([item['model'] for item in skipped], ['CHILD', 'LOCKED'])
+        self.assertIn('缺少属性 memo', skipped[0]['reason'])
+        self.assertIn('只读', skipped[1]['reason'])
 
 
 class WriteTests(unittest.TestCase):
@@ -219,6 +263,7 @@ class MainTests(unittest.TestCase):
         edit.changes = changes
         edit.action = action
         with patch.object(edit, '_resolve_model', return_value=('HOST', u'主机')), \
+             patch.object(edit, '_descendants', return_value=['HOST']), \
              patch.object(edit, '_model_attrs', return_value=({'memo': {'name': u'备注', 'readonly': False, 'type': 'str'}}, set())), \
              patch.object(edit, '_search_instances', side_effect=fake_search), \
              patch.object(edit, 'cmdb', side_effect=fake_cmdb), \
@@ -261,6 +306,31 @@ class MainTests(unittest.TestCase):
         code, captured = self._run(u'预览', [], query='')
         self.assertEqual(code, 0)
         self.assertIn(u'模型下全部实例', captured['report'])
+
+    def test_preview_includes_parent_and_child_models(self):
+        rows = [{'instanceId': 'a1', '_object_id': 'HOST', 'memo': u'旧'},
+                {'instanceId': 'b1', '_object_id': 'HOST_CHILD', 'memo': u'旧'}]
+        fake_search, fake_cmdb = self._patch_platform(rows)
+        attr_map = {
+            'HOST': ({'memo': {'name': u'备注', 'readonly': False, 'type': 'str'}}, set()),
+            'HOST_CHILD': ({'memo': {'name': u'备注', 'readonly': False, 'type': 'str'}}, set()),
+        }
+        captured = {}
+        edit.cmdb_model = 'm1'
+        edit.query = '{"ip":{"$like":"10.1.%"}}'
+        edit.changes = 'memo="新"'
+        edit.action = u'预览'
+        with patch.object(edit, '_resolve_model', return_value=('HOST', u'主机')), \
+             patch.object(edit, '_descendants', return_value=['HOST', 'HOST_CHILD']), \
+             patch.object(edit, '_model_attrs', side_effect=lambda model: attr_map[model]), \
+             patch.object(edit, '_search_instances', side_effect=fake_search), \
+             patch.object(edit, 'cmdb', side_effect=fake_cmdb), \
+             patch.object(edit, 'put_str', side_effect=lambda key, value: captured.update({key: value})):
+            code = edit.main()
+        self.assertEqual(code, 0)
+        self.assertIn(u'含 1 个子模型', captured['report'])
+        self.assertIn(u'HOST_CHILD', captured['report'])
+        self.assertIn(u'命中实例：2 条', captured['report'])
 
 
 class PackageTests(unittest.TestCase):

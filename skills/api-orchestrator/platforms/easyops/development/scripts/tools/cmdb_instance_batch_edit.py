@@ -3,6 +3,8 @@
 
 功能：
     按「CMDB 模型 + query 查询条件」筛选实例，再把「变更数据」统一写入命中的实例。
+    支持父模型：递归展开全部子模型，父模型与子模型实例一并处理；按实例实际模型分组写入，
+    子模型缺少属性或属性只读时整组跳过并在报告中说明。
     变更数据每行一条 attr_id=value，value 必须是合法 JSON（字符串带双引号）：
         memo="新备注"
         port=8080
@@ -22,7 +24,7 @@
 安全约束：
     · 执行动作拒绝空 query（空 query 会命中模型全部实例）；预览允许，用于评估影响面。
     · 禁止修改 instanceId/_object_id/_id/_uuid 与 ctime/mtime/creator/modifier 等系统字段。
-    · 写入前按模型定义校验属性 ID 与只读属性；按实例实际 _object_id 分组写入。
+    · 写入前按「所选模型 + 全部子模型」校验属性 ID 与只读属性；按实例实际 _object_id 分组写入。
     · 单次最多处理 10000 条实例，超出直接中止，要求缩小查询范围。
     · 写入后按 instanceId 回读，逐属性比对期望值，输出不一致明细。
 
@@ -68,6 +70,7 @@ MODEL_OBJECT_ID = 'CMDB_MODEL@EASYOPS'
 PAGE_SIZE = 1000
 MAX_INSTANCES = 10000
 BATCH_SIZE = 500
+MODEL_PAGE_SIZE = 300
 PREVIEW_LIMIT = 100
 FORBIDDEN_ATTRS = ('instanceId', '_object_id', '_id', '_uuid', 'ctime', 'mtime', 'creator', 'modifier')
 ATTR_ID_RE = re.compile(r'^[0-9A-Za-z_]+$')
@@ -175,6 +178,7 @@ def _port(value, default):
 
 
 _AGENT_CONFIG_CACHE = None
+_MODEL_ATTR_CACHE = {}
 
 
 def _agent_config_host_org():
@@ -458,26 +462,130 @@ def _model_attrs(model_id):
     return attrs, relation_ids
 
 
-def _validate_changes(model_id, changes):
-    """返回 (errors, attrs, relation_ids)。模型定义读取失败时跳过属性校验。"""
+def _descendants(model_id):
+    """递归展开父模型的全部子模型（BFS、去重，父模型在前）。"""
+    result = [model_id]
+    seen = set([model_id])
+    queue = [model_id]
+    while queue:
+        parent = queue.pop(0)
+        page = 1
+        while True:
+            try:
+                response = cmdb('GET', '/object_basic', query={
+                    'parentObjectId': parent, 'page': page, 'pageSize': MODEL_PAGE_SIZE})
+                batch = _list(response)
+            except Exception as error:
+                LOGGER.warning(u'[_descendants] 查询子模型失败 parent=%s: %s',
+                               _text(parent), _text(error))
+                batch = []
+            for child in batch:
+                child_id = _text(child.get('objectId') or child.get('id') or child.get('object_id'))
+                if child_id and child_id not in seen:
+                    seen.add(child_id)
+                    result.append(child_id)
+                    queue.append(child_id)
+            if len(batch) < MODEL_PAGE_SIZE or page >= 100:
+                break
+            page += 1
+    return result
+
+
+def _model_attr_map(models):
+    """批量读取模型属性定义；返回 {model_id: (attrs, relation_ids)}，读取失败为 (None, None)。"""
+    result = {}
+    for model_id in models:
+        if model_id not in _MODEL_ATTR_CACHE:
+            try:
+                _MODEL_ATTR_CACHE[model_id] = _model_attrs(model_id)
+            except Exception as error:
+                LOGGER.warning(u'[_model_attr_map] 读取模型 %s 属性定义失败，跳过该模型校验: %s',
+                               _text(model_id), _text(error))
+                _MODEL_ATTR_CACHE[model_id] = (None, None)
+        result[model_id] = _MODEL_ATTR_CACHE[model_id]
+    return result
+
+
+def _search_models(models, query, fields):
+    """逐模型搜索并按 (实际模型, instanceId) 去重，父模型与子模型重复命中只保留一条。"""
+    rows = []
+    seen = set()
+    for model_id in models:
+        batch, _ = _search_instances(model_id, query, fields)
+        for row in batch:
+            instance_id = _text(row.get('instanceId') or row.get('id'))
+            if not instance_id:
+                continue
+            actual_model = _text(row.get('_object_id') or model_id)
+            key = (actual_model, instance_id)
+            if key in seen:
+                continue
+            seen.add(key)
+            item = dict(row)
+            item['_object_id'] = actual_model
+            rows.append(item)
+        if len(rows) >= MAX_INSTANCES:
+            raise ValueError(u'查询命中数达到单次上限 %d 条，已中止。请缩小查询范围。' % MAX_INSTANCES)
+    return rows
+
+
+def _validate_changes(changes, attr_map):
+    """按「所选模型 + 全部子模型」的属性并集校验；返回错误列表。"""
     errors = []
     for entry in changes:
         if entry['attr'] in FORBIDDEN_ATTRS:
             errors.append(u'属性 %s 不允许通过本工具修改（主键/系统元数据）' % entry['attr'])
-    try:
-        attrs, relation_ids = _model_attrs(model_id)
-    except Exception as error:
-        LOGGER.warning(u'[_validate_changes] 读取模型 %s 属性定义失败，跳过属性校验: %s',
-                       _text(model_id), _text(error))
-        return errors, {}, set()
+    if not [attrs for attrs, _ in attr_map.values() if attrs]:
+        return errors
     for entry in changes:
         attr = entry['attr']
-        if attr in attrs:
-            if attrs[attr]['readonly']:
-                errors.append(u'属性 %s（%s）是只读属性，不允许修改' % (attr, attrs[attr]['name']))
-        elif attr not in relation_ids:
-            errors.append(u'属性 %s 不属于模型 %s（请核对属性 ID，或当前用户无该字段权限）' % (attr, model_id))
-    return errors, attrs, relation_ids
+        found = False
+        readonly_everywhere = True
+        for attrs, relation_ids in attr_map.values():
+            if attrs is None:
+                continue
+            if attr in attrs:
+                found = True
+                if not attrs[attr]['readonly']:
+                    readonly_everywhere = False
+            elif attr in relation_ids:
+                found = True
+                readonly_everywhere = False
+        if not found:
+            errors.append(u'属性 %s 不属于所选模型及其子模型（请核对属性 ID，或当前用户无该字段权限）' % attr)
+        elif readonly_everywhere:
+            errors.append(u'属性 %s 在所有候选模型中都是只读属性，不允许修改' % attr)
+    return errors
+
+
+def _filter_groups(groups, changes, attr_map):
+    """逐子模型检查属性是否可用；缺属性/只读的子模型整组跳过并返回原因。"""
+    kept = []
+    skipped = []
+    for model_id, rows in groups:
+        attrs, relation_ids = attr_map.get(model_id, (None, None))
+        if attrs is None:
+            kept.append((model_id, rows))
+            continue
+        missing = []
+        readonly = []
+        for entry in changes:
+            attr = entry['attr']
+            if attr in attrs:
+                if attrs[attr]['readonly']:
+                    readonly.append(u'%s（%s）' % (attr, attrs[attr]['name']))
+            elif attr not in relation_ids:
+                missing.append(attr)
+        if missing or readonly:
+            reasons = []
+            if missing:
+                reasons.append(u'缺少属性 %s' % u'、'.join(missing))
+            if readonly:
+                reasons.append(u'只读属性 %s' % u'、'.join(readonly))
+            skipped.append({'model': model_id, 'count': len(rows), 'reason': u'；'.join(reasons)})
+        else:
+            kept.append((model_id, rows))
+    return kept, skipped
 
 
 def _instance_label(row):
@@ -486,7 +594,7 @@ def _instance_label(row):
 
 
 def _group_rows(rows, default_model):
-    """按实例实际 _object_id 分组（父模型搜索会带出子模型实例）。返回 [(model_id, [rows])]。"""
+    """按实例实际 _object_id 分组。返回 [(model_id, [rows])]。"""
     grouped = {}
     order = []
     seen = set()
@@ -630,24 +738,32 @@ def _readback(groups, changes):
     return result
 
 
-def _common_header(action, model_id, model_name, query, changes, matched, groups):
+def _common_header(action, model_id, model_name, query, changes, matched, groups,
+                   model_count=1, skipped=None):
     lines = []
     lines.append(u'CMDB 实例批量编辑报告（%s）' % action)
     lines.append(u'工具版本：%s    执行时间：%s' % (TOOL_VERSION, time.strftime('%Y-%m-%d %H:%M:%S')))
     lines.append(u'模型：%s（%s）' % (model_id, model_name))
+    if model_count > 1:
+        lines.append(u'模型范围：含 %d 个子模型（父模型与子模型实例一并处理）' % (model_count - 1))
     lines.append(u'查询条件：%s' % (_format_value(query) if query else u'<空，模型下全部实例>'))
     lines.append(u'变更字段（%d 个）：%s' % (len(changes), u'、'.join(
         [u'%s=%s' % (entry['attr'], _format_value(entry['value'])) for entry in changes])))
-    lines.append(u'命中实例：%d 条' % matched)
+    skipped_count = sum([item['count'] for item in (skipped or [])])
+    lines.append(u'命中实例：%d 条' % (matched + skipped_count))
+    if skipped:
+        lines.append(u'跳过子模型：%s' % u'；'.join(
+            [u'%s %d 条（%s）' % (item['model'], item['count'], item['reason']) for item in skipped]))
     if len(groups) > 1:
         lines.append(u'按实际模型分组：%s' % u'，'.join(
             [u'%s=%d' % (model_id_, len(rows)) for model_id_, rows in groups]))
     return lines
 
 
-def _preview_report(model_id, model_name, query, changes, rows, groups):
+def _preview_report(model_id, model_name, query, changes, rows, groups, model_count=1, skipped=None):
     matched = sum([len(group_rows) for _, group_rows in groups])
-    lines = _common_header(u'预览', model_id, model_name, query, changes, matched, groups)
+    lines = _common_header(u'预览', model_id, model_name, query, changes, matched, groups,
+                           model_count, skipped)
     lines.append(u'')
     lines.append(u'实例明细（仅展示前 %d 条，共 %d 条）：' % (PREVIEW_LIMIT, matched))
     shown = 0
@@ -672,9 +788,11 @@ def _preview_report(model_id, model_name, query, changes, rows, groups):
     return u'\n'.join(lines)
 
 
-def _execute_report(model_id, model_name, query, changes, rows, groups, import_results, readback):
+def _execute_report(model_id, model_name, query, changes, rows, groups, import_results, readback,
+                    model_count=1, skipped=None):
     matched = sum([len(group_rows) for _, group_rows in groups])
-    lines = _common_header(u'执行', model_id, model_name, query, changes, matched, groups)
+    lines = _common_header(u'执行', model_id, model_name, query, changes, matched, groups,
+                           model_count, skipped)
     lines.append(u'')
     lines.append(u'执行结果：')
     if matched == 0:
@@ -732,25 +850,29 @@ def main():
     model_id, model_name = _resolve_model(_input('cmdb_model'))
     query = _parse_query(_input('query'))
     changes = _parse_changes(_input('changes'))
-    errors, attrs, relation_ids = _validate_changes(model_id, changes)
+    models = _descendants(model_id)
+    attr_map = _model_attr_map(models)
+    errors = _validate_changes(changes, attr_map)
     if errors:
         raise ValueError(u'变更数据校验失败：\n  ' + u'\n  '.join(errors))
     if action == u'执行' and not query:
         raise ValueError(u'执行动作拒绝空 query：空条件会命中模型全部实例。请填写过滤条件；只想评估影响面请用「预览」。')
 
     fields = ['instanceId', 'name', '_object_id'] + [entry['attr'] for entry in changes]
-    rows, total = _search_instances(model_id, query, fields)
-    if isinstance(total, int) and total > MAX_INSTANCES:
-        raise ValueError(u'查询命中 %d 条，超过单次上限 %d 条，已中止。请缩小查询范围。' % (total, MAX_INSTANCES))
+    rows = _search_models(models, query, fields)
     if len(rows) >= MAX_INSTANCES:
         raise ValueError(u'查询命中数达到单次上限 %d 条，已中止。请缩小查询范围。' % MAX_INSTANCES)
-    groups = _group_rows(rows, model_id)
+    all_groups = _group_rows(rows, model_id)
+    groups, skipped = _filter_groups(all_groups, changes, attr_map)
     matched = sum([len(group_rows) for _, group_rows in groups])
-    LOGGER.info('[main] action=%s model=%s query=%s changes=%d matched=%d groups=%d',
-                _text(action), _text(model_id), _text(_format_value(query)), len(changes), matched, len(groups))
+    LOGGER.info('[main] action=%s model=%s children=%d query=%s changes=%d matched=%d skipped=%d groups=%d',
+                _text(action), _text(model_id), len(models) - 1,
+                _text(_format_value(query)), len(changes), matched,
+                sum([item['count'] for item in skipped]), len(groups))
 
     if action == u'预览':
-        report = _preview_report(model_id, model_name, query, changes, rows, groups)
+        report = _preview_report(model_id, model_name, query, changes, rows, groups,
+                                 len(models), skipped)
         put_str('report', report)
         put_str('summary', _summary(action, model_id, matched))
         return 0
@@ -761,7 +883,8 @@ def main():
         import_results.append(_import_group(group_model, group_rows, changes))
     readback = _readback(groups, changes)
     report, total_insert, total_update, total_failed, insert_warn = _execute_report(
-        model_id, model_name, query, changes, rows, groups, import_results, readback)
+        model_id, model_name, query, changes, rows, groups, import_results, readback,
+        len(models), skipped)
     put_str('report', report)
     put_str('summary', _summary(action, model_id, matched, total_update, total_failed))
     if total_failed > 0 or insert_warn:

@@ -477,9 +477,9 @@ items:
     files: [工具_CMDB实例批量编辑_1.0.0.tar.gz]
     version: "1.0.0"
     history:
-      - {ver: "1.0.0", date: "2026-11-24", change: "初版入库：CMDB 模型单选 + query JSON + attr_id=value（JSON 值）批量更新；预览/执行双动作、属性与只读校验、按实例实际模型分组写入、回读校验；sandboxRun=true"}
-    scenario: 按 CMDB 模型与 query 条件批量修改实例属性——变更数据每行 attr_id=value（value 为 JSON，字符串带双引号），预览列出命中实例与变更前后值，执行按 instanceId 批量 upsert 并回读校验
-    notes: "toolId f9e4d55236dc4971bd27555a11a31e65；versionId 5fa9dc4e13fd45348ace552a2973f6df；sandboxRun=true（沙箱内部 agent 执行，读 agent conf 定位 CMDB）；入参 cmdb_model(cmdbInstance 单选 CMDB_MODEL@EASYOPS)/query(strings)/changes(strings)/action(enum 预览|执行，默认预览)；🔴执行拒绝空 query；禁止改 instanceId/_object_id/_id/_uuid 与 ctime/mtime/creator/modifier；单次上限 10000 条；导入 POST /tools/import（multipart file）或前端工具管理导入；源码 ../development/scripts/tools/cmdb_instance_batch_edit.py；本沙箱不可达 192.168.110.24，未做平台导入与真跑"
+      - {ver: "1.0.0", date: "2026-11-24", change: "初版入库：CMDB 模型单选（支持父模型递归展开全部子模型）+ query JSON + attr_id=value（JSON 值）批量更新；预览/执行双动作、属性与只读校验、按实例实际模型分组写入、回读校验；sandboxRun=true"}
+    scenario: 按 CMDB 模型（支持父模型，自动递归展开子模型）与 query 条件批量修改实例属性——变更数据每行 attr_id=value（value 为 JSON，字符串带双引号），预览列出命中实例与变更前后值，执行按 instanceId 批量 upsert 并回读校验
+    notes: "toolId f9e4d55236dc4971bd27555a11a31e65；versionId 5fa9dc4e13fd45348ace552a2973f6df；sandboxRun=true（沙箱内部 agent 执行，读 agent conf 定位 CMDB）；父模型自动递归展开全部子模型，按实例实际模型分组写入，子模型缺属性/只读时整组跳过并报告；入参 cmdb_model(cmdbInstance 单选 CMDB_MODEL@EASYOPS)/query(strings)/changes(strings)/action(enum 预览|执行，默认预览)；🔴执行拒绝空 query；禁止改 instanceId/_object_id/_id/_uuid 与 ctime/mtime/creator/modifier；单次上限 10000 条；导入 POST /tools/import（multipart file）或前端工具管理导入；源码 ../development/scripts/tools/cmdb_instance_batch_edit.py；本沙箱不可达 192.168.110.24，未做平台导入与真跑"
     added: "2026-11-24"
   - id: openapi-demo-tool
     name: OpenAPI请求示例工具包
