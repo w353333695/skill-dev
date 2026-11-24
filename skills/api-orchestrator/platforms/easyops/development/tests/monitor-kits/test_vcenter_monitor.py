@@ -587,6 +587,79 @@ class MoTypeCompatTests(unittest.TestCase):
         self.assertTrue(isinstance(spec.type, type))
 
 
+class PerfIntervalTests(unittest.TestCase):
+    """perf intervalId 按实体类型分组（0.1.9 目标环境真机 InvalidArgument 实证回归）：
+    vSphere 实时 20s 仅对 Host/VM 有效，Datastore 是聚合实体只有历史间隔。"""
+
+    def fake_perf_manager(self, query_record, fail_types=()):
+        from types import SimpleNamespace as NS
+        counters = []
+        for key, group, name in ((1, "datastore", "totalReadLatency"),
+                                 (2, "datastore", "totalWriteLatency"),
+                                 (3, "net", "received"),
+                                 (4, "net", "transmitted")):
+            counters.append(NS(key=key,
+                               groupInfo=NS(key=group),
+                               nameInfo=NS(key=name),
+                               rollupType="average"))
+        slot_by_id = {1: ("datastore", "totalReadLatency"),
+                      2: ("datastore", "totalWriteLatency"),
+                      3: ("net", "received"),
+                      4: ("net", "transmitted")}
+
+        class FakePM(object):
+            perfCounter = counters
+
+            def QueryPerf(self, querySpec):
+                entity_type = querySpec[0].entity._type
+                query_record.append((entity_type, querySpec[0].intervalId, len(querySpec)))
+                if entity_type in fail_types:
+                    raise ValueError("InvalidArgument: querySpec.interval")
+                outputs = []
+                for spec in querySpec:
+                    series = []
+                    for mid in spec.metricId:
+                        pair = slot_by_id.get(mid.counterId)
+                        lower = (pair[1] or "").lower() if pair else ""
+                        samples = [12.0] if "read" in lower else \
+                                  [34.0] if "write" in lower else \
+                                  [100.0] if lower == "received" else [200.0]
+                        series.append(NS(id=NS(counterId=mid.counterId), value=samples))
+                    outputs.append(NS(entity=spec.entity, value=series))
+                return outputs
+
+        return FakePM()
+
+    def test_interval_grouping_host_realtime_datastore_historical(self):
+        m = collect_namespace()
+        host_ref = FakeRef("HostSystem", "host-10")
+        ds_ref = FakeRef("Datastore", "datastore-11")
+        query_record = []
+        content = SimpleNamespace(perfManager=self.fake_perf_manager(query_record))
+        values = m["query_perf"](content, {host_ref: ["net_in", "net_out"],
+                                           ds_ref: ["read_latency", "write_latency"]},
+                                 m["DebugLog"]("ERROR"), time.time() + 60)
+        # 实体类型分组：HostSystem=20 实时、Datastore=300 历史
+        self.assertIn(("HostSystem", 20, 1), query_record)
+        self.assertIn(("Datastore", 300, 1), query_record)
+        self.assertEqual(values[host_ref]["net_in"], 100.0)
+        self.assertEqual(values[ds_ref]["read_latency"], 12.0)
+
+    def test_datastore_failure_does_not_block_host_group(self):
+        m = collect_namespace()
+        host_ref = FakeRef("HostSystem", "host-10")
+        ds_ref = FakeRef("Datastore", "datastore-11")
+        query_record = []
+        content = SimpleNamespace(perfManager=self.fake_perf_manager(
+            query_record, fail_types=("Datastore",)))
+        values = m["query_perf"](content, {host_ref: ["net_in", "net_out"],
+                                           ds_ref: ["read_latency"]},
+                                 m["DebugLog"]("ERROR"), time.time() + 60)
+        self.assertIn("net_in", values.get(host_ref, {}))   # host 组不受拖累
+        self.assertNotIn(ds_ref, values)                    # datastore 组失败跳过
+        self.assertEqual(query_record[0][1], 20)            # 20 组先独立成功
+
+
 class FatalProtocolTests(unittest.TestCase):
     def test_top_level_exception_prints_collect_error_and_exits_zero(self):
         """顶层异常走 COLLECT_ERROR: 协议（exit 0，stdout 可见错误正文，凭据不出现）。

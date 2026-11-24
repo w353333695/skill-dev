@@ -400,9 +400,17 @@ def retrieve_rows_simple(property_collector, filter_spec):
     return rows
 
 
+PERF_INTERVAL_REALTIME = 20
+PERF_INTERVAL_HISTORICAL = 300
+
+
 def query_perf(content, entity_slots, log, deadline):
     """批量 QueryPerf。entity_slots: {moref: [slot,...]} -> {moref: {slot: value}}。
-    计数器缺失/查询失败按实体跳过（WARN），不伪造值。"""
+    intervalId 按实体类型分组（0.1.9 目标环境真机实证：vSphere 实时采样 20s 仅对
+    HostSystem/VirtualMachine 有效，Datastore 是聚合实体只有历史间隔——传 20 报
+    InvalidArgument: querySpec.interval，且混批调用会让整批一起失败，拖死宿主机
+    网络指标）。分组独立调用：HostSystem=20 实时，Datastore=300 历史取最新样本。
+    计数器缺失/查询失败按组跳过（WARN），不伪造值。"""
     if not entity_slots:
         return {}
     perf_manager = content.perfManager
@@ -421,38 +429,45 @@ def query_perf(content, entity_slots, log, deadline):
                if slot not in slot_counter_id]
     if missing:
         log.event("WARN", "perf.counters_missing", slots=missing)
-    specs = []
+    grouped = {}  # intervalId -> [(entity, PerfQuerySpec)]
     for entity, slots in entity_slots.items():
+        entity_type = _mo_ref_type(entity)
+        interval = PERF_INTERVAL_REALTIME if entity_type in ("HostSystem", "VirtualMachine") \
+            else PERF_INTERVAL_HISTORICAL
         metric_ids = [vim.PerfMetricId(counterId=slot_counter_id[slot], instance="")
                       for slot in slots if slot in slot_counter_id]
         if metric_ids:
-            specs.append(vim.PerfQuerySpec(entity=entity, metricId=metric_ids,
-                                           maxSample=1, intervalId=20))
+            grouped.setdefault(interval, []).append(
+                (entity, vim.PerfQuerySpec(entity=entity, metricId=metric_ids,
+                                           maxSample=1, intervalId=interval)))
     values = {}
     chunk = 50
-    for start in range(0, len(specs), chunk):
-        if time.time() > deadline:
-            log.event("WARN", "perf.deadline_exceeded", resolved=len(values))
-            break
-        batch = specs[start:start + chunk]
-        try:
-            outputs = perf_manager.QueryPerf(querySpec=batch)
-        except Exception:
-            log.traceback_event("WARN", "perf.query_failed", "[query_perf]")
-            continue
-        for output in outputs:
-            slot_values = {}
-            for series in (output.value or []):
-                pair = counter_slot_by_key.get(series.id.counterId)
-                slot = PERF_DESIRED.get(pair) if pair else None
-                samples = series.value or []
-                if slot and samples:
-                    try:
-                        slot_values[slot] = float(samples[-1])
-                    except (TypeError, ValueError):
-                        pass
-            if slot_values:
-                values[output.entity] = slot_values
+    for interval, entity_specs in sorted(grouped.items()):
+        for start in range(0, len(entity_specs), chunk):
+            if time.time() > deadline:
+                log.event("WARN", "perf.deadline_exceeded", interval=interval,
+                          resolved=len(values))
+                return values
+            batch = entity_specs[start:start + chunk]
+            try:
+                outputs = perf_manager.QueryPerf(querySpec=[spec for _, spec in batch])
+            except Exception:
+                log.traceback_event("WARN", "perf.query_failed",
+                                    "[query_perf interval=%s]" % interval)
+                continue
+            for output in outputs:
+                slot_values = {}
+                for series in (output.value or []):
+                    pair = counter_slot_by_key.get(series.id.counterId)
+                    slot = PERF_DESIRED.get(pair) if pair else None
+                    samples = series.value or []
+                    if slot and samples:
+                        try:
+                            slot_values[slot] = float(samples[-1])
+                        except (TypeError, ValueError):
+                            pass
+                if slot_values:
+                    values[output.entity] = slot_values
     return values
 
 

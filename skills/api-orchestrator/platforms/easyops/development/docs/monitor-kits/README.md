@@ -157,6 +157,15 @@ CheckField 要求 ManagedObject **类对象**，字符串报 For "type" expected
 类名即 API 类型名；识别失败的 unknown 按**类名**聚合展示（单条日志，诊断价值高）。
 排障口径：真机版本差异只能靠 DEBUG 日志一轮轮收敛，`connect.ok`（含版本号）→
 `inventory.datacenters` → `inventory.dc_batch`（各层计数）三级日志足以定位挂点。
+### vSphere perf 实时采样范围坑（2026-11-24 目标环境 306 条指标回归）
+
+真机 306 条指标全量产出后 perf 链路补齐：vSphere 实时采样（intervalId=20）仅对
+HostSystem/VirtualMachine 有效；**Datastore 是聚合实体只有历史间隔**（300s 起，
+Zabbix datastore latency 也用 300）——传 20 报 `InvalidArgument: querySpec.interval`；
+且 Datastore 与 HostSystem 混在同一批 `QueryPerf` 调用时**一损俱损**（单个非法
+interval 让整批失败，拖死宿主机网络指标）。修复：按实体类型分组（HostSystem=20
+实时、Datastore=300 历史取最新样本）独立调用，组间互不拖累；查不到按组 WARN 跳过
+不伪造值（perf 挂了只影响存储延迟与宿主机网络四项，状态/使用率指标不受影响）。
 
 ### 激活请求经网关被 301 降级 GET 的坑（2026-11-19）
 

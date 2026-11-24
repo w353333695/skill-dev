@@ -23,9 +23,10 @@ items:
   - id: vcenter-monitor-kit
     name: vCenter监控
     category: monitor-kits
-    files: [监控套件_vCenter监控_0.1.9.zip, vCenter监控_告警规则模板_0.1.9.xlsx]
-    version: "0.1.9"
+    files: [监控套件_vCenter监控_0.1.10.zip, vCenter监控_告警规则模板_0.1.10.xlsx]
+    version: "0.1.10"
     history:
+      - {ver: "0.1.10", date: "2026-11-24", change: "真机306条指标全量产出后perf链路修复：vSphere实时20s采样仅对Host/VM有效，Datastore是聚合实体只有历史间隔（传20报InvalidArgument: querySpec.interval），且datastore与host混批QueryPerf一损俱损拖死宿主机网络指标；改按实体类型分组（HostSystem=20实时、Datastore=300历史取最新样本）独立调用互不拖累；read_latency/write_latency/net_in/net_out四指标恢复"}
       - {ver: "0.1.9", date: "2026-11-24", change: "目标环境真机三轮回归：MoRef类型名读出但带模块前缀（新版pyVmomi类__name__为vim.HostSystem全限定名），剥前缀归一后分派；真机日志确认3dc/8集群侧CR/8宿主/236VM/58存储全量返回，仅差前缀剥离即全通"}
       - {ver: "0.1.8", date: "2026-11-24", change: "MoRef类型名探测补第四级__class__.__name__：0.1.7真机实证_type与type实例属性都不存在（pyVmomi托管对象类型在Python类上，社区isinstance判型的原因），类名即API类型名；unknown日志按类名展示提升诊断价值"}
       - {ver: "0.1.7", date: "2026-11-23", change: "目标环境真机二轮回归：登录+数据中心枚举全通（vCenter 6.7.0、3个数据中心），采挂响应侧MoRef类型名读取——新pyVmomi的ManagedObjectReference无_type属性（getattr返回空）致数百对象全进unknown桶；_mo_ref_type逐属性探测（_type字符串→type字符串→类对象__name__），unknown逐行日志改单条聚合计数"}
