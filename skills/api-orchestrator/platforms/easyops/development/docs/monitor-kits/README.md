@@ -145,6 +145,19 @@ python3 skills/api-orchestrator/platforms/easyops/development/scripts/validate_m
 
 `vCenter监控` 0.1.4（2026-11-20）：目标环境 11.66.19.194 debug-collector-job 实测两项修复。① TLS：目标 pyVim 旧版无 `disableSslCertValidation` 参数（TypeError 后裸调），且该版本默认校验证书报 CERTIFICATE_VERIFY_FAILED——traceback 实证其 SmartConnect 支持 `sslContext` 参数，脚本改为三级降级（①disableSslCertValidation→②sslContext=CERT_NONE→③裸调）。② 密码：读平台源码 `collector_service/agent_job/job_generator.go` 的 `decrypt` 证实——`IsEncrypt` 参数解密失败时 **WARN 后保原值注入**（不报错）；前端 debug 弹窗对加密参数只做轻混淆（`1234Asd!`→base64(`1234.Asd!`)=`MTIzNC5Bc2Qh`），不是平台密文格式 → debug 注入的是未解密混淆值；**正式任务创建链路前端用平台算法加密，decrypt 正常**（DM 套件即此链路）。脚本加密码候选兜底：注入值可 base64 解码为可打印文本时优先用解码值连接、认证失败回退原值；正式任务明文不受影响。排障口径：**验证加密参数链路必须建正式采集任务，debug-collector-job 弹窗对 isEncrypt 参数的注入不代表正式任务**。
 
+### pyVmomi 版本兼容三连坑（2026-11-20~24 目标环境真机三轮回归）
+
+目标环境（vCenter 6.7.0 + 较新 pyVim/pyVmomi 的 py2）真机回归实证三处版本差异，链路逐级打通：
+① TLS：旧 pyVim 无 `disableSslCertValidation` 参数但支持 `sslContext`，默认校验证书报
+CERTIFICATE_VERIFY_FAILED——三级降级（①disableSslCertValidation→②sslContext=CERT_NONE→③裸调）；
+② PropertyCollector 请求侧：较新 pyVmomi 的 TraversalSpec/PropertySpec `type` 字段
+CheckField 要求 ManagedObject **类对象**，字符串报 For "type" expected type type——类对象优先、字符串兜底；
+③ 响应侧：pyVmomi 对象是托管类实例，**类型名只在 `obj.__class__.__name__` 上**
+（`_type`/`type` 实例属性都不存在——社区代码用 isinstance(vim.HostSystem) 判型的原因），
+类名即 API 类型名；识别失败的 unknown 按**类名**聚合展示（单条日志，诊断价值高）。
+排障口径：真机版本差异只能靠 DEBUG 日志一轮轮收敛，`connect.ok`（含版本号）→
+`inventory.datacenters` → `inventory.dc_batch`（各层计数）三级日志足以定位挂点。
+
 ### 激活请求经网关被 301 降级 GET 的坑（2026-11-19）
 
 api-cli 经前端网关调 `kit.activate`（合约路径 `@1.0.19`）时，网关对合约路径返回重定向，POST 被降级为 GET，后端报「register: POST ... req: GET ... Matching route not found」——降级与 http/https 入口无关（https+insecure 复现同样错误）。已验证可用配方即 `systems.yaml#collector_service.runtime.gateway_monitor_lifecycle.internal_activation`：curl 直连 `EASYOPS_COLLECTOR_SERVICE_BACKEND_URL`（:12000）POST `/api/v1/collector/kit/activate`，headers 带 Host/org/user + `giraffe-contract-name: easyops.api.collector_service.job.ActivateCollectorKit`（无@版本），body 不变，返回 code=0/totalStatus=success。api-cli `--insecure` 用于跳过自签证书校验（网关 HTTPS 需要）；导入手感是 curl -F 直连 8151。

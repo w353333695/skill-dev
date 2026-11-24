@@ -401,23 +401,34 @@ class MoRefTypeCompatTests(unittest.TestCase):
             """type 属性为类对象形态。"""
             type = staticmethod(lambda: None)  # 占位避免误用
 
+        # 真机 0.1.7 形态：pyVmomi 托管类实例（无 _type/type 属性，类型在类名上）
+        class HostSystem(object):
+            pass
+
+        class VirtualMachine(object):
+            pass
+
+        class MysteryRef(object):
+            pass
+
         rows = [
             {"obj": NewRef("ComputeResource"), "props": {"name": "C1"}},
             {"obj": NewRef("HostSystem"), "props": {"name": "h1"}},
             {"obj": NewRef("VirtualMachine"), "props": {"name": "vm1"}},
             {"obj": NewRef("Datastore"), "props": {"name": "ds1"}},
-            {"obj": NewRef("MysteryThing"), "props": {}},
-            {"obj": object(), "props": {}},  # 两种属性都读不到
+            {"obj": HostSystem(), "props": {"name": "h2"}},      # 类名命中 host 桶
+            {"obj": VirtualMachine(), "props": {"name": "vm2"}},  # 类名命中 vm 桶
+            {"obj": MysteryRef(), "props": {}},                   # 类名不识别 → unknown
+            {"obj": object(), "props": {}},                       # unknown(object)
         ]
         view = m["assemble_rows"](rows, log)
         self.assertEqual(len(view["cr"]), 1)
-        self.assertEqual(len(view["host"]), 1)
-        self.assertEqual(len(view["vm"]), 1)
+        self.assertEqual(len(view["host"]), 2)  # type属性 + 类名两条路径
+        self.assertEqual(len(view["vm"]), 2)
         self.assertEqual(len(view["datastore"]), 1)
-        # unknown 聚合进日志：MysteryThing×1 + 空类型×1
         unknown_entries = [e for e in log.entries if e.get("stage") == "rows.unknown_types"]
         self.assertEqual(len(unknown_entries), 1)
-        self.assertEqual(unknown_entries[0]["counts"], {"MysteryThing": 1, "<empty>": 1})
+        self.assertEqual(unknown_entries[0]["counts"], {"MysteryRef": 1, "object": 1})
 
     def test_assemble_rows_unknown_aggregated_single_log(self):
         """unknown 类型聚合成一条日志（0.1.6 教训：逐行刷屏几百行）。"""
@@ -427,7 +438,7 @@ class MoRefTypeCompatTests(unittest.TestCase):
         m["assemble_rows"](rows, log)
         unknown_entries = [e for e in log.entries if e.get("stage") == "rows.unknown_types"]
         self.assertEqual(len(unknown_entries), 1)  # 单条聚合
-        self.assertEqual(unknown_entries[0]["counts"].get("<empty>"), 300)
+        self.assertEqual(unknown_entries[0]["counts"].get("object"), 300)  # 类名展示更有诊断价值
 
 
 class ConnectFallbackTests(unittest.TestCase):

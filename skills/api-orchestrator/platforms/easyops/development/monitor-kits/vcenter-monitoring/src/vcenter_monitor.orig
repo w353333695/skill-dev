@@ -507,9 +507,11 @@ class MetricBuilder(object):
 
 
 def _mo_ref_type(obj):
-    """MoRef 类型名兼容（0.1.6 目标环境真机实证：新版 pyVmomi 的
-    ManagedObjectReference 类型名不在 _type 属性上，逐属性探测）：
-    _type 字符串（老版）→ type 属性字符串 → type 属性类对象取 __name__ → 空串。"""
+    """MoRef 类型名兼容（0.1.6/0.1.7 目标环境真机两轮实证）：
+    pyVmomi 对象是托管类实例，类型名在 Python 类上（社区用 isinstance(vim.HostSystem)
+    判型的原因）——0.1.7 实证 _type 与 type 实例属性都不存在，全靠 __class__.__name__。
+    探测优先级：_type 字符串（部分版本/桩）→ type 属性字符串 → type 类对象
+    __name__ → __class__.__name__（pyVmomi 托管类实例，类名即 API 类型名）。"""
     kind = getattr(obj, "_type", None)
     if isinstance(kind, str) and kind:
         return kind
@@ -517,7 +519,12 @@ def _mo_ref_type(obj):
     if isinstance(kind, str) and kind:
         return kind
     if isinstance(kind, type) or callable(kind):
-        return getattr(kind, "__name__", "")
+        name = getattr(kind, "__name__", "")
+        if name:
+            return name
+    name = getattr(getattr(obj, "__class__", None), "__name__", "")
+    if name:
+        return name
     return ""
 
 

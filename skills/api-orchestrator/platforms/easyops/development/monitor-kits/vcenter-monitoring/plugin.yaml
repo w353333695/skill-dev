@@ -11,7 +11,7 @@
 # =============================================================================
 type: simple-script
 name: vCenter监控
-version: 0.1.7
+version: 0.1.8
 agentType: easyops
 samplerType: metric_sampler
 relateObjectId: CLOUD_PROVIDER@ONEMODEL
