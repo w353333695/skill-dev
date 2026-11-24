@@ -524,7 +524,9 @@ def _mo_ref_type(obj):
             return name
     name = getattr(getattr(obj, "__class__", None), "__name__", "")
     if name:
-        return name
+        # 新版 pyVmomi 类名带模块前缀（0.1.8 真机实证：__name__ == 'vim.HostSystem'），
+        # 剥前缀归一为 API 类型名后进分派表
+        return name.split(".", 1)[-1] if name.startswith("vim.") else name
     return ""
 
 

@@ -401,34 +401,33 @@ class MoRefTypeCompatTests(unittest.TestCase):
             """type 属性为类对象形态。"""
             type = staticmethod(lambda: None)  # 占位避免误用
 
-        # 真机 0.1.7 形态：pyVmomi 托管类实例（无 _type/type 属性，类型在类名上）
-        class HostSystem(object):
-            pass
-
-        class VirtualMachine(object):
-            pass
-
-        class MysteryRef(object):
-            pass
+        # 真机 0.1.7/0.1.8 形态：pyVmomi 托管类实例（无 _type/type 属性），
+        # 新版类 __name__ 带模块前缀（0.1.8 真机：'vim.HostSystem'）
+        HostSystem = type("vim.HostSystem", (object,), {})
+        VirtualMachine = type("vim.VirtualMachine", (object,), {})
+        ClusterComputeResource = type("vim.ClusterComputeResource", (object,), {})
+        Datastore = type("vim.Datastore", (object,), {})
+        MysteryRef = type("MysteryRef", (object,), {})
 
         rows = [
             {"obj": NewRef("ComputeResource"), "props": {"name": "C1"}},
+            {"obj": ClusterComputeResource(), "props": {"name": "C2"}},  # 前缀剥离命中 cr
             {"obj": NewRef("HostSystem"), "props": {"name": "h1"}},
+            {"obj": HostSystem(), "props": {"name": "h2"}},      # 类名前缀剥离命中 host 桶
             {"obj": NewRef("VirtualMachine"), "props": {"name": "vm1"}},
-            {"obj": NewRef("Datastore"), "props": {"name": "ds1"}},
-            {"obj": HostSystem(), "props": {"name": "h2"}},      # 类名命中 host 桶
             {"obj": VirtualMachine(), "props": {"name": "vm2"}},  # 类名命中 vm 桶
+            {"obj": NewRef("Datastore"), "props": {"name": "ds1"}},
+            {"obj": Datastore(), "props": {"name": "ds2"}},       # 类名命中 datastore 桶
             {"obj": MysteryRef(), "props": {}},                   # 类名不识别 → unknown
-            {"obj": object(), "props": {}},                       # unknown(object)
         ]
         view = m["assemble_rows"](rows, log)
-        self.assertEqual(len(view["cr"]), 1)
-        self.assertEqual(len(view["host"]), 2)  # type属性 + 类名两条路径
+        self.assertEqual(len(view["cr"]), 2)  # ComputeResource字符串 + 前缀类名
+        self.assertEqual(len(view["host"]), 2)
         self.assertEqual(len(view["vm"]), 2)
-        self.assertEqual(len(view["datastore"]), 1)
+        self.assertEqual(len(view["datastore"]), 2)
         unknown_entries = [e for e in log.entries if e.get("stage") == "rows.unknown_types"]
         self.assertEqual(len(unknown_entries), 1)
-        self.assertEqual(unknown_entries[0]["counts"], {"MysteryRef": 1, "object": 1})
+        self.assertEqual(unknown_entries[0]["counts"], {"MysteryRef": 1})
 
     def test_assemble_rows_unknown_aggregated_single_log(self):
         """unknown 类型聚合成一条日志（0.1.6 教训：逐行刷屏几百行）。"""
