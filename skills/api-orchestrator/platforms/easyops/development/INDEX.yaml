@@ -332,6 +332,16 @@ items:
     scenario: Linux/Windows操作系统带内SNMP监控采集器、指标、告警和配置说明
     notes: "不采集iDRAC/iLO/XCC/iBMC及风扇、电源、温度等BMC硬件指标"
     added: "2026-11-04"
+  - id: cmdb-instance-batch-edit-source
+    name: CMDB实例批量编辑脚本源码与离线回归
+    category: scripts
+    files: [scripts/tools/cmdb_instance_batch_edit.py, scripts/tools/tests/test_cmdb_instance_batch_edit.py]
+    version: "1.0.0"
+    history:
+      - {ver: "1.0.0", date: "2026-11-24", change: "初版开发：参数解析/属性校验/按实例实际模型分组写入/回读比对；25 项离线回归与工具包结构校验通过"}
+    scenario: CMDB 实例批量编辑工具源码（预览/执行、attr_id=value 的 JSON 值、instanceId 批量 upsert）
+    notes: "成品在../hub/tools/工具_CMDB实例批量编辑_1.0.0.tar.gz；平台 192.168.110.24 当前不可达，未导入、未真跑；脚本 py2/3 兼容，lib2to3 语法校验通过"
+    added: "2026-11-24"
   - id: monitor-kit-preflight-validator
     name: 监控套件契约校验器
     category: scripts
